@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>v0.1 商务最小操作台</title>
+<style>
+body{font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#0f172a;color:#e2e8f0;margin:0;padding:16px;font-size:14px}
+h1{font-size:18px;margin:0 0 4px}
+.sub{color:#94a3b8;font-size:12px;margin-bottom:12px}
+.bar{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+input,select,button{font:inherit;padding:6px 10px;border-radius:8px;border:1px solid #334155;background:#1e293b;color:#e2e8f0}
+button.primary{background:#e11d48;border-color:#e11d48;color:#fff}
+button.warn{background:#b45309;border-color:#b45309;color:#fff}
+.card{background:#111c30;border:1px solid #24334f;border-radius:12px;padding:12px;margin-bottom:10px}
+.card h3{margin:0 0 8px;font-size:14px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0}
+.kv{color:#94a3b8;font-size:12px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{border:1px solid #24334f;padding:6px;text-align:left;vertical-align:top}
+a{color:#7dd3fc}
+.tab{display:none}.tab.on{display:block}
+.msg{color:#fbbf24;min-height:18px}
+</style>
+</head>
+<body>
+<h1>v0.1 商务最小操作台（虹励）</h1>
+<div class="sub">待办裁决 · 全量订单 · 发货单凭证登记 · 桥接下单入口 · 只调用本项目 HTTP API</div>
+<div class="bar">
+  <label>身份 X-User-Id <input id="uid" value="u-op" style="width:110px"/></label>
+  <button class="primary" onclick="loadTodos()">刷新待办</button>
+  <button onclick="loadOrders()">刷新订单</button>
+  <a href="/bridge" target="_blank">桥接下单/我的订单 →</a>
+  <span id="msg" class="msg"></span>
+</div>
+<div class="bar">
+  <button onclick="show('todos')" class="primary">待办</button>
+  <button onclick="show('orders')">全量订单</button>
+  <button onclick="show('evidence')">凭证登记</button>
+</div>
+
+<div id="todos" class="tab on"><div id="todoList">加载中…</div></div>
+<div id="orders" class="tab"><div id="orderList">加载中…</div></div>
+<div id="evidence" class="tab">
+  <div class="card"><h3>凭证登记（CW1：上传/登记到发货单）</h3>
+    <div class="row">订单ID <input id="evOrder" placeholder="ORD-…"/><button onclick="loadShipments()">查发货单</button></div>
+    <div id="shipList"></div>
+  </div>
+</div>
+
+<script>
+const uid=()=>document.getElementById('uid').value||'u-op';
+const H=()=>({'Content-Type':'application/json','X-User-Id':uid()});
+function msg(x){document.getElementById('msg').textContent=x||''}
+async function j(path,opts){const r=await fetch(path,opts);const t=await r.text();let d;try{d=JSON.parse(t)}catch(e){d={raw:t}} if(!r.ok) throw new Error(d.error||t); return d;}
+function show(id){['todos','orders','evidence'].forEach(x=>document.getElementById(x).classList.toggle('on',x===id));}
+
+async function loadTodos(){
+  const d=await j('/api/v1/todos?state=PENDING&limit=100',{headers:H()});
+  const list=document.getElementById('todoList');
+  const items=(d.tasks||[]).filter(t=>['STOCK_REVIEW','STOCK_WAREHOUSE','PAYMENT','RECEIPT_EX','INVOICE_FINANCE_ISSUE','WAREHOUSE','TRANSFER'].includes(t.kind));
+  if(!items.length){list.innerHTML='<div class="card">无商务待办</div>';return}
+  list.innerHTML=items.map(t=>{
+    const common=`<h3>${t.kind} · ${t.order_id} <span class="kv">state=${t.state} assignee=${t.assignee_id||'-'}</span></h3>`;
+    let ops='';
+    if(t.kind==='STOCK_REVIEW'){ops=`<div class="row"><input id="wh-${t.id}" value="wh-yangyuan" placeholder="仓库ID"/><input id="note-${t.id}" placeholder="备注"/></div>
+      <div class="row"><button class="primary" onclick="sig('${t.order_id}','stock-review','APPROVED','${t.id}')">通过（选仓）</button>
+      <button class="warn" onclick="sig('${t.order_id}','stock-review','RETURNED','${t.id}')">驳回</button></div>`;}
+    if(t.kind==='STOCK_WAREHOUSE'){ops=`<div class="row"><button class="primary" onclick="sig('${t.order_id}','warehouse-confirm','APPROVED','${t.id}')">仓管确认</button>
+      <button class="warn" onclick="sig('${t.order_id}','warehouse-confirm','RETURNED','${t.id}')">退回</button></div>`;}
+    if(t.kind==='PAYMENT'){ops=`<div class="row"><button class="primary" onclick="sig('${t.order_id}','payment-confirm','APPROVED','${t.id}')">到账确认</button>
+      <button class="warn" onclick="sig('${t.order_id}','payment-confirm','RETURNED','${t.id}')">未到账退回</button></div>`;}
+    if(t.kind==='WAREHOUSE'){ops=`<div class="row"><input id="qty-${t.id}" type="number" placeholder="实发数量"/></div>
+      <div class="row"><button class="primary" onclick="ship('${t.order_id}','${t.id}')">确认发货</button></div>`;}
+    if(t.kind==='RECEIPT_EX'){ops=`<div class="row"><button class="primary" onclick="sig('${t.order_id}','receipt-ex-review','APPROVED','${t.id}')">放行开票</button>
+      <button class="warn" onclick="sig('${t.order_id}','receipt-ex-review','REJECTED','${t.id}')">驳回补回单</button></div>`;}
+    if(t.kind==='INVOICE_FINANCE_ISSUE'){ops=`<div class="row"><input id="invno-${t.id}" placeholder="发票号"/></div>
+      <div class="row"><button class="primary" onclick="inv('${t.order_id}','${t.id}')">确认开票</button>
+      <button class="warn" onclick="sig('${t.order_id}','invoice-issued','FAILED','${t.id}')">开票失败</button></div>`;}
+    if(t.kind==='TRANSFER'){ops=`<div class="row"><input id="twh-${t.id}" placeholder="目标仓"/></div>
+      <div class="row"><button class="primary" onclick="trans('${t.order_id}','${t.id}')">同意转仓</button>
+      <button class="warn" onclick="sig('${t.order_id}','transfer-decision','REJECT','${t.id}')">驳回</button></div>`;}
+    return `<div class="card">${common}${ops}</div>`;}).join('');
+}
+async function sig(orderID,signal,verdict,taskID){
+  try{
+    const body={verdict};
+    if(signal==='stock-review'){body.warehouse_id=document.getElementById(`wh-${taskID}`).value; body.note=document.getElementById(`note-${taskID}`).value||'';}
+    if(signal==='transfer-decision'){body.verdict='APPROVE_TRANSFER'; body.warehouse_id=document.getElementById(`twh-${taskID}`).value;}
+    await j(`/api/v1/orders/${orderID}/signal/${signal}`,{method:'POST',headers:H(),body:JSON.stringify(body)});
+    msg(`已投递 ${signal} @ ${orderID}`); loadTodos();
+  }catch(e){msg('错误: '+e.message)}
+}
+async function ship(orderID,taskID){
+  const qty=document.getElementById(`qty-${taskID}`).value;
+  await j(`/api/v1/orders/${orderID}/signal/ship-action`,{method:'POST',headers:H(),body:JSON.stringify({verdict:'SHIP',qty:parseInt(qty,10)})});
+  msg('发货已确认'); loadTodos();
+}
+async function inv(orderID,taskID){
+  const invno=document.getElementById(`invno-${taskID}`).value||('NO-'+Date.now());
+  await j(`/api/v1/orders/${orderID}/signal/invoice-issued`,{method:'POST',headers:H(),body:JSON.stringify({verdict:'ISSUED',tax_no:invno})});
+  msg('开票已确认'); loadTodos();
+}
+async function trans(orderID,taskID){
+  await j(`/api/v1/orders/${orderID}/signal/transfer-decision`,{method:'POST',headers:H(),body:JSON.stringify({verdict:'APPROVE_TRANSFER',warehouse_id:document.getElementById(`twh-${taskID}`).value})});
+  msg('转仓已确认'); loadTodos();
+}
+async function loadOrders(){
+  const st=document.getElementById('orderState')?document.getElementById('orderState').value:'';
+  const d=await j('/api/v1/orders'+(st?('?state='+st):''),{headers:H()});
+  const rows=(d.orders||[]).map(o=>`<tr><td><a href="#" onclick="loadShipments('${o.id}')">${o.id}</a></td><td>${o.state||''}</td><td>${o.customer_id||''}</td><td>${o.payment_term||''}</td><td>${o.updated_at||''}</td></tr>`).join('');
+  document.getElementById('orderList').innerHTML=`<div class="row"><select id="orderState" onchange="loadOrders()"><option value="">全部状态</option><option>ORD_REQUESTED</option><option>STK_STOCK_REVIEWING</option><option>SHP_SHIP_ASSIGNING</option><option>INV_INVOICING</option><option>INV_CLOSED</option></select></div><table><tr><th>订单</th><th>状态</th><th>客户</th><th>结算</th><th>更新</th></tr>${rows}</table>`;
+}
+async function loadShipments(orderID){
+  orderID=orderID||document.getElementById('evOrder').value;
+  if(!orderID){msg('请输入订单ID');return}
+  const d=await j(`/api/v1/orders/${orderID}/shipments`,{headers:H()});
+  const sh=document.getElementById('shipList');
+  const rows=(d.shipments||[]).map(s=>`<tr><td>${s.id}</td><td>${s.state}</td><td>${s.shipped_qty}/${s.planned_qty}</td><td>${s.warehouse_id}</td>
+    <td><input id="file-${s.id}" placeholder="file://url"/><input id="hash-${s.id}" placeholder="hash"/>
+      <select id="kind-${s.id}"><option>RECEIPT</option><option>INVOICE</option></select>
+      <button onclick="ev('${orderID}','${s.id}')">登记凭证</button></td></tr>`).join('');
+  sh.innerHTML=`<table><tr><th>发货单</th><th>状态</th><th>已发/应发</th><th>仓库</th><th>登记</th></tr>${rows}</table>`;
+  show('evidence');
+}
+async function ev(orderID,shipmentID){
+  const kind=document.getElementById(`kind-${shipmentID}`).value;
+  const body={file_url:document.getElementById(`file-${shipmentID}`).value||'file://manual',file_hash:document.getElementById(`hash-${shipmentID}`).value||('h-'+Date.now()),kind,source:'manual'};
+  if(kind==='INVOICE'){body.invoice_no=prompt('发票号')||('NO-'+Date.now()); body.amount_cents=parseInt(prompt('开票金额(分)')||'0',10);}
+  await j(`/api/v1/orders/${orderID}/shipments/${shipmentID}/evidence`,{method:'POST',headers:H(),body:JSON.stringify(body)});
+  msg('凭证已登记'); loadShipments(orderID);
+}
+loadTodos();
+</script>
+</body>
+</html>

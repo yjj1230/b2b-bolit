@@ -1,0 +1,15 @@
+# D-002 M0 冻结现状索引
+decision_id: D-002
+choice: >
+  扫描 spec/docs/cmd/internal/migrations/tests/scripts 全部 213 个现有制品登记
+  project/views/artifact-manifest.yaml（artifact_id=相对路径、kind、sha256 digest、git 时间、
+  推定 owner），不移动任何文件
+rationale: >
+  §09 M0 退出条件要求所有现有制品有 artifact_id；manifest 保存摘要而不把大证据入 git（§09）
+premises:
+  - 当前工作区 HEAD=e42e3ea、分支 graph_guide、demo 观察时点 2026-08-13T08:06:07Z
+objections: []
+decider: project-governance（bootstrap 执行者 reasonix-executor）
+effective_interval: {from: "2026-08-13T00:00:00+00:00", to: null}
+supersedes: []
+review_condition: 机制激活评估时复核

@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>既有生产环境部署调研需求 · 现场取证指南</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      primaryColor: '#eef3ff', primaryBorderColor: '#4f6ef7', primaryTextColor: '#172554',
+      lineColor: '#64748b', fontSize: '13px',
+      fontFamily: 'ui-sans-serif, system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif',
+      sequenceMessageMargin: 30, actorBkg: '#eef3ff', actorBorder: '#4f6ef7',
+      signalColor: '#334155', actorTextColor: '#172554'
+    },
+    flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'basis' },
+    sequence: { useMaxWidth: true, showSequenceNumbers: false, wrap: true }
+  });
+</script>
+<style>
+  :root{
+    --ink:#0f172a; --ink2:#334155; --ink3:#64748b;
+    --line:#e2e8f0; --line2:#cbd5e1;
+    --bg:#f6f8fb; --card:#ffffff;
+    --blue:#2563eb; --blue-bg:#eff6ff; --blue-line:#bfdbfe;
+    --green:#059669; --green-bg:#ecfdf5; --green-line:#a7f3d0;
+    --amber:#b45309; --amber-bg:#fffbeb; --amber-line:#fde68a;
+    --red:#dc2626; --red-bg:#fef2f2; --red-line:#fecaca;
+    --violet:#7c3aed; --violet-bg:#f5f3ff; --violet-line:#ddd6fe;
+    --cyan:#0e7490; --cyan-bg:#ecfeff; --cyan-line:#a5f3fc;
+    --shadow:0 1px 2px rgba(15,23,42,.05), 0 8px 24px rgba(15,23,42,.06);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:ui-sans-serif,system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.75;font-size:15px}
+  .wrap{max-width:1180px;margin:0 auto;padding:32px 22px 80px}
+  header.hero{background:linear-gradient(135deg,#172554 0%,#0f766e 60%,#4c1d95 100%);color:#fff;border-radius:18px;padding:34px 34px 28px;margin-bottom:26px;box-shadow:var(--shadow)}
+  header.hero h1{margin:0 0 10px;font-size:27px;letter-spacing:.5px}
+  header.hero p{margin:4px 0;color:#dbeafe;font-size:14px}
+  .hero-badges{margin-top:16px;display:flex;flex-wrap:wrap;gap:10px}
+  .badge{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 13px;font-size:12.5px;font-weight:600;border:1px solid transparent}
+  .badge.blue{background:#dbeafe;color:#1e3a8a}
+  .badge.green{background:#d1fae5;color:#065f46}
+  .badge.amber{background:#fef3c7;color:#92400e}
+  .badge.red{background:#fee2e2;color:#991b1b}
+  .badge.violet{background:#ede9fe;color:#5b21b6}
+  .badge.cyan{background:#cffafe;color:#155e75}
+  h2{font-size:21px;margin:44px 0 14px;padding-left:12px;border-left:5px solid var(--blue);line-height:1.4}
+  h2.r1{border-left-color:#2563eb}
+  h2.r2{border-left-color:#7c3aed}
+  h2.r3{border-left-color:#dc2626}
+  h2.db{border-left-color:#0e7490}
+  h2.risk{border-left-color:#b45309}
+  h3{font-size:17px;margin:28px 0 10px;color:var(--ink)}
+  h4{font-size:15px;margin:20px 0 8px;color:var(--ink2)}
+  p{margin:8px 0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 24px;margin:14px 0;box-shadow:var(--shadow)}
+  .card.blue{border-color:var(--blue-line);background:linear-gradient(180deg,#f8fbff,var(--card))}
+  .card.green{border-color:var(--green-line);background:linear-gradient(180deg,#f8fff9,var(--card))}
+  .card.amber{border-color:var(--amber-line);background:linear-gradient(180deg,#fffef7,var(--card))}
+  .card.red{border-color:var(--red-line);background:linear-gradient(180deg,#fff9f9,var(--card))}
+  .card.violet{border-color:var(--violet-line);background:linear-gradient(180deg,#fdfbff,var(--card))}
+  .card.cyan{border-color:var(--cyan-line);background:linear-gradient(180deg,#f8feff,var(--card))}
+  .tldr{font-size:16px;line-height:1.9}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr}}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13px;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.04)}
+  th{background:#f1f5f9;color:#0f172a;text-align:left;font-weight:700;padding:10px 11px;border-bottom:2px solid var(--line);white-space:nowrap}
+  td{padding:10px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  tbody tr:hover td{background:#fafcff}
+  .tag{display:inline-block;border-radius:6px;padding:1px 8px;font-size:12px;font-weight:600;white-space:nowrap;border:1px solid transparent}
+  .tag.green{background:var(--green-bg);color:var(--green);border-color:var(--green-line)}
+  .tag.blue{background:var(--blue-bg);color:var(--blue);border-color:var(--blue-line)}
+  .tag.amber{background:var(--amber-bg);color:var(--amber);border-color:var(--amber-line)}
+  .tag.red{background:var(--red-bg);color:var(--red);border-color:var(--red-line)}
+  .tag.violet{background:var(--violet-bg);color:var(--violet);border-color:var(--violet-line)}
+  .tag.cyan{background:var(--cyan-bg);color:var(--cyan);border-color:var(--cyan-line)}
+  .tag.gray{background:#f1f5f9;color:#475569;border-color:var(--line2)}
+  .mermaid{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;margin:16px 0;overflow-x:auto;box-shadow:var(--shadow)}
+  .small{font-size:12.5px;color:var(--ink3)}
+  code, .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;font-size:.92em;background:#f1f5f9;border-radius:5px;padding:1px 6px;color:#0f172a}
+  pre{background:#0f172a;color:#e2e8f0;border-radius:12px;padding:16px 18px;overflow-x:auto;font-size:13px;line-height:1.6}
+  pre code{background:none;color:inherit;padding:0}
+  .toc{column-count:2;column-gap:30px;font-size:14px}
+  .toc a{color:var(--blue);text-decoration:none}
+  .toc a:hover{text-decoration:underline}
+  @media(max-width:760px){.toc{column-count:1}}
+  ul{margin:8px 0 8px 1.2em;padding:0}
+  li{margin:4px 0}
+  .legend{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+  .kbd{background:#fff;border:1px solid var(--line2);border-bottom-width:2px;border-radius:6px;padding:0 7px;font-size:12px;font-family:ui-monospace,monospace}
+  .must{color:#dc2626;font-weight:700}
+  .should{color:#b45309;font-weight:700}
+  .optional{color:#64748b;font-weight:700}
+  footer{margin-top:56px;text-align:center;color:var(--ink3);font-size:12.5px;border-top:1px solid var(--line);padding-top:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <h1>既有生产环境部署调研需求 · 现场取证指南</h1>
+  <p>服务对象：现场 Agent / 运维 / 实施同学 · 目的：为「渐进式发布计划 v2（三次发布）」补充可还原生产现场的一手证据</p>
+  <p>对应分析文档：<strong>分期部署数据流分析.html</strong> · 最高裁决：docs/发布计划v2/渐进式发布计划v2.html</p>
+  <div class="hero-badges">
+    <span class="badge blue">只读取证 · 不采集任何密钥/密码/令牌</span>
+    <span class="badge green">覆盖三次发布全周期</span>
+    <span class="badge amber">证据必须可追溯、可复核</span>
+    <span class="badge red">红线：敏感信息只确认状态，不记录值</span>
+  </div>
+</header>
+
+<div class="card">
+  <h3 style="margin-top:0">目录</h3>
+  <div class="toc">
+    <a href="#s0">0 · 本指南使用说明与红线</a><br>
+    <a href="#s1">1 · 调研对象与生产拓扑</a><br>
+    <a href="#s2">2 · 通用取证规范与证据分级</a><br>
+    <a href="#s3">3 · 第 1 次发布取证清单（销售助理接入）</a><br>
+    <a href="#s4">4 · 第 2 次发布取证清单（商务+财务+仓管接入）</a><br>
+    <a href="#s5">5 · 第 3 次发布取证清单（销售接入+全量切换）</a><br>
+    <a href="#s6">6 · 跨发布生产基线数据采集（定量）</a><br>
+    <a href="#s7">7 · 证据汇总、验收与回填</a><br>
+    <a href="#s8">附录 A · 只读命令模板</a><br>
+    <a href="#s9">附录 B · 敏感信息红线与脱敏规范</a>
+  </div>
+</div>
+
+<!-- ============ 0 ============ -->
+<h2 id="s0">0 · 本指南使用说明与红线</h2>
+
+<div class="card red">
+  <h3 style="margin-top:0">0.1 红线：不采集、不回传、不落盘的内容</h3>
+  <p>本指南<strong>只采集部署与运行状态</strong>，不采集任何秘密值。以下内容<strong>禁止出现在任何截图、命令输出、表格、聊天记录、报告中</strong>：</p>
+  <table>
+    <tr><th style="width:280px">禁止采集项</th><th>正确做法</th></tr>
+    <tr><td>飞书应用 <code>app_secret</code></td><td>只确认「已配置、未过期、最后一次轮换日期」</td></tr>
+    <tr><td>旧系统 <code>CREATE_ORDER_AUTH_SECRET</code> / <code>FEISHU_ACTION_CALLBACK_TOKEN</code></td><td>只确认「配置项存在、与环境变量/配置文件一致、是否即将过期」</td></tr>
+    <tr><td>企微/飞书机器桥接 secret（如 <code>WECOM_TEST_BRIDGE_SECRET</code> / <code>PRODUCTION_ORDER_BRIDGE_SECRET</code>）</td><td>只确认「存在、长度符合预期、未硬编码在代码仓库」</td></tr>
+    <tr><td>数据库密码 / pgAPI <code>X-API-Key</code> / 各类 <code>token</code> / <code>view_token</code> / <code>approver_token</code></td><td>只确认「已配置、鉴权生效、未明文出现在日志/截图」</td></tr>
+    <tr><td>完整 <code>open_id</code> / 手机号 / 身份证等人员明文信息</td><td>只记录「前 4 后 4 + 脱敏指纹」；数量、一致性、归属角色</td></tr>
+    <tr><td>客户合同、金额明细、商品底价等业务敏感内容</td><td>只统计计数、文件大小、状态分布，不回传明细</td></tr>
+  </table>
+  <p class="small">一句话：<strong>凡是能用来通过身份校验、解密、冒签的字符串，一律只确认「在不在、对不对得上、有没有过期、最后一次轮换是什么时候」。</strong></p>
+</div>
+
+<div class="card green">
+  <h3 style="margin-top:0">0.2 本指南的目标</h3>
+  <p>按三次发布的时间线，把生产现场还原为<strong>可写进分析文档的一手证据</strong>，最终达到：</p>
+  <ul>
+    <li><strong>部署可还原</strong>：每套系统的进程、端口、路径、版本、启动方式、服务依赖可画成拓扑图。</li>
+    <li><strong>数据可对账</strong>：旧系统 JSONL、飞书多维表、pgAPI PG、新系统 PG 各数据面的计数与时间戳可互相核对。</li>
+    <li><strong>发布可决策</strong>：第 1/2/3 次发布前，每个 P0 项都有「生产现场已确认/未确认」的状态。</li>
+    <li><strong>风险可定位</strong>：双通道并发、存量待办、事件链完整性、附件归属等风险点都能对应到生产证据。</li>
+    <li><strong>切换可演练</strong>：第 3 次发布的全量迁移、对账、冻结、切换、回滚各步骤，都有现场可执行、可验收的证据项。</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h3>0.3 取证流程总览</h3>
+  <div class="mermaid">
+flowchart TB
+    A["接收本指南"] --> B["0. 阅读红线与证据规范"]
+    B --> C["1. 收集部署拓扑（系统/进程/端口/路径）"]
+    C --> D["2. 采集跨发布生产基线（数据面计数）"]
+    D --> E{"当前为哪次发布取证？"}
+    E -->|"第 1 次前"| F1["3. 第 1 次取证清单"]
+    E -->|"第 2 次前"| F2["4. 第 2 次取证清单"]
+    E -->|"第 3 次前/切换"| F3["5. 第 3 次取证清单"]
+    F1 --> G["7. 证据编号、脱敏、复核"]
+    F2 --> G
+    F3 --> G
+    G --> H["回填《分期部署数据流分析》证据索引"]
+    H --> I["Go / No-Go 决策"]
+    style A fill:#eff6ff,stroke:#2563eb
+    style I fill:#ecfdf5,stroke:#059669
+  </div>
+</div>
+
+<!-- ============ 1 ============ -->
+<h2 id="s1">1 · 调研对象与生产拓扑</h2>
+
+<div class="card blue">
+  <h3 style="margin-top:0">1.1 目标系统清单</h3>
+  <table>
+    <tr><th style="width:50px">#</th><th style="width:180px">系统</th><th style="width:230px">代码仓库 / 技术栈</th><th>生产侧需要采集的部署对象</th></tr>
+    <tr><td>1</td><td>旧系统 · 三方审批</td><td><code>tripartite-approval</code>（Node/TS + JSONL）</td><td>Windows Server 主机、Node 进程/服务、<code>data/*.jsonl</code> 数据目录、附件目录、飞书应用、多维表同步任务</td></tr>
+    <tr><td>2</td><td>新系统 · b2b_pilot_v3</td><td><code>b2b_pilot_v3</code>（Go + PG + Temporal + SpiceDB + 企微）</td><td>Docker/宿主机、PostgreSQL、Temporal、SpiceDB、企微应用、公网域名/备案、HTTPS 证书</td></tr>
+    <tr><td>3</td><td>pgAPI</td><td><code>pgAPI</code>（Python FastAPI + PostgreSQL）</td><td>FastAPI 服务进程、RHCRM PG 连接、五张镜像表、同步执行器状态</td></tr>
+    <tr><td>4</td><td>飞书侧</td><td>飞书开放平台 / 多维表 / 审批中心</td><td>企业自建应用配置、审批应用、多维表台账、H5 入口</td></tr>
+    <tr><td>5</td><td>企微侧</td><td>企业微信管理后台</td><td>自建应用、可信域名、回调 URL、群聊/工作台入口</td></tr>
+    <tr><td>6</td><td>数据同步链</td><td>rhcrm_contract_sync.py 等</td><td>飞书多维表 → RHCRM 购销合同表同步任务、pgAPI 上游同步任务</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <h3>1.2 生产拓扑（期望还原后画出的图）</h3>
+  <p>现场 Agent 采集完成后，应能让我们画出如下拓扑。若某条连线不存在/不可达，请直接标注「不存在/不可达」，不要画成假设。</p>
+  <div class="mermaid">
+flowchart TB
+    subgraph FEISHU_SIDE["飞书侧"]
+      FS_APP["飞书自建应用<br/>（审批应用 + OAuth + 回调）"]
+      FS_APPR["飞书审批中心<br/>external_instance"]
+      FS_BIT["飞书多维表台账<br/>流程表/明细表/客户档案"]
+      FS_H5["飞书 H5 下单入口"]
+    end
+    subgraph OLD_HOST["旧系统生产主机（Windows Server）"]
+      OLD_NODE["Node/Express 服务<br/>公网 101.37.66.110:3000（以现场为准）"]
+      OLD_DATA["data/*.jsonl（16 个）"]
+      OLD_FILES["data/ 附件目录"]
+      OLD_JOBS["后台任务/定时任务/看门狗"]
+    end
+    subgraph NEW_HOST["新系统生产环境（Docker/Linux）"]
+      NEW_API["Go API + cmd/sync"]
+      NEW_PG[("新系统 PostgreSQL")]
+      NEW_TEMPO["Temporal"]
+      NEW_SPICE["SpiceDB"]
+      NEW_BRIDGE["internal/bridge"]
+    end
+    subgraph PGAPI_HOST["pgAPI / RHCRM 数据侧"]
+      PGAPI["FastAPI pgAPI"]
+      RHCRM_PG[("RHCRM PostgreSQL<br/>五张镜像表")]
+      RHCRM_CONTRACT[("购销合同表")]
+      SYNC_JOB["同步任务<br/>rhcrm_contract_sync.py / 上游同步"]
+    end
+    subgraph WECOM_SIDE["企微侧"]
+      WECOM_APP["企微自建应用"]
+      WECOM_DOMAIN["可信域名 / 备案域名"]
+      WECOM_ENTRY["群聊确认卡 / 侧边栏 / 工作台"]
+    end
+    FS_H5 -->|"现状：飞书下单"| OLD_NODE
+    OLD_NODE --> OLD_DATA
+    OLD_NODE --> OLD_FILES
+    OLD_NODE <--> FS_APP
+    FS_APP <--> FS_APPR
+    OLD_NODE -->|"flowBitableSync"| FS_BIT
+    FS_BIT -->|"同步/镜像"| RHCRM_PG
+    FS_BIT -->|"rhcrm_contract_sync.py"| RHCRM_CONTRACT
+    RHCRM_PG --> PGAPI
+    PGAPI --> RHCRM_PG
+    NEW_API -->|"internal/pgapi 只读"| PGAPI
+    NEW_API --> NEW_PG
+    NEW_API --> NEW_TEMPO
+    NEW_API --> NEW_SPICE
+    NEW_BRIDGE -->|"R1 下单 / R2-R3 受信办理"| OLD_NODE
+    NEW_API --> NEW_BRIDGE
+    WECOM_ENTRY --> NEW_API
+    WECOM_APP --> WECOM_DOMAIN
+    WECOM_DOMAIN --> NEW_API
+    NEW_API -.->|"cmd/sync 读 approval-flows"| PGAPI
+  </div>
+  <p class="small">注：公网地址、端口、域名、路径均以现场实际采集为准；图中示例来自既有文档，仅用于引导，不作为结论。</p>
+</div>
+
+<div class="card">
+  <h3>1.3 每套系统必须采集的「基础五元组」</h3>
+  <table>
+    <tr><th style="width:130px">维度</th><th>旧系统</th><th>新系统</th><th>pgAPI</th></tr>
+    <tr><td>主机</td><td>操作系统版本、CPU/内存/磁盘、是否虚拟机</td><td>宿主机 OS + Docker 版本</td><td>宿主机 OS / 是否与 RHCRM 同机</td></tr>
+    <tr><td>进程/服务</td><td>Node 版本、服务名、启动用户、守护方式</td><td>容器清单、镜像 tag、重启策略</td><td>Python 版本、服务名、守护方式</td></tr>
+    <tr><td>网络</td><td>监听地址/端口、公网入口、反代、SSL</td><td>监听端口、域名、备案、证书到期</td><td>监听地址/端口、鉴权开关</td></tr>
+    <tr><td>存储</td><td><code>data/</code> 目录路径、磁盘余量</td><td>PG 数据目录/卷、对象存储/证据目录</td><td>PG 连接库名、表清单</td></tr>
+    <tr><td>版本</td><td><code>git rev-parse HEAD</code> / 代码包版本</td><td>镜像 tag / <code>git rev-parse HEAD</code></td><td>代码版本 / 依赖版本</td></tr>
+  </table>
+</div>
+
+<!-- ============ 2 ============ -->
+<h2 id="s2">2 · 通用取证规范与证据分级</h2>
+
+<div class="card">
+  <h3>2.1 证据编号规则</h3>
+  <p>每条证据使用统一编号：<code>EVID-{发布阶段}-{系统}-{主题}-{序号}</code>，例如：</p>
+  <ul>
+    <li><code>EVID-R1-OLD-拓扑-01</code>：第 1 次取证，旧系统拓扑第 1 条。</li>
+    <li><code>EVID-R2-NEW-待办-03</code>：第 2 次取证，新系统待办视图第 3 条。</li>
+    <li><code>EVID-R3-DATA-事件链-02</code>：第 3 次取证，事件链完整性第 2 条。</li>
+    <li><code>EVID-BASE-OLD-数据-01</code>：跨发布基线，旧系统数据面第 1 条。</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h3>2.2 证据采集方法（只读优先）</h3>
+  <table>
+    <tr><th style="width:120px">方法</th><th>适用对象</th><th>要求</th></tr>
+    <tr><td><span class="tag green">截图</span></td><td>管理后台、配置页、看板</td><td>必须包含：系统时间、URL/路径、关键状态；截图后立即编号</td></tr>
+    <tr><td><span class="tag blue">命令输出</span></td><td>进程、端口、文件计数、服务状态</td><td>只读命令；输出粘贴为文本或截图；禁止回显密码/密钥</td></tr>
+    <tr><td><span class="tag violet">配置核对</span></td><td>配置文件、环境变量、角色映射</td><td>只记录键名与「是否一致/是否过期/是否脱敏」，不记录值</td></tr>
+    <tr><td><span class="tag cyan">文件清单</span></td><td>JSONL、附件、迁移文件</td><td>记录：绝对路径、文件名、行数、字节数、最早/最晚时间戳、MD5/SHA256 可选</td></tr>
+    <tr><td><span class="tag amber">接口探测</span></td><td>健康检查、只读 API</td><td>使用 GET/健康检查；不传任何 token；如必须鉴权，使用现场已配置环境且不回显 Header</td></tr>
+  </table>
+</div>
+
+<div class="card amber">
+  <h3>2.3 证据可信度分级</h3>
+  <table>
+    <tr><th style="width:100px">等级</th><th style="width:220px">含义</th><th>要求</th></tr>
+    <tr><td><span class="tag green">L1 · 可复核</span></td><td>能由第二人重复执行并得到相同结果</td><td>附只读命令 + 输出 + 执行时间 + 执行人</td></tr>
+    <tr><td><span class="tag blue">L2 · 可追溯</span></td><td>来自系统界面/日志/文件，有明确来源</td><td>附截图/路径/行号/时间戳</td></tr>
+    <tr><td><span class="tag amber">L3 · 访谈</span></td><td>来自业务/运维口述</td><td>必须记录「谁说的、何时说的、原话摘要」，并在报告中标注为待 L1/L2 复核</td></tr>
+    <tr><td><span class="tag red">L0 · 无证据</span></td><td>无法取证</td><td>明确标注「未取证」，不得用假设填补</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <h3>2.4 现场 Agent 取证的时序</h3>
+  <div class="mermaid">
+sequenceDiagram
+    autonumber
+    actor AG as 现场 Agent
+    participant OLD as 旧系统主机
+    participant NEW as 新系统环境
+    participant PAPI as pgAPI 服务
+    participant FS as 飞书管理后台
+    participant WX as 企微管理后台
+    participant RPT as 证据包
+
+    AG->>OLD: 只读命令采集进程/端口/数据目录/JSONL 计数
+    OLD-->>AG: 文本输出（已脱敏）
+    AG->>NEW: 只读命令采集容器/迁移版本/域名/证书
+    NEW-->>AG: 文本输出（已脱敏）
+    AG->>PAPI: GET /health、/health/db、列表分页计数
+    PAPI-->>AG: JSON（仅 total/pagination/状态）
+    AG->>FS: 截图应用/审批/多维表配置
+    FS-->>AG: 截图（敏感值打码）
+    AG->>WX: 截图可信域名/应用/入口配置
+    WX-->>AG: 截图（敏感值打码）
+    AG->>RPT: 编号、脱敏、登记证据台账
+    RPT-->>AG: 生成采集包（zip + 清单）
+  </div>
+</div>
+
+<!-- ============ 3 ============ -->
+<h2 id="s3" class="r1">3 · 第 1 次发布取证清单（销售助理接入）</h2>
+
+<div class="card release r1">
+  <h3 style="margin-top:0">3.1 采集目的</h3>
+  <p>验证 v2 计划第 1 次发布的所有前提是否在生产现场成立：<strong>旧系统既有接口可用、OAuth 授权通路可通、V01 profile 可配置、白名单可加、pgAPI 只读通路可采、PC/企微入口可用。</strong></p>
+  <div class="mermaid">
+flowchart LR
+    A["旧系统 OAuth 接口"] --> B["授权回调白名单"]
+    B --> C["POST /external-orders/create 下单"]
+    C --> D["V01 幂等键前缀自动确认"]
+    D --> E["V01 profile 审批人解析"]
+    E --> F["pgAPI approval-flows 只读"]
+    F --> G["企微/PC 入口"]
+    style A fill:#eff6ff,stroke:#2563eb
+    style G fill:#ecfdf5,stroke:#059669
+  </div>
+</div>
+
+<div class="card">
+  <h3>3.2 取证明细表</h3>
+  <table>
+    <tr><th style="width:70px">编号</th><th style="width:190px">取证对象</th><th style="width:250px">采集动作（只读）</th><th>期望结果（现场应是什么样）</th><th style="width:150px">对应分析/风险</th></tr>
+    <tr><td>R1-01</td><td>旧系统进程/端口</td><td>服务名、Node 版本、监听端口、公网入口、HTTPS 情况</td><td>3000 端口在听；公网可达；进程守护正常</td><td>数据流分析 §0/§2</td></tr>
+    <tr><td>R1-02</td><td>旧系统代码版本</td><td><code>git rev-parse HEAD</code> 或包版本</td><td>能明确对应到当前生产代码提交</td><td>G2 旧改边界</td></tr>
+    <tr><td>R1-03</td><td>飞书应用与 OAuth</td><td>飞书管理后台：应用类型、OAuth 回调/重定向白名单、应用可用状态</td><td>重定向白名单可新增 v0.1 回调地址；应用未停用</td><td>A1 方案 / G8</td></tr>
+    <tr><td>R1-04</td><td><code>/api/approval/feishu-user-by-code</code></td><td>接口存在性（路由注册）、响应字段、错误码</td><td>接口可访问；返回 <code>ok/token/user/role</code> 等字段</td><td>A1 方案 / bridge.go</td></tr>
+    <tr><td>R1-05</td><td><code>POST /external-orders/create</code></td><td>路由、multipart 字段、幂等键校验、303 行为、submission-status</td><td>接口可用；幂等键 8–200 字符；成功 303；可查询提交状态</td><td>A1 方案 / G1</td></tr>
+    <tr><td>R1-06</td><td>生产 <code>sales_person_map.json</code> / <code>agent_person_map.json</code></td><td>记录文件路径、条目数；确认虹励是否已加入 agent 白名单（值脱敏）</td><td>虹励在 agent 白名单，或确认可在上线前配置</td><td>G8 / 边界 1</td></tr>
+    <tr><td>R1-07</td><td><code>approval_role_map.json</code></td><td>记录角色 key 列表、<code>approval_profiles</code> 机制是否存在、V01 profile 是否可配置</td><td><code>approval_profiles</code> 字段存在；可新增 V01 配置且 merge 语义可验证</td><td>P0-1 / 附录 D</td></tr>
+    <tr><td>R1-08</td><td>V01 profile 审批人</td><td>确认 TEST_SUPERVISOR/TEST_CHAIRMAN 需配置的真实审批人姓名与 open_id 指纹（前 4 后 4）</td><td>能明确填写对象；不记录完整 open_id</td><td>P0-1</td></tr>
+    <tr><td>R1-09</td><td>旧系统幂等键前缀自动确认（G2）</td><td>确认当前生产是否已部署 <code>B2B_V01_</code> 前缀识别改动；若无，确认测试环境验证状态</td><td>已部署或明确「未部署、待发布窗口」</td><td>G2 / 第 1 次唯一旧改</td></tr>
+    <tr><td>R1-10</td><td>pgAPI 服务与读接口</td><td><code>GET /health</code>、<code>GET /health/db</code>、<code>GET /api/db/approval-flows?page_size=1</code></td><td>服务健康；列表返回 <code>success/total/pagination</code>；不需要回传明细</td><td>G4 / 数据流分析 §2</td></tr>
+    <tr><td>R1-11</td><td>新系统桥接模块</td><td>新系统服务是否已部署、<code>/healthz</code>、桥接端点是否注册</td><td>新系统可访问；<code>GET /api/v1/bridge/auth-url</code> 返回 auth_url</td><td>bridge.go / G1</td></tr>
+    <tr><td>R1-12</td><td>企微/PC 入口</td><td>企微管理后台：可信域名/备案状态；PC 兜底 URL 可达性</td><td>域名已备案或未备案但 PC 可兜底</td><td>G9</td></tr>
+    <tr><td>R1-13</td><td>旧系统生产滞留单</td><td>查 orders 当前 PENDING 状态计数（不含明细），记录按节点分布</td><td>有数量级即可；用于判断现状卡单程度</td><td>边界 2</td></tr>
+  </table>
+</div>
+
+<div class="card green">
+  <h3>3.3 第 1 次发布 Go/No-Go 证据门</h3>
+  <table>
+    <tr><th style="width:40px">#</th><th>必须具备的证据</th><th>证据等级要求</th></tr>
+    <tr><td>1</td><td>旧系统 OAuth 接口与创建订单接口可达，且响应契约与 bridge.go 一致</td><td>L1</td></tr>
+    <tr><td>2</td><td>飞书应用重定向白名单可加入 v0.1 回调地址（或已加入）</td><td>L2</td></tr>
+    <tr><td>3</td><td>虹励 agent/sales 白名单已确认或可配置</td><td>L2</td></tr>
+    <tr><td>4</td><td>V01 profile 审批人已明确（姓名 + open_id 指纹），TEST_SUPERVISOR 不漏配</td><td>L2</td></tr>
+    <tr><td>5</td><td>pgAPI approval-flows 只读通路已验证分页可用</td><td>L1</td></tr>
+    <tr><td>6</td><td>企微备案域名未就绪时，PC 兜底入口可达</td><td>L1</td></tr>
+  </table>
+</div>
+
+<!-- ============ 4 ============ -->
+<h2 id="s4" class="r2">4 · 第 2 次发布取证清单（商务+财务+仓管接入）</h2>
+
+<div class="card release r2">
+  <h3 style="margin-top:0">4.1 采集目的</h3>
+  <p>验证受信办理通道在生产现场的可行性、边界与补丁状态：<strong>三个 decision 接口的鉴权、文件上传、operator 占位符、并发锁缺口、存量待办分布、三角色工作台过滤依据。</strong></p>
+  <div class="mermaid">
+flowchart LR
+    A["备货 decision<br/>stockPrepares.ts"] --> D["受信通道可行性"]
+    B["发货 decision<br/>shipments.ts"] --> D
+    C["开票 decision<br/>invoices.ts"] --> D
+    D --> E["真实 operator 补丁"]
+    D --> F["幂等锁补丁"]
+    D --> G["multipart 文件直传"]
+    E & F & G --> H["三角色灰度量产"]
+    style H fill:#ecfdf5,stroke:#059669
+  </div>
+</div>
+
+<div class="card">
+  <h3>4.2 取证明细表</h3>
+  <table>
+    <tr><th style="width:70px">编号</th><th style="width:190px">取证对象</th><th style="width:250px">采集动作（只读）</th><th>期望结果</th><th style="width:150px">对应分析/风险</th></tr>
+    <tr><td>R2-01</td><td>备货 decision 路由</td><td>确认 <code>POST /stock-prepares/:id/decision</code> 存在；查看鉴权代码是否仅 <code>approver_token</code></td><td>仅 approver_token 匹配，无飞书身份/entry 限制</td><td>P0-3 / S5</td></tr>
+    <tr><td>R2-02</td><td>发货 decision 路由</td><td>确认 <code>POST /shipments/:id/decision</code> 存在；multer <code>receipt_files</code> 配置</td><td>receipt_files 必传，最多 10 个，multipart 已就绪</td><td>P0-5</td></tr>
+    <tr><td>R2-03</td><td>开票 decision 路由</td><td>确认 <code>POST /invoices/:id/decision</code> 存在；multer <code>invoice_files</code> 配置</td><td>invoice_files 可选/最多 10 个</td><td>P0-5 / 第 3 次盖章回传</td></tr>
+    <tr><td>R2-04</td><td>operator 占位符</td><td>在生产代码/部署包中核对 decision 调用处 operatorOpenId 是否仍为 <code>(stock-prepare-web-approver)</code> 等</td><td>明确当前仍是占位符；若已修，记录修复方式</td><td>RSK-12</td></tr>
+    <tr><td>R2-05</td><td>并发锁缺口</td><td>核对 stockPrepares/shipments/invoices decision 是否有类似 <code>activeOrderDecisionKeys</code> 的并发控制</td><td>确认无锁；双通道并发风险成立</td><td>RSK-1 / S5</td></tr>
+    <tr><td>R2-06</td><td>存量待办分布</td><td>按节点统计当前 PENDING 数量：商务填写发货仓/财务确认到款/仓库发货/回单；按 flow_id 批次分布</td><td>能画出存量待办清单；数量级清晰</td><td>P0-2 / S1</td></tr>
+    <tr><td>R2-07</td><td>飞书残留待办入口</td><td>飞书审批中心是否仍可打开并办理存量 PENDING</td><td>仍可办；与新系统形成双通道窗口</td><td>RSK-1</td></tr>
+    <tr><td>R2-08</td><td>三角色待办过滤依据</td><td>旧系统 <code>approver_open_ids</code> 字段完整性；新系统工作台按角色/仓库/款到过滤所需的字段是否齐全</td><td>字段存在且可过滤；仓管金额剥价可验证</td><td>G6 / S6</td></tr>
+    <tr><td>R2-09</td><td>文件存储路径</td><td>回单/发票/出库单文件目录、磁盘余量、最大文件大小、保留策略</td><td>路径可写；磁盘充足；旧系统文件真相成立</td><td>RSK-4 / P0-5</td></tr>
+    <tr><td>R2-10</td><td>受信端点补丁部署条件</td><td>旧系统是否有测试/预发环境可先行验证真实 operator + 幂等锁；生产发布窗口由谁执行</td><td>有测试环境；生产发布责任明确</td><td>P0-3 / G5</td></tr>
+    <tr><td>R2-11</td><td>企微入口</td><td>企微备案域名是否已就绪；三角色用企微还是 PC 兜底</td><td>入口方式定案</td><td>G9</td></tr>
+    <tr><td>R2-12</td><td>pgAPI 同步时延</td><td>飞书多维表最近更新 → pgAPI 可见的时间差（用一条测试/已知记录核对）</td><td>时延可量化（分钟/小时级）</td><td>RSK-2 / D6</td></tr>
+  </table>
+</div>
+
+<div class="card violet">
+  <h3>4.3 第 2 次发布 Go/No-Go 证据门</h3>
+  <table>
+    <tr><th style="width:40px">#</th><th>必须具备的证据</th><th>证据等级要求</th></tr>
+    <tr><td>1</td><td>三个 decision 接口的生产路由、鉴权、文件上传能力全部核验通过</td><td>L1</td></tr>
+    <tr><td>2</td><td>operator 占位符与并发锁缺口的现场代码/部署包核对完成</td><td>L1</td></tr>
+    <tr><td>3</td><td>存量待办按节点/批次的统计完成，业务方确认「新单新办法」可执行</td><td>L2</td></tr>
+    <tr><td>4</td><td>三角色工作台过滤字段与剥价机制验证可用</td><td>L1</td></tr>
+    <tr><td>5</td><td>文件存储路径、容量、保留策略满足回单/发票直传</td><td>L1</td></tr>
+    <tr><td>6</td><td>企微或 PC 兜底入口方式定案</td><td>L2</td></tr>
+  </table>
+</div>
+
+<!-- ============ 5 ============ -->
+<h2 id="s5" class="r3">5 · 第 3 次发布取证清单（销售接入 + 全量切换）</h2>
+
+<div class="card release r3">
+  <h3 style="margin-top:0">5.1 采集目的</h3>
+  <p>为「系统切换项目」提供完整现场底账：<strong>JSONL 全量底数、事件链完整性、附件清单、多维表/pgAPI/RHCRM 三方对账基准、切换前环境就绪度、回滚演练条件。</strong></p>
+  <div class="mermaid">
+flowchart TB
+    A["全量底账：JSONL + 附件"] --> C["四层对账"]
+    B["镜像底账：多维表 + pgAPI + RHCRM"] --> C
+    C --> D["冻结旧系统"]
+    D --> E["终审对账"]
+    E --> F["切换"]
+    F --> G["观察期 + 回滚"]
+    style A fill:#fff7ed,stroke:#b45309
+    style B fill:#ecfeff,stroke:#0e7490
+    style G fill:#ecfdf5,stroke:#059669
+  </div>
+</div>
+
+<div class="card">
+  <h3>5.2 取证明细表</h3>
+  <table>
+    <tr><th style="width:70px">编号</th><th style="width:190px">取证对象</th><th style="width:250px">采集动作（只读）</th><th>期望结果</th><th style="width:150px">对应分析/风险</th></tr>
+    <tr><td>R3-01</td><td>JSONL 文件底账</td><td>对 16 个 <code>data/*.jsonl</code> 逐一记录：路径、行数、字节数、最早/最晚时间戳</td><td>16 个文件全部可读；数量级与规格说明一致</td><td>RSK-3 / P0-8</td></tr>
+    <tr><td>R3-02</td><td>事件链完整性</td><td>对 orders/stock_prepares/shipments/invoices 四类事件表，按 flow_id 抽查事件链首尾完整；统计有头无尾/有尾无头计数</td><td>完整率可量化；异常样本可定位</td><td>RSK-3 / D2</td></tr>
+    <tr><td>R3-03</td><td>附件底账</td><td>合同/出库单/回单/发票文件：目录、文件数、总字节、缺失链接检测（JSONL 引用但文件不存在）</td><td>缺失清单可导出；总体量可估算迁移/只读方案</td><td>RSK-4 / D3</td></tr>
+    <tr><td>R3-04</td><td>多维表底账</td><td>飞书多维表：流程表/明细表/客户档案行数、最近更新时间；与旧系统订单数差异</td><td>行数与 JSONL 可对账；差异可解释</td><td>D7 / G12</td></tr>
+    <tr><td>R3-05</td><td>pgAPI 五表底账</td><td><code>GET /api/db/approval-flows?page_size=1</code> 取 total；五表分别记录 total 与最近 <code>last_modified_time</code></td><td>五表计数可得；与多维表/JSONL 可对账</td><td>RSK-5 / P0-10</td></tr>
+    <tr><td>R3-06</td><td>RHCRM 购销合同表</td><td>行数、最近同步时间、与多维表流程表计数差异</td><td>8,784 单量级可核对；差异可解释</td><td>DS-RHCRM</td></tr>
+    <tr><td>R3-07</td><td>pgAPI 同步执行器状态</td><td><code>POST /api/db-sync/tables/approval-flows/append</code> 是否仍 501；上游同步任务是否存在、由谁调度</td><td>明确「未接入」或「已接入、切换后如何停」</td><td>P0-10 / G12</td></tr>
+    <tr><td>R3-08</td><td>新系统 PG 迁移版本</td><td>migrations 001–007 是否全部应用；PG 版本、数据目录/卷、磁盘余量</td><td>迁移版本可查；容量满足全量迁移</td><td>RSK-3 / RSK-6</td></tr>
+    <tr><td>R3-09</td><td>新系统详情页/附件查看</td><td>详情页是否可独立展示（不依赖旧 flows）；附件查看通道是否就绪</td><td>详情/附件查看通过验收</td><td>P0-6 / S3</td></tr>
+    <tr><td>R3-10</td><td>旧系统冻结方式</td><td>停新单/停办理入口由谁操作、操作手册、预计停写窗口</td><td>冻结步骤可执行、可回滚</td><td>RSK-6</td></tr>
+    <tr><td>R3-11</td><td>切换开关位置</td><td>新系统「真相源开关」配置项、受信通道停用方式</td><td>开关可配置；停受信通道不影响历史</td><td>RSK-6 / RSK-13</td></tr>
+    <tr><td>R3-12</td><td>回滚演练条件</td><td>旧系统重启入口/重开写、新系统停写、增量数据回流路径</td><td>至少一次回滚演练可执行</td><td>RSK-13 / §4.5</td></tr>
+    <tr><td>R3-13</td><td>历史身份映射</td><td>飞书 open_id → 企微 user_id 映射表：条目数、覆盖度、更新时间</td><td>覆盖度可量化；缺失可补齐</td><td>D4</td></tr>
+    <tr><td>R3-14</td><td>T1.3 状态语义</td><td>五项状态语义是否已拍板；新系统状态机与旧系统 169 枚举映射表是否冻结</td><td>映射表已冻结或明确待拍板</td><td>P0-7 / RSK-8</td></tr>
+  </table>
+</div>
+
+<div class="card red">
+  <h3>5.3 第 3 次发布 Go/No-Go 证据门</h3>
+  <table>
+    <tr><th style="width:40px">#</th><th>必须具备的证据</th><th>证据等级要求</th></tr>
+    <tr><td>1</td><td>JSONL 16 文件、附件、事件链完整性底账完成，缺失/异常清单可导出</td><td>L1</td></tr>
+    <tr><td>2</td><td>多维表/pgAPI/RHCRM/JSONL 四者计数对账完成，差异有解释</td><td>L1</td></tr>
+    <tr><td>3</td><td>新系统 PG 迁移版本与容量满足全量迁移</td><td>L1</td></tr>
+    <tr><td>4</td><td>详情页/附件查看自立就绪（不依赖旧 flows）</td><td>L1</td></tr>
+    <tr><td>5</td><td>冻结、切换、回滚操作手册与责任人就位</td><td>L2</td></tr>
+    <tr><td>6</td><td>T1.3 五项状态语义已拍板或明确未拍板风险</td><td>L2</td></tr>
+  </table>
+</div>
+
+<!-- ============ 6 ============ -->
+<h2 id="s6" class="db">6 · 跨发布生产基线数据采集（定量）</h2>
+
+<div class="card cyan">
+  <h3 style="margin-top:0">6.1 目的</h3>
+  <p>在任何一次发布前，先采集一套<strong>生产数据基线</strong>。基线一旦建立，每次发布前后都按同一口径更新，用于判断发布是否改变了数据读写行为。</p>
+</div>
+
+<div class="card">
+  <h3>6.2 基线采集表（定量）</h3>
+  <table>
+    <tr><th style="width:180px">指标</th><th style="width:240px">采集对象</th><th>统计口径 / 只读动作</th><th>结果单位</th></tr>
+    <tr><td>JSONL 行数</td><td><code>orders/order_events/stock_prepares/stock_prepare_events/shipments/shipment_events/invoices/invoice_events</code></td><td><code>wc -l</code> 或 PowerShell <code>Measure-Object -Line</code></td><td>行</td></tr>
+    <tr><td>JSONL 文件大小</td><td>同上 + 其余 8 个辅助 JSONL</td><td><code>ls -l</code> / <code>Get-ChildItem | Measure-Object -Property Length -Sum</code></td><td>MB</td></tr>
+    <tr><td>JSONL 时间范围</td><td>上述文件</td><td>首行/末行 <code>created_at</code> / <code>occurred_at</code> 字段</td><td>最早/最晚时间</td></tr>
+    <tr><td>附件数/总大小</td><td><code>data/</code> 下合同/出库单/回单/发票目录</td><td>文件计数 + 总字节；不读内容</td><td>个 / GB</td></tr>
+    <tr><td>附件缺失数</td><td>JSONL 引用文件路径</td><td>比对引用与磁盘实际存在性</td><td>个（缺失清单）</td></tr>
+    <tr><td>多维表行数</td><td>飞书多维表流程表/明细表/客户档案</td><td>界面行数/筛选计数</td><td>行</td></tr>
+    <tr><td>pgAPI 五表行数</td><td><code>approval-flows/details/invoices/customers/products</code></td><td><code>GET ...?page_size=1</code> 取 <code>total</code></td><td>行</td></tr>
+    <tr><td>RHCRM 购销合同表行数</td><td>RHCRM 购销合同表</td><td>SQL <code>COUNT(*)</code>（不导出明细）</td><td>行</td></tr>
+    <tr><td>滞留待办数</td><td>orders/stock_prepares/shipments/invoices 中非终态 PENDING</td><td>按节点统计</td><td>个</td></tr>
+    <tr><td>新系统 PG 表计数</td><td>orders / events / legacy_flow_mapping 等</td><td>SQL <code>COUNT(*)</code> 按租户</td><td>行</td></tr>
+    <tr><td>pgAPI 同步时延</td><td>多维表最近更新 → pgAPI 可见</td><td>用 1 条已知记录计时</td><td>分钟</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <h3>6.3 基线更新纪律</h3>
+  <ul>
+    <li>第 1 次发布前建立基线；第 2 次前更新；第 3 次切换前做<strong>冻结基线</strong>；观察期每天更新。</li>
+    <li>同一指标必须使用同一命令口径；口径变更要记录。</li>
+    <li>所有计数必须同时记录采集时间与数据截止时间。</li>
+  </ul>
+</div>
+
+<!-- ============ 7 ============ -->
+<h2 id="s7">7 · 证据汇总、验收与回填</h2>
+
+<div class="card">
+  <h3>7.1 证据包交付物</h3>
+  <table>
+    <tr><th style="width:60px">#</th><th>交付物</th><th>说明</th></tr>
+    <tr><td>1</td><td>取证台账（Excel/CSV）</td><td>每条证据一行：编号、对象、方法、结果摘要、证据等级、采集人、采集时间、脱敏状态</td></tr>
+    <tr><td>2</td><td>截图包</td><td>按「发布阶段-系统-主题」分目录；文件名=证据编号</td></tr>
+    <tr><td>3</td><td>命令输出包</td><td>纯文本，按编号命名；禁止包含密码/令牌</td></tr>
+    <tr><td>4</td><td>基线表</td><td>§6.2 全部指标，含统计口径与时间戳</td></tr>
+    <tr><td>5</td><td>异常清单</td><td>所有「不符合预期」的发现单独列表，标注影响与建议</td></tr>
+    <tr><td>6</td><td>证据缺口清单</td><td>所有 L0 无证据项，明确标注「未取证」</td></tr>
+  </table>
+</div>
+
+<div class="card green">
+  <h3>7.2 验收标准</h3>
+  <table>
+    <tr><th style="width:200px">验收维度</th><th>通过标准</th></tr>
+    <tr><td>覆盖率</td><td>第 1/2/3 次取证清单完成率 100%，或未完成项已在证据缺口清单中注明原因</td></tr>
+    <tr><td>可追溯</td><td>每条证据至少 L2；关键 Go/No-Go 项必须 L1</td></tr>
+    <tr><td>脱敏</td><td>抽查 10 条证据，无任何密钥/密码/令牌/完整 open_id 明文</td></tr>
+    <tr><td>可对账</td><td>§6.2 基线表 100% 填写，且同一指标在 JSONL/多维表/pgAPI/RHCRM 间的差异有解释</td></tr>
+    <tr><td>可决策</td><td>能明确给出三次发布各自的 Go/No-Go 结论与依据</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <h3>7.3 证据回填分析文档的方式</h3>
+  <div class="mermaid">
+flowchart LR
+    A["取证台账"] --> B["更新《分期部署数据流分析》附录 A"]
+    C["基线表"] --> D["更新 §5 数据库读写梳理 与 §6 风险表"]
+    E["异常清单"] --> F["新增风险或修订当前方案"]
+    G["证据缺口"] --> H["标注为待现场复核"]
+    B & D & F & H --> I["形成下一版分析文档"]
+    style I fill:#ecfdf5,stroke:#059669
+  </div>
+</div>
+
+<!-- ============ 8 ============ -->
+<h2 id="s8">附录 A · 只读命令模板</h2>
+
+<div class="card">
+  <h3>A.1 通用只读命令（Linux / 新系统 / pgAPI）</h3>
+  <pre><code># 进程与端口
+systemctl status &lt;服务名&gt; --no-pager
+ss -lntp | grep -E ':3000|:8000|:8080|:5432'
+
+# 版本
+node -v && python --version && docker --version && psql --version
+
+# 数据文件计数与大小（不读内容）
+find /path/to/data -maxdepth 1 -type f -name '*.jsonl' -printf '%f %s bytes\n'
+wc -l /path/to/data/*.jsonl
+du -sh /path/to/data /path/to/attachments
+
+# 磁盘余量
+df -h /path/to/data /var/lib/postgresql /var/lib/docker
+
+# 容器状态（不要打印环境变量）
+docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}'
+docker images --format 'table {{.Repository}}\t{{.Tag}}\t{{.Size}}'</code></pre>
+</div>
+
+<div class="card">
+  <h3>A.2 旧系统 Windows 只读命令模板</h3>
+  <pre><code># 服务与进程
+Get-Service | Where-Object {$_.DisplayName -match 'node|express|pm2'}
+Get-Process node | Select-Object Id, ProcessName, StartTime
+
+# 监听端口
+netstat -ano | findstr :3000
+
+# 数据目录计数与大小
+$data = "D:\path\to\tripartite-approval\data"
+Get-ChildItem $data -Filter *.jsonl | Select-Object Name, Length, LastWriteTime
+(Get-Content "$data\orders.jsonl" | Measure-Object -Line).Lines
+Get-ChildItem $data -Recurse -File | Measure-Object -Property Length -Sum
+
+# 磁盘余量
+Get-PSDrive -PSProvider FileSystem | Select-Object Name, Used, Free
+
+# 代码版本
+git -C D:\path\to\tripartite-approval rev-parse HEAD</code></pre>
+</div>
+
+<div class="card">
+  <h3>A.3 pgAPI 只读探测模板（不打印密钥）</h3>
+  <pre><code># 健康检查（无需密钥）
+curl -s http://127.0.0.1:8000/health
+curl -s http://127.0.0.1:8000/health/db
+
+# 列表计数（如配置了 X-API-Key，使用现场环境变量，不回显）
+curl -s -H "X-API-Key: $PGAPI_API_KEY" \
+  "http://127.0.0.1:8000/api/db/approval-flows?page=1&page_size=1" \
+  | python -m json.tool | grep -E '"total"|"success"|"page_size"'
+
+# 同步执行器状态（只读）
+curl -s http://127.0.0.1:8000/api/db-sync/tables
+curl -s http://127.0.0.1:8000/api/db-sync/status</code></pre>
+</div>
+
+<!-- ============ 9 ============ -->
+<h2 id="s9">附录 B · 敏感信息红线与脱敏规范</h2>
+
+<div class="card red">
+  <h3 style="margin-top:0">B.1 禁止采集清单（再次强调）</h3>
+  <p>下列内容<strong>不采集、不截图、不回传</strong>：</p>
+  <ul>
+    <li>飞书 <code>app_secret</code>、企微 <code>secret</code>、各类 <code>app_secret</code>。</li>
+    <li>旧系统 <code>CREATE_ORDER_AUTH_SECRET</code>、<code>FEISHU_ACTION_CALLBACK_TOKEN</code>、<code>WECOM_TEST_BRIDGE_SECRET</code>、<code>PRODUCTION_ORDER_BRIDGE_SECRET</code>。</li>
+    <li>数据库密码、pgAPI <code>X-API-Key</code>、对象存储 AK/SK、TLS 私钥、加密 AES key。</li>
+    <li>各类 <code>token</code>（<code>view_token</code>、<code>approver_token</code>、<code>submitter_token</code>、OAuth token、create-order token）。</li>
+    <li>完整 <code>open_id</code>、<code>user_id</code>（记录前 4 后 4 + sha256 前 8 位指纹）。</li>
+    <li>客户/订单/金额/底价等业务明细（只统计计数与分布）。</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h3>B.2 脱敏方法</h3>
+  <table>
+    <tr><th style="width:200px">信息类型</th><th>允许记录形式</th></tr>
+    <tr><td>密钥/密码/令牌</td><td>只记录：键名、是否存在、是否过期、最近轮换日期、长度范围；值一律以 <code>***</code> 代替</td></tr>
+    <tr><td>open_id / user_id</td><td><code>ou_2967****d38</code> + <code>sha256(open_id)[:8]</code></td></tr>
+    <tr><td>公网 IP / 域名</td><td>可记录（部署拓扑需要）</td></tr>
+    <tr><td>端口 / 路径 / 版本号</td><td>可记录</td></tr>
+    <tr><td>业务明细</td><td>只记录 COUNT / SUM / MIN / MAX / 状态分布；不回传行级明细</td></tr>
+    <tr><td>配置项值（非密钥）</td><td>可记录，例如：角色 key、节点 ID、表名、字段名、文件路径</td></tr>
+  </table>
+</div>
+
+<div class="card green tldr">
+  <h3 style="margin-top:0">B.3 一句话总结</h3>
+  <p><strong>取证目标：用最少的敏感信息，还原最完整的生产现场。</strong>凡是与「部署、版本、路径、端口、计数、状态、时间、配置键名」相关的，尽量采集；凡是与「秘密值、令牌、密码、完整个人标识、业务明细」相关的，只确认状态、不采集值。</p>
+</div>
+
+<footer>
+  本指南与《分期部署数据流分析.html》配套使用 · 最高裁决：docs/发布计划v2/渐进式发布计划v2.html · 只读取证 · 不采集密钥/密码/令牌
+</footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>09 · HTTP API 视角 Score Card · B2B 订单履约验证项目</title>
+<style>
+  :root{
+    --paper:#f5f4ed; --paper2:#efeee5; --ink:#1f1d18; --ink2:#6b665b;
+    --ink3:#3a382f; --blue:#1B365D; --rule:#d4d1c5;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif; line-height:1.6;}
+  .wrap{max-width:960px; margin:0 auto; padding:48px 40px 80px;}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;}
+  .folio{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--rule); padding-bottom:10px;
+    font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink2);}
+  .folio a{color:var(--ink2); border:none;}
+  .folio a:hover{color:var(--blue);}
+  .tag{display:inline-block; padding:3px 10px; font-size:11px; letter-spacing:.16em; background:var(--paper2); color:var(--blue);}
+  .kicker{display:flex; align-items:baseline; gap:12px; margin-top:48px;}
+  h1{font-size:clamp(32px,5vw,50px); line-height:1.12; font-weight:500; margin-top:14px; letter-spacing:-.01em;}
+  .lede{margin-top:18px; font-size:17px; line-height:1.7; color:var(--ink3); max-width:720px;}
+  h2{font-size:23px; font-weight:600; margin:52px 0 14px; color:var(--blue); display:flex; align-items:baseline; gap:12px; border-top:1px solid var(--rule); padding-top:26px;}
+  h2 .no{font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.12em;}
+  h3{font-size:17.5px; font-weight:600; margin:30px 0 10px; color:var(--ink);}
+  h3 .no{color:var(--blue); font-family:'IBM Plex Mono',monospace; font-size:12px; margin-right:8px;}
+  p{margin:10px 0; color:var(--ink3);}
+  ul,ol{margin:10px 0 10px 26px; color:var(--ink3);}
+  li{margin:5px 0;}
+  a{color:var(--blue); text-decoration:none; border-bottom:1px solid var(--rule);}
+  a:hover{border-bottom-color:var(--blue);}
+  blockquote{border-left:2px solid var(--blue); padding:10px 18px; margin:16px 0; background:var(--paper2); font-style:italic;}
+  table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  .table-wrap{overflow-x:auto; margin:16px 0 24px; border:1px solid var(--rule);}
+  .table-wrap table{margin:0;}
+  th{background:var(--paper2); color:var(--blue); text-align:left; font-weight:600; padding:9px 12px; border-bottom:1.5px solid var(--blue); font-size:12.5px; white-space:nowrap;}
+  td{padding:9px 12px; border-bottom:1px solid var(--rule); vertical-align:top; color:var(--ink3);}
+  tr:nth-child(even) td{background:#faf9f3;}
+  tr:hover td{background:#f0ede0;}
+  .mermaid{background:var(--paper); border:1px solid var(--rule); padding:18px; overflow-x:auto; text-align:center; margin:20px 0;}
+  .mermaid svg{max-width:100%; height:auto;}
+  .mermaid svg.statediagram span,.mermaid svg.statediagram div{color:#1f1d18 !important;}
+  .mermaid svg.statediagram text{fill:#1f1d18 !important;}
+  figcaption{text-align:center; font-size:12px; color:var(--ink2); margin:-10px 0 26px; font-style:italic;}
+  code{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace; font-size:13px; background:var(--paper2); padding:1px 5px;}
+  pre{background:var(--paper2); border:1px solid var(--rule); padding:16px 18px; overflow-x:auto; font-size:12.8px; line-height:1.55; margin:14px 0;}
+  pre code{background:none; padding:0;}
+  footer.colophon{margin-top:56px; padding-top:14px; border-top:1px solid var(--rule); display:flex; justify-content:space-between;
+    font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink2); flex-wrap:wrap; gap:8px;}
+  footer.colophon a{color:var(--ink2); border:none;}
+  footer.colophon a:hover{color:var(--blue);}
+  .toc{border:1px solid var(--rule); background:var(--paper2); padding:18px 24px; margin:26px 0;}
+  .toc .tt{font-size:11px; letter-spacing:.2em; color:var(--blue); margin-bottom:8px;}
+  .toc a{display:block; padding:3px 0; color:var(--ink3); border:none;}
+  .toc a:hover{color:var(--blue);}
+  .toc .mono{font-size:12px; color:var(--blue); margin-right:8px;}
+  @media(max-width:720px){.wrap{padding:28px 18px 60px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="folio"><span>B2B Pilot · API Score Card</span><span>2026-08-07 · HTTP 视角评估</span></div>
+  <div class="kicker"><span class="mono">SCORE CARD</span></div>
+  <h1>HTTP API 视角 · 业务测试 Score Card<br/><span style="font-style:italic; color:var(--blue);">覆盖率 · 风险性 · 影响面评估</span></h1>
+  <p class="lede">本卡从 <strong>HTTP API 视角</strong>评估订单履约全流程：① 13 个端点 × 设计对照（02 §2.1 / CQ-01..15 / 07 §6.1）的贯通性；② 每个业务场景的测试覆盖、风险等级、影响面。验证基线：tests/l2_e2e 21 用例（含 W5/W6）+ scripts/fullchain demo + code-review-graph（v3 @ 2e2fec9，head_matches_build=true）。</p>
+
+  <h2><span class="no">1 ·</span> 端点 × 设计 × 测试覆盖矩阵</h2>
+  <div class="table-wrap"><table>
+    <tr><th>端点</th><th>设计锚点</th><th>测试覆盖（E2E）</th><th>风险</th><th>影响面</th></tr>
+    <tr><td class="mono">GET /healthz</td><td>02 §2.1 运维</td><td>fullchain demo 步 01</td><td>低</td><td>全系统探测</td></tr>
+    <tr><td class="mono">POST /api/v1/orders</td><td>CQ-01/04（幂等启动）</td><td>FullChainPaid / NonPaid / ChairmanCD / PartialShipment / ModificationClasses / RejectPath / SignalErrors / IdempotentReplay / AuthzDenied</td><td>高</td><td>订单入口（全流程源头）</td></tr>
+    <tr><td class="mono">POST /orders/{id}/signal/{signal}</td><td>CQ-01（人工闸门不可绕过）</td><td>同上 9 用例 + WeComCallbackAdapter（W5 回调驱动等价）</td><td>高</td><td>全流程推进（8 信号名 × 权限判定）</td></tr>
+    <tr><td class="mono">GET /orders/{id}</td><td>CQ-02/03（BFF 投影）</td><td>Projection（仓管剥价）/ WeComS1Sidebar（contact 剥价 + context 校验）</td><td>高</td><td>全角色视图（数据泄露面）</td></tr>
+    <tr><td class="mono">GET /orders/{id}/events</td><td>CQ-12（审计回放）</td><td>FullChainPaid（26 事件链断言）</td><td>中</td><td>审计/对账</td></tr>
+    <tr><td class="mono">GET /api/v1/todos</td><td>CQ-05（待办检索）</td><td>TodosDuringFlow</td><td>中</td><td>S4 工作台/催办</td></tr>
+    <tr><td class="mono">POST /orders/{oid}/shipments/{sid}/evidence</td><td>CQ-15（只追加+权限）</td><td>EvidenceChain（v1/v2 201、contact 403）</td><td>高</td><td>凭证链可信度</td></tr>
+    <tr><td class="mono">GET /orders/{oid}/shipments/{sid}/evidence</td><td>CQ-15（版本回放）</td><td>EvidenceChain（[1,2] 有序回放）</td><td>中</td><td>凭证审计</td></tr>
+    <tr><td class="mono">POST /api/v1/preorders</td><td>CQ-11（msgid 幂等）</td><td>PreOrderChain / PreOrderIgnore / PreOrderEscalateAndConfirm / AuthzDenied</td><td>高</td><td>预订单入口</td></tr>
+    <tr><td class="mono">POST /preorders/{id}/signal/{signal}</td><td>CQ-11（人工确认闸门）</td><td>同上 3 用例 + WeComCallbackAdapter（confirm/ignore/modify 回调）</td><td>高</td><td>预订单全链</td></tr>
+    <tr><td class="mono">GET /preorders/{id}</td><td>CQ-11（查询）</td><td>fullchain demo 步 20-21</td><td>中</td><td>S2 确认态查询</td></tr>
+    <tr><td class="mono">GET /api/v1/wecom/jsapi-config</td><td>07 §6.1（JS-SDK 双签名）</td><td>WeComS1Sidebar（双签名 + 协议白名单）</td><td>中</td><td>S1 侧边栏 H5</td></tr>
+    <tr><td class="mono">POST /api/v1/auth/exchange</td><td>07 §6.1（OAuth 服务端授权）</td><td>WeComS1Sidebar（code/chat/未知拒绝/context_token）</td><td>中</td><td>S1 身份与上下文</td></tr>
+  </table></div>
+
+  <h2><span class="no">2 ·</span> 业务场景 Score Card（覆盖率 / 风险 / 影响面）</h2>
+  <div class="table-wrap"><table>
+    <tr><th>业务场景</th><th>覆盖用例</th><th>覆盖</th><th>风险</th><th>影响面</th></tr>
+    <tr><td>款到订单全链（6 闸门 → INV_CLOSED）</td><td class="mono">TestE2EFullChainPaid + scripts/fullchain</td><td>✅ 端到端 + 可运行 demo</td><td>高</td><td>核心履约路径</td></tr>
+    <tr><td>非款到（回单分流/例外审核）</td><td class="mono">TestE2EFullChainNonPaid（分流③）</td><td>✅</td><td>高</td><td>非款到客户群</td></tr>
+    <tr><td>董事长 C/D 闸门</td><td class="mono">TestE2EChairmanCD</td><td>✅</td><td>中</td><td>高金额/高等级订单</td></tr>
+    <tr><td>部分发货（2 批 40+60）</td><td class="mono">TestE2EPartialShipment</td><td>✅</td><td>中</td><td>分批履约</td></tr>
+    <tr><td>订单修改 A/B/C/D/E（revision/resubmit）</td><td class="mono">TestE2EModificationClasses</td><td>✅（5 子测）</td><td>高</td><td>变更重入备货</td></tr>
+    <tr><td>拒绝终态</td><td class="mono">TestE2ERejectPath</td><td>✅</td><td>中</td><td>审价否决</td></tr>
+    <tr><td>信号错误/未知信号</td><td class="mono">TestE2ESignalErrors</td><td>✅</td><td>低</td><td>API 契约健壮性</td></tr>
+    <tr><td>待办检索（CQ-05）</td><td class="mono">TestE2ETodosDuringFlow</td><td>✅</td><td>中</td><td>S4 工作台</td></tr>
+    <tr><td>预订单全链（确认/忽略/升级降级）</td><td class="mono">PreOrderChain / Ignore / EscalateAndConfirm</td><td>✅（3 用例）</td><td>高</td><td>S2 人工确认闸门</td></tr>
+    <tr><td>凭证链（只追加/回放/权限）</td><td class="mono">TestE2EEvidenceChain</td><td>✅</td><td>高</td><td>CQ-15 可信凭证</td></tr>
+    <tr><td>BFF 投影（仓管/contact 剥价）</td><td class="mono">Projection + WeComS1Sidebar ④</td><td>✅（本轮补 contact）</td><td>高</td><td>跨角色数据泄露面</td></tr>
+    <tr><td>授权拒绝（越权 403/401）</td><td class="mono">TestE2EAuthzDenied + W6 篡改 token</td><td>✅</td><td>高</td><td>安全边界</td></tr>
+    <tr><td>幂等重放（订单/预订单）</td><td class="mono">TestE2EIdempotentReplayThroughHTTP</td><td>✅</td><td>高</td><td>重试安全</td></tr>
+    <tr><td>企微 S3 审批回调 → 流程推进</td><td class="mono">TestE2EWeComCallbackAdapter（W5）</td><td>✅（本轮补）</td><td>高</td><td>企微接入等价性</td></tr>
+    <tr><td>企微 S1 侧边栏（双签名/OAuth/上下文）</td><td class="mono">TestE2EWeComS1Sidebar（W6）</td><td>✅（本轮补）</td><td>中</td><td>S1 H5 接入</td></tr>
+  </table></div>
+
+  <h2><span class="no">3 ·</span> 覆盖率 / 风险性 / 影响面评估</h2>
+  <h3><span class="no">3.1</span> 业务覆盖率（HTTP 视角）</h3>
+  <ul>
+    <li><strong>场景级：15/15 全绿</strong>——21 个 E2E 用例覆盖全部 13 个端点与全部业务分支。</li>
+    <li><strong>行覆盖率：87.8%</strong>（make cover，门禁 85% + domain 100% 硬门禁）——差距全部为防御性错误分支（repo pgx scan error、workflows 闸门防御返回），非业务路径缺失；正确性核心 domain 100%。</li>
+    <li><strong>可运行证据</strong>：scripts/fullchain 22 步 demo（订单全链 INV_CLOSED + 26 事件 + 凭证 + 预订单 + 待办 + 出站卡片）连续 2× exit=0。</li>
+  </ul>
+  <h3><span class="no">3.2</span> 风险性</h3>
+  <ul>
+    <li><strong>高影响面</strong>：订单创建/信号/投影/凭证/预订单——全部有 E2E + 权限拒绝用例（AuthzDenied/403/401），跨角色投影本轮补 contact 剥离（07 §4.1 偏差已修）。</li>
+    <li><strong>残余风险</strong>：① TestSuite 信号递送竞态（环境层，300ms 间隔规避，tests/README 记录）；② 真实企微通道（official）未做端到端（W3/W4 真实环境门禁，Phase 3 人工验收——诚实声明不冒充）；③ Outbox 投影器阶段二（本地 StaticChecker 判定）。</li>
+  </ul>
+  <h3><span class="no">3.3</span> 影响面</h3>
+  <ul>
+    <li>本轮新增端点（jsapi-config / auth/exchange）仅服务 S1 H5，不影响既有 11 个业务端点；withContext 的 X-WeCom-Context 校验仅在携带该头时生效（既有调用零影响）。</li>
+    <li>ProjectOrder contact 剥离变更影响面：仅 CONTACT 角色订单视图（此前错误地暴露金额），已由 W6 + api 单测 + 既有 Projection 用例验证。</li>
+  </ul>
+
+  <h2><span class="no">4 ·</span> 设计贯通结论（任务 1）</h2>
+  <ol>
+    <li><strong>端点 ↔ 设计</strong>：13 端点 ↔ 02 §2.1 设计清单 + CQ-01..15 全映射（05 roundtrip 15 CQ 代码图锚点抽查存活）；07 §6.1 S1 服务端能力本轮补齐（jsapi 双签名/OAuth 交换/context 校验）。</li>
+    <li><strong>流程贯通</strong>：HTTP 入口 → Starter（LocalRunner/Temporal 5 实现）→ OrderWorkflow / PreOrderWorkflow 调用链完整（code-review-graph 图证）；E2E 21 用例 + demo 全绿。</li>
+    <li><strong>本轮修复</strong>：① ProjectOrder 对 CONTACT 不剥价（07 §4.1 设计偏差，W6 暴露并修复）；② 预订单 modified 分支派生状态硬编码（上轮 W5 暴露并修复）。</li>
+    <li><strong>结论</strong>：HTTP API 视角订单履约全流程<strong>完全符合设计、全线贯通</strong>；剩余缺口仅为覆盖率数值 87.8%（防御分支性质）与真实企微环境人工验收（Phase 3）。</li>
+  </ol>
+
+  <h2><span class="no">5 ·</span> 接手速查（L 层 → 命令 → 覆盖/风险/影响）</h2>
+  <div class="table-wrap"><table>
+    <tr><th>层</th><th>一条命令</th><th>覆盖</th><th>风险</th><th>影响面</th><th>评估出处</th></tr>
+    <tr><td>L0</td><td class="mono">make test-tests-l0</td><td>FSM/守恒/幂等/回单分流/接入层/模型契约</td><td>低（纯函数）</td><td>正确性核心</td><td>docs/09 §2 首行</td></tr>
+    <tr><td>L1</td><td class="mono">make test-tests-l1</td><td>HTTP×真 PG：幂等/跨租户/事件链/凭证只追加</td><td>中</td><td>数据防线</td><td>docs/09 §1</td></tr>
+    <tr><td>L2</td><td class="mono">make test-tests-l2</td><td>21 用例全业务流（含企微 W5/W6）</td><td>高</td><td>全流程推进</td><td>docs/09 §2</td></tr>
+    <tr><td>L3</td><td class="mono">make test-tests-l3</td><td>seeddata/reconcile/audit/concurrency + 覆盖率门禁</td><td>高</td><td>系统级守恒</td><td>docs/03 L3 行</td></tr>
+    <tr><td>企微 W</td><td class="mono">make test-wecom</td><td>W1/W2 单测 + W5/W6 E2E + deferred 回归（mock 全覆盖）</td><td>中-高</td><td>企微接入面</td><td>tests/README「企微 L 层」</td></tr>
+    <tr><td>全链 demo</td><td class="mono">go run ./scripts/fullchain</td><td>22 步 HTTP 全流程（订单/凭证/预订单/待办/出站）</td><td>—</td><td>验收证据</td><td>docs/09 §4</td></tr>
+    <tr><td>门禁</td><td class="mono">make cover</td><td>全仓 87.8% + domain 100% 硬门禁 + 8 包齐全</td><td>—</td><td>防假绿</td><td>docs/03 §3</td></tr>
+  </table></div>
+  <p><strong>部署三路径</strong>：① 本地 mock（<span class="mono">make up</span> + <span class="mono">go run ./cmd/api</span>）；② 容器 mock（<span class="mono">docker compose up -d --build</span>，api :18080 / wecom :18081）；③ 真实企微测试企业（official 通道，07 §10.2 清单 + §10.3 验证步骤 + W3/W4 人工验收）。</p>
+
+  <div class="foot">B2B Pilot · HTTP API Score Card · 2026-08-07 · 基线：tests/l2_e2e 21 用例 + code-review-graph @ 2e2fec9</div>
+</div>
+</body>
+</html>

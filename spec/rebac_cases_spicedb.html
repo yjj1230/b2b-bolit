@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ReBAC 授权表（SpiceDB）：谁、能看什么、能做什么</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({ startOnLoad: true, theme: "base", securityLevel: "loose",
+      themeVariables: {
+        primaryColor: "#f0f5fa", primaryBorderColor: "#4a7aa6", primaryTextColor: "#1e2d3d",
+        secondaryColor: "#f2f7f0", tertiaryColor: "#fef9f0", lineColor: "#7e8d9e",
+        fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif",
+        fontSize: "15px"
+      }, flowchart: { curve: "basis", htmlLabels: true, useMaxWidth: true }
+    });
+  </script>
+  <style>
+    :root {
+      --ink: #1b2633; --muted: #5c6b7a; --soft: #f5f6f8; --paper: #ffffff;
+      --line: #dfe3e8; --blue: #345d8a; --blue-soft: #eef4fb; --green: #4a6b4f;
+      --green-soft: #edf5ee; --gold: #8a6228; --gold-soft: #fef8ed; --red: #9c4a4a;
+      --red-soft: #fdf0ef; --purple: #5e428a; --purple-soft: #f4eefb;
+      --teal: #0b706e; --teal-soft: #e3f2f0;
+      --radius: 10px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; color: var(--ink); background: var(--soft);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      line-height: 1.78; font-size: 15px; }
+    .page { max-width: 1060px; margin: 0 auto; padding: 40px 16px 64px; overflow-x: hidden; }
+
+    header { background: linear-gradient(165deg, #1a2d38 0%, #1f3a45 40%, #1a2d38 100%); border-radius: 12px;
+      padding: 44px 46px 36px; color: #eef4f7; box-shadow: 0 16px 48px rgba(20,30,40,0.12); }
+    .eyebrow { margin: 0 0 10px; color: #a3c5d6; font-size: 13px; font-weight: 700; letter-spacing: 0.03em; }
+    h1 { margin: 0; font-size: clamp(28px, 4vw, 40px); line-height: 1.2; font-weight: 800; }
+    .lead { max-width: 720px; margin: 18px 0 0; color: #c5dae4; font-size: 16px; line-height: 1.75; }
+    .hero-strip { width: 56px; height: 4px; margin-top: 22px; background: #d5a85d; border-radius: 2px; }
+    .hero-cards { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1px; margin-top: 28px;
+      background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.12); border-radius: 8px; overflow: hidden; }
+    .hero-cards div { min-height: 74px; padding: 16px 18px; background: rgba(29,54,68,.82); }
+    .hero-cards strong { display: block; color: #fff; font-size: 15px; }
+    .hero-cards span { display: block; margin-top: 4px; color: #b3cdd9; font-size: 12px; line-height: 1.55; }
+    nav { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 0; }
+    nav a { color: #bdd6e5; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.16);
+      border-radius: 6px; padding: 7px 11px; text-decoration: none; font-size: 13px; font-weight: 600; }
+    nav a:hover { background: rgba(255,255,255,.16); }
+
+    section { margin-top: 22px; padding: 28px 30px; background: var(--paper); border: 1px solid var(--line);
+      border-radius: var(--radius); box-shadow: 0 3px 14px rgba(27,38,51,0.03); overflow: hidden; }
+    h2 { margin: 0 0 12px; padding-bottom: 10px; border-bottom: 2px solid var(--blue-soft);
+      color: var(--blue); font-size: 21px; font-weight: 750; }
+    h3 { margin: 28px 0 10px; font-size: 17px; color: var(--ink); } h3:first-child { margin-top: 0; }
+    p { margin: 8px 0; } .desc { color: var(--muted); font-size: 14px; margin-bottom: 16px; }
+
+    .scene { margin: 14px 0; padding: 16px 18px; background: var(--gold-soft); border-left: 4px solid var(--gold);
+      border-radius: 0 6px 6px 0; font-size: 14px; }
+    .scene strong { color: #6e4b1c; }
+    .answer { margin: 16px 0; padding: 16px 20px; background: var(--green-soft); border-left: 4px solid var(--green);
+      border-radius: 0 6px 6px 0; font-size: 14px; }
+    .answer strong { color: var(--green); }
+    .note { margin: 16px 0; padding: 16px 20px; background: var(--blue-soft); border-left: 4px solid var(--blue);
+      border-radius: 0 6px 6px 0; font-size: 14px; }
+    .note strong { color: var(--blue); }
+    .info { margin: 16px 0; padding: 16px 20px; background: var(--teal-soft); border-left: 4px solid var(--teal);
+      border-radius: 0 6px 6px 0; font-size: 14px; }
+    .info strong { color: var(--teal); }
+
+    .table-wrap { overflow-x: auto; margin: 14px 0; -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin; scrollbar-color: #c5cdd5 transparent; border-radius: 6px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; background: var(--paper);
+      border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+    th, td { padding: 8px 9px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top;
+      overflow-wrap: break-word; word-break: break-word; hyphens: auto; }
+    th { background: #f0f3f7; color: var(--blue); font-weight: 700; font-size: 12px;
+      white-space: nowrap; letter-spacing: 0.02em; }
+    td:first-child { font-weight: 700; white-space: nowrap; }
+    tr:nth-child(even) td { background: #fafcfb; }
+    tr.highlight td { background: #f2f7f0 !important; }
+    .deny td { color: var(--red); }
+    .deny td:last-child { font-style: italic; }
+    .caption { color: var(--muted); font-size: 12px; margin-top: 4px; }
+
+    .role-tag { display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 700;
+      white-space: nowrap; letter-spacing: 0.02em; }
+    .role-sales { background: #e4ecf7; color: #2a5a9e; }
+    .role-customer { background: #fef3e4; color: #a35c10; }
+    .role-warehouse { background: #e6f2e7; color: #356b38; }
+    .role-biz { background: #fde8ed; color: #a34050; }
+    .role-manager { background: #ede5f6; color: #5e3a8a; }
+
+    /* ownership badges */
+    .own-fill { display: inline-flex; align-items: center; gap: 2px; padding: 2px 7px; border-radius: 999px;
+      background: #e7f3ed; color: #2d5a3a; font-size: 10px; font-weight: 700; white-space: nowrap;
+      border: 1.5px solid #7ab88d; }
+    .own-auto { display: inline-flex; align-items: center; gap: 2px; padding: 2px 7px; border-radius: 999px;
+      background: #eaeeed; color: #4f6065; font-size: 10px; font-weight: 700; white-space: nowrap;
+      border: 1.5px solid #a8b5ae; }
+    .own-legend { display: flex; gap: 16px; align-items: center; margin: 10px 0 6px; flex-wrap: wrap; }
+    .own-legend span { font-size: 13px; color: var(--muted); }
+
+    .mermaid-wrap { width: 100%; overflow-x: auto; padding: 10px 8px 14px; margin: 18px 0;
+      background: #fafcfd; border: 1px solid #edf1f5; border-radius: 8px; }
+    .mermaid { min-width: 500px; display: flex; justify-content: center; }
+
+    .concept-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 16px 0; }
+    .concept-card { padding: 18px 20px; background: #f9fafb; border: 1px solid var(--line);
+      border-radius: 8px; transition: box-shadow 0.15s; }
+    .concept-card:nth-child(1) { border-top: 3px solid var(--blue); }
+    .concept-card:nth-child(2) { border-top: 3px solid var(--gold); }
+    .concept-card:nth-child(3) { border-top: 3px solid var(--green); }
+    .concept-card h4 { margin: 0 0 6px; font-size: 15px; font-weight: 750; }
+    .concept-card p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.65; }
+
+    .case-flow { display: grid; grid-template-columns: 1fr 56px 1fr; align-items: center; margin: 14px 0; }
+    .case-flow > div { padding: 14px 18px; border: 1px solid var(--line); border-radius: 8px;
+      background: var(--paper); }
+    .case-flow > div:first-child { border-top: 3px solid var(--blue); }
+    .case-flow > div:last-child { border-top: 3px solid var(--green); }
+    .case-arrow { display: flex; align-items: center; justify-content: center;
+      font-size: 22px; color: var(--muted); }
+
+    .summary-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 16px 0; }
+    .summary-card { padding: 18px 20px; background: #f9fafb; border: 1px solid var(--line);
+      border-radius: 8px; text-align: center; }
+    .summary-card strong { display: block; margin-bottom: 6px; font-size: 28px; line-height: 1;
+      color: var(--blue); }
+    .summary-card span { display: block; color: var(--muted); font-size: 13px; line-height: 1.55; }
+
+    /* excel table specific */
+    .excel-grid { overflow-x: auto; -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin; scrollbar-color: #c5cdd5 transparent; }
+    .excel-grid table { font-size: 11px; min-width: 880px; table-layout: fixed; }
+    .excel-grid th { position: sticky; top: 0; z-index: 1; }
+    .excel-grid td small { display: block; color: var(--muted); font-size: 9.5px; margin-top: 1px;
+      font-weight: 400; font-family: "SF Mono","Fira Code",Consolas,monospace;
+      overflow-wrap: anywhere; word-break: break-all; }
+    .excel-grid tr.allow td { background: #f7fdf8; }
+    .excel-grid tr.deny-row td { color: var(--red); background: #fef9f9; }
+
+    pre { margin: 12px 0; padding: 14px 16px; background: #1e2a30; color: #c9d6df; border-radius: 6px;
+      font-size: 11.5px; line-height: 1.65; overflow-x: auto; white-space: pre-wrap; word-break: break-all;
+      font-family: "SF Mono","Fira Code",Consolas,monospace;
+      scrollbar-width: thin; scrollbar-color: #3a4a50 transparent; }
+
+    footer { margin-top: 32px; color: var(--muted); text-align: center; font-size: 12px; line-height: 1.8; }
+
+    @media (max-width: 820px) {
+      .page { padding: 18px 12px 48px; }
+      header, section { padding: 22px 16px; }
+      .hero-cards { grid-template-columns: 1fr; }
+      .concept-grid, .case-flow, .summary-grid { grid-template-columns: 1fr; }
+      .case-arrow { transform: rotate(90deg); }
+      .excel-grid table { min-width: 520px; font-size: 10px; }
+      th, td { padding: 7px 8px; }
+      pre { font-size: 10.5px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <p class="eyebrow">写给 COO · 运营 · 商务同事</p>
+      <h1>ReBAC 授权表（SpiceDB）：<br>怎么定「谁、能看什么、能做什么」</h1>
+      <p class="lead">
+        这不是技术文档。这是一张<strong>你可以自己填的表格</strong>——用它描述"在公司里，谁因为什么关系，能看到备货单的哪些字段，能发起发货还是只能看进度"。填完了，系统就按你的意思跑。本项目的授权引擎是 SpiceDB（Google Zanzibar 论文的最成熟开源实现，Netflix 等验证）。
+      </p>
+      <div class="hero-strip"></div>
+      <div class="hero-cards">
+        <div><strong>① 人</strong><span>谁要访问</span></div>
+        <div><strong>② 关系</strong><span>凭什么能访问</span></div>
+        <div><strong>③ 权限</strong><span>能看什么 · 能做什么</span></div>
+      </div>
+      <nav>
+        <a href="#concept">核心概念</a>
+        <a href="#template">授权表模板</a>
+        <a href="#cases">场景实填</a>
+        <a href="#special">特殊场景</a>
+        <a href="#summary">全景汇总</a>
+        <a href="#excel">Excel 共享授权表</a>
+      </nav>
+    </header>
+
+    <!-- ========== 一、概念 ========== -->
+    <section id="concept">
+      <h2>一、先看一个直观的例子</h2>
+      <p class="desc">下面这张图描述了你每天都在做的事——ReBAC 就是把这件事写成规则，交给 SpiceDB 自动判断。</p>
+      <div class="mermaid-wrap">
+        <div class="mermaid">
+flowchart LR
+    P["🧑 张明（商务）"] -->|"是负责人"| R["🔗 备货单负责人<br>prestock#owner"]
+    R -->|"允许"| O["📋 天华科技备货单<br>PS-8801"]
+    O --> A["✅ 查看 · 改额度 · 发货"]
+
+    P2["🧑 王强（仓管）"] -->|"被分配"| R2["🔗 发货单仓管<br>shipment#warehouse_operator"]
+    R2 -->|"允许"| O2["📋 发货单 SHP-02"]
+    O2 --> A2["✅ 确认 · 驳回"]
+
+    P3["🧑 李客户（联系人）"] -->|"是联系人"| R3["🔗 客户联系人<br>customer#contact"]
+    R3 -->|"允许"| O3["📋 天华科技物流视图<br>裁剪后"]
+    O3 --> A3["✅ 查看物流 · 上传签章"]
+
+    P4["🧑 其他租户用户"] -.->|"无关系"| R4["🚫 租户隔离拒绝"]
+    R4 -.-> A4["⛔ 看不到"]
+    classDef person fill:#eef4fb,stroke:#4a7aa6,color:#1e3d5c
+    classDef relation fill:#fef8ed,stroke:#b08840,color:#5c3d18
+    classDef object fill:#edf5ee,stroke:#5a8a5e,color:#1e3e22
+    classDef allow fill:#f0f8f0,stroke:#4a8a4e,color:#1e5e22
+    classDef deny fill:#fdf0ef,stroke:#a05050,color:#6e2828
+    class P,P2,P3,P4 person
+    class R,R2,R3,R4 relation
+    class O,O2,O3 object
+    class A,A2,A3 allow
+    class A4 deny
+        </div>
+      </div>
+      <p class="caption">ReBAC 的核心：你能不能访问，不取决于你是哪个部门，而取决于<strong>你跟这条信息之间有没有业务关系</strong>。SpiceDB 用"关系元组"存储这些关系，毫秒级判定。</p>
+
+      <div class="concept-grid">
+        <div class="concept-card">
+          <h4>① 人</h4>
+          <p>就是登录系统的那个人。<br>商务张明、仓管王强、客户联系人李客户。<br>在 SpiceDB 里统一叫 <code>user</code>。</p>
+        </div>
+        <div class="concept-card">
+          <h4>② 关系 &nbsp;← ReBAC 的核心</h4>
+          <p>这个人和数据之间的<strong>业务关系</strong>。<br>"张明是天华科技备货单的负责人"<br>"王强被分配了发货单 SHP-02"<br>"李客户是天华科技的客户联系人"<br><br>关系是<strong>事实</strong>，不是标签。SpiceDB 把它存为"关系元组"：<code>prestock:PS-8801#owner@user:zhang_ming</code>。</p>
+        </div>
+        <div class="concept-card">
+          <h4>③ 权限</h4>
+          <p>基于关系，<strong>能做什么</strong>。<br>能查看、能改额度、能发起发货。<br>能确认、能驳回、能上传凭证。<br><br>可以精确到：这条记录的<strong>这些字段</strong>你能看（如客户看不到价格）。</p>
+        </div>
+      </div>
+
+      <div class="answer">
+        <strong>一句话：</strong>ReBAC = "因为你跟这个东西之间有关系，所以你才能动它。"<br>
+        跟传统"因为你是销售部的所以你都能看"完全不同——<strong>关系比部门标签更精确</strong>。你每次在企微群里判断"这人能不能看这张备货单"，本质上就是在做 ReBAC。SpiceDB 就是那个帮你自动判定的引擎。
+      </div>
+    </section>
+
+    <!-- ========== 二、授权表模板 ========== -->
+    <section id="template">
+      <h2>二、授权表：一张表格，定义所有权限</h2>
+      <p class="desc">这是你需要理解的核心工具。七列——像填 Excel 一样，逐行描述"谁、凭什么关系、对什么东西、能看什么字段、能做什么操作、多久有效、谁批准的"。</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th style="width:9%">谁</th><th style="width:12%">凭什么关系</th><th style="width:12%">对什么</th><th style="width:28%">能看什么</th><th style="width:17%">能做什么</th><th style="width:12%">有效期</th><th style="width:10%">谁批准/来源</th>
+          </tr></thead>
+          <tbody>
+            <tr>
+              <td>张明<br>天华科技商务</td>
+              <td><strong>备货单负责人</strong><br>张明 = PS-8801 的 owner</td>
+              <td>备货单 PS-8801</td>
+              <td>备货单全部字段：额度·已用·剩余·有效期<br>关联发货单：状态·物流·凭证</td>
+              <td>查看 · 改额度<br>发起发货 · 关闭</td>
+              <td>长期<br>（只要还是负责人）</td>
+              <td>系统自动<br>备货单创建时绑定</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note">
+        <strong>这七列里，最核心的是第 2 列——"凭什么关系"。</strong><br>
+        如果填的是"因为是商务部门的人"→ 传统角色权限（RBAC），太粗。<br>
+        如果填的是"因为是这张备货单的负责人"→ ReBAC，<strong>权限跟着业务关系走</strong>，精确、自动联动。
+      </div>
+    </section>
+
+    <!-- ========== 三、场景实填 ========== -->
+    <section id="cases">
+      <h2>三、你的真实场景，填进授权表</h2>
+
+      <!-- A. 商务开备货单 -->
+      <h3>场景 A：商务在企微客户群开备货单</h3>
+      <div class="scene"><strong>日常：</strong>张明在天华科技客户群里打开侧边栏，系统自动识别出这是天华科技的群。张明选择一张已生效的采购订单，填写备货额度 1000kg，提交。审批通过后额度生效。</div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>谁</th><th>凭什么关系</th><th>对什么</th><th>能看什么</th><th>能做什么</th><th>有效期</th></tr></thead>
+        <tbody>
+          <tr class="highlight">
+            <td><span class="role-tag role-sales">商务·张明</span></td>
+            <td><strong>客户负责人</strong><br>张明 = 天华科技的 account_owner<br>+ 订单创建人</td>
+            <td>天华科技的已生效订单</td>
+            <td>订单全部字段</td>
+            <td><strong>开备货单</strong></td>
+            <td>长期</td>
+          </tr>
+          <tr class="deny">
+            <td><span class="role-tag role-sales">售后·李娜</span></td>
+            <td>无关系<br>（既非 account_owner 也非 creator）</td>
+            <td>天华科技的订单</td>
+            <td>—</td>
+            <td>不能开备货单</td>
+            <td>看不到</td>
+          </tr>
+        </tbody>
+      </table></div>
+      <p class="caption">开备货单需要两个关系之一：你是这个客户的负责人，或者你是这张订单的创建人。<strong>不是"商务部门的人都能开"</strong>——是"跟这个客户/订单有具体关系的人才能开"。</p>
+
+      <!-- B. 商务改额度/发起发货 -->
+      <h3>场景 B：商务改备货额度、发起多次发货</h3>
+      <div class="scene"><strong>日常：</strong>张明的备货单 PS-8801 审批通过了（状态=ACTIVE），总额度 1000kg。他先发 300kg，再发 200kg，系统实时显示剩余 500kg。他想把总额度改到 1200kg。</div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>谁</th><th>凭什么关系</th><th>对什么</th><th>能看什么</th><th>能做什么</th><th>有效期</th></tr></thead>
+        <tbody>
+          <tr class="highlight">
+            <td><span class="role-tag role-sales">商务·张明</span></td>
+            <td><strong>备货单负责人</strong><br>张明 = PS-8801 的 owner</td>
+            <td>备货单 PS-8801</td>
+            <td>总额度·已用额度·剩余额度<br>每次发货的状态·物流</td>
+            <td>查看 · <strong>改额度</strong><br><strong>发起发货</strong> · 关闭</td>
+            <td>备货单有效期内</td>
+          </tr>
+          <tr class="deny">
+            <td><span class="role-tag role-warehouse">仓管·王强</span></td>
+            <td>被分配仓管<br>（是 warehouse_manager 但非 owner）</td>
+            <td>备货单 PS-8801</td>
+            <td>可查看</td>
+            <td>不能改额度<br>不能发起发货</td>
+            <td>—</td>
+          </tr>
+        </tbody>
+      </table></div>
+      <div class="note">
+        <strong>注意：SpiceDB 只管"关系对不对"，不管"额度够不够"。</strong><br>
+        王强是 warehouse_manager，SpiceDB 允许他<strong>查看</strong>备货单，但不允许他改额度或发起发货——这些权限只给 owner。<br>
+        如果张明想发 2000kg 而总额度只有 1000kg——SpiceDB 会放行（因为他是 owner），但 Workflow 会拒绝（因为超额）。<br>
+        这叫<strong>"两道门"</strong>：第一道门（SpiceDB）判断关系，第二道门（Temporal Workflow）判断状态和额度。
+      </div>
+
+      <!-- C. 仓管确认/驳回 -->
+      <h3>场景 C：仓管确认或驳回被分配的发货单</h3>
+      <div class="scene"><strong>日常：</strong>张明发起了发货 SHP-02，系统分配给天华仓库的王强处理。王强在企微收到待办卡片，点击进入确认页——产品、数量、地址都对，点"确认发货"。库存锁定变为确认。</div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>谁</th><th>凭什么关系</th><th>对什么</th><th>能看什么</th><th>能做什么</th><th>有效期</th></tr></thead>
+        <tbody>
+          <tr class="highlight">
+            <td><span class="role-tag role-warehouse">仓管·王强</span></td>
+            <td><strong>发货单仓管员</strong><br>王强 = SHP-02 的 warehouse_operator</td>
+            <td>发货单 SHP-02</td>
+            <td>产品·规格·数量·地址·质检单<br><em>不显示：价格·销售备注</em></td>
+            <td>查看 · <strong>确认</strong> · <strong>驳回</strong><br>上传凭证</td>
+            <td>发货完成后<br>自动收回</td>
+          </tr>
+          <tr class="deny">
+            <td><span class="role-tag role-warehouse">仓库主管·刘总</span></td>
+            <td>无关系<br>（未被分配为 warehouse_operator）</td>
+            <td>发货单 SHP-02</td>
+            <td>—</td>
+            <td>不能确认<br>不能驳回</td>
+            <td>即使卡片被转发<br>也无法操作</td>
+          </tr>
+        </tbody>
+      </table></div>
+      <p class="caption">仓管的权限范围天然最小化——<strong>"只看被分配去处理的那几张发货单"</strong>。即使仓管待办卡片被同事转发，非分配仓管点进去也只能看到 403 错误，看不到价格和内部备注。</p>
+
+      <!-- D. 客户联系人上传凭证 -->
+      <h3>场景 D：客户联系人上传签收单、查看物流</h3>
+      <div class="scene"><strong>日常：</strong>天华科技的李客户收到货后，需要上传签收回单。他在小程序打开上传页，拍照上传。系统追加了一个凭证版本，不覆盖之前仓管上传的出库单。</div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>谁</th><th>凭什么关系</th><th>对什么</th><th>能看什么</th><th>能做什么</th><th>有效期</th></tr></thead>
+        <tbody>
+          <tr class="highlight">
+            <td><span class="role-tag role-customer">客户·李客户</span></td>
+            <td><strong>客户联系人</strong><br>李客户 = 天华科技的 contact</td>
+            <td>天华科技的发货单</td>
+            <td>物流状态·承诺交期·凭证列表<br><em>不显示：价格·内部审批·备注</em></td>
+            <td>查看物流 · <strong>上传签章</strong></td>
+            <td>长期</td>
+          </tr>
+          <tr>
+            <td><span class="role-tag role-sales">商务·张明</span></td>
+            <td>备货单负责人 + 发货发起人</td>
+            <td>天华科技的发货单</td>
+            <td>全部字段（含价格）</td>
+            <td>查看 · 上传凭证</td>
+            <td>长期</td>
+          </tr>
+          <tr class="deny">
+            <td><span class="role-tag role-customer">其他客户</span></td>
+            <td>无关系（不同客户主体）</td>
+            <td>天华科技的发货单</td>
+            <td>—</td>
+            <td>看不到</td>
+            <td>—</td>
+          </tr>
+        </tbody>
+      </table></div>
+      <p class="caption">同一张发货单 SHP-02，张明看到全部字段，李客户只能看到物流和凭证，看不到价格和内部备注——<strong>ReBAC 精确到字段级</strong>。而且凭证是"只追加版本，不覆盖历史"——每次上传都是新版本，旧版本留审计。</p>
+
+      <!-- E. 跨租户拒绝 -->
+      <h3>场景 E：跨租户伪造 ID — 租户隔离</h3>
+      <div class="scene"><strong>安全场景：</strong>天宇科技的某用户拿到了天华科技备货单 PS-8801 的内部 ID，试图通过 API 直接访问。系统必须在三层全部拒绝：SpiceDB 授权拒绝、业务数据库拒绝、对象存储拒绝。</div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>谁</th><th>凭什么关系</th><th>对什么</th><th>能看什么</th><th>能做什么</th><th>有效期</th></tr></thead>
+        <tbody>
+          <tr class="deny">
+            <td><span class="role-tag role-sales">天宇科技·某用户</span></td>
+            <td>无关系<br>（天宇科技 ≠ 天华科技租户）</td>
+            <td>备货单 PS-8801<br>（天华科技资产）</td>
+            <td>—</td>
+            <td>全部拒绝<br>SpiceDB 拒绝<br>业务库拒绝<br>对象存储拒绝</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><span class="role-tag role-sales">商务·张明</span></td>
+            <td>备货单负责人<br>且属于天华科技租户</td>
+            <td>备货单 PS-8801</td>
+            <td>全部字段</td>
+            <td>全部操作</td>
+            <td>长期</td>
+          </tr>
+        </tbody>
+      </table></div>
+      <p class="caption"><strong>租户隔离是 SpiceDB 的内置能力。</strong>每个权限定义末尾都有 <code>&amp; tenant-&gt;member</code>——即使你有 owner 关系，如果你不属于这个租户，权限求交（intersection）会拒绝你。业务数据库和对象存储额外加一层租户校验，形成三道防线。</p>
+
+      <!-- F. 发货作废窗口 (caveat, 阶段二) -->
+      <h3>场景 F：发货作废窗口（阶段二）</h3>
+      <div class="scene"><strong>日常：</strong>张明刚发起发货 SHP-03 就发现数量填错了，需要在 30 分钟内作废。超过 30 分钟就不能作废了——需要走人工流程。</div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>谁</th><th>凭什么关系</th><th>对什么</th><th>能看什么</th><th>能做什么</th><th>有效期/条件</th></tr></thead>
+        <tbody>
+          <tr class="highlight">
+            <td><span class="role-tag role-sales">商务·张明</span></td>
+            <td><strong>发货发起人</strong><br>张明 = SHP-03 的 requester</td>
+            <td>发货单 SHP-03</td>
+            <td>全部字段</td>
+            <td><strong>作废</strong></td>
+            <td><strong>仅创建后 30 分钟内</strong><br><small>SpiceDB Caveat: within_void_window</small></td>
+          </tr>
+          <tr class="deny">
+            <td><span class="role-tag role-sales">商务·张明</span></td>
+            <td>发货发起人<br>（同为 requester）</td>
+            <td>发货单 SHP-03</td>
+            <td>全部字段</td>
+            <td>不能作废</td>
+            <td>超过 30 分钟后<br>Caveat 条件不满足</td>
+          </tr>
+        </tbody>
+      </table></div>
+      <div class="info">
+        <strong>这是 SpiceDB 的 Caveats（条件授权）——阶段二才上线。</strong><br>
+        它允许在"有关系"的基础上加一个<strong>条件判断</strong>："你有 requester 关系，但只有创建后 30 分钟内才能作废"。<br>
+        Pilot 第一版不包含 Caveats——状态和时间窗由 Workflow 判定。阶段二再把稳定条件（如作废窗口）下沉到 SpiceDB。
+      </div>
+    </section>
+
+    <!-- ========== 四、特殊场景 ========== -->
+    <section id="special">
+      <h2>四、两个特殊但非常重要的场景</h2>
+
+      <h3>场景 G：临时代办</h3>
+      <div class="scene"><strong>日常：</strong>张明休假三天，让李娜帮忙盯着。"这三天，我负责的天华科技备货单你来处理。回来之后就不用了。"</div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>谁</th><th>凭什么关系</th><th>对什么</th><th>能看什么</th><th>能做什么</th><th>有效期</th><th>批准的</th></tr></thead>
+        <tbody>
+          <tr class="highlight">
+            <td><span class="role-tag role-sales">商务·李娜</span></td>
+            <td><strong>临时委托</strong><br>张明委托李娜代管天华备货单</td>
+            <td>天华科技所有备货单<br>及关联发货单</td>
+            <td>跟张明本人看到的一样</td>
+            <td>张明能做的<br>李娜都能做</td>
+            <td>7/13–7/16<br><small>3天后自动删除关系元组</small></td>
+            <td>张明本人授权<br>主管确认</td>
+          </tr>
+        </tbody>
+      </table></div>
+      <div class="note">
+        <strong>SpiceDB 怎么实现临时代办：</strong><br>
+        系统给 SpiceDB 写入一条带有效期的关系元组：<code>prestock:PS-8801#owner@user:li_na</code>。<br>
+        3 天后，Outbox 投影器自动调用 <code>DeleteRelationships</code> 删除这条关系——李娜权限自动收回。<br>
+        不需要管理员手工改权限。张明点"委托给李娜，7/13-7/16"，系统自动操作。
+      </div>
+      <div class="note">
+        <strong>💡 Outbox 投影器是什么（业务版）：</strong><br>
+        你可以把它理解成<strong>"自动同步员"</strong>——每当系统里发生了一件会影响权限的事（比如张明创建了备货单、王强被分配了发货单、李娜被委托代办），系统会把这件事记在一张"待办清单"（Outbox 表）里。然后"自动同步员"（投影器）会逐条把这些关系变化同步到 SpiceDB 授权引擎里。这样就保证了<strong>业务数据库里存的关系 = SpiceDB 里判定的关系</strong>，不会出现"数据库说张明是负责人但授权引擎不知道"的情况。<br>
+        <small style="color:var(--muted)"><strong>技术版：</strong>Transactional Outbox 模式。业务事务内同时写入业务数据 + outbox_event 表，Go 投影器异步消费 outbox → 调用 SpiceDB WriteRelationships / DeleteRelationships。投影幂等（同一条 event 重复消费不产生重复关系），失败可重放。详见 golang_pilot_temporal_rebac.html §7.3–7.4。</small>
+
+      <h3>场景 H：客户换对接人</h3>
+      <div class="scene"><strong>日常：</strong>天华科技李客户离职，换王客户对接。需要在系统中更新客户联系人，旧联系人权限自动失效，新联系人自动获得相同权限。</div>
+      <div class="case-flow">
+        <div>
+          <strong>之前：李客户是联系人</strong><br>
+          李客户 → 可看天华科技物流·上传签章<br>
+          关系元组：<code>customer:tianhua#contact@user:li_customer</code>
+        </div>
+        <div class="case-arrow">→</div>
+        <div>
+          <strong>更新后：王客户是联系人</strong><br>
+          李客户权限自动失效 ✓<br>
+          王客户自动获得相同权限 ✓<br>
+          关系元组：<code>customer:tianhua#contact@user:wang_customer</code><br>
+          <small>操作人·时间·原因 留痕 ✓</small>
+        </div>
+      </div>
+      <p class="caption"><strong>ReBAC + SpiceDB 的核心优势：</strong>权限跟着<strong>关系元组</strong>走，不跟着<strong>人</strong>走。删除 <code>li_customer</code> 的关系、写入 <code>wang_customer</code> 的关系——所有关联权限（查看物流、上传凭证）自动联动切换。不需要在五个地方手动改。</p>
+    </section>
+
+    <!-- ========== 五、全景汇总 ========== -->
+    <section id="summary">
+      <h2>五、七个授权视角 · 一张全景表</h2>
+      <p class="desc">以上所有场景汇总。以后任何新业务需求，先看能不能用这七条之一来描述。</p>
+
+      <div class="mermaid-wrap">
+        <div class="mermaid">
+flowchart LR
+    subgraph Relations["🔗 业务关系（SpiceDB Relation）"]
+        direction TB
+        R1["account_owner"] --> R1B["客户负责人"]
+        R2["owner"] --> R2B["备货单负责人"]
+        R3["warehouse_operator"] --> R3B["被分配仓管"]
+        R4["requester"] --> R4B["发货发起人"]
+        R5["contact"] --> R5B["客户联系人"]
+        R6["uploader"] --> R6B["凭证上传者"]
+    end
+    subgraph Objects["📋 资源（SpiceDB Definition）"]
+        direction TB
+        O1["customer"] --> O1B["客户"]
+        O2["order"] --> O2B["订单"]
+        O3["prestock"] --> O3B["备货单"]
+        O4["shipment"] --> O4B["发货单"]
+        O5["evidence"] --> O5B["凭证"]
+    end
+    subgraph Actions["✅ 权限（SpiceDB Permission）"]
+        A1["create_prestock"] --- A2["change_quota"]
+        A3["request_shipment"] --- A4["confirm"]
+        A5["reject"] --- A6["append_evidence"]
+        A7["view"] --- A8["void"]
+    end
+    Relations --> Objects --> Actions
+    classDef rel fill:#fef8ed,stroke:#b08840,color:#5c3d18
+    classDef obj fill:#edf5ee,stroke:#5a8a5e,color:#1e3e22
+    classDef act fill:#eef4fb,stroke:#4a7aa6,color:#1e3d5c
+    class R1,R2,R3,R4,R5,R6 rel
+    class O1,O2,O3,O4,O5 obj
+    class A1,A2,A3,A4,A5,A6,A7,A8 act
+        </div>
+      </div>
+      <p class="caption">人 → 关系（凭什么）→ 资源（对什么）→ 权限（能做什么）——ReBAC + SpiceDB 的完整链路</p>
+
+      <div class="table-wrap"><table>
+        <thead><tr><th style="width:14%">授权视角</th><th style="width:28%">一句话</th><th style="width:30%">SpiceDB 权限映射</th><th>怎么维护</th></tr></thead>
+        <tbody>
+          <tr><td><strong>客户负责人视角</strong></td><td>谁负责这个客户，谁能对这个客户的订单开备货单</td><td><code>order#create_prestock</code><br><small>via customer-&gt;account_owner</small></td><td>维护"客户负责人"表 → Outbox 写 SpiceDB</td></tr>
+          <tr><td><strong>备货单负责人视角</strong></td><td>谁创建了备货单，谁就能改额度、发起发货、关闭</td><td><code>prestock#change_quota</code><br><code>prestock#request_shipment</code><br><code>prestock#close</code></td><td>备货单创建时自动写 owner 关系元组</td></tr>
+          <tr><td><strong>仓管操作视角</strong></td><td>被分配了发货单的仓管，才能确认或驳回</td><td><code>shipment#confirm</code><br><code>shipment#reject</code></td><td>发货单创建时分配仓管 → 写 warehouse_operator 元组</td></tr>
+          <tr><td><strong>发货发起人视角</strong></td><td>谁发起发货，谁就能追加凭证、在窗口内作废</td><td><code>shipment#append_evidence</code><br><code>shipment#void</code></td><td>发货单创建时自动写 requester 元组</td></tr>
+          <tr><td><strong>客户联系人视角</strong></td><td>客户只能看自己的物流，看不到价格和内部备注</td><td><code>shipment#view</code><br><small>propagated via prestock-&gt;order-&gt;customer-&gt;contact &amp; tenant-&gt;member</small></td><td>维护"客户联系人"表 → Outbox 写 SpiceDB</td></tr>
+          <tr><td><strong>临时代办视角</strong></td><td>我有事，委托同事代办几天</td><td>临时写入 <code>prestock#owner</code> 关系元组 → TTL 后删除</td><td>用户自助委托 → 系统写/删关系元组</td></tr>
+          <tr><td><strong>跨租户拒绝视角</strong></td><td>不同租户之间的资源完全隔离</td><td>所有 permission 末尾 <code>&amp; tenant-&gt;member</code><br><small>租户不匹配 → 自动拒绝</small></td><td>SpiceDB Schema 内置 + 业务库双重校验</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="answer">
+        <strong>这张表就是平台权限体系的全部。</strong>每个视角回答三个问题：<br>
+        ① <strong>谁</strong>——人<br>
+        ② <strong>凭什么</strong>——一条具体的、可审计的<strong>业务关系</strong>（存为 SpiceDB 关系元组）<br>
+        ③ <strong>能干嘛</strong>——什么资源、什么字段、什么操作<br><br>
+        不是"因为你是商务部门的人"——而是<strong>"因为你是这张备货单的 owner"</strong>。<br>
+        不是"因为你级别高"——而是<strong>"因为这个发货单上 warehouse_operator 字段就是你的名字"</strong>。
+      </div>
+    </section>
+
+    <!-- ========== 六、规模化授权 ═══════════════════════════════════ -->
+    <section id="scale">
+      <h2>六、规模化授权：3 个商务 × 几百个客户怎么管</h2>
+      <p class="desc">前面的场景都是以"一个人、一张单"讲的。但真实的企业是：<strong>3 个商务，每人负责几百个客户，每个客户有备货单、发货单、凭证。</strong>如果逐条手填授权表，表会膨胀到几千行，根本维护不动。这一节告诉你：怎么用 SpiceDB 的 RBAC + ReBAC + ABAC 三层能力，让授权表保持<strong>十几行的规模</strong>，同时覆盖几千个客户。</p>
+
+      <!-- 问题陈述 -->
+      <div class="scene">
+        <strong>真实痛点：</strong>张明负责华东区 300 个客户。如果授权表写成"张明→客户 C001 的负责人→开备货单"、"张明→客户 C002 的负责人→开备货单"……光是张明一个人就要 300 行。3 个商务就是 900 行。每次有客户新增、商务调岗、客户交接——都得改表。<br><br>
+        <strong>你要的不是"张明能看 C001、C002、C003……"，而是"张明是华东 A 组的商务负责人，对这个组里的所有客户都能开备货单"。</strong>
+      </div>
+
+      <!-- 三层分离模型 -->
+      <h3>6.1 核心思路：把"策略"和"数据"分开</h3>
+      <p class="desc">SpiceDB 是 RBAC + ReBAC + ABAC 的结合体。规模化授权的关键是<strong>不要把"谁对谁有什么权限"全写到一张表里</strong>——而是拆成三层，各自独立维护。</p>
+
+      <div class="own-legend">
+        <span class="own-fill">✏️ 业务填</span> <span>这层你要维护（策略定义）</span>
+        <span class="own-auto" style="margin-left:8px;">⚙️ 系统自动</span> <span>这层系统自动处理，不用你管</span>
+      </div>
+
+      <div class="mermaid-wrap">
+        <div class="mermaid">
+flowchart TB
+    subgraph L1["第①层：权限模板（授权表）"]
+        direction LR
+        TMP["📋 业务定义角色能做什么<br>例: 商务负责人 = 开备货单 + 改额度 + 发货<br><strong>约 15 行，很少改</strong>"]
+    end
+    subgraph L2["第②层：关系数据（CRM / 业务库）"]
+        direction LR
+        CRM["👥 谁负责哪个客户<br>张明→华东新材（account_owner）<br>王强→SHP-02 仓管（warehouse_operator）<br><strong>数千行，日常维护</strong>"]
+    end
+    subgraph L3["第③层：SpiceDB 判定引擎"]
+        direction LR
+        SPICE["🔐 Check 时合并①+②<br>张明 + account_owner + tianhua<br>→ 自动判定能否开备货单<br><strong>完全自动，无人维护</strong>"]
+    end
+    TMP -->|"定义角色/权限 → SpiceDB Schema"| SPICE
+    CRM -->|"Outbox 投影 → SpiceDB 关系元组"| SPICE
+    style L1 fill:#eef4fb,stroke:#4a7aa6,color:#1e3d5c
+    style L2 fill:#fef8ed,stroke:#b08840,color:#5c3d18
+    style L3 fill:#edf5ee,stroke:#5a8a5e,color:#1e3e22
+        </div>
+      </div>
+
+      <div class="table-wrap"><table>
+        <thead><tr><th style="width:12%">层</th><th style="width:18%">谁维护</th><th style="width:35%">内容</th><th style="width:15%">规模</th><th>频率</th></tr></thead>
+        <tbody>
+          <tr><td><strong>① 权限模板</strong></td><td>业务方 <span class="own-fill">✏️</span><br><small>在 Excel 授权表里定义</small></td><td>"商务负责人"这个角色对备货单能做什么操作</td><td>≈ 15 行</td><td>很少改</td></tr>
+          <tr><td><strong>② 关系数据</strong></td><td>业务方 <span class="own-auto">⚙️</span><br><small>在 CRM 里日常维护，自动投影</small></td><td>"张明 = 华东新材的负责人"、"王强 = SHP-02 的仓管员"</td><td>数千行</td><td>每天变</td></tr>
+          <tr><td><strong>③ SpiceDB 判定</strong></td><td><span class="own-auto">⚙️</span> 完全自动<br><small>Outbox 投影 + Go BFF</small></td><td>Check 时合并 ① 和 ②，毫秒级返回允许/拒绝</td><td>0 维护</td><td>每次请求</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="answer">
+        <strong>关键结论：</strong>业务方只需要做两件事——<strong>① 在授权表里定义角色模板</strong>（"商务负责人能做什么"，十几行，很少改）；<strong>② 在 CRM 里维护客户分配</strong>（"张明负责华东新材"，日常操作）。SpiceDB 自动合并两者。<strong>授权表不会因为客户从 100 涨到 10000 而多写一行。</strong>
+      </div>
+
+      <!-- RBAC 层 -->
+      <h3>6.2 RBAC 层：角色模板——"商务负责人能做什么"写一次</h3>
+      <p class="desc">把"商务负责人能做什么"定义成一个<strong>角色模板</strong>。所有商务共享这个模板——不管是张明还是李娜，只要他们有"商务负责人"这个角色，就自动获得模板里的所有权限。这就是 <strong>RBAC（基于角色的访问控制）</strong>。</p>
+
+      <div class="concept-grid">
+        <div class="concept-card">
+          <h4>业务语言</h4>
+          <p>"商务负责人"这个角色，能做三件事：<br>① 开备货单<br>② 改额度<br>③ 发起发货<br><br>不用管谁是商务负责人——谁戴这个帽子，谁就能做。</p>
+        </div>
+        <div class="concept-card">
+          <h4>SpiceDB 怎么实现</h4>
+          <p>在 Schema 里定义角色和授权绑定：<br><code>definition role {<br>  relation can_create_prestock: user:*<br>}</code><br><code>definition role_grant {<br>  relation role: role<br>  relation grantee: user<br>}</code></p>
+        </div>
+        <div class="concept-card">
+          <h4>效果</h4>
+          <p>张明获得"商务负责人"角色 → 自动获得所有关联权限。<br>新来一个商务 → 授一次角色 → 全自动。<br>商务调岗 → 收回角色 → 权限自动消失。</p>
+        </div>
+      </div>
+
+      <h4>🗒 角色授权模式（SpiceDB ZSL，阶段二增强）</h4>
+      <pre><span style="color:#546e7a;">// === RBAC 层：角色模板定义 ===
+// 试点 v1 使用直接关系 (account_owner: user)，更简单。
+// 角色授权模式留作"需要自定义角色管理 UI"时的阶段二升级路径。</span>
+
+<span style="color:#82aaff;">definition</span> <span style="color:#ffcb6b;">role</span> {
+    <span style="color:#82aaff;">relation</span> <span style="color:#c3e88d;">can_create_prestock</span>: <span style="color:#ffcb6b;">user</span>:*      <span style="color:#546e7a;">// 通配符: 拥有此角色的任何人都能开备货单</span>
+    <span style="color:#82aaff;">relation</span> <span style="color:#c3e88d;">can_change_quota</span>: <span style="color:#ffcb6b;">user</span>:*
+    <span style="color:#82aaff;">relation</span> <span style="color:#c3e88d;">can_request_shipment</span>: <span style="color:#ffcb6b;">user</span>:*
+    <span style="color:#82aaff;">relation</span> <span style="color:#c3e88d;">can_close</span>: <span style="color:#ffcb6b;">user</span>:*
+}
+
+<span style="color:#82aaff;">definition</span> <span style="color:#ffcb6b;">role_grant</span> {
+    <span style="color:#82aaff;">relation</span> <span style="color:#c3e88d;">role</span>: <span style="color:#ffcb6b;">role</span>
+    <span style="color:#82aaff;">relation</span> <span style="color:#c3e88d;">grantee</span>: <span style="color:#ffcb6b;">user</span>
+
+    <span style="color:#82aaff;">permission</span> <span style="color:#c3e88d;">create_prestock</span> = role-&gt;can_create_prestock &amp; grantee
+    <span style="color:#82aaff;">permission</span> <span style="color:#c3e88d;">change_quota</span> = role-&gt;can_change_quota &amp; grantee
+    <span style="color:#82aaff;">permission</span> <span style="color:#c3e88d;">request_shipment</span> = role-&gt;can_request_shipment &amp; grantee
+    <span style="color:#82aaff;">permission</span> <span style="color:#c3e88d;">close</span> = role-&gt;can_close &amp; grantee
+}
+
+<span style="color:#546e7a;">// customer 的 account_owner 可以接受 role_grant 作为 subject:</span>
+<span style="color:#82aaff;">definition</span> <span style="color:#ffcb6b;">customer</span> {
+    <span style="color:#82aaff;">relation</span> <span style="color:#c3e88d;">account_owner</span>: <span style="color:#ffcb6b;">user</span> | <span style="color:#ffcb6b;">role_grant</span>  <span style="color:#546e7a;">// 直接关系 OR 角色授权</span>
+    <span style="color:#546e7a;">// ... 其余 relation 不变 ...</span>
+}
+
+<span style="color:#546e7a;">// 运行时: 给张明授权"商务负责人"角色
+// WriteRelationships: role_grant:sales_owner_grant#grantee@user:zhang_ming
+// WriteRelationships: role_grant:sales_owner_grant#role@role:sales_owner
+// 此后张明对所有他 account_owner 的客户自动拥有 sales_owner 角色的全部权限</span></pre>
+
+      <div class="note">
+        <strong>试点 v1 不需要这个。</strong>v1 直接用 <code>account_owner: user</code>（简单直接关系），角色授权模式留作阶段二——当业务方说"我需要一个界面来管理谁有什么角色"时再升级。两种模式可以共存：已有的客户用直接关系，新增客户或需要批量管理的客户走角色授权。
+      </div>
+
+      <!-- ReBAC 层 -->
+      <h3>6.3 ReBAC 层：关系即事实——CRM 里改了，SpiceDB 自动同步</h3>
+      <p class="desc">"张明是华东新材的负责人"这是一条<strong>关系事实</strong>，它不应该由授权表来维护，而应该由 CRM（客户管理系统）来维护。<strong>授权表只管"负责人能做什么"，CRM 管"谁是负责人"。</strong>这就是 ReBAC 的规模化核心——<strong>权限跟着关系走</strong>。</p>
+
+      <div class="case-flow">
+        <div>
+          <strong>CRM 里维护（日常操作）</strong><br>
+          张明 = 华东新材的 account_owner<br>
+          王强 = SHP-02 的 warehouse_operator<br>
+          李客户 = 天华科技的 contact<br><br>
+          <small>业务在 CRM 里改就行</small>
+        </div>
+        <div class="case-arrow">→</div>
+        <div>
+          <strong>Outbox 自动投影（无人值守）</strong><br>
+          customer:tianhua#account_owner@user:zhang_ming<br>
+          shipment:SHP-02#warehouse_operator@user:wang_qiang<br><br>
+          <small>关系变化自动同步到 SpiceDB</small>
+        </div>
+      </div>
+
+      <div class="note">
+        <strong>为什么规模化必须这样：</strong>张明调离 → CRM 里把华东新材的负责人改成李娜 → Outbox 自动删除旧元组、写入新元组 → 李娜即时获得所有华东新材备货单的权限，张明即时失去。<strong>不用在五个地方手动改。</strong>一个商务换岗只改 CRM 一条记录，几百个客户的授权自动联动。这就是 ReBAC 的核心威力。
+      </div>
+
+      <h4>可选优化：Subject-Set 分组</h4>
+      <p style="font-size:13px;color:var(--muted)">如果业务方希望"华东 A 组的成员自动成为 A 组内所有客户的负责人"，可以把 account_owner 的 subject 扩展为团队：</p>
+      <pre><span style="color:#82aaff;">definition</span> <span style="color:#ffcb6b;">customer</span> {
+    <span style="color:#82aaff;">relation</span> <span style="color:#c3e88d;">account_owner</span>: <span style="color:#ffcb6b;">user</span> | <span style="color:#ffcb6b;">sales_team</span>#<span style="color:#c3e88d;">member</span>
+    <span style="color:#546e7a;">// 可以是具体的人 (user:zhang_ming)，也可以是"华东A组的所有成员"</span>
+}</pre>
+      <p style="font-size:13px;color:var(--muted)">团队加人 → 只需要在 sales_team 里加一条 member 元组，新人自动获得组内所有客户的权限。同样标注为<strong>阶段二可选</strong>。</p>
+
+      <!-- ABAC 层 -->
+      <h3>6.4 ABAC 层：条件授权——静态属性 vs 动态条件</h3>
+      <p class="desc">ABAC（基于属性的访问控制）让你在"有关系"的基础上<strong>附加条件</strong>。但 SpiceDB 里必须区分两种 ABAC——用错了会影响性能。这是很多团队踩坑的地方。</p>
+
+      <div class="table-wrap"><table>
+        <thead><tr><th style="width:15%">类型</th><th style="width:25%">适合什么</th><th style="width:30%">怎么在 SpiceDB 里做</th><th>例子</th></tr></thead>
+        <tbody>
+          <tr class="highlight"><td><strong>静态属性</strong></td><td>不随请求变化的属性<br>（订单状态、客户等级、合同类型）</td><td><strong>建模为关系对象</strong> + 交集箭头<br>不要用 caveat！</td><td>"只看已发货且待开票的订单"<br>→ 把 order_status 建模为对象<br>→ 用 <code>&amp; status_shipped &amp; status_pending</code></td></tr>
+          <tr><td><strong>动态条件</strong></td><td>只在请求时刻才知道的数据<br>（当前时间、IP、地理位置）</td><td><strong>Caveats</strong>（条件表达式）</td><td>"发货单创建后 30 分钟内可作废"<br>→ <code>caveat within_void_window(now, created_at) { now &lt; created_at + 30min }</code></td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="info">
+        <strong>⚠️ 关键规则（来自 SpiceDB 官方文档）：</strong>"Using caveats for static data can have negative performance impacts. Static attribute data should always be modeled in the schema."<br>
+        翻译：<strong>不要把订单状态写进 caveat。静态属性应该建模为 SpiceDB 里的关系对象。</strong>caveat 只用于时间、位置等在请求时才变的数据。
+      </div>
+
+      <h4>示例：静态属性建模（阶段二评估）</h4>
+      <pre><span style="color:#546e7a;">// === 把"已发货待开票"建模为关系对象，而不是写 if-then ===</span>
+<span style="color:#82aaff;">definition</span> <span style="color:#ffcb6b;">shipment_status</span> {
+    <span style="color:#82aaff;">relation</span> <span style="color:#c3e88d;">member</span>: <span style="color:#ffcb6b;">shipment</span>
+}
+
+<span style="color:#82aaff;">definition</span> <span style="color:#ffcb6b;">shipment</span> {
+    <span style="color:#82aaff;">relation</span> <span style="color:#c3e88d;">status_shipped</span>: <span style="color:#ffcb6b;">shipment_status</span>
+    <span style="color:#82aaff;">relation</span> <span style="color:#c3e88d;">status_evidence_complete</span>: <span style="color:#ffcb6b;">shipment_status</span>
+    <span style="color:#546e7a;">// ... 其余 relation 不变 ...</span>
+
+    <span style="color:#82aaff;">permission</span> <span style="color:#c3e88d;">can_auto_complete</span> = status_shipped &amp; status_evidence_complete
+    <span style="color:#546e7a;">// 两个条件都满足 → 可以自动结案</span>
+}</pre>
+      <p class="caption">⚠ 试点 v1 状态门由 Temporal Workflow 确定性校验、SpiceDB 聚焦关系授权——符合设计文档"两道门"原则。静态属性下沉 SpiceDB 是阶段二评估项。</p>
+
+      <!-- 三层结合 -->
+      <h3>6.5 三层结合：一次 Check 怎么走</h3>
+      <div class="mermaid-wrap">
+        <div class="mermaid">
+flowchart TB
+    REQ["🧑 张明在企微侧边栏对天华科技 PS-8801 发起发货"]
+    RBAC_LAYER{"RBAC 层：<br>张明有'商务负责人'角色？"}
+    REBAC_LAYER{"ReBAC 层：<br>张明是 PS-8801 的 owner？"}
+    ABAC_LAYER{"ABAC 层：<br>PS-8801 在有效期内？"}
+    WORKFLOW{"Workflow 状态门：<br>PS-8801 = ACTIVE？<br>额度够吗？"}
+    ALLOW["✅ 允许"]
+
+    REQ --> RBAC_LAYER
+    RBAC_LAYER -->|"是（或跳过v1）"| REBAC_LAYER
+    RBAC_LAYER -->|"否"| DENY1["❌ 拒绝"]
+    REBAC_LAYER -->|"是（CRM投影的元组）"| ABAC_LAYER
+    REBAC_LAYER -->|"否"| DENY2["❌ 拒绝"]
+    ABAC_LAYER -->|"是（或跳过v1）"| WORKFLOW
+    ABAC_LAYER -->|"否"| DENY3["❌ 拒绝"]
+    WORKFLOW -->|"是"| ALLOW
+    WORKFLOW -->|"否"| DENY4["❌ 拒绝（额度不足/状态不对）"]
+
+    style RBAC_LAYER fill:#eef4fb,stroke:#4a7aa6
+    style REBAC_LAYER fill:#fef8ed,stroke:#b08840
+    style ABAC_LAYER fill:#f4eefb,stroke:#5e428a
+    style WORKFLOW fill:#edf5ee,stroke:#5a8a5e
+    style ALLOW fill:#e7f3ed,stroke:#367153,stroke-width:2px
+    style DENY1 fill:#fdf0ef,stroke:#a05050
+    style DENY2 fill:#fdf0ef,stroke:#a05050
+    style DENY3 fill:#fdf0ef,stroke:#a05050
+    style DENY4 fill:#fdf0ef,stroke:#a05050
+        </div>
+      </div>
+      <p class="caption">这不是"三层都打开"，而是"三层都通过"。任何一层拒绝，操作就被拒绝。<strong>SpiceDB 管 RBAC + ReBAC + ABAC（静态），Temporal Workflow 管状态和额度（设计文档"两道门"原则）。</strong></p>
+
+      <!-- 业务简化结论 -->
+      <div class="answer">
+        <strong>规模化后，业务只需要做两件事：</strong><br>
+        ① <strong>在授权表里定义角色模板</strong>——"商务负责人能做什么"（约 15 行，按第 7 节的 Excel 表格填）。这是<strong>策略</strong>。<br>
+        ② <strong>在 CRM 里维护客户分配</strong>——"张明负责华东新材"（日常业务操作）。这是<strong>数据</strong>。<br><br>
+        <strong>策略不动，数据常变，SpiceDB 自动合并。</strong><br>
+        授权表不会因为客户从 100 涨到 10000 而多写一行。新来一个商务 → 在 CRM 里给他分配客户 → Outbox 投影到 SpiceDB → 权限即时生效。调岗 → CRM 改一条 → 全自动联动。<br>
+        <small style="color:var(--muted)">更多技术细节：golang_pilot_temporal_rebac.html §5（SpiceDB 授权模型）§7（授权集成与 Outbox 投影）</small>
+      </div>
+
+      <!-- 反模式 -->
+      <h3>6.6 ⚠ 常见错误（反模式）</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th style="width:5%">❌</th><th style="width:43%">错误做法</th><th style="width:43%">✅ 正确做法</th><th style="width:9%">影响</th></tr></thead>
+        <tbody>
+          <tr class="deny"><td>1</td><td>在授权表里逐行列举每个客户×每个商务<br>"张明→C001→开备货单""张明→C002→开备货单"……</td><td>授权表只写"商务负责人→开备货单"。客户分配在 CRM 里维护，Outbox 自动投影。</td><td>表膨胀 100×</td></tr>
+          <tr class="deny"><td>2</td><td>把订单状态写成 caveat 条件<br><code>caveat order_is_shipped(status) { status == "shipped" }</code></td><td>把 order_status 建模为 SpiceDB 关系对象，用交集箭头 <code>&amp;</code> 组合。</td><td>性能差</td></tr>
+          <tr class="deny"><td>3</td><td>"因为我是销售总监，所以我能看所有人的数据"</td><td>ReBAC 要求你和每条数据之间有<strong>业务关系</strong>。不存在"级别隐含权限"。如果需要总监看团队数据，需要显式的关系（如 sales_team#manager）。</td><td>越权</td></tr>
+          <tr class="deny"><td>4</td><td>用部门标签代替关系<br>"只要是销售部的都能开备货单"</td><td>用 ReBAC 关系（account_owner / creator）替代部门标签。部门只能用来判断"是不是自己人"（tenant→member），不能用来判断"能不能动这条数据"。</td><td>权限过粗</td></tr>
+          <tr class="deny"><td>5</td><td>把 SpiceDB 当策略引擎<br>在 Schema 里写复杂的 if-then-else</td><td>SpiceDB 管关系 + 角色 + 条件。业务策略（如"超额发货要走审批"）由 Temporal Workflow 或 API 层处理。</td><td>Schema 不可维护</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="note" style="margin-top:20px;border-left-color:var(--red);background:var(--red-soft);">
+        <strong>🚫 明确不用你填的——这些交给系统：</strong><br>
+        <span class="own-auto">⚙️</span> <strong>具体客户×商务的对应关系</strong>（如"张明=天华科技负责人"）→ CRM 里维护，Outbox 自动投影到 SpiceDB<br>
+        <span class="own-auto">⚙️</span> <strong>备货单/发货单的 owner 和 operator 元组</strong> → 备货单创建时、发货单分配仓管时，Workflow 自动写入<br>
+        <span class="own-auto">⚙️</span> <strong>仓管分配</strong>（"王强=SHP-02 的仓管员"）→ 发货流程自动写入 warehouse_operator 关系元组<br>
+        <span class="own-auto">⚙️</span> <strong>客户联系人变更</strong> → CRM 里改一条 contact 记录，Outbox 自动删旧写新，全系统联动<br>
+        <span class="own-auto">⚙️</span> <strong>租户成员关系</strong>（"张明属于天华科技租户"）→ 企业组织架构同步，不是授权表管的<br><br>
+        <strong>你只需要做一件事：在授权表里定义"什么角色能做什么"（T1-T6 模板行）。剩下的，系统自动。</strong>
+      </div>
+    </section>
+
+    <!-- ========== 七、Excel 共享授权表 ========== -->
+    <section id="excel">
+      <h2>七、Excel 共享授权表：一张表，业务填得懂，程序读得通</h2>
+      <p class="desc">
+        下面这张表是<strong>业务和开发的翻译层——也是你们和我们的共享 Single Source of Truth</strong>。
+        它按第 六 节的三层模型组织：<strong>权限模板（RBAC，定义角色能做什么）→ 关系数据（ReBAC，CRM 维护谁有什么角色）→ 条件授权（ABAC，额外的时间/属性限制）</strong>。
+        你用业务语言填写，程序员直接转换为 SpiceDB Schema 和关系元组。可以<strong>复制到 Excel 里维护</strong>。
+      </p>
+      <p class="desc">
+        <strong>📋 填表口诀：</strong>模板行 = "什么角色 → 能做什么"（约 6-8 行，很少改）。数据行 = "谁 → 担任什么角色 → 对什么对象"（日常在 CRM 里维护，<strong>不用在授权表里逐条写</strong>，这里只放几个例子说明格式）。条件行 = "在什么情况下额外限制"。
+      </p>
+
+      <div class="own-legend">
+        <span class="own-fill">✏️ 业务填</span> <span>这行你要在授权表里定义和维护</span>
+        <span class="own-auto" style="margin-left:8px;">⚙️ 系统自动</span> <span>这行由 CRM / Workflow 自动产生，<strong>不用你填</strong>，仅知会</span>
+      </div>
+
+      <div class="excel-grid">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:3%">行</th>
+              <th style="width:11%">谁 / 角色<br><small>→ user / role</small></th>
+              <th style="width:12%">凭什么关系<br><small>→ relation</small></th>
+              <th style="width:14%">能做什么<br><small>→ permission</small></th>
+              <th style="width:15%">能看什么<br><small>→ field_mask</small></th>
+              <th style="width:9%">对什么<br><small>→ resource</small></th>
+              <th style="width:8%">有效期<br><small>→ ttl/caveat</small></th>
+              <th style="width:8%">数据来源<br><small>→ source</small></th>
+              <th style="width:7%">模板/数据<br><small>→ type</small></th>
+              <th style="width:7%">范式<br><small>→ para.</small></th>
+              <th style="width:6%">备注</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- ═══ RBAC 模板层 ═══ -->
+            <tr style="background:#e7efec;"><td colspan="11" style="font-weight:800;font-size:12px;color:var(--blue);text-align:center;padding:10px 12px;white-space:normal;overflow-wrap:break-word;line-height:1.7;">
+              ▸ 权限模板（RBAC 层）— 定义"什么角色能做什么"。业务在授权表里填，约 6 行，很少改。
+            </td></tr>
+            <!-- T1：客户负责人角色 -->
+            <tr class="allow"><td style="text-align:center;font-weight:900;">T1</td>
+              <td><strong>客户负责人</strong><br><small>role:sales_owner</small></td>
+              <td><strong>account_owner</strong><br><small>客户负责关系<br>customer#account_owner</small></td>
+              <td>开备货单<br><small>order#create_prestock</small></td>
+              <td>该客户的所有订单（全部字段）<br><small>full fields</small></td>
+              <td>所负责客户的已生效订单<br><small>order:* (customer:X)</small></td>
+              <td>只要还是负责人<br><small>永久</small></td>
+              <td><strong>CRM 维护</strong> → Outbox → SpiceDB<br><small>customer.account_owner 表</small></td>
+              <td><span class="own-fill">✏️ 填写</span></td><td>RBAC</td><td>场景A</td></tr>
+            <!-- T2：备货单负责人角色 -->
+            <tr class="allow"><td style="text-align:center;font-weight:900;">T2</td>
+              <td><strong>备货单负责人</strong><br><small>role:prestock_owner</small></td>
+              <td><strong>owner</strong><br><small>备货单归属关系<br>prestock#owner</small></td>
+              <td>查看 · 改额度 · 发起发货 · 关闭<br><small>prestock#view</small><br><small>prestock#change_quota</small><br><small>prestock#request_shipment</small><br><small>prestock#close</small></td>
+              <td>总额度·已用·剩余·有效期 + 关联发货单全部<br><small>full prestock fields</small></td>
+              <td>自己创建的备货单<br><small>prestock:* (owner=self)</small></td>
+              <td>备货单有效期内<br><small>until valid_until</small></td>
+              <td><strong>创建备货单时自动</strong><br><small>PrestockWorkflow</small></td>
+              <td><span class="own-fill">✏️ 填写</span></td><td>RBAC</td><td>场景B</td></tr>
+            <!-- T3：仓管员角色 -->
+            <tr class="allow"><td style="text-align:center;font-weight:900;">T3</td>
+              <td><strong>仓管员</strong><br><small>role:warehouse_op</small></td>
+              <td><strong>warehouse_operator</strong><br><small>仓管分配关系<br>shipment#warehouse_operator</small></td>
+              <td>查看 · 确认 · 驳回 · 上传凭证<br><small>shipment#view</small><br><small>shipment#confirm</small><br><small>shipment#reject</small><br><small>shipment#append_evidence</small></td>
+              <td>产品·规格·数量·地址·质检单<br><em>不显示：价格·销售备注</em><br><small>logistics only</small></td>
+              <td>被分配的发货单<br><small>shipment:* (warehouse_operator=self)</small></td>
+              <td>发货完成后收回<br><small>until COMPLETED</small></td>
+              <td><strong>发货单创建时分配</strong><br><small>ShipmentWorkflow</small></td>
+              <td><span class="own-fill">✏️ 填写</span></td><td>RBAC</td><td>场景C</td></tr>
+            <!-- T4：客户联系人角色 -->
+            <tr class="allow"><td style="text-align:center;font-weight:900;">T4</td>
+              <td><strong>客户联系人</strong><br><small>role:customer_contact</small></td>
+              <td><strong>contact</strong> + <strong>customer_contact</strong><br><small>客户联系关系<br>customer#contact<br>shipment#customer_contact</small></td>
+              <td>查看物流 · 上传签章<br><small>shipment#view_evidence</small><br><small>shipment#append_evidence</small></td>
+              <td>物流状态·承诺交期·凭证列表<br><em>不显示：价格·内部备注</em><br><small>logistics + evidence only</small></td>
+              <td>本客户的发货单<br><small>shipment:* (customer=self)</small></td>
+              <td>长期<br><small>永久</small></td>
+              <td><strong>CRM 维护</strong> → Outbox → SpiceDB<br><small>customer.contact 表</small></td>
+              <td><span class="own-fill">✏️ 填写</span></td><td>RBAC</td><td>场景D</td></tr>
+            <!-- T5：发货发起人角色 -->
+            <tr class="allow"><td style="text-align:center;font-weight:900;">T5</td>
+              <td><strong>发货发起人</strong><br><small>role:shipment_requester</small></td>
+              <td><strong>requester</strong><br><small>发货发起关系<br>shipment#requester</small></td>
+              <td>追加凭证 · 在窗口内作废<br><small>shipment#append_evidence</small><br><small>shipment#void</small></td>
+              <td>全部字段（含价格）<br><small>full fields</small></td>
+              <td>自己发起的发货单<br><small>shipment:* (requester=self)</small></td>
+              <td>长期（作废仅30min内）<br><small>永久 / caveat 30min</small></td>
+              <td><strong>发货单创建时自动</strong><br><small>ShipmentWorkflow</small></td>
+              <td><span class="own-fill">✏️ 填写</span></td><td>RBAC</td><td>场景D允许例</td></tr>
+            <!-- T6：凭证上传者角色 -->
+            <tr class="allow"><td style="text-align:center;font-weight:900;">T6</td>
+              <td><strong>凭证上传者</strong><br><small>role:evidence_uploader</small></td>
+              <td><strong>uploader</strong><br><small>凭证上传关系<br>evidence#uploader</small></td>
+              <td>查看自己上传的凭证版本<br><small>evidence#view</small></td>
+              <td>自己上传的凭证版本<br><small>own uploaded versions</small></td>
+              <td>自己上传过的凭证<br><small>evidence:* (uploader=self)</small></td>
+              <td>长期<br><small>永久</small></td>
+              <td><strong>上传时自动</strong><br><small>AppendEvidence Activity</small></td>
+              <td><span class="own-fill">✏️ 填写</span></td><td>RBAC</td><td>凭证上传者</td></tr>
+
+            <!-- ═══ ReBAC 数据层 ═══ -->
+            <tr style="background:#fef8ed;"><td colspan="11" style="font-weight:800;font-size:12px;color:var(--gold);text-align:center;padding:8px;white-space:normal;overflow-wrap:break-word;">
+              ▸ 关系数据（ReBAC 层）— CRM 维护"谁担任什么角色、对什么对象"。<strong>不需要在授权表里逐条填</strong>，下面只是几个例子说明格式。实际数据有数千行，由 CRM 或 Workflow 自动产生 → Outbox → SpiceDB。
+            </td></tr>
+            <!-- D1：商务负责客户 -->
+            <tr class="allow"><td style="text-align:center;font-weight:900;">D1</td>
+              <td>张明<br><small>user:zhang_ming</small></td>
+              <td><strong>客户负责人</strong><br><small>→ 匹配模板 T1</small><br><small>customer:tianhua#account_owner@user:zhang_ming</small></td>
+              <td><em>→ 由 T1 模板决定</em></td>
+              <td><em>→ 由 T1 模板决定</em></td>
+              <td>天华科技<br><small>customer:tianhua</small></td>
+              <td>长期<br><small>永久</small></td>
+              <td><strong>CRM 客户负责人表</strong><br><small>→ Outbox 投影</small></td>
+              <td><span class="own-auto">⚙️ 自动</span></td>
+              <td>ReBAC</td>
+              <td>场景A的数据实例</td></tr>
+            <!-- D2：仓管被分配发货单 -->
+            <tr class="allow"><td style="text-align:center;font-weight:900;">D2</td>
+              <td>王强<br><small>user:wang_qiang</small></td>
+              <td><strong>仓管员</strong><br><small>→ 匹配模板 T3</small><br><small>shipment:SHP-02#warehouse_operator@user:wang_qiang</small></td>
+              <td><em>→ 由 T3 模板决定</em></td>
+              <td><em>→ 由 T3 模板决定</em></td>
+              <td>发货单 SHP-02<br><small>shipment:SHP-02</small></td>
+              <td>发货完成后收回<br><small>until COMPLETED</small></td>
+              <td><strong>发货单创建时分配</strong><br><small>ShipmentWorkflow → Outbox</small></td>
+              <td><span class="own-auto">⚙️ 自动</span></td>
+              <td>ReBAC</td>
+              <td>场景C的数据实例</td></tr>
+            <!-- D3：客户联系人 -->
+            <tr class="allow"><td style="text-align:center;font-weight:900;">D3</td>
+              <td>李客户<br><small>user:li_customer</small></td>
+              <td><strong>客户联系人</strong><br><small>→ 匹配模板 T4</small><br><small>customer:tianhua#contact@user:li_customer</small></td>
+              <td><em>→ 由 T4 模板决定</em></td>
+              <td><em>→ 由 T4 模板决定</em></td>
+              <td>天华科技<br><small>customer:tianhua</small></td>
+              <td>长期<br><small>永久</small></td>
+              <td><strong>CRM 客户联系人表</strong><br><small>→ Outbox 投影</small></td>
+              <td><span class="own-auto">⚙️ 自动</span></td>
+              <td>ReBAC</td>
+              <td>场景D的数据实例</td></tr>
+            <!-- D4：客户换对接人 -->
+            <tr class="allow"><td style="text-align:center;font-weight:900;">D4</td>
+              <td>王客户<br><small>user:wang_customer</small></td>
+              <td><strong>客户联系人（替换李客户）</strong><br><small>→ 匹配模板 T4<br>Delete: li_customer + Write: wang_customer</small></td>
+              <td><em>→ 由 T4 模板决定<br>（自动切换，无需改模板）</em></td>
+              <td><em>→ 由 T4 模板决定</em></td>
+              <td>天华科技<br><small>customer:tianhua</small></td>
+              <td>长期<br><small>永久</small></td>
+              <td><strong>CRM 客户联系人表变更</strong><br><small>→ Outbox: Delete old + Write new</small></td>
+              <td><span class="own-auto">⚙️ 自动</span></td>
+              <td>ReBAC</td>
+              <td>场景H：关系跟元组走</td></tr>
+            <!-- D5：临时代办 -->
+            <tr class="allow"><td style="text-align:center;font-weight:900;">D5</td>
+              <td>李娜<br><small>user:li_na</small></td>
+              <td><strong>客户负责人（临时）</strong><br><small>→ 临时匹配模板 T1<br>prestock:PS-8801#owner@user:li_na</small></td>
+              <td><em>→ 由 T1 模板决定</em></td>
+              <td><em>→ 由 T1 模板决定</em></td>
+              <td>张明负责的所有备货单<br><small>prestock:PS-* (owner=zhang_ming)</small></td>
+              <td>2026-07-13~07-16<br><small>TTL: 3天自动删除</small></td>
+              <td><strong>张明委托 + 主管确认</strong><br><small>Outbox: 到期 DeleteRelationships</small></td>
+              <td><span class="own-auto">⚙️ 自动</span></td>
+              <td>ReBAC</td>
+              <td>场景G</td></tr>
+
+            <!-- ═══ Deny 示例 ═══ -->
+            <tr style="background:#fdf0ef;"><td colspan="11" style="font-weight:800;font-size:12px;color:var(--red);text-align:center;padding:10px 12px;white-space:normal;overflow-wrap:break-word;line-height:1.7;">
+              ▸ 拒绝示例 — 为什么被拒绝？要么模板里没有这个权限，要么数据里没有这个关系，要么条件不满足。
+            </td></tr>
+            <tr class="deny-row"><td style="text-align:center;font-weight:900;">X1</td>
+              <td>售后李娜<br><small>user:li_na</small></td>
+              <td><strong>无关系</strong><br><small>—（不是 account_owner 也不是 creator）</small></td>
+              <td>拒绝开备货单<br><small>DENY: 模板 T1 的权限仅限 account_owner</small></td>
+              <td>—</td><td>天华科技订单<br><small>order:PO-042</small></td>
+              <td>—</td><td>—</td>
+              <td>—</td><td>ReBAC 拒绝</td><td>场景A 拒绝例</td></tr>
+            <tr class="deny-row"><td style="text-align:center;font-weight:900;">X2</td>
+              <td>仓库主管刘总<br><small>user:liu_zong</small></td>
+              <td><strong>无关系</strong><br><small>—（warehouse_operator 数据中不存在）</small></td>
+              <td>拒绝确认/驳回<br><small>DENY: 模板 T3 的权限仅限 warehouse_operator</small></td>
+              <td>—（卡片转发也无法操作）</td><td>发货单 SHP-02<br><small>shipment:SHP-02</small></td>
+              <td>—</td><td>—</td>
+              <td>—</td><td>ReBAC 拒绝</td><td>场景C 拒绝例</td></tr>
+            <tr class="deny-row"><td style="text-align:center;font-weight:900;">X3</td>
+              <td>天宇科技 某用户<br><small>user:other_tenant_user</small></td>
+              <td><strong>无关系 + 不同租户</strong><br><small>—（tenant→member 不匹配）</small></td>
+              <td>全部拒绝（SpiceDB+业务库+存储）<br><small>DENY: tenant→member mismatch</small></td>
+              <td>—</td><td>备货单 PS-8801（天华）<br><small>prestock:PS-8801 (tenant:tianhua)</small></td>
+              <td>—</td><td>—</td>
+              <td>—</td><td>ReBAC(租户隔离)</td><td>场景E<br>三道防线</td></tr>
+
+            <!-- ═══ ABAC 条件层 ═══ -->
+            <tr style="background:#f4eefb;"><td colspan="11" style="font-weight:800;font-size:12px;color:var(--purple);text-align:center;padding:10px 12px;white-space:normal;overflow-wrap:break-word;line-height:1.7;">
+              ▸ 条件授权（ABAC 层）— 在"有权限模板 + 有关系数据"的基础上，附加动态条件限制。
+            </td></tr>
+            <tr class="allow"><td style="text-align:center;font-weight:900;">C1</td>
+              <td>张明<br><small>user:zhang_ming</small></td>
+              <td><strong>发货发起人 + 时间窗口</strong><br><small>→ 匹配模板 T5<br>+ caveat: within_void_window(now, created_at)<br>{ now &lt; created_at + 30min }</small></td>
+              <td>作废（仅创建后30分钟内）<br><small>shipment#void</small></td>
+              <td>全部字段<br><small>full fields</small></td>
+              <td>发货单 SHP-03<br><small>shipment:SHP-03</small></td>
+              <td>30分钟窗口<br><small>caveat: 30min</small></td>
+              <td><strong>发货单创建时自动 + 条件</strong><br><small>（阶段二）</small></td>
+              <td><span class="own-fill">✏️ 填写</span></td><td><strong>ABAC<br>(caveat)</strong></td>
+              <td>场景F<br>阶段二</td></tr>
+            <tr class="deny-row"><td style="text-align:center;font-weight:900;">C1-X</td>
+              <td>张明<br><small>user:zhang_ming</small></td>
+              <td><strong>同 C1，但超过 30 分钟</strong><br><small>caveat 条件 now &lt; created_at+30min = false</small></td>
+              <td>拒绝作废<br><small>DENY: caveat 条件不满足</small></td>
+              <td>全部字段</td><td>同 C1<br><small>shipment:SHP-03</small></td>
+              <td>超过30分钟后<br><small>caveat failed</small></td>
+              <td>—</td>
+              <td>—</td><td>ABAC 拒绝</td><td>场景F 拒绝例</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note">
+        <strong>📋 怎么读这张表的三层结构：</strong><br>
+        <strong>T1-T6（RBAC 模板层）</strong>= 业务要填的<strong>策略</strong>——定义每种角色能做什么、能看到哪些字段。约 6 行，很少改。<br>
+        <strong>D1-D5（ReBAC 数据层）</strong>= <strong>不需要在授权表里填</strong>——这些由 CRM 或 Workflow 自动产生、Outbox 自动投影到 SpiceDB。这里只放几个例子说明"关系数据长什么样"。实际运行时，张明→天华科技的 account_owner 关系在 CRM 里维护，改一条就全自动联动。<br>
+        <strong>C1（ABAC 条件层）</strong>= 在"有模板权限 + 有关系数据"之后附加的额外条件，如"仅创建后 30 分钟内可作废"。<br>
+        <strong>X1-X3（拒绝示例）</strong>= 展示三种拒绝原因：模板里没这个权限、数据里没这个关系、租户不匹配。<br>
+        <small style="color:var(--muted)">每个单元格有<strong>上下两行</strong>——上面是业务语言，下面是程序映射（SpiceDB 标识符）。程序员会写脚本自动转换。</small>
+      </div>
+      <div class="note">
+        <strong>📋 怎么用这张表：</strong>
+        ① <strong>T1-T6 模板行 = 你要填的。</strong>把此表复制到 Excel，在模板区域定义"每种角色能做什么"。跟业务团队讨论："客户负责人应该能做什么操作？能看到哪些字段？"填进模板行。<br>
+        ② <strong>D1-D5 数据行 = 不需要在授权表里填。</strong>这些由 CRM 和 Workflow 自动产生。授权表里保留这几行只是说明"存在这种类型的关系数据"，实际运行时有几千行。<br>
+        ③ <strong>C1 条件行 = 特殊限制。</strong>如"发货单创建后30分钟内可作废"——这种需要附加时间/位置条件的场景。<br>
+        ④ 后续有新角色 → 在模板区加一行（T7, T8...）。模板区保持 10 行以内。<br>
+        ⑤ <strong>填完的 Excel 发给开发</strong>——这就是授权的正式需求文档。开发写脚本从 Excel 生成 SpiceDB Schema。
+      </div>
+
+      <h3>程序员视角：这张表 → SpiceDB Schema + 关系元组</h3>
+      <p class="desc">下面展示上面 13 行授权记录如何映射到 SpiceDB 的 Zanzibar Schema Language（ZSL）和运行时关系元组（Relationship Tuples）。实际项目中，程序员写一个脚本自动从 Excel 读取这张表并生成。</p>
+
+      <h4>🗒 SpiceDB Schema 定义（Zanzibar Schema Language）</h4>
+      <pre><span style="color:#546e7a;">// === 从授权表生成的 SpiceDB Schema ===
+// 表的每一行 → 对应的 definition / relation / permission</span>
+
+<span style="color:#82aaff;">definition</span> <span style="color:#ffcb6b;">user</span> {}
+
+<span style="color:#82aaff;">definition</span> <span style="color:#ffcb6b;">tenant</span> {
+    <span style="color:#82aaff;">relation</span> <span style="color:#c3e88d;">member</span>: <span style="color:#ffcb6b;">user</span>          <span style="color:#546e7a;">← X3: 租户隔离的基础</span>
+}
+
+<span style="color:#82aaff;">definition</span> <span style="color:#ffcb6b;">customer</span> {
+    <span style="color:#82aaff;">relation</span> <span style="color:#c3e88d;">account_owner</span>: <span style="color:#ffcb6b;">user</span>  <span style="color:#546e7a;">← T1: 客户负责人</span>
+    <span style="color:#82aaff;">relation</span> <span style="color:#c3e88d;">contact</span>: <span style="color:#ffcb6b;">user</span>         <span style="color:#546e7a;">← T4/D3: 客户联系人</span>
+    <span style="color:#82aaff;">relation</span> <span style="color:#c3e88d;">tenant</span>: <span style="color:#ffcb6b;">tenant</span>         <span style="color:#546e7a;">← X3: 租户绑定</span>
+
+    <span style="color:#82aaff;">permission</span> <span style="color:#c3e88d;">view</span> = (account_owner + contact) &amp; tenant-&gt;member
+    <span style="color:#82aaff;">permission</span> <span style="color:#c3e88d;">manage_fulfillment</span> = account_owner &amp; tenant-&gt;member  <span style="color:#546e7a;">← T1</span>
+}
+
+<span style="color:#82aaff;">definition</span> <span style="color:#ffcb6b;">order</span> {
+    <span style="color:#82aaff;">relation</span> <span style="color:#c3e88d;">creator</span>: <span style="color:#ffcb6b;">user</span>          <span style="color:#546e7a;">← T1: 订单创建人也可开备货单</span>
+    <span style="color:#82aaff;">relation</span> <span style="color:#c3e88d;">customer</span>: <span style="color:#ffcb6b;">customer</span>
+    <span style="color:#82aaff;">relation</span> <span style="color:#c3e88d;">tenant</span>: <span style="color:#ffcb6b;">tenant</span>
+
+    <span style="color:#82aaff;">permission</span> <span style="color:#c3e88d;">view</span> = (creator + customer-&gt;view) &amp; tenant-&gt;member
+    <span style="color:#82aaff;">permission</span> <span style="color:#c3e88d;">create_prestock</span> = (creator + customer-&gt;manage_fulfillment) &amp; tenant-&gt;member  <span style="color:#546e7a;">← T1</span>
+}
+
+<span style="color:#82aaff;">definition</span> <span style="color:#ffcb6b;">prestock</span> {
+    <span style="color:#82aaff;">relation</span> <span style="color:#c3e88d;">order</span>: <span style="color:#ffcb6b;">order</span>
+    <span style="color:#82aaff;">relation</span> <span style="color:#c3e88d;">owner</span>: <span style="color:#ffcb6b;">user</span>             <span style="color:#546e7a;">← T2/D5: 备货单负责人（含临时代办）</span>
+    <span style="color:#82aaff;">relation</span> <span style="color:#c3e88d;">warehouse_manager</span>: <span style="color:#ffcb6b;">user</span>  <span style="color:#546e7a;">← T2: 备货单负责人（可查看，不可改额度）</span>
+    <span style="color:#82aaff;">relation</span> <span style="color:#c3e88d;">tenant</span>: <span style="color:#ffcb6b;">tenant</span>
+
+    <span style="color:#82aaff;">permission</span> <span style="color:#c3e88d;">view</span> = (owner + warehouse_manager + order-&gt;view) &amp; tenant-&gt;member  <span style="color:#546e7a;">← T2</span>
+    <span style="color:#82aaff;">permission</span> <span style="color:#c3e88d;">change_quota</span> = owner &amp; tenant-&gt;member          <span style="color:#546e7a;">← T2</span>
+    <span style="color:#82aaff;">permission</span> <span style="color:#c3e88d;">request_shipment</span> = owner &amp; tenant-&gt;member     <span style="color:#546e7a;">← T2</span>
+    <span style="color:#82aaff;">permission</span> <span style="color:#c3e88d;">close</span> = owner &amp; tenant-&gt;member                 <span style="color:#546e7a;">← T2</span>
+}
+
+<span style="color:#82aaff;">definition</span> <span style="color:#ffcb6b;">shipment</span> {
+    <span style="color:#82aaff;">relation</span> <span style="color:#c3e88d;">prestock</span>: <span style="color:#ffcb6b;">prestock</span>
+    <span style="color:#82aaff;">relation</span> <span style="color:#c3e88d;">requester</span>: <span style="color:#ffcb6b;">user</span>           <span style="color:#546e7a;">← T5/C1: 发货发起人</span>
+    <span style="color:#82aaff;">relation</span> <span style="color:#c3e88d;">warehouse_operator</span>: <span style="color:#ffcb6b;">user</span>  <span style="color:#546e7a;">← T3: 被分配仓管</span>
+    <span style="color:#82aaff;">relation</span> <span style="color:#c3e88d;">customer_contact</span>: <span style="color:#ffcb6b;">user</span>    <span style="color:#546e7a;">← T4: 客户联系人</span>
+    <span style="color:#82aaff;">relation</span> <span style="color:#c3e88d;">tenant</span>: <span style="color:#ffcb6b;">tenant</span>
+
+    <span style="color:#82aaff;">permission</span> <span style="color:#c3e88d;">view</span> = (requester + warehouse_operator + prestock-&gt;view) &amp; tenant-&gt;member  <span style="color:#546e7a;">← T3/T5</span>
+    <span style="color:#82aaff;">permission</span> <span style="color:#c3e88d;">confirm</span> = warehouse_operator &amp; tenant-&gt;member    <span style="color:#546e7a;">← T3</span>
+    <span style="color:#82aaff;">permission</span> <span style="color:#c3e88d;">reject</span> = warehouse_operator &amp; tenant-&gt;member      <span style="color:#546e7a;">← T3</span>
+    <span style="color:#82aaff;">permission</span> <span style="color:#c3e88d;">void</span> = requester &amp; tenant-&gt;member                <span style="color:#546e7a;">← C1 (阶段二+Caveat)</span>
+    <span style="color:#82aaff;">permission</span> <span style="color:#c3e88d;">append_evidence</span> = (requester + warehouse_operator + customer_contact) &amp; tenant-&gt;member  <span style="color:#546e7a;">← T3/T4/T5</span>
+    <span style="color:#82aaff;">permission</span> <span style="color:#c3e88d;">view_evidence</span> = (requester + warehouse_operator + customer_contact) &amp; tenant-&gt;member   <span style="color:#546e7a;">← T4</span>
+}
+
+<span style="color:#82aaff;">definition</span> <span style="color:#ffcb6b;">evidence</span> {
+    <span style="color:#82aaff;">relation</span> <span style="color:#c3e88d;">shipment</span>: <span style="color:#ffcb6b;">shipment</span>
+    <span style="color:#82aaff;">relation</span> <span style="color:#c3e88d;">uploader</span>: <span style="color:#ffcb6b;">user</span>            <span style="color:#546e7a;">← T6: 凭证上传者</span>
+    <span style="color:#82aaff;">relation</span> <span style="color:#c3e88d;">tenant</span>: <span style="color:#ffcb6b;">tenant</span>
+
+    <span style="color:#82aaff;">permission</span> <span style="color:#c3e88d;">view</span> = (uploader + shipment-&gt;view_evidence) &amp; tenant-&gt;member  <span style="color:#546e7a;">← T6</span>
+    <span style="color:#82aaff;">permission</span> <span style="color:#c3e88d;">append_version</span> = shipment-&gt;append_evidence &amp; tenant-&gt;member    <span style="color:#546e7a;">← 凭证追加继承</span>
+}</pre>
+
+      <h4>🗒 运行时关系元组示例（Go 代码写入 SpiceDB）</h4>
+      <pre><span style="color:#546e7a;">// === 授权表每一行 → 运行时 WriteRelationships 元组 ===
+// 这些是 SpiceDB 实际存储和判定的"关系事实"</span>
+
+<span style="color:#546e7a;">// D1: 张明 = 天华科技的客户负责人
+// 张明 = PO-042 的创建人</span>
+<span style="color:#c3e88d;">customer</span>:<span style="color:#ffcb6b;">tianhua</span>#<span style="color:#c3e88d;">account_owner</span>@<span style="color:#82aaff;">user</span>:<span style="color:#ffcb6b;">zhang_ming</span>
+<span style="color:#c3e88d;">order</span>:<span style="color:#ffcb6b;">PO-042</span>#<span style="color:#c3e88d;">creator</span>@<span style="color:#82aaff;">user</span>:<span style="color:#ffcb6b;">zhang_ming</span>
+
+<span style="color:#546e7a;">// T2: 张明 = PS-8801 的负责人</span>
+<span style="color:#c3e88d;">prestock</span>:<span style="color:#ffcb6b;">PS-8801</span>#<span style="color:#c3e88d;">owner</span>@<span style="color:#82aaff;">user</span>:<span style="color:#ffcb6b;">zhang_ming</span>
+
+<span style="color:#546e7a;">// D2: 王强 = SHP-02 的仓管员</span>
+<span style="color:#c3e88d;">shipment</span>:<span style="color:#ffcb6b;">SHP-02</span>#<span style="color:#c3e88d;">warehouse_operator</span>@<span style="color:#82aaff;">user</span>:<span style="color:#ffcb6b;">wang_qiang</span>
+
+<span style="color:#546e7a;">// D3: 李客户 = 天华科技的客户联系人
+// 李客户 = SHP-02 的客户联系人</span>
+<span style="color:#c3e88d;">customer</span>:<span style="color:#ffcb6b;">tianhua</span>#<span style="color:#c3e88d;">contact</span>@<span style="color:#82aaff;">user</span>:<span style="color:#ffcb6b;">li_customer</span>
+<span style="color:#c3e88d;">shipment</span>:<span style="color:#ffcb6b;">SHP-02</span>#<span style="color:#c3e88d;">customer_contact</span>@<span style="color:#82aaff;">user</span>:<span style="color:#ffcb6b;">li_customer</span>
+
+<span style="color:#546e7a;">// T5: 张明 = SHP-02 的发货发起人</span>
+<span style="color:#c3e88d;">shipment</span>:<span style="color:#ffcb6b;">SHP-02</span>#<span style="color:#c3e88d;">requester</span>@<span style="color:#82aaff;">user</span>:<span style="color:#ffcb6b;">zhang_ming</span>
+
+<span style="color:#546e7a;">// D5: 李娜 = PS-8801 的临时负责人（TTL 3天，Outbox 到期自动删除）</span>
+<span style="color:#c3e88d;">prestock</span>:<span style="color:#ffcb6b;">PS-8801</span>#<span style="color:#c3e88d;">owner</span>@<span style="color:#82aaff;">user</span>:<span style="color:#ffcb6b;">li_na</span>  <span style="color:#546e7a;">// expires: 2026-07-16</span>
+
+<span style="color:#546e7a;">// D4: 王客户替换李客户</span>
+<span style="color:#546e7a;">// DeleteRelationships:</span> <span style="color:#c3e88d;">customer</span>:<span style="color:#ffcb6b;">tianhua</span>#<span style="color:#c3e88d;">contact</span>@<span style="color:#82aaff;">user</span>:<span style="color:#ffcb6b;">li_customer</span>
+<span style="color:#546e7a;">// WriteRelationships:</span>  <span style="color:#c3e88d;">customer</span>:<span style="color:#ffcb6b;">tianhua</span>#<span style="color:#c3e88d;">contact</span>@<span style="color:#82aaff;">user</span>:<span style="color:#ffcb6b;">wang_customer</span>
+
+<span style="color:#546e7a;">// T6: 王强 = E-01 的上传者</span>
+<span style="color:#c3e88d;">evidence</span>:<span style="color:#ffcb6b;">E-01</span>#<span style="color:#c3e88d;">uploader</span>@<span style="color:#82aaff;">user</span>:<span style="color:#ffcb6b;">wang_qiang</span>
+
+<span style="color:#546e7a;">// X3: 租户隔离 — 所有对象的 tenant relation</span>
+<span style="color:#c3e88d;">tenant</span>:<span style="color:#ffcb6b;">tianhua</span>#<span style="color:#c3e88d;">member</span>@<span style="color:#82aaff;">user</span>:<span style="color:#ffcb6b;">zhang_ming</span>   <span style="color:#546e7a;">// 张明属于天华科技租户</span>
+<span style="color:#c3e88d;">tenant</span>:<span style="color:#ffcb6b;">tianyu</span>#<span style="color:#c3e88d;">member</span>@<span style="color:#82aaff;">user</span>:<span style="color:#ffcb6b;">other_user</span>  <span style="color:#546e7a;">// 天宇的用户只能看天宇的数据</span></pre>
+
+      <div class="info">
+        <strong>程序员怎么用这张表：</strong><br>
+        ① 扫描授权表 Excel 的每一行，提取 <code>subject</code> <code>relation</code> <code>resource</code> <code>permission</code> <code>caveat</code><br>
+        ② 汇总所有不同的 <code>relation</code> 和 <code>permission</code> → 生成 SpiceDB Schema（<code>.zed</code> 文件）<br>
+        ③ 根据每行的业务场景 → 生成 <code>WriteRelationships</code> 调用（在备货单创建时、发货单分配仓管时、委托时等）<br>
+        ④ 写一个脚本自动做这个转换——<strong>Excel 表就是你的 Single Source of Truth</strong>。<br>
+        ⑤ Schema 变更走 PR → 迁移 → 授权矩阵测试（A2黄金矩阵）→ UAT 流程，确保不会意外破坏现有权限。
+      </div>
+
+      <div class="answer">
+        <strong>为什么这张 Excel 表是共享 Single Source of Truth：</strong><br>
+        <strong>业务侧：</strong>你只需要维护这十来行（以后可能到 20-30 行）——每次有新角色、新关系、新权限，在 Excel 里加一行。<br>
+        <strong>开发侧：</strong>不会出现"业务说的权限跟代码里写的不一样"——<strong>因为代码是从这张表自动生成的</strong>。<br>
+        <strong>审计侧：</strong>任何一次数据访问，都能追溯到这张 Excel 表的哪一行授权了它。<br>
+        <strong>未来：</strong>这张表可以做成在线表单——搜"张明"就能看到他的全部权限，搜"PS-8801"就能看到谁能动它。测试个体权限的在线界面也可以直接从这张表的数据生成。
+      </div>
+    </section>
+
+    <footer>
+      基于 ReBAC / SpiceDB (Google Zanzibar) 思想 · 对齐 Temporal+SpiceDB Pilot 备货/多次发货授权模型<br>
+      参考：golang_pilot_temporal_rebac.html §5 SpiceDB 授权模型 · rebac_cases_openfga.html · 写给非 IT 背景的 COO / 运营 / 商务同事
+    </footer>
+  </main>
+</body>
+</html>

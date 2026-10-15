@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>B2B 订单履约 · 项目分析 — 0.1 冲刺 · 双图谱 × 证据收敛</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Noto+Serif+SC:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f5f4ed;
+    --paper-tint: #efeee5;
+    --paper-deep: #e8e6dc;
+    --ink: #1f1d18;
+    --ink-soft: #3a382f;
+    --ink-mute: #6b665b;
+    --blue: #1B365D;
+    --blue-soft: #e9ecef;
+    --rule: #d4d1c5;
+    --green: #3b6d3b;
+    --amber: #8a6d3b;
+    --red: #9b3b3b;
+    --serif: 'Source Serif Pro', 'Noto Serif SC', Georgia, serif;
+    --mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink-soft);
+    font-family: var(--serif);
+    font-size: 16px;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+  .shell { width: min(1000px, calc(100% - 48px)); margin: 0 auto; }
+  .mono { font-family: var(--mono); }
+  .blue { color: var(--blue); }
+  .mute { color: var(--ink-mute); }
+  code {
+    padding: 1px 5px;
+    border-radius: 2px;
+    color: var(--blue);
+    background: var(--blue-soft);
+    font-family: var(--mono);
+    font-size: .86em;
+  }
+  pre {
+    margin: 26px 0;
+    padding: 22px 24px;
+    overflow-x: auto;
+    border: 1px solid var(--rule);
+    background: var(--paper-deep);
+    color: var(--ink);
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.72;
+  }
+  pre code { padding: 0; color: inherit; background: transparent; }
+
+  /* ── 状态标签（0.1 三态标注） ─────── */
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 2px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .04em;
+    white-space: nowrap;
+  }
+  .tag.ok   { color: var(--blue);  background: var(--blue-soft); }
+  .tag.gray { color: var(--ink-mute); background: var(--paper-deep); }
+  .tag.amber{ color: var(--amber); background: #f3ecdc; }
+  .tag.red  { color: var(--red);   background: #f3e3e3; }
+
+  /* ── Folio 页眉 ─────────────────────── */
+  .folio {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 26px 0 12px;
+    border-bottom: 1px solid var(--rule);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+  }
+  .folio .brand { color: var(--blue); }
+
+  /* ── 封面 ───────────────────────────── */
+  .cover { padding: 76px 0 56px; }
+  .kicker {
+    display: inline-block;
+    padding: 3px 10px;
+    background: var(--paper-tint);
+    color: var(--blue);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+  }
+  h1 {
+    margin: 22px 0 0;
+    color: var(--ink);
+    font-size: clamp(38px, 5.6vw, 58px);
+    font-weight: 500;
+    line-height: 1.14;
+    letter-spacing: .005em;
+  }
+  .lede {
+    max-width: 720px;
+    margin: 26px 0 0;
+    font-size: 18.5px;
+    line-height: 1.62;
+    color: var(--ink-soft);
+  }
+  .cover-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 28px;
+    margin-top: 32px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+  }
+  .cover-meta span::before { content: "— "; color: var(--blue); }
+
+  /* ── 目录 ───────────────────────────── */
+  .toc {
+    margin: 0 0 8px;
+    padding: 30px 34px;
+    border: 1px solid var(--rule);
+    background: var(--paper-tint);
+  }
+  .toc .toc-title {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--blue);
+    margin-bottom: 16px;
+  }
+  .toc ol { list-style: none; margin: 0; padding: 0; counter-reset: toc; columns: 2; column-gap: 40px; }
+  .toc li { counter-increment: toc; margin: 7px 0; break-inside: avoid; }
+  .toc li::before {
+    content: counter(toc, decimal-leading-zero);
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--blue);
+    margin-right: 10px;
+  }
+  .toc a { color: var(--ink-soft); text-decoration: none; border-bottom: 1px solid transparent; }
+  .toc a:hover { color: var(--blue); border-bottom-color: var(--blue); }
+
+  /* ── 章节 ───────────────────────────── */
+  section { padding: 64px 0 56px; border-top: 1px solid var(--rule); }
+  .act-no {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--blue);
+  }
+  h2 {
+    margin: 10px 0 6px;
+    color: var(--ink);
+    font-size: 30px;
+    font-weight: 500;
+    line-height: 1.3;
+  }
+  h3 {
+    margin: 38px 0 4px;
+    color: var(--ink);
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  .subtitle { margin: 0 0 6px; color: var(--ink-mute); font-size: 15.5px; }
+  p { max-width: 780px; margin: 12px 0; }
+  p small { color: var(--ink-mute); }
+  .lead { color: var(--ink); font-size: 18px; line-height: 1.66; }
+
+  /* ── 要点框 ─────────────────────────── */
+  .decision {
+    max-width: 880px;
+    margin: 30px 0 8px;
+    padding: 18px 22px 16px;
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--blue);
+    background: var(--paper-tint);
+  }
+  .decision .label {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--blue);
+  }
+  .decision p { margin: 8px 0 0; color: var(--ink); }
+  .decision b { color: var(--blue); font-weight: 600; }
+  .decision.ink { border-left-color: var(--ink); background: var(--paper); }
+  .decision.ink .label, .decision.ink b { color: var(--ink); }
+
+  /* ── 表格 ───────────────────────────── */
+  .table-wrap {
+    width: 100%;
+    margin: 22px 0;
+    overflow-x: auto;
+    border: 1px solid var(--rule);
+    background: var(--paper);
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  caption {
+    padding: 10px 14px;
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    border-bottom: 1px solid var(--rule);
+    background: var(--paper-tint);
+  }
+  th {
+    padding: 9px 13px;
+    background: var(--paper-tint);
+    color: var(--ink);
+    text-align: left;
+    white-space: nowrap;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  td { padding: 10px 13px; border-top: 1px solid var(--rule); vertical-align: top; }
+  td:first-child { color: var(--ink); font-weight: 600; }
+  tr:nth-child(even) td { background: var(--paper-tint); }
+  .mono-cell { font-family: var(--mono); font-size: 12.3px; white-space: nowrap; color: var(--blue) !important; }
+
+  /* ── mermaid ────────────────────────── */
+  .mermaid-wrap {
+    margin: 26px 0;
+    padding: 20px;
+    overflow-x: auto;
+    border: 1px solid var(--rule);
+    background: var(--paper);
+  }
+  .mermaid { display: flex; justify-content: center; min-width: 620px; }
+  .mermaid svg { max-width: 100%; height: auto; }
+  figcaption {
+    margin-top: 10px;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .06em;
+    color: var(--ink-mute);
+  }
+
+  /* ── 附录 ───────────────────────────── */
+  .appendix { background: var(--paper-tint); }
+  .appendix .spec-label {
+    display: inline-block;
+    padding: 4px 12px;
+    background: var(--blue);
+    color: #f5f4ed;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+  }
+  .appendix h3 { margin: 40px 0 4px; }
+  .appendix .mermaid-wrap, .appendix .table-wrap { background: var(--paper); }
+
+  /* ── Colophon ───────────────────────── */
+  .colophon {
+    margin-top: 0;
+    padding: 44px 0 60px;
+    background: var(--ink);
+    color: #b8b3a6;
+    font-size: 14px;
+  }
+  .colophon p { max-width: 780px; margin: 0; }
+  .colophon b { color: #f5f4ed; font-weight: 500; }
+  .colophon .meta-line {
+    margin-top: 14px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: #7d786c;
+  }
+
+  @media (max-width: 820px) {
+    .toc ol { columns: 1; }
+    h1 { font-size: 36px; }
+    h2 { font-size: 25px; }
+    .cover { padding: 56px 0 44px; }
+    section { padding: 48px 0 42px; }
+    .folio .meta-part { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- folio -->
+  <header class="folio">
+    <span class="brand">B2B PILOT V3 · 订单履约验证项目</span>
+    <span class="meta-part">项目分析 · 0.1 冲刺 · 双图谱 × 证据收敛</span>
+    <span>MMXXVI · Vol. 02</span>
+  </header>
+
+  <!-- 封面 -->
+  <header class="cover">
+    <span class="kicker">项目分析 · 0.1 冲刺版</span>
+    <h1>从群里一句话，<br>到一张可对账的闭环</h1>
+    <p class="lede">项目已从「验证三支柱」转入 <b>0.1 上线冲刺</b>：下周五（08-21）前，先让商务虹励一个人跑起来，不打扰现有飞书流程。一张图说清业务世界「是什么」——B2B 订单履约的实体、关系、事件与规则；另一张图说清产品「做什么」——企微订单助手以 7 角色 17 场景消化这些业务需求；而项目本身如何演进，由第三层机制回答——<b>证据收敛式迭代（ECM）</b>：声明、决策、制品、证据、基线各安其位，每次变化只让受影响的部分重新收敛。本文档 0.1 交互口径，一律以 <code>ord_fulfill</code> demo 为现实需求裁决源，以 <code>docs/v0.1/</code> 为最新文档家族。</p>
+    <div class="cover-meta">
+      <span>对象 · 长安仁恒 · B2B 订单履约闭环</span>
+      <span>方法 · 世界知识图谱 + 产品操作图谱 + ECM</span>
+      <span>口径 · ord_fulfill demo / docs/v0.1（demo 裁决）</span>
+      <span>产出 · 本体 18 CQ · 17 场景 · 追踪矩阵 · 0.1 冲刺路线</span>
+    </div>
+  </header>
+
+  <!-- 目录 -->
+  <nav class="toc" aria-label="目录">
+    <div class="toc-title">目录 · Contents</div>
+    <ol>
+      <li><a href="#overview">项目总览：0.1 冲刺，一个人先跑起来</a></li>
+      <li><a href="#wkg">世界知识图谱：业务本体论（0.1 校准版）</a></li>
+      <li><a href="#wkg-entity">实体类型：世界的名词</a></li>
+      <li><a href="#wkg-relation">关系类型：世界的动词</a></li>
+      <li><a href="#wkg-event">事件类型：世界的变化</a></li>
+      <li><a href="#wkg-rule">约束与规则：不可让步的边界</a></li>
+      <li><a href="#wkg-cq">能力问题：本体的验收标准（18 问）</a></li>
+      <li><a href="#pog">产品操作图谱：服务 · 场景 · 操作（17 场景）</a></li>
+      <li><a href="#pog-topo">服务拓扑：四个入口，一处后台</a></li>
+      <li><a href="#pog-func">功能地图：七角色十七场景 · 五大使命</a></li>
+      <li><a href="#pog-task">操作任务图：三条主线</a></li>
+      <li><a href="#pog-engine">操作支撑层：AI 边界与守恒防线</a></li>
+      <li><a href="#pog-role">角色 × 模块：谁用什么、看见什么</a></li>
+      <li><a href="#align">双图谱对齐：承诺如何被兑现</a></li>
+      <li><a href="#trace">需求 — 功能追踪矩阵</a></li>
+      <li><a href="#fullpath">事件全链路：一次「群里要货」的旅程</a></li>
+      <li><a href="#ecm">项目机制：证据收敛式迭代（ECM）</a></li>
+      <li><a href="#roadmap">0.1 冲刺路线与度量</a></li>
+      <li><a href="#appendix">附录：术语与参考</a></li>
+    </ol>
+  </nav>
+
+  <!-- ══════════ 一、项目总览 ══════════ -->
+  <section id="overview">
+    <div class="act-no">第一章 · 总览</div>
+    <h2>0.1 冲刺：一个人先跑起来</h2>
+    <p class="subtitle">以长安仁恒为样板客户，落地「客户开口 → 订单 → 审批 → 备货 → 发货 → 回单开票 → 归档」的完整履约闭环。当前阶段不再是全量验证，而是 0.1 版上线冲刺：先让商务虹励一个人用起来，飞书原流程不停。</p>
+
+    <p class="lead">B2B 订单履约型企业的经营长期在两处承压：<b>订单侧</b>，客户在群里口头要货、销售手工建单、听错数量、漏单催单；<b>履约侧</b>，审价靠人盯、备货发货开票三大闸门分散在不同会话、回单不齐卡住开票、超发错发难防。b2b_pilot_v3 的回答是：把「群聊一句话」与「订单履约闭环」合并为一个企微原生的验证项目——行为一次采集，流程处处留痕，授权按图判定。<b>0.1 的答案更收敛</b>：把自动下单移出一期，把财务、仓管留在飞书原流程，用数据同步让飞书侧数据在本系统流里可见可操作，先让虹励一个人跑通全流程。</p>
+
+    <div class="table-wrap">
+      <table>
+        <caption>项目总览 · 一张卡片看清项目</caption>
+        <thead><tr><th style="width:16%">维度</th><th>内容</th></tr></thead>
+        <tbody>
+          <tr><td>项目定位</td><td>业务流落地 + 技术实施的整合验证项目（b2b_pilot_v3）；当前冲刺 0.1 发布版——非生产系统，但按生产纪律交付</td></tr>
+          <tr><td>样板客户</td><td>长安仁恒——订单履约型 B2B 企业；demo 演示客户为广西天华（膨润土 AB-3），演示仓用「华南仓」；<b>0.1 真实仓库为虹励的两个外租仓库</b></td></tr>
+          <tr><td>履约闭环</td><td>客户开口 → 统一订单（已开单）→ 审价（+C/D 终审）→ 备货选仓 → 发货 → 回单 → 开票（可多单合并）→ 三金额对账 → 订单关闭</td></tr>
+          <tr><td>0.1 上线</td><td><b>08-21（下周五）前必须上线</b>；用户仅虹励（商务）一人；不打扰现有飞书流程；数据同步单向只读；使用中快速升级 0.2 / 0.3（文档驱动迭代）</td></tr>
+          <tr><td>移出一期</td><td>自动下单（会话存档自动拉取 + 意图解析自动建单）——同城企微备案未完成，API 有风险；智能下单<b>人工确认段保留</b>；锁库存暂不做（先补缺货业务数据）</td></tr>
+          <tr><td>技术栈</td><td>Go 1.25 · PostgreSQL 16 · SpiceDB（authzed-go）· Temporal · 企业微信（S1-S4）· 飞书同步 Job（cmd/sync，0.1 新增）· Docker Compose 一键拉起</td></tr>
+          <tr><td>业务底座</td><td>企微会话存档捕捉群消息；意图识别 LLM 只产候选，SKU / 数量 / 价格 / 库存 / 权限由确定性代码校验，人工确认才生效；发客户群内容须守门员确认</td></tr>
+          <tr><td>演示边界</td><td>真实开票 / 税控、ERP 对接、BI 均不在 baseline；库存以「仓库 × 产品 × 数量」粒度做数量守恒校验（0.1 锁库存暂缓）；财务 / 仓管 0.1 经数据同步在流内可见，真实操作仍在飞书</td></tr>
+          <tr><td>交付物</td><td>0.1 可运行 · 可演示 · 可度量的最小完整闭环：虹励跑通一笔完整订单（下单 → 审价 → 备货 → 发货 → 开票 → 回单）；同一套系统后续直接扩展</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mermaid-wrap">
+      <div class="mermaid">
+flowchart TB
+  subgraph G["企微群 · 客户开口"]
+    M["客户群内要货 / 问单 / 催进度<br/>（客户无感签收，不进系统）"]
+  end
+  subgraph F["订单助手 0.1 · 虹励主用"]
+    PRE["智能下单确认卡 DRAFT<br/>销售确认（唯一确认角色）"]
+    ORD["正式订单 · 四节点状态<br/>已开单 → 已备货 → 已发货 → 已开票"]
+  end
+  subgraph A["人类闸门"]
+    P["销售主管审价<br/>审批即审价"]
+    C["董事长终审<br/>仅 C/D 级"]
+    OP["商务（虹励）<br/>备货选仓 / 发货 / 开票"]
+  end
+  subgraph S["飞书侧 · 原流程不停"]
+    SYNC["数据同步 Job · 单向只读<br/>订单 / 多维表 / 三方审批流"]
+    FIN["财务：后台传凭证 · 例外审核"]
+    WH["仓管：两步确认 · 回单发仓库群"]
+  end
+  subgraph E["闭环终点"]
+    DONE["回款跟踪 → 合同归档 → 订单关闭<br/>三金额对账 · 事件链可回放"]
+  end
+  M --> PRE --> ORD
+  ORD --> P --> C --> OP
+  OP --> SYNC --> FIN & WH
+  FIN --> DONE
+  WH --> DONE
+  P -.->|"驳回 → 待补充 → 重提"| ORD
+  OP -.->|"守恒校验 · 发群守门员"| ORD
+      </div>
+      <figcaption>图 1 · 0.1 闭环——从群里一句话到订单关闭；财务/仓管留在飞书，经数据同步在流内可见，仅虹励先行操作</figcaption>
+    </div>
+
+    <h3>1.1 · 0.1 变更清单（A1–A8）</h3>
+    <p>0.1 的业务口径由 08-13 需求评审会议纪要拍板、08-15 demospace 标注反馈深化、08-16 口头纠正定稿，全部落入 <code>ord_fulfill</code> demo（演示数据层已实施）。这八条变更就是本次冲刺的业务范围：</p>
+    <div class="table-wrap">
+      <table>
+        <caption>0.1 变更清单 · A1–A8（裁决源：ord_fulfill demo）</caption>
+        <thead><tr><th style="width:8%">编号</th><th style="width:26%">变更</th><th>内容</th><th style="width:14%">状态</th></tr></thead>
+        <tbody>
+          <tr><td class="mono-cell">A1</td><td>备货补「选仓按钮 + 收货地址」</td><td>备货详情页底部「选备货仓 / 写备注 / 通过 / 驳回」四按钮；按收货地址选仓；锁库存暂不做，先补缺货业务数据（款到发货缺货比例、常缺货产品清单）</td><td><span class="tag ok">demo 已实施</span></td></tr>
+          <tr><td class="mono-cell">A2</td><td>财务上传凭证反转为主路径</td><td>财务在订单后台页面上传电子凭证（PDF / 图片），AI 自动识别匹配订单；凭证机器人降级为兜底（只服务无电脑场景）；销售合同回传仍走机器人</td><td><span class="tag ok">demo 已实施</span></td></tr>
+          <tr><td class="mono-cell">A3</td><td>发群守门员（第一轮强制）</td><td>任何内容发客户群前必须销售点一次确认；先收紧后放行；「哪些内容可直发、哪些必须审核」明确成规则（0.1 全部强制确认）</td><td><span class="tag ok">demo 已实施</span></td></tr>
+          <tr><td class="mono-cell">A4</td><td>多单合并开票 / 关联逻辑</td><td>发票与订单分离，通过「关联」连接（一笔款可跨多笔订单）；关联可追加；收款 / 发货 / 开票三金额分别展示；未开票额度保留在订单上由财务确认继续开</td><td><span class="tag ok">demo 已实施</span> <span class="tag amber">业财归属待确认</span></td></tr>
+          <tr><td class="mono-cell">A5</td><td>无回单开票规则待确认</td><td>是否允许「销售无回单开票」未确认；待办：找宋主任 / 财务负责人 / 张总确认，整理「现状-问题-建议」文档并算资金延后约 30 天的利息账</td><td><span class="tag red">规则待确认</span></td></tr>
+          <tr><td class="mono-cell">A6</td><td>回单凭证链路纠正</td><td>「司机私聊仓管 → 转发机器人」是错的；实际：两个外租仓仓管把回单统一发群聊 → 仓库群升级为企微群 → 凭证机器人自动抓取 / 识别 / 登记归档</td><td><span class="tag ok">demo 已实施</span> <span class="tag amber">仓库群升级待办</span></td></tr>
+          <tr><td class="mono-cell">A7</td><td>订单创建多方分担纠正</td><td>订单创建由多方分担：陈虹励（佘总订单 + 董事长订单，约 20%）+ 销售助理 1（张磊订单）+ 销售助理 2（合约订单）+ 销售本人（其余全部）；四种下单方式覆盖全部创建主体</td><td><span class="tag ok">demo 已实施</span></td></tr>
+          <tr><td class="mono-cell">A8</td><td>0.1 版本架构决策</td><td>08-21 上线 · 仅虹励 · 不打扰飞书 · 数据同步 · 自动下单移出 · 智能下单确认卡保留 · 文档驱动迭代（一个文档进去，所有东西自动跟它同步）</td><td><span class="tag ok">架构前提</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="decision">
+      <div class="label">项目要点 · 一</div>
+      <p><b>演示是手段，验证是目的；0.1 是验证的第一个真实切片。</b>闭环不是功能堆砌，而是三条验证线的公共载体：SpiceDB 能否承载复杂 B2B 授权、Temporal 能否承载主流程 + 人工审批、企微「群里一句话变订单」是否可行。0.1 通过「仅虹励 + 飞书同步」把验证成本压到最低，把结论节奏拉到最快——用起来，比任何推演都更接近真相。</p>
+    </div>
+  </section>
+
+  <!-- ══════════ 二、世界知识图谱 ══════════ -->
+  <section id="wkg">
+    <div class="act-no">第二章 · 世界知识图谱</div>
+    <h2>业务世界，是一张可查的图</h2>
+    <p class="subtitle">本体论：先定义名词、动词与规则，再谈功能。世界图回答「系统记住什么」——本章为 0.1 校准版，以 ord_fulfill demo 为裁决源。</p>
+
+    <p>世界知识图谱是 B2B 订单履约业务的<b>本体</b>：哪些实体存在（名词）、实体之间如何关联（动词）、发生了什么（事件）、什么不可违反（约束）。它是产品设计的坐标系——任何产品功能，都必须能指回这张图上的某个实体、关系或约束，否则就不该进入坐标。核心心智模型：<b>先建模后抽取、先融合后存储、每个阶段都验证</b>；能力问题驱动本体，克制添加实体。0.1 校准不推翻骨架：15 个既有 CQ、本体与四流程状态机全部保留，按 demo 现实新增 <b>发票-订单关联、发群守门员、企微仓库群、凭证机器人抓取、收货地址</b> 五个业务对象，并新增 3 个能力问题（合计 18 CQ）。</p>
+
+    <div class="mermaid-wrap">
+      <div class="mermaid">
+flowchart TB
+  subgraph CUST["客户侧"]
+    CU["客户<br/>A/B/C/D 级 · 归属销售"]
+    CT["联系人<br/>采购 · 库管 · 收货人"]
+    CG["企微供应协同群"]
+  end
+  subgraph ORG["组织侧（公司）"]
+    SA["销售 / 销售助理<br/>下单 · 确认 · 发群守门员"]
+    SM["销售主管<br/>审价"]
+    CH["董事长<br/>C/D 级终审"]
+    OP["商务（虹励 · 0.1 主角）<br/>备货选仓 · 发货 · 开票"]
+    FN["财务<br/>后台传凭证 · 例外审核"]
+    WH["仓管（2 外租仓）<br/>金额不可见 · 回单发仓库群"]
+  end
+  subgraph FLW["订单域"]
+    PRE["预订单 DRAFT"]
+    O["订单 ORD"]
+    STK["备货 STK"]
+    SHP["发货 SHP"]
+    INV["开票 INV<br/>发票-订单关联（可追加）"]
+  end
+  subgraph WHS["仓库渠道侧"]
+    W["外租仓 ×2"]
+    ST["库存<br/>仓库 × 产品 × 数量（0.1 锁库存暂缓）"]
+    LG["物流<br/>德邦等 · 预计送达"]
+    WG["企微仓库群<br/>仓管统一发回单"]
+  end
+  subgraph RUL["规则与凭证侧"]
+    EV["证据链<br/>只追加版本 v1/v2/v3"]
+    RB["凭证机器人<br/>仓库群抓取 · 兜底识别"]
+    GK["发群守门员<br/>销售确认后才发群"]
+    RL["规则库<br/>四守恒 · 回单四分流 · 修改分类"]
+  end
+  CG -->|"群里一句话"| PRE
+  PRE -->|"销售确认（唯一）"| O
+  O -->|"审价 + C/D 终审"| SM
+  SM --> CH
+  O --> STK --> SHP --> INV
+  OP --> STK
+  WH --> SHP
+  FN --> INV
+  CU --> CG
+  CT --> CG
+  W --> ST
+  SHP --> LG
+  WG -->|"回单照片"| RB
+  RB --> EV
+  GK -->|"确认后才出站"| CG
+  RL -->|"校验"| FLW
+  SA -->|"查单 · 下单 · 发客户"| CG
+      </div>
+      <figcaption>图 2 · 世界知识图谱全景（0.1 校准版）：客户、组织、订单、仓库渠道、规则凭证五个子图，新增仓库群、凭证机器人抓取与发群守门员</figcaption>
+    </div>
+
+    <p>这张图可以拆成五个子图来读：<b>客户子图</b>（跟谁做生意）、<b>组织子图</b>（谁在做事）、<b>订单子图</b>（事做到哪一步）、<b>仓库渠道子图</b>（货如何流动）、<b>规则凭证子图</b>（依据什么、留下什么）。0.1 的三个新对象各就各位：<b>守门员</b>守住「什么能发到客户群」，<b>仓库群 + 凭证机器人</b>接住「回单怎么回来」，<b>发票-订单关联</b>托起「一笔款怎么跨多笔订单」。</p>
+
+    <h3 id="wkg-entity">2.1 · 实体类型：世界的名词</h3>
+    <div class="table-wrap">
+      <table>
+        <caption>本体 · 实体类型（Entity Types · 0.1 校准版）</caption>
+        <thead><tr><th style="width:14%">实体</th><th>含义</th><th>关键属性</th><th style="width:16%">数据来源</th></tr></thead>
+        <tbody>
+          <tr><td>租户 Tenant</td><td>企业租户（长安仁恒 / 未来客户），多租户隔离根节点</td><td>成员、商务、财务、管理员关系</td><td>入驻 / 配置</td></tr>
+          <tr><td>用户 User</td><td>七类角色：销售 / 销售助理 / 销售主管 / 商务 / 财务 / 仓管 / 董事长</td><td>角色、所属租户、数据可见范围</td><td>组织架构 / 账号</td></tr>
+          <tr><td>客户 Customer</td><td>订单对象，带等级 A/B/C/D——C/D 级触发董事长终审；每个客户归属销售明确</td><td>等级、归属销售、联系人、账期偏好（30 天 / 月结）</td><td>CRM 档案 / 群上下文</td></tr>
+          <tr><td>联系人 Contact</td><td>客户侧具体角色：采购 / 库管 / 收货人（0.1 客户不进系统，标注阶段二）</td><td>身份、角色、可见范围</td><td>CRM（拉群时销售与商务共同定义）</td></tr>
+          <tr><td>产品 Product</td><td>标准型号（SKU 归一化目标），如膨润土 AB-3（袋装 / 吨袋）</td><td>SKU、名称、包装规格</td><td>产品字典</td></tr>
+          <tr><td>仓库 Warehouse</td><td>demo 演示用「华南仓」；<b>0.1 真实为虹励的两个外租仓库</b>（仓管统一发回单到仓库群）</td><td>仓名、仓管、库存</td><td>基础档案（以真实业务为准）</td></tr>
+          <tr><td>企微仓库群 WarehouseGroup</td><td><b>0.1 新增</b>：外租仓沟通群升级为企微群，回单统一发群由机器人抓取</td><td>群、关联仓库、机器人抓取状态</td><td>虹励补充现状截图 + 升级企微群（待办）</td></tr>
+          <tr><td>预订单 PreOrder</td><td>智能下单：群消息 → AI 提取要素 → DRAFT 汇总卡 → 销售确认（唯一确认角色）</td><td>msgid（消息幂等）、候选、状态、幂等键</td><td>会话存档 + 意图识别（自动段 0.1 移出，确认卡保留）</td></tr>
+          <tr><td>订单 Order</td><td>统一订单主档，四节点状态（已开单 → 已备货 → 已发货 → 已开票）</td><td>客户、明细、账期（款到 / 非款到）、收货地址、幂等键</td><td>四种下单方式（A7 多方分担）</td></tr>
+          <tr><td>订单明细 OrderItem</td><td>订单产品明细——数量守恒基准；<b>0.1 新增收货地址</b>（备货按地址选仓的输入）</td><td>产品、数量、单价（仓管不可见）、仓库分配、收货地址</td><td>下单表单</td></tr>
+          <tr><td>备货单 StockPrepare</td><td>备货审批聚合：选备货仓 + 收货地址 → 通过 / 驳回</td><td>本批备货量、剩余待备货量、可变更仓库</td><td>商务备货闸门（A1 四按钮）</td></tr>
+          <tr><td>发货单 Shipment</td><td>一次发货——仓管「确认接受」与「确认已经发货」两步；守恒校验拦截超发</td><td>应发量、已发量、目标仓、交期</td><td>商务分配 + 仓管确认</td></tr>
+          <tr><td>开票 Invoice</td><td>开票申请 / 发票：与订单分离，经关联连接（一笔款可跨多笔订单）</td><td>收款金额 / 发货金额 / 开票金额三金额分展</td><td>财务订单后台上传凭证（主路径）</td></tr>
+          <tr><td>发票-订单关联 InvoiceOrderLink</td><td><b>0.1 新增</b>：多单合并开票的关联边——可追加（先关联 1、2 笔，漏了补第 3 笔）；未开票额度保留在订单上</td><td>发票、订单、关联金额、追加记录</td><td>财务确认关联（业财归属待惊蜇确认）</td></tr>
+          <tr><td>审批任务 ApprovalTask</td><td>审价 / 董事长终审 / 备货 / 发货 / 开票 / 回单例外</td><td>阶段码（ORD/STK/SHP/INV）、PENDING/APPROVED/RETURNED/REJECTED</td><td>流程引擎（Signal 驱动）</td></tr>
+          <tr><td>发群守门员 Gatekeeper</td><td><b>0.1 新增</b>：任何发客户群内容（订单卡片 / 物流图片 / 发票）须销售一次显式确认；确认记录 append-only 可审计</td><td>内容类型、状态（待确认 / 已确认 / 已拒绝）、确认人、时间</td><td>发群动作（第一轮强制，先收紧后放行）</td></tr>
+          <tr><td>凭证机器人 Robot</td><td>私聊机器人（兜底）+ 企微仓库群抓取：OCR 识别 → 匹配订单 → 只追加登记</td><td>来源（后台 / 群抓取 / 合同回传）、识别结果</td><td>凭证链路（A2 兜底 + A6 抓取）</td></tr>
+          <tr><td>事件 Event</td><td>append-only 事件链：谁、何时、何因、结果</td><td>from_state / to_state / reason / operator</td><td>五类事件表（审计回放根基）</td></tr>
+          <tr><td>凭证 Evidence</td><td>发票凭证 / 签收回单——只追加不覆盖；两类来源：订单后台上传（主路径）+ 机器人抓取（兜底）</td><td>上传者、版本 v1/v2/v3、关联订单、来源</td><td>财务上传 + 凭证机器人 OCR 登记</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 id="wkg-relation">2.2 · 关系类型：世界的动词</h3>
+    <p>关系是带方向的语义边，标注 domain → range。关系的精确性决定下游查询的可靠程度——这里不用「相关」这种模糊动词，每条关系都对应一种明确的业务事实，且每条关系至少服务一个能力问题。0.1 新增四条关系：<b>发票关联、守门员守卫、机器人抓取、仓库群归属</b>。</p>
+    <div class="table-wrap">
+      <table>
+        <caption>本体 · 关系类型（Relation Types · 0.1 校准版）</caption>
+        <thead><tr><th style="width:24%">关系</th><th>domain → range</th><th>业务含义</th></tr></thead>
+        <tbody>
+          <tr><td>BELONGS_TO 归属租户</td><td>用户 → 租户</td><td>多租户隔离根节点，业务唯一性一律按 (tenant_id, 业务键) 复合约束</td></tr>
+          <tr><td>OWNS 负责客户</td><td>销售 → 客户</td><td>ReBAC 直接关系——销售只看本人客户，新增订单无需逐条授权（层级边继承）</td></tr>
+          <tr><td>DELEGATED_TO 代办授权</td><td>用户 → 用户</td><td>代办授权，caveat 有效期（到期即时失效）；销售助理代下单即此关系的业务化</td></tr>
+          <tr><td>COVERS 订单覆盖客户</td><td>订单 → 客户</td><td>订单属于客户，客户等级（C/D）驱动董事长终审闸门</td></tr>
+          <tr><td>CONTAINS 订单含明细</td><td>订单 → 明细</td><td>一单多明细，明细数量 = 守恒基准；明细带收货地址（0.1 A1）</td></tr>
+          <tr><td>STORES 库存</td><td>仓库 → 产品</td><td>库存 = 初始 + 入 − 出，出与发货同事务，恒 ≥ 0（CQ-08；0.1 锁库存暂缓，表与约束保留）</td></tr>
+          <tr><td>PREPARES 备货</td><td>订单 → 备货单</td><td>可分批；累计备货确认量 ≤ 订单数量（CQ-06）；备货按收货地址选仓</td></tr>
+          <tr><td>FULFILLS 发货</td><td>备货单 → 发货单</td><td>一备货可多张发货单；累计发货 ≤ 备货（CQ-07）</td></tr>
+          <tr><td>GENERATES_INV 开票</td><td>订单 → 开票</td><td>累计开票 ≤ 有效发货（金额 + 数量双维度，CQ-09）</td></tr>
+          <tr><td>LINKS_INV 发票关联</td><td>发票 ↔ 订单（多对多）</td><td><b>0.1 新增</b>：多单合并开票——一笔款跨多笔订单，关联可追加，三金额分展（CQ-17）</td></tr>
+          <tr><td>DERIVES 派生订单</td><td>预订单 → 订单（1:1）</td><td>预订单确认后派生正式订单，幂等键串联（CQ-11）；销售是唯一确认角色</td></tr>
+          <tr><td>PRODUCES / TRIGGERS 产生事件</td><td>订单 / 预订单 → 事件</td><td>append-only，任何状态迁移不得绕过事件链（CQ-12）</td></tr>
+          <tr><td>ASSIGNED_TO 分配仓管</td><td>仓管 → 发货单</td><td>发货任务推送本仓待办，金额对仓管不可见（CQ-03）</td></tr>
+          <tr><td>HAS_GROUP 仓库群</td><td>仓库 → 企微仓库群</td><td><b>0.1 新增</b>：外租仓 → 企微仓库群，回单统一发群（A6）</td></tr>
+          <tr><td>CAPTURES 机器人抓取</td><td>凭证机器人 → 凭证版本</td><td><b>0.1 新增</b>：机器人从仓库群抓取回单 / 识别发票，只追加登记（CQ-18）</td></tr>
+          <tr><td>GUARDS 守门员守卫</td><td>守门员 → 订单 / 发群内容</td><td><b>0.1 新增</b>：发客户群内容须销售确认（先收紧后放行），确认记录可审计（CQ-16）</td></tr>
+          <tr><td>UPLOADS 上传凭证</td><td>用户 → 凭证</td><td>凭证上传者界定；财务订单后台上传为主路径（A2）；凭证只追加不覆盖（CQ-15）</td></tr>
+          <tr><td>CONTACT_OF 客户联系人</td><td>用户 ↔ 客户</td><td>客户侧具体角色，决定群内可见范围（最小交集裁剪；0.1 无客户角色，标注阶段二）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 id="wkg-event">2.3 · 事件类型：世界的变化</h3>
+    <p>事件是带时间锚的头等实体——「发生了什么」，而不是「什么存在」。全部业务事件按域收敛为五组：企微捕捉、订单、备货、发货、开票，外加异常域。这是世界图谱与产品操作图谱最关键的接缝：<b>一个事件 → 一个操作 → 一个凭证 → 一轮审核</b>。0.1 新增三个事件类型：<b>守门员确认、机器人抓取、发票-订单关联</b>。</p>
+    <div class="mermaid-wrap">
+      <div class="mermaid">
+flowchart LR
+  subgraph sg0["企微/外部输入域"]
+    MC["PreOrderCaptured<br/>智能下单要素提取 DRAFT"]
+    PC["PreOrderConfirmed<br/>销售确认（唯一确认角色）"]
+    GK["GatekeeperConfirmed<br/>发群守门员确认"]
+    RB["RobotCaptured<br/>凭证机器人抓取回单"]
+  end
+  subgraph sg1["订单域 ORD"]
+    OR["OrderRequested<br/>正式订单（幂等键）"]
+    PR["PriceReviewed<br/>销售主管审价"]
+    CR["ChairmanReviewed<br/>C/D 级终审"]
+  end
+  subgraph sg2["备货域 STK"]
+    SA["StockAssigned<br/>商务备货（选仓 + 收货地址）"]
+    WC["WarehouseConfirmed<br/>仓管确认可执行"]
+  end
+  subgraph sg3["发货域 SHP"]
+    GS["GoodsShipped<br/>确认发货（守恒校验）"]
+    RT["ReceiptRegistered<br/>回单登记（仓库群 → 机器人）"]
+  end
+  subgraph sg4["开票域 INV"]
+    IA["InvoiceApplied<br/>开票申请"]
+    IL["InvoiceLinked<br/>发票-订单关联（可追加）"]
+    II["InvoiceIssued<br/>财务后台上传凭证（主路径）"]
+    EX["ReceiptException<br/>无回单开票例外审核"]
+  end
+  PC --> OR
+  MC --> PC
+  OR --> PR --> CR --> SA
+  SA --> WC --> GS
+  GS --> RT
+  GS --> IA --> IL --> II
+  IA --> EX
+  OR --> GK
+  RT --> RB
+      </div>
+      <figcaption>图 3 · 事件图谱（0.1 校准版）——事件是头等节点，append-only；新增 GatekeeperConfirmed / RobotCaptured / InvoiceLinked</figcaption>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <caption>本体 · 事件类型明细（Events × 触发 · 0.1 校准版）</caption>
+        <thead><tr><th style="width:12%">域</th><th>事件</th><th>触发</th></tr></thead>
+        <tbody>
+          <tr><td rowspan="4">企微 / 外部输入域</td><td>PreOrderCaptured</td><td>智能下单：AI 提取群内要素生成 DRAFT 汇总卡（msgid 幂等去重）</td></tr>
+          <tr><td>PreOrderConfirmed</td><td>销售点击确认卡（唯一确认角色；确认只发生一次）</td></tr>
+          <tr><td>GatekeeperConfirmed</td><td><b>0.1 新增</b>：发客户群内容经销售守门员确认（第一轮强制）</td></tr>
+          <tr><td>RobotCaptured</td><td><b>0.1 新增</b>：凭证机器人从企微仓库群抓取回单 / 识别发票凭证</td></tr>
+          <tr><td rowspan="3">订单域</td><td>OrderRequested</td><td>四种下单方式成单（人工 / 智能确认 / 工作台代下 / 群入口代下；幂等键）</td></tr>
+          <tr><td>PriceReviewed</td><td>销售主管审价（通过 / 退回 / 拒绝；审批即审价）</td></tr>
+          <tr><td>ChairmanReviewed</td><td>董事长终审（仅 C/D 级客户订单）</td></tr>
+          <tr><td rowspan="2">备货域</td><td>StockAssigned</td><td>商务备货：选备货仓 + 收货地址，通过 / 驳回（A1）</td></tr>
+          <tr><td>WarehouseConfirmed</td><td>仓管确认可执行 / 退回 / 申请转仓</td></tr>
+          <tr><td rowspan="2">发货域</td><td>GoodsShipped</td><td>仓管填实际发货量（守恒校验拦截超发；发货 + 库存扣减单事务）</td></tr>
+          <tr><td>ReceiptRegistered</td><td>回单登记：仓库群 → 凭证机器人抓取 → 匹配订单归档</td></tr>
+          <tr><td rowspan="4">开票域</td><td>InvoiceApplied</td><td>提交开票申请（回单四分流判定）</td></tr>
+          <tr><td>InvoiceLinked</td><td><b>0.1 新增</b>：发票-订单关联（可追加；三金额分展）</td></tr>
+          <tr><td>InvoiceIssued</td><td>财务订单后台上传凭证（主路径）→ 校验开票金额 = 已发货金额 → 登记 v2</td></tr>
+          <tr><td>ReceiptException</td><td>无回单超期进例外审核（驳回 / 放行；规则待确认 A5）</td></tr>
+          <tr><td>异常域</td><td>FlowFailed</td><td>超时、超发、未到账等异常与补偿（Timer 催办：24h 提醒 · 48h 升级）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 id="wkg-rule">2.4 · 约束与规则：不可让步的边界</h3>
+    <p>本体不止于名词与动词，还必须有<b>规则</b>——它们是划分「可接受状态」与「不可接受状态」的边界。守恒四则 + 权限投影 + AI 安全边界 + 0.1 特殊规则构成本体的核心不变量，任何产品功能与操作流程都不得违反它们。</p>
+    <div class="table-wrap">
+      <table>
+        <caption>本体 · 约束与规则（Invariants · 0.1 校准版）</caption>
+        <thead><tr><th style="width:16%">类别</th><th>规则</th><th style="width:14%">0.1 状态</th><th style="width:22%">违反的后果</th></tr></thead>
+        <tbody>
+          <tr><td>守恒</td><td>备货守恒：累计备货确认量 ≤ 订单数量（每明细）</td><td><span class="tag ok">启用</span></td><td>备货闸门校验拦截</td></tr>
+          <tr><td>守恒</td><td>发货守恒：累计发货量 ≤ 备货量；全部发货 ⇔ 累计发货 = 订单数量</td><td><span class="tag ok">启用</span></td><td>CG2 超发拦截：输入「6」被拒，须修正为「5」</td></tr>
+          <tr><td>守恒</td><td>库存守恒：库存 = 初始 + 入 − 出；出与发货同事务，恒 ≥ 0</td><td><span class="tag amber">0.1 锁库存暂缓</span>（表与约束保留）</td><td>库存扣减事务回滚（0.1 不启用链路）</td></tr>
+          <tr><td>守恒</td><td>开票守恒：累计开票金额 / 数量 ≤ 可开票金额 / 数量（按有效发货，双维度；开票金额 = 已发货金额）</td><td><span class="tag ok">启用</span></td><td>凭证登记校验失败（CQ-09）</td></tr>
+          <tr><td>守恒</td><td>回单不卡开票：无回单超期自动进例外审核，不阻断开票；回单与开票状态解耦</td><td><span class="tag red">规则待确认</span>（A5）</td><td>（业务原则）回单缺失只触发例外审核，不卡单</td></tr>
+          <tr><td>权限</td><td>仓管不查看价格 / 金额（字段级投影）</td><td><span class="tag ok">启用</span></td><td>资金信息越权可见（R2）</td></tr>
+          <tr><td>权限</td><td>销售仅本人客户订单（含代办）；商务全量全字段（ops 聚合）；董事长仅 C/D 级大单</td><td><span class="tag ok">启用</span></td><td>越权查看 / 操作（CQ-01/02）</td></tr>
+          <tr><td>权限</td><td>群内最小交集：群内发出的信息裁剪为所有群成员可见权限的最小交集；金额 / 技术参数不明文</td><td><span class="tag ok">启用</span></td><td>资金 / 技术信息越权可见（R3）</td></tr>
+          <tr><td>AI 安全</td><td>任何生成结果（智能下单 / 凭证识别）都需人工确认才生效；AI 不擅自生成正式订单</td><td><span class="tag ok">启用</span></td><td>幽灵订单 / 错误凭证（红线）</td></tr>
+          <tr><td>AI 安全</td><td>发客户群内容必须守门员确认（先收紧后放行；第一轮全部强制）</td><td><span class="tag ok">启用</span>（A3）</td><td>未确认内容直达客户群（CQ-16）</td></tr>
+          <tr><td>AI 安全</td><td>会话存档自动拉取 + 意图解析自动建单</td><td><span class="tag amber">0.1 移出</span>（A8；确认卡保留）</td><td>同城企微备案未完成，API 有风险</td></tr>
+          <tr><td>0.1 特殊</td><td>订单创建多方分担：虹励（佘总 + 董事长订单，约 20%）+ 助理 1（张磊）+ 助理 2（合约）+ 销售本人（其余）；群入口代下单自动带出并锁定归属销售</td><td><span class="tag ok">启用</span>（A7）</td><td>创建主体错位、归属混乱</td></tr>
+          <tr><td>0.1 特殊</td><td>多单合并开票：发票-订单关联可追加；三金额（收款 / 发货 / 开票）分展；未开票额度保留在订单上</td><td><span class="tag ok">启用</span>（A4）</td><td>业财对不上账（CQ-17）</td></tr>
+          <tr><td>0.1 特殊</td><td>无回单开票规则待确认（找宋主任 / 财务负责人 / 张总；算资金延后约 30 天利息账）</td><td><span class="tag red">待确认</span>（A5）</td><td>规则不清则例外审核无依据</td></tr>
+          <tr><td>基础</td><td>事件不可变：Event 只追加（append-only），状态更新与事件链同事务</td><td><span class="tag ok">启用</span></td><td>审计断链，无法回放</td></tr>
+          <tr><td>基础</td><td>原始聊天不落业务库：事件链只存意图特征与存档引用（archive_ref），原始文本存独立加密可过期存档</td><td><span class="tag ok">启用</span></td><td>数据违规，合规风险</td></tr>
+          <tr><td>基础</td><td>幂等三层：消息幂等（msgid）+ 订单幂等（idempotency_key）+ DB 唯一约束</td><td><span class="tag ok">启用</span></td><td>重复订单 / 重复成单 / 并发重复开票</td></tr>
+          <tr><td>基础</td><td>订单提交 ≠ 已履约：状态必须由实际业务结果汇总，禁止提前置为完成</td><td><span class="tag ok">启用</span></td><td>状态失真，对账失败</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="decision">
+      <div class="label">本体要点 · 一</div>
+      <p><b>守恒是业务与代码之间的桥，0.1 的桥只修需要走的那几段。</b>备货、发货、库存、开票四道守恒把「不超发、不多开、不漏发」翻译成可校验的数值不等式；锁库存暂缓不等于删掉守恒——表、约束、校验逻辑全部保留，只是不启用扣减链路。凭证把现实世界的动作锚定到订单（后台主路径 + 机器人兜底），守门员把「什么能到客户面前」变成一条可审计的边界。没有守恒，流程只是自述；没有凭证，审计只是一堆日志；没有守门员，自动化就是惊吓。</p>
+    </div>
+
+    <h3 id="wkg-cq">2.5 · 能力问题：本体的验收标准（18 问）</h3>
+    <p>本体建模的第一法则是：<b>先写能力问题，再定 schema</b>。能力问题是业务世界必须能回答的问题清单——它们是本体的规格与测试。0.1 保留 15 个既有 CQ（技术基座不变），按 demo 现实新增 3 个 CQ：<b>发群守门员（CQ-16）、多单合并开票（CQ-17）、仓库群回单（CQ-18）</b>。产品操作图谱的每一项功能，最终都要服务于回答这些问题。</p>
+    <div class="table-wrap">
+      <table>
+        <caption>能力问题清单（Competency Questions · 18 问）</caption>
+        <thead><tr><th style="width:8%">编号</th><th>问题</th><th style="width:12%">所属域</th><th style="width:24%">0.1 裁决来源</th></tr></thead>
+        <tbody>
+          <tr><td>CQ-01</td><td>用户 U 对订单 O 当前拥有哪些操作权限（查看 / 提交 / 审批 / 备货 / 发货 / 开票 / 关闭）？</td><td>授权</td><td>demo 角色矩阵</td></tr>
+          <tr><td>CQ-02</td><td>用户 U 的数据可见范围是什么？（销售本人及代办 / 商务全公司 / 仓管本仓 / 财务按供方分流 / 管理层全量）</td><td>授权</td><td>demo XS4/SW2/SW3 聚合视图</td></tr>
+          <tr><td>CQ-03</td><td>仓管查看订单时，价格 / 金额字段是否已被剥离（字段级授权投影）？</td><td>授权</td><td>demo CG1「金额对仓管不可见」</td></tr>
+          <tr><td>CQ-04</td><td>订单 O 当前处于什么状态？允许哪些状态迁移？哪些迁移是禁止的？</td><td>流程</td><td>demo 四节点（已开单 → 已备货 → 已发货 → 已开票）</td></tr>
+          <tr><td>CQ-05</td><td>订单 O 的审批链（销售主管审价 → C/D 级董事长终审）当前状态与结果是什么？</td><td>流程</td><td>demo XSZG1 / DSZ1</td></tr>
+          <tr><td>CQ-06</td><td>备货守恒：累计备货确认量是否 ≤ 订单数量（含分批、退回、转仓）？</td><td>业务一致性</td><td>demo SW1 备货通过 / 驳回（选仓 + 收货地址）</td></tr>
+          <tr><td>CQ-07</td><td>发货守恒：累计发货量 ≤ 备货量？全部发货的完成条件是否成立？</td><td>业务一致性</td><td>demo CG2 超发拦截（应发 5 吨 · 输入 6 被拒）</td></tr>
+          <tr><td>CQ-08</td><td>库存联动：实际发货与库存扣减是否同事务？任何时刻库存不为负？</td><td>业务一致性</td><td><span class="tag amber">0.1 暂缓</span>锁库存不做，守恒保留</td></tr>
+          <tr><td>CQ-09</td><td>开票守恒：累计开票金额 / 数量 ≤ 可开票金额 / 数量（按有效发货计算，双维度）？</td><td>业务一致性</td><td>demo CW1「校验开票金额 = 已发货金额（不超发货）」</td></tr>
+          <tr><td>CQ-10</td><td>订单 O 的回单状态（按发货批次汇总：未回 / 部分 / 全部；无回单超期进例外审核）？</td><td>流程</td><td>demo CW2 无回单开票（超期 → 例外审核）</td></tr>
+          <tr><td>CQ-11</td><td>企微消息 M 生成的预订单当前状态与确认结果？消息 → 预订单 → 正式订单全链幂等是否成立？</td><td>流程 + AI</td><td>demo XS3 智能下单确认卡（销售唯一确认角色）</td></tr>
+          <tr><td>CQ-12</td><td>订单 O 的完整事件链（谁、何时、何因、结果）是什么？能否回放？</td><td>流程 + 审计</td><td>demo AI 执行记录时间线</td></tr>
+          <tr><td>CQ-13</td><td>代办授权 D 是否在有效期内？到期后代办权限是否即时失效？</td><td>授权</td><td>保留设计（0.1 商务单人使用）</td></tr>
+          <tr><td>CQ-14</td><td>哪些操作并发作用于同一订单 / 库存（重复确认、超发、重复开票、并发扣减）？如何被阻止？</td><td>业务一致性</td><td>demo XS3「确认只发生一次」幂等</td></tr>
+          <tr><td>CQ-15</td><td>凭证链（发票凭证 / 签收回单）是否只追加不覆盖？任一版本能否回放？上传者权限如何界定？</td><td>流程 + 审计</td><td>demo CW1「v2 只追加不覆盖」/ CG3「回单 v3」</td></tr>
+          <tr><td>CQ-16</td><td><b>发群守门员</b>：任何内容发到客户群前，是否必须经过销售的一次显式确认？确认记录是否可审计？</td><td>流程 + AI</td><td>demo XS1/XS5/CW1「第一轮守门员」（A3）</td></tr>
+          <tr><td>CQ-17</td><td><b>多单合并开票</b>：发票与订单如何关联（一笔款跨多笔订单）？关联能否追加？三金额（收款 / 发货 / 开票）如何分别展示？</td><td>业务一致性</td><td>demo CW1「关联可追加 · 三金额分展」（A4）</td></tr>
+          <tr><td>CQ-18</td><td><b>仓库群回单</b>：仓管将签收回单统一发到仓库群后，凭证机器人如何抓取 / 识别 / 登记归档？</td><td>流程 + AI</td><td>demo CG3「仓库群 → 企微群 → 凭证机器人」（A6）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="decision ink">
+      <div class="label">本体要点 · 二</div>
+      <p><b>能力问题是两张图谱的公共契约。</b>世界图谱负责把问题问对（实体的形状、关系的语义、守恒的边界），产品操作图谱负责把问题答上（场景、操作、数据）。一个能力问题若在产品侧找不到任何回答路径，就是产品缺口的直接证据——这也是 roundtrip 验证的终点：代码实现后必须能回答全部 18 个 CQ，答不出的就是设计裂缝。0.1 新增的三问（守门员 / 合并开票 / 仓库群回单）正是本次冲刺新引入的承诺，它们必须在 demo、文档与实现三层都找到落点。</p>
+    </div>
+  </section>
+
+  <!-- ══════════ 三、产品操作图谱 ══════════ -->
+  <section id="pog">
+    <div class="act-no">第三章 · 产品操作图谱</div>
+    <h2>产品，是业务需求的消化系统</h2>
+    <p class="subtitle">服务定义边界，功能定义能力，操作定义动作。产品操作图谱回答「系统如何推进」——0.1 全部交互以 ord_fulfill demo 为准（7 角色 · 17 场景）。</p>
+
+    <p>产品操作图谱把企微订单助手拆成三层来读：<b>服务层</b>（对外承诺什么）、<b>功能层</b>（每个服务由哪些场景能力组成）、<b>操作层</b>（用户实际执行的动作与任务流）。世界图谱里的每一个事件与规则，最终都要落到某个具体的操作上——业务世界发生什么，产品就提供对应的操作去承接、记录、验证与反哺。<b>0.1 交互口径以 <code>ord_fulfill</code> demo 为最高准确度</b>（7 角色 · 17 场景，已集成运营 / 产品 / 客户直接反馈）；旧 demo（docs/demo/index.html 16 场景）及其后文档与之冲突的，一律以 ord_fulfill demo 为准。</p>
+
+    <h3 id="pog-topo">3.1 · 服务拓扑：四个入口，一处后台</h3>
+    <div class="mermaid-wrap">
+      <div class="mermaid">
+flowchart TB
+  subgraph ENTRY["入口 · 企微生态 + 后台"]
+    CHAT["企微群聊<br/>供应协同群 · 上下文来源"]
+    H5["订单助手 H5<br/>侧边栏（S1）· 工作台（S4）"]
+    ADMIN["订单后台页面<br/>财务上传凭证（主路径 · A2）"]
+    RB["凭证机器人<br/>仓库群抓取 · 兜底识别"]
+    CD["应用消息卡片（S3）<br/>待办 · 催办 · 通知"]
+  end
+  subgraph APP["订单助手 · 移动端"]
+    T1["待办 Tab<br/>智能下单确认 · 审价 · 三闸门 · 例外"]
+    T2["订单 Tab<br/>客户订单首页 · 全量订单（ops）"]
+    T3["下单 Tab<br/>单页长表单 · 五组字段"]
+    T4["已办 / 历史 / 上传凭证"]
+  end
+  subgraph BASE["底座"]
+    WF["Temporal 主流程<br/>四段编排 · Signal / Timer"]
+    AUTH["SpiceDB 图式授权<br/>RBAC + ReBAC + caveat"]
+    PG["PostgreSQL 16<br/>事实 + 事件链 + 幂等映射"]
+    SYNC["飞书同步 Job（0.1 新增）<br/>订单 / 多维表 / 审批流 → PG"]
+  end
+  CHAT -->|"群里一句话"| T1
+  H5 --> T2
+  H5 --> T3
+  CD --> T1
+  RB -->|"抓取登记"| PG
+  ADMIN -->|"凭证登记（主路径）"| PG
+  SYNC --> PG
+  T1 --> WF
+  T1 --> AUTH
+  T2 --> AUTH
+  T3 --> WF
+  WF --> PG
+      </div>
+      <figcaption>图 4 · 服务拓扑（0.1）——四个入口 + 一处后台，同一底座；飞书侧数据经同步 Job 单向流入，财务/仓管在流内可见</figcaption>
+    </div>
+
+    <h3 id="pog-func">3.2 · 功能地图：七角色十七场景 · 五大业务使命</h3>
+    <p>0.1 demo 定义了 7 个角色、17 个场景——这就是产品操作图谱的功能层。17 个场景按<b>业务使命</b>归入五组（客户沟通与查单 / 下单 / 履约推进 / 单据与凭证 / 全局视图），每个场景是一个可走查、可验收的最小操作单元，编号即用例编号（销售 XS / 销售主管 XSZG / 商务 SW / 销售助理 XSZL / 财务 CW / 仓管 CG / 董事长 DSZ）。</p>
+    <div class="mermaid-wrap">
+      <div class="mermaid">
+flowchart TB
+  subgraph G1["使命一 · 客户沟通与查单"]
+    XS1["XS1 查订单/订单详情"]
+    XS5["XS5 查物流（图片发群）"]
+  end
+  subgraph G2["使命二 · 下单（四种方式并存）"]
+    XS2["XS2 人工下单"]
+    XS3["XS3 智能下单确认卡"]
+    XSZL1["XSZL1 工作台代下单"]
+    XSZL2["XSZL2 客户群入口代下单"]
+  end
+  subgraph G3["使命三 · 履约推进"]
+    XSZG1["XSZG1 审价审批"]
+    DSZ1["DSZ1 C/D 终审"]
+    SW1["SW1 备货/发货/开票"]
+    SW3["SW3 工作台全量待办"]
+    CG1["CG1 确认接受发货任务"]
+    CG2["CG2 确认已经发货"]
+  end
+  subgraph G4["使命四 · 单据与凭证"]
+    CW1["CW1 上传开票凭证（主路径）"]
+    CG3["CG3 回单凭证（仓库群→机器人）"]
+    CW2["CW2 审批无回单开票"]
+  end
+  subgraph G5["使命五 · 全局视图"]
+    XS4["XS4 销售工作台（全量）"]
+    SW2["SW2 商务查全量订单（ops）"]
+  end
+  G1 --> G2 --> G3 --> G4
+  G5 -.-> G2
+  G5 -.-> G3
+      </div>
+      <figcaption>图 5 · 17 场景 = 5 大业务使命；使命间通过订单生命周期（已开单 → 已备货 → 已发货 → 已开票）串联</figcaption>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <caption>产品操作图谱 · 场景 → 角色 → 核心功能 → 关键交互（17 场景 · 0.1）</caption>
+        <thead><tr><th style="width:9%">场景</th><th style="width:10%">角色</th><th style="width:26%">核心功能</th><th>关键交互</th></tr></thead>
+        <tbody>
+          <tr><td>XS1</td><td>销售</td><td>查订单 / 订单详情（客户订单 Home + 状态筛选）</td><td>AI 识别问单意图直达详情；「‹ 客户名订单」返回客户订单首页；「发给客户」→ <b>守门员再确认</b> → 客户可见卡片发群（未发货时仅「已下单 + 预计到货」，不含金额）</td></tr>
+          <tr><td>XS2</td><td>销售</td><td>人工下单——单页长表单（客户顶部锁定，不设分步）</td><td>字段按「客户与归属 / 结算信息 / 合同与附件 / 商品明细 / 补充说明」纵向排列；单价自动带出最近订单价（协议价上限内可改）；合同按主体自动匹配模板 HT-2025-0038；风控校验（额度内）；提交后展示完整流程并由销售主动回群通知</td></tr>
+          <tr><td>XS3</td><td>销售</td><td>智能下单确认卡（DRAFT → 确认 → 正式订单）</td><td>AI 提取下单要素 + 匹配框架合同；确认卡展示引用原话 / 主体 / 产品 / 数量 / 单价 / 包装 / 账期 / 付款方式 / 交期 / 特殊标记；<b>销售是唯一可确认角色</b>，确认只发生一次（幂等键防重复）；成单后自动生成客户可见卡片</td></tr>
+          <tr><td>XS4</td><td>销售</td><td>工作台全量待办（订单并行 40-50 笔的唯一入口）</td><td>智能下单确认（超时置顶）/ 审价驳回·待补充（AI 解析驳回意见 → 建议修改字段 ¥3,200 → ¥3,000）/ 订单评论提醒（改地址 / 改日期 / 改数量 → 确认修改）/ 回单异常，点击条目直达处理卡片</td></tr>
+          <tr><td>XS5</td><td>销售</td><td>查物流（图片发群）</td><td>订单明细展示物流公司与单号；点「生成物流图片发群」→ <b>守门员确认</b> → 含物流单号 / 运输进度 / 预计送达的图片发到企微群，客户直接看图</td></tr>
+          <tr><td>XSZG1</td><td>销售主管</td><td>审价审批（审批即审价，工作台「待办 / 历史」）</td><td>无群上下文聚合全部销售订单审价；审价卡直接展示公司 / 账期 / 产品 / 数量 / 单价 / 到货地址；通过 → 进入下一闸门，C/D 级大单自动进董事长终审；历史 Tab 可追溯每次审批结论</td></tr>
+          <tr><td>SW1</td><td>商务</td><td>备货 / 发货 / 开票三大闸门（群侧边栏待办）</td><td>三类入口常驻（空类显示 0 项）；备货详情含收货地址，底部「<b>选备货仓 / 写备注 / 通过 / 驳回</b>」四按钮——按收货地址选仓（A1）；备货（超 24h）优先；锁库存暂不做</td></tr>
+          <tr><td>SW2</td><td>商务</td><td>查全量订单（ops 聚合视图，群外独立入口）</td><td>租户全量订单按时间倒序；可见价格 / 账期 / 内部备注（全字段）；按状态 / 客户 / 金额筛选；每笔展示四节点状态；可向下承接备货处理</td></tr>
+          <tr><td>SW3</td><td>商务</td><td>工作台全量待办（群外）</td><td>全租户待办聚合（含他人订单审批任务）；闸门类型标签 + 订单摘要；点击直达与群内同一套操作卡片</td></tr>
+          <tr><td>XSZL1</td><td>销售助理</td><td>工作台代下单（先选归属销售）</td><td>下单前先选择「下单归属销售」——决定可选客户范围；随后客户自动补全，其余与销售下单完全一致（单页长表单 · 五组字段 · 合同自动匹配 · 合计自动计算）</td></tr>
+          <tr><td>XSZL2</td><td>销售助理</td><td><b>客户群入口代下单（0.1 新增）</b></td><td>从客户群进入时，客户由群上下文直接确定；<b>归属销售自动带出并锁定</b>（readonly 不可改——每个客户归属的销售是明确的）；其余与销售下单一致</td></tr>
+          <tr><td>CW1</td><td>财务</td><td><b>订单后台上传开票凭证（主路径 · A2）</b></td><td>财务在订单后台页面上传电子凭证（PDF / 图片）→ AI 自动识别发票号 / 开票金额 / 税额 → 匹配订单 → 校验开票金额 = 已发货金额（不超发货）→ 登记 v2（只追加不覆盖）；<b>多单合并开票</b>：发票-订单关联可追加，收款 / 发货 / 开票三金额分展（A4）；凭证机器人降级为兜底</td></tr>
+          <tr><td>CW2</td><td>财务</td><td>审批无回单开票（例外审核）</td><td>无签收回单超期 → 开票申请流转至财务待办；例外依据随卡展示（发货日期 / 回单状态 / 申请说明）；「驳回 / 放行」→ 放行后开票继续；<b>是否允许无回单开票规则待确认</b>（A5：找宋主任 / 财务负责人 / 张总 + 算资金延后约 30 天利息账）</td></tr>
+          <tr><td>CG1</td><td>仓管</td><td>确认接受发货任务（本仓待办）</td><td>发货要求推送本仓待办：产品 / 数量 / 目标仓 / 交期（金额不展示）；「确认接受」→ 任务进入已办；随后收到「确认已经发货」任务（0.1 仓管经数据同步可见，真实操作仍在飞书）</td></tr>
+          <tr><td>CG2</td><td>仓管</td><td>确认已经发货（守恒校验防超发）</td><td>物流取走货后填写本次发货数量（应发 5 吨 · 已发 0 吨）；输入「6」→ 守恒校验拦截「超出应发量，超发禁止」；修正为「5」→ 通过；已发货量自动累计 5/5 吨</td></tr>
+          <tr><td>CG3</td><td>仓管</td><td><b>回单凭证（仓库群 → 机器人 · A6）</b></td><td>两个外租仓仓管把签收回单统一发在企微仓库群 → 凭证机器人自动抓取 / OCR 识别签收信息 → 匹配订单 → 登记 v3（只追加）；「上传凭证」Tab 保留手动备选；仓库群升级企微群为前置待办（虹励补截图）</td></tr>
+          <tr><td>DSZ1</td><td>董事长</td><td>C/D 级订单终审（仅 C/D 级客户订单进入此闸门）</td><td>审价通过后自动进入终审；金额 / 客户等级 / 审价结论 / 账期全字段同卡核对；「通过 / 驳回」（支持备注）；驳回进入终态并出站「被驳回」卡片</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 id="pog-task">3.3 · 操作任务图：三条主线</h3>
+    <p>操作层不是场景列表的堆叠，而是<b>任务图</b>——节点是操作，边是依赖。企微订单助手有三条主线：智能下单线（把群里一句话变成订单）、审批链线（把订单变成可履约的承诺）、履约闭环线（把承诺变成已发货、已开票、已归档的事实）。</p>
+
+    <div class="mermaid-wrap">
+      <div class="mermaid">
+flowchart LR
+  A["群内一句话<br/>再发 5 吨膨润土 AB-3…"] --> B["会话存档捕捉<br/>msgid 幂等去重"]
+  B --> C["意图识别<br/>LLM 只产候选 · 确定性校验"]
+  C -->|"高置信且校验通过"| D["智能下单确认卡<br/>DRAFT-2026-0036 · 引用原话"]
+  C -->|"低置信 / 多候选 / 高金额"| E["轻提醒 · 销售修正确认"]
+  D --> F["销售确认<br/>唯一确认角色 · 确认只发生一次"]
+  E --> F
+  F --> G["正式订单 ORD-2026-0118<br/>自动生成客户可见卡片"]
+  G --> H["发给客户<br/>守门员确认后才发群"]
+      </div>
+      <figcaption>图 6 · 主线一：智能下单——AI 只产候选，销售唯一确认；消息幂等 + 订单幂等双层防重；出站必经守门员</figcaption>
+    </div>
+
+    <div class="mermaid-wrap">
+      <div class="mermaid">
+flowchart LR
+  O["正式订单"] --> P["销售主管审价<br/>审批即审价 · 待办 + 历史"]
+  P -->|"通过 · 非 C/D"| B1["商务备货闸门<br/>选备货仓 + 收货地址"]
+  P -->|"通过 · C/D 级"| C["董事长终审<br/>全字段同卡"]
+  P -->|"驳回"| R["销售待办 · 驳回待补充<br/>AI 解析驳回意见 → 建议修改字段"]
+  R -->|"修改后重提"| P
+  C -->|"通过"| B1
+  C -->|"驳回"| X["终态 · 出站「被驳回」卡片"]
+  B1 -->|"通过"| W["仓管确认可执行"]
+  W -->|"确认"| S["发货命令下达"]
+      </div>
+      <figcaption>图 7 · 主线二：审批链——人类闸门是业务主体，Signal 等待 + Timer 催办升级（24h 提醒 · 48h 升级）；备货按收货地址选仓</figcaption>
+    </div>
+
+    <div class="mermaid-wrap">
+      <div class="mermaid">
+flowchart LR
+  S["发货命令"] --> A["商务分配<br/>选仓 + 发货量"]
+  A --> B["仓管确认接受<br/>金额不可见 · 本仓要素核对"]
+  B --> C["仓管确认已发货<br/>守恒校验 · 超发拦截"]
+  C -->|"部分发货"| A
+  C -->|"全部发货"| D["回单环节<br/>仓管发仓库群 → 机器人抓取 v3"]
+  D --> E["开票申请 · 回单四分流<br/>款到 / 有回单 / 超期 / 提前申请"]
+  E -->|"无回单超期"| F["财务例外审核<br/>依据随卡 · 放行 / 驳回（规则待确认）"]
+  E -->|"正常"| F2["财务订单后台上传凭证（主路径）<br/>开票守恒 · 金额 = 已发货金额"]
+  F -->|"放行"| F2
+  F2 --> V["发票-订单关联（可追加）<br/>三金额分展 · 凭证 v2 只追加"]
+  V --> W2["回款跟踪 → 合同归档 → 订单关闭"]
+      </div>
+      <figcaption>图 8 · 主线三：履约闭环——记录 → 闸门 → 发货 → 仓库群回单 → 合并开票 → 归档，全程可审计</figcaption>
+    </div>
+
+    <h3 id="pog-engine">3.4 · 操作支撑层：AI 边界与守恒防线</h3>
+    <p>十七个场景并非各自为政——它们由五个横切机制共同支撑。这解释了「群里一句话变成订单」如何既快又稳：<b>AI 只产候选、确定性代码校验、人工确认生效、守门员把住出站、幂等防重、守恒防错、凭证留痕</b>。</p>
+    <div class="mermaid-wrap">
+      <div class="mermaid">
+flowchart TB
+  subgraph AI["AI 安全边界"]
+    L1["LLM 只产候选<br/>意图 · 要素 · 驳回意见 · 凭证识别"] --> D1["确定性代码校验<br/>SKU · 数量 · 价格 · 库存 · 权限"]
+    D1 --> M1["人工确认才生效<br/>销售唯一确认 · 财务确认关联"]
+  end
+  subgraph GK["发群守门员（0.1 新增）"]
+    K1["任何发客户群内容<br/>订单卡片 · 物流图片 · 发票"]
+    K2["销售点一次确认<br/>第一轮强制 · 确认记录可审计"]
+    K1 --> K2
+  end
+  subgraph IDEM["幂等三层"]
+    I1["消息幂等 msgid<br/>同一消息只生成一个预订单"]
+    I2["订单幂等 idempotency_key<br/>确认只发生一次"]
+    I3["DB 唯一约束<br/>兜底并发"]
+  end
+  subgraph CONS["守恒四则"]
+    C1["备货 ≤ 订单"]
+    C2["发货 ≤ 备货<br/>超发禁止"]
+    C3["开票 ≤ 发货<br/>金额 + 数量双维度"]
+    C4["库存 ≥ 0<br/>发货扣减同事务（0.1 链路暂缓）"]
+  end
+  subgraph EVD["凭证链"]
+    E1["订单后台上传（主路径）<br/>AI 识别 · 匹配订单"]
+    E2["凭证机器人（兜底 + 仓库群抓取）<br/>OCR 识别 · 只追加登记"]
+  end
+  AI --> GK
+  GK --> IDEM
+  IDEM --> CONS
+  CONS --> EVD
+      </div>
+      <figcaption>图 9 · 操作支撑层：AI 边界、发群守门员、幂等三层、守恒四则、凭证链——五个横切机制托住全部 17 个场景</figcaption>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <caption>操作支撑层 · 关键设计决策（0.1）</caption>
+        <thead><tr><th>决策面</th><th>采用</th><th>理由</th></tr></thead>
+        <tbody>
+          <tr><td>AI 边界</td><td>LLM 只产候选 + 确定性代码校验 + 人工确认生效</td><td>任何生成结果不得擅自生成正式订单；低置信只发轻提醒、不自动建单（红线）；自动建单段 0.1 移出</td></tr>
+          <tr><td>发群守门员</td><td>任何发客户群内容须销售一次确认；第一轮全部强制；先收紧后放行</td><td>「哪些内容可直发、哪些必须审核」0.1 全部强制，规则表后续迭代（A3 / P5）</td></tr>
+          <tr><td>审批形态</td><td>Signal 等待人工闸门 + Timer 催办升级（24h 提醒 · 48h 升级）</td><td>三方审批是业务主体，流程可等待不可静默；Activity 全局超时 + 重试上限</td></tr>
+          <tr><td>授权判定</td><td>SpiceDB 唯一判定点；API 预检 + 每个业务副作用前重复验证（纵深防御）</td><td>授权是图不是表；字段级投影由 BFF 按授权结果执行（仓管无价、客户图无金额）</td></tr>
+          <tr><td>幂等</td><td>msgid + idempotency_key + DB 唯一约束三层叠加</td><td>消息、订单、发货、开票全部带幂等键，重复确认 / 重复开票 / 并发扣减被阻止（CQ-11/14）</td></tr>
+          <tr><td>一致性</td><td>守恒断言 + 行锁 + CHECK 约束；Workflow 只做决策，副作用全在 Activity</td><td>数量守恒任何时刻可聚合校验；状态更新与事件链同事务；0.1 锁库存暂缓但守恒保留</td></tr>
+          <tr><td>凭证</td><td>订单后台上传为主路径，凭证机器人降级兜底（无电脑场景 + 销售合同回传）；仓库群抓取回单</td><td>财务每天对电脑最稳（A2）；回单真实链路 = 仓管发群 → 机器人抓取（A6）；凭证只追加可回放（CQ-15/18）</td></tr>
+          <tr><td>合并开票</td><td>发票-订单分离 + 关联可追加 + 三金额分展</td><td>一笔款可跨多笔订单，漏了可补关联（A4）；未开票额度保留在订单上（CQ-17）</td></tr>
+          <tr><td>群内投影</td><td>信息裁剪为群成员可见权限的最小交集</td><td>金额 / 技术参数不明文；发客户的订单卡片不含审批意见 / 合同 / 内部备注</td></tr>
+          <tr><td>通知策略</td><td>自动化降级做、不整体替换；通知由销售主动触发</td><td>避免让销售 surprise；待办 + 私信双通道（订单机器人私信提醒，不依赖进群）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 id="pog-role">3.5 · 角色 × 模块：谁用什么、看见什么</h3>
+    <div class="table-wrap">
+      <table>
+        <caption>角色 × 模块操作矩阵（0.1 使用方式 · 含数据可见性）</caption>
+        <thead><tr><th>角色</th><th>0.1 使用方式</th><th>主要使用模块</th><th>核心操作</th><th>数据可见性</th></tr></thead>
+        <tbody>
+          <tr><td>销售</td><td>主路径</td><td>订单 / 下单 / 待办</td><td>查单、人工下单、智能下单确认、驳回补充、评论确认、发给客户（守门员）、物流图发群</td><td>本人客户订单；客户图不含金额</td></tr>
+          <tr><td>销售助理</td><td>主路径</td><td>下单（双入口）</td><td>工作台代下单（先选归属销售）；客户群入口代下单（归属销售自动带出锁定）</td><td>所服务销售的客户范围</td></tr>
+          <tr><td>销售主管</td><td>主路径</td><td>待办 / 历史</td><td>审价审批（审批即审价）、历史追溯</td><td>全部销售订单（跨客户）</td></tr>
+          <tr><td><b>商务（虹励）</b></td><td><b>0.1 主角</b></td><td>待办 / 订单</td><td>备货（选仓 + 收货地址）/ 发货 / 开票三闸门、ops 全量订单、承接备货</td><td>全租户订单全字段（价格 / 账期 / 内部备注）</td></tr>
+          <tr><td>财务</td><td><span class="tag amber">0.1 经数据同步可见</span>，真实操作仍在飞书</td><td>订单后台 / 待办</td><td>订单后台上传凭证（主路径）、多单合并开票关联、例外审核（无回单开票）</td><td>按供方分流的到账与开票任务</td></tr>
+          <tr><td>仓管</td><td><span class="tag amber">0.1 经数据同步可见</span>，回单群升级企微群后可接入</td><td>待办 / 已办 / 上传凭证</td><td>确认接受发货任务、确认已经发货（守恒拦截）、回单发仓库群（机器人抓取）</td><td>本仓任务要素（产品 / 数量 / 目标仓 / 交期）——金额不可见</td></tr>
+          <tr><td>董事长</td><td>主路径</td><td>待办</td><td>C/D 级订单终审（通过 / 驳回 / 备注）</td><td>仅 C/D 级大单，全字段（金额 / 客户等级 / 审价结论）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="decision ink">
+      <div class="label">操作图谱要点</div>
+      <p><b>三层一边界，0.1 的主角是虹励。</b>服务层承诺边界，功能层提供场景能力，操作层执行动作，AI 安全边界与发群守门员统一约束「自动化」的限度。世界图谱的事件在这里变成待办卡片，规则在这里变成守恒校验与闸门，能力问题在这里变成订单详情、审批历史与凭证版本。财务与仓管 0.1 不迁移——它们留在飞书，经数据同步在流内可见，这就是「不打扰现有流程」在操作图谱上的投影。</p>
+    </div>
+  </section>
+
+  <!-- ══════════ 四、双图谱对齐 ══════════ -->
+  <section id="align">
+    <div class="act-no">第四章 · 双图谱对齐</div>
+    <h2>承诺如何被兑现</h2>
+    <p class="subtitle">世界图谱定义「什么是对的」，产品操作图谱定义「怎么做对」。对齐，就是让二者逐条对上。</p>
+
+    <p>两张图谱单独看都只是地图；放在一起看，才成为工程。对齐的原则有三条：<b>事件对齐</b>——世界里的每个事件类型，产品里必须有对应的场景与操作承接；<b>规则对齐</b>——世界里的每条约束，产品里必须有对应的校验逻辑与闸门；<b>问题对齐</b>——世界图谱的每个能力问题，产品里必须有对应的查询与呈现路径。</p>
+
+    <div class="mermaid-wrap">
+      <div class="mermaid">
+flowchart LR
+  subgraph W["世界知识图谱<br/>业务本体（0.1 校准）"]
+    E["事件：捕捉 / 审价 / 终审 / 备货选仓 / 发货 / 仓库群回单 / 合并开票 / 例外"]
+    R["规则：四守恒 · 回单四分流 · 幂等 · 最小交集 · 守门员"]
+    Q["能力问题：18 问"]
+  end
+  subgraph P["产品操作图谱<br/>企微订单助手 0.1"]
+    F["场景：17 个操作场景"]
+    A["闸门：审价 / 终审 / 备货 / 发货 / 开票 / 例外 + 守门员"]
+    V["视图：详情四节点 · 待办聚合 · 凭证版本 · 三金额分展"]
+  end
+  E -->|"承接：事件 → 场景 + 操作"| F
+  R -->|"执行：规则 → 闸门 + 校验"| A
+  Q -->|"回答：问题 → 视图 + 历史"| V
+  F -->|"一次采集"| V
+  A -->|"异常驱动"| F
+      </div>
+      <figcaption>图 10 · 双图谱对齐（0.1）——事件被场景承接，规则被闸门执行，问题被视图回答</figcaption>
+    </div>
+
+    <h3 id="trace">4.1 · 需求 — 功能追踪矩阵</h3>
+    <p>把世界图谱的关键需求 / 能力问题与产品操作图谱的功能逐条绑定。矩阵的意义在于暴露空白：任何一行的产品侧为空，就是一个待确认的缺口。所有交互描述以 <code>ord_fulfill</code> demo 为准（如「凭证上传 = 订单后台主路径」而非旧文档的「机器人优先」）。</p>
+    <div class="table-wrap">
+      <table>
+        <caption>追踪矩阵 · 业务需求 → 产品场景 → 关键操作 → 验证方式（0.1）</caption>
+        <thead><tr><th style="width:20%">业务需求（世界图谱）</th><th style="width:16%">产品场景（操作图谱）</th><th style="width:34%">关键操作 / 交互</th><th>验证方式</th></tr></thead>
+        <tbody>
+          <tr><td>群里一句话 → 订单（CQ-11）</td><td>XS3 智能下单确认卡</td><td>AI 提取要素 + 匹配框架合同 → 确认卡引用原话 → 销售唯一确认（幂等键，确认只发生一次）→ 正式订单 + 客户可见卡片（守门员确认后发群）</td><td>确认幂等用例；CQ-11 roundtrip</td></tr>
+          <tr><td>人工下单效率 + 多方分担（A7）</td><td>XS2 / XSZL1 / XSZL2 单页长表单</td><td>五组字段纵向排列；产品 / 数量 / 到货时间取自群内原话；单价自动带出最近订单价（协议价上限内可改）；合同按主体自动匹配；工作台代下先选归属销售，群入口代下归属销售自动带出锁定——覆盖虹励 / 助理 1 / 助理 2 / 销售本人四类创建主体</td><td>demo 走查 + 预填来源标注核对</td></tr>
+          <tr><td>问单 / 催进度（CQ-04/05）</td><td>XS1 查订单 / 订单详情</td><td>AI 识别问单意图直达最匹配订单；客户订单首页汇总（全部 4 · 进行中 2 · 已发货 1 · 已完成 1）+ 状态筛选；详情含履约时间线、物流、预计送达</td><td>筛选与状态一致性用例</td></tr>
+          <tr><td>物流可见（客户不进系统）</td><td>XS5 查物流（图片发群）</td><td>一键「生成物流图片发群」→ 守门员确认 → 物流单号 / 运输进度 / 预计送达自动成图，客户在群里直接看图</td><td>图片内容校验（无金额、无内部术语）</td></tr>
+          <tr><td>审价标准统一（审批即审价）</td><td>XSZG1 审价审批</td><td>工作台聚合全部销售订单审价（无群上下文）；审价卡直接展示公司 / 账期 / 产品 / 数量 / 单价 / 到货地址；历史 Tab 可追溯</td><td>审价用例 + 历史追溯用例</td></tr>
+          <tr><td>C/D 级大单风险（CQ-05）</td><td>DSZ1 董事长终审</td><td>仅 C/D 级客户订单进入闸门；金额 / 客户等级 / 审价结论 / 账期全字段同卡；通过 / 驳回（含备注）；驳回出站「被驳回」卡片</td><td>闸门分流用例（C/D vs A/B）</td></tr>
+          <tr><td>三闸门漏办 + 按地址选仓（A1）</td><td>SW1 / SW3 商务待办</td><td>三类审批聚合到待办 Tab（空类显示 0 项）；备货超 24h 优先；备货详情含收货地址，底部「选备货仓 / 写备注 / 通过 / 驳回」四按钮；锁库存暂不做</td><td>三类审批用例 + 选仓用例（N 系列新增）</td></tr>
+          <tr><td>超发 / 错发（CQ-07/08）</td><td>CG2 确认已经发货</td><td>填写本次发货数量 → 守恒校验：输入 6 拦截「超出应发量，超发禁止」→ 修正 5 通过 → 已发货量 5/5 自动累计</td><td>守恒用例（输入-拦截-修正三步）</td></tr>
+          <tr><td>回单不卡开票（CQ-10）</td><td>CW2 审批无回单开票</td><td>无回单超期自动进财务例外审核；例外依据随卡展示；放行 → 开票继续，回单补齐后凭证链自动闭合；规则本身待确认（A5）</td><td>回单四分流用例（款到 / 有回单 / 超期 / 提前申请）</td></tr>
+          <tr><td>凭证留痕可举证（CQ-15）</td><td>CW1 订单后台上传（主路径）</td><td>财务后台上传电子凭证 → AI 识别 + 金额校验 → 登记 v2（只追加不覆盖）；凭证机器人降级兜底 + 销售合同回传仍走机器人</td><td>凭证版本追加用例 + 金额校验用例</td></tr>
+          <tr><td>仓库群回单（CQ-18）</td><td>CG3 仓库群 → 机器人</td><td>仓管把回单统一发企微仓库群 → 凭证机器人抓取 / OCR 识别 / 匹配订单 / 登记 v3；仓库群升级企微群为前置待办（A6 / P2）</td><td>机器人抓取用例（N 系列新增）</td></tr>
+          <tr><td>多单合并开票（CQ-17）</td><td>CW1 关联开票</td><td>发票-订单分离；关联可追加（先 1、2 笔，漏了补第 3 笔）；收款 / 发货 / 开票三金额分展；未开票额度保留在订单上（业财归属待确认 A4 / P4）</td><td>关联追加用例 + 三金额展示用例</td></tr>
+          <tr><td>发群内容可控（CQ-16）</td><td>守门员横切 XS1/XS5/CW1</td><td>任何发客户群内容（订单卡片 / 物流图片 / 发票）须销售一次确认；第一轮全部强制；确认记录 append-only 可审计</td><td>守门员用例（N 系列新增）+ 审计断言</td></tr>
+          <tr><td>群内信息保密（金额 / 技术参数）</td><td>群内最小交集投影</td><td>群内消息 / 卡片 / 截图 / 机器人通知均不出现金额明文；客户可见卡片不含审批意见 / 合同 / 内部备注</td><td>权限矩阵测试（多角色群裁剪矩阵）</td></tr>
+          <tr><td>角色越权防护（CQ-01/02/03/13）</td><td>SpiceDB 图式授权</td><td>仓管任务卡片金额不可见；销售仅本人客户（含代办）；商务全量全字段；代办授权 caveat 有效期；撤销即删边即时生效</td><td>授权用例（L1-07 权限矩阵 + 跨租户拒绝）</td></tr>
+          <tr><td>飞书侧数据可见可操作（A8）</td><td>数据同步 Job（cmd/sync）</td><td>飞书数据库 / 多维表 / 三方审批流单向只读同步进 PG；flow_id → order_id 链路映射；幂等批次（migration_batches）；财务 / 仓管操作结果留本系统</td><td>同步抽样核对用例（N 系列新增）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 id="fullpath">4.2 · 事件全链路：一次「群里要货」的旅程</h3>
+    <p>以世界图谱中最高频的入口「群里一句话」为例，看它如何在两张图谱之间走完全程——这也是「从客户开口到开票，全程看得见」的最小演示。</p>
+    <div class="mermaid-wrap">
+      <div class="mermaid">
+flowchart TB
+  W1["世界：客户在群里要货<br/>企微消息事件 · msgid 幂等"] --> W2["世界：AI 安全边界<br/>候选必须人工确认"]
+  W2 --> P1["操作：智能下单确认卡<br/>DRAFT-2026-0036 · 销售唯一确认"]
+  P1 --> P2["操作：正式订单 ORD-2026-0118<br/>客户可见卡片（不含金额）"]
+  P2 --> P2B["操作：发给客户<br/>守门员确认后才发群"]
+  P2B --> P3["操作：销售主管审价<br/>审批即审价 · 待办 + 历史"]
+  P3 -->|"C/D 级"| P3B["操作：董事长终审<br/>全字段同卡"]
+  P3B --> P4["操作：商务备货闸门<br/>选备货仓 + 收货地址"]
+  P4 --> P5["操作：仓管确认接受<br/>金额不可见 · 本仓要素"]
+  P5 --> P6["操作：仓管确认发货<br/>守恒校验 · 5/5 吨 · 库存联动"]
+  P6 --> P7["操作：回单凭证<br/>仓管发仓库群 → 机器人抓取 v3"]
+  P7 --> P8["操作：开票申请 · 回单四分流"]
+  P8 --> P9["操作：财务订单后台上传凭证（主路径）<br/>开票守恒 · 关联可追加 · 三金额分展"]
+  P9 --> V1["全景：订单详情四节点状态"]
+  P8 --> V2["全景：回单状态 · 例外审核"]
+  P3 --> V3["全景：审批历史可追溯"]
+  V1 --> B["反哺：规则学习 · 画像更新"]
+  V2 --> B
+  V3 --> B
+      </div>
+      <figcaption>图 11 · 事件全链路（0.1）——一次「群里要货」从世界图谱出发，经确认、守门员、审价、终审、备货选仓、发货、仓库群回单、合并开票，最终到达全景视图并反哺规则</figcaption>
+    </div>
+
+    <div class="decision">
+      <div class="label">对齐结论</div>
+      <p><b>两张图谱的映射是完备的：</b>五组事件 → 十七个操作场景；守恒四则 + 权限投影 + 守门员 → 校验、闸门与出站确认；十八个能力问题 → 订单详情、待办聚合、审批历史、凭证版本与三金额视图。0.1 显式的边界有三条：<b>真实企微链路</b>（real_wecom 全部 UNKNOWN）、<b>飞书侧结构调研</b>（同步 Job 依赖三项调研产出）、<b>后端实现深度</b>（守门员 / 合并开票 / 仓库群回单等 0.1 新承诺在 demo 已实施、后端待落地）。这三条边界都不得用内部证据替代。</p>
+    </div>
+  </section>
+
+  <!-- ══════════ 五、项目机制：证据收敛式迭代 ══════════ -->
+  <section id="ecm">
+    <div class="act-no">第五章 · 项目机制</div>
+    <h2>证据收敛式迭代：项目如何自我治理</h2>
+    <p class="subtitle">双图谱回答「业务与产品如何对齐」，ECM（Evidence-Convergent Mechanism）回答「项目如何演进、交接与验收」。机制身份：ECM 1.0.0 · PROPOSED（bootstrap 落库，未激活）。</p>
+
+    <p class="lead">项目不是一条从需求到代码的流水线，而是一组异步更新、粒度不同、权威范围不同的事实与承诺。机制的任务不是选出一份「最新文档」，而是持续回答：<b>每条声明现在是什么状态，谁有权决定它，哪些制品已经跟上，哪些证据仍然有效，下一步改哪里最能推动项目向前</b>。目录只表达制品的职责与生命周期；真正的决定性必须落在带稳定 ID 的声明、决策、实现和证据关系上。</p>
+
+    <div class="table-wrap">
+      <table>
+        <caption>ECM · 六类治理对象</caption>
+        <thead><tr><th style="width:14%">对象</th><th>含义</th><th style="width:34%">关键字段</th></tr></thead>
+        <tbody>
+          <tr><td>Source 来源</td><td>原始表达与外部事实</td><td>source_id、来源人 / 系统、发生时间、观察时间、digest、可信范围、有效期</td></tr>
+          <tr><td>Claim 声明</td><td>项目可判断、可实现、可验证的最小声明</td><td>主谓宾、scope、风险、owner、语义状态、实现状态、验证状态、验收 oracle</td></tr>
+          <tr><td>Decision 决策</td><td>在候选之间形成当前承诺</td><td>选择、理由、前提、反对项、决策人、生效区间、替代关系、复核条件</td></tr>
+          <tr><td>Artifact 制品</td><td>承载说明、交互、代码、配置、测试程序或报告</td><td>kind、路径 / URI、版本、digest、覆盖 claim、生成方式、baseline</td></tr>
+          <tr><td>Evidence 证据</td><td>对声明或制品进行一次可重放观察</td><td>输入摘要、artifact、环境、验证器、机制版本、命令、原始输出、结论、TTL</td></tr>
+          <tr><td>Baseline 基线</td><td>冻结某一交付时刻相互一致的一组对象</td><td>包含的 claim/decision/artifact/evidence digest、机制版本、开放风险、批准人</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>5.1 · 三态正交与九种关系</h3>
+    <p>「已决定、已实现、已验证」是三个不同维度，禁止合并成一个「状态 = 完成」。例如 0.1 的发群守门员是 <code>ACCEPTED（A3 拍板）+ IMPLEMENTED(demo) + UNVERIFIED(backend)</code>；自动下单是 <code>DEFERRED(vNext) + 部分实现保留</code>——两者都不是「完成」，也不能互相冒充。关系是治理的边：<span class="mono">DERIVED_FROM / REFINES / IMPLEMENTS / VERIFIES / DECIDES / SUPERSEDES / DEPENDS_ON / CONFLICTS_WITH / VALID_DURING</span>。一条「群内金额不可见」声明会同时约束 demo 截图、API 投影、ReBAC、测试和产品说明——影响半径沿边计算，变化只作废受影响证据，不全量重跑。</p>
+    <div class="table-wrap">
+      <table>
+        <caption>三组状态必须分开（Semantic / Implementation / Verification）</caption>
+        <thead><tr><th style="width:20%">维度</th><th>回答</th><th>状态词表</th></tr></thead>
+        <tbody>
+          <tr><td>语义 Semantic</td><td>这是不是当前承诺</td><td>PROPOSED → ACCEPTED → DEFERRED / REJECTED / SUPERSEDED / CHALLENGED</td></tr>
+          <tr><td>实现 Implementation</td><td>制品是否已经跟上</td><td>UNPLANNED → PLANNED → PARTIAL → IMPLEMENTED → DRIFTED</td></tr>
+          <tr><td>验证 Verification</td><td>证据是否足够且仍有效</td><td>UNVERIFIED → PASS / FAIL → STALE / INVALID / EXPIRED</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>5.2 · 信息流动：事件驱动的局部收敛双循环</h3>
+    <p>每次变化不是「同步所有文档」的命令，而是一个变化事件。系统先识别变化触及哪些声明，再决定需要更新视图、实现还是验证。不能自动裁决的部分被压缩成人类问题包（每次最多 3 项，含冲突的精确声明、候选与来源、影响范围、推荐项与最晚决策点）；其余工作继续。</p>
+    <div class="mermaid-wrap">
+      <div class="mermaid">
+flowchart LR
+  ING["1 INGEST<br/>登记变化 · 来源 · digest"] --> NOR["2 NORMALIZE<br/>抽取 / 关联 claim"]
+  NOR --> DIF["3 DIFF<br/>声明级语义 diff"]
+  DIF --> IMP["4 IMPACT<br/>沿依赖边算影响半径"]
+  IMP --> ROU["5 ROUTE<br/>自动同步 / 问题包"]
+  ROU --> VER["6 VERIFY<br/>运行受影响挑战"]
+  VER --> BAS["7 BASELINE<br/>门禁通过发新切片"]
+  BAS -.->|"慢循环"| OBS["A OBSERVE<br/>记录漏检 / 误报 / 死锁"]
+  OBS --> PRO["B PROPOSE<br/>规则 / schema 变更提案"]
+  PRO --> REP["C REPLAY<br/>历史正反例回放"]
+  REP --> SHA["D SHADOW<br/>新旧并行 · 不改门禁"]
+  SHA --> APP["E APPROVE<br/>人审差异与回滚"]
+  APP --> ACT["F ACTIVATE<br/>发布新机制版本"]
+  ACT -.-> ING
+      </div>
+      <figcaption>图 12 · ECM 双循环——快循环推动项目收敛（INGEST→BASELINE），慢循环更新机制本身（OBSERVE→ACTIVATE）</figcaption>
+    </div>
+
+    <h3>5.3 · 控制面：权威关系在这里，不在目录排序里</h3>
+    <p>不把 Go 源码搬进编号目录，也不一次性重命名全部历史文件。仓库新增轻量控制面 <code>project/</code>，让 <code>spec</code>、<code>docs</code>、demo、代码与测试继续按各自工具习惯存在；控制面只保存稳定关系和状态。</p>
+<pre><code>project/                         # 项目控制面（已落库）
+├── project.yaml                 # 项目身份、机制绑定（ECM 1.0.0 PROPOSED）
+├── ontology.yaml                # 受控词表（artifact_kinds / claim_statuses / edge_types…）
+├── claims/                      # 34 条原子声明（ordering 13 / fulfillment 8 /
+│                                #   authorization 7 / wecom-interaction 6）
+├── decisions/                   # D-001..D-005 决策库
+├── conflicts/                   # open / resolved 冲突记录
+├── baselines/                   # 可交付一致切片（当前 NONE，尚无已发布 baseline）
+├── policies/mechanism/          # ECM-1.0.0.yaml（规范源）+ ECM-1.0.0.html（指南）
+│                                # + current.yaml（指针，status=PROPOSED）
+│                                # + calibration-cases.yaml + migrations/ + CHANGELOG.md
+├── events/project-events.jsonl  # append-only 审计流（已 26 条）
+├── handoffs/                    # HOF-20260813-001 交接包 + current.yaml 指针
+└── views/                       # artifact-manifest.yaml（213 制品）· demo-boundary.yaml（三态标注）</code></pre>
+
+    <h3>5.4 · 机制版本化与 Agent 协议</h3>
+    <p>机制采用「机器规范是规范源、人类指南是发布视图」的双制品结构，不能悄悄换尺子：<code>ECM-x.y.z.yaml</code> 是机器可判定语义的唯一规范源，<code>ECM-x.y.z.html</code> 是同版本人类指南，<code>current.yaml</code> 指针决定仓库采用哪个已发布版本。Agent 启动必须先执行确定性机制解析（A.5：读 <code>project/project.yaml</code> → 沿指针读 <code>current.yaml</code> → 校验 spec/guide digest → 冻结机制快照），接手工作必须先执行 handoff 接受协议（A.6：校验交接包 → 检查变化窗口 → 写接受回执），并遵守六条禁止推断：文件更晚 ≠ 权威更高、位于 spec ≠ 已批准、demo 可点 ≠ 生产已实现、前任写了「完成」≠ 开放项可关闭。</p>
+    <div class="table-wrap">
+      <table>
+        <caption>本项目机制现状（诚实标注）</caption>
+        <thead><tr><th>项</th><th>状态</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>机制身份</td><td><span class="tag amber">ECM 1.0.0 · PROPOSED</span></td><td>根目录《证据收敛式项目迭代机制.html》为 bootstrap 提案；YAML/HTML 双制品已落库，指针未激活</td></tr>
+          <tr><td>激活条件</td><td><span class="tag amber">未满足</span></td><td>ECM-ACT-001：须同时发布 YAML Schema、canonicalizer、状态机 / 决策表测试向量、可重放 validator，方可标记 ACTIVE</td></tr>
+          <tr><td>Agent 运行状态</td><td><span class="tag gray">BOOTSTRAP_DIAGNOSTIC</span></td><td>指针 status≠ACTIVE → A.5 第 06 步失败：允许只读盘点与用户已授权的控制面迁移，不得用 ECM 门禁宣布 PASS</td></tr>
+          <tr><td>自检</td><td><span class="tag ok">29/29</span></td><td><code>scripts/ecm_selfcheck.py</code>：A.5 机械部分 + digest 三处一致 + 事件流 + handoff 契约 + claims 库 26 条合法性</td></tr>
+          <tr><td>首批 claims</td><td><span class="tag ok">34 条落库</span></td><td>交互形态 / 签收凭证链 / 群权限交集 / 企微交互四域；含 SIM-01（客户签收前提被否定）、SIM-02（用例总表 4 步向导 STALE）两个活案例</td></tr>
+          <tr><td>交接包</td><td><span class="tag ok">HOF-20260813-001</span></td><td>manifest / summary / open-items / decisions-since-baseline / evidence-index / acceptance 六件套</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="decision ink">
+      <div class="label">机制要点</div>
+      <p><b>0.1 冲刺本身就是一次 ECM 意义上的「变化 → 局部收敛」。</b>ord_fulfill demo 吸收了运营 / 产品 / 客户的直接反馈（A1–A8、B、C 类需求），使旧一代文档（16 场景、凭证机器人优先、司机转回单）整体进入待收敛状态；项目的应对正是 ECM 的快循环：<code>docs/gap-analysis.md</code> 做声明级差距分析，<code>docs/v0.1/</code> 11 章节按 demo 裁决重写受影响的章节，未受影响的基座（CQ 骨架、守恒防线、SpiceDB/Temporal 设计）原地保留。不需要全仓重跑——这正是「变化只作废受影响证据」的活案例。</p>
+    </div>
+  </section>
+
+  <!-- ══════════ 六、0.1 冲刺路线与度量 ══════════ -->
+  <section id="roadmap">
+    <div class="act-no">第六章 · 0.1 冲刺路线与度量</div>
+    <h2>先收敛，再扩展：08-21 前上线</h2>
+    <p class="subtitle">既有 M0–M8 里程碑退为技术基座的历史路线；当前唯一路线是 0.1 冲刺：文档定稿 → 部署 → 同步 Job → 验证 → 上线。</p>
+
+    <div class="mermaid-wrap">
+      <div class="mermaid">
+flowchart LR
+  D0["文档定稿<br/>docs/v0.1 · 11 章节（08-16 ✓）"] --> D1["调研冻结<br/>飞书结构三项调研"]
+  D1 --> D2["部署<br/>docker compose 9 容器"]
+  D2 --> D3["同步 Job<br/>cmd/sync 首跑全量 + 增量"]
+  D3 --> D4["企微回调<br/>URL 验证 + 出站冒烟"]
+  D4 --> D5["商务试用<br/>虹励跑通一笔完整订单"]
+  D5 --> D6["验证<br/>17 场景 walkthrough + N-01..10"]
+  D6 --> D7["上线（08-21）<br/>平行流运行 · 升级 0.2/0.3"]
+      </div>
+      <figcaption>图 13 · 0.1 冲刺路线——文档已定稿，剩余七步按周推进，08-21 上线为硬节点</figcaption>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <caption>0.1 上线步骤（docs/v0.1/10-deployment.html §6）</caption>
+        <thead><tr><th style="width:8%">步</th><th>动作</th><th>产出 / 退出条件</th></tr></thead>
+        <tbody>
+          <tr><td class="mono-cell">01</td><td>调研冻结：程序员调研飞书侧结构（数据库 / 多维表 / 三方审批流部署）</td><td>调研清单（11-migration §3 三项调研，每项有明确目标与产出）</td></tr>
+          <tr><td class="mono-cell">02</td><td>仓库准备：git clone 到 /opt/b2b_pilot_v3/code；配置 config/ 与 secrets/（0600）</td><td>代码 / 配置 / 敏感凭据三分离</td></tr>
+          <tr><td class="mono-cell">03</td><td>镜像构建：docker compose build（api / worker / wecom / sync 四 target）</td><td>四镜像可构建</td></tr>
+          <tr><td class="mono-cell">04</td><td>基础设施：compose up postgres / spicedb / temporal → migrate（001-005）→ spicedb-schema 校验</td><td>数据层就绪，schema 编译通过</td></tr>
+          <tr><td class="mono-cell">05</td><td>应用启动：api / worker / wecom → 健康检查全绿（healthz / wecom/healthz）</td><td>探针三件套可用</td></tr>
+          <tr><td class="mono-cell">06</td><td>同步接入：配置 sync → 首跑全量 + 增量验证（抽样核对飞书 vs 本系统订单数）</td><td>migration_batches 幂等批次通过</td></tr>
+          <tr><td class="mono-cell">07</td><td>企微回调：配置回调 URL（HTTPS 反代）→ URL 验证 → 出站卡片冒烟</td><td>企微通道可用（官方 provider）</td></tr>
+          <tr><td class="mono-cell">08</td><td>商务试用：虹励账号开通 → 跑通一笔完整订单（下单 → 审价 → 备货 → 发货 → 开票 → 回单）</td><td>一笔真实业务闭环</td></tr>
+          <tr><td class="mono-cell">09</td><td>验证：17 场景 walkthrough + N-01..N-10 测试 + 守门员 / 合并开票 / 仓库群回单专项</td><td>验证证据可回放</td></tr>
+          <tr><td class="mono-cell">10</td><td>上线（08-21）：飞书原流程不动，0.1 平行流运行；使用中快速升级 0.2 / 0.3（文档驱动迭代）</td><td>平行流上线，原流程零打扰</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>6.1 · 0.1 范围裁剪清单（标记 · 不删除）</h3>
+    <div class="table-wrap">
+      <table>
+        <caption>0.1 不做 / 暂缓清单——保留设计，避免「演示可点 = 系统已交付」的误读</caption>
+        <thead><tr><th>项</th><th>0.1 状态</th><th>处理方式</th></tr></thead>
+        <tbody>
+          <tr><td>自动下单（会话存档自动拉取 + 意图解析自动建单）</td><td><span class="tag amber">移出一期</span></td><td>同城企微备案未完成，API 有风险；智能下单人工确认段（XS3 确认卡）保留；相关游标基础设施保留</td></tr>
+          <tr><td>锁库存（inventory_items 扣减链路）</td><td><span class="tag amber">暂不做</span></td><td>先补业务数据（款到发货缺货比例、常缺货产品清单）；表、约束与守恒逻辑保留不启用</td></tr>
+          <tr><td>客户联系人视图（customer_contacts）</td><td><span class="tag gray">阶段二</span></td><td>0.1 客户不进系统，表保留</td></tr>
+          <tr><td>Outbox 投影器（阶段二）</td><td><span class="tag gray">阶段二</span></td><td>0.1 保留静态判定（StaticChecker），表保留</td></tr>
+          <tr><td>STK 转仓（TRANSFER_REQUESTED）</td><td><span class="tag amber">可用性待确认</span></td><td>0.1 保留仓管退回；转仓流程设计保留</td></tr>
+          <tr><td>修改分类 A/B/C/D/E 全量</td><td><span class="tag ok">保留（简化）</span></td><td>订单修改是日常操作：E 类静默修改可用，A-D 走人工</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>6.2 · 待确认事项与决策门（P1–P5）</h3>
+    <div class="table-wrap">
+      <table>
+        <caption>0.1 开放事项——每项有 owner、阻塞范围、最晚决策点</caption>
+        <thead><tr><th style="width:8%">#</th><th>事项</th><th>责任人</th><th style="width:18%">阻塞范围</th><th>建议动作</th></tr></thead>
+        <tbody>
+          <tr><td class="mono-cell">P1</td><td><b>无回单开票规则</b>（A5）：是否允许销售无回单开票</td><td>虹励找宋主任 / 财务负责人 / 张总</td><td>开票流程（CW2）</td><td>整理「现状-问题-建议」文档并算一笔账：回单延迟导致资金延后约 30 天到账，按利息折算损失</td></tr>
+          <tr><td class="mono-cell">P2</td><td><b>仓库群升级企微群</b>（A6）：虹励补仓库群现状截图并升级</td><td>虹励</td><td>回单凭证自动抓取（CG3）</td><td>升级前回单走手动上传 Tab 备选</td></tr>
+          <tr><td class="mono-cell">P3</td><td><b>缺货业务数据</b>（A1）：款到发货缺货比例、常缺货产品清单</td><td>商务 / 产品到岗后</td><td>库存管理需求（0.1 后）</td><td>写成文档，等产品到岗后再讨论库存管理</td></tr>
+          <tr><td class="mono-cell">P4</td><td><b>业财归属</b>（A4）：多单合并开票的业财归属</td><td>找惊蜇确认</td><td>合并开票边界</td><td>demo 已标注，确认后更新文档</td></tr>
+          <tr><td class="mono-cell">P5</td><td><b>发群直发规则</b>（A3）：「哪些内容可直发、哪些必须审核」</td><td>商务 / 销售侧</td><td>守门员放行策略</td><td>0.1 全部强制确认，规则表后续迭代</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>6.3 · 项目度量（诚实三态标注）</h3>
+    <div class="table-wrap">
+      <table>
+        <caption>项目度量 · 现状与目标（demo / backend / real 三态分开）</caption>
+        <thead><tr><th>维度</th><th>指标</th><th>当前状态</th></tr></thead>
+        <tbody>
+          <tr><td>演示覆盖</td><td>demo 场景数</td><td>17 / 17 场景（ord_fulfill demo，A1–A8 + B/C 需求已实施于演示数据层）</td></tr>
+          <tr><td>文档覆盖</td><td>0.1 文档家族</td><td>docs/v0.1 · 11 章节定稿（2026-08-16）；gap-analysis.md 记录重构决策</td></tr>
+          <tr><td>后端证据</td><td>API 路由级证据场景数</td><td>6 场景（XS1/XS2/XS3/XS4/SW2/SW3 相关路由存在）；0.1 新承诺（守门员 / 合并开票 / 仓库群回单 / 选仓 / 同步 Job）后端待落地</td></tr>
+          <tr><td>真实企微</td><td>真实企微环境端到端验证</td><td>0 / 17（全部 UNKNOWN，待真实链路验证）</td></tr>
+          <tr><td>飞书同步</td><td>cmd/sync 数据同步 Job</td><td>设计定稿（部署 / 迁移两章），实现待建；依赖 P 类三项调研</td></tr>
+          <tr><td>测试分层</td><td>L0 单元 / L1 集成 / L2 E2E / L3 系统</td><td>目标覆盖率 95% 以上；0.1 新增用例 N-01..N-10（守门员 / 合并开票 / 仓库群回单 / 选仓 / 同步）</td></tr>
+          <tr><td>机制自检</td><td>ECM 控制面一致性</td><td>ecm_selfcheck 29/29；机制 PROPOSED（激活需 ECM-ACT-001 四件套）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <caption>业务 KPI · 度量成功</caption>
+        <thead><tr><th>维度</th><th>指标</th></tr></thead>
+        <tbody>
+          <tr><td>上线</td><td>08-21 前 0.1 平行流上线；飞书原流程零打扰；虹励跑通一笔完整订单</td></tr>
+          <tr><td>效率</td><td>「群里一句话 → 待确认订单」≤ 2 分钟；人工下单预填覆盖字段数；审价平均时效；催办升级及时率</td></tr>
+          <tr><td>一致性</td><td>守恒拦截全部生效（备货 ≤ 订单 · 发货 ≤ 备货 · 开票 ≤ 发货 · 库存 ≥ 0）；三金额（收款 / 发货 / 开票）对账零差异；同步批次幂等可重跑</td></tr>
+          <tr><td>授权</td><td>演示权限零越权（仓管无价 / 销售仅本人 / 客户图无金额 / 群内无金额明文）；守门员确认记录 100% 可审计</td></tr>
+          <tr><td>使用</td><td>虹励日均使用频次；智能下单确认卡采纳率；后台凭证上传占比；同步时效（5m–1h 内可见）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="decision">
+      <div class="label">路线要点</div>
+      <p><b>0.1 的完成定义不是「功能做完」，而是「虹励用起来且对得上账」。</b>文档已定稿、demo 已裁决、范围已裁剪、开放事项已有 owner——剩下的是执行：调研 → 部署 → 同步 → 验证 → 上线。五件待确认事项（P1–P5）都有明确责任人与最晚决策点，其中 P1（无回单开票规则）与 P2（仓库群升级）直接决定开票与回单两条链路能否在 0.1 完整跑通。上线后立即进入 0.2 / 0.3 迭代：一个文档进去，所有东西自动跟它同步。</p>
+    </div>
+  </section>
+
+  <!-- ══════════ 附录 ══════════ -->
+  <section id="appendix" class="appendix">
+    <div class="act-no"><span class="spec-label">附录 · 术语与参考</span></div>
+    <h2>术语表与资料索引</h2>
+    <p class="subtitle">为 Agent 读者准备的规范索引：本文档所有名词以本表为准；0.1 交互以 ord_fulfill demo 为裁决源，文档以 docs/v0.1 为最新。</p>
+
+    <h3>A1 · 术语表</h3>
+    <div class="table-wrap">
+      <table class="contract-table">
+        <thead><tr><th style="width:22%">术语</th><th>定义</th></tr></thead>
+        <tbody>
+          <tr><td>b2b_pilot_v3</td><td>B2B 订单履约验证项目：业务流落地 + 技术实施的整合验证；当前冲刺 0.1 发布版（08-21 上线）</td></tr>
+          <tr><td>0.1 冲刺</td><td>当前阶段：仅虹励（商务）先用、不打扰飞书流程、数据同步单向只读、自动下单移出、锁库存暂缓；使用中快速升级 0.2 / 0.3</td></tr>
+          <tr><td>ord_fulfill demo</td><td>0.1 现实需求裁决源（app/index.html）：7 角色 17 场景，已集成运营 / 产品 / 客户直接反馈；A1–A8 业务变更 + B/C 交互需求已实施于演示数据层</td></tr>
+          <tr><td>docs/v0.1</td><td>0.1 发布版文档家族（最新）：11 章节（双 graph / 产品 / 交互 / 架构 / 业务流程 / 企微 / 数据库 / API / 测试 / 部署 / 迁移）</td></tr>
+          <tr><td>企微订单助手</td><td>产品操作图谱的载体：企微生态内的订单助手（侧边栏 H5 + 工作台 H5 + 群内入口 + 订单后台 + 凭证机器人）</td></tr>
+          <tr><td>世界知识图谱</td><td>业务需求的本体论：实体、关系、事件、约束、能力问题（0.1 校准版，18 CQ）</td></tr>
+          <tr><td>产品操作图谱</td><td>服务、场景、操作三层结构，映射业务需求的消化过程（0.1 以 ord_fulfill demo 为准，17 场景 · 五大业务使命）</td></tr>
+          <tr><td>ECM</td><td>证据收敛式项目迭代机制（Evidence-Convergent Mechanism）1.0.0：以声明为治理原子、决策为语义权威、制品为投影、证据为可重放观察、基线为一致切片；当前 PROPOSED（bootstrap 落库，未激活）</td></tr>
+          <tr><td>履约闭环四分支</td><td>ORD 订单创建 → STK 备货审批 → SHP 发货分配及出库 → INV 开票回单审批 → 回款归档</td></tr>
+          <tr><td>四节点状态</td><td>订单详情展示的履约时间线：已开单 → 已备货 → 已发货 → 已开票</td></tr>
+          <tr><td>审批即审价</td><td>销售主管的审价与审批是同一动作（非商务职能）；工作台聚合全部销售订单</td></tr>
+          <tr><td>发群守门员</td><td>0.1 新增（A3）：任何内容发客户群前须销售点一次确认；第一轮全部强制，先收紧后放行；确认记录可审计（CQ-16）</td></tr>
+          <tr><td>多单合并开票</td><td>0.1 新增（A4）：发票与订单分离，经「关联」连接（一笔款可跨多笔订单）；关联可追加；收款 / 发货 / 开票三金额分展（CQ-17）</td></tr>
+          <tr><td>仓库群回单</td><td>0.1 新增（A6）：两个外租仓仓管把回单统一发企微仓库群 → 凭证机器人抓取 / 识别 / 登记归档（CQ-18）</td></tr>
+          <tr><td>凭证双路径</td><td>财务订单后台上传电子凭证为主路径（A2），凭证机器人降级兜底（无电脑场景）+ 销售合同回传仍走机器人</td></tr>
+          <tr><td>飞书数据同步</td><td>0.1 新增组件（cmd/sync）：飞书数据库 / 多维表 / 三方审批流 → 本系统 PG 单向只读同步，幂等批次（migration_batches），原审批流不停</td></tr>
+          <tr><td>回单四分流</td><td>开票入口判定：款到发货直接进入 / 有回单 / 无回单超期（自动进例外审核）/ 提前申请；无回单开票规则待确认（A5）</td></tr>
+          <tr><td>凭证机器人</td><td>私聊机器人（兜底）+ 企微仓库群抓取：OCR 识别 → 匹配订单 → 只追加登记（v2/v3）</td></tr>
+          <tr><td>AI 安全边界</td><td>LLM 只产候选 + 确定性代码校验 + 人工确认才生效；低置信只发轻提醒；发群须守门员确认</td></tr>
+          <tr><td>四守恒</td><td>备货 ≤ 订单 · 发货 ≤ 备货 · 开票 ≤ 发货（金额 + 数量双维度）· 库存 ≥ 0（0.1 锁库存暂缓，守恒保留）</td></tr>
+          <tr><td>幂等三层</td><td>消息幂等（msgid）→ 订单幂等（idempotency_key）→ DB 唯一约束</td></tr>
+          <tr><td>修改分类</td><td>A/B/C/D/E 五类修改走不同流程回退路径（0.1 简化：E 类静默可用，A-D 走人工）</td></tr>
+          <tr><td>能力问题 CQ</td><td>本体论的规格与测试：业务世界必须能回答的问题清单（0.1 为 18 问，含守门员 / 合并开票 / 仓库群回单）</td></tr>
+          <tr><td>A1–A8</td><td>0.1 业务变更清单：选仓 + 收货地址 / 凭证主路径反转 / 守门员 / 合并开票 / 无回单规则待确认 / 仓库群回单 / 多方分担 / 架构决策</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>A2 · 场景 × 角色对照（ord_fulfill demo 全量 17 场景）</h3>
+    <div class="table-wrap">
+      <table class="contract-table">
+        <thead><tr><th style="width:10%">场景</th><th style="width:12%">角色</th><th>名称</th><th style="width:26%">舞台</th></tr></thead>
+        <tbody>
+          <tr><td>XS1</td><td>销售</td><td>查订单 / 订单详情（客户订单 Home + 筛选 + 发给客户 · 守门员）</td><td>群侧边栏 ·「订单」Tab</td></tr>
+          <tr><td>XS2</td><td>销售</td><td>人工下单（单页长表单 · 五组字段）</td><td>群侧边栏 ·「下单」Tab</td></tr>
+          <tr><td>XS3</td><td>销售</td><td>智能下单确认卡（DRAFT → 销售唯一确认 → 正式订单）</td><td>群侧边栏 · 待办 Tab</td></tr>
+          <tr><td>XS4</td><td>销售</td><td>工作台全量待办（驳回补充 / 评论提醒 / 确认）</td><td>手机工作台 ·「待办」Tab</td></tr>
+          <tr><td>XS5</td><td>销售</td><td>查物流（生成物流图片发群 · 守门员）</td><td>企微群聊 · 销售触发</td></tr>
+          <tr><td>XSZG1</td><td>销售主管</td><td>审价审批（审批即审价 · 待办 + 历史）</td><td>手机工作台 ·「待办 / 历史」Tab</td></tr>
+          <tr><td>SW1</td><td>商务</td><td>备货 / 发货 / 开票（备货四按钮：选备货仓 / 写备注 / 通过 / 驳回）</td><td>群侧边栏 · 待办 Tab</td></tr>
+          <tr><td>SW2</td><td>商务</td><td>查全量订单（ops 聚合视图 · 群外）</td><td>订单助手 ·「订单」Tab（独立入口）</td></tr>
+          <tr><td>SW3</td><td>商务</td><td>工作台全量待办（全租户）</td><td>手机工作台 ·「待办」Tab</td></tr>
+          <tr><td>XSZL1</td><td>销售助理</td><td>工作台代下单（先选「下单归属销售」）</td><td>工作台 ·「下单」Tab</td></tr>
+          <tr><td>XSZL2</td><td>销售助理</td><td>客户群入口代下单（归属销售自动带出锁定 · 0.1 新增）</td><td>群侧边栏 ·「下单」Tab</td></tr>
+          <tr><td>CW1</td><td>财务</td><td>订单后台上传开票凭证（主路径）+ 多单合并开票关联</td><td>订单后台 · 订单详情页</td></tr>
+          <tr><td>CW2</td><td>财务</td><td>审批无回单开票（例外审核 · 规则待确认）</td><td>工作台 ·「待办」Tab</td></tr>
+          <tr><td>CG1</td><td>仓管</td><td>确认接受发货任务（金额不可见）</td><td>本仓待办 · Tab</td></tr>
+          <tr><td>CG2</td><td>仓管</td><td>确认已经发货（守恒拦截 · 超发禁止）</td><td>本仓待办 · Tab</td></tr>
+          <tr><td>CG3</td><td>仓管</td><td>回单凭证（仓管发仓库群 → 机器人抓取 · 0.1 纠正）</td><td>企微仓库群 · 机器人抓取</td></tr>
+          <tr><td>DSZ1</td><td>董事长</td><td>C/D 级订单终审（全字段同卡）</td><td>待办 Tab · 手机端</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>A3 · 资料索引与口径说明</h3>
+    <div class="table-wrap">
+      <table class="contract-table">
+        <thead><tr><th style="width:28%">资料</th><th>类型</th><th>在本分析中的角色</th></tr></thead>
+        <tbody>
+          <tr><td>ord_fulfill demo（app/index.html）</td><td>演示原型（0.1 最高裁决源）</td><td>0.1 全部交互与场景的裁决源：7 角色 · 17 场景 · 守门员 · 合并开票 · 仓库群回单 · 选仓；已集成运营 / 产品 / 客户反馈</td></tr>
+          <tr><td>ord_fulfill/docs/订单助手demo更新需求-合并版.md</td><td>需求档案</td><td>A1–A8 / B1–B7 / C1–C2 全部需求条目，标注来源、优先级、实施状态</td></tr>
+          <tr><td>ord_fulfill/minutes/（会议纪要 + 优化建议）</td><td>一手业务输入</td><td>08-13 需求评审会议纪要（业务基线）+ 08-15 demospace 标注反馈（优先级更高）</td></tr>
+          <tr><td>docs/v0.1/*（11 章节）</td><td>0.1 发布版文档家族（最新）</td><td>双 graph / 产品 / 交互 / 架构 / 业务流程 / 企微 / 数据库 / API / 测试 / 部署 / 迁移——本文档的 0.1 事实来源</td></tr>
+          <tr><td>docs/gap-analysis.md</td><td>重构决策记录</td><td>0.1 重构基线：A1–A8 → 章节映射、术语映射、多余清单、核对清单</td></tr>
+          <tr><td>docs/demo/index.html</td><td>上一代演示（16 场景）</td><td>历史原型；与 ord_fulfill demo 冲突处以 ord_fulfill 为准</td></tr>
+          <tr><td>docs/01-core-graph.html 等 01–09</td><td>既有验证项目文档家族</td><td>技术基座（15 CQ 骨架、守恒防线、SpiceDB/Temporal 设计）保留；0.1 语义冲突处以 demo 为准</td></tr>
+          <tr><td>证据收敛式项目迭代机制.html</td><td>机制 bootstrap 提案</td><td>ECM 1.0.0 人类可读载体（PROPOSED）；本分析第五章的机制事实来源</td></tr>
+          <tr><td>project/policies/mechanism/ECM-1.0.0.yaml + current.yaml</td><td>机制规范源 + 指针</td><td>机器判定的规范源；current.yaml status=PROPOSED（未激活，bootstrap=true）</td></tr>
+          <tr><td>project/claims/*.yaml（34 条）</td><td>原子声明（ECM）</td><td>交互形态 / 签收凭证链 / 群权限交集 / 企微交互四域；demo 与后端三态分离标注</td></tr>
+          <tr><td>project/views/artifact-manifest.yaml + demo-boundary.yaml</td><td>控制面视图</td><td>213 制品清单；demo/backend/real_wecom 三态标注（防「演示可点 = 已交付」误读）</td></tr>
+          <tr><td>project/handoffs/HOF-20260813-001</td><td>Agent 交接包</td><td>bootstrap 交接六件套；后续接手 Agent 的起点校验物</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="decision">
+      <div class="label">口径声明 · 冲突处理</div>
+      <p><b>0.1 一切交互以 <code>ord_fulfill</code> demo 为最高裁决源；文档以 <code>docs/v0.1/</code> 为最新家族。</b>本版相对上一版（Vol. 01 · 16 场景 / 15 CQ）的主要口径变化：场景 16 → 17（新增 XSZL2 客户群入口代下单）；能力问题 15 → 18（新增守门员 / 合并开票 / 仓库群回单三问）；凭证上传从「机器人优先」反转为「订单后台主路径，机器人兜底」（A2）；回单链从「司机 → 仓管 → 机器人」纠正为「仓管发仓库群 → 机器人抓取」（A6）；备货新增「选备货仓 + 收货地址」（A1）；发群必经守门员（A3）；发票与订单分离、关联可追加、三金额分展（A4）；订单创建多方分担（A7）；0.1 仅虹励使用、自动下单移出、锁库存暂缓、飞书数据同步（A8）。「客户发签收照片 → 销售转发」场景此前已删除（客户无感签收），本版维持删除。</p>
+    </div>
+  </section>
+
+
+
+
+
+</div>
+
+<!-- colophon -->
+<footer class="colophon">
+  <div class="shell">
+    <p><b>b2b_pilot_v3 · 项目分析 · 结语。</b>世界知识图谱给业务立规矩——实体、关系、事件、约束各安其位，十八个能力问题验收本体；产品操作图谱给需求找归宿——入口划界、十七场景发力、操作落地，AI 安全边界与发群守门员托住自动化的限度；证据收敛机制给项目定纪律——声明有状态、决策有权威、制品有投影、证据可重放、基线可交付。当前一切收敛于一个目标：0.1 上线，先让虹励一个人跑起来，用起来再快速升级 0.2 / 0.3。项目不是因为场景多而完整，而是因为承诺与实现一一对得上——剩下的每一个缺口，都有名字、有原因、有去处。</p>
+    <p class="meta-line">Set in Source Serif Pro · Noto Serif SC · IBM Plex Mono — 双图谱方法 × 证据收敛 · 0.1 冲刺 · 2026</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    securityLevel: 'loose',
+    theme: 'base',
+    fontFamily: 'Source Serif Pro, Noto Serif SC, Georgia, serif',
+    themeVariables: {
+      primaryColor: '#efeee5',
+      primaryTextColor: '#1f1d18',
+      primaryBorderColor: '#1B365D',
+      secondaryColor: '#e8e6dc',
+      secondaryTextColor: '#1f1d18',
+      secondaryBorderColor: '#1B365D',
+      tertiaryColor: '#e9ecef',
+      tertiaryTextColor: '#1f1d18',
+      tertiaryBorderColor: '#1B365D',
+      lineColor: '#6b665b',
+      fontSize: '14px',
+      clusterBkg: '#f5f4ed',
+      clusterBorder: '#d4d1c5',
+      edgeLabelBackground: '#f5f4ed',
+      stateBkg: '#efeee5',
+      stateBorder: '#1B365D',
+      stateLabel: '#1f1d18',
+      stateLabelColor: '#1f1d18',
+      transitionLabelColor: '#1f1d18'
+    },
+    flowchart: { curve: 'basis', htmlLabels: true, useMaxWidth: true }
+  });
+</script>
+</body></html>

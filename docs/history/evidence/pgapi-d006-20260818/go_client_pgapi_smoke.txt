@@ -1,0 +1,10 @@
+SearchProducts total=5 err=<nil>
+GetProduct name=标准电机 C68 spec=SKU-C68 err=<nil>
+CreateProduct id=api_10f287fd91bd4e82849d282a575ddfc3 err=<nil>
+UpdateProduct tech=__go_patch__ err=<nil>
+GetCustomer name=北京华信科技 level=A users=1 err=<nil>
+GetAddresses name=北京华信科技 phone=13800000000 err=<nil>
+CreateCustomer id=api_4301a37c119f4a41bee75638d1f7f9c8 err=<nil>
+SearchContracts total=1 spec=[SKU-C68] qty=[1000] err=<nil>
+GetMissing IsNotFound=true err=pgapi 404: record not found
+go_client_exit=0

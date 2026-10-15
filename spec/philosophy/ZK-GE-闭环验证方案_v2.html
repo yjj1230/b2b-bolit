@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>ZK × Graph Engineering 闭环验证方案 v2</title>
+<style>
+  :root {
+    --paper: #f7f6f2;
+    --surface: #ffffff;
+    --surface-2: #eef2ef;
+    --ink: #1e2527;
+    --muted: #5f696b;
+    --line: #d8ddda;
+    --green: #176b54;
+    --green-soft: #e4f1eb;
+    --blue: #255f85;
+    --blue-soft: #e8f0f6;
+    --amber: #8a5a12;
+    --amber-soft: #f7edd8;
+    --red: #9a3b36;
+    --red-soft: #f6e8e5;
+    --code: #192123;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    --serif: "Songti SC", "STSong", "Noto Serif CJK SC", serif;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.8;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--blue); text-underline-offset: 3px; }
+  .shell { width: min(1180px, calc(100% - 40px)); margin: 0 auto; }
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    border-bottom: 1px solid var(--line);
+    background: rgba(247, 246, 242, .96);
+    backdrop-filter: blur(10px);
+  }
+  .topbar-inner {
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .brand { flex: 0 0 auto; font-size: 13px; font-weight: 800; color: var(--green); }
+  .toc {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    white-space: nowrap;
+  }
+  .toc::-webkit-scrollbar { display: none; }
+  .toc a {
+    color: var(--muted);
+    text-decoration: none;
+    padding: 6px 9px;
+    border-radius: 5px;
+    font-size: 12px;
+  }
+  .toc a:hover, .toc a.active { color: var(--ink); background: var(--surface-2); }
+  .hero {
+    padding: 62px 0 38px;
+    border-bottom: 1px solid var(--line);
+  }
+  .eyebrow { color: var(--green); font-size: 12px; font-weight: 800; text-transform: uppercase; }
+  h1, h2, h3 { font-family: var(--serif); }
+  h1 {
+    max-width: 920px;
+    margin: 14px 0 18px;
+    font-size: 42px;
+    line-height: 1.25;
+    letter-spacing: 0;
+  }
+  .hero .lede { max-width: 850px; margin: 0; font-size: 19px; color: #3d484a; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 24px; font-size: 13px; color: var(--muted); }
+  .thesis {
+    margin-top: 34px;
+    padding: 20px 22px;
+    border-left: 4px solid var(--green);
+    background: var(--surface);
+    max-width: 950px;
+  }
+  .thesis strong { color: var(--green); }
+  main { padding: 18px 0 80px; }
+  section { padding-top: 62px; scroll-margin-top: 54px; }
+  h2 { margin: 0; font-size: 28px; line-height: 1.35; }
+  h2 .num { color: var(--green); font-family: var(--sans); font-size: 13px; margin-right: 10px; }
+  .subtitle { max-width: 780px; margin: 8px 0 22px; color: var(--muted); }
+  h3 { margin: 34px 0 10px; font-size: 20px; line-height: 1.5; }
+  p { max-width: 800px; }
+  .verdict {
+    display: grid;
+    grid-template-columns: 180px minmax(0, 1fr);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .verdict + .verdict { margin-top: 10px; }
+  .verdict .label { padding: 16px; font-weight: 800; background: var(--surface-2); }
+  .verdict .body { padding: 16px 18px; }
+  .verdict p { margin: 0; max-width: none; }
+  .tag {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 800;
+    vertical-align: 1px;
+  }
+  .tag.must { color: var(--red); background: var(--red-soft); }
+  .tag.keep { color: var(--green); background: var(--green-soft); }
+  .tag.new { color: var(--blue); background: var(--blue-soft); }
+  .callout {
+    margin: 22px 0;
+    padding: 16px 18px;
+    max-width: 920px;
+    border: 1px solid var(--line);
+    border-left-width: 4px;
+    border-radius: 6px;
+    background: var(--surface);
+  }
+  .callout strong { display: block; margin-bottom: 3px; }
+  .callout.warn { border-left-color: var(--amber); background: var(--amber-soft); }
+  .callout.danger { border-left-color: var(--red); background: var(--red-soft); }
+  .callout.good { border-left-color: var(--green); background: var(--green-soft); }
+  .table-wrap {
+    margin: 20px 0;
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--surface);
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th { padding: 11px 13px; background: var(--surface-2); text-align: left; white-space: nowrap; }
+  td { padding: 11px 13px; border-top: 1px solid var(--line); vertical-align: top; }
+  tr:hover td { background: #fafcfb; }
+  code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em; }
+  code { color: #21597b; background: var(--blue-soft); padding: 1px 5px; border-radius: 3px; }
+  pre {
+    margin: 18px 0;
+    padding: 18px;
+    max-width: 920px;
+    overflow-x: auto;
+    background: var(--code);
+    color: #e9f0ed;
+    border-radius: 6px;
+    font-size: 12.5px;
+    line-height: 1.65;
+  }
+  pre code { color: inherit; background: none; padding: 0; }
+  .flow {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(140px, 1fr));
+    gap: 22px;
+    margin: 28px 0;
+    padding: 20px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--surface);
+  }
+  .flow .node {
+    position: relative;
+    min-height: 108px;
+    padding: 13px;
+    border-top: 3px solid var(--blue);
+    background: var(--blue-soft);
+  }
+  .flow .node:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    right: -17px;
+    top: 49%;
+    width: 11px;
+    height: 11px;
+    border-top: 2px solid var(--muted);
+    border-right: 2px solid var(--muted);
+    transform: rotate(45deg);
+  }
+  .flow .node strong { display: block; font-size: 13px; }
+  .flow .node span { display: block; margin-top: 5px; color: var(--muted); font-size: 12px; line-height: 1.55; }
+  .flow .node.intent { border-color: var(--green); background: var(--green-soft); }
+  .flow .node.runtime { border-color: var(--amber); background: var(--amber-soft); }
+  .diagram-caption { margin: -18px 0 24px; text-align: center; color: var(--muted); font-size: 12px; }
+  .dag {
+    margin: 24px 0;
+    padding: 22px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--surface);
+  }
+  .dag-row { display: flex; align-items: stretch; justify-content: center; gap: 18px; }
+  .dag-arrow { text-align: center; color: var(--muted); font-size: 20px; line-height: 28px; }
+  .dag-box {
+    flex: 1 1 0;
+    max-width: 330px;
+    padding: 13px 14px;
+    border: 1px solid var(--line);
+    border-top: 3px solid var(--blue);
+    background: var(--blue-soft);
+  }
+  .dag-box strong { display: block; }
+  .dag-box span { color: var(--muted); font-size: 12px; }
+  .dag-box.gate { border-top-color: var(--red); background: var(--red-soft); }
+  .dag-box.verify { border-top-color: var(--green); background: var(--green-soft); }
+  .stage {
+    display: grid;
+    grid-template-columns: 52px minmax(0, 1fr);
+    gap: 18px;
+    padding: 24px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .stage-no {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--green-soft);
+    color: var(--green);
+    font-weight: 900;
+  }
+  .stage h3 { margin: 0 0 6px; }
+  .stage p { margin: 5px 0 12px; }
+  .stage-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .fact { padding: 11px 12px; border-left: 2px solid var(--line); background: var(--surface); font-size: 12.5px; }
+  .fact b { display: block; color: var(--muted); font-size: 11px; text-transform: uppercase; }
+  .levels { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin: 20px 0; }
+  .level { padding: 14px; border-top: 4px solid var(--line); background: var(--surface); }
+  .level:nth-child(1) { border-color: #718087; }
+  .level:nth-child(2) { border-color: var(--blue); }
+  .level:nth-child(3) { border-color: var(--green); }
+  .level:nth-child(4) { border-color: var(--amber); }
+  .level:nth-child(5) { border-color: var(--red); }
+  .level b { display: block; }
+  .level span { color: var(--muted); font-size: 12px; }
+  .checklist { list-style: none; padding: 0; max-width: 900px; }
+  .checklist li { position: relative; padding: 8px 0 8px 30px; border-bottom: 1px solid var(--line); }
+  .checklist li::before { content: "✓"; position: absolute; left: 4px; color: var(--green); font-weight: 900; }
+  .decision {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    margin: 20px 0;
+  }
+  .decision > div { padding: 14px; background: var(--surface); border-top: 3px solid var(--line); }
+  .decision .pass { border-color: var(--green); }
+  .decision .review { border-color: var(--amber); }
+  .decision .fail { border-color: var(--red); }
+  .decision .invalid { border-color: var(--blue); }
+  .decision b { display: block; }
+  footer { margin-top: 70px; padding: 28px 0; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+  @media (max-width: 920px) {
+    h1 { font-size: 34px; }
+    .flow { grid-template-columns: 1fr; gap: 10px; }
+    .flow .node { min-height: 0; }
+    .flow .node:not(:last-child)::after { display: none; }
+    .stage-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .levels, .decision { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 640px) {
+    .shell { width: min(100% - 26px, 1180px); }
+    .topbar-inner { gap: 8px; }
+    .brand { display: none; }
+    h1 { font-size: 29px; }
+    .hero { padding: 42px 0 30px; }
+    .hero .lede { font-size: 17px; }
+    section { padding-top: 50px; }
+    h2 { font-size: 23px; }
+    .verdict { grid-template-columns: 1fr; }
+    .verdict .label { padding: 10px 14px; }
+    .dag-row { flex-direction: column; }
+    .dag-box { max-width: none; }
+    .stage { grid-template-columns: 1fr; gap: 8px; }
+    .stage-grid, .levels, .decision { grid-template-columns: 1fr; }
+  }
+  @media print {
+    body { background: white; font-size: 11pt; }
+    .topbar { display: none; }
+    .shell { width: 100%; }
+    section { break-inside: avoid; padding-top: 24px; }
+    .hero { padding-top: 20px; }
+    .table-wrap { overflow: visible; }
+    a { color: inherit; text-decoration: none; }
+  }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="shell topbar-inner">
+    <div class="brand">ZK-GE / v2</div>
+    <nav class="toc" aria-label="文档目录">
+      <a href="#audit">审计结论</a>
+      <a href="#boundary">证明边界</a>
+      <a href="#trust">信任模型</a>
+      <a href="#graphs">五图体系</a>
+      <a href="#protocol">证据协议</a>
+      <a href="#pipeline">九阶段</a>
+      <a href="#assurance">保证等级</a>
+      <a href="#evidence">证据契约</a>
+      <a href="#gate">决策门禁</a>
+      <a href="#tooling">实现架构</a>
+      <a href="#roadmap">落地路线</a>
+      <a href="#limits">边界</a>
+    </nav>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="shell">
+    <div class="eyebrow">Verification methodology · version 2.0</div>
+    <h1>ZK × Graph Engineering 闭环验证方案</h1>
+    <p class="lede">目标不是宣称“证明 AI 写的每一行都正确”，而是在<strong>不做逐行源码审查</strong>的前提下，把需求、架构、实现、运行结果与风险接受绑定成一条可复现、可追溯、可独立挑战的证据链。</p>
+    <div class="hero-meta">
+      <span>核心：规约先行</span><span>拓扑：实现与验证并行</span><span>决策：按风险分级</span><span>结果：有界保证，不做绝对承诺</span>
+    </div>
+    <div class="thesis"><strong>v2 的核心修正：</strong>你可以不读代码，但不能不定义正确性；可以把代码隔离在验证边界之外，但不能把测试报告误称为密码学证明；可以自动合并低风险变更，但高风险系统仍必须对意图和剩余风险做人工决策。</div>
+  </div>
+</header>
+
+<main class="shell">
+  <section id="audit">
+    <h2><span class="num">00</span>对现有方案的审计结论</h2>
+    <p class="subtitle">原方案的方向成立：Graph Engineering 很适合把“不可读的实现”投影成可验证结构。但有八处需要实质修改，否则“全绿”会制造虚假的确定感。</p>
+
+    <div class="verdict"><div class="label"><span class="tag must">必须修改</span> 标题与结论</div><div class="body"><p>“不读一行代码，验证 AI 写的每一行”无法成立。有限测试与结构图不能证明任意程序的全部语义。改为“免逐行审查的有界保证”，且每个结论都必须写清<strong>范围、假设、保证等级与剩余风险</strong>。</p></div></div>
+    <div class="verdict"><div class="label"><span class="tag must">必须修改</span> ZKP 对应</div><div class="body"><p>源码不是被密码学隐藏的 witness，CI 也不是零知识 verifier。更准确的叫法是<strong>代码隔离 / 选择性披露</strong>。Git hash 只是内容寻址；只有受保护引用、签名证明和外部日志共同存在时，才形成防替换的版本绑定。</p></div></div>
+    <div class="verdict"><div class="label"><span class="tag must">必须修改</span> 阶段拓扑</div><div class="body"><p>测试设计不能在实现完成后才开始。阶段 ④“实现”和阶段 ⑤“挑战设计”必须从架构节点并行分叉，由隔离上下文或独立验证者完成，再在阶段 ⑥汇合。这才符合 Graph Engineering 的菱形模式。</p></div></div>
+    <div class="verdict"><div class="label"><span class="tag must">必须修改</span> 独立性</div><div class="body"><p>如果同一个 AI 写规格、代码、测试和最终总结，闭环只是自证。必须隔离实现者与验证者的上下文、权限和输入；隐藏挑战在实现冻结前提交摘要，在执行时才揭示给验证环境。</p></div></div>
+    <div class="verdict"><div class="label"><span class="tag must">必须修改</span> 图的保真度</div><div class="body"><p>“类型 = 本体、签名 = 关系”是有用的启发，不是普遍等式。动态调用、反射、配置、SQL、消息、基础设施和运行时路由都会逃出静态代码图。需要显式追踪映射与运行图补证。</p></div></div>
+    <div class="verdict"><div class="label"><span class="tag must">必须修改</span> 完备性</div><div class="body"><p>能力问题遍历返回非空，只证明“存在一条结构路径”，不证明业务答案正确。原“业务完备性”应改为<strong>声明范围内的业务符合性</strong>；只有有限状态模型或形式化内核可使用更强的完备性措辞。</p></div></div>
+    <div class="verdict"><div class="label"><span class="tag new">新增</span> 可信计算基</div><div class="body"><p>编译器、图抽取器、测试框架、oracle、CI 镜像、策略引擎、签名密钥都可能出错或被篡改。必须列出 TCB（Trusted Computing Base）、固定版本、做自测，并让证据绑定验证器摘要。</p></div></div>
+    <div class="verdict"><div class="label"><span class="tag new">新增</span> 运行闭环</div><div class="body"><p>合并不是闭环终点。环境差异、真实数据和外部依赖只会在运行时出现。需要金丝雀、业务不变量、SLO、异常预算和自动回滚，让运行证据反哺 Meta 与图。</p></div></div>
+
+    <div class="callout good"><strong>应保留的核心</strong>能力问题先行、世界知识与任务拓扑双视角、确定性抽图、预期图与实际图比对、属性/模型验证、证据汇总和风险边上的人类闸门。这些是原方案最有价值的骨架。</div>
+  </section>
+
+  <section id="boundary">
+    <h2><span class="num">01</span>先定义“保证”到底是什么</h2>
+    <p class="subtitle">正确性不是代码自身的属性，而是“实现相对于某份规约、在某组环境与假设下”的关系。</p>
+
+    <div class="callout danger"><strong>不可实现的命题</strong><code>所有代码路径 × 所有输入 × 所有环境 × 所有未来依赖</code> 都正确。对一般程序，这既无法通过有限测试得到，也不能靠代码图得到。</div>
+
+    <p>v2 只接受如下形式的可审计声明：</p>
+    <pre><code>AssuranceClaim :=
+  subject_artifact_digest
+  + specification_digest
+  + environment_digest
+  + verifier_set_digest
+  + covered_properties
+  + excluded_properties
+  + assumptions
+  + evidence_results
+  + residual_risk
+  + assurance_level</code></pre>
+
+    <div class="table-wrap"><table>
+      <thead><tr><th>术语</th><th>v2 的精确定义</th><th>不代表什么</th></tr></thead>
+      <tbody>
+        <tr><td><b>免读代码</b></td><td>产品负责人不做逐行源码审查；实现仅进入隔离构建与验证环境</td><td>源码从未被机器、验证器或受权专家访问</td></tr>
+        <tr><td><b>通过</b></td><td>已声明门禁对同一制品摘要全部满足，且无未接受的高风险例外</td><td>软件绝对无 bug</td></tr>
+        <tr><td><b>符合性</b></td><td>已声明的结构、行为、非功能属性与可观察结果满足规约</td><td>遗漏需求也被验证</td></tr>
+        <tr><td><b>证据</b></td><td>可复现验证运行的结构化、可溯源产物</td><td>密码学意义上的“程序正确性证明”</td></tr>
+        <tr><td><b>闭环</b></td><td>生产信号能触发假设、规约、挑战和图的修订</td><td>CI 全绿后流程结束</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="trust">
+    <h2><span class="num">02</span>威胁模型与信任边界</h2>
+    <p class="subtitle">先假设系统会怎样“骗过全绿”，再设计验证。这里的攻击者未必有恶意，也可能只是同源偏差、工具盲区或环境漂移。</p>
+
+    <div class="table-wrap"><table>
+      <thead><tr><th>威胁</th><th>典型失效</th><th>v2 控制</th></tr></thead>
+      <tbody>
+        <tr><td>同源自证</td><td>AI 按自己的错误理解同时写实现和测试</td><td>实现者/验证者隔离；独立 oracle；隐藏挑战；对抗性 reviewer</td></tr>
+        <tr><td>规格投机</td><td>为了让代码通过而修改 Meta、约束或阈值</td><td>规格先冻结；protected path；变更需要重新审批并使旧证据失效</td></tr>
+        <tr><td>测试过拟合</td><td>只针对已知样例写分支</td><td>生成式、变形、差分与隐藏测试；变异分数验证测试强度</td></tr>
+        <tr><td>报告伪造/错配</td><td>拿旧报告证明新提交</td><td>每份证据绑定源码、制品、规格、环境和验证器摘要</td></tr>
+        <tr><td>抽图盲区</td><td>反射、运行时注入、消息路由不在静态图中</td><td>静态图 + 构建图 + 运行图；对盲区设 coverage debt 和阻断阈值</td></tr>
+        <tr><td>验证器缺陷</td><td>规则引擎或 oracle 本身错误</td><td>验证器版本锁定、自测语料、交叉验证、故障注入、双实现比对</td></tr>
+        <tr><td>环境漂移</td><td>本地通过、生产失败</td><td>可复现构建、镜像摘要、依赖锁、迁移演练、金丝雀与回滚</td></tr>
+        <tr><td>未建模风险</td><td>安全、性能、隐私、可用性完全没进 Meta</td><td>风险模板强制列项；未填写不是“不适用”，而是“未知并阻断”</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>可信计算基 TCB</h3>
+    <p>保证强度不会超过以下组件中最弱的一项：规格与 oracle、源码解析器、编译器/运行时、测试与模型检查器、依赖解析器、CI runner 与基础镜像、策略引擎、制品仓库、签名密钥、生产遥测。每个组件都要有 <code>id + version + digest + owner + self_test</code>。</p>
+    <div class="callout warn"><strong>两个人类决策点，而不是一个</strong>G1 在实现前确认“这就是要解决的问题、这些风险可接受”；G2 在发布前确认“证据覆盖了约定范围、例外与剩余风险可接受”。两次都不要求读代码，但都不能交给写代码的同一个 AI。</div>
+  </section>
+
+  <section id="graphs">
+    <h2><span class="num">03</span>从“三张图”升级为“五图证据体系”</h2>
+    <p class="subtitle">三图框架适合解释理念，但要支撑真实发布决策，还需要运行图和证据图。五张图通过稳定 ID 与摘要绑定，而不是靠名称相似来猜映射。</p>
+
+    <div class="flow" aria-label="五图证据体系">
+      <div class="node intent"><strong>1. 意图图</strong><span>能力、场景、主体、规则、不变量、非功能目标、风险、假设</span></div>
+      <div class="node"><strong>2. 架构图</strong><span>边界、契约、数据所有权、信任域、允许/禁止依赖、部署单元</span></div>
+      <div class="node"><strong>3. 实现图</strong><span>符号、调用、数据流、依赖、配置、Schema、API、IaC、制品</span></div>
+      <div class="node runtime"><strong>4. 运行图</strong><span>真实调用、消息流、拓扑、SLO、业务事件、异常与回滚</span></div>
+      <div class="node intent"><strong>5. 证据图</strong><span>Claim → Challenge → Run → Evidence → Decision → Exception</span></div>
+    </div>
+    <div class="diagram-caption">五图不是五份手工文档：意图与架构是承诺；实现与运行由工具抽取；证据图由流水线生成。</div>
+
+    <div class="table-wrap"><table>
+      <thead><tr><th>映射边</th><th>必须回答</th><th>失败条件</th></tr></thead>
+      <tbody>
+        <tr><td><code>REALIZES</code></td><td>哪个架构节点实现哪个意图节点？</td><td>意图无实现，或实现无意图来源</td></tr>
+        <tr><td><code>IMPLEMENTS</code></td><td>哪个制品/符号实现哪个契约？</td><td>契约只有名称匹配，没有稳定 ID</td></tr>
+        <tr><td><code>OBSERVED_AS</code></td><td>静态边在运行时是否出现，是否出现未声明边？</td><td>动态边无法归属或越过信任边界</td></tr>
+        <tr><td><code>VERIFIED_BY</code></td><td>每个 claim 由哪些相互独立的 verifier 覆盖？</td><td>只有实现者自写测试，或只有单一证据类型</td></tr>
+        <tr><td><code>INVALIDATES</code></td><td>哪类变更使哪些证据过期？</td><td>换了代码/依赖/规格后仍复用旧绿灯</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="protocol">
+    <h2><span class="num">04</span>ZK 灵感应落在“证据协议”，不是术语包装</h2>
+    <p class="subtitle">v2 保留承诺、挑战、响应、验证四段式，但使用工程上可成立的含义。</p>
+
+    <div class="table-wrap"><table>
+      <thead><tr><th>协议步骤</th><th>工程实现</th><th>必须满足</th></tr></thead>
+      <tbody>
+        <tr><td><b>Statement</b></td><td>可执行 claim 集：功能、结构、不变量、SLO、安全与合规</td><td>每条有稳定 ID、owner、风险级别、oracle 与验收阈值</td></tr>
+        <tr><td><b>Commitment</b></td><td>对规格包、挑战包、工具链和策略包计算摘要并签名</td><td>先于实现冻结；变更会生成新版本并使相关证据失效</td></tr>
+        <tr><td><b>Challenge</b></td><td>公开门禁 + 隐藏样例 + 生成式输入 + 故障注入 + 图约束查询</td><td>由独立验证域产生；可记录随机种子；不可被实现者定向适配</td></tr>
+        <tr><td><b>Response</b></td><td>构建制品在隔离环境中的行为、轨迹、指标和反例</td><td>直接采集，不接受 AI 自述替代原始输出</td></tr>
+        <tr><td><b>Verification</b></td><td>固定版本 verifier 按策略计算 pass/fail/invalid</td><td>验证器与输入摘要写入证据；能由另一 runner 重放</td></tr>
+        <tr><td><b>Attestation</b></td><td>签名 evidence manifest 与 provenance</td><td>绑定同一源码、制品、规格、环境；防止报告拼接</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="callout good"><strong>可以使用密码学，但不要混淆作用</strong>哈希、签名、透明日志和证明链能证明“这份证据对应这份输入、未被替换、由这个 runner 产生”；它们不能独自证明业务逻辑正确。密码学在这里保护<strong>证据完整性与来源</strong>。</div>
+  </section>
+
+  <section id="pipeline">
+    <h2><span class="num">05</span>九阶段闭环 v2：同样九步，不再假装是直线</h2>
+    <p class="subtitle">阶段编号表达治理顺序；真正的执行拓扑是 DAG。阶段 ④和 ⑤并行，阶段 ⑥汇合，阶段 ⑨把生产事实反馈回阶段 ①。</p>
+
+    <div class="dag" aria-label="九阶段任务图">
+      <div class="dag-row"><div class="dag-box gate"><strong>G1 意图批准</strong><span>① Meta → ② GE 设计 → ③ 架构与验证计划</span></div></div>
+      <div class="dag-arrow">↓ 分叉</div>
+      <div class="dag-row">
+        <div class="dag-box"><strong>④ 实现域</strong><span>AI 只获得公开契约；输出冻结制品</span></div>
+        <div class="dag-box verify"><strong>⑤ 独立挑战域</strong><span>oracle、隐藏挑战、模型与对抗用例</span></div>
+      </div>
+      <div class="dag-arrow">↓ 汇合</div>
+      <div class="dag-row"><div class="dag-box verify"><strong>⑥ 质量与制品证明</strong><span>构建、静态、测试、供应链、可复现性</span></div><div class="dag-box verify"><strong>⑦ 多图偏差验证</strong><span>意图/架构/实现/运行的约束差分</span></div></div>
+      <div class="dag-arrow">↓</div>
+      <div class="dag-row"><div class="dag-box verify"><strong>⑧ 业务符合性与鲁棒性</strong><span>属性、状态、变形、差分、故障与安全</span></div></div>
+      <div class="dag-arrow">↓</div>
+      <div class="dag-row"><div class="dag-box gate"><strong>G2 发布与剩余风险批准</strong><span>⑨ 适配性、金丝雀、运行证据、回滚、Meta 反馈</span></div></div>
+    </div>
+
+    <div class="stage"><div class="stage-no">1</div><div><h3>项目 Meta：定义价值、边界与风险宪法</h3><p>不只写领域描述与能力问题，还要写反目标、外部依赖、数据分类、不可逆动作、SLO、合规约束、威胁模型、风险等级和已知未知项。</p><div class="stage-grid"><div class="fact"><b>承诺</b><code>meta.yaml</code> + <code>risk.yaml</code></div><div class="fact"><b>挑战</b>每个目标可观察；每个风险有控制或明确接受</div><div class="fact"><b>证据</b>Meta lint、歧义/冲突/孤儿 claim 报告</div><div class="fact"><b>失效</b>“以后再定”、空 oracle、未知项被写成 N/A</div></div></div></div>
+    <div class="stage"><div class="stage-no">2</div><div><h3>Graph Engineering 设计：建立五图 Schema 与追踪规则</h3><p>定义节点、边、来源、置信度、时间与失效语义。每个 claim 必须能追踪到架构、挑战和证据；不要求所有业务问题都强行翻译成代码图遍历。</p><div class="stage-grid"><div class="fact"><b>承诺</b><code>ontology.yaml</code> + <code>traceability.yaml</code></div><div class="fact"><b>挑战</b>Schema 自洽、关系有精确动词、每条事实带 provenance</div><div class="fact"><b>证据</b>Schema/约束报告与 trace coverage</div><div class="fact"><b>失效</b>靠名称相似自动对齐意图与代码</div></div></div></div>
+    <div class="stage"><div class="stage-no">3</div><div><h3>架构与验证设计：同时承诺“怎么造”和“怎么证”</h3><p>模块 DAG 之外，必须包含接口契约、数据所有权、信任域、失败模式、迁移/回滚、允许依赖，以及每条 claim 的验证方法和最小阈值。G1 在这里冻结规格摘要。</p><div class="stage-grid"><div class="fact"><b>承诺</b><code>architecture.yaml</code> + <code>verification-plan.yaml</code></div><div class="fact"><b>挑战</b>无环、无越界数据流、关键风险至少两种独立证据</div><div class="fact"><b>证据</b>架构规则报告、claim-to-verifier 矩阵</div><div class="fact"><b>失效</b>只有组件图，没有契约和失败语义</div></div></div></div>
+    <div class="stage"><div class="stage-no">4</div><div><h3>隔离实现：代码是受控制品，不是神秘 witness</h3><p>实现域只读冻结的公开契约，不能改规格、门禁和隐藏挑战。输出源码 commit、依赖锁、SBOM、构建脚本与候选制品摘要。产品负责人不读源码。</p><div class="stage-grid"><div class="fact"><b>输入</b>签名规格包与公开契约</div><div class="fact"><b>挑战</b>hermetic build、依赖锁、最小权限</div><div class="fact"><b>证据</b>source/build/artifact digests + provenance</div><div class="fact"><b>失效</b>实现能修改测试阈值或报告生成器</div></div></div></div>
+    <div class="stage"><div class="stage-no">5</div><div><h3>独立挑战设计：在另一条边上构造 oracle</h3><p>验证域从 Meta、模型、威胁与历史事故生成挑战，不读取实现者的推理与测试。公开测试帮助开发；隐藏测试、生成种子和对抗语料只在候选制品冻结后执行。</p><div class="stage-grid"><div class="fact"><b>承诺</b>challenge pack 摘要先冻结</div><div class="fact"><b>方法</b>例子 + 属性 + 变形 + 差分 + 模型 + 故障</div><div class="fact"><b>证据</b>oracle coverage、mutation score、challenge provenance</div><div class="fact"><b>失效</b>把覆盖率当测试有效性的充分条件</div></div></div></div>
+    <div class="stage"><div class="stage-no">6</div><div><h3>代码质量与制品验证：同一个候选物一次性过门</h3><p>所有检查都针对同一个 artifact digest：编译、类型、lint、静态安全、单元/契约/集成测试、依赖许可与漏洞、SBOM、可复现构建。重建后摘要变化则证据无效。</p><div class="stage-grid"><div class="fact"><b>挑战</b>固定镜像、固定种子、无网络或白名单网络</div><div class="fact"><b>门禁</b>结果阈值按风险等级，不设统一 80%</div><div class="fact"><b>证据</b>原始日志摘要 + 结构化结果 + attestation</div><div class="fact"><b>失效</b>flaky test 重跑到绿；只存摘要不存原始证据</div></div></div></div>
+    <div class="stage"><div class="stage-no">7</div><div><h3>代码偏差验证：从结构 diff 升级为多图约束</h3><p>比较的不是节点数量，而是约束：禁止依赖、信任域穿越、数据所有权、API/schema 兼容、关键路径、变更爆炸半径、运行时未声明边。动态盲区作为显式 debt。</p><div class="stage-grid"><div class="fact"><b>预期</b>意图图 + 架构图 + policy</div><div class="fact"><b>实际</b>实现图 + 构建图 + 运行图</div><div class="fact"><b>证据</b>逐条 violation，带源节点、规则、严重度和 provenance</div><div class="fact"><b>失效</b>“偏差为空”被解释为语义正确</div></div></div></div>
+    <div class="stage"><div class="stage-no">8</div><div><h3>业务符合性与鲁棒性：验证可观察语义</h3><p>能力问题必须落到可观察业务结果，而不只是图路径存在。有限状态系统做模型检查；代数不变量做属性测试；无精确 oracle 时做变形或差分测试；外部依赖做契约、回放与故障注入。</p><div class="stage-grid"><div class="fact"><b>功能</b>场景、状态迁移、前后置条件</div><div class="fact"><b>鲁棒</b>边界、并发、超时、重试、幂等、恢复</div><div class="fact"><b>非功能</b>安全、隐私、性能、可靠性、可访问性</div><div class="fact"><b>证据</b>反例优先；通过率必须带样本、种子和模型范围</div></div></div></div>
+    <div class="stage"><div class="stage-no">9</div><div><h3>Meta 适配性、发布与运行反馈：真正闭环</h3><p>聚合 claim 的独立证据，计算保证等级，列出例外和剩余风险。G2 决策后先金丝雀；生产业务不变量、SLO 与安全信号持续进入运行图。偏差触发回滚并创建新的 Meta/挑战版本。</p><div class="stage-grid"><div class="fact"><b>决策</b>pass / conditional / fail / invalid</div><div class="fact"><b>发布</b>签名制品、渐进流量、自动回滚</div><div class="fact"><b>运行</b>SLO、业务不变量、异常预算、漂移</div><div class="fact"><b>反馈</b>incident → new claim/challenge → 新一轮</div></div></div></div>
+  </section>
+
+  <section id="assurance">
+    <h2><span class="num">06</span>保证等级与风险分级</h2>
+    <p class="subtitle">不是“绿/红”二值神话，而是让保证强度与错误代价匹配。系统总等级取关键 claim 的最低等级，而不是平均值。</p>
+
+    <div class="levels">
+      <div class="level"><b>L0 可构建</b><span>锁定环境中能产生制品；没有业务保证。</span></div>
+      <div class="level"><b>L1 结构符合</b><span>类型、契约、依赖和图约束满足；不代表行为正确。</span></div>
+      <div class="level"><b>L2 行为符合</b><span>场景、属性、变形/差分和变异门禁通过；保证限于输入模型。</span></div>
+      <div class="level"><b>L3 运行可信</b><span>安全、性能、故障、金丝雀、SLO 和回滚经过验证。</span></div>
+      <div class="level"><b>L4 形式化内核</b><span>关键有限模型或算法有机器检查证明；不自动外推到整个系统。</span></div>
+    </div>
+
+    <div class="table-wrap"><table>
+      <thead><tr><th>风险级别</th><th>例子</th><th>最低要求</th><th>自动发布</th></tr></thead>
+      <tbody>
+        <tr><td><b>R0</b> 实验/可丢弃</td><td>内部原型、无真实数据</td><td>L1；基础静态与冒烟</td><td>允许</td></tr>
+        <tr><td><b>R1</b> 可逆内部变更</td><td>后台工具、可快速回滚</td><td>L2；变异门禁；金丝雀</td><td>策略允许时</td></tr>
+        <tr><td><b>R2</b> 客户/敏感数据</td><td>订单、身份、计费</td><td>L3；安全与隐私；双证据；G2</td><td>不允许无条件自动</td></tr>
+        <tr><td><b>R3</b> 不可逆/监管/人身</td><td>资金划拨、删除、医疗、权限根</td><td>关键内核 L4 或独立专家验证；演练回滚；职责分离</td><td>禁止</td></tr>
+      </tbody>
+    </table></div>
+    <div class="callout warn"><strong>“不读代码”的适用边界</strong>R0-R1 可以主要依靠自动证据；R2-R3 仍可让产品所有者不读代码，但必须引入独立安全/领域验证者、形式化内核或合格第三方。执念应是“我本人不逐行 review”，而不是“任何人都永远不检查高风险实现”。</div>
+  </section>
+
+  <section id="evidence">
+    <h2><span class="num">07</span>证据契约：让每个绿灯都能追到同一制品</h2>
+    <p class="subtitle">HTML 总表只是视图，不能成为事实源。事实源必须是机器可读、不可拼接、可重放的 evidence manifest。</p>
+
+    <pre><code>{
+  "schema": "zkge.evidence/v2",
+  "claim_id": "BILLING.INVARIANT.004",
+  "subject": {
+    "source_commit": "sha256:...",
+    "artifact": "sha256:...",
+    "sbom": "sha256:..."
+  },
+  "commitments": {
+    "meta": "sha256:...",
+    "architecture": "sha256:...",
+    "challenge_pack": "sha256:...",
+    "policy": "sha256:..."
+  },
+  "run": {
+    "environment": "sha256:...",
+    "verifier": "property-runner@2.3.1#sha256:...",
+    "seed": "1844674407370955161",
+    "started_at": "2026-08-06T12:00:00Z"
+  },
+  "result": {
+    "status": "pass",
+    "samples": 100000,
+    "mutation_score": 0.91,
+    "counterexamples": [],
+    "raw_evidence": "sha256:..."
+  },
+  "scope": ["currency=CNY", "amount&lt;=1e9"],
+  "exclusions": ["third_party_settlement"],
+  "signature": "sigstore-or-org-signature"
+}</code></pre>
+
+    <h3>证据的七条不变量</h3>
+    <ul class="checklist">
+      <li>每条证据只证明一个明确 claim，不能用“测试全绿”覆盖不相干结论。</li>
+      <li>源码、最终制品、规格、挑战、策略、环境、验证器七类摘要必须齐全。</li>
+      <li>证据必须保存原始输出或其内容摘要；AI 生成的自然语言摘要仅是派生视图。</li>
+      <li>任一绑定摘要变化，相关证据自动标记 <code>invalid</code>，不能继续显示绿色。</li>
+      <li>随机测试必须记录生成器版本、种子、样本空间和最小反例。</li>
+      <li>flaky 不能靠重跑到绿；必须报告失败分布，并在风险策略中单独处理。</li>
+      <li>例外必须有 owner、理由、补偿控制、到期时间；过期例外自动阻断。</li>
+    </ul>
+  </section>
+
+  <section id="gate">
+    <h2><span class="num">08</span>最终门禁：不读代码时，你到底看什么</h2>
+    <p class="subtitle">你不需要看一堆工具日志，只看一个“可下钻但不可粉饰”的决策面板。默认展示反例、缺口、过期证据与剩余风险，而不是绿色数量。</p>
+
+    <div class="decision">
+      <div class="pass"><b>PASS</b><span>所有必需 claim 达到风险等级要求；无未批准例外；证据绑定有效。</span></div>
+      <div class="review"><b>CONDITIONAL</b><span>仅允许有时限、可补偿、可回滚的例外；必须由风险 owner 接受。</span></div>
+      <div class="fail"><b>FAIL</b><span>存在反例、阈值失败、未建模高风险或越权依赖；不得合并/发布。</span></div>
+      <div class="invalid"><b>INVALID</b><span>摘要错配、环境/验证器未知、证据过期或 provenance 断裂；不是失败，而是没有可用证明。</span></div>
+    </div>
+
+    <div class="table-wrap"><table>
+      <thead><tr><th>面板必须显示</th><th>禁止的替代指标</th></tr></thead>
+      <tbody>
+        <tr><td>本次变更影响的 claim、风险级别、最低/实际保证等级</td><td>总测试数、总绿灯数</td></tr>
+        <tr><td>所有反例、越界边、未覆盖动态点、flaky 与验证器异常</td><td>单一代码覆盖率</td></tr>
+        <tr><td>规格/制品/环境/验证器摘要是否一致</td><td>“最后一次 CI 成功”徽章</td></tr>
+        <tr><td>供应链变化、权限变化、数据迁移和回滚演练结果</td><td>只看业务单测</td></tr>
+        <tr><td>剩余风险、例外 owner 与到期时间</td><td>AI 自评“低风险”</td></tr>
+        <tr><td>生产金丝雀和 SLO 状态，及自动回滚是否可用</td><td>合并即完成</td></tr>
+      </tbody>
+    </table></div>
+
+    <pre><code>release_allowed =
+  all(required_claims.meet_minimum_level)
+  and evidence_bindings.valid
+  and no(open_counterexample)
+  and no(unowned_or_expired_exception)
+  and supply_chain_policy.pass
+  and rollback_verified
+  and human_gate_G2.approved_when_required</code></pre>
+  </section>
+
+  <section id="tooling">
+    <h2><span class="num">09</span>最小实现架构与仓库约定</h2>
+    <p class="subtitle">原方案把新增量估计为“四个胶水脚本”，偏乐观。真正可依赖的系统至少需要七个职责清晰的组件，并把报告生成与判定逻辑分开。</p>
+
+    <div class="table-wrap"><table>
+      <thead><tr><th>组件</th><th>职责</th><th>首选形态</th></tr></thead>
+      <tbody>
+        <tr><td><b>spec compiler</b></td><td>校验 Meta/claim/架构/验证计划，生成稳定 ID 与摘要</td><td>CUE / JSON Schema / 自定义 CLI</td></tr>
+        <tr><td><b>graph adapters</b></td><td>抽取代码、API、DB、配置、IaC、依赖和运行轨迹</td><td>code-review-graph + 语言/平台适配器</td></tr>
+        <tr><td><b>challenge registry</b></td><td>保存公开/隐藏挑战承诺、oracle、生成器与种子</td><td>只读制品库 + 权限隔离</td></tr>
+        <tr><td><b>verifier runners</b></td><td>静态、契约、属性、模型、变异、安全、性能、故障验证</td><td>固定容器镜像，按能力插件化</td></tr>
+        <tr><td><b>evidence emitter</b></td><td>统一输出 schema，绑定摘要、原始日志和 provenance</td><td>CI library，不允许各工具自由写总结</td></tr>
+        <tr><td><b>policy engine</b></td><td>按风险等级求值，输出 pass/conditional/fail/invalid</td><td>OPA/Rego 或等价确定性规则引擎</td></tr>
+        <tr><td><b>attestor &amp; viewer</b></td><td>签名证据并生成只读决策面板</td><td>in-toto/SLSA 风格 provenance + 静态 HTML</td></tr>
+      </tbody>
+    </table></div>
+
+    <pre><code>.zkge/
+  meta.yaml                 # 价值、边界、风险、SLO、假设
+  ontology.yaml             # 五图 schema
+  claims/*.yaml             # 可执行声明与稳定 ID
+  architecture/*.yaml       # 契约、信任域、数据流、回滚
+  verification-plan.yaml    # claim -> verifier -> threshold
+  policy/*.rego             # 风险分级与发布规则
+  commitments/              # 已签名摘要
+  evidence/                 # 结构化证据索引（大日志放制品库）
+  exceptions/*.yaml         # owner、补偿控制、expires_at
+  dashboard/index.html      # 派生视图，不参与判定</code></pre>
+
+    <div class="callout warn"><strong>对 code-review-graph 的现实定位</strong>它可以成为实现图与影响分析的重要数据源，但不能单独承担“业务正确性验证器”。v2 不再写“70% 已就绪”这类未经能力基线验证的比例。接入前应对每种语言、动态特性、数据流和生成代码做抽取精度/召回基准，并把盲区纳入政策。</div>
+  </section>
+
+  <section id="roadmap">
+    <h2><span class="num">10</span>落地路线：先证明验证系统抓得到错</h2>
+    <p class="subtitle">每轮验收都用已知缺陷、变异或故障注入来验证验证者本身。不要先追求覆盖所有仓库。</p>
+
+    <div class="table-wrap"><table>
+      <thead><tr><th>Round</th><th>范围</th><th>交付</th><th>硬验收</th></tr></thead>
+      <tbody>
+        <tr><td><b>0 基线</b></td><td>选一个 R1、可回滚、有真实历史 bug 的服务</td><td>20 个 claim、风险表、10 个历史缺陷语料、当前盲区清单</td><td>不改代码先回放：系统能检出多少历史缺陷；无基线不宣称有效</td></tr>
+        <tr><td><b>1 证据骨架</b></td><td>阶段 1-6</td><td>摘要绑定、可复现构建、结构化 evidence、G1/G2</td><td>替换 commit/制品/报告任一项，决策必须变为 INVALID</td></tr>
+        <tr><td><b>2 五图偏差</b></td><td>阶段 7</td><td>追踪矩阵、架构规则、静态+运行差分</td><td>注入禁止依赖、未声明消息边、schema 破坏，必须精确定位</td></tr>
+        <tr><td><b>3 行为强度</b></td><td>阶段 5、8</td><td>属性/变形/差分/模型/变异组合</td><td>对业务核心注入语义 bug；以 mutation score 和漏检原因验收</td></tr>
+        <tr><td><b>4 生产闭环</b></td><td>阶段 9</td><td>金丝雀、业务不变量、SLO、回滚、incident 反哺</td><td>演练依赖超时、数据错误和回滚；证据图自动生成新 claim</td></tr>
+        <tr><td><b>5 扩域</b></td><td>逐仓库/语言/风险扩展</td><td>验证器能力矩阵和成本数据</td><td>只有在漏检率、误报率、时延和成本达标后扩大自动发布范围</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>90 天建议节奏</h3>
+    <ul class="checklist">
+      <li>第 1-2 周：选 PoC、整理历史 bug、写 claim 与风险模板，完成 G1。</li>
+      <li>第 3-5 周：实现证据 schema、摘要绑定、策略求值和 INVALID 语义。</li>
+      <li>第 6-8 周：接入实现图、依赖/契约/数据流规则，建立抽取盲区基线。</li>
+      <li>第 9-10 周：加入属性、变形、差分与变异测试，验证测试本身。</li>
+      <li>第 11-12 周：金丝雀、业务不变量、回滚演练；用数据决定是否扩大免审范围。</li>
+    </ul>
+  </section>
+
+  <section id="limits">
+    <h2><span class="num">11</span>最终边界与结论</h2>
+    <p class="subtitle">这套方法可以显著降低人工读代码的需要，但不能消除需求责任、oracle 责任与风险责任。</p>
+
+    <div class="table-wrap"><table>
+      <thead><tr><th>它能给你的</th><th>它不能给你的</th></tr></thead>
+      <tbody>
+        <tr><td>实现与冻结规格之间的结构和行为符合性证据</td><td>规格本身没有遗漏或理解错误的保证</td></tr>
+        <tr><td>同一制品、环境和验证器下可复现的结果</td><td>所有未来环境和输入都正确</td></tr>
+        <tr><td>对同源自证、报告错配和工具盲区的系统性控制</td><td>完全不信任任何工具或人的无信任系统</td></tr>
+        <tr><td>按风险自动化合并/发布低风险变更的依据</td><td>让高风险不可逆决策完全无人负责</td></tr>
+        <tr><td>把生产事故转成新 claim、新挑战和新图约束的闭环</td><td>一次建设、永久有效的验证体系</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="thesis"><strong>最终判断：</strong>你的直觉有效，但真正有效的不是“ZKP 能证明 AI 代码”，而是 ZKP 启发你把软件交付改造成一个<strong>先承诺、后挑战、证据绑定、独立验证、风险决策</strong>的协议；Graph Engineering 则负责把意图、架构、实现、运行与证据的拓扑显式化。两者结合后，你可以合理地做到“不逐行 review 代码”，但应把目标写成：<strong>用可审计证据替代源码阅读，用有界保证替代绝对正确，用运行反馈完成闭环。</strong></div>
+
+    <h3>参考框架</h3>
+    <ul class="checklist">
+      <li>附件：《Code Graph Engineering — 一门设计哲学》《Graph Engineering 调研报告》《ZK-GE 闭环验证方案 v1》。</li>
+      <li><a href="https://csrc.nist.gov/publications/detail/sp/800-218/final">NIST SP 800-218 Secure Software Development Framework</a>：安全软件开发实践与责任边界。</li>
+      <li><a href="https://slsa.dev/">SLSA</a> 与 <a href="https://in-toto.io/">in-toto</a>：构建 provenance、制品与步骤证明链。</li>
+      <li><a href="https://owasp.org/www-project-application-security-verification-standard/">OWASP ASVS</a>：安全验证要求的分层参考。</li>
+      <li><a href="https://opentelemetry.io/">OpenTelemetry</a>：运行图与可观察证据的数据来源参考。</li>
+    </ul>
+  </section>
+
+  <footer>
+    ZK × Graph Engineering 闭环验证方案 v2 · 2026-08-06 · 单文件、自包含 HTML · 本文中的“证明”默认指工程证据，除非明确标注为形式化或密码学证明。
+  </footer>
+</main>
+
+<script>
+  const navigationLinks = Array.from(document.querySelectorAll('.toc a'));
+  const documentSections = navigationLinks
+    .map(function findLinkedSection(link) {
+      return document.querySelector(link.getAttribute('href'));
+    })
+    .filter(Boolean);
+
+  function updateActiveSection(entries) {
+    const visibleSection = entries
+      .filter(function isVisible(entry) { return entry.isIntersecting; })
+      .sort(function compareVisibility(a, b) { return b.intersectionRatio - a.intersectionRatio; })[0];
+
+    if (!visibleSection) return;
+
+    navigationLinks.forEach(function markActiveLink(link) {
+      const isActive = link.getAttribute('href') === '#' + visibleSection.target.id;
+      link.classList.toggle('active', isActive);
+    });
+  }
+
+  const sectionObserver = new IntersectionObserver(updateActiveSection, {
+    rootMargin: '-15% 0px -70% 0px',
+    threshold: [0, .25, .5]
+  });
+
+  documentSections.forEach(function observeSection(section) {
+    sectionObserver.observe(section);
+  });
+</script>
+</body>
+</html>

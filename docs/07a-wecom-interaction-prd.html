@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>07a · 企微交互 PRD（UI 层）· B2B 订单履约验证项目</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+SC:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:#f5f4ed; --paper2:#efeee5; --ink:#1f1d18; --ink2:#6b665b;
+    --ink3:#3a382f; --blue:#1B365D; --rule:#d4d1c5; --red:#c0392b; --green:#1a7f37;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif; line-height:1.6;}
+  .wrap{max-width:960px; margin:0 auto; padding:48px 40px 80px;}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;}
+  .folio{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--rule); padding-bottom:10px;
+    font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink2);}
+  .folio a{color:var(--ink2); border:none;}
+  .folio a:hover{color:var(--blue);}
+  .tag{display:inline-block; padding:3px 10px; font-size:11px; letter-spacing:.16em; background:var(--paper2); color:var(--blue);}
+  .kicker{display:flex; align-items:baseline; gap:12px; margin-top:48px;}
+  h1{font-size:clamp(32px,5vw,50px); line-height:1.12; font-weight:500; margin-top:14px; letter-spacing:-.01em;}
+  .lede{margin-top:18px; font-size:17px; line-height:1.7; color:var(--ink3); max-width:720px;}
+  h2{font-size:23px; font-weight:600; margin:52px 0 14px; color:var(--blue); display:flex; align-items:baseline; gap:12px; border-top:1px solid var(--rule); padding-top:26px;}
+  h2 .no{font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.12em;}
+  h3{font-size:17.5px; font-weight:600; margin:30px 0 10px; color:var(--ink);}
+  h3 .no{color:var(--blue); font-family:'IBM Plex Mono',monospace; font-size:12px; margin-right:8px;}
+  h4{font-size:15.5px; font-weight:600; margin:24px 0 8px; color:var(--ink);}
+  h4 .no{color:var(--blue); font-family:'IBM Plex Mono',monospace; font-size:11px; margin-right:6px;}
+  p{margin:10px 0; color:var(--ink3);}
+  ul,ol{margin:10px 0 10px 26px; color:var(--ink3);}
+  li{margin:5px 0;}
+  a{color:var(--blue); text-decoration:none; border-bottom:1px solid var(--rule);}
+  a:hover{border-bottom-color:var(--blue);}
+  blockquote{border-left:2px solid var(--blue); padding:10px 18px; margin:16px 0; background:var(--paper2); font-style:italic;}
+  table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  .table-wrap{overflow-x:auto; margin:16px 0 24px; border:1px solid var(--rule);}
+  .table-wrap table{margin:0;}
+  th{background:var(--paper2); color:var(--blue); text-align:left; font-weight:600; padding:9px 12px; border-bottom:1.5px solid var(--blue); font-size:12.5px; white-space:nowrap;}
+  td{padding:9px 12px; border-bottom:1px solid var(--rule); vertical-align:top; color:var(--ink3);}
+  tr:nth-child(even) td{background:#faf9f3;}
+  tr:hover td{background:#f0ede0;}
+  .mermaid{background:var(--paper); border:1px solid var(--rule); padding:18px; overflow-x:auto; text-align:center; margin:20px 0;}
+  .mermaid svg{max-width:100%; height:auto;}
+  .mermaid svg.statediagram span,.mermaid svg.statediagram div{color:#1f1d18 !important;}
+  .mermaid svg.statediagram text{fill:#1f1d18 !important;}
+  figcaption{text-align:center; font-size:12px; color:var(--ink2); margin:-10px 0 26px; font-style:italic;}
+  code{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace; font-size:13px; background:var(--paper2); padding:1px 5px;}
+  pre{background:var(--paper2); border:1px solid var(--rule); padding:16px 18px; overflow-x:auto; font-size:12.8px; line-height:1.55; margin:14px 0;}
+  pre code{background:none; padding:0;}
+  footer.colophon{margin-top:56px; padding-top:14px; border-top:1px solid var(--rule); display:flex; justify-content:space-between;
+    font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink2); flex-wrap:wrap; gap:8px;}
+  footer.colophon a{color:var(--ink2); border:none;}
+  footer.colophon a:hover{color:var(--blue);}
+  .toc{border:1px solid var(--rule); background:var(--paper2); padding:18px 24px; margin:26px 0;}
+  .toc .tt{font-size:11px; letter-spacing:.2em; color:var(--blue); margin-bottom:8px;}
+  .toc a{display:block; padding:3px 0; color:var(--ink3); border:none;}
+  .toc a:hover{color:var(--blue);}
+  .toc .mono{font-size:12px; color:var(--blue); margin-right:8px;}
+  .pill{display:inline-block; padding:4px 12px; border-radius:999px; font-size:11px; letter-spacing:.14em;
+    font-family:'IBM Plex Mono',monospace; text-transform:uppercase; vertical-align:middle; margin-left:10px;}
+  .pill.draft{background:#fdf3f3; color:var(--red); border:1px solid var(--red);}
+  .pill.approved{background:#eef6ee; color:var(--green); border:1px solid var(--green);}
+  .wireframe{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace; font-size:12px; line-height:1.45; color:var(--ink);}
+  .callout{border-left:3px solid var(--blue); background:var(--paper2); padding:10px 16px; margin:14px 0; font-size:14px;}
+  .callout.red{border-left-color:var(--red); background:#fdf3f3;}
+  .callout.green{border-left-color:var(--green); background:#eef6ee;}
+  /* ---- UI mockup：纯 CSS 企微客户端示意（配色非官方规范） ---- */
+  .mockup-row{display:flex; gap:30px; flex-wrap:wrap; justify-content:center; margin:22px 0 4px;}
+  .mockup{position:relative; flex:0 0 auto; text-align:center;}
+  .mockup figcaption{margin:10px 0 0; max-width:300px;}
+  .mockup-row>figure{margin:0;}
+  .nd{position:absolute; width:20px; height:20px; border-radius:50%; background:var(--red); color:#fff; font-size:11px; font-weight:700;
+    display:flex; align-items:center; justify-content:center; box-shadow:0 0 0 2px #fff, 0 2px 6px rgba(192,57,43,.4); z-index:6;}
+  .nlegend{display:flex; flex-wrap:wrap; gap:6px 20px; justify-content:center; margin:8px 0 28px; font-size:11.5px; color:var(--ink3);}
+  .nlegend b{color:var(--red); font-family:'IBM Plex Mono',monospace;}
+  .phone{width:250px; border:9px solid #332d28; border-radius:34px; background:#f6f6f4;
+    box-shadow:0 10px 26px rgba(31,29,24,.16); overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue',sans-serif;}
+  .phone .screen{min-height:430px; background:#f6f6f4;}
+  .wx-top{background:#2BA245; color:#fff; padding:9px 12px; font-size:13px; font-weight:600; display:flex; justify-content:space-between; align-items:center;}
+  .wx-top .t{font-size:10.5px; opacity:.85; font-weight:400;}
+  .chat{padding:10px 10px 4px; display:flex; flex-direction:column; gap:8px;}
+  .msg{border-radius:10px; padding:7px 10px; font-size:12px; line-height:1.45; max-width:80%; text-align:left;}
+  .msg.in{background:#fff; border:1px solid #e4e1d6; color:#2c2a25; align-self:flex-start;}
+  .msg.out{background:#cdeeda; color:#1f4d2c; align-self:flex-end;}
+  .entry-bar{display:flex; gap:6px; padding:8px 10px; background:#fff; border-top:1px solid #e4e1d6;}
+  .entry-btn{flex:1; border:1px solid #2BA245; color:#2BA245; background:#fff; border-radius:6px; font-size:11.5px; padding:5px 0; text-align:center; font-weight:600;}
+  .entry-btn.hot{background:#2BA245; color:#fff;}
+  .side-panel{width:272px; background:#fbfaf6; border:1px solid var(--rule); border-radius:10px; overflow:hidden;
+    box-shadow:0 8px 20px rgba(31,29,24,.12); text-align:left;
+    font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue',sans-serif;}
+  .sp-banner{background:var(--blue); color:#fff; padding:8px 10px; font-size:12px; font-weight:600;}
+  .sp-banner small{display:block; opacity:.78; font-size:10px; font-weight:400; margin-top:2px;}
+  .sp-tabs{display:flex; background:#fff; border-bottom:1px solid var(--rule);}
+  .sp-tab{flex:1; text-align:center; font-size:11.5px; padding:7px 0; color:var(--ink2); border-bottom:2px solid transparent;}
+  .sp-tab.on{color:var(--blue); font-weight:600; border-bottom-color:var(--blue);}
+  .sp-body{padding:8px;}
+  .sp-search{border:1px solid var(--rule); border-radius:6px; background:#fff; padding:5px 8px; font-size:11px; color:var(--ink2); margin-bottom:8px;}
+  .sp-item{display:flex; align-items:center; gap:6px; border:1px solid var(--rule); border-radius:8px; background:#fff; padding:7px 9px; margin-bottom:6px; font-size:11px;}
+  .sp-item .o{font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--blue);}
+  .sp-item .s{font-size:9.5px; color:#fff; background:var(--blue); border-radius:3px; padding:0 4px; white-space:nowrap;}
+  .sp-item .p{margin-left:auto; font-weight:600; color:var(--ink);}
+  .sp-state{text-align:center; color:var(--ink2); font-size:11px; padding:14px 0 6px;}
+  .msg-card{width:302px; background:#fff; border:1px solid var(--rule); border-radius:12px; overflow:hidden;
+    box-shadow:0 8px 20px rgba(31,29,24,.12); text-align:left;
+    font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue',sans-serif; font-size:12px;}
+  .mc-head{display:flex; justify-content:space-between; align-items:center; padding:9px 12px; border-bottom:1px solid #f0eee4; font-weight:600; color:var(--ink);}
+  .mc-head .t{font-size:10px; color:var(--ink2); font-weight:400;}
+  .mc-body{padding:10px 12px; color:var(--ink3);}
+  .mc-src{font-size:10.5px; color:var(--ink2); margin-bottom:8px;}
+  .mc-src b{color:var(--ink);}
+  .mc-items{width:100%; border-collapse:collapse; font-size:11px; margin:6px 0;}
+  .mc-items th{background:#f6f5ee; color:var(--ink2); font-weight:600; padding:4px 6px; border-bottom:1px solid var(--rule); font-size:10px; text-align:left;}
+  .mc-items td{padding:4px 6px; border-bottom:1px solid #f0eee4; color:var(--ink3);}
+  .mc-items td:last-child{text-align:right; font-weight:600; color:var(--ink);}
+  .mc-note{font-size:10px; color:var(--ink2); margin-top:6px;}
+  .mc-actions{display:flex; gap:8px; padding:10px 12px; border-top:1px solid #f0eee4;}
+  .btn-p{flex:1; background:#2BA245; color:#fff; border-radius:6px; padding:6px 0; font-size:12px; font-weight:600; text-align:center;}
+  .btn-g{flex:1; background:#fff; color:var(--ink); border:1px solid #c9c5b6; border-radius:6px; padding:5px 0; font-size:12px; text-align:center;}
+  .btn-g.red{color:var(--red); border-color:#e0b7b0;}
+  .btn-t{background:none; border:none; color:var(--ink2); font-size:11.5px; padding:6px 2px; text-align:center;}
+  .mc-done{display:flex; align-items:center; gap:6px; color:var(--green); font-weight:600; font-size:12px; padding:2px 0;}
+  .mc-done .lk{margin-left:auto; color:var(--blue); font-weight:600;}
+  .mc-done.gray{color:var(--ink2); font-weight:400;}
+  .wrk{background:#fff; border:1px solid var(--rule); border-radius:10px; overflow:hidden; text-align:left;
+    font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue',sans-serif;}
+  .wrk-bar{display:flex; gap:6px; padding:8px 10px; border-bottom:1px solid #f0eee4; background:#fbfaf6;}
+  .wrk-tab{flex:1; text-align:center; font-size:11px; padding:4px 0; border-radius:6px; color:var(--ink2); background:#fff; border:1px solid var(--rule);}
+  .wrk-tab.on{background:var(--blue); color:#fff; border-color:var(--blue);}
+  .wrk-list{padding:8px;}
+  .todo{display:flex; align-items:center; gap:6px; border:1px solid var(--rule); border-radius:8px; padding:7px 9px; margin-bottom:6px; font-size:11px;}
+  .todo .k{font-size:9.5px; background:#eef0f5; color:var(--blue); border-radius:3px; padding:1px 5px; white-space:nowrap;}
+  .todo .o{font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--ink3);}
+  .todo .tm{margin-left:auto; color:var(--ink2); font-size:10px;}
+  .todo.late{border-color:#e0b7b0; background:#fdf6f5;}
+  .todo.late .tm{color:var(--red); font-weight:600;}
+  .wrk-more{text-align:center; font-size:10.5px; color:var(--ink2); padding:4px 0 8px;}
+  @media(max-width:720px){.wrap{padding:28px 18px 60px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="folio">
+    <span><a href="index.html">← Docs</a> · B2B Order Fulfillment</span>
+    <span>07a · Interaction PRD</span>
+    <span>UI 层 · 与 07 业务流互补</span>
+  </header>
+
+  <div class="kicker">
+    <span class="tag">Interaction PRD · UI Layer</span>
+    <span class="mono" style="font-size:11px; letter-spacing:.18em; color:var(--ink2);">07a · 交互层面 · 独立演进</span>
+  </div>
+
+  <h1>企微交互 PRD<span style="font-style:italic; color:var(--blue);">· UI 层面</span><span class="pill draft">Draft v0.1</span></h1>
+
+  <p class="lede"><strong>本文档的定位</strong>：07-wecom-integration.html 定义的是<strong>业务流与转接协议</strong>（后端视角：EventKey 路由、HTTP 映射、验签、多备案）；本文档补齐<strong>UI 层交互设计</strong>（前端视角：用户在企微客户端<strong>看见什么 → 点什么 → 得到什么反馈</strong>），供 PM / UI 设计师 / 前端工程师 / 测试对照落地。两文档一一对应：每节标注来源（<span class="mono">→ 07 §x</span>），07 是「事实源」，本文是「呈现层规范」。</p>
+
+  <nav class="toc">
+    <div class="tt">CONTENTS · 目录</div>
+    <a href="#s0"><span class="mono">0</span>定位 · 设计原则 · 范围</a>
+    <a href="#s1"><span class="mono">1</span>交互触点全景（角色 × 通道 × 触点）</a>
+    <a href="#s2"><span class="mono">2</span>S1 侧边栏 H5 交互设计</a>
+    <a href="#s3"><span class="mono">3</span>S2 预订单确认卡片交互设计</a>
+    <a href="#s4"><span class="mono">4</span>S3 应用消息卡片交互设计</a>
+    <a href="#s5"><span class="mono">5</span>S4 工作台 H5 交互设计</a>
+    <a href="#s6"><span class="mono">6</span>通用交互规范（反馈三态 · 错误文案 · 字段投影）</a>
+    <a href="#s7"><span class="mono">7</span>交互验收清单（W4 门禁 · Given/When/Then）</a>
+    <a href="#s8"><span class="mono">8</span>待决事项（Open Questions）</a>
+  </nav>
+
+  <h2 id="s0"><span class="no">0 ·</span> 定位 · 设计原则 · 范围</h2>
+
+  <h3><span class="no">0.1</span> 与 07 的关系</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>维度</th><th>07 · 企微接入设计（已有）</th><th>07a · 交互 PRD（本文）</th></tr>
+    <tr><td>视角</td><td>业务流 + 转接协议（后端）</td><td>UI 呈现 + 交互行为（前端）</td></tr>
+    <tr><td>回答的问题</td><td>EventKey 如何路由？HTTP 如何映射？验签/多备案怎么做？</td><td>卡片长什么样？按钮文案？点了之后显示什么？错误怎么提示？</td></tr>
+    <tr><td>读者</td><td>后端工程师 / 架构师</td><td>PM / UI 设计师 / 前端工程师 / 测试</td></tr>
+    <tr><td>事实源关系</td><td>事实源（业务语义唯一权威）</td><td>呈现层规范（不新增业务语义，只规定 UI 表现）</td></tr>
+  </table>
+  </div>
+  <blockquote><strong>约束</strong>：本文所有交互动作的<strong>业务语义与后端行为以 07 为唯一事实源</strong>（信号名、幂等、投影规则、暂缓段范围均不重复定义）；本文只规定「前端如何呈现与反馈」。若本文与 07 冲突，以 07 为准并修正本文。</blockquote>
+
+  <h3><span class="no">0.2</span> 交互设计原则（由 07 §1 交互红线推导）</h3>
+  <ol>
+    <li><strong>人工确认可视化</strong>：任何「系统生成的业务结果」在 UI 上都必须以<strong>显式人工确认</strong>为终点——预订单卡片三按钮、审批卡片通过/驳回；确认前界面不得出现「正式订单」字样或状态。</li>
+    <li><strong>轻提醒不打扰</strong>：低置信/多候选场景只发<strong>轻提醒</strong>（卡片标记「需人工核对」，不提供一键确认的强引导）。</li>
+    <li><strong>反馈可追踪</strong>：每次操作的成功反馈都携带可追踪标识（订单号 / 消息 ID / 事件引用），出站卡片保留来源。</li>
+    <li><strong>投影即呈现</strong>：字段级权限（剥价 / 剥金额 / 剥内部备注）在 UI 上表现为<strong>字段级显隐</strong>，而非整页拒绝——用户只看到自己有权看到的内容，且不提示「存在隐藏字段」。</li>
+    <li><strong>幂等友好</strong>：重复点击 / 已决任务 / 过期代办在 UI 上给出<strong>明确的终态文案</strong>（「该任务已被处理」「链接已失效」），而非裸报错。</li>
+  </ol>
+
+  <h3><span class="no">0.3</span> 范围</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>In（本文覆盖）</th><th>Out（不覆盖，见 07）</th></tr>
+    <tr><td>S1 侧边栏 H5：三入口分流、面板 IA、查订单/查库存/人工下单/发货/凭证上传</td><td>会话存档拉取架构（07 §2）、意图识别管线（07 §3，<strong>暂缓</strong>）</td></tr>
+    <tr><td>S2 预订单确认卡片：卡片结构、三按钮交互、24h/48h 升级 UI</td><td>EventKey 协议与验签细节（07 §4.2）、多备案配置（07 §7）</td></tr>
+    <tr><td>S3 应用消息卡片：审批/催办/状态/回单异常卡片交互与文案</td><td>出站通道基础设施（07 §5）、部署清单（07 §10）</td></tr>
+    <tr><td>S4 工作台：待办列表、消息中心、降级视图</td><td>HTTP API 等价性验证（07 §4.4）、测试 Score Card（07 §9.1）</td></tr>
+    <tr><td>通用规范：反馈三态、错误文案、字段投影 UI、防误触</td><td>真实企微 E2E 验收证据（07 §9.2 W3/W4，本文 §7 提供可执行清单）</td></tr>
+  </table>
+  </div>
+  <div class="callout red"><strong>⚠ 暂缓段声明（与 07 §3.0 一致）</strong>：会话存档<strong>自动拉取</strong>与<strong>意图解析自动建单</strong>暂缓实现。本文 §3 只覆盖<strong>「预订单确认卡片 → 正式订单」人工段</strong>（保留主流程）；自动捕捉段的 UI（「群消息自动生成候选卡片」的呈现细节）不绘制。</div>
+
+  <h2 id="s1"><span class="no">1 ·</span> 交互触点全景（角色 × 通道 × 触点）</h2>
+  <p><strong>一句话全景</strong>：用户在企微的<strong>三个位置</strong>（聊天窗口、工作台、应用消息列表）与系统交互；交互分<strong>两类</strong>——<strong>查询/录入</strong>（H5 页面，S1/S4）与<strong>卡片决策</strong>（template_card，S2/S3）。本表是 UI 视角的触点地图，与 07 §1/§4.5 的角色×场景矩阵同源（07 为事实源）。</p>
+
+  <div class="table-wrap">
+  <table>
+    <tr><th>角色</th><th>S1 侧边栏 H5（聊天窗口工具栏）</th><th>S2 预订单卡片（应用消息）</th><th>S3 审批/通知卡片（应用消息）</th><th>S4 工作台 H5</th></tr>
+    <tr><td><strong>归属销售</strong></td><td>查本人订单（全字段）· 查库存 · 人工下单 · 上传凭证 · 作废发货</td><td>确认 / 修改 / 忽略</td><td>本人订单审批/催办/状态卡片</td><td>本人待办列表</td></tr>
+    <tr><td><strong>商务</strong></td><td>查全量订单/库存</td><td>—（可协助）</td><td>审价 / 备货 / 发货确认 / 开票卡片（通过/驳回）</td><td>全量待办</td></tr>
+    <tr><td><strong>仓管</strong></td><td>本仓发货单（<strong>剥价视图</strong>）· 发货数量录入 · 回单凭证上传</td><td>—</td><td>仓库确认 / 发货卡片</td><td>本仓待办</td></tr>
+    <tr><td><strong>财务</strong></td><td>查全量（视授予）</td><td>—</td><td>到账确认 / 回单异常 / 开票卡片</td><td>财务待办</td></tr>
+    <tr><td><strong>董事长</strong></td><td>查全量（决策视图）</td><td>—</td><td>C/D 大单终审卡片（通过/驳回）</td><td>终审待办</td></tr>
+    <tr><td><strong>客户联系人</strong></td><td>「我的物流」视图（<strong>剥金额/内部备注</strong>）· 签收凭证上传</td><td>⬜ 被捕捉对象（非操作者）</td><td>—（仅可收物流通知）</td><td>—</td></tr>
+    <tr><td><strong>管理员</strong></td><td>全量</td><td>可协助建单</td><td>全审批委派</td><td>全量</td></tr>
+  </table>
+  </div>
+
+  <p><strong>触点全景图</strong>（UI 形态视角；灰虚线 = 暂缓段，不进入运行态 UI）：</p>
+  <pre class="mermaid">
+flowchart LR
+    subgraph POS["企微客户端三位置"]
+        CHAT["聊天窗口<br/>(单聊/客户群)"]
+        WORK["工作台"]
+        MSG["应用消息列表"]
+    end
+    subgraph UI1["H5 页面（查询/录入）"]
+        S1P["S1 侧边栏面板<br/>Tab: 查订单/查库存/人工下单/我的物流"]
+        S4P["S4 工作台页<br/>待办列表/消息中心"]
+    end
+    subgraph UI2["消息卡片（决策）"]
+        C_PRE["S2 预订单确认卡<br/>确认/修改/忽略"]
+        C_APP["S3 审批卡<br/>通过/驳回"]
+        C_ESC["S3 催办卡<br/>点击回原任务"]
+        C_STA["S3 状态卡<br/>只读·跳转详情"]
+        C_REC["S3 回单异常卡<br/>进入例外审核"]
+    end
+    CHAT -->|"工具栏按钮<br/>single_chat_tools/group_chat_tools"| S1P
+    WORK -->|"应用入口 normal"| S4P
+    MSG -->|"按钮 key 回调"| C_PRE
+    MSG --> C_APP
+    MSG --> C_ESC
+    MSG --> C_STA
+    MSG --> C_REC
+    C_STA -->|"点击"| S1P
+    C_PRE -.->|"暂缓:自动捕捉段"| ARCH["群消息自动生成候选(不进入运行态 UI)"]
+    style ARCH stroke-dasharray: 6 4, stroke:#c0392b
+  </pre>
+  <figcaption>图 1 · 交互触点全景：三个位置、两类 UI 形态、五类卡片</figcaption>
+
+  <h2 id="s2"><span class="no">2 ·</span> S1 侧边栏 H5 交互设计（→ 07 §6.1）</h2>
+
+  <h3><span class="no">2.1</span> 入口与上下文（三入口分流）</h3>
+  <p>同一套 H5 面板，由企微侧边栏入口参数决定<strong>注入的上下文</strong>与<strong>默认 Tab</strong>（服务端依据 <span class="mono">X-WeCom-Context</span> 重认证，不信任前端传入身份）：</p>
+  <div class="table-wrap">
+  <table>
+    <tr><th>入口</th><th>场景</th><th>注入上下文</th><th>默认 Tab</th><th>UI 差异点</th></tr>
+    <tr><td><span class="mono">single_chat_tools</span></td><td>单聊（与客户/同事一对一）</td><td>会话对象身份（客户联系人 → 客户）</td><td>查订单</td><td>顶部显示当前会话客户名；「人工下单」预填客户</td></tr>
+    <tr><td><span class="mono">group_chat_tools</span></td><td>客户群</td><td>群 ID → 群绑定客户 + 归属销售（<span class="mono">wecom_context_bindings</span>）</td><td>查订单</td><td>顶部显示群名 + 绑定客户；无绑定则提示「未绑定客户群」并引导联系管理员</td></tr>
+    <tr><td><span class="mono">normal</span></td><td>工作台/菜单直入</td><td>无会话上下文</td><td>查订单（需先选范围）</td><td>无上下文 banner；「人工下单」客户必选</td></tr>
+  </table>
+  </div>
+
+  <h3><span class="no">2.2</span> 进入流程（用户感知层时序）</h3>
+  <pre><code class="language-mermaid">sequenceDiagram
+    participant U as 用户（企微客户端）
+    participant W as 企微 JS-SDK（ww）
+    participant H as S1 H5 面板
+    participant B as 服务端 BFF（jsapi/exchange）
+    U->>W: 点击聊天窗口底部工具栏按钮
+    W->>H: 打开侧边栏 H5（携带 entry 参数）
+    H->>W: ww.register 企业签名 + ww.agentConfig 应用签名（双票据）
+    W-->>H: 签名结果（成功/失败）
+    H->>W: 触发 OAuth snsapi_base 静默授权
+    W->>H: 返回 code
+    H->>B: POST /api/v1/auth/exchange（code + 上下文）
+    B-->>H: X-WeCom-Context + 角色 + 可见字段集（投影元数据）
+    H-->>H: 按角色渲染 Tab 集与字段（剥价/剥金额不渲染）
+    H-->>U: 面板就绪（顶部上下文 banner + 默认 Tab）</code></pre>
+  <figcaption>图 2 · S1 进入流程：双票据 → 静默授权 → 服务端重认证 → 按角色渲染</figcaption>
+
+  <div class="callout"><strong>失败态（用户可感知）</strong>：① 签名失败 → 面板内提示「请在企微客户端内打开」+ 重试按钮（不跳转外部浏览器）；② 授权失败 → 「登录已失效，请重新打开」；③ 上下文无法解析（群未绑定） → 黄色提示条「未识别客户群，功能受限」，仅开放无上下文能力（查库存/查订单需手动选客户）。</div>
+
+  <h3><span class="no">2.3</span> 面板信息架构（IA）</h3>
+  <p>顶部：<strong>上下文 banner</strong>（客户群名 / 客户名 / 无上下文提示）。中部：<strong>能力 Tab</strong>（按角色裁剪）：</p>
+  <div class="table-wrap">
+  <table>
+    <tr><th>Tab</th><th>可见角色</th><th>核心内容</th></tr>
+    <tr><td>查订单</td><td>全部角色（字段按投影）</td><td>订单列表（状态筛选）→ 详情页</td></tr>
+    <tr><td>查库存</td><td>销售/商务/管理员（客户联系人无）</td><td>仓库选择 → SKU 列表 + 可承诺量</td></tr>
+    <tr><td>人工下单</td><td>销售/商务/管理员</td><td>下单表单（客户/产品/数量/备注）</td></tr>
+    <tr><td>我的物流</td><td>客户联系人专属</td><td>本客户发货单物流视图（无金额/内部备注）</td></tr>
+  </table>
+  </div>
+
+  <h3><span class="no">2.4</span> 查订单交互</h3>
+  <p><strong>列表页</strong>：默认按最近更新排序；状态筛选（进行中/已完成/已驳回）+ 关键字搜索（订单号/客户名）。每行显示：订单号、客户名、状态徽标、金额（按投影）、更新时间。<strong>点击行 → 详情页</strong>。</p>
+  <p><strong>详情页</strong>：分区呈现——① 订单头（订单号/状态/创建时间）；② 商品明细（SKU/数量/单价×数量，按投影）；③ 履约进度（审价→备货→发货→开票→回单，垂直时间线，当前闸门高亮）；④ 凭证区（签收/回单图片列表，可上传）；⑤ 操作区（按角色与状态显示按钮：作废发货 / 上传凭证 / 跳转审批）。</p>
+  <p><strong>字段投影的 UI 表现</strong>（原则 ④）：</p>
+  <div class="table-wrap">
+  <table>
+    <tr><th>角色</th><th>单价/金额列</th><th>内部备注</th><th>UI 呈现方式</th></tr>
+    <tr><td>销售（本人订单）/ 商务 / 董事长 / 管理员</td><td>✅ 显示</td><td>✅ 显示</td><td>正常渲染</td></tr>
+    <tr><td>仓管</td><td>❌ <strong>剥价</strong></td><td>❌</td><td>列头与单元格<strong>整体不渲染</strong>（不留空列、不显示「—」占位，避免暗示存在隐藏字段）</td></tr>
+    <tr><td>客户联系人</td><td>❌ <strong>剥金额</strong></td><td>❌ <strong>剥内部备注</strong></td><td>物流视图仅渲染：发货进度、承运信息、签收凭证、回单状态</td></tr>
+  </table>
+  </div>
+  <p><strong>三态</strong>：加载中 → 骨架屏/居中 spinner；空 → 「暂无订单」（附「新建订单」或「联系销售」CTA）；失败 → 错误页 + 重试（见 §6.2 文案）。</p>
+
+  <h3><span class="no">2.5</span> 查库存交互</h3>
+  <ul>
+    <li>仓库选择（下拉，默认上下文客户对应仓）→ SKU 列表：型号、名称、<strong>可承诺量</strong>（高亮）、在途/占用。</li>
+    <li>搜索：型号模糊匹配（标准型号映射表，08-external-integration §1.4）。</li>
+    <li>「库存不足」的 SKU 置灰 + 标记「可下单·排期」，点击提示「可提交预订单，到货后履约」——<strong>不阻止下单</strong>（07 §3.3 库存校验规则）。</li>
+  </ul>
+
+  <h3><span class="no">2.6</span> 人工下单表单交互</h3>
+  <p><strong>字段与校验</strong>（→ 07 §4.5.1 建单-人工）：</p>
+  <div class="table-wrap">
+  <table>
+    <tr><th>字段</th><th>控件</th><th>必填</th><th>校验规则</th><th>错误提示（示例）</th></tr>
+    <tr><td>客户</td><td>下拉搜索</td><td>是（normal 入口必选；群/单聊入口预填可改）</td><td>必须为当前角色可服务的客户</td><td>「无权为该客户下单」</td></tr>
+    <tr><td>产品（SKU）</td><td>搜索 + 多选</td><td>是</td><td>≥1 项；标准型号匹配</td><td>「请选择至少一个产品」</td></tr>
+    <tr><td>数量</td><td>数字输入</td><td>是</td><td>＞0 且 ≤ 上限（防误触大单）</td><td>「数量超出单笔上限，如需大单请走审批」</td></tr>
+    <tr><td>价格</td><td>只读展示（客户等级价）</td><td>—</td><td>系统取价，用户不编辑</td><td>—</td></tr>
+    <tr><td>备注</td><td>多行文本</td><td>否</td><td>长度 ≤200</td><td>「备注过长」</td></tr>
+  </table>
+  </div>
+  <p><strong>提交反馈</strong>：点击「提交订单」→ 按钮 loading「提交中…」→ 成功：绿色 toast「订单已创建 ORD-2026…」+ 按钮变「查看订单」跳详情；<strong>重复提交</strong>（409 幂等）→ 黄色 toast「订单已提交，请勿重复操作」（07 §4.2 幂等语义的 UI 化）。</p>
+
+  <h3><span class="no">2.7</span> 发货操作交互（→ 07 §4.5.3 仓管）</h3>
+  <ul>
+    <li><strong>发货数量录入</strong>：详情页「发货」→ 数量输入（部分/整批），预填可发量；<strong>超发</strong>（超出分配量）→ 红色校验「超出可发数量 N 件」并禁止提交（07 CQ-07 守恒的 UI 化）。</li>
+    <li><strong>作废发货</strong>：30 分钟窗口内显示「作废」按钮 + <strong>剩余时间倒计时</strong>（mm:ss）；窗口过期后按钮消失/置灰（07 §4.5.1 场景 F；超窗后端 403 → UI 提示「作废窗口已过」）。作废需<strong>二次确认弹窗</strong>（防误触，§6.4）。</li>
+  </ul>
+
+  <h3><span class="no">2.8</span> 凭证上传交互（→ 07 §4.5 场景 C/D）</h3>
+  <ul>
+    <li>入口：详情页「凭证区」→ 选择图片（≤9 张）→ 逐张上传进度条 → 成功后凭证列表追加缩略图 + 「已登记」徽标。</li>
+    <li>凭证<strong>只追加</strong>（CQ-15）：UI 不提供删除/覆盖，文案注明「凭证仅可追加，历史版本可回放」。</li>
+    <li>重复提交同版本（409）→ toast「该凭证已登记」。</li>
+  </ul>
+
+  <h3><span class="no">2.9</span> 侧边栏线框（低保真）</h3>
+  <pre class="wireframe">┌─────────────────────────────┐
+│ 长安仁恒·订单助手      ⋮    │ ← 顶部：上下文 banner（群/客户名）
+│ 客户群: 广西天华 华南大区[已绑定]│
+├─────────────────────────────┤
+│ [查订单] [查库存] [人工下单] │ ← Tab（按角色裁剪；客户联系人=我的物流）
+├─────────────────────────────┤
+│ ▣ 搜索订单号/客户名  [状态▾] │
+│ ┌─────────────────────────┐ │
+│ │ ORD-2026-0117  广西天华  │ │
+│ │ ● 待审价      ¥16,000   │ │
+│ ├─────────────────────────┤ │
+│ │ ORD-2026-0112  广西天华  │ │
+│ │ ● 备货中      ¥6,800    │ │
+│ └─────────────────────────┘ │
+│  加载中… / 暂无订单 / 重试   │ ← 三态
+└─────────────────────────────┘
+（仓管视角：金额列整列不渲染；客户联系人：仅「我的物流」Tab）</pre>
+  <figcaption>图 3 · S1 面板线框（查订单 Tab 示例）</figcaption>
+
+  <h3><span class="no">2.10</span> 视觉稿示例（纯 CSS 示意 · 配色非企微官方规范）</h3>
+  <p>线框的视觉稿形态，标注关键交互点。三入口（<span class="mono">single_chat_tools</span> / <span class="mono">group_chat_tools</span> / <span class="mono">normal</span>）共用同一面板，差异仅在顶部上下文 banner 与默认 Tab（§2.1）：</p>
+  <div class="mockup-row">
+    <figure class="mockup">
+      <div class="phone">
+        <div class="screen">
+          <div class="wx-top">广西天华 · 华南大区<span class="t">客户群 · 3 人</span></div>
+          <div class="chat">
+            <div class="msg in">张经理：膨润土 AB-3 这周能发吗？</div>
+            <div class="msg out">收到，我看下库存和排期。</div>
+            <div class="msg in">好的，等你消息。</div>
+          </div>
+          <div class="entry-bar"><div class="entry-btn hot">📦 订单</div><div class="entry-btn">🛒 库存</div></div>
+        </div>
+      </div>
+      <span class="nd" style="top:118px; left:78px;">①</span>
+      <figcaption>聊天窗口形态：底部工具栏 = S1 入口（客户群场景）</figcaption>
+    </figure>
+    <figure class="mockup">
+      <div class="side-panel">
+        <div class="sp-banner">广西天华 · 华南大区<small>客户群已绑定 · 归属销售 张销售</small></div>
+        <div class="sp-tabs"><div class="sp-tab on">查订单</div><div class="sp-tab">查库存</div><div class="sp-tab">人工下单</div></div>
+        <div class="sp-body">
+          <div class="sp-search">🔍 搜索订单号 / 客户名</div>
+          <div class="sp-item"><span class="o">ORD-2026-0117</span><span class="s">待审价</span><span class="p">¥16,000</span></div>
+          <div class="sp-item"><span class="o">ORD-2026-0112</span><span class="s">备货中</span><span class="p">¥6,800</span></div>
+          <div class="sp-state">加载中… / 暂无订单 / 重试</div>
+        </div>
+      </div>
+      <span class="nd" style="top:52px; left:-9px;">②</span>
+      <span class="nd" style="top:78px; left:198px;">③</span>
+      <figcaption>侧边栏面板展开形态：上下文 banner + 角色裁剪 Tab + 三态区</figcaption>
+    </figure>
+  </div>
+  <div class="nlegend">
+    <span><b>①</b> 聊天工具栏入口（单聊 / 客户群均出现）</span>
+    <span><b>②</b> 上下文 banner：群名 + 绑定客户 + 归属销售</span>
+    <span><b>③</b> 能力 Tab 按角色裁剪（仓管=剥价视图 · 客户联系人=我的物流）</span>
+  </div>
+  <div class="callout"><strong>投影示意</strong>：仓管视角下，右侧面板订单列表的金额列（<span class="p" style="color:var(--ink3);">¥16,000</span> 所在位置）<strong>整列不渲染</strong>；客户联系人视角仅「我的物流」Tab（§2.4 投影规则）。</div>
+
+  <h2 id="s3"><span class="no">3 ·</span> S2 预订单确认卡片交互设计（→ 07 §4.1/§4.2，人工段）</h2>
+
+  <h3><span class="no">3.1</span> 卡片结构规范（template_card）</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>区域</th><th>内容</th><th>规则</th></tr>
+    <tr><td>标题</td><td>「预订单待确认」</td><td>固定前缀，一眼可辨为待办而非通知</td></tr>
+    <tr><td>摘要（来源）</td><td>群名 · 发言人 · 时间</td><td>人工段来源 = 销售/协助者录入或候选生成；注明「需人工核对」当候选置信度低</td></tr>
+    <tr><td>主体（候选信息）</td><td>SKU / 数量 / 单价 / 合计</td><td>逐行展示候选；价格展示给<strong>归属销售</strong>（确认卡片只发归属销售）</td></tr>
+    <tr><td>辅助行</td><td>客户 / 仓库 / 幂等提示</td><td>「仅可确认一次」弱提示（防重复点击焦虑）</td></tr>
+    <tr><td>按钮区</td><td><strong>确认 / 修改 / 忽略</strong>（横排主按钮）</td><td>确认=主按钮（实心），修改=次按钮（描边），忽略=文字按钮（弱化）</td></tr>
+  </table>
+  </div>
+
+  <h3><span class="no">3.2</span> 三按钮交互流</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>按钮</th><th>点击后 UI 反馈</th><th>成功态</th><th>异常态</th></tr>
+    <tr><td><strong>确认</strong></td><td>按钮 loading「确认中…」，卡片防重复点击</td><td>卡片更新为「✅ 已生成正式订单 ORD-2026-…」+ 订单链接（点击跳 S1 详情）</td><td>非待确认态（409）→ 卡片刷新为「该预订单已被处理」；网络失败 → toast「网络异常，请重试」</td></tr>
+    <tr><td><strong>修改</strong></td><td>卡片切换为<strong>编辑态</strong>：候选行变可编辑（数量/产品），底部「保存并确认 / 取消」</td><td>保存 → 同确认成功态（候选已更新）</td><td>校验失败（数量超限）→ 行内红色错误；非待确认态 → 「已被处理」</td></tr>
+    <tr><td><strong>忽略</strong></td><td><strong>二次确认弹层</strong>「确认忽略该预订单？此操作不可撤销」[取消][确认忽略]</td><td>卡片更新为「已忽略」终态（置灰，无按钮）</td><td>非待确认态 → 「已被处理」</td></tr>
+  </table>
+  </div>
+  <blockquote><strong>关键原则</strong>：三按钮任何路径，<strong>确认前 UI 不出现「正式订单」</strong>；成功反馈必须携带订单号（原则 ③ 可追踪）。「修改」无独立后端信号（= confirm + <span class="mono">confirmed:false</span>，07 §4.2）——UI 层仍以独立交互呈现，后端语义不变。</blockquote>
+
+  <h3><span class="no">3.3</span> 升级与兜底（→ 07 §3.4）</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>时机</th><th>卡片形态</th><th>接收人</th><th>交互</th></tr>
+    <tr><td>24h 未处理</td><td>催办卡（标题「预订单待确认 · 已催办」，红点标记）</td><td>归属销售 + 抄送主管</td><td>点击 → 跳回原确认卡片（EventKey 指向原预订单）</td></tr>
+    <tr><td>48h 仍未处理</td><td>业务链接 H5 兜底（07 §5 出站通道）</td><td>归属销售 + 主管</td><td>点击 → 打开 S1 H5 待办页人工处理（含「转人工协助」入口）</td></tr>
+  </table>
+  </div>
+
+  <h3><span class="no">3.4</span> 预订单确认状态流转（UI 视角）</h3>
+  <pre class="mermaid">
+stateDiagram-v2
+    [*] --> PENDING: 候选生成（人工录入/协助）
+    PENDING --> CONFIRMED: 点击确认
+    PENDING --> EDITING: 点击修改
+    EDITING --> PENDING: 取消
+    EDITING --> CONFIRMED: 保存并确认（候选已更新）
+    PENDING --> IGNORED: 二次确认后忽略
+    PENDING --> ESCALATED: Timer 24h 未处理
+    ESCALATED --> PENDING: 销售/主管回到原卡片
+    ESCALATED --> OVERDUE: Timer 48h（人工兜底链接）
+    OVERDUE --> CONFIRMED: H5 人工处理
+    OVERDUE --> IGNORED: H5 人工忽略
+    CONFIRMED --> [*]: 出站卡「已生成正式订单 ORD-…」
+    IGNORED --> [*]
+  </pre>
+  <figcaption>图 4 · S2 预订单确认状态流转（灰虚线段 = 暂缓，未进入运行态）</figcaption>
+
+  <h3><span class="no">3.5</span> 确认卡片线框（低保真）</h3>
+  <pre class="wireframe">┌──────────────────────────────────┐
+│ 📋 预订单待确认           09:42  │
+│ 来源：广西天华 华南大区 · 张销售 · 今天 │
+│ ┌──────────────────────────────┐ │
+│ │ 型号         数量   单价  合计 │ │
+│ │ 膨润土 AB-3   5   ¥3,200 16,000│ │
+│ │ AB-3 袋装     2   ¥3,400  6,800│ │
+│ └──────────────────────────────┘ │
+│ 客户：广西天华 · 仓库：华南仓     │
+│ 仅可确认一次，请核对后操作        │
+│ ┌───────────┐ ┌───────┐ ┌─────┐ │
+│ │ 确认       │ │ 修改  │ │ 忽略 │ │
+│ └───────────┘ └───────┘ └─────┘ │
+└──────────────────────────────────┘
+点击确认后 → 卡片刷新：
+│ ✅ 已生成正式订单 ORD-2026-0118  │
+│ [查看订单 →]（跳转 S1 详情）      │</pre>
+  <figcaption>图 5 · S2 预订单确认卡片线框（确认成功态）</figcaption>
+
+  <h3><span class="no">3.6</span> 视觉稿示例（纯 CSS 示意 · 配色非企微官方规范）</h3>
+  <p>确认卡片三态视觉稿：<strong>待确认 → 确认成功 / 忽略终态</strong>（点击后原位刷新，不产生新消息卡片——原则 ③ 可追踪，出站另发「已生成正式订单」回执卡）：</p>
+  <div class="mockup-row">
+    <figure class="mockup">
+      <div class="msg-card">
+        <div class="mc-head">📋 预订单待确认<span class="t">09:42</span></div>
+        <div class="mc-body">
+          <div class="mc-src">来源：<b>广西天华 · 华南大区</b> · 张销售 · 今天</div>
+          <table class="mc-items">
+            <tr><th>型号</th><th>数量</th><th>单价</th><th>合计</th></tr>
+            <tr><td>膨润土 AB-3（吨袋）</td><td>5 吨</td><td>¥3,200</td><td>¥16,000</td></tr>
+            <tr><td>膨润土 AB-3（袋装）</td><td>2 吨</td><td>¥3,400</td><td>¥6,800</td></tr>
+          </table>
+          <div class="mc-note">客户：广西天华 · 仓库：华南仓 · 仅可确认一次</div>
+        </div>
+        <div class="mc-actions"><div class="btn-p">确认</div><div class="btn-g">修改</div><div class="btn-t">忽略</div></div>
+      </div>
+      <span class="nd" style="top:216px; left:-9px;">①</span>
+      <figcaption>待确认态：确认=主按钮（实心）· 修改=次按钮（描边）· 忽略=文字按钮（弱化）</figcaption>
+    </figure>
+    <figure class="mockup">
+      <div class="msg-card">
+        <div class="mc-head">✅ 预订单已确认<span class="t">09:43</span></div>
+        <div class="mc-body">
+          <div class="mc-done">✅ 已生成正式订单 <span class="mono" style="font-size:11px;">ORD-2026-0118</span><span class="lk">查看订单 →</span></div>
+        </div>
+      </div>
+      <span class="nd" style="top:56px; left:244px;">②</span>
+      <figcaption>确认成功态：原位刷新 + 订单号 + 跳转链接（订单链接跳 S1 详情）</figcaption>
+    </figure>
+    <figure class="mockup">
+      <div class="msg-card">
+        <div class="mc-head">预订单已忽略<span class="t">09:45</span></div>
+        <div class="mc-body">
+          <div class="mc-done gray">已忽略 · 此预订单不再处理（不可撤销）</div>
+        </div>
+      </div>
+      <span class="nd" style="top:56px; left:100px;">③</span>
+      <figcaption>忽略终态：置灰无按钮（忽略前有二次确认弹层，§3.2）</figcaption>
+    </figure>
+  </div>
+  <div class="nlegend">
+    <span><b>①</b> 三按钮：确认 / 修改 / 忽略（弱化放最右）</span>
+    <span><b>②</b> 成功反馈必带订单号（可追踪，原则 ③）</span>
+    <span><b>③</b> 忽略为终态，按钮全部移除</span>
+  </div>
+  <div class="callout"><strong>编辑态说明</strong>：点「修改」后卡片切换编辑态（候选行可改数量/产品），底部变为「保存并确认 / 取消」——无独立后端信号（= confirm + <span class="mono">confirmed:false</span>，07 §4.2），UI 独立呈现。</div>
+
+  <h2 id="s4"><span class="no">4 ·</span> S3 应用消息卡片交互设计（→ 07 §4.1/§4.3）</h2>
+
+  <h3><span class="no">4.1</span> 卡片类型与按钮规范</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>卡片类型（Kind）</th><th>触发时机</th><th>按钮</th><th>按钮布局</th><th>接收人</th></tr>
+    <tr><td><span class="mono">PRICE</span> 待审价</td><td>进入审价闸门</td><td>通过 / 驳回</td><td>主：通过（实心）；次：驳回（描边红）</td><td>商务（assignee）</td></tr>
+    <tr><td><span class="mono">WAREHOUSE</span> 仓库确认</td><td>进入仓管闸门</td><td>通过 / 驳回</td><td>同上</td><td>仓管（assignee）</td></tr>
+    <tr><td><span class="mono">PAYMENT</span> 待确认到账</td><td>进入财务闸门</td><td>确认到账 / 驳回</td><td>同上</td><td>财务（assignee）</td></tr>
+    <tr><td><span class="mono">CHAIRMAN</span> 董事长审批</td><td>C/D 大单进入终审</td><td>通过 / 驳回</td><td>同上（卡片带「大单」红标）</td><td>董事长</td></tr>
+    <tr><td><span class="mono">ESCALATE</span> 催办</td><td>闸门任务 24h 未处理</td><td>前往处理</td><td>单按钮</td><td>原 assignee（48h 抄送主管）</td></tr>
+    <tr><td><span class="mono">ORDER_EVENT</span> 状态通知</td><td>订单状态变更（创建/已审价/已发货/已开票/已关闭）</td><td>查看详情</td><td>单按钮（只读）</td><td>相关角色</td></tr>
+    <tr><td><span class="mono">RECEIPT_EX</span> 回单异常</td><td>非款到 5 天无回单</td><td>处理异常 / 忽略提示</td><td>主：处理异常</td><td>财务 / 销售</td></tr>
+  </table>
+  </div>
+
+  <h3><span class="no">4.2</span> 审批卡片交互流（通过/驳回）</h3>
+  <pre><code class="language-mermaid">sequenceDiagram
+    participant U as 审批人（企微客户端）
+    participant C as 卡片（template_card）
+    participant S as 服务端（验签+流程）
+    U->>C: 点击「通过」（或「驳回」）
+    C->>C: 按钮 loading「处理中…」防重复点击
+    C->>S: 回调（EventKey approve:/reject:&lt;taskID&gt;）
+    alt 成功
+        S-->>C: 200 流程推进
+        C-->>U: 卡片刷新「✅ 已通过 · 审价完成」
+    else 任务已决/状态不匹配（409 幂等）
+        S-->>C: 409
+        C-->>U: 卡片刷新「该任务已被处理」（置灰，按钮移除）
+    else 权限不足/代办过期（403）
+        S-->>C: 403
+        C-->>U: 卡片刷新「任务已失效或您无操作权限」
+    else 网络/验签失败
+        S-->>C: 失败
+        C-->>U: toast「处理失败，请重试」按钮恢复可点
+    end</code></pre>
+  <figcaption>图 6 · S3 审批卡片点击反馈分支（成功/幂等/越权/失败四分支）</figcaption>
+
+  <h3><span class="no">4.3</span> 各卡片特殊交互</h3>
+  <ul>
+    <li><strong>催办卡</strong>：「前往处理」→ 打开原任务卡片（同 EventKey）；原卡片仍显示在消息列表中，置顶提示「已催办」。</li>
+    <li><strong>状态卡（只读）</strong>：无决策按钮，仅「查看详情」→ 跳 S1 H5 详情页（跳转需重新走 OAuth 静默授权，见 §2.2）；<strong>不做敏感操作</strong>（07 §4.1 出站行）。</li>
+    <li><strong>回单异常卡</strong>：「处理异常」→ 进入例外审核（财务/销售 assignee）；卡片展示回单超期天数（「已超期 3 天」红色徽标）。</li>
+    <li><strong>董事长大单卡</strong>：主体区额外展示<strong>客户等级（C/D）徽标</strong>与金额大字（决策需全字段，07 §4.5.5）。</li>
+  </ul>
+
+  <h3><span class="no">4.4</span> 卡片文案规范（模板）</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>场景</th><th>标题</th><th>摘要（示例）</th><th>主文本</th></tr>
+    <tr><td>审价</td><td>订单待审价</td><td>ORD-2026-0117 · 广西天华</td><td>金额 ¥16,000 · 客户等级 B · 请核对价格后通过或驳回</td></tr>
+    <tr><td>到账</td><td>待确认到账</td><td>ORD-2026-0110 · 广西天华</td><td>应到 ¥6,800 · 账期 30 天 · 请核对到账后确认</td></tr>
+    <tr><td>发货</td><td>已发货</td><td>ORD-2026-0108 · 5 吨已出仓</td><td>华南仓 · 承运 X 运单号 Y · 预计 2 天到达</td></tr>
+    <tr><td>回单异常</td><td>回单异常（已超期 3 天）</td><td>ORD-2026-0102 · 非款到单</td><td>发货后 5 天无签收回单，请处理例外审核</td></tr>
+    <tr><td>催办</td><td>待办催办 · 已超 24h</td><td>审价任务 · ORD-2026-0117</td><td>该任务等待处理中，主管已收到抄送</td></tr>
+  </table>
+  </div>
+  <p><strong>文案原则</strong>：标题 ≤12 字且含动作词（待/已 + 名词）；摘要含订单号（可追踪）；主文本给出<strong>决策所需关键信息</strong>（金额/等级/超期天数），避免审批人点开详情才知道「要不要批」。</p>
+
+  <h3><span class="no">4.5</span> 视觉稿示例（纯 CSS 示意 · 配色非企微官方规范）</h3>
+  <p>审批卡与催办卡视觉稿（其余卡片 Kind 同构，按钮与文案见 §4.1/§4.4）：</p>
+  <div class="mockup-row">
+    <figure class="mockup">
+      <div class="msg-card">
+        <div class="mc-head">订单待审价<span class="t">审价闸门</span></div>
+        <div class="mc-body">
+          <div class="mc-src"><b>ORD-2026-0117</b> · 广西天华</div>
+          <div>金额 <b>¥16,000</b> · 客户等级 B · 请核对价格后通过或驳回</div>
+        </div>
+        <div class="mc-actions"><div class="btn-p">通过</div><div class="btn-g red">驳回</div></div>
+      </div>
+      <span class="nd" style="top:120px; left:-9px;">①</span>
+      <span class="nd" style="top:120px; left:212px;">②</span>
+      <figcaption>审批卡：① 通过=主按钮（实心绿）② 驳回=描边红（次按钮）</figcaption>
+    </figure>
+    <figure class="mockup">
+      <div class="msg-card">
+        <div class="mc-head">⚠ 待办催办 · 已超 24h<span class="t">抄送主管</span></div>
+        <div class="mc-body">
+          <div class="mc-src">审价任务 · <b>ORD-2026-0117</b></div>
+          <div>主管已收到抄送，请尽快处理</div>
+        </div>
+        <div class="mc-actions"><div class="btn-p">前往处理</div></div>
+      </div>
+      <span class="nd" style="top:120px; left:152px;">③</span>
+      <figcaption>催办卡：③ 单按钮「前往处理」→ 回到原任务卡片（同 EventKey）</figcaption>
+    </figure>
+  </div>
+  <div class="nlegend">
+    <span><b>①</b> 通过/确认类一律主按钮（实心绿）</span>
+    <span><b>②</b> 驳回类一律描边红（次按钮）</span>
+    <span><b>③</b> 催办卡单按钮，点击不产生新任务</span>
+  </div>
+  <div class="callout red"><strong>反馈纪律</strong>：点击后按钮立即 loading 置灰（防重复）；409 → 卡片原位刷新「该任务已被处理」（置灰终态）；403 → 「任务已失效或您无操作权限」——均不产生裸状态码（§6.2）。</div>
+
+  <h2 id="s5"><span class="no">5 ·</span> S4 工作台 H5 交互设计（→ 07 §6.2）</h2>
+
+  <h3><span class="no">5.1</span> 信息架构</h3>
+  <p><strong>定位</strong>：无群上下文的安全降级视图（07 §6.2）——只做<strong>聚合与跳转</strong>，不做敏感操作（下单/审批均跳转对应卡片或 S1 页面）。两大模块：</p>
+  <ul>
+    <li><strong>待办列表</strong>：我的待办（按 assignee）+ 全部待办（商务/管理员）双视图；条目 = 任务类型徽标（审价/仓管/到账/终审/预订单确认/回单异常）+ 订单号 + 截止/超时标记。</li>
+    <li><strong>消息中心</strong>：出站卡片留痕列表（消息 ID 落库可追踪，07 §4.3），点击回看卡片内容。</li>
+  </ul>
+
+  <h3><span class="no">5.2</span> 待办列表交互</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>交互</th><th>规则</th></tr>
+    <tr><td>筛选</td><td>按 kind（任务类型）/ state（待处理/已超时/已完成）筛选；默认「待处理」</td></tr>
+    <tr><td>排序</td><td>超时优先 → 最早截止优先；超时条目红色徽标「已超时 N 天」</td></tr>
+    <tr><td>点击条目</td><td>跳转对应处理界面：审批类 → 打开原 S3 卡片（消息定位）；预订单类 → 打开确认卡片；复杂操作（发货数量录入）→ S1 H5 表单页</td></tr>
+    <tr><td>下拉刷新</td><td>拉取最新待办（CQ-05 查询）；列表空 → 「暂无待办 🎉」</td></tr>
+  </table>
+  </div>
+
+  <h3><span class="no">5.3</span> 工作台线框（低保真）</h3>
+  <pre class="wireframe">┌─────────────────────────────┐
+│ 长安仁恒·订单助手       [刷新]│
+├─────────────────────────────┤
+│ [我的待办] [全部待办(商务)]   │
+│ 筛选: [kind▾] [state▾]      │
+│ ┌─────────────────────────┐ │
+│ │ 审价  ORD-2026-0117  2h │ │
+│ │ 到账  ORD-2026-0110  5h │ │
+│ │ ⚠ 预订单确认 0118 已24h │ │  ← 超时红标
+│ └─────────────────────────┘ │
+│ 消息中心（出站留痕 12 条）    │
+└─────────────────────────────┘</pre>
+  <figcaption>图 7 · S4 工作台线框</figcaption>
+
+  <h3><span class="no">5.4</span> 视觉稿示例（纯 CSS 示意 · 配色非企微官方规范）</h3>
+  <div class="mockup-row">
+    <figure class="mockup">
+      <div class="phone">
+        <div class="screen">
+          <div class="wx-top">长安仁恒订单助手<span class="t">工作台</span></div>
+          <div class="wrk">
+            <div class="wrk-bar"><div class="wrk-tab on">我的待办</div><div class="wrk-tab">消息中心</div></div>
+            <div class="wrk-list">
+              <div class="todo"><span class="k">审价</span><span class="o">ORD-2026-0117</span><span class="tm">剩 2h</span></div>
+              <div class="todo"><span class="k">到账</span><span class="o">ORD-2026-0110</span><span class="tm">剩 5h</span></div>
+              <div class="todo late"><span class="k">预订单确认</span><span class="o">ORD-2026-0118</span><span class="tm">已超 24h</span></div>
+            </div>
+            <div class="wrk-more">无更多待办 · 下拉刷新</div>
+          </div>
+        </div>
+      </div>
+      <span class="nd" style="top:196px; left:96px;">①</span>
+      <span class="nd" style="top:238px; left:8px;">②</span>
+      <figcaption>工作台待办：① 超时条目红标置顶 ② 点击条目跳转对应处理界面（不提供敏感操作表单）</figcaption>
+    </figure>
+  </div>
+  <div class="nlegend">
+    <span><b>①</b> 超时优先排序 + 红色徽标（§5.2）</span>
+    <span><b>②</b> 审批类跳原卡片 · 预订单类跳确认卡 · 数量录入类跳 S1 表单</span>
+  </div>
+
+  <h2 id="s6"><span class="no">6 ·</span> 通用交互规范（跨通道）</h2>
+
+  <h3><span class="no">6.1</span> 反馈三态规范</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>状态</th><th>呈现</th><th>适用</th></tr>
+    <tr><td>Loading</td><td>按钮内 loading（卡片/H5 通用）+ 防重复点击（点击后立即置灰）</td><td>一切提交型交互（确认/通过/驳回/下单/上传）</td></tr>
+    <tr><td>Success</td><td>卡片：原位刷新终态 + 徽标（✅/已忽略/置灰）；H5：toast + 内容刷新</td><td>提交成功；成功反馈必带订单号/引用（原则 ③）</td></tr>
+    <tr><td>Error</td><td>409/403 → 卡片原位刷新终态文案（见 §6.2）；网络/5xx → toast + 按钮恢复可点（可重试）</td><td>服务端拒绝 / 网络异常区分呈现</td></tr>
+  </table>
+  </div>
+
+  <h3><span class="no">6.2</span> 错误文案表（用户可理解语言，禁止裸展示状态码）</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>后端语义（07 §4.2）</th><th>UI 文案</th><th>呈现位置</th></tr>
+    <tr><td>409 任务已决/状态不匹配（幂等）</td><td>「该任务已被处理，无需重复操作」</td><td>卡片原位刷新（置灰终态）；H5 toast</td></tr>
+    <tr><td>403 越权 / 代办过期（CQ-13）</td><td>「任务已失效或您无操作权限」+ 提示联系管理员重新委派</td><td>卡片原位刷新；H5 错误页</td></tr>
+    <tr><td>400 参数校验失败</td><td>表单行内具体提示（见 §2.6）</td><td>表单行内</td></tr>
+    <tr><td>未知 EventKey / 回调被拒</td><td>「该操作暂不支持」</td><td>卡片原位刷新</td></tr>
+    <tr><td>网络失败 / 服务不可用</td><td>「网络异常，请重试」（按钮恢复）</td><td>toast</td></tr>
+    <tr><td>签名/授权失败</td><td>「请在企微客户端内打开」/「登录已失效，请重新打开」</td><td>H5 错误页 + 重试</td></tr>
+  </table>
+  </div>
+
+  <h3><span class="no">6.3</span> 字段投影 UI 表现总表（→ 07 §4.5 角色表）</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>数据项</th><th>销售(本人)</th><th>商务</th><th>仓管</th><th>财务</th><th>董事长</th><th>客户联系人</th></tr>
+    <tr><td>单价/金额</td><td>✅</td><td>✅</td><td>❌ 剥价</td><td>✅（视授予）</td><td>✅</td><td>❌ 剥金额</td></tr>
+    <tr><td>内部备注</td><td>✅</td><td>✅</td><td>❌</td><td>✅（视授予）</td><td>✅</td><td>❌ 剥内部备注</td></tr>
+    <tr><td>客户等级</td><td>✅</td><td>✅</td><td>❌</td><td>✅</td><td>✅（决策必需）</td><td>❌</td></tr>
+    <tr><td>物流/签收/凭证</td><td>✅</td><td>✅</td><td>✅</td><td>✅（视授予）</td><td>✅</td><td>✅（仅此块）</td></tr>
+    <tr><td>UI 实现</td><td colspan="6">被剥字段<strong>整体不渲染</strong>（不留占位、不提示「存在隐藏字段」）；列表列与详情分区均按角色元数据裁剪（§2.2 投影元数据驱动）</td></tr>
+  </table>
+  </div>
+
+  <h3><span class="no">6.4</span> 安全与防误触</h3>
+  <ul>
+    <li><strong>二次确认</strong>：不可逆操作必须二次确认——预订单「忽略」（§3.2）、发货「作废」（§2.7）；弹层文案含后果说明。</li>
+    <li><strong>防重复提交</strong>：所有提交按钮点击后立即 loading + 置灰，客户端先防重，后端幂等兜底（409 文案化）。</li>
+    <li><strong>审计可见性</strong>：敏感操作成功反馈附「操作已记录」（事件链留痕的 UI 暗示，07 §8 审计要求）；原始聊天/会话内容<strong>不出现在任何 UI</strong>（业务库零原始文本，07 §8 合规）。</li>
+    <li><strong>暂缓段不出现在 UI</strong>：意图识别相关文案（「AI 识别」「自动生成」）禁止出现在当前版本任何界面——当前候选来源仅「人工录入/协助」，界面文案用「候选信息」而非「AI 识别结果」。</li>
+  </ul>
+
+  <h2 id="s7"><span class="no">7 ·</span> 交互验收清单（W4 门禁 · Given/When/Then，→ 07 §9.2）</h2>
+  <p>以下清单供前端联调与 Phase 3 人工验收使用（对照 07 §9.2 W4「S1-S4 交互 E2E」；Fake 门禁全绿为真实验收前置条件，逐项记录证据：截图+日志+时间戳）。</p>
+  <div class="table-wrap">
+  <table>
+    <tr><th>#</th><th>通道</th><th>验收用例（Given / When / Then）</th></tr>
+    <tr><td>U1</td><td>S1</td><td>Given 销售在客户群会话；When 点击工具栏按钮；Then 面板顶部显示群名+绑定客户，默认「查订单」Tab，双票据/OAuth 静默无感完成</td></tr>
+    <tr><td>U2</td><td>S1</td><td>Given 仓管打开侧边栏；When 查看发货单详情；Then 任何金额/单价/内部备注列<strong>不渲染</strong>（剥价），数量/仓库/地址正常显示</td></tr>
+    <tr><td>U3</td><td>S1</td><td>Given 客户联系人打开侧边栏；When 进入「我的物流」；Then 仅物流/凭证字段，无金额与内部备注；可上传签收凭证并见「已登记」反馈</td></tr>
+    <tr><td>U4</td><td>S1</td><td>Given 销售提交人工下单；When 连续双击提交；Then 第二次被客户端拦截（loading 置灰），仅创建一笔订单，成功 toast 含订单号</td></tr>
+    <tr><td>U5</td><td>S1</td><td>Given 仓管录入发货数量；When 输入超过可发量；Then 行内红色校验「超出可发数量 N 件」且禁止提交（守恒防线 UI 化）</td></tr>
+    <tr><td>U6</td><td>S2</td><td>Given 销售收到预订单确认卡；When 点击「确认」；Then 卡片原位刷新「✅ 已生成正式订单 ORD-…」含链接，链接可跳 S1 详情</td></tr>
+    <tr><td>U7</td><td>S2</td><td>Given 预订单已被他人处理；When 再次点击确认；Then 卡片刷新「该任务已被处理」置灰终态（409 文案化，无裸报错）</td></tr>
+    <tr><td>U8</td><td>S2</td><td>Given 预订单 24h 未处理；When 时间到达；Then 催办卡送达销售+主管，点击回原卡片；48h 后 H5 兜底链接可用</td></tr>
+    <tr><td>U9</td><td>S3</td><td>Given 商务收到待审价卡；When 点击「通过」；Then 按钮 loading → 卡片刷新「已通过 · 审价完成」；驳回同理并进入驳回链反馈</td></tr>
+    <tr><td>U10</td><td>S3</td><td>Given 代办授权过期（CQ-13）；When 代办点击审批卡「通过」；Then 卡片刷新「任务已失效或您无操作权限」，无越权推进</td></tr>
+    <tr><td>U11</td><td>S3</td><td>Given 订单状态变更；When 出站状态卡送达；Then 卡片为只读（无决策按钮），「查看详情」跳转 S1 详情页成功</td></tr>
+    <tr><td>U12</td><td>S4</td><td>Given 商务打开工作台；When 查看待办；Then 默认「待处理」筛选、超时条目红标置顶；点击条目跳转对应处理界面</td></tr>
+    <tr><td>U13</td><td>S4</td><td>Given 工作台 H5；When 尝试敏感操作；Then 界面不提供下单/审批表单（只跳转）——降级视图安全边界</td></tr>
+    <tr><td>U14</td><td>跨通道</td><td>Given 任意错误场景（网络/409/403）；When 发生；Then 文案符合 §6.2 表格（无状态码裸展示）</td></tr>
+  </table>
+  </div>
+  <div class="callout"><strong>验收纪律（07 §9.2 诚实声明）</strong>：Fake 门禁（mock 通道全绿）是前置而非替代；真实企微客户端人工验收逐项记录证据。U1-U14 全部通过 = W4 门禁达成。</div>
+
+  <h2 id="s8"><span class="no">8 ·</span> 待决事项（Open Questions）</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>#</th><th>问题</th><th>影响</th><th>建议默认（未决前采用）</th></tr>
+    <tr><td>Q1</td><td>卡片按钮的品牌色规范（企微主按钮默认色 vs 品牌蓝）</td><td>S2/S3 全部卡片视觉</td><td>沿用企微客户端原生按钮色（不自定义，保证客户端一致性与可用性）；品牌色仅用于 H5 页面</td></tr>
+    <tr><td>Q2</td><td>「修改」编辑态支持改哪些字段（数量/产品/价格？）</td><td>§3.2 编辑态范围</td><td>数量 + 产品（价格不可改，客户等级价系统取定）；待 08 §1.4 主数据（SKU 映射/价格表）就绪后定稿</td></tr>
+    <tr><td>Q3</td><td>客户联系人如何获得 S1 入口（外部联系人能否使用聊天工具栏）</td><td>U3 依赖的外部身份识别</td><td>通过客户群内@或企微外部联系人可见范围配置；待企微真实环境验证（Phase 3）</td></tr>
+    <tr><td>Q4</td><td>48h 兜底链接的落地页形态（S4 待办 vs 独立人工协助页）</td><td>§3.3 兜底 UI</td><td>跳转 S4 待办列表（复用现有页面，最小新增）；如人工协助需双向沟通再评估独立页</td></tr>
+    <tr><td>Q5</td><td>出站卡片是否需要「已读回执」展示</td><td>消息中心（§5.1）</td><td>v1 不展示已读（企微应用消息无标准已读回调）；消息 ID 留痕已满足可追踪</td></tr>
+    <tr><td>Q6</td><td>自动捕捉段恢复后，候选卡片是否需标注「AI 识别」来源标签</td><td>§6.4 文案约束（当前禁止）</td><td>恢复时按 §3.0 决策复审：建议标注「智能识别 · 请人工核对」以符合原则 ②（恢复时再定）</td></tr>
+  </table>
+  </div>
+
+  <footer class="colophon">
+    <span><a href="index.html">← Docs Index</a> · <a href="07-wecom-integration.html">07 企微接入设计（业务流事实源）</a></span>
+    <span>07a · Interaction PRD · B2B Order Fulfillment</span>
+  </footer>
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad:true, theme:'base',
+    themeVariables:{
+      fontFamily:"'Noto Serif SC','Source Serif Pro',serif",
+      primaryColor:'#efeee5', primaryBorderColor:'#1B365D', primaryTextColor:'#1f1d18',
+      lineColor:'#1B365D', secondaryColor:'#f5f4ed', tertiaryColor:'#f5f4ed',
+      edgeLabelBackground:'#f5f4ed', clusterBkg:'#f5f4ed', clusterBorder:'#d4d1c5',
+      stateBkg:'#efeee5', stateBorder:'#1B365D', stateLabel:'#1f1d18',
+      stateLabelColor:'#1f1d18', labelTextColor:'#1f1d18', transitionLabelColor:'#1f1d18',
+      actorBkg:'#efeee5', actorBorder:'#1B365D', actorTextColor:'#1f1d18', actorLineColor:'#1B365D',
+      noteBkg:'#efeee5', noteBorder:'#d4d1c5'
+    },
+    flowchart:{curve:'basis'}, er:{useMaxWidth:true}
+  });
+  mermaid.run({ querySelector: 'code.language-mermaid' }).catch(() => {});
+</script>
+</body>
+</html>

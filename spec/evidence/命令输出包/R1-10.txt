@@ -1,0 +1,12 @@
+证据编号：R1-10
+取证对象：pgAPI
+采集时间：2026-08-19 17:58 +08:00
+采集人：王杰
+证据等级：L1
+脱敏状态：已脱敏，不含密码、Secret、Token、完整 open_id 或业务明细
+
+采集方法/动作：
+检查健康、OpenAPI、三表接口、systemd 同步链、仓库提交、静态编译和 SQL 聚合。
+
+脱敏输出/结果：
+rhcrm-server main@b387f24f；仅 customers/products/purchase-contracts；旧路径 0；客户 3231/3150，产品 306/293，合同 8807/8309/7485；同步链最近成功。

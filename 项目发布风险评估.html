@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>项目发布风险评估 · b2b_pilot_v3</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({ startOnLoad: true, theme: 'base', themeVariables: {
+    primaryColor: '#eef3ff', primaryBorderColor: '#4f6ef7', primaryTextColor: '#172554',
+    lineColor: '#64748b', fontSize: '13px', fontFamily: 'ui-sans-serif, system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif'
+  }});
+</script>
+<style>
+  :root{
+    --ink:#0f172a; --ink2:#334155; --ink3:#64748b;
+    --line:#e2e8f0; --line2:#cbd5e1;
+    --bg:#f6f8fb; --card:#ffffff;
+    --blue:#2563eb; --blue-bg:#eff6ff; --blue-line:#bfdbfe;
+    --green:#059669; --green-bg:#ecfdf5; --green-line:#a7f3d0;
+    --amber:#b45309; --amber-bg:#fffbeb; --amber-line:#fde68a;
+    --red:#dc2626; --red-bg:#fef2f2; --red-line:#fecaca;
+    --violet:#7c3aed; --violet-bg:#f5f3ff; --violet-line:#ddd6fe;
+    --shadow:0 1px 2px rgba(15,23,42,.05), 0 8px 24px rgba(15,23,42,.06);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:ui-sans-serif,system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.75;font-size:15px}
+  .wrap{max-width:1080px;margin:0 auto;padding:32px 22px 80px}
+  header.hero{background:linear-gradient(135deg,#172554 0%,#1e3a8a 55%,#3730a3 100%);color:#fff;border-radius:18px;padding:34px 34px 28px;margin-bottom:26px;box-shadow:var(--shadow)}
+  header.hero h1{margin:0 0 10px;font-size:27px;letter-spacing:.5px}
+  header.hero p{margin:4px 0;color:#dbeafe;font-size:14px}
+  .hero-badges{margin-top:16px;display:flex;flex-wrap:wrap;gap:10px}
+  .badge{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 13px;font-size:12.5px;font-weight:600;border:1px solid transparent}
+  .badge.blue{background:#dbeafe;color:#1e3a8a}
+  .badge.green{background:#d1fae5;color:#065f46}
+  .badge.amber{background:#fef3c7;color:#92400e}
+  .badge.red{background:#fee2e2;color:#991b1b}
+  .badge.violet{background:#ede9fe;color:#5b21b6}
+  h2{font-size:21px;margin:44px 0 14px;padding-left:12px;border-left:5px solid var(--blue);line-height:1.4}
+  h3{font-size:17px;margin:28px 0 10px;color:var(--ink)}
+  h4{font-size:15px;margin:20px 0 8px;color:var(--ink2)}
+  p{margin:8px 0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 24px;margin:14px 0;box-shadow:var(--shadow)}
+  .card.blue{border-color:var(--blue-line);background:linear-gradient(180deg,#f8fbff,var(--card))}
+  .card.green{border-color:var(--green-line);background:linear-gradient(180deg,#f8fff9,var(--card))}
+  .card.amber{border-color:var(--amber-line);background:linear-gradient(180deg,#fffef7,var(--card))}
+  .card.red{border-color:var(--red-line);background:linear-gradient(180deg,#fff9f9,var(--card))}
+  .tldr{font-size:16px;line-height:1.9}
+  .tldr strong{color:var(--blue)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:760px){.grid2{grid-template-columns:1fr}}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13.5px;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.04)}
+  th{background:#f1f5f9;color:#0f172a;text-align:left;font-weight:700;padding:10px 11px;border-bottom:2px solid var(--line);white-space:nowrap}
+  td{padding:10px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:#fafcff}
+  .tag{display:inline-block;border-radius:6px;padding:1px 8px;font-size:12px;font-weight:600;white-space:nowrap;border:1px solid transparent}
+  .tag.green{background:var(--green-bg);color:var(--green);border-color:var(--green-line)}
+  .tag.blue{background:var(--blue-bg);color:var(--blue);border-color:var(--blue-line)}
+  .tag.amber{background:var(--amber-bg);color:var(--amber);border-color:var(--amber-line)}
+  .tag.red{background:var(--red-bg);color:var(--red);border-color:var(--red-line)}
+  .tag.violet{background:var(--violet-bg);color:var(--violet);border-color:var(--violet-line)}
+  .tag.gray{background:#f1f5f9;color:#475569;border-color:var(--line2)}
+  .mermaid{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;margin:16px 0;overflow-x:auto;box-shadow:var(--shadow)}
+  .small{font-size:12.5px;color:var(--ink3)}
+  code, .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;font-size:.92em;background:#f1f5f9;border-radius:5px;padding:1px 6px;color:#0f172a}
+  pre{background:#0f172a;color:#e2e8f0;border-radius:12px;padding:16px 18px;overflow-x:auto;font-size:13px;line-height:1.6}
+  pre code{background:none;color:inherit;padding:0}
+  .toc{column-count:2;column-gap:30px;font-size:14px}
+  .toc a{color:var(--blue);text-decoration:none}
+  .toc a:hover{text-decoration:underline}
+  @media(max-width:760px){.toc{column-count:1}}
+  .footnote{color:var(--ink3);font-size:12.5px}
+  .divider{height:1px;background:var(--line);margin:34px 0}
+  .kbd{background:#fff;border:1px solid var(--line2);border-bottom-width:2px;border-radius:6px;padding:0 7px;font-size:12px;font-family:ui-monospace,monospace}
+  .conclusion-box{border-left:4px solid var(--green);background:var(--green-bg);padding:14px 18px;border-radius:10px}
+  ul{margin:8px 0 8px 1.2em;padding:0}
+  li{margin:4px 0}
+  .legend{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <h1>项目发布风险评估</h1>
+  <p>评估对象：b2b_pilot_v3（企微版订单履约系统） · 对照「飞书三方审批」现状（tripartite-approval）</p>
+  <p>评估范围：docs/v0.1 十一章节 · docs/发布计划（渐进式发布计划、可行性验证、对比与同步设计）· 两个仓库的代码</p>
+  <p>评估日期：2026-08-18 · 评估视角：数据不可丢失、不可有不能解决的死路、缺口能不能补</p>
+  <div class="hero-badges">
+    <span class="badge green">结论：计划成立，但有 12 个缺口要先补</span>
+    <span class="badge blue">v0.1 命门：把订单写进旧飞书流（代码尚未开工）</span>
+    <span class="badge amber">08-21 窗口：只做「最小切片」有机会，完整版要顺延</span>
+  </div>
+</header>
+
+<div class="card">
+  <h3 style="margin-top:0">目录</h3>
+  <div class="toc">
+    <a href="#s1">1. 一句话结论</a><br>
+    <a href="#s2">2. 我们是怎么评估的（证据与可信度）</a><br>
+    <a href="#s3">3. 现在有什么（家底盘点）</a><br>
+    <a href="#s4">4. 发布计划要什么（目标）</a><br>
+    <a href="#s5">5. 缺什么：12 个风险 Gap 总表</a><br>
+    <a href="#s6">6. Gap 分类：决策 vs 施工</a><br>
+    <a href="#s7">7. 数据不丢失 / 无死路 专项核对</a><br>
+    <a href="#s8">8. 怎么补：关键路径与最小上线切片</a><br>
+    <a href="#s9">9. 最终结论与需要你拍板的事</a><br>
+    <a href="#s10">附录 A：证据索引</a>
+  </div>
+</div>
+
+<!-- ===================== 1 ===================== -->
+<h2 id="s1">1 · 一句话结论</h2>
+<div class="card green tldr">
+<p><strong>能完成，但不是「现在就能发」。</strong>当前仓库已经有一套能自己跑通订单全流程的引擎（下单→审价→终审→备货→发货→开票→回单），也有读飞书数据的同步骨架；但最新发布计划 v0.1 的真正命门——<strong>销售助手在企微/PC 下单，订单写进旧飞书三方审批流并续跑</strong>——对应的桥接代码<strong>还不存在</strong>。</p>
+<p>好在这条命门在《B2B_V01_对比与同步设计_20260818》里已有明确方案（方案 A1：代理 OAuth + 调用旧系统既有下单接口），我们逐行核对了旧系统接口，<strong>是真实可用的</strong>。因此：<strong>技术上有能力评估；发布计划成立；能否赶上 08-21，取决于是否接受「最小上线切片」</strong>——先做「下单桥接 + 我的订单 + 跳转旧系统详情」，把存量订单同步、前端精装修、复制重提等体验项后置。</p>
+<p>最难的仗在 <strong>0.5 真相源切换</strong>（JSONL→PG 一次性迁移 + 两级终审迁入），那是「切换项目」级别，必须单独立项，不是普通一版。</p>
+</div>
+
+<!-- ===================== 2 ===================== -->
+<h2 id="s2">2 · 我们是怎么评估的（证据与可信度）</h2>
+<div class="card">
+<table>
+  <tr><th style="width:180px">审计动作</th><th>对象与结果</th></tr>
+  <tr><td>读文档</td><td>docs/v0.1 全部 11 章节索引与核心章节（04/05/08/09/10/11）、docs/gap-analysis.md、docs/发布计划/ 下 4 份文件（渐进式发布计划、可行性验证、对比与同步设计）</td></tr>
+  <tr><td>读新系统代码</td><td>b2b_pilot_v3：cmd/api、cmd/wecom、cmd/sync、internal/api、internal/repo、internal/sync、internal/wecom、internal/workflows、migrations/001-007、docker-compose.yml、Dockerfile</td></tr>
+  <tr><td>读旧系统代码</td><td>tripartite-approval：src/routes/stockPrepares.ts、shipments.ts、invoices.ts、externalOrders.ts 关键段；README、PROJECT_HANDOFF_SNAPSHOT、生产 role map 审计附录</td></tr>
+  <tr><td>跑测试</td><td><span class="tag green">通过</span> go test（domain / api / authz / wecom / pgapi / orderdata / sync / workflows）全部 ok；<span class="tag amber">未执行</span> L1 集成测试——本机无 Docker/PostgreSQL（端口 55432 未开），这是环境限制，不是代码失败</td></tr>
+  <tr><td>覆盖率档案</td><td>coverage.txt 全仓 85.4%（门禁 85%）；domain 100% 硬门禁（Makefile cover 目标）</td></tr>
+  <tr><td>旧系统 Node 类型检查</td><td><span class="tag amber">未执行</span>（本机无 Node/npm），旧系统结论以静态读码为准</td></tr>
+</table>
+<p class="small">可信度说明：新系统核心路径的判断有「跑通测试 + 代码逐行」双证据；旧系统受信办理通道的判断有「代码行号 + 文档交叉」双证据；工时类估算为工程经验值，不作为承诺。</p>
+</div>
+
+<!-- ===================== 3 ===================== -->
+<h2 id="s3">3 · 现在有什么（家底盘点）</h2>
+<div class="card">
+<p>新系统 <strong>b2b_pilot_v3</strong> 已经不是一个空壳，它有一套完整的「订单履约引擎」，并且 v0.1 文档里标注的不少能力已经落到代码。但它的家底偏向「系统自己跑」，不是「和旧飞书系统连起来」。</p>
+</div>
+
+<div class="mermaid">
+flowchart TB
+  subgraph HAVE["✅ 现在已有（代码级证据）"]
+    A1["Go HTTP API：16 个端点<br/>server.go 路由 / v01.go 守门员·合并开票·三金额"]
+    A2["领域层：4 个订单状态机 + 预订单<br/>domain/fsm.go 全量单测"]
+    A3["工作流：Temporal / 本地内嵌双模式<br/>workflows/order.go + LocalRunner"]
+    A4["数据库：PG 31 表，迁移 001-007<br/>含 invoice_order_links、evidence 字段"]
+    A5["企微接入：回调验签/路由、OAuth、JSAPI<br/>wecom/official.go + mock 全通"]
+    A6["同步骨架：飞书 → PG 单向只读<br/>cmd/sync + internal/sync + 幂等批次"]
+    A7["凭证机器人：仓库群回单抓取登记<br/>wecom/receipt_robot.go"]
+    A8["部署骨架：Dockerfile 4 target + compose 9 服务"]
+  end
+  subgraph HALF["🟡 只有一半"]
+    B1["HTTP 源同步：框架有，飞书 API 未接<br/>HTTPFetcher 占位报错"]
+    B2["企微官方通道：SendCard 简化为 text<br/>GroupSender 无 official 实现"]
+    B3["前端：仓库内无 web/ 目录<br/>只有 ord_fulfill 静态 demo"]
+  end
+  subgraph MISS["❌ 完全没有"]
+    C1["下单桥接模块（v0.1 命门）<br/>OAuth 代理 + 调用旧系统下单"]
+    C2["旧系统针对性小改<br/>自动确认 + V01 profile 注入"]
+    C3["自建单列表 / 详情跳转 flows 页"]
+    C4["存量订单多维表同步落地配置"]
+  end
+  A1 --> A3
+  A3 --> A2
+  A4 --> A1
+  A6 --> A4
+</div>
+
+<div class="card">
+<h3>3.1 家底明细（为什么说「有底子」）</h3>
+<table>
+  <tr><th style="width:200px">能力</th><th>现状</th><th>证据</th></tr>
+  <tr><td>订单创建/信号/查询/待办</td><td><span class="tag green">已实现并测试</span></td><td>internal/api/server.go 路由；internal/api/server_test.go</td></tr>
+  <tr><td>发群守门员（A3）</td><td><span class="tag green">已实现</span></td><td>internal/api/v01.go:61；repo.AppendGatekeeperConfirmation</td></tr>
+  <tr><td>多单合并开票 + 三金额（A4）</td><td><span class="tag green">已实现</span></td><td>internal/repo/v01.go:78；migrations/006</td></tr>
+  <tr><td>仓库群回单机器人（A6）</td><td><span class="tag green">已实现（mock OCR）</span></td><td>internal/wecom/receipt_robot.go:102</td></tr>
+  <tr><td>飞书同步 Job（file 源）</td><td><span class="tag green">已实现</span></td><td>cmd/sync/main.go；internal/repo/sync.go</td></tr>
+  <tr><td>飞书同步 Job（http 源）</td><td><span class="tag amber">占位，未接飞书</span></td><td>internal/sync/sync.go HTTPFetcher 显式报错</td></tr>
+  <tr><td>下单桥接（写旧系统）</td><td><span class="tag red">不存在</span></td><td>grep 全仓无 internal/bridge、feishu-user-by-code、external-orders/create</td></tr>
+  <tr><td>销售助手前端</td><td><span class="tag red">不存在</span></td><td>仓库根目录无 web/；ord_fulfill 为静态 demo</td></tr>
+</table>
+</div>
+
+<!-- ===================== 4 ===================== -->
+<h2 id="s4">4 · 发布计划要什么（目标）</h2>
+<div class="mermaid">
+flowchart LR
+  V01["v0.1<br/>销售助手虹励<br/>下单入口 + 状态视图<br/>飞书流续跑"] --> V02["v0.2<br/>+ 商务<br/>备货环节迁移"]
+  V02 --> V03["v0.3<br/>+ 仓管 + 财务<br/>发货/回单/到款/开票迁移"]
+  V03 --> V04["v0.4<br/>+ 销售全员<br/>销售环节迁移"]
+  V04 --> V05["0.5<br/>两级终审迁入<br/>真相源切换<br/>飞书流整体下线"]
+  V01 -.-> OLD["旧飞书三方审批<br/>继续执行后续环节<br/>(v0.1 不动它)"]
+</div>
+
+<div class="card blue">
+<h3>4.1 v0.1 的真实范围（已由 2026-08-18 决策锁定，勿再推翻）</h3>
+<ul>
+  <li><strong>唯一用户</strong>：销售助手虹励；其他用户零影响、继续用飞书。</li>
+  <li><strong>只做三件事</strong>：① 在 v0.1 侧下单；② 订单写进旧飞书审批流，旧系统继续跑完后续所有环节；③ v0.1 列表/详情能回显状态、跳转旧系统 flows 页。</li>
+  <li><strong>明确不做</strong>：v0.1 不执行备货/发货/开票；不迁移 JSONL；不修旧系统 bug；不新增旧系统导出端点；自动下单/锁库存继续移出。</li>
+  <li><strong>开发量边界</strong>：为上线新增的开发量全部算 v0.1；旧系统只允许一处小改（自动确认 + V01 profile 注入），其余只做配置/数据操作。</li>
+</ul>
+</div>
+
+<div class="card">
+<h3>4.2 设计文档给出的 S0–S5 上线节奏</h3>
+<table>
+  <tr><th>阶段</th><th>工作内容</th><th>关键产出</th></tr>
+  <tr><td>S0 调研冻结</td><td>T1.3 五项状态口径拍板；T3 飞书应用权限调研；旧系统白名单/角色映射确认</td><td>拍板记录、权限确认单</td></tr>
+  <tr><td>S1 桥接与旧系统小改</td><td>v0.1 桥接模块；旧系统幂等键前缀自动确认 + V01 profile 注入</td><td>联调：下单 → 飞书审批实例出现</td></tr>
+  <tr><td>S2 列表与视图</td><td>自建单列表（PG 直查）；存量单 cmd/sync 多维表源；详情跳 flows 页</td><td>10 笔测试单全链路可见</td></tr>
+  <tr><td>S3 体验增强（P1）</td><td>复制/重提、重新授权、驳回原因展示</td><td>体验清单 6 项通过</td></tr>
+  <tr><td>S4 灰度</td><td>仅虹励一人，真实下单 1–2 笔走全流程</td><td>体验闭环验收</td></tr>
+  <tr><td>S5 上线</td><td>打开桥接开关、监控告警、回滚预案</td><td>3 天观察报告</td></tr>
+</table>
+</div>
+
+<!-- ===================== 5 ===================== -->
+<h2 id="s5">5 · 缺什么：12 个风险 Gap 总表</h2>
+<div class="card amber">
+<p><strong>读表说明</strong>：类型里「施工」= 我们自己写代码就能解决；「决策」= 必须业务方/外部给信息才能定；「配置」= 不用写代码但要有人去旧系统后台/数据文件操作；「旧改」= 需要动旧系统代码（有边界）。大小 S=1 人日内，M=2–4 人日，L=5–10 人日，XL=跨版本项目级。</p>
+</div>
+
+<table>
+  <tr>
+    <th style="width:44px">#</th>
+    <th style="width:170px">Gap</th>
+    <th style="width:90px">现状</th>
+    <th style="width:82px">类型</th>
+    <th style="width:68px">大小</th>
+    <th style="width:82px">能否补</th>
+    <th>怎么补（说人话）</th>
+  </tr>
+
+  <tr>
+    <td><b>G1</b></td>
+    <td><b>下单桥接模块</b><br>（v0.1 命门）</td>
+    <td><span class="tag red">没有</span></td>
+    <td><span class="tag blue">施工</span></td>
+    <td><b>L</b></td>
+    <td><span class="tag green">能</span></td>
+    <td>新建 internal/bridge：① 代理飞书 OAuth 授权；② 拿 code 调旧系统既有 <code>/api/approval/feishu-user-by-code</code> 换 token 并缓存；③ 把销售助手表单映射为旧系统 <code>POST /external-orders/create</code> 的字段；④ 成功后回写 flow_id/instance_id 到 PG。字段映射和错误分类设计文档 §6.2 已给全。</td>
+  </tr>
+
+  <tr>
+    <td><b>G2</b></td>
+    <td><b>旧系统针对性小改</b><br>（自动确认信息确认 + V01 profile）</td>
+    <td><span class="tag red">未开工</span></td>
+    <td><span class="tag violet">旧改</span></td>
+    <td><b>S</b></td>
+    <td><span class="tag green">能</span></td>
+    <td>只改旧系统下单创建处（submitExternalOrder.ts）：识别 v0.1 幂等键前缀 → 自动通过「信息确认」节点 + 注入 V01_SALES_ASSISTANT profile。改动收敛一处、只影响 v0.1 订单；但要独立测试服务验证后上生产。</td>
+  </tr>
+
+  <tr>
+    <td><b>G3</b></td>
+    <td><b>销售助手前端</b><br>（下单页 + 我的订单 + 详情跳转）</td>
+    <td><span class="tag red">没有</span></td>
+    <td><span class="tag blue">施工</span></td>
+    <td><b>L</b></td>
+    <td><span class="tag green">能</span></td>
+    <td>本仓库无 web/ 目录。最小做法：先做一个极简 PC 后台页（下单表单 + 我的订单列表 + 点详情跳旧系统 /flows/:flow_id），跑通闭环；企微入口和精装修后置。ord_fulfill demo 只能当交互稿，不是可上线前端。</td>
+  </tr>
+
+  <tr>
+    <td><b>G4</b></td>
+    <td><b>存量订单同步</b><br>（多维表 HTTP 源）</td>
+    <td><span class="tag amber">半成品</span></td>
+    <td><span class="tag blue">施工</span> + <span class="tag amber">决策</span></td>
+    <td><b>M</b></td>
+    <td><span class="tag green">能</span></td>
+    <td>同步骨架已有（cmd/sync + 幂等批次），但 HTTPFetcher 是占位报错、column_map 为空。需要：① 实现飞书 bitable API 拉取；② 回填字段映射配置；③ 飞书应用先有 bitable 读权限（外部配置）。此 Gap 可后置 1 周——销售助手下单后可在飞书审批中心直接看进度。</td>
+  </tr>
+
+  <tr>
+    <td><b>G5</b></td>
+    <td><b>T1.3 五项状态语义拍板</b></td>
+    <td><span class="tag amber">未决</span></td>
+    <td><span class="tag amber">决策</span></td>
+    <td><b>无代码量</b></td>
+    <td><span class="tag green">能</span></td>
+    <td>5 个问题（订单撤回/作废、发货取消、回单位置、开票信息填写位置、盖章回传）需要业务方拍板。不拍板就先用「旧系统原始状态/节点文字」展示，不阻塞下单主链，但会卡住状态映射配置冻结。</td>
+  </tr>
+
+  <tr>
+    <td><b>G6</b></td>
+    <td><b>旧系统配置/数据操作</b><br>（白名单、回调地址、审批人）</td>
+    <td><span class="tag amber">未做</span></td>
+    <td><span class="tag violet">配置</span></td>
+    <td><b>S</b></td>
+    <td><span class="tag green">能</span></td>
+    <td>四件事：① 旧飞书应用重定向白名单加 v0.1 回调地址；② agent/sales 白名单加虹励；③ V01 profile 显式配 TEST_SUPERVISOR（必配！否则 fallback 到王杰→卡单）；④ 确认生产 role map 是否与提供文件一致。都有明确清单（附录 D）。</td>
+  </tr>
+
+  <tr>
+    <td><b>G7</b></td>
+    <td><b>企微备案域名</b></td>
+    <td><span class="tag amber">未就绪</span></td>
+    <td><span class="tag amber">决策</span></td>
+    <td><b>不定</b></td>
+    <td><span class="tag green">能绕行</span></td>
+    <td>企微群聊/侧边栏入口依赖备案域名。未就绪就先用 <b>PC 订单后台</b> + 飞书授权 + 飞书审批中心，体验闭环照样能跑；企微入口后置。这是关键路径上的外部依赖。</td>
+  </tr>
+
+  <tr>
+    <td><b>G8</b></td>
+    <td><b>企微官方通道补全</b><br>（template_card、群发）</td>
+    <td><span class="tag amber">简化</span></td>
+    <td><span class="tag blue">施工</span></td>
+    <td><b>M</b></td>
+    <td><span class="tag green">能</span></td>
+    <td>OfficialGateway 的 SendCard 现在是 text 简化版；GroupSender 无 official 实现（只有 mock）。v0.1 最小切片不依赖它；等企微入口提上日程时再补 template_card 和群发。</td>
+  </tr>
+
+  <tr>
+    <td><b>G9</b></td>
+    <td><b>部署与监控补齐</b></td>
+    <td><span class="tag amber">半</span></td>
+    <td><span class="tag blue">施工</span></td>
+    <td><b>S–M</b></td>
+    <td><span class="tag green">能</span></td>
+    <td>compose 已有 9 服务（含 sync）、Dockerfile 4 target；缺前端静态资源容器、证据文件卷、日志/审计目录挂载、同步失败告警。上线前按 v0.1/10-deployment 清单补齐。</td>
+  </tr>
+
+  <tr>
+    <td><b>G10</b></td>
+    <td><b>v0.2 受信办理通道</b></td>
+    <td><span class="tag red">未开工</span></td>
+    <td><span class="tag blue">施工</span> + <span class="tag violet">旧改</span></td>
+    <td><b>M</b></td>
+    <td><span class="tag green">能</span></td>
+    <td>新系统办理 → 旧系统 decision 接口。旧系统三个 decision 接口只认 approver_token、支持文件上传，已验证无鉴权死路；v0.2 前补真实 operator + 幂等锁即可。不阻塞 v0.1。</td>
+  </tr>
+
+  <tr>
+    <td><b>G11</b></td>
+    <td><b>v0.4 新系统详情页/附件查看自立</b></td>
+    <td><span class="tag red">未开工</span></td>
+    <td><span class="tag blue">施工</span></td>
+    <td><b>L</b></td>
+    <td><span class="tag green">能</span></td>
+    <td>0.5 前必须就绪，否则旧系统停机后详情/附件变死路。依赖 G3 前端建设时一并规划。</td>
+  </tr>
+
+  <tr>
+    <td><b>G12</b></td>
+    <td><b>0.5 真相源切换</b></td>
+    <td><span class="tag red">未开工</span></td>
+    <td><span class="tag blue">施工</span> + <span class="tag amber">决策</span></td>
+    <td><b>XL</b></td>
+    <td><span class="tag green">能</span></td>
+    <td>最大工程风险：JSONL 级全量迁移（含事件链）+ 新系统审批台 + 环节编排接管 + 切换仪式 + 演练。设计已有（P0-7/P0-8），应作为「切换项目」单独立项，不随普通版本排期。</td>
+  </tr>
+</table>
+
+<!-- ===================== 6 ===================== -->
+<h2 id="s6">6 · Gap 分类：哪些是决策，哪些是施工</h2>
+
+<div class="mermaid">
+flowchart TB
+  subgraph D["🧭 决策 / 外部信息（不写代码，但要有人拍板）"]
+    D1["G5 · T1.3 五项状态语义"]
+    D2["G7 · 企微备案域名"]
+    D3["G6 · 审批人 open_id / role map 确认"]
+    D4["G4 前置 · 飞书 bitable 读权限"]
+    D5["结算方式枚举对齐（账期30天→旧系统文本）"]
+  end
+  subgraph C["🔧 施工 / 内部可控（写代码）"]
+    C1["G1 · 下单桥接模块（命门）"]
+    C2["G3 · 销售助手前端"]
+    C3["G4 · 多维表 HTTP 源落地"]
+    C4["G8 · 企微官方通道补全"]
+    C5["G9 · 部署监控补齐"]
+    C6["G10-G12 · v0.2 受信通道 / v0.4 详情页 / 0.5 切换"]
+  end
+  subgraph O["🔩 旧系统配合（边界清晰）"]
+    O1["G2 · 旧系统一处小改"]
+    O2["G6 · 旧系统后台配置/白名单"]
+  end
+  D1 -.-> C1
+  D5 -.-> C1
+  D4 -.-> C3
+  O2 -.-> C1
+</div>
+
+<div class="grid2">
+<div class="card amber">
+<h3 style="margin-top:0">🧭 决策 / 外部信息</h3>
+<p>这些不是写代码能解决的，必须拿到答案才能冻结配置。好在设计文档已经把它们<strong>和代码解耦</strong>：没拍板前可以先过渡，不阻塞下单主链。</p>
+<ul>
+  <li><b>G5 五项状态语义</b>：影响状态回显映射，可先用旧系统原始状态文字过渡。</li>
+  <li><b>G7 企微备案域名</b>：影响企微入口，可先用 PC 后台过渡。</li>
+  <li><b>G6/D5 审批人与结算方式</b>：不拍板会卡单或走错财务闸门，必须上线前关闭。</li>
+  <li><b>飞书 bitable 读权限</b>：只影响存量订单列表（P1），不阻塞下单。</li>
+</ul>
+</div>
+<div class="card blue">
+<h3 style="margin-top:0">🔧 施工 / 内部可控</h3>
+<p>这些是我们可以直接排期开发的。最大的是 G1（桥接）和 G3（前端），但都有明确方案和接口依据。</p>
+<ul>
+  <li><b>G1 桥接模块</b>：方案 A1 已定，依赖旧系统既有接口（已验证存在），无未知技术风险。</li>
+  <li><b>G3 前端</b>：工作量最大，但可以用「极简 PC 后台」策略把 v0.1 闭环先跑通。</li>
+  <li><b>G4/G8/G9</b>：有骨架，补完即可。</li>
+  <li><b>G10–G12</b>：后续版本施工，按周迭代排，别挤进 08-21。</li>
+</ul>
+</div>
+</div>
+
+<!-- ===================== 7 ===================== -->
+<h2 id="s7">7 · 数据不丢失 / 无死路 专项核对</h2>
+<div class="card">
+<p>《发布计划可行性验证》已经按「数据不可丢失、不可有不能解决的死路」逐版过了一遍，结论是<strong>没有不可跨越的断点，但有 8 个 P0 必须堵上</strong>。我们把 P0 和当前状态对齐如下。</p>
+</div>
+
+<table>
+  <tr><th style="width:70px">P0</th><th style="width:200px">时点</th><th style="width:270px">要堵上的点</th><th>当前状态 / 归属</th></tr>
+  <tr><td><b>P0-1</b></td><td>v0.1 前</td><td>V01 profile 显式配 TEST_SUPERVISOR</td><td><span class="tag amber">未配置</span> · 旧系统数据配置</td></tr>
+  <tr><td><b>P0-2</b></td><td>v0.2 前</td><td>存量待办规则（新单新办法、存量飞书走完）</td><td><span class="tag amber">未定稿</span> · 业务方 + 设计</td></tr>
+  <tr><td><b>P0-3</b></td><td>v0.2 前</td><td>受信端点（真实 operator + 并发锁）</td><td><span class="tag red">未开工</span> · 旧系统临时修补</td></tr>
+  <tr><td><b>P0-4</b></td><td>v0.3 前</td><td>开票迁移范围按真实任务修正</td><td><span class="tag amber">未定稿</span> · 业务方 + 设计</td></tr>
+  <tr><td><b>P0-5</b></td><td>v0.3 前</td><td>受信通道文件转发 + 附件归属</td><td><span class="tag red">未开工</span> · 设计</td></tr>
+  <tr><td><b>P0-6</b></td><td>v0.4 前</td><td>新系统详情页 + 附件查看自立</td><td><span class="tag red">未开工</span> · v0.1 开发</td></tr>
+  <tr><td><b>P0-7</b></td><td>0.5 前</td><td>T1.3 五项拍板（状态机接住所有中间状态）</td><td><span class="tag amber">未拍板</span> · 业务方</td></tr>
+  <tr><td><b>P0-8</b></td><td>0.5 前</td><td>JSONL 全量迁移 + 切换仪式 + 演练</td><td><span class="tag red">未开工</span> · 设计 + 开发</td></tr>
+</table>
+
+<div class="grid2">
+<div class="card red">
+<h3 style="margin-top:0">🔴 数据风险 TOP（已有对策）</h3>
+<ul>
+  <li><b>D2 事件链没进 PG</b>：0.5 前必须补 JSONL 级全量迁移（含事件链），否则审计历史丢失。</li>
+  <li><b>D3 附件归属</b>：合同/出库单/回单/发票，0.5 前必须明确「旧系统保留只读 + 新系统链接」或迁对象存储。</li>
+  <li><b>D6 双系统一致性</b>：新系统以「受信通道成功回执」为准落库，失败重试 + 对账。</li>
+  <li><b>D4 身份映射</b>：飞书 open_id → 企微 user_id 映射表永久保留。</li>
+</ul>
+</div>
+<div class="card red">
+<h3 style="margin-top:0">🔴 死路风险 TOP（已有兜底）</h3>
+<ul>
+  <li><b>S1 存量待办</b>：新单新办法、存量单飞书走完；迁移开关按 flow_id 批次生效。</li>
+  <li><b>S3 旧系统停机后 flows 页不可用</b>：0.5 前置新系统详情页 + 附件查看。</li>
+  <li><b>S4 进行中订单无处可去</b>：冻结新单、存量走完、新系统状态机接住所有中间状态。</li>
+  <li><b>S5 双通道并发办理</b>：受信端点加幂等锁 + 旧系统已办检测兜底。</li>
+</ul>
+</div>
+</div>
+
+<!-- ===================== 8 ===================== -->
+<h2 id="s8">8 · 怎么补：关键路径与最小上线切片</h2>
+
+<div class="mermaid">
+flowchart LR
+  subgraph MIN["最小上线切片（08-21 可冲）"]
+    M1["G6 旧系统配置确认"] --> M2["G1 下单桥接模块"]
+    M2 --> M3["G2 旧系统一处小改"]
+    M3 --> M4["G3 极简 PC 下单+列表+跳转"]
+    M4 --> M5["虹励灰度 1-2 单"]
+  end
+  subgraph P1["顺延 1 周（体验增强）"]
+    P1A["G4 存量订单多维表同步"]
+    P1B["G3 企微入口 / 精装修"]
+    P1C["复制重提 / 驳回原因"]
+  end
+  subgraph NEXT["后续版本"]
+    N1["v0.2 受信通道 + 备货迁移"]
+    N2["v0.3 发货/财务迁移"]
+    N3["v0.4 销售环节迁移"]
+    N4["0.5 切换项目"]
+  end
+  M5 --> P1A
+  P1A --> P1B
+  P1B --> P1C
+  P1C --> N1 --> N2 --> N3 --> N4
+</div>
+
+<div class="card blue">
+<h3>8.1 建议的补法（按顺序）</h3>
+<table>
+  <tr><th style="width:70px">顺序</th><th style="width:230px">动作</th><th style="width:100px">谁来做</th><th>完成标志</th></tr>
+  <tr><td>1</td><td>关掉外部信息：G5 先过渡、G6/D5 拿到答案</td><td>业务方 + 旧系统侧</td><td>审批人 open_id 确认单、结算方式映射表</td></tr>
+  <tr><td>2</td><td>G2 旧系统小改（独立测试服务验证）</td><td>旧系统侧落地</td><td>v0.1 幂等键前缀单 → 自动通过信息确认</td></tr>
+  <tr><td>3</td><td>G1 桥接模块 + 单测</td><td>v0.1 开发</td><td>测试账号授权 → 下单成功 → 飞书实例出现 → PG 有 flow_id</td></tr>
+  <tr><td>4</td><td>G3 极简 PC 前端</td><td>v0.1 开发</td><td>下单 + 我的订单 + 跳 flows 全通</td></tr>
+  <tr><td>5</td><td>G4 存量同步（可后置）</td><td>v0.1 开发</td><td>多维表 1,316 行进列表、状态可回显</td></tr>
+  <tr><td>6</td><td>G9 部署监控补齐后灰度上线</td><td>v0.1 运维</td><td>虹励真实 1–2 单全流程通过</td></tr>
+</table>
+</div>
+
+<div class="card amber">
+<h3>8.2 对 08-21 窗口的诚实判断</h3>
+<p><strong>如果只交付「最小上线切片」</strong>（桥接 + 旧系统小改 + 极简 PC 页面 + 灰度），且外部配置今天就开始走，<strong>有机会但紧</strong>：桥接模块本身没有未知技术风险，真正的耗时点是旧系统小改的测试验证和飞书应用配置等待。</p>
+<p><strong>如果要交付完整体验清单</strong>（企微入口 + 存量同步 + 复制重提 + 精装修），08-21 <strong>不建议硬压</strong>。正确姿势是：本周发最小切片，下 1–2 周补齐体验项，同时把 v0.2 受信通道排进下周。</p>
+</div>
+
+<!-- ===================== 9 ===================== -->
+<h2 id="s9">9 · 最终结论与需要你拍板的事</h2>
+
+<div class="conclusion-box">
+<p style="margin:0 0 6px"><b>结论：</b>我们有能力评估，发布计划<strong>成立</strong>，不是「能不能完成」的问题，而是<strong>「按什么切片完成」</strong>的问题。</p>
+<ul style="margin:0">
+  <li>现有代码：订单履约引擎和同步骨架是真实的，测试通过，不是 PPT。</li>
+  <li>发布计划：设计文档已经给出可执行的 S0–S5 和 P0-1..P0-8，路线清晰。</li>
+  <li>最大技术未知数（旧系统 decision 接口能不能受信办理）已经逐行验证：<strong>能</strong>。</li>
+  <li>最大工程风险（0.5 切换）有对策，但要单独立项。</li>
+</ul>
+</div>
+
+<div class="card red">
+<h3 style="margin-top:0">需要你（业务方/项目负责人）拍板或提供的 5 件事</h3>
+<table>
+  <tr><th style="width:44px">#</th><th style="width:260px">事项</th><th>为什么必须</th></tr>
+  <tr><td>1</td><td>V01 profile 的 TEST_SUPERVISOR 真实审批人 open_id</td><td>不配会 fallback 到王杰 → 主管节点卡单</td></tr>
+  <tr><td>2</td><td>结算方式枚举对齐（账期 30 天/月结 30 天 → 旧系统文本）</td><td>决定备货阶段是否触发「财务确认到款」闸门</td></tr>
+  <tr><td>3</td><td>T1.3 五项状态语义拍板（或明确先过渡）</td><td>影响状态回显映射冻结</td></tr>
+  <tr><td>4</td><td>企微备案域名：是否本周可备好，还是先 PC 后台</td><td>决定 v0.1 入口形态</td></tr>
+  <tr><td>5</td><td>确认 08-21 按「最小切片」交付，体验项顺延</td><td>决定排期与资源投入</td></tr>
+</table>
+</div>
+
+<!-- ===================== 附录 ===================== -->
+<h2 id="s10">附录 A · 证据索引</h2>
+<div class="card">
+<table>
+  <tr><th style="width:260px">结论</th><th>证据</th></tr>
+  <tr><td>16 个 API 端点已实现</td><td>internal/api/server.go:58-71（含 v01.go 三个 0.1 新增端点）</td></tr>
+  <tr><td>下单桥接模块不存在</td><td>grep 全仓无 <code>internal/bridge</code> / <code>feishu-user-by-code</code> / <code>external-orders/create</code> 引用</td></tr>
+  <tr><td>前端不存在</td><td>仓库根目录无 web/；仅 cmd/internal/migrations 等 Go 代码与 docs/spec 文档</td></tr>
+  <tr><td>同步骨架存在、HTTP 源是占位</td><td>internal/sync/sync.go HTTPFetcher.Fetch 返回「T1-T3 survey pending」显式错误</td></tr>
+  <tr><td>旧系统备货 decision 仅认 approver_token</td><td>tripartite-approval/src/routes/stockPrepares.ts:963-977</td></tr>
+  <tr><td>旧系统发货 decision 仅认 approver_token + 文件上传</td><td>tripartite-approval/src/routes/shipments.ts:1853-1871（multer receipt_files 最多 10 个）</td></tr>
+  <tr><td>旧系统开票 decision 仅认 approver_token + 文件上传</td><td>tripartite-approval/src/routes/invoices.ts:772-789（multer invoice_files 最多 10 个）</td></tr>
+  <tr><td>operatorOpenId 为占位符</td><td>tripartite-approval/src/routes/stockPrepares.ts:1062（"(stock-prepare-web-approver)"）</td></tr>
+  <tr><td>V01 profile 必须显式配 TEST_SUPERVISOR</td><td>《对比与同步设计》附录 D-4（merge 语义，否则 fallback 王杰）</td></tr>
+  <tr><td>测试通过情况</td><td>go test 8 个非集成包全部 ok（本机 2026-08-18）；coverage.txt 全仓 85.4%</td></tr>
+  <tr><td>L1 集成测试未执行</td><td>本机无 Docker；测试 PG 端口 55432 未监听</td></tr>
+  <tr><td>旧系统 TypeScript 未编译验证</td><td>本机无 Node/npm；旧系统结论以静态读码为准</td></tr>
+</table>
+<p class="small">本报告由对两个仓库的代码与文档审计生成，结论均有文档或代码行号支撑；涉及工时/排期部分为工程判断，落地时以实际开发速度为准。</p>
+</div>
+
+</div>
+</body>
+</html>

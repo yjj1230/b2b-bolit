@@ -1,0 +1,18 @@
+# project/handoffs/HOF-20260813-001/acceptance.yaml
+# 接受回执（§10 / A.8 机器契约 / ECM-REC-001..004）
+# 当前 decision=NOT_APPLICABLE：bootstrap 模式（§10 例外 + ECM-REC-004）禁止写 ACCEPTED；
+# 且同一 Agent 不得自证独立接手（A.10 第 6 条）。须由后续**不同** Agent 或人工完成
+# A.6 独立校验后填写本文件。
+handoff_id: HOF-20260813-001
+bootstrap_mode: true
+mechanism_status: PROPOSED
+decision: NOT_APPLICABLE
+agent: UNKNOWN
+observed_at: UNKNOWN
+change_window_digest: UNKNOWN
+first_action: UNKNOWN
+note: >
+  接手方操作：1) 按 A.4/A.5 判定状态（当前 project.yaml 存在但机制 PROPOSED，
+  应进入 BOOTSTRAP_DIAGNOSTIC）；2) 独立校验 manifest 摘要与 open-items 恢复；
+  3) 填写 decision（ACCEPTED | CONDITIONAL | REJECTED）并声明首个动作。
+  ECM-REC-004：bootstrap_mode=true 时 decision 不得为 ACCEPTED（由独立接手方解除）。

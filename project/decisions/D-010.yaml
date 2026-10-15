@@ -1,0 +1,29 @@
+# D-010 影子环境与生命周期裁决（用户直接裁决，2026-08-20）
+decision_id: D-010
+choice: >
+  在 D-008/D-009 基础上补充三项：
+  Q1=独立环境：单独给影子库一套环境。影子轨部署在专用环境/专用 compose 项目，
+      与 A 轨生产栈不共用主机与网络命名空间；本仓库 docker-compose.shadow.yml
+      改为自带 shadow-temporal 独立实例（不再依赖宿主 17233），影子容器对 A 轨
+      任何主机名零可达，共享面收敛为零。
+  Q2=生命周期：影子库在 v0.3 正式上线之后撤销。v0.3 上线前影子轨保持可用并持续
+      产出审计；v0.3 上线后执行归档（报告/分歧清单/覆盖基线）→ 关闭影子栈 →
+      drop b2b_shadow，不再保留影子数据副本。
+  Q3=容量基线：当前数据量每天不超过 1 万条事件流转，压力不大。影子栈资源按
+      ≤1 万条/天规划（单实例 PG / 内存 SpiceDB / auto-setup Temporal 即可），
+      不做高负载容量设计；若日均量级跃升一个数量级再重评资源。
+rationale: >
+  独立环境从物理上消除「影子影响 A 轨」的残余风险，并满足 D-009 无托底原则
+  （影子可用性不依赖生产 Temporal 容量）；v0.3 撤销为影子数据副本设定明确
+  生命周期终点，归档后才可清理；1 万条/天的基线让单实例资源规划有据可依。
+premises:
+  - project/decisions/D-008.yaml（双轨发布）
+  - project/decisions/D-009.yaml（无托底 + 全节点覆盖/差异映射可接受）
+  - docs/v0.1/12-shadow-full-flow.html（六条铁律、A-01..A-06）
+objections: []
+decider: project-owner（用户直接裁决）
+effective_interval: {from: "2026-08-20T00:00:00+00:00", to: null}
+supersedes: []
+review_condition: >
+  ① 影子栈完成独立环境部署并跑通 R1 全量重放；② 日均数据量超过 1 万条/天时
+  重开资源评估；③ v0.3 上线前复核撤销清单（归档完整性）再执行 teardown。

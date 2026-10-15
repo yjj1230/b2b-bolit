@@ -1,0 +1,223 @@
+# b2b_pilot_v3 docker compose —— docs/02-architecture.html §6 部署
+# postgres 15432 / spicedb 15051 / temporal 17233 / api 18080 / wecom 18081
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: b2b_pilot
+    ports:
+      - "15432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+
+  migrate:
+    image: postgres:16-alpine
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./migrations:/migrations:ro
+    entrypoint: >
+      sh -c 'for f in /migrations/*.sql; do
+               echo "applying $$f";
+               psql "postgres://postgres:postgres@postgres:5432/b2b_pilot?sslmode=disable" -v ON_ERROR_STOP=1 -f $$f || exit 1;
+             done'
+
+  spicedb:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: spicedb
+    # SpiceDB v1.39 强制要求 grpc-preshared-key（与 api/worker/seedrel 的 B2B_SPICEDB_KEY=b2b-dev-key 一致）
+    command: serve --grpc-addr 0.0.0.0:50051 --http-addr 0.0.0.0:8443 --http-enabled --datastore-engine memory --grpc-preshared-key b2b-dev-key --log-level warn
+    ports:
+      - "15051:50051"
+    healthcheck:
+      # 官方镜像无 shell，v1.39 无 healthcheck 子命令 → 用镜像内置 gRPC 探针
+      test: ["CMD", "/usr/local/bin/spicedb-healthcheck", "-addr", "127.0.0.1:50051", "-token", "b2b-dev-key"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+
+  # spicedb-schema：写 schema.zed + 演示授权关系基线（seedrel 幂等；v1.39 CLI 无 schema/relationship 子命令）
+  spicedb-schema:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: seedrel
+    depends_on:
+      spicedb:
+        condition: service_healthy
+    volumes:
+      - ./schema.zed:/schema.zed:ro
+    command: ["-spicedb", "spicedb:50051", "-token", "b2b-dev-key", "-schema", "/schema.zed"]
+
+  # AUTH-03 收敛：v0.1 授权关系基线（tenant#ops 含 u-op/虹励、warehouse#staff、accounting）。
+  # 对象级关系（prestock/shipment）由 worker 的 Outbox 投影器自动写入。
+  seedrel:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: seedrel
+    depends_on:
+      spicedb-schema:
+        condition: service_completed_successfully
+    command: ["-spicedb", "spicedb:50051", "-token", "b2b-dev-key"]
+
+  temporal:
+    image: temporalio/auto-setup:1.24.2
+    environment:
+      - DB=postgres12
+      - DB_PORT=5432
+      - POSTGRES_USER=postgres
+      - POSTGRES_PWD=postgres
+      - POSTGRES_SEEDS=postgres
+      - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/docker.yaml
+    ports:
+      - "17233:7233"
+    healthcheck:
+      # auto-setup:1.24.2 只监听容器 IP；镜像内仅有 config/dynamicconfig/docker.yaml
+      test: ["CMD-SHELL", "tctl --address $$(hostname -i):7233 namespace list >/dev/null 2>&1 || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 60
+      start_period: 30s
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: api
+    environment:
+      B2B_PG_DSN: postgres://postgres:postgres@postgres:5432/b2b_pilot?sslmode=disable
+      B2B_SPICEDB_ADDR: spicedb:50051
+      B2B_TEMPORAL_ADDR: temporal:7233
+      B2B_HTTP_ADDR: :8080
+      B2B_WECOM_PROVIDER: ${B2B_WECOM_PROVIDER:-mock}
+      B2B_WECOM_TENANT_CFG: /etc/b2b/wecom-tenant.json
+      B2B_WECOM_CONTEXT_SECRET: ${B2B_WECOM_CONTEXT_SECRET:-b2b-dev-context-secret}
+      # v0.1 桥接下单（仅当 B2B_FEISHU_BRIDGE_ENABLED=true 时启用；契约见 internal/bridge）
+      B2B_FEISHU_BRIDGE_ENABLED: ${B2B_FEISHU_BRIDGE_ENABLED:-false}
+      B2B_FEISHU_BRIDGE_BASE_URL: ${B2B_FEISHU_BRIDGE_BASE_URL:-}
+      B2B_FEISHU_BRIDGE_APP_ID: ${B2B_FEISHU_BRIDGE_APP_ID:-}
+      B2B_FEISHU_BRIDGE_REDIRECT_URI: ${B2B_FEISHU_BRIDGE_REDIRECT_URI:-}
+      # ROL-01：审批人路由与生产身份白名单（v0.1 默认商务单人 u-op）
+      B2B_ASSIGNEE_SUPERVISOR: ${B2B_ASSIGNEE_SUPERVISOR:-u-supervisor}
+      B2B_ASSIGNEE_CHAIRMAN: ${B2B_ASSIGNEE_CHAIRMAN:-u-chairman}
+      B2B_ASSIGNEE_OP: ${B2B_ASSIGNEE_OP:-u-op}
+      B2B_ASSIGNEE_ACCOUNTING: ${B2B_ASSIGNEE_ACCOUNTING:-u-accounting}
+      B2B_ASSIGNEE_SALES: ${B2B_ASSIGNEE_SALES:-u-sales}
+      B2B_ASSIGNEE_WAREHOUSE_PREFIX: ${B2B_ASSIGNEE_WAREHOUSE_PREFIX:-u-wh-}
+      B2B_ASSIGNEE_WAREHOUSE_DEFAULT: ${B2B_ASSIGNEE_WAREHOUSE_DEFAULT:-u-wh-yangyuan}
+      B2B_V01_PRINCIPALS: ${B2B_V01_PRINCIPALS:-u-op:OP}
+      # ROL-01 生产严格身份（B2B_AUTH_STRICT=true）：withContext 只认 X-WeCom-Context，
+      # 无令牌/校验失败/不在白名单一律 401；false=演示模式（信任 X-User-Id）。
+      B2B_AUTH_STRICT: ${B2B_AUTH_STRICT:-false}
+      # UI-01 订单数据实体（pgAPI 产品/客户/购销合同搜索；漏传会 501「provider not configured」）
+      B2B_PGAPI_BASE_URL: ${B2B_PGAPI_BASE_URL:-https://api.renheng.com/pgapi}
+      B2B_PGAPI_API_KEY: ${B2B_PGAPI_API_KEY:-}
+      B2B_PGAPI_TIMEOUT: ${B2B_PGAPI_TIMEOUT:-}
+      B2B_PGAPI_ARCHIVE_ENABLED: ${B2B_PGAPI_ARCHIVE_ENABLED:-false}
+    volumes:
+      - ${B2B_WECOM_TENANT_CFG_FILE:-./config/wecom-tenant.test.example.json}:/etc/b2b/wecom-tenant.json:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      spicedb:
+        condition: service_healthy
+      spicedb-schema:
+        condition: service_completed_successfully
+      temporal:
+        condition: service_healthy
+    ports:
+      - "18080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/healthz || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: worker
+    environment:
+      B2B_PG_DSN: postgres://postgres:postgres@postgres:5432/b2b_pilot?sslmode=disable
+      B2B_SPICEDB_ADDR: spicedb:50051
+      B2B_TEMPORAL_ADDR: temporal:7233
+      B2B_WECOM_PROVIDER: ${B2B_WECOM_PROVIDER:-mock}
+      B2B_WECOM_TENANT_CFG: /etc/b2b/wecom-tenant.json
+      B2B_PGAPI_BASE_URL: ${B2B_PGAPI_BASE_URL:-https://api.renheng.com/pgapi}
+      B2B_PGAPI_API_KEY: ${B2B_PGAPI_API_KEY:?B2B_PGAPI_API_KEY must be set}
+      B2B_PGAPI_TIMEOUT: ${B2B_PGAPI_TIMEOUT:-10}
+    volumes:
+      - ${B2B_WECOM_TENANT_CFG_FILE:-./config/wecom-tenant.test.example.json}:/etc/b2b/wecom-tenant.json:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      spicedb-schema:
+        condition: service_completed_successfully
+      temporal:
+        condition: service_healthy
+
+  wecom:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: wecom
+    environment:
+      B2B_PG_DSN: postgres://postgres:postgres@postgres:5432/b2b_pilot?sslmode=disable
+      B2B_SPICEDB_ADDR: spicedb:50051
+      B2B_TEMPORAL_ADDR: temporal:7233
+      B2B_HTTP_ADDR: :8080
+      B2B_WECOM_PROVIDER: ${B2B_WECOM_PROVIDER:-mock}
+      B2B_WECOM_TENANT_CFG: /etc/b2b/wecom-tenant.json
+      B2B_WECOM_CONTEXT_SECRET: ${B2B_WECOM_CONTEXT_SECRET:-b2b-dev-context-secret}
+      # 回调转接目标必须是 api 服务（容器内服务名，不能用 127.0.0.1）
+      B2B_API_ADDR: http://api:8080
+    volumes:
+      - ${B2B_WECOM_TENANT_CFG_FILE:-./config/wecom-tenant.test.example.json}:/etc/b2b/wecom-tenant.json:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    ports:
+      - "18081:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/wecom/healthz || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 30
+
+  # 0.1 新增：飞书数据同步 Job（docs/v0.1/04 §6 / 11-migration；单向只读，不回写飞书）
+  sync:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: sync
+    restart: unless-stopped
+    environment:
+      B2B_PG_DSN: postgres://postgres:postgres@postgres:5432/b2b_pilot?sslmode=disable
+    command: ["-config", "/etc/sync/sync.json",
+              "-dsn", "postgres://postgres:postgres@postgres:5432/b2b_pilot?sslmode=disable",
+              "-interval", "5m",
+              "-state-file", "/tmp/sync-last-ok"]
+    volumes:
+      - ./config/sync.example.json:/etc/sync/sync.json:ro
+      - ./data:/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "test -f /tmp/sync-last-ok && test $$(( $$(date +%s) - $$(stat -c %Y /tmp/sync-last-ok) )) -lt 900 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 5m

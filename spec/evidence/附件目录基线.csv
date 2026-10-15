@@ -1,0 +1,8 @@
+﻿类别,目录,文件数,总字节,最新写入/状态
+合同,C:\feishu-approval-poc\data\contracts,1949,2400100353,2026-08-19 17:24:18 +08:00
+客户合同上传,C:\feishu-approval-poc\data\customer_contract_uploads,9,6438125,2026-08-19 17:24:18 +08:00
+出库单,C:\feishu-approval-poc\data\outbound_orders,1256,10723514,2026-08-19 17:24:18 +08:00
+回单,C:\feishu-approval-poc\data\shipment_receipts,971,654130350,2026-08-19 17:24:18 +08:00
+开票申请,C:\feishu-approval-poc\data\invoice_applications,767,5768329,2026-08-19 17:24:18 +08:00
+发票文件,C:\feishu-approval-poc\data\invoice_files,88,70853388,2026-08-19 17:24:18 +08:00
+开票材料包,C:\feishu-approval-poc\data\invoice_material_packages,0,0,无文件

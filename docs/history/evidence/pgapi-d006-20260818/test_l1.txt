@@ -1,0 +1,3 @@
+PILOT_TEST_PG_DSN="postgres://postgres:postgres@localhost:55432/b2b_pilot_test?sslmode=disable" go test -count=1 -tags integration ./internal/repo/... ./internal/authz/...
+ok  	b2b_pilot_v3/internal/repo	234.441s
+ok  	b2b_pilot_v3/internal/authz	13.229s

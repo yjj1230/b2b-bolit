@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>08 · 外部依赖接入层 · B2B 订单履约验证项目</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+SC:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:#f5f4ed; --paper2:#efeee5; --ink:#1f1d18; --ink2:#6b665b;
+    --ink3:#3a382f; --blue:#1B365D; --rule:#d4d1c5;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif; line-height:1.6;}
+  .wrap{max-width:960px; margin:0 auto; padding:48px 40px 80px;}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;}
+  .folio{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--rule); padding-bottom:10px;
+    font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink2);}
+  .folio a{color:var(--ink2); border:none;}
+  .folio a:hover{color:var(--blue);}
+  .tag{display:inline-block; padding:3px 10px; font-size:11px; letter-spacing:.16em; background:var(--paper2); color:var(--blue);}
+  .kicker{display:flex; align-items:baseline; gap:12px; margin-top:48px;}
+  h1{font-size:clamp(32px,5vw,50px); line-height:1.12; font-weight:500; margin-top:14px; letter-spacing:-.01em;}
+  .lede{margin-top:18px; font-size:17px; line-height:1.7; color:var(--ink3); max-width:720px;}
+  h2{font-size:23px; font-weight:600; margin:52px 0 14px; color:var(--blue); display:flex; align-items:baseline; gap:12px; border-top:1px solid var(--rule); padding-top:26px;}
+  h2 .no{font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.12em;}
+  h3{font-size:17.5px; font-weight:600; margin:30px 0 10px; color:var(--ink);}
+  h3 .no{color:var(--blue); font-family:'IBM Plex Mono',monospace; font-size:12px; margin-right:8px;}
+  p{margin:10px 0; color:var(--ink3);}
+  ul,ol{margin:10px 0 10px 26px; color:var(--ink3);}
+  li{margin:5px 0;}
+  a{color:var(--blue); text-decoration:none; border-bottom:1px solid var(--rule);}
+  a:hover{border-bottom-color:var(--blue);}
+  blockquote{border-left:2px solid var(--blue); padding:10px 18px; margin:16px 0; background:var(--paper2); font-style:italic;}
+  table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  .table-wrap{overflow-x:auto; margin:16px 0 24px; border:1px solid var(--rule);}
+  .table-wrap table{margin:0;}
+  th{background:var(--paper2); color:var(--blue); text-align:left; font-weight:600; padding:9px 12px; border-bottom:1.5px solid var(--blue); font-size:12.5px; white-space:nowrap;}
+  td{padding:9px 12px; border-bottom:1px solid var(--rule); vertical-align:top; color:var(--ink3);}
+  tr:nth-child(even) td{background:#faf9f3;}
+  tr:hover td{background:#f0ede0;}
+  .mermaid{background:var(--paper); border:1px solid var(--rule); padding:18px; overflow-x:auto; text-align:center; margin:20px 0;}
+  .mermaid svg{max-width:100%; height:auto;}
+  .mermaid svg.statediagram span,.mermaid svg.statediagram div{color:#1f1d18 !important;}
+  .mermaid svg.statediagram text{fill:#1f1d18 !important;}
+  figcaption{text-align:center; font-size:12px; color:var(--ink2); margin:-10px 0 26px; font-style:italic;}
+  code{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace; font-size:13px; background:var(--paper2); padding:1px 5px;}
+  pre{background:var(--paper2); border:1px solid var(--rule); padding:16px 18px; overflow-x:auto; font-size:12.8px; line-height:1.55; margin:14px 0;}
+  pre code{background:none; padding:0;}
+  footer.colophon{margin-top:56px; padding-top:14px; border-top:1px solid var(--rule); display:flex; justify-content:space-between;
+    font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink2); flex-wrap:wrap; gap:8px;}
+  footer.colophon a{color:var(--ink2); border:none;}
+  footer.colophon a:hover{color:var(--blue);}
+  .toc{border:1px solid var(--rule); background:var(--paper2); padding:18px 24px; margin:26px 0;}
+  .toc .tt{font-size:11px; letter-spacing:.2em; color:var(--blue); margin-bottom:8px;}
+  .toc a{display:block; padding:3px 0; color:var(--ink3); border:none;}
+  .toc a:hover{color:var(--blue);}
+  .toc .mono{font-size:12px; color:var(--blue); margin-right:8px;}
+  @media(max-width:720px){.wrap{padding:28px 18px 60px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="folio">
+    <span><a href="index.html">← Docs</a> · B2B Order Fulfillment</span>
+    <span>08 · External Integration</span>
+    <span>Integration Layer</span>
+  </header>
+
+  <div class="kicker">
+    <span class="tag">Integration Layer · 外部依赖接入层</span>
+    <span class="mono" style="font-size:11px; letter-spacing:.18em; color:var(--ink2);">架构文档 · 独立成章</span>
+  </div>
+
+  <h1>外部依赖接入层<br/><span style="font-style:italic; color:var(--blue);">Integration Layer</span></h1>
+
+  <p class="lede"><strong>文档定位：架构文档（architecture）</strong>，与 07-wecom-integration.html 同为「接入类专项架构」。独立成章的原因：外部依赖是<strong>横切关注点</strong>——新增数据源、切换配置源时本层独立演进，不污染主架构文档（02）与开发计划（04）。编号延续文档家族 07 → 08。本文档回答「系统如何组织对外部世界的接入」（组件边界、接口契约、依赖方向、演进路径）；落地实施步骤见 §6 附录（轻量），详细里程碑见 04-development-plan.html。</p>
+
+  <h2><span class="no">0 ·</span> 结论摘要（TL;DR）</h2>
+  <ul>
+    <li>系统对外部有<strong>两类依赖</strong>：① 动态数据源（企微会话存档/出站/回调，未来飞书多维表格）；② 业务配置性数据（审批催办、回单超期、修改分类、自动审批阈值）。</li>
+    <li>新增独立层 <span class="mono">internal/integration/</span> 统一承接两者，领域层 <span class="mono">internal/domain</span> 保持纯 Go 零依赖（只依赖接口/纯函数，不感知接入实现）。</li>
+    <li>基线实现 <span class="mono">StaticConfigProvider</span>：值 = 历史硬编码默认值（24h/48h/5d），<strong>行为完全不变</strong>（决策点 2026-08：Static 起步）。</li>
+    <li>已接线：<span class="mono">internal/workflows/client.go</span> 的 Timer 硬编码常量（24h/48h/5d/24h）改为从接入层策略读取。</li>
+    <li>明确不归入本层：数据迁移源（<span class="mono">legacy_*</span> 只读归档 → 独立 <span class="mono">internal/migration/</span>）、SpiceDB/Temporal/PG 接入（已相对独立）。</li>
+    <li><strong>业务依赖数据</strong>（主数据类）与「配置性数据」边界明确：前者是<strong>业务事实</strong>、随业务运营变化、需权威来源与维护人，不归 <span class="mono">BusinessConfigProvider</span> 策略接口。<strong>审计清单</strong>（§1.4）：客户档案（等级/归属销售）、用户与企微 ID 目录、产品/SKU、仓库、库存均已落库但<strong>由 seed 种子供给、无权威维护源</strong>；<strong>审批人分配（5 处硬编码）</strong>、SKU 标准型号映射、客户等级价格表、供方分流路由为<strong>纯硬编码/部分配置化</strong>；企微上下文绑定与多备案配置已落库/已配置化。</li>
+  </ul>
+
+  <h2><span class="no">1 ·</span> 外部依赖全景（现状梳理）</h2>
+
+  <h3><span class="no">1.1</span> 已硬编码的外部系统接入点</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>接入点</th><th>位置</th><th>依赖性质</th><th>当前状态</th></tr>
+    <tr><td><strong>企业微信</strong></td><td><span class="mono">internal/wecom/</span>（gateway.go 5.5KB / official.go 11.5KB / intent.go / mock.go）+ <span class="mono">cmd/wecom/</span></td><td>动态数据接入 + 出站通知</td><td>已 provider 隔离（<span class="mono">Gateway</span> 聚合接口：Outbound/Inbound/CallbackVerifier；mock/official/thirdparty 工厂），是接入层第一个动态源实现</td></tr>
+    <tr><td><strong>SpiceDB</strong></td><td><span class="mono">internal/authz/</span></td><td>授权数据（关系拓扑）</td><td>已独立（Outbox 投影器异步同步），不归入本层</td></tr>
+    <tr><td><strong>Temporal</strong></td><td><span class="mono">internal/workflows/</span> + <span class="mono">cmd/worker</span></td><td>编排引擎</td><td>基础设施，不归入本层</td></tr>
+    <tr><td><strong>PostgreSQL</strong></td><td><span class="mono">internal/repo/</span></td><td>持久层</td><td>内部存储，不归入本层</td></tr>
+  </table>
+  </div>
+
+  <h3><span class="no">1.2</span> 文档要求「配置数据」但代码仍硬编码的点（核心发现）</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>配置项</th><th>文档出处</th><th>代码硬编码位置</th><th>状态</th></tr>
+    <tr><td><strong>修改分类规则</strong>（A/B/C/D/E）</td><td>01 §1.2 constraints + §2.2 规则表（「A/B/C/D/E 修改分类规则为<strong>配置数据</strong>」，源自三方审批流程图 fig12/13）</td><td><span class="mono">internal/domain/ord.go:70-84</span> <span class="mono">ClassifyModification</span> / <span class="mono">ModifyTargetState</span></td><td>接入层已定义 <span class="mono">ModificationRulePolicy</span>，Static 委托 domain 纯函数</td></tr>
+    <tr><td><strong>审批催办策略</strong>（24h 提醒 / 48h 升级）</td><td>01 §2.1 + 02 §2.2</td><td><span class="mono">internal/workflows/client.go</span> 原硬编码 <span class="mono">24*3600*1e9</span> / <span class="mono">48*3600*1e9</span></td><td>✅ 已接线接入层 <span class="mono">ApprovalPolicy</span></td></tr>
+    <tr><td><strong>预订单确认升级</strong>（24h）</td><td>01 §2.6 + 07 §3.3</td><td><span class="mono">internal/workflows/client.go</span> 原硬编码 <span class="mono">24*3600*1e9</span></td><td>✅ 已接线接入层 <span class="mono">PreOrderPolicy</span></td></tr>
+    <tr><td><strong>无回单超期阈值</strong>（5 天）</td><td>01 §2.5 + §2.1 stop rule + 02 §2.2</td><td><span class="mono">internal/workflows/client.go</span> 原硬编码 <span class="mono">5*24*3600*1e9</span></td><td>✅ 已接线接入层 <span class="mono">ReceiptPolicy</span></td></tr>
+    <tr><td><strong>自动审批阈值</strong>（supervisor_auto_approve / chairman_auto_approve）</td><td>02 §8.2（「迁移为审批策略配置数据，不硬编码」）</td><td>代码中无实现（基线全人工闸门）</td><td>接入层已定义 <span class="mono">AutoApprovePolicy</span>，Static 恒 false</td></tr>
+    <tr><td><strong>企微合规决策门</strong>（Phase 0 三分法降级）</td><td>02 §2.4 + 07 §2.4</td><td>—</td><td>决策：<strong>部署期配置决定</strong>（现有 <span class="mono">WeComProvider: mock/official/thirdparty</span> 机制承载），不做运行时热切换</td></tr>
+    <tr><td><strong>多备案/多租户企微配置</strong></td><td>02 §2.4 + 07 §7</td><td><span class="mono">internal/wecom.TenantConfig</span></td><td>已配置化（07 承载），不重复建设</td></tr>
+    <tr><td><strong>供方分流→财务确认路由</strong></td><td>01 §2.3 payment_term + supplier_channel</td><td>业务规则</td><td>部分配置化，随 FSM 演进（主数据属性见 <strong>§1.4</strong> 行 9）</td></tr>
+  </table>
+  </div>
+
+  <h3><span class="no">1.3</span> 未来外部数据源（迁移布局揭示）</h3>
+  <p><span class="mono">02-architecture.html</span> §8 揭示原系统（飞书三方审批）为 <strong>JSONL 非关系型追加式存储</strong> + 飞书多维表格（<span class="mono">bitable_flow_records</span> / <span class="mono">customer_bitable_sync</span>）。用户决策：</p>
+  <ul>
+    <li><strong>迁移源</strong>（<span class="mono">legacy_*</span> 只读归档）→ 独立 <span class="mono">internal/migration/</span>，<strong>不归入接入层</strong>（一次性工程 ≠ 运行时依赖）；</li>
+    <li><strong>飞书多维表格</strong>若未来作为动态业务数据源/配置源 → 实现 <span class="mono">integration.DynamicSource</span> 注册即可（§4），业务代码零改动。</li>
+  </ul>
+
+  <h3><span class="no">1.4</span> 业务依赖数据（主数据类）：现状、归属与演进 <span style="font-size:12px; color:var(--ink2); font-weight:normal;">（与 §1.2 配置性数据区分）</span></h3>
+  <p><strong>边界</strong>：§1.2 的「配置性数据」是<strong>策略参数</strong>（阈值/规则，如 24h 催办、5 天回单超期、修改分类 A-E），归 <span class="mono">BusinessConfigProvider</span>；本节「业务依赖数据」是<strong>业务事实/主数据</strong>（客户档案、价格、映射、路由、组织与权限基础），随业务运营变化，<strong>需要权威来源与维护人</strong>，<strong>不归</strong> <span class="mono">BusinessConfigProvider</span>——应走 <span class="mono">DynamicSource</span> 或独立主数据接口（演进见 §5.3）。下表为 2026-08 全量审计（代码 + migrations 核验），「有一批」的完整口径。</p>
+  <div class="table-wrap">
+  <table>
+    <tr><th>#</th><th>数据项</th><th>业务用途 / 消费方</th><th>当前状态</th><th>代码 / 存储位置</th><th>权威维护缺口 → 演进路径</th></tr>
+    <tr><td class="mono">1</td><td><strong>客户档案</strong>（名称 / <strong>商业等级 A-D</strong> / 归属销售）</td><td>等级 C/D → 董事长审批、A/B → 合同生成（<span class="mono">ordGradeStep</span>）；等级与归属销售是 <span class="mono">AutoApprovePolicy</span> 入参与 SpiceDB 授权拓扑（owner）的源头</td><td>✅ 已落库（<span class="mono">customers</span> 表），<strong>seed 种子供给</strong></td><td><span class="mono">migrations/001_init.sql</span>（grade CHECK A-D / owner_id FK users）；<span class="mono">internal/repo/txwrappers.go:179</span> <span class="mono">GetCustomerGrade</span>；<span class="mono">internal/repo/seed.go</span></td><td><strong>无权威维护源</strong>（无维护接口/维护人）；需业务侧（CRM/客户成功）或 <span class="mono">DynamicSource</span> 接入；等级评估规则本身另见 07 §3.3</td></tr>
+    <tr><td class="mono">2</td><td><strong>用户 / 员工目录</strong>（角色 + <span class="mono">wecom_user_id</span>）</td><td>角色决定授权（SALES/SUPERVISOR/CHAIRMAN/…）；企微 ID 是出站卡片路由到人的基础（§4.3 接收人）</td><td>✅ 已落库（<span class="mono">users</span> 表），<strong>seed 种子供给</strong></td><td><span class="mono">migrations/001_init.sql</span>（role CHECK + wecom_user_id）；<span class="mono">internal/repo/seed.go</span></td><td><strong>无权威维护源</strong>（无入职/离职流程）；真实接入前需企微通讯录同步（<span class="mono">userlist</span> API）或 SCIM</td></tr>
+    <tr><td class="mono">3</td><td><strong>产品 / SKU 目录</strong></td><td>订单明细引用（<span class="mono">order_items</span> FK）；意图识别 SKU 归一化的底层数据</td><td>✅ 已落库（<span class="mono">products</span> 表，tenant+sku 唯一），<strong>seed 种子供给</strong></td><td><span class="mono">migrations/001_init.sql</span>；<span class="mono">internal/repo/seed.go</span></td><td><strong>无权威维护源</strong>；需产品主数据接口（SKU 目录归属商品管理侧）</td></tr>
+    <tr><td class="mono">4</td><td><strong>仓库主数据</strong>（四仓：阳原/长兴/东莞/成都）</td><td>备货/发货仓库选择（<span class="mono">stock_prepares</span> / <span class="mono">shipments</span> 引用）</td><td>✅ 已落库（<span class="mono">warehouses</span> 表），<strong>seed 种子供给</strong></td><td><span class="mono">migrations/001_init.sql</span>；<span class="mono">internal/repo/seed.go</span></td><td><strong>无权威维护源</strong>；新增/停用仓库需主数据流程</td></tr>
+    <tr><td class="mono">5</td><td><strong>库存数量</strong>（仓库 × 产品 × qty）</td><td>库存守恒校验、可承诺量（CQ-08）；数量守恒防线载体</td><td>✅ 已落库（<span class="mono">inventory_items</span> 表，qty CHECK ≥0），<strong>seed 初始 1000</strong></td><td><span class="mono">migrations/001_init.sql</span>；<span class="mono">internal/repo/seed.go</span></td><td><strong>动态业务数据</strong>：真实库存系统对接在 baseline 范围裁剪外（README 范围裁剪），接入时经 <span class="mono">DynamicSource</span> 或独立同步任务</td></tr>
+    <tr><td class="mono">6</td><td><strong>客户等级价格表</strong>（tenant × grade × sku → 单价）</td><td>意图识别管线确定性校验「价格」：客户等级价格表，LLM 不报价（07 §3.3）</td><td>⚠️ 仅硬编码占位（<span class="mono">MockParser.Prices</span>），随意图识别场景暂缓</td><td><span class="mono">internal/wecom/intent.go</span>（注释「客户等级价格表简化」）</td><td><strong>维护人待确认</strong>（07 §3.0 恢复条件）；未来独立为主数据接口（tenant × grade × sku）</td></tr>
+    <tr><td class="mono">7</td><td><strong>SKU 标准型号映射表</strong>（型号 → 标准 SKU）</td><td>意图识别 <span class="mono">resolve_sku</span> 归一化（07 §3.3）；非 SKU 目录本身，是「口语型号 → 目录 SKU」的映射</td><td>⚠️ 仅硬编码占位（<span class="mono">MockParser.Products</span>），随意图识别场景暂缓</td><td><span class="mono">internal/wecom/intent.go</span>（注释「标准型号归一化，07 §3.2；维护人待确认」）</td><td><strong>维护人/来源待确认</strong>（07 §3.0 恢复条件 ③）；未来独立主数据接口</td></tr>
+    <tr><td class="mono">8</td><td><strong>审批人分配 / 审批链路由</strong>（阶段 → 角色 → 具体人）</td><td>每个审批闸门（审价/董事长/仓管/财务/回单例外/开票）的 assignee 决定卡片推给谁</td><td>🔴 <strong>纯硬编码 5 处</strong>：<span class="mono">u-supervisor</span>（审价）、<span class="mono">u-chairman</span>（C/D 级）、<span class="mono">u-wh-yangyuan</span>（仓管×2）、<span class="mono">u-accounting</span>（财务/开票）、<span class="mono">u-op</span>（回单例外）</td><td><span class="mono">internal/workflows/order.go</span>（行 396/472/677/791/878/1095/1173）</td><td><strong>最高优先级缺口</strong>：无表无配置，接入真实客户必改；应建「审批链路由」主数据（tenant × stage/kind → assignee 或角色解析），可随 <span class="mono">BusinessConfigProvider</span> 家族或独立接口演进</td></tr>
+    <tr><td class="mono">9</td><td><strong>供方分流 → 财务确认路由</strong>（supplier_channel → 是否走财务闸门）</td><td>款到发货按供方分流：<span class="mono">StateSTKPaymentConfirming</span> 财务确认到账（01 §2.3）</td><td>⚠️ 部分配置化：<span class="mono">supplier_channel</span> 为下单自由文本（渠道A/渠道B），FSM 按「款到/非款到」分支，无渠道主数据校验</td><td><span class="mono">migrations/001_init.sql</span> orders.supplier_channel；<span class="mono">internal/domain/stk.go</span>；<span class="mono">internal/workflows/order.go:780-787</span></td><td>渠道枚举/主数据校验待定；随 FSM 演进（§1.2 已引用本节）</td></tr>
+    <tr><td class="mono">10</td><td><strong>企微上下文绑定</strong>（外部群/用户 → 租户 + 归属销售）</td><td>出站消息按租户核验（跨租户禁止）、消息发送者权限判定（07 §4/§8）</td><td>✅ 已落库（<span class="mono">wecom_context_bindings</span>），<strong>seed 供给 + 接入时维护</strong></td><td><span class="mono">migrations/003_preorder.sql</span>；<span class="mono">internal/repo/seed.go</span></td><td>新客户/新群接入时需维护（07 §7.3 切换流程）；可与企微通讯录同步联动</td></tr>
+    <tr><td class="mono">11</td><td><strong>多备案企微配置</strong>（corp_id/agent/密钥/存档密钥）</td><td>每租户一套企微接入配置（07 §7）</td><td>✅ 已配置化（<span class="mono">wecom.TenantConfig</span>），<strong>不重复建设</strong></td><td><span class="mono">internal/wecom</span>；07-wecom-integration.html §7</td><td>已由 07 承载；仅列示保持全景完整</td></tr>
+  </table>
+  </div>
+  <p><strong>现状小结</strong>：11 项业务依赖数据中，5 项（客户/用户/产品/仓库/库存）已落库但由 <span class="mono">seed</span> 种子供给、<strong>无权威维护源与维护流程</strong>；4 项（等级价格表/SKU 映射/审批人分配/供方分流）为<strong>硬编码或部分配置化</strong>，其中<strong>审批人分配（#8）为最高优先级缺口</strong>——即使意图识别保持暂缓，真实企微出站卡片（07 §4.3）也需要正确 assignee；2 项（上下文绑定/多备案配置）已就绪。</p>
+  <p><strong>演进路径</strong>（与 §5.3 配置源 Static → 可替换同构）：① 基线（当前）：seed + 硬编码，行为不变；② 主数据落库接口：为客户/用户/产品/仓库建维护接口（CRUD + 审计），审批人分配（#8）优先建 <span class="mono">approval_routing</span> 配置（tenant × stage → assignee）；③ 外部权威源：CRM（客户/等级）、企微通讯录（用户 + wecom_user_id）、ERP/库存系统（库存/价格表）经 <span class="mono">DynamicSource</span> 或独立主数据接口接入，业务代码零改动。恢复条件（07 §3.0）涉及的 SKU 映射/价格表维护人确认即第 ③ 步子集。</p>
+
+
+  <h2><span class="no">2 ·</span> 设计目标与非目标</h2>
+  <h3>Goals</h3>
+  <ol>
+    <li>将对外部系统的接入收敛到 <span class="mono">internal/integration/</span> 一层；</li>
+    <li>将业务配置性数据从硬编码抽离为可动态加载的配置（接口契约 + 可替换 Provider）；</li>
+    <li>保持 <span class="mono">internal/domain</span>（纯 Go 零依赖）解耦——领域层只依赖接口/纯函数。</li>
+  </ol>
+  <h3>Non-Goals</h3>
+  <ul>
+    <li>不重构已有 SpiceDB / Temporal / PG 接入（已相对独立）；</li>
+    <li>不在本阶段实施数据迁移（baseline 明确不实施，仅预留）；</li>
+    <li>不改变 <span class="mono">internal/wecom/</span> 内部解密/验签实现，仅将其归位为接入层的动态数据源实现；</li>
+    <li>不做企微合规降级的<strong>运行时</strong>热切换（部署期配置决定）。</li>
+  </ul>
+
+  <h2><span class="no">3 ·</span> 架构位置与依赖方向</h2>
+  <pre class="mermaid">
+flowchart TB
+    subgraph biz["业务层（只依赖接口）"]
+        WF["internal/workflows&lt;br/&gt;Timer/催办/升级参数"]
+        API["cmd/api / cmd/wecom / cmd/worker"]
+    end
+    subgraph int["★ 接入层 internal/integration"]
+        CFG["BusinessConfigProvider 接口&lt;br/&gt;StaticConfigProvider（基线）"]
+        SRC["DynamicSource 接口 + Registry"]
+    end
+    subgraph dom["领域层（纯 Go 零依赖）"]
+        D["internal/domain&lt;br/&gt;FSM / 值对象 / 守恒断言"]
+    end
+    subgraph ext["外部世界"]
+        WX["企业微信&lt;br/&gt;（wecom.Gateway 实现 DynamicSource）"]
+        FB["飞书多维表格（预留）"]
+    end
+
+    WF --> CFG
+    API --> CFG
+    API --> SRC
+    SRC --> WX
+    SRC -.预留.-> FB
+    CFG --> D
+    WX -.内部实现.-> D
+
+    style int fill:#f5f0e6,stroke:#8a6d3b
+    style dom fill:#eef2f5,stroke:#3b6d8a
+  </pre>
+  <p><strong>依赖规则</strong>（与 01 §2.1 领域层纯度约束一致）：</p>
+  <ul>
+    <li><span class="mono">integration → domain</span>：复用其纯类型/函数（<span class="mono">domain.Modification</span> / <span class="mono">ClassifyModification</span>），<strong>domain 不感知 integration</strong>；</li>
+    <li><span class="mono">workflows / api → integration</span>：只依赖接口契约，不感知 Static/DB/外部源差异；</li>
+    <li>物理依赖必须是 <span class="mono">integration</span> 依赖 <span class="mono">domain</span>，禁止反向。</li>
+  </ul>
+
+  <h2><span class="no">4 ·</span> 接口契约</h2>
+  <h3><span class="no">4.1</span> 业务配置数据（<span class="mono">internal/integration/config.go</span>）</h3>
+  <pre><code>// 审批催办：24h 提醒 / 48h 升级（01 §2.1）
+type ApprovalPolicy interface {
+    RemindAfter() time.Duration
+    EscalateAfter() time.Duration
+}
+
+// 无回单超期：5 天自动进例外（01 §2.5）
+type ReceiptPolicy interface {
+    ReceiptExceptionAfter() time.Duration
+}
+
+// 修改分类规则 A/B/C/D/E（01 §2.2，配置数据；委托 domain 纯函数）
+type ModificationRulePolicy interface {
+    Classify(m domain.Modification) domain.ModificationClass
+    TargetState(class domain.ModificationClass) (string, error)
+}
+
+// 自动审批阈值（02 §8.2；基线全人工闸门，恒 false）
+type AutoApprovePolicy interface {
+    AutoApprove(stageCode, grade string, amountCents int64) bool
+}
+
+// 预订单确认升级：24h（01 §2.6）
+type PreOrderPolicy interface {
+    PreOrderEscalateAfter() time.Duration
+}
+
+// 聚合契约：业务层只依赖这一个接口
+type BusinessConfigProvider interface {
+    ApprovalPolicy
+    ReceiptPolicy
+    ModificationRulePolicy
+    AutoApprovePolicy
+    PreOrderPolicy
+}</code></pre>
+
+  <h3><span class="no">4.2</span> 动态数据源（<span class="mono">internal/integration/source.go</span>）</h3>
+  <pre><code>// 动态数据源标识：外部系统实时/近实时数据接入点
+type DynamicSource interface {
+    SourceName() string // "wecom" / "feishu_bitable" ...
+}
+
+// 注册表：按名称取用（cmd/* main 注入，无全局可变状态）
+type Registry struct{ /* ... */ }
+func NewRegistry() *Registry
+func (r *Registry) Register(s DynamicSource)
+func (r *Registry) Get(name string) DynamicSource</code></pre>
+  <p>现有实现：<span class="mono">internal/wecom.Gateway</span>（企微会话存档拉取 / 出站卡片 / 回调验签）即 <span class="mono">DynamicSource</span> 的第一个实现，归位说明见 §5.1。</p>
+
+  <h2><span class="no">5 ·</span> 实施落地</h2>
+  <h3><span class="no">5.1</span> 企微归位（接口已就绪，物理迁移留后续）</h3>
+  <p><span class="mono">internal/wecom/</span> 已具备完整 provider 隔离（<span class="mono">Gateway</span> 聚合接口 + <span class="mono">NewGateway(cfg)</span> 工厂 + <span class="mono">TenantConfig</span> 多备案），<strong>本轮不移动代码物理位置</strong>（避免破坏 <span class="mono">cmd/wecom</span> 与 <span class="mono">internal/api</span> 依赖链），通过接口 + 本文档建立统一接入层心智模型。目标态：</p>
+  <ul>
+    <li><span class="mono">cmd/wecom</span> / <span class="mono">cmd/api</span> 只依赖 <span class="mono">integration.Registry</span> + <span class="mono">wecom.Gateway</span>（作为 DynamicSource 注册）；</li>
+    <li>业务逻辑（意图识别 <span class="mono">intent.go</span>、消息幂等、预订单触发）留在业务侧，不归入接入层。</li>
+  </ul>
+  <h3><span class="no">5.2</span> 已接线清单（本轮交付）</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>位置</th><th>改动</th></tr>
+    <tr><td><span class="mono">internal/integration/</span>（新增）</td><td>接口契约（config.go）+ StaticConfigProvider（static.go）+ DynamicSource/Registry（source.go）+ 单测</td></tr>
+    <tr><td><span class="mono">internal/workflows/client.go</span></td><td>硬编码 Timer（24h/48h/5d/24h）→ <span class="mono">integration.BusinessConfigProvider</span>；新增 <span class="mono">NewTemporalStarterWithPolicy</span> 注入点，<span class="mono">NewTemporalStarter</span> 保持签名不变</td></tr>
+  </table>
+  </div>
+  <h3><span class="no">5.3</span> 演进路径（配置源 Static → 可替换）</h3>
+  <ol>
+    <li><strong>基线（当前）</strong>：<span class="mono">StaticConfigProvider</span>，值 = 历史硬编码，行为不变；</li>
+    <li><strong>DB 配置源</strong>：新增 <span class="mono">DBConfigProvider</span> 实现 <span class="mono">BusinessConfigProvider</span>（读 <span class="mono">business_configs</span> 表，租户维度热更新）——接口已就绪，业务代码零改动；</li>
+    <li><strong>外部配置源</strong>：飞书多维表格实现 <span class="mono">BusinessConfigProvider</span> 或 <span class="mono">DynamicSource</span> 注册。</li>
+  </ol>
+  <p><strong>业务依赖数据（§1.4）同构演进</strong>：审批人分配（§1.4 #8）为最短路径项——可随 <span class="mono">DBConfigProvider</span> 一并建 <span class="mono">approval_routing</span> 表（tenant × stage → assignee），或独立主数据接口；其余主数据（客户/用户/产品/仓库/库存/价格表/SKU 映射）走 <span class="mono">DynamicSource</span> 或独立主数据接口，业务代码零改动。</p>
+
+  <h2><span class="no">6 ·</span> 附录：实施步骤（轻量，详见 04-development-plan）</h2>
+  <ul>
+    <li>✅ Step 1 定义接入层接口契约 <span class="mono">internal/integration/</span>（零破坏）</li>
+    <li>✅ Step 2 抽离硬编码业务配置：<span class="mono">workflows/client.go</span> Timer → 接入层（Static 基线，行为不变）</li>
+    <li>☐ Step 3 企微物理归位（<span class="mono">internal/wecom</span> → 接入层注册为 DynamicSource；影响面大，独立迭代）</li>
+    <li>☐ Step 4 <span class="mono">cmd/wecom</span> / <span class="mono">cmd/api</span> 依赖切换为 <span class="mono">integration.Registry</span></li>
+    <li>☐ Step 5 配置源升级（DB / 飞书），接入层接口不变</li>
+  </ul>
+
+  <h2><span class="no">7 ·</span> 决策记录（ADR）</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>决策</th><th>选择</th><th>理由</th></tr>
+    <tr><td>配置介质</td><td><strong>Static 默认值起步</strong></td><td>接口契约先落地，StaticProvider 用当前硬编码值，行为完全不变；后续可无缝换 DB/外部源，零风险</td></tr>
+    <tr><td>legacy 归档归属</td><td><strong>独立 <span class="mono">internal/migration/</span></strong></td><td>迁移是一次性工程，与持续运行的接入层职责不同</td></tr>
+    <tr><td>企微降级开关</td><td><strong>部署期配置决定</strong></td><td>现有 <span class="mono">WeComProvider</span> 机制已可表达（mock/official/thirdparty），无需运行时热切换</td></tr>
+    <tr><td>接入层文档定位</td><td><strong>架构文档，独立成章（08）</strong></td><td>外部依赖是横切关注点，独立演进；与 07 企微文档同属「接入类专项架构」</td></tr>
+    <tr><td>本轮迁移范围</td><td>不物理移动 wecom 代码</td><td>避免破坏 cmd/wecom 与 api 依赖链；接口 + 文档先行，物理迁移独立迭代</td></tr>
+    <tr><td>业务依赖数据归属</td><td><strong>不归 <span class="mono">BusinessConfigProvider</span>，单列 §1.4 审计</strong></td><td>主数据是业务事实（需权威源/维护人），与策略参数（阈值/规则）性质不同；先全量审计暴露缺口（审批人分配 5 处硬编码为最高优先级），演进走 DynamicSource / 独立主数据接口（§5.3）</td></tr>
+  </table>
+  </div>
+
+  <footer class="colophon">
+    <span><a href="index.html">← Docs Index</a></span>
+    <span>08 · External Integration · B2B Order Fulfillment</span>
+  </footer>
+</div>
+</body>
+</html>

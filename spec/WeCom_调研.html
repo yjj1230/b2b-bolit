@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>企业微信客户联系侧边栏 H5 · 全生命周期开发指南</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+:root {
+  --bg:#0f1117; --surface:#191d27; --surface-2:#222735; --line:#30364a;
+  --fg:#edf0f7; --fg-2:#a9b0c3; --muted:#757d94; --blue:#74a4ff;
+  --green:#51c892; --amber:#f1c453; --red:#f27a70; --cyan:#52c9d8;
+  --radius:8px; --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC",
+  "Microsoft YaHei",sans-serif; --mono:"SFMono-Regular",Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:20px}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:15px;line-height:1.72}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1440px;margin:auto;min-height:100vh}
+.sidebar{position:sticky;top:0;height:100vh;overflow:auto;padding:28px 18px;border-right:1px solid var(--line);background:var(--surface)}
+.brand{font-size:17px;font-weight:750;color:var(--blue)} .brand-sub{margin:4px 0 22px;color:var(--muted);font-size:12px}
+.sidebar a{display:block;padding:6px 10px;border-radius:5px;color:var(--fg-2);font-size:12px;text-decoration:none}
+.sidebar a:hover{background:var(--surface-2);color:var(--fg)}
+.sidebar .sub{padding-left:24px;color:var(--muted)}
+main{min-width:0;padding:46px 58px 90px}
+h1{max-width:980px;font-size:34px;line-height:1.22;letter-spacing:0;margin-bottom:10px}
+.lead{max-width:980px;color:var(--fg-2);font-size:17px}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0 34px}
+.meta span,.tag{display:inline-block;padding:3px 9px;border:1px solid var(--line);border-radius:4px;background:var(--surface-2);color:var(--fg-2);font-size:12px}
+h2{margin:52px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--line);font-size:25px}
+h3{margin:30px 0 10px;font-size:19px} h4{margin:20px 0 7px;font-size:15px}
+p{margin:9px 0 14px;color:var(--fg-2)}
+a{color:var(--blue);text-underline-offset:3px}
+strong{color:var(--fg)} code{padding:1px 5px;border-radius:4px;background:#293045;color:#f6d477;font-family:var(--mono);font-size:.88em}
+pre{margin:14px 0 18px;padding:16px 18px;overflow:auto;border:1px solid var(--line);border-radius:var(--radius);background:#12151d;color:#d4d9e6;font-family:var(--mono);font-size:12.5px;line-height:1.62}
+pre code{padding:0;background:transparent;color:inherit}
+ul,ol{margin:10px 0 16px 24px;color:var(--fg-2)} li{margin:5px 0}
+.callout{margin:18px 0;padding:14px 17px;border:1px solid var(--line);border-left:4px solid var(--blue);border-radius:var(--radius);background:var(--surface)}
+.callout.warn{border-left-color:var(--amber)} .callout.danger{border-left-color:var(--red)} .callout.good{border-left-color:var(--green)}
+.callout .title{margin-bottom:4px;font-weight:750}.callout p{margin:0}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0}
+.card{padding:15px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface)}
+.card h4{margin:5px 0}.card p{margin:4px 0;font-size:13px}
+.table-wrap{margin:15px 0 20px;overflow:auto;border:1px solid var(--line);border-radius:var(--radius)}
+table{width:100%;border-collapse:collapse;min-width:720px;background:var(--surface);font-size:13px}
+th,td{padding:10px 12px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{background:var(--surface-2);color:var(--fg)} tr:last-child td{border-bottom:0} th:last-child,td:last-child{border-right:0}
+.yes{color:var(--green);font-weight:700}.no{color:var(--red);font-weight:700}.note{color:var(--amber);font-weight:700}
+.steps{counter-reset:step;list-style:none;margin-left:0}
+.steps li{position:relative;margin:10px 0;padding:13px 15px 13px 52px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface)}
+.steps li:before{counter-increment:step;content:counter(step);position:absolute;left:15px;top:14px;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--blue);color:#07111f;font-weight:800}
+.mermaid-wrap{margin:16px 0 22px;padding:18px;overflow:auto;border:1px solid var(--line);border-radius:var(--radius);background:#fff}
+.check td:first-child{width:42px;text-align:center;color:var(--green);font-weight:800}
+.source-level{white-space:nowrap}
+.footer{margin-top:52px;padding-top:20px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}
+@media(max-width:980px){.layout{grid-template-columns:1fr}.sidebar{position:static;width:auto;height:auto;border-right:0;border-bottom:1px solid var(--line)}.sidebar nav{columns:2}main{padding:34px 24px 70px}.grid{grid-template-columns:1fr 1fr}}
+@media(max-width:620px){h1{font-size:27px}.grid{grid-template-columns:1fr}.sidebar nav{columns:1}main{padding:28px 16px 60px}code{overflow-wrap:anywhere;word-break:break-word}pre,pre code{white-space:pre-wrap}pre code{display:block;width:100%;min-width:0}}
+@media print{body{background:#fff;color:#111}.layout{display:block}.sidebar{display:none}main{padding:0}.card,.callout,table,pre{background:#fff;color:#111;box-shadow:none}p,li,td{color:#333}a{color:#0645ad}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar">
+  <div class="brand">企微客户联系侧边栏</div>
+  <div class="brand-sub">H5 主路径 · 全生命周期 Runbook</div>
+  <nav>
+    <a href="#decision">0. 结论与路线选择</a>
+    <a href="#terms">1. 概念与边界</a>
+    <a href="#architecture">2. 架构与生命周期</a>
+    <a href="#prerequisites">3. 开发前准备</a>
+    <a href="#admin">4. 管理后台配置</a>
+    <a href="#frontend">5. H5 前端开发</a>
+    <a href="#oauth" class="sub">OAuth 身份</a>
+    <a href="#jssdk" class="sub">JS-SDK 注册</a>
+    <a href="#context" class="sub">单聊/群聊上下文</a>
+    <a href="#backend">6. 服务端开发</a>
+    <a href="#local">7. 本地联调</a>
+    <a href="#testing">8. 测试与验收</a>
+    <a href="#release">9. 发布与回滚</a>
+    <a href="#operations">10. 运维与应急</a>
+    <a href="#security">11. 安全与合规</a>
+    <a href="#troubleshooting">12. 排错手册</a>
+    <a href="#miniapp">13. 小程序备选路线</a>
+    <a href="#project">14. 本项目迁移清单</a>
+    <a href="#sources">15. 来源与证据等级</a>
+    <a href="#checklists">16. 可执行检查表</a>
+  </nav>
+</aside>
+
+<main>
+<header>
+  <h1>企业微信客户联系聊天工具栏（侧边栏）H5 全生命周期开发指南</h1>
+  <p class="lead">从产品选型、企业与应用配置，到 OAuth、JS-SDK、客户上下文、真实客户端联调、上线、监控、密钥轮换和退役。本文以本项目实际需要的<strong>客户单聊/客户群聊天工具栏 H5</strong>为主路径，微信小程序作为独立备选方案。</p>
+  <div class="meta">
+    <span>审校日期 2026-08-04</span>
+    <span>官方文档优先</span>
+    <span>自建应用</span>
+    <span>H5 + @wecom/jssdk</span>
+    <span>B2B Pilot</span>
+  </div>
+</header>
+
+<section id="decision">
+<h2>0. 结论与路线选择</h2>
+
+<div class="callout danger">
+  <div class="title">必须先修正的根本错误</div>
+  <p>企业微信聊天工具栏可以承载 H5 页面，也可以关联微信小程序，但它们是两套不同的开发、认证和发布链路。<strong>微信小程序的 <code>dist/weapp</code> 不是静态网页，不能把 <code>pages/index/index.html</code> 当作侧边栏 URL。</strong></p>
+</div>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>维度</th><th>H5 聊天工具栏（本项目主选）</th><th>关联微信小程序（备选）</th></tr></thead>
+<tbody>
+<tr><td>配置方式</td><td>配置 HTTPS 页面 URL</td><td>关联 AppID，配置小程序页面路径</td></tr>
+<tr><td>前端运行时</td><td>企业微信内置 WebView</td><td>微信小程序运行时</td></tr>
+<tr><td>客户端 SDK</td><td><code>@wecom/jssdk</code>，<code>ww.register</code></td><td><code>wx.qy.*</code></td></tr>
+<tr><td>成员登录</td><td>网页 OAuth2：授权 URL → <code>auth/getuserinfo</code></td><td><code>wx.qy.login</code> → <code>jscode2session</code></td></tr>
+<tr><td>会话上下文</td><td><code>ww.getContext</code> + <code>ww.getCurExternalContact/Chat</code></td><td><code>wx.qy.getContext</code> + 对应 <code>wx.qy.*</code></td></tr>
+<tr><td>发布</td><td>部署 Web 静态资产和 BFF；无需微信小程序审核</td><td>开发者工具上传、审核、发布、关联企微</td></tr>
+<tr><td>本项目适配度</td><td class="yes">高：截图宿主就是 WebView，Go BFF 可直接承载 OAuth 与签名</td><td class="note">可用，但现有 Taro 代码仍缺真实群上下文和可信会话</td></tr>
+</tbody>
+</table>
+</div>
+
+<p><strong>本项目决策：</strong>以 H5 自建应用作为客户联系聊天工具栏主入口。订单、备货、发货和权限规则仍由 Go BFF、Temporal、SpiceDB 与业务数据库负责；企微只提供成员身份、会话上下文和交互入口。</p>
+</section>
+
+<section id="terms">
+<h2>1. 概念与边界</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>名词</th><th>准确含义</th><th>本项目用途</th></tr></thead>
+<tbody>
+<tr><td>企业微信自建应用</td><td>企业在管理后台创建、只服务本企业的应用；拥有独立 AgentID 与 Secret</td><td>承载侧边栏入口、OAuth、JS-SDK 应用身份和业务通知</td></tr>
+<tr><td>聊天工具栏/侧边栏</td><td>成员与客户单聊或客户群会话中的工具入口；打开的是配置页面</td><td>在当前客户上下文内处理备货和发货</td></tr>
+<tr><td>应用主页</td><td>工作台进入应用时打开的页面，入口上下文通常是 <code>normal</code></td><td>可作为“我的待办/我的单据”，不能假装有当前客户上下文</td></tr>
+<tr><td>可信域名</td><td>JS-SDK 允许调用的页面域名；官方要求 ICP 备案并验证域名归属</td><td>例如 <code>wecom-test.example.com</code> 和生产域名</td></tr>
+<tr><td>OAuth 回调域</td><td>网页授权重定向与 <code>auth/getuserinfo</code> 对应的应用域名</td><td>建立当前企微成员与内部 principal 的可信绑定</td></tr>
+<tr><td>企业签名</td><td>使用企业 <code>jsapi_ticket</code> 生成，注册企业身份权限</td><td><code>getConfigSignature</code></td></tr>
+<tr><td>应用签名</td><td>使用 <code>type=agent_config</code> 的应用 ticket 生成，注册应用身份权限</td><td>获取当前客户/客户群必须使用应用身份</td></tr>
+<tr><td>external_userid</td><td>外部联系人在当前企业/应用语境下的标识</td><td>映射内部 customer/contact，不能当成员身份</td></tr>
+<tr><td>chatId</td><td>当前客户群的群 ID</td><td>映射内部 customer 与会话绑定</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout warn">
+  <div class="title">身份与上下文不是同一件事</div>
+  <p>OAuth 回答“当前操作人是谁”；<code>getCurExternalContact/Chat</code> 回答“当前会话面对谁”。两者都必须存在并在服务端重新授权。浏览器上传的 <code>principal_id</code>、<code>tenant_id</code> 或 <code>customer_id</code> 不能作为可信事实。</p>
+</div>
+</section>
+
+<section id="architecture">
+<h2>2. 架构与生命周期</h2>
+
+<div class="mermaid-wrap"><pre class="mermaid">
+flowchart LR
+  U["企微成员"] --> W["客户单聊/客户群<br/>聊天工具栏 WebView"]
+  W --> H5["侧边栏 H5<br/>@wecom/jssdk"]
+  H5 --> O["OAuth / 业务会话<br/>Go BFF"]
+  H5 --> S["JS-SDK 签名接口<br/>企业票据 + 应用票据"]
+  H5 --> C["getContext<br/>single/group 分流"]
+  C --> B["可信上下文绑定<br/>chatId/external_userid"]
+  O --> A["SpiceDB 授权"]
+  B --> A
+  A --> D["订单/备货/发货 API"]
+  D --> T["Temporal + PostgreSQL"]
+  Q["企微 Open API"] --> O
+  Q --> S
+</pre></div>
+
+<h3>生命周期门禁</h3>
+<div class="grid">
+  <div class="card"><span class="tag">Discover</span><h4>需求与入口</h4><p>确认是单聊、群聊、工作台还是卡片入口；定义没有客户上下文时的安全降级。</p></div>
+  <div class="card"><span class="tag">Provision</span><h4>企业配置</h4><p>应用、可见范围、客户联系权限、可信域名、回调域、可信 IP 和工具栏页面。</p></div>
+  <div class="card"><span class="tag">Build</span><h4>前后端开发</h4><p>OAuth、业务 Session、双票据缓存、签名、上下文分流、业务授权和回调。</p></div>
+  <div class="card"><span class="tag">Verify</span><h4>真实企微 UAT</h4><p>桌面和移动端、单聊和群聊、角色权限、失败路径、弱网与版本兼容。</p></div>
+  <div class="card"><span class="tag">Operate</span><h4>发布与运维</h4><p>灰度、回滚、Token/Ticket 指标、回调巡检、客户端错误和业务对账。</p></div>
+  <div class="card"><span class="tag">Retire</span><h4>下线与归档</h4><p>撤入口、撤权限、作废凭证、清理客户映射、保留审计证据和数据留存记录。</p></div>
+</div>
+</section>
+
+<section id="prerequisites">
+<h2>3. 开发前准备</h2>
+
+<h3>3.1 责任人与环境</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>资源</th><th>Owner</th><th>Dev/Test</th><th>Production</th></tr></thead>
+<tbody>
+<tr><td>企微企业</td><td>企微管理员</td><td>独立测试企业或受控测试范围</td><td>正式企业</td></tr>
+<tr><td>自建应用</td><td>应用管理员</td><td>测试 AgentID/Secret</td><td>生产 AgentID/Secret</td></tr>
+<tr><td>页面域名</td><td>平台/运维</td><td><code>wecom-test.example.com</code></td><td><code>wecom.example.com</code></td></tr>
+<tr><td>API 域名</td><td>平台/后端</td><td>同源优先；否则严格 CORS</td><td>同源优先</td></tr>
+<tr><td>密钥</td><td>安全/后端</td><td>测试 KMS/Secret Manager</td><td>生产 KMS，最小读取权限</td></tr>
+<tr><td>测试成员/客户群</td><td>业务 UAT Owner</td><td>固定成员、客户、客户群和映射</td><td>灰度白名单</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>3.2 开发前输出物</h3>
+<ul>
+  <li>入口矩阵：<code>single_chat_tools</code>、<code>group_chat_tools</code>、<code>normal</code> 各显示什么。</li>
+  <li>权限矩阵：商务、仓管、客户、管理员可见字段与允许动作。</li>
+  <li>数据映射：<code>corp_id + userid</code>、<code>corp_id + external_userid</code>、<code>corp_id + chat_id</code> 到内部实体。</li>
+  <li>失败策略：无上下文、无映射、关系过期、JS-SDK 不可用、企微 API 限流时的行为。</li>
+  <li>证据计划：配置截图、测试账号、UAT 录屏、日志 trace、错误码和发布审批记录。</li>
+</ul>
+</section>
+
+<section id="admin">
+<h2>4. 企业微信管理后台配置</h2>
+
+<ol class="steps">
+  <li><strong>创建自建应用。</strong>记录 CorpID、AgentID；通过受控方式获取 Secret。Secret 只进入服务端密钥系统，禁止发送到群聊、工单正文或前端仓库。</li>
+  <li><strong>配置应用可见范围。</strong>先限定测试成员/部门；生产灰度按白名单逐步扩大。可见范围不是业务授权，业务 API 仍需 ReBAC。</li>
+  <li><strong>开通客户联系能力。</strong>确认测试成员具备客户联系功能；在客户联系 API 权限配置中把该应用设为可调用应用。否则上下文接口会返回 <code>no permission</code>。</li>
+  <li><strong>配置可信域名。</strong>填写 H5 页面域名，完成域名归属验证。生产必须 HTTPS；官方要求可信域名有 ICP 备案。不要填写路径、协议或临时随机域名。</li>
+  <li><strong>配置网页授权回调域。</strong>OAuth 重定向域必须与应用对应；<code>auth/getuserinfo</code> 使用的 access token 必须来自同一应用。</li>
+  <li><strong>配置企业可信 IP。</strong>如管理后台要求，为调用企微服务端 API 的固定出口 IP 配置白名单。不要填开发者个人动态 IP 作为生产方案。</li>
+  <li><strong>配置到聊天工具栏。</strong>新增页面名称“备货管理”，选择网页，填稳定 HTTPS URL，例如 <code>https://wecom-test.example.com/sidebar</code>。不要指向 <code>dist/weapp</code>。</li>
+  <li><strong>按需配置回调。</strong>消息、审批或客户联系事件需要回调时，配置 URL、Token、EncodingAESKey；保存配置证据并验证 GET 握手与 POST 解密。</li>
+</ol>
+
+<div class="callout good">
+  <div class="title">配置完成的最小证据</div>
+  <p>应用详情、可见范围、客户联系权限、可信域名、回调域、可信 IP、聊天工具栏 URL、回调验证成功页面各一份截图；同时记录 CorpID/AgentID，但对 Secret、Token、AESKey 做完整遮蔽。</p>
+</div>
+
+<h3>4.1 URL 与域名规则</h3>
+<ul>
+  <li>JS-SDK 签名 URL 必须是当前页面完整 URL 去掉 <code>#</code> 及其后内容；不得 URL encode 后再参与签名。</li>
+  <li>页面域名必须命中应用可信域名。SPA 使用 History Router 时，每个实际 URL 都应可由服务器回落到 <code>index.html</code>。</li>
+  <li>OAuth <code>redirect_uri</code> 必须 URL encode；回调后校验 <code>state</code>，并只允许回到服务端白名单内的业务路径。</li>
+  <li>不要把 Secret 放在 URL。CorpID/AgentID 不是密钥，但仍建议由服务端环境配置下发，避免跨企业参数混用。</li>
+</ul>
+</section>
+
+<section id="frontend">
+<h2>5. H5 前端开发</h2>
+
+<h3>5.1 使用官方新版 SDK</h3>
+<pre><code>npm install @wecom/jssdk
+
+import * as ww from '@wecom/jssdk'</code></pre>
+
+<p>官方当前同时提供 npm 与 CDN 方式，并明确建议旧版 <code>jweixin-1.2.0.js</code> 项目迁移到 <code>ww.register</code>。用户提供的 <code>wecom-sidebar-jssdk</code> 最后主要更新停留在 2021 年，可用于理解旧版封装和 Mock 思路，不应作为新项目默认依赖。</p>
+
+<h3 id="oauth">5.2 OAuth 与业务 Session</h3>
+<div class="mermaid-wrap"><pre class="mermaid">
+sequenceDiagram
+  actor M as 企微成员
+  participant H as H5
+  participant B as Go BFF
+  participant W as 企微 OAuth/Open API
+  M->>H: 从聊天工具栏打开页面
+  H->>B: GET /wecom/session
+  alt 无有效业务 Session
+    B-->>H: 401 + oauth_start_url
+    H->>B: GET /wecom/oauth/start?return_to=/sidebar
+    B-->>M: 302 到企微 OAuth（带 state）
+    W-->>B: callback?code=...&state=...
+    B->>W: auth/getuserinfo(access_token, code)
+    W-->>B: userid
+    B->>B: 绑定 principal，签发 HttpOnly Session
+    B-->>H: 302 /sidebar
+  end
+  H->>B: GET /wecom/session
+  B-->>H: 当前成员显示信息 + 能力摘要
+</pre></div>
+
+<ul>
+  <li>静默授权使用 <code>snsapi_base</code>，只在确需头像等敏感信息时使用 <code>snsapi_privateinfo</code>。</li>
+  <li>OAuth code 单次使用，官方说明 5 分钟过期。服务端必须校验 <code>state</code>，阻断登录 CSRF。</li>
+  <li>业务 Session 推荐使用 <code>HttpOnly; Secure; SameSite=Lax</code> Cookie；不要把长期 Token 放进 localStorage。</li>
+  <li><code>return_to</code> 必须是站内相对路径或严格白名单 URL，避免开放重定向。</li>
+</ul>
+
+<h3 id="jssdk">5.3 JS-SDK 注册</h3>
+<pre><code>import * as ww from '@wecom/jssdk'
+
+async function fetchSignature(kind, url) {
+  const response = await fetch('/api/wecom/js-sdk/sign', {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ kind, url })
+  })
+  if (!response.ok) throw new Error('signature request failed')
+  return response.json()
+}
+
+export function registerWeCom({ corpId, agentId }) {
+  ww.register({
+    corpId,
+    agentId,
+    jsApiList: [
+      'getContext',
+      'getCurExternalContact',
+      'getCurExternalChat'
+    ],
+    getConfigSignature: (url) => fetchSignature('corp', url),
+    getAgentConfigSignature: (url) => fetchSignature('agent', url),
+    onConfigFail: (error) => reportSdkError('config', error),
+    onAgentConfigFail: (error) => reportSdkError('agent_config', error)
+  })
+}</code></pre>
+
+<div class="callout warn">
+  <div class="title">签名服务必须限制来源</div>
+  <p>服务端只为已登录用户、受信任 Origin 和允许的页面 URL 签名。企业 ticket 与应用 ticket 均只在后端缓存；绝不能把 ticket、access_token 或 Secret 下发前端。官方的 <code>ww.getSignature(ticket)</code> 仅供本地快速调试。</p>
+</div>
+
+<h3 id="context">5.4 单聊与群聊上下文必须分流</h3>
+<pre><code>export async function resolveEntryContext() {
+  const { entry } = await ww.getContext()
+
+  if (entry === 'single_chat_tools') {
+    const { userId } = await ww.getCurExternalContact()
+    return { entry, externalUserId: userId }
+  }
+
+  if (entry === 'group_chat_tools') {
+    const { chatId } = await ww.getCurExternalChat()
+    return { entry, chatId }
+  }
+
+  return { entry: entry || 'normal' }
+}</code></pre>
+
+<p>不要在群聊里同时调用客户 ID 接口，也不要在单聊里调用客户群接口。官方入口与最低版本如下：</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>接口</th><th>入口</th><th>应用要求</th><th>官方最低版本</th></tr></thead>
+<tbody>
+<tr><td><code>ww.getContext</code></td><td>所有入口，用于先判断 entry</td><td>按接口要求注册</td><td>企业微信 3.0.24</td></tr>
+<tr><td><code>ww.getCurExternalContact</code></td><td><code>single_chat_tools</code></td><td>应用身份 + 客户联系功能权限</td><td>单聊工具栏 2.8.10</td></tr>
+<tr><td><code>ww.getCurExternalChat</code></td><td><code>group_chat_tools</code></td><td>应用身份 + 客户联系功能权限</td><td>2.8.17</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>5.5 初始化应是状态机，不是定时器</h3>
+<p>推荐状态：<code>booting → authenticating → registering_sdk → resolving_context → loading_data → ready</code>，以及可恢复的 <code>no_context / unmapped / forbidden / sdk_error</code>。不要用固定 <code>setTimeout(1000)</code> 或 localStorage 轮询 external_userid；它会产生旧客户串话和难以复现的竞态。</p>
+
+<h3>5.6 首屏产品契约</h3>
+<ul>
+  <li>群聊入口：显示当前客户名称、已生效订单、备货额度与发货进度。</li>
+  <li>单聊入口：显示该外部联系人所属客户及受授权数据。</li>
+  <li>工作台入口：没有会话上下文，只展示“我的备货单/我的待办”，不得自动猜客户。</li>
+  <li>无映射：明确提示选择客户或联系管理员，选择后仍需服务端授权。</li>
+  <li>所有写操作再次授权；页面成功打开不是后续命令的授权凭证。</li>
+</ul>
+
+<h3>5.7 多模块与微前端治理</h3>
+<p>MoChat、OpenSCRM 和 2021 年的 qiankun 实践都把侧边栏、工作台、管理后台与服务端拆开。这种结构适合多个团队长期维护多个业务模块，但不是单一 Pilot 的默认起点。只有独立发布、技术栈隔离或团队边界带来的收益明确大于运行时复杂度时，才引入微前端。</p>
+<ul>
+  <li>主壳统一负责 OAuth、业务 Session、<code>ww.register</code>、entry 分流、错误上报和版本诊断；子应用不得各自重复刷新 token/ticket。</li>
+  <li>向子应用传最小、短生命周期的上下文视图或服务端 context handle。不要传 Secret/ticket/token，也不要把原始 SDK 对象和客户 ID 存入可持久化全局状态。</li>
+  <li>每个子应用固定资源基址、路由前缀、CSP、权限清单和独立版本；发布时验证 publicPath、跨域、缓存和旧壳兼容性。</li>
+  <li>Hash Router 只是减少签名 URL 变化的一种工程选择，不是企微官方要求。无论 Hash 或 History，都要用真实当前 URL 验证签名，并覆盖前进、后退、刷新和深链。</li>
+  <li>壳或子应用卸载时清理事件监听、请求和敏感内存状态；切换当前会话后必须重新解析上下文，禁止沿用上一客户。</li>
+</ul>
+</section>
+
+<section id="backend">
+<h2>6. 服务端开发</h2>
+
+<h3>6.1 推荐端点</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>端点</th><th>职责</th><th>安全要求</th></tr></thead>
+<tbody>
+<tr><td><code>GET /wecom/oauth/start</code></td><td>生成 OAuth URL、state、return_to 绑定</td><td>return_to 白名单、短时 state、一次性使用</td></tr>
+<tr><td><code>GET /wecom/oauth/callback</code></td><td>code 换 userid，建立业务 Session</td><td>校验 state、code 失败不可重试复用</td></tr>
+<tr><td><code>GET /api/wecom/session</code></td><td>返回当前成员的非敏感会话摘要</td><td>只从服务端 Session 读取 principal/tenant</td></tr>
+<tr><td><code>POST /api/wecom/js-sdk/sign</code></td><td>为 SDK 请求 URL 生成企业/应用签名</td><td>登录、Origin 与 URL allowlist、限流</td></tr>
+<tr><td><code>POST /api/wecom/context/resolve</code></td><td>把 external_userid/chatId 映射为内部 customer</td><td>绑定当前 corp/user，执行 ReBAC，不信任客户提交</td></tr>
+<tr><td><code>GET /api/wecom/callback</code></td><td>回调 URL 验证</td><td>验签、解密 echostr、返回明文</td></tr>
+<tr><td><code>POST /api/wecom/callback</code></td><td>接收加密事件</td><td>验签、解密、ReceiveID 校验、幂等与快速应答</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>6.2 Access Token 与两类 Ticket</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>凭证</th><th>获取</th><th>用途</th><th>缓存键建议</th></tr></thead>
+<tbody>
+<tr><td>应用 access_token</td><td><code>/cgi-bin/gettoken?corpid&amp;corpsecret</code></td><td>OAuth 换身份、获取 ticket、调用业务 API</td><td><code>corp_id + agent_id</code></td></tr>
+<tr><td>企业 jsapi_ticket</td><td><code>/cgi-bin/get_jsapi_ticket</code></td><td><code>getConfigSignature</code></td><td><code>corp_id + corp_ticket</code></td></tr>
+<tr><td>应用 jsapi_ticket</td><td><code>/cgi-bin/ticket/get?type=agent_config</code></td><td><code>getAgentConfigSignature</code></td><td><code>corp_id + agent_id + agent_ticket</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<p>正常有效期通常为 7200 秒，以返回的 <code>expires_in</code> 为准，并提前留安全窗口刷新。企微可能提前使 token 失效，因此收到明确的凭证失效错误时只允许一次受控刷新重试。使用 singleflight/分布式锁避免多实例同时刷新。</p>
+
+<div class="callout danger">
+  <div class="title">不要每次页面打开都取 ticket</div>
+  <p>官方对 ticket 获取有严格频率限制：一小时内每企业最多 400 次，单应用最多 100 次。必须集中缓存，并记录命中率、刷新次数和企微错误码。</p>
+</div>
+
+<h3>6.3 签名算法</h3>
+<pre><code>canonical =
+  "jsapi_ticket=" + ticket +
+  "&amp;noncestr=" + nonce +
+  "&amp;timestamp=" + unixSeconds +
+  "&amp;url=" + pageURLWithoutFragment
+
+signature = SHA1(canonical)</code></pre>
+<p>参数顺序固定，不做 URL encode。服务端分别选择企业 ticket 或应用 ticket。日志只记录 URL 的 origin/path、ticket 类型、耗时和结果，禁止记录 ticket、Secret、access_token 或完整 OAuth code。</p>
+
+<h3>6.4 上下文绑定与授权</h3>
+<ol>
+  <li>从 HttpOnly Session 得到 <code>corp_id + userid</code>，映射内部 principal 与 tenant。</li>
+  <li>从 SDK 请求得到当前 <code>external_userid</code> 或 <code>chatId</code>，只作为“待解析上下文”。</li>
+  <li>在服务端检查该标识属于当前企业且映射有效；必要时通过企微客户/客户群 API 刷新。</li>
+  <li>解析内部 customer 后，执行 SpiceDB 关系授权与字段裁剪。</li>
+  <li>业务命令使用服务端绑定的 principal/tenant/customer，忽略客户端同名字段。</li>
+</ol>
+
+<h3>6.5 回调可靠性</h3>
+<ul>
+  <li>GET 验证：按企微算法校验 <code>msg_signature</code>，AES 解密 <code>echostr</code>，校验 ReceiveID，返回解密后的明文。</li>
+  <li>POST 事件：校验签名后解密；先落原始事件摘要和处理状态，再执行业务。</li>
+  <li>不要假设每类回调都有统一 <code>event_id</code>。按事件类型使用稳定业务键，例如 <code>SpNo + status + update_time</code>，或 payload hash + 时间桶；数据库唯一键兜底。</li>
+  <li>回调快速返回，耗时工作进入队列/Outbox；失败可重试、可巡检、可人工补偿。</li>
+  <li>审批状态必须支持主动查询巡检，不能把回调当唯一事实来源。</li>
+</ul>
+
+<h3>6.6 服务端 SDK 与工具选型边界</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>候选</th><th>适合借鉴/使用</th><th>本项目结论</th></tr></thead>
+<tbody>
+<tr><td>直接调用官方 HTTP API</td><td>自建应用所需接口较少，契约和错误处理可控</td><td class="yes">Go BFF 当前首选；自行封装 token/ticket、重试、回调加解密和可观测性</td></tr>
+<tr><td><code>zsmhub/workweixin</code></td><td>Go；服务商、第三方应用和代开发；分布式 token/ticket 缓存及回调处理</td><td class="note">项目定位偏服务商链路，不可直接假设覆盖本自建应用主路径；采用前逐接口、维护状态和密码学实现审计</td></tr>
+<tr><td><code>felord/wecom-sdk</code></td><td>Java 服务；开放 API、统一回调和 token 生命周期</td><td>仅在 Java 服务采用；本项目 Go BFF 不为引入它而增加 JVM 服务</td></tr>
+<tr><td><code>WecomTeam/wecom-cli</code></td><td>终端调用文档、消息、通讯录、待办、会议等公开能力</td><td>可作受控的辅助验证/运营工具；不是侧边栏构建器，也不能替代 OAuth、JS-SDK 签名或真实客户端 UAT</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>第三方 SDK 必须固定版本和校验和，检查许可证、维护频率、接口覆盖、错误码透传、缓存并发、提前失效、超时重试、回调 ReceiveID 校验及日志脱敏。项目 README 的“自动管理 token”不能替代压测、故障注入和源码审计。</p>
+</section>
+
+<section id="local">
+<h2>7. 本地开发与真实企微联调</h2>
+
+<h3>7.1 推荐模式：稳定测试域名 + HTTPS 反向代理</h3>
+<p>企业微信不会把 <code>localhost</code> 当作可信域名。推荐长期配置一个测试域名，由受控代理把请求转发到本机或共享开发环境：</p>
+<pre><code>企业微信聊天工具栏:
+  https://wecom-test.example.com/sidebar
+
+代理:
+  https://wecom-test.example.com  ->  http://127.0.0.1:5173
+  https://wecom-test.example.com/api -> http://127.0.0.1:8080</code></pre>
+
+<p>社区资料常用 Whistle、hosts 或 ngrok/frp。选择时遵循：</p>
+<ul>
+  <li>优先 HTTPS 代理；移动端不会读取开发机 hosts，单纯 hosts 方案只适合桌面端。</li>
+  <li>代理证书只安装在受控测试设备，结束后撤销系统代理和证书信任。</li>
+  <li>临时穿透 URL 会变化，意味着重新配置可信域名和验证；不要暴露管理接口和调试数据。</li>
+  <li>测试域与生产域使用完全不同的 Secret、Cookie 域、数据库和客户数据。</li>
+</ul>
+
+<h3>7.2 分层开发</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>层</th><th>运行环境</th><th>可验证</th><th>不可替代</th></tr></thead>
+<tbody>
+<tr><td>浏览器 Mock</td><td>普通 Chrome</td><td>UI、状态机、错误态、接口契约</td><td>真实 SDK 注册与入口上下文</td></tr>
+<tr><td>Go Fake Adapter</td><td>本地服务</td><td>OAuth/映射/授权/回调业务逻辑</td><td>企微错误码、限流、加密差异</td></tr>
+<tr><td>企微桌面端</td><td>真实测试企业</td><td>WebView、开发者工具、单聊/群聊入口</td><td>移动端系统差异</td></tr>
+<tr><td>企微移动端</td><td>iOS/Android 真机</td><td>真实触控、网络、相机、上传和返回行为</td><td>桌面端布局与缓存</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>7.3 联调顺序</h3>
+<ol class="steps">
+  <li>先让普通浏览器 Mock 路径通过，不调用真实 SDK。</li>
+  <li>验证 OAuth start/callback、业务 Cookie 与 CSRF 防护。</li>
+  <li>验证企业签名和应用签名端点，确保 URL、ticket 类型与 AgentID 对齐。</li>
+  <li>在企微工作台入口验证 <code>entry=normal</code> 的安全降级。</li>
+  <li>在客户单聊工具栏验证 external_userid。</li>
+  <li>在客户群工具栏验证 chatId。</li>
+  <li>验证无权限成员、无映射客户、被撤销关系和旧页面返回。</li>
+</ol>
+
+<h3>7.4 代理环境退出检查</h3>
+<p>社区的 Whistle 方案能把稳定测试域代理到本机，但 HTTPS 解密依赖本机代理与受信任 CA，属于高权限调试手段：</p>
+<ul>
+  <li>只在隔离测试设备和测试企业使用，代理规则限定测试域名，不捕获邮箱、生产 API 或其他敏感流量。</li>
+  <li>联调前记录代理、证书、DNS/hosts 和企微客户端版本；更新规则后重启企微并清理 WebView 缓存再复测。</li>
+  <li>联调结束后关闭系统 HTTP/HTTPS 代理，移除 Whistle CA 信任和临时 hosts/穿透规则，再验证正常网络。</li>
+  <li>OpenSCRM 的 <code>?debug=1</code> 强制登录属于其项目自己的开发功能，不能复制为本项目的生产身份绕过入口。</li>
+</ul>
+</section>
+
+<section id="testing">
+<h2>8. 测试与验收</h2>
+
+<h3>8.1 自动化测试</h3>
+<ul>
+  <li>签名黄金向量：固定 ticket/nonce/timestamp/URL，断言 SHA-1。</li>
+  <li>URL 变体：query 顺序、中文编码、末尾斜杠、History 路径、hash 路由。</li>
+  <li>Token/Ticket 缓存：并发刷新、提前失效、45009 限流、超时与单次重试。</li>
+  <li>OAuth：state 不匹配、code 重放、回调域错误、开放重定向。</li>
+  <li>上下文：single/group/normal/unsupported；缺映射、跨 corp、关系撤销。</li>
+  <li>回调：签名错误、密文篡改、ReceiveID 不匹配、重复投递、乱序和处理崩溃恢复。</li>
+</ul>
+
+<h3>8.2 真实 UAT 矩阵</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>维度</th><th>组合</th><th>关键断言</th></tr></thead>
+<tbody>
+<tr><td>客户端</td><td>Windows / macOS / iOS / Android</td><td>首屏无空白、无重叠、返回与刷新正确</td></tr>
+<tr><td>入口</td><td>单聊 / 客户群 / 工作台 / 卡片链接</td><td>entry 正确；无上下文入口不猜客户</td></tr>
+<tr><td>角色</td><td>商务 / 仓管 / 客户 / 无权限成员</td><td>字段裁剪和动作权限符合 ReBAC</td></tr>
+<tr><td>关系</td><td>负责人 / 非负责人 / 已撤销 / 临时代办</td><td>每次写操作重新授权</td></tr>
+<tr><td>网络</td><td>正常 / 慢网 / 短时断网 / API 限流</td><td>错误可理解、重试受控、不重复提交</td></tr>
+<tr><td>版本</td><td>最低支持版本 / 当前版本</td><td>接口兼容或明确提示升级</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>8.3 发布门禁</h3>
+<ul>
+  <li>真实客户单聊和客户群均完成 OAuth → SDK → 上下文 → 数据加载。</li>
+  <li>截图中的首屏必须是本项目构建产物，版本号/commit 可在诊断页核对。</li>
+  <li>无 P0/P1 安全问题；跨租户、转发旧链接、伪造上下文全部拒绝。</li>
+  <li>关键指标、告警、Runbook、回滚版本与业务 Owner 均已就绪。</li>
+  <li>UAT 证据包含终端版本、入口、测试身份、时间、trace_id 和结果。</li>
+</ul>
+</section>
+
+<section id="release">
+<h2>9. H5 发布、灰度与回滚</h2>
+
+<div class="callout good">
+  <div class="title">H5 不走微信小程序审核</div>
+  <p>H5 的发布对象是 Web 资产和 BFF。微信公众平台的“上传代码 → 体验版 → 审核 → 发布”只适用于微信小程序路线。</p>
+</div>
+
+<ol class="steps">
+  <li><strong>构建不可变产物。</strong>记录 commit、依赖锁文件、构建时间和前端版本；静态文件使用内容 hash。</li>
+  <li><strong>部署测试环境。</strong>跑健康检查、OAuth smoke、签名黄金向量和真实企微测试群 UAT。</li>
+  <li><strong>生产预热。</strong>确认 access token/ticket 缓存、DNS/TLS、域名验证文件和服务端出口 IP。</li>
+  <li><strong>灰度。</strong>通过服务端 Feature Flag、用户白名单或新 URL 灰度，不在客户端硬编码企业名单。</li>
+  <li><strong>观察。</strong>比较 OAuth 成功率、SDK 注册失败率、上下文成功率、首屏 p95、403 和企微 errcode。</li>
+  <li><strong>全量或回滚。</strong>回滚 Web 版本与 API 兼容层；数据库变更使用向前兼容迁移，避免前端回滚后不可用。</li>
+</ol>
+
+<p>若修改聊天工具栏 URL，保留旧 URL 的兼容重定向或维护页，直到所有客户端缓存和入口配置确认更新。重定向不得丢失 OAuth state，也不得跳到未签名域名。</p>
+</section>
+
+<section id="operations">
+<h2>10. 上线运维与应急</h2>
+
+<h3>10.1 指标</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>指标</th><th>建议标签</th><th>告警方向</th></tr></thead>
+<tbody>
+<tr><td>OAuth 成功率/耗时</td><td>corp、agent、client、result</td><td>成功率突降、callback 5xx、invalid code 激增</td></tr>
+<tr><td>SDK 注册成功率</td><td>config/agent_config、entry、client_version</td><td>invalid signature/no permission</td></tr>
+<tr><td>上下文解析成功率</td><td>single/group、mapped/unmapped/forbidden</td><td>无映射突增、跨 corp 拒绝异常</td></tr>
+<tr><td>Token/Ticket 缓存</td><td>credential_type、hit/refresh/error</td><td>缓存命中下降、刷新风暴、45009</td></tr>
+<tr><td>回调</td><td>event_type、verify/decrypt/dedupe/process</td><td>验签失败、积压、重复率变化</td></tr>
+<tr><td>业务首屏</td><td>entry、role、data_state</td><td>p95 超标、空数据异常、前端崩溃</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>10.2 应急顺序</h3>
+<ol>
+  <li>判断是入口配置、Web 资产、OAuth、SDK、上下文、授权还是业务 API。</li>
+  <li>按 trace_id 串联前端、BFF、企微 API 和业务流程日志。</li>
+  <li>安全失败优先：无法确认身份/上下文时拒绝写操作，不降级为全租户数据。</li>
+  <li>企微限流/不可达时使用有界退避和熔断；不要无限重试。</li>
+  <li>必要时切只读模式或维护页；恢复后执行审批、回调和业务状态对账。</li>
+</ol>
+
+<h3>10.3 密钥轮换</h3>
+<p>不要假设企微所有 Secret 都支持新旧值并行。轮换前先确认管理后台对该凭证的实际能力：</p>
+<ol>
+  <li>盘点 Secret、回调 Token、EncodingAESKey、Cookie 签名密钥和内部 API 密钥的消费者。</li>
+  <li>对支持双 key 的内部密钥先部署“读新旧、写新”；对企微单值凭证准备短时切换窗口。</li>
+  <li>更新 KMS/Secret Manager，滚动重启，验证 token/ticket 刷新和回调。</li>
+  <li>撤销旧密钥，检查日志和仓库泄漏，保存轮换证据。</li>
+</ol>
+
+<h3>10.4 退役</h3>
+<ul>
+  <li>先将聊天工具栏切换为只读告知页，再撤入口和可见范围。</li>
+  <li>撤销客户联系 API 权限、可信 IP、回调 URL 和应用 Secret。</li>
+  <li>清理 token/ticket 缓存、会话 Cookie、测试成员与测试群。</li>
+  <li>按数据保留策略删除 external_userid/chatId 映射；保留必要审计与审批记录。</li>
+  <li>归档最终配置、版本、数据处置证明和 Owner 签字。</li>
+</section>
+
+<section id="security">
+<h2>11. 安全与合规基线</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>控制点</th><th>必须做到</th><th>禁止</th></tr></thead>
+<tbody>
+<tr><td>身份</td><td>OAuth 服务端换 userid，业务 Session 绑定 corp/principal</td><td>相信前端传入 principal_id/tenant_id</td></tr>
+<tr><td>客户上下文</td><td>服务端映射并授权 external_userid/chatId</td><td>把 chatId 当授权凭证</td></tr>
+<tr><td>凭证</td><td>Secret/token/ticket 只在服务端 KMS 和缓存</td><td>放前端、URL、日志、截图、Git</td></tr>
+<tr><td>签名</td><td>限制可签名 Origin/URL，服务端 SHA-1</td><td>提供任意 URL 的匿名签名接口</td></tr>
+<tr><td>Session</td><td>HttpOnly/Secure/SameSite、CSRF 防护、会话撤销</td><td>长期 bearer token 存 localStorage</td></tr>
+<tr><td>数据</td><td>最小字段、租户隔离、ReBAC、审计</td><td>列表先全量返回再由前端隐藏</td></tr>
+<tr><td>隐私</td><td>说明用途、保存期限、访问者和删除流程</td><td>无限期保存客户标识和会话数据</td></tr>
+<tr><td>日志</td><td>脱敏 external_userid、手机号、订单信息</td><td>记录 OAuth code、Secret、ticket、完整密文</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>客户联系数据属于高敏业务数据。上线前由业务、法务和安全共同确认隐私告知、最小收集、数据驻留、导出权限、离职交接和客户删除请求处理流程。</p>
+</section>
+
+<section id="troubleshooting">
+<h2>12. 排错手册</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>现象</th><th>优先检查</th><th>修复方向</th></tr></thead>
+<tbody>
+<tr><td>侧边栏打开了“销售订单工作台”等陌生页面</td><td>聊天工具栏实际 URL、响应中的版本/commit、CDN 缓存</td><td>改为本项目 H5 URL，清 CDN，加入构建指纹</td></tr>
+<tr><td>空白页/资源 404</td><td>是否把 <code>dist/weapp</code> 当 H5；SPA fallback；publicPath</td><td>构建真正 H5 产物，正确部署静态资源</td></tr>
+<tr><td><code>invalid signature</code></td><td>URL 是否去 hash、是否被 encode、ticket 类型、AgentID、时钟</td><td>输出脱敏 canonical 参数定位差异</td></tr>
+<tr><td><code>getCurExternalContact:fail no permission</code></td><td>是否应用身份注册、客户联系权限、单聊入口、成员权限</td><td>补应用 ticket/AgentID 和管理后台权限</td></tr>
+<tr><td><code>getCurExternalChat:fail no permission</code></td><td>是否客户群工具栏、应用身份、客户联系权限</td><td>确认 <code>entry=group_chat_tools</code> 后再调用</td></tr>
+<tr><td><code>without context of external contact</code></td><td>页面是否从工作台/普通链接进入</td><td>按 entry 安全降级，不继续取客户上下文</td></tr>
+<tr><td><code>50001</code></td><td>OAuth 域名是否匹配 access_token 对应应用</td><td>对齐回调域、AgentID、Secret 与 token 缓存键</td></tr>
+<tr><td>偶发串到上一个客户</td><td>localStorage 缓存和轮询、SPA 未重置状态</td><td>上下文只保存在当前页面内，每次入口重新解析</td></tr>
+<tr><td>45009/限流</td><td>是否每请求刷新 token/ticket、多实例刷新风暴</td><td>共享缓存、singleflight、退避、熔断</td></tr>
+<tr><td>桌面可用、手机不可用</td><td>证书链、代理、移动端网络、客户端版本、viewport</td><td>真机 HTTPS 与最低版本验证</td></tr>
+<tr><td>OAuth 循环跳转</td><td>Cookie Domain/SameSite、state、回调 URL、反向代理协议头</td><td>修复可信代理和 Session 配置</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section id="miniapp">
+<h2>13. 微信小程序备选路线</h2>
+
+<p>只有在明确选择微信小程序运行时后，才使用以下流程：</p>
+<ol>
+  <li>在微信公众平台注册小程序，获得 AppID。</li>
+  <li>用微信开发者工具和企微插件开发；企微专有能力使用 <code>wx.qy.*</code>。</li>
+  <li>调用 <code>wx.qy.login</code> 获取 5 分钟 code；服务端使用关联应用的 access token 调用企微 <code>jscode2session</code>。</li>
+  <li>开发者工具上传；配置企微体验版成员；完成真机测试。</li>
+  <li>提交小程序审核、发布并关联到企业微信；配置页面路径而不是 HTML URL。</li>
+</ol>
+
+<div class="callout warn">
+  <div class="title">小程序路线仍需独立解决可信上下文</div>
+  <p>Taro 的 <code>Taro.login()</code> 不能替代客户群上下文获取。必须在真实企微入口调用对应 <code>wx.qy.getContext/getCurExternalChat/getCurExternalContact</code>，并由服务端绑定成员身份、客户上下文和业务授权。</p>
+</div>
+</section>
+
+<section id="project">
+<h2>14. 本项目落地与迁移清单</h2>
+
+<h3>14.1 当前偏差</h3>
+<ul>
+  <li><code>docs/tutorial/deployment_dev.html</code> 把 <code>build:weapp</code> 产物误写成静态网页，并配置了不存在的 <code>pages/index/index.html</code>。</li>
+  <li>截图实际加载“销售订单工作台”，其文案在本仓库和 Git 历史均不存在，说明聊天工具栏 URL 指向了错误应用/旧部署。</li>
+  <li><code>apps/wecom-miniapp</code> 是小程序代码，不是截图宿主所需的 H5 侧边栏。</li>
+  <li>现有前端未获取 chatId/external_userid；BFF 直接信任客户端 <code>X-WeCom-Context</code>。</li>
+  <li>列表按 tenant 返回而非当前 customer + 逐条授权；没有已生效订单查询和仓管待办入口。</li>
+</ul>
+
+<h3>14.2 推荐工程结构</h3>
+<pre><code>apps/
+  wecom-sidebar-h5/        # H5 主入口，@wecom/jssdk
+  bff-api/                 # OAuth、Session、签名、上下文、业务 API
+packages/
+  adapters/                # WeCom Open API、回调加解密
+  authz/                   # SpiceDB/ReBAC
+docs/
+  survey/WeCom_调研.html   # 本全生命周期指南
+  tutorial/                # 按本指南更新的部署和使用步骤</code></pre>
+
+<h3>14.3 实施顺序</h3>
+<ol class="steps">
+  <li>在企微后台确认当前“备货管理”聊天工具栏的真实 URL，移除错误“销售订单工作台”入口。</li>
+  <li>创建 <code>wecom-sidebar-h5</code>，实现 OAuth、官方 SDK 注册和 entry 分流；展示构建版本。</li>
+  <li>重构 BFF：用 HttpOnly Session 替代客户端身份 Header；新增双签名与上下文解析端点。</li>
+  <li>按 customer + principal 执行列表授权；补已生效订单、备货进度和仓管待办查询。</li>
+  <li>修正 <code>docs/tutorial</code>，删除 <code>dist/weapp/*.html</code> 路径；将小程序流程放入独立附录。</li>
+  <li>完成真实企微桌面/移动、单聊/群聊、四角色 UAT 后再宣称 Pilot 可交付。</li>
+</ol>
+</section>
+
+<section id="sources">
+<h2>15. 来源、时效性与证据等级</h2>
+
+<p>技术契约以企业微信官方文档为准；社区文章用于补充管理后台截图、本地代理和常见错误。官方页面也可能更新，实施前应重新核对“最后更新”和管理后台实际字段。</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>等级</th><th>来源</th><th>用于本文</th><th>注意</th></tr></thead>
+<tbody>
+<tr><td class="source-level yes">A 官方</td><td><a href="https://developer.work.weixin.qq.com/document/path/90514">JS-SDK 开始使用</a></td><td><code>@wecom/jssdk</code>、<code>ww.register</code>、企业/应用签名、旧版迁移</td><td>主依据</td></tr>
+<tr><td class="source-level yes">A 官方</td><td><a href="https://developer.work.weixin.qq.com/document/path/91789">聊天工具栏接口</a> / <a href="https://developer.work.weixin.qq.com/document/path/94315">ww.getContext</a></td><td>入口与 entry</td><td>主依据</td></tr>
+<tr><td class="source-level yes">A 官方</td><td><a href="https://developer.work.weixin.qq.com/document/path/100732">当前客户 ID</a> / <a href="https://developer.work.weixin.qq.com/document/path/100733">当前客户群 ID</a></td><td>应用身份、权限、最低版本、错误信息</td><td>主依据</td></tr>
+<tr><td class="source-level yes">A 官方</td><td><a href="https://developer.work.weixin.qq.com/document/path/91022">网页授权 URL</a> / <a href="https://developer.work.weixin.qq.com/document/path/91023">获取访问用户身份</a></td><td>H5 OAuth</td><td>主依据</td></tr>
+<tr><td class="source-level yes">A 官方</td><td><a href="https://developer.work.weixin.qq.com/document/path/91039">access_token</a> / <a href="https://developer.work.weixin.qq.com/document/path/90506">JS-SDK 签名算法</a></td><td>Token、ticket、缓存与签名</td><td>主依据</td></tr>
+<tr><td class="source-level yes">A 官方</td><td><a href="https://developer.work.weixin.qq.com/document/path/96222">小程序开发前须知</a> / <a href="https://developer.work.weixin.qq.com/document/path/91506">wx.qy.login</a> / <a href="https://developer.work.weixin.qq.com/document/path/91507">code2Session</a> / <a href="https://developer.work.weixin.qq.com/document/path/92428">体验版</a></td><td>小程序独立路线</td><td>与 H5 不混用</td></tr>
+<tr><td class="source-level note">B 社区</td><td><a href="https://juejin.cn/post/7550230336647544866">2025 JS-SDK 侧边栏实践</a></td><td>新版 SDK 实战、后台配置</td><td>代码中的定时器/本地缓存方案未采纳</td></tr>
+<tr><td class="source-level note">B 社区</td><td><a href="https://juejin.cn/post/7532773597849452579">本地开发调试</a> / <a href="https://juejin.cn/post/7170957193255059493">环境代理</a></td><td>Whistle、可信域名、客户端调试</td><td>客户端快捷键和 UI 可能变化</td></tr>
+<tr><td class="source-level note">B 社区</td><td><a href="https://wecom-sidebar.github.io/wecom-sidebar-docs/intro/about.html">企微侧栏指南</a> / <a href="https://wecom-sidebar.github.io/wecom-sidebar-docs/pre_work/concept.html">基本概念</a></td><td>环境搭建与概念解释</td><td>项目主要形成于 2021 年</td></tr>
+<tr><td class="source-level note">B 社区</td><td><a href="https://wecom-sidebar.github.io/wecom-sidebar-docs/pre_work/dev_env.html">本地开发环境</a></td><td>Whistle 全局代理、HTTPS 捕获、规则转发与客户端重启</td><td>仅限隔离测试设备；结束后撤销代理与 CA 信任</td></tr>
+<tr><td class="source-level note">B 社区</td><td><a href="https://github.com/wecom-sidebar/wecom-sidebar-docs">wecom-sidebar-docs</a> / <a href="https://github.com/wecom-sidebar/wecom-sidebar-jssdk">wecom-sidebar-jssdk</a></td><td>旧版 SDK 封装和 Mock 思路</td><td>不作为新项目默认 SDK</td></tr>
+<tr><td class="source-level note">B 项目</td><td><a href="https://github.com/openscrm/api-server">OpenSCRM api-server</a></td><td>Go/React、Redis/MySQL、回调分类、队列与独立 sidebar 产物</td><td>README 明示缺乏维护；只借鉴结构和故障案例</td></tr>
+<tr><td class="source-level note">B 项目</td><td><a href="https://github.com/mochat-cloud/mochat">MoChat</a></td><td>sidebar/workbench/dashboard 分离、多租户 RBAC 与插件边界</td><td>技术栈和依赖较旧；采用前核对 GPL-3.0 义务</td></tr>
+<tr><td class="source-level note">B 社区</td><td><a href="https://juejin.cn/post/7030317396015448078">企微侧边栏与微前端</a></td><td>主壳公共初始化、publicPath、路由和子应用生命周期</td><td>2021 年旧 SDK 实践；只采纳架构原则，不照搬代码</td></tr>
+<tr><td class="source-level note">B 项目</td><td><a href="https://github.com/zsmhub/workweixin">zsmhub/workweixin</a></td><td>Go 服务商 SDK、分布式 token/ticket 缓存、回调处理</td><td>偏服务商/代开发，不等同本项目自建应用主路径</td></tr>
+<tr><td class="source-level note">B 项目</td><td><a href="https://gitee.com/felord/wecom-sdk">felord/wecom-sdk</a></td><td>Java Open API、统一回调和 token 生命周期</td><td>仅供 Java 选型；本项目为 Go BFF</td></tr>
+<tr><td class="source-level note">B 工具</td><td><a href="https://github.com/WecomTeam/wecom-cli">WecomTeam/wecom-cli</a></td><td>公开 API 的命令行调用与辅助验证</td><td>不提供聊天工具栏 H5 的构建、签名或发布链路</td></tr>
+<tr><td class="source-level note">C 补充</td><td><a href="https://zhuanlan.zhihu.com/p/641279702">知乎文章</a> / <a href="https://blog.csdn.net/m0_51223745/article/details/134202790">CSDN 文章</a></td><td>社区经验交叉参考</td><td>本次抓取受站点限制，未用于关键断言</td></tr>
+<tr><td class="source-level note">C 补充</td><td><a href="https://github.com/wecom-sidebar">wecom-sidebar 组织</a></td><td>相关实践索引</td><td>实施时回到官方接口页复核</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section id="checklists">
+<h2>16. 可执行检查表</h2>
+
+<h3>开发就绪</h3>
+<div class="table-wrap"><table class="check"><tbody>
+<tr><td>□</td><td>已明确选择 H5，不再把 <code>weapp</code> 产物当网页。</td></tr>
+<tr><td>□</td><td>测试企业、自建应用、成员、客户单聊和客户群均已准备。</td></tr>
+<tr><td>□</td><td>可信域名、OAuth 回调域、客户联系权限、可信 IP 已配置并留证。</td></tr>
+<tr><td>□</td><td>CorpID/AgentID 已记录；Secret 已进入密钥系统。</td></tr>
+<tr><td>□</td><td>单聊、群聊、工作台入口产品契约和权限矩阵已评审。</td></tr>
+</tbody></table></div>
+
+<h3>上线就绪</h3>
+<div class="table-wrap"><table class="check"><tbody>
+<tr><td>□</td><td>OAuth state/code、HttpOnly Session、签名 URL allowlist 已有自动化测试。</td></tr>
+<tr><td>□</td><td>企业 ticket 与应用 ticket 分离缓存，限流与提前失效已验证。</td></tr>
+<tr><td>□</td><td>single/group/normal 分流正确；无上下文和无映射安全失败。</td></tr>
+<tr><td>□</td><td>业务列表按 customer/principal 授权，前端不能伪造身份 Header。</td></tr>
+<tr><td>□</td><td>真实企微四端 UAT、回滚、告警、Runbook 和业务 Owner 已签字。</td></tr>
+</tbody></table></div>
+
+<h3>下线就绪</h3>
+<div class="table-wrap"><table class="check"><tbody>
+<tr><td>□</td><td>工具栏入口、可见范围、客户联系权限和回调已撤销。</td></tr>
+<tr><td>□</td><td>Secret、Token、Ticket、Session 和测试证书已失效或清理。</td></tr>
+<tr><td>□</td><td>客户标识与会话映射按保留策略处理，审计证据已归档。</td></tr>
+</tbody></table></div>
+</section>
+
+<div class="footer">
+  企业微信客户联系侧边栏 H5 全生命周期开发指南 · B2B Pilot · 审校于 2026-08-04
+</div>
+</main>
+</div>
+
+<script>
+mermaid.initialize({
+  startOnLoad: true,
+  theme: 'neutral',
+  securityLevel: 'loose',
+  flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'basis' },
+  sequence: { useMaxWidth: true, actorFontSize: 14, messageFontSize: 13 }
+});
+</script>
+</body>
+</html>

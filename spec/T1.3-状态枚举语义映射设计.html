@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>T1.3 · 状态语义映射设计（代码事实源）</title>
+<style>
+:root{
+  --bg:#f4f6fa; --card:#ffffff; --ink:#1c2333; --ink2:#5c6b84; --ink3:#3d4a63;
+  --brand:#2453a6; --brand2:#3b6fd4; --brand-bg:#e8f0fd;
+  --line:#e3e8f1; --amber:#a06a1f; --amber-bg:#fbf3e2; --red:#b04242; --red-bg:#fcefef;
+  --green:#2e7d4f; --green-bg:#e8f6ee;
+  --radius:14px; --shadow:0 1px 2px rgba(28,35,51,.05),0 6px 24px rgba(28,35,51,.07);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;line-height:1.7;}
+.mono,code{font-family:'SF Mono',ui-monospace,Menlo,Consolas,monospace;}
+.wrap{max-width:1040px;margin:0 auto;padding:36px 26px 72px;}
+.hero{background:linear-gradient(135deg,#16283f 0%,#1d3a63 48%,#2453a6 100%);color:#f2f6fc;border-radius:18px;padding:34px 38px;position:relative;overflow:hidden;}
+.hero::after{content:"";position:absolute;right:-60px;top:-60px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.10),transparent 65%);}
+.hero .crumbs{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#9fb4d8;margin-bottom:12px;font-weight:500;}
+.hero h1{font-size:26px;font-weight:700;}
+.hero .sub{color:#c9d6ec;margin-top:8px;font-size:14.5px;}
+.hero .meta{margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;}
+.hero .tag{display:inline-block;padding:4px 12px;font-size:12px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);color:#e6edf8;}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0 0;}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:13px 16px;box-shadow:var(--shadow);}
+.stat .v{font-size:22px;font-weight:700;color:var(--brand);font-variant-numeric:tabular-nums;}
+.stat .k{font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--ink2);margin-top:2px;}
+.stat .d{font-size:11px;color:var(--ink3);margin-top:2px;}
+.nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);margin:16px -26px 0;padding:9px 26px;display:flex;gap:4px 16px;flex-wrap:wrap;font-size:12.5px;}
+.nav a{color:var(--ink3);text-decoration:none;padding:4px 2px;border-bottom:2px solid transparent;white-space:nowrap;}
+.nav a:hover{color:var(--brand);border-bottom-color:var(--brand);}
+h2{font-size:20px;font-weight:700;margin:42px 0 4px;color:var(--ink);display:flex;align-items:baseline;gap:12px;}
+h2 .no{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:30px;padding:0 8px;background:var(--brand);color:#fff;border-radius:9px;font-size:13px;font-weight:700;}
+h2 .hint{font-size:12.5px;font-weight:400;color:var(--ink2);}
+p{margin:8px 0;color:var(--ink3);}
+.tblcard{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--brand2);border-radius:var(--radius);padding:16px 20px;margin:14px 0;box-shadow:var(--shadow);}
+table{width:100%;border-collapse:collapse;font-size:12.6px;background:#fff;border-radius:10px;overflow:hidden;border:1px solid var(--line);margin:8px 0 4px;}
+th{background:#f0f4fa;color:var(--ink);text-align:left;font-weight:600;padding:8px 12px;border-bottom:2px solid var(--brand2);font-size:11.8px;white-space:nowrap;}
+td{padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink3);}
+tr:last-child td{border-bottom:none;}
+tr:nth-child(even) td{background:#fafcff;}
+code{font-size:11px;background:#eef2f9;padding:1px 6px;border-radius:4px;color:#23406e;}
+.kind{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:999px;white-space:nowrap;}
+.kind.g{background:var(--green-bg);color:var(--green);}
+.kind.a{background:var(--amber-bg);color:var(--amber);}
+.kind.r{background:var(--red-bg);color:var(--red);}
+.kind.b{background:var(--brand-bg);color:var(--brand);}
+.diff{background:var(--red-bg);border:1px solid #ebc9c9;border-radius:6px;padding:1px 7px;font-size:10.5px;font-weight:700;color:var(--red);white-space:nowrap;}
+.pend{color:var(--amber);font-weight:600;}
+.note{background:var(--amber-bg);border:1px solid #ebd9ae;border-radius:var(--radius);padding:12px 16px;margin:12px 0;font-size:13px;color:var(--ink3);}
+.note .tt{font-family:Menlo,monospace;font-size:10px;font-weight:600;letter-spacing:.16em;color:var(--amber);display:block;margin-bottom:3px;}
+.note.red{background:var(--red-bg);border-color:#ebc9c9;}
+.note.red .tt{color:var(--red);}
+.note.green{background:var(--green-bg);border-color:#bfe0c9;}
+.note.green .tt{color:var(--green);}
+.note.blue{background:var(--brand-bg);border-color:#c6d9f5;}
+.note.blue .tt{color:var(--brand);}
+details{margin-top:8px;border:1px solid var(--line);border-radius:10px;background:#fafbfe;overflow:hidden;}
+details summary{list-style:none;cursor:pointer;padding:9px 14px;font-size:12.5px;color:var(--ink3);user-select:none;}
+details summary::-webkit-details-marker{display:none;}
+details summary:hover{background:#f2f6fd;}
+details summary b{color:var(--brand);}
+details .inner{padding:2px 14px 14px;font-size:12px;color:var(--ink3);line-height:1.9;}
+.biz{background:#f2f7f2;border:1px solid #cfe3cf;border-radius:10px;padding:10px 14px;margin:8px 0;font-size:13px;color:var(--ink3);}
+.biz .lab{font-size:10px;font-weight:700;letter-spacing:.16em;color:var(--green);display:block;margin-bottom:2px;}
+.tech{background:#f5f7fb;border:1px dashed #c6d2e4;border-radius:10px;padding:10px 14px;margin:8px 0;font-size:12.5px;color:var(--ink3);}
+.tech .lab{font-size:10px;font-weight:700;letter-spacing:.16em;color:var(--brand2);display:block;margin-bottom:2px;}
+.sign{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px 26px;margin:24px 0;box-shadow:var(--shadow);}
+.sign h3{font-size:15px;font-weight:700;margin-bottom:12px;}
+.sign .row{display:flex;gap:20px;flex-wrap:wrap;font-size:13.5px;color:var(--ink3);}
+.sign .row .cell{flex:1;min-width:180px;border-top:1.5px solid var(--ink2);padding-top:6px;margin-top:30px;font-size:12px;color:var(--ink2);}
+footer{margin-top:30px;padding-top:14px;border-top:1px solid var(--line);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink2);display:flex;justify-content:space-between;flex-wrap:wrap;}
+.backtop{position:fixed;right:24px;bottom:24px;background:var(--brand);color:#fff;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:17px;box-shadow:0 4px 14px rgba(36,83,166,.35);opacity:.9;}
+@media(max-width:840px){.stats{grid-template-columns:repeat(2,1fr);}.hero{padding:26px 22px;}}
+@media print{.backtop,.nav{display:none;}details{background:none;}details summary{display:none;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="hero">
+  <div class="crumbs">B2B Order Fulfillment · v0.1 Release Prep · 块1 T1.3</div>
+  <h1>状态语义映射设计（T1.3）</h1>
+  <div class="sub">以 <b style="color:#fff">项目代码 internal/domain/state.go + 四张 FSM</b> 为单一事实源，逐项对照旧系统真实状态</div>
+  <div class="meta">
+    <span class="tag">169 枚举值</span>
+    <span class="tag">代码事实源：34 状态 + 4 FSM</span>
+    <span class="tag"><b style="color:#ffd9d9">红标=找得到但不一致</b> · <b style="color:#f0c76a">橙标=找不到，待定</b></span>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="v">27</div><div class="k">主表状态</div><div class="d">订单10+备货6+发货6+开票5</div></div>
+  <div class="stat"><div class="v">34</div><div class="k">代码状态</div><div class="d">ORD 10 + STK 10 + SHP 5 + INV 11 + PRE 9</div></div>
+  <div class="stat"><div class="v">4</div><div class="k">FSM 迁移表</div><div class="d">ord/stk/shp/inv.go</div></div>
+  <div class="stat"><div class="v">3</div><div class="k">差异项</div><div class="d">回单/开票信息/备货驳回</div></div>
+</div>
+
+<nav class="nav">
+  <a href="#s1"><span class="no">1</span>读法说明</a>
+  <a href="#s2"><span class="no">2</span>订单状态</a>
+  <a href="#s3"><span class="no">3</span>备货状态</a>
+  <a href="#s4"><span class="no">4</span>发货状态</a>
+  <a href="#s5"><span class="no">5</span>开票状态</a>
+  <a href="#s6"><span class="no">6</span>差异/待定</a>
+  <a href="#s7"><span class="no">7</span>事件动作码</a>
+  <a href="#s8"><span class="no">8</span>落点</a>
+</nav>
+
+<h2 id="s1"><span class="no">1</span>怎么读这张文档</h2>
+<div class="tblcard">
+  <div class="biz"><span class="lab">给商务（陈虹励）</span>每行是"旧系统状态 → 新系统状态"。<b>绿色"代码映射"</b> = 新系统已有这个状态（代码里定义好的），直接对应；<b>红色"差异"</b> = 代码/文档里有这个概念，但确认和旧系统不一致；<b>橙色"待定"</b> = 代码/文档里找不到对应。两者都需要商务/后端对口径。</div>
+  <div class="tech"><span class="lab">给技术</span><b>单一事实源：internal/domain/state.go</b>（34 个状态常量）+ ord.go/stk.go/shp.go/inv.go（4 张 FSM 迁移表）+ ShipmentState/InvoiceState（聚合子状态）。旧系统状态逐一映射到代码状态；<b>找得到但不一致 → 标"差异"；找不到 → 标"待定"，不擅自编造</b>。</div>
+  <div style="display:flex;gap:14px;font-size:12.5px;color:var(--ink3);flex-wrap:wrap;margin-top:6px;">
+    <span><span class="kind g">代码映射</span> 新系统已有该状态</span>
+    <span><span class="diff">差异</span> 找得到但不一致　<span class="kind a">待定</span> 找不到对应</span>
+  </div>
+</div>
+
+<h2 id="s2"><span class="no">2</span>订单状态 <span class="hint">ORD 段 10 状态（代码已定义）</span></h2>
+<div class="tblcard">
+  <div class="biz"><span class="lab">商务视角</span>新系统订单有 <b>10 个代码定义的状态</b>（已受理→价格审阅→董事长审阅→合同→已驳回等），旧系统 10 种状态基本都能对应上。仅"已撤回/作废"需要确认（新系统代码暂无专门"取消"终态）。</div>
+  <div class="tech"><span class="lab">技术视角</span>代码：ORD_REQUESTED / ORD_PRICE_REVIEWING / ORD_PRICE_APPROVED / ORD_CHAIRMAN_REVIEWING / ORD_CONTRACT_GENERATING / ORD_CONTRACTED / ORD_MODIFYING / ORD_RETURNED / ORD_REJECTED（state.go）。四节点（已开单/已备货/已发货/已开票）是流程归属，由 stage_code 表达。</div>
+  <table>
+    <tr><th>旧系统显示（源状态码）</th><th></th><th>新系统状态（代码枚举）</th><th>类型</th><th>说明</th></tr>
+    <tr><td>已受理，系统处理中<br/><code>SYSTEM_PROCESSING</code></td><td style="width:24px;text-align:center;color:var(--brand2);font-weight:700">→</td><td><b>订单已受理</b><br/><code>ORD_REQUESTED</code></td><td><span class="kind g">代码映射</span></td><td><br/><span style="color:var(--ink2);font-size:11px">state.go StateORDRequested</span></td></tr><tr><td>客户信息同步中<br/><code>CUSTOMER_SYNC_PENDING</code></td><td style="width:24px;text-align:center;color:var(--brand2);font-weight:700">→</td><td><b>订单已受理</b><br/><code>ORD_REQUESTED</code></td><td><span class="kind g">代码映射</span></td><td><br/><span style="color:var(--ink2);font-size:11px">同步子态归入 ORD_REQUESTED</span></td></tr><tr><td>等待信息确认<br/><code>MANAGER_PENDING</code></td><td style="width:24px;text-align:center;color:var(--brand2);font-weight:700">→</td><td><b>价格审阅中</b><br/><code>ORD_PRICE_REVIEWING</code></td><td><span class="kind g">代码映射</span></td><td><br/><span style="color:var(--ink2);font-size:11px">state.go StateORDPriceReviewing</span></td></tr><tr><td>等待主管审批<br/><code>SUPERVISOR_PENDING</code></td><td style="width:24px;text-align:center;color:var(--brand2);font-weight:700">→</td><td><b>价格审阅中</b><br/><code>ORD_PRICE_REVIEWING</code></td><td><span class="kind g">代码映射</span></td><td><br/><span style="color:var(--ink2);font-size:11px">审价环节</span></td></tr><tr><td>等待董事长审批<br/><code>CHAIRMAN_PENDING</code></td><td style="width:24px;text-align:center;color:var(--brand2);font-weight:700">→</td><td><b>董事长审阅中</b><br/><code>ORD_CHAIRMAN_REVIEWING</code></td><td><span class="kind g">代码映射</span></td><td><br/><span style="color:var(--ink2);font-size:11px">state.go StateORDChairmanReview</span></td></tr><tr><td>主管已通过<br/><code>SUPERVISOR_APPROVED</code></td><td style="width:24px;text-align:center;color:var(--brand2);font-weight:700">→</td><td><b>价格已通过</b><br/><code>ORD_PRICE_APPROVED</code></td><td><span class="kind g">代码映射</span></td><td><br/><span style="color:var(--ink2);font-size:11px">state.go StateORDPriceApproved</span></td></tr><tr><td>董事长已通过<br/><code>CHAIRMAN_APPROVED</code></td><td style="width:24px;text-align:center;color:var(--brand2);font-weight:700">→</td><td><b>合同生成中</b><br/><code>ORD_CONTRACT_GENERATING</code></td><td><span class="kind g">代码映射</span></td><td><br/><span style="color:var(--ink2);font-size:11px">state.go StateORDContractGenerate</span></td></tr><tr><td>主管驳回<br/><code>SUPERVISOR_REJECTED</code></td><td style="width:24px;text-align:center;color:var(--brand2);font-weight:700">→</td><td><b>已驳回（终态）</b><br/><code>ORD_REJECTED</code></td><td><span class="kind g">代码映射</span></td><td><br/><span style="color:var(--ink2);font-size:11px">state.go StateORDRejected · IsTerminal</span></td></tr><tr><td>信息确认驳回<br/><code>MANAGER_REJECTED</code></td><td style="width:24px;text-align:center;color:var(--brand2);font-weight:700">→</td><td><b>已驳回（终态）</b><br/><code>ORD_REJECTED</code></td><td><span class="kind g">代码映射</span></td><td><br/><span style="color:var(--ink2);font-size:11px">state.go StateORDRejected</span></td></tr><tr><td>已撤回/作废<br/><code>CANCELED</code></td><td style="width:24px;text-align:center;color:var(--brand2);font-weight:700">→</td><td><b>待定</b></td><td><span class="kind a">待定</span></td><td><br/><span style="color:var(--ink2);font-size:11px">代码无 CANCELED 终态，用 ORD_REJECTED 兜底（需确认是否新增 CANCELLED）</span></td></tr>
+  </table>
+</div>
+
+<h2 id="s3"><span class="no">3</span>备货状态 <span class="hint">STK 段 10 状态（代码已定义）</span></h2>
+<div class="tblcard">
+  <div class="biz"><span class="lab">商务视角</span>新系统备货有 10 个代码定义的状态，旧系统 6 种大部分能对应。仅"已取消"需确认（代码用"退回"表达）。</div>
+  <div class="tech"><span class="lab">技术视角</span>代码：STK_READY_FOR_STOCK … STK_SHIP_ORDER_ISSUED / STK_RETURNED（state.go）。</div>
+  <table>
+    <tr><th>旧系统显示（源状态码）</th><th></th><th>新系统状态（代码枚举）</th><th>类型</th><th>说明</th></tr>
+    <tr><td>待备货预定<br/><code>RESERVATION_PENDING</code></td><td style="width:24px;text-align:center;color:var(--brand2);font-weight:700">→</td><td><b>备货审阅中</b><br/><code>STK_STOCK_REVIEWING</code></td><td><span class="kind g">代码映射</span></td><td><br/><span style="color:var(--ink2);font-size:11px">state.go StateSTKStockReviewing</span></td></tr><tr><td>待确认到款<br/><code>PAYMENT_PENDING</code></td><td style="width:24px;text-align:center;color:var(--brand2);font-weight:700">→</td><td><b>到款确认中</b><br/><code>STK_PAYMENT_CONFIRMING</code></td><td><span class="kind g">代码映射</span></td><td><br/><span style="color:var(--ink2);font-size:11px">state.go StateSTKPaymentConfirming</span></td></tr><tr><td>待填发货仓<br/><code>WAREHOUSE_PENDING</code></td><td style="width:24px;text-align:center;color:var(--brand2);font-weight:700">→</td><td><b>仓管确认中</b><br/><code>STK_WAREHOUSE_CONFIRMING</code></td><td><span class="kind g">代码映射</span></td><td><br/><span style="color:var(--ink2);font-size:11px">state.go StateSTKWarehouseConfirm</span></td></tr><tr><td>已归档（备货完成）<br/><code>ARCHIVED</code></td><td style="width:24px;text-align:center;color:var(--brand2);font-weight:700">→</td><td><b>发货命令已出</b><br/><code>STK_SHIP_ORDER_ISSUED</code></td><td><span class="kind g">代码映射</span></td><td><br/><span style="color:var(--ink2);font-size:11px">state.go StateSTKShipOrderIssued</span></td></tr><tr><td>已取消<br/><code>CANCELED</code></td><td style="width:24px;text-align:center;color:var(--brand2);font-weight:700">→</td><td><b>待定</b></td><td><span class="kind a">待定</span></td><td><br/><span style="color:var(--ink2);font-size:11px">代码用 STK_RETURNED 表达退回；取消/驳回语义需确认</span></td></tr><tr><td>已驳回<br/><code>REJECTED</code></td><td style="width:24px;text-align:center;color:var(--brand2);font-weight:700">→</td><td><b>已退回</b><br/><code>STK_RETURNED</code></td><td><span class="kind r">差异</span></td><td><br/><span style="color:var(--ink2);font-size:11px">代码有 STK_RETURNED（退回可重提），但旧系统"已驳回"是终态，语义不一致</span></td></tr>
+  </table>
+</div>
+
+<h2 id="s4"><span class="no">4</span>发货状态 <span class="hint">SHP 段 + ShipmentState（OPEN/SHIPPED/CLOSED）</span></h2>
+<div class="tblcard">
+  <div class="biz"><span class="lab">商务视角</span>新系统发货单状态：待发货 / 已发货 / 已关闭。旧系统"待上传回单""待填写开票信息"在新系统<b>不在发货环节处理</b>（回单不卡发货、开票信息在开票环节）——这是业务差异，需确认。</div>
+  <div class="tech"><span class="lab">技术视角</span>代码：ShipmentStateOpen/Shipped/Closed + SHP_SHIP_ASSIGNING/WAREHOUSE_SHIPPING/SHIPPED/FULLY_SHIPPED/PARTIAL_SHIPPED（state.go, shp.go）。回单与开票解耦（inv.go 注释）。</div>
+  <table>
+    <tr><th>旧系统显示（源状态码）</th><th></th><th>新系统状态（代码枚举）</th><th>类型</th><th>说明</th></tr>
+    <tr><td>待仓库发货<br/><code>WAREHOUSE_PENDING</code></td><td style="width:24px;text-align:center;color:var(--brand2);font-weight:700">→</td><td><b>待发货（发货单开放）</b><br/><code>OPEN</code></td><td><span class="kind g">代码映射</span></td><td><br/><span style="color:var(--ink2);font-size:11px">ShipmentStateOpen</span></td></tr><tr><td>待上传回单<br/><code>RECEIPT_PENDING</code></td><td style="width:24px;text-align:center;color:var(--brand2);font-weight:700">→</td><td><b>回单分流（例外审核）</b><br/><code>RECEIPT_EXCEPTION</code></td><td><span class="kind r">差异</span></td><td><br/><span style="color:var(--ink2);font-size:11px">代码：回单不做独立状态，receipt.go 分流判定（HAVE_RECEIPT/RECEIPT_EXCEPTION），在 INV 段 INV_RECEIPT_EXCEPTION_REVIEWING 例外审核——与旧系统"待上传回单"独立状态不一致</span></td></tr><tr><td>待填写开票信息<br/><code>INVOICE_INFO_PENDING</code></td><td style="width:24px;text-align:center;color:var(--brand2);font-weight:700">→</td><td><b>开票申请中（INV 段）</b><br/><code>INV_INVOICE_APPLYING</code></td><td><span class="kind r">差异</span></td><td><br/><span style="color:var(--ink2);font-size:11px">代码：开票信息在 INV 段 INV_INVOICE_APPLYING（开票申请时填写），非 SHP 段——与旧系统"发货环节填开票信息"不一致</span></td></tr><tr><td>已发货<br/><code>WAREHOUSE_SHIPPED</code></td><td style="width:24px;text-align:center;color:var(--brand2);font-weight:700">→</td><td><b>已发货</b><br/><code>SHIPPED</code></td><td><span class="kind g">代码映射</span></td><td><br/><span style="color:var(--ink2);font-size:11px">ShipmentStateShipped / SHP_SHIPPED</span></td></tr><tr><td>已归档（发货完成）<br/><code>ARCHIVED</code></td><td style="width:24px;text-align:center;color:var(--brand2);font-weight:700">→</td><td><b>已关闭</b><br/><code>CLOSED</code></td><td><span class="kind g">代码映射</span></td><td><br/><span style="color:var(--ink2);font-size:11px">ShipmentStateClosed</span></td></tr><tr><td>已取消<br/><code>CANCELED</code></td><td style="width:24px;text-align:center;color:var(--brand2);font-weight:700">→</td><td><b>待定</b></td><td><span class="kind a">待定</span></td><td><br/><span style="color:var(--ink2);font-size:11px">代码无取消态，需对口径</span></td></tr><tr><td>已驳回<br/><code>REJECTED</code></td><td style="width:24px;text-align:center;color:var(--brand2);font-weight:700">→</td><td><b>待定</b></td><td><span class="kind a">待定</span></td><td><br/><span style="color:var(--ink2);font-size:11px">代码无驳回态，需对口径</span></td></tr>
+  </table>
+</div>
+
+<h2 id="s5"><span class="no">5</span>开票状态 <span class="hint">INV 段 + InvoiceState（PENDING/PROCESSING/ISSUED/FAILED/NONE）</span></h2>
+<div class="tblcard">
+  <div class="biz"><span class="lab">商务视角</span>新系统开票状态：待申请 / 处理中 / 已开票 / 失败 / 不开票。旧系统 4 种能对应；"盖章回传"新系统没有（回单与开票解耦）；"已取消"需确认。</div>
+  <div class="tech"><span class="lab">技术视角</span>代码：InvoiceStatePending/Processing/Issued/Failed/None + INV_* 11 状态（state.go, inv.go）。</div>
+  <table>
+    <tr><th>旧系统显示（源状态码）</th><th></th><th>新系统状态（代码枚举）</th><th>类型</th><th>说明</th></tr>
+    <tr><td>待开票申请<br/><code>SALES_APPLY_PENDING</code></td><td style="width:24px;text-align:center;color:var(--brand2);font-weight:700">→</td><td><b>待开票申请</b><br/><code>PENDING</code></td><td><span class="kind g">代码映射</span></td><td><br/><span style="color:var(--ink2);font-size:11px">InvoiceStatePending / INV_INVOICE_APPLYING</span></td></tr><tr><td>待客户盖章回传<br/><code>STAMP_RETURN_PENDING</code></td><td style="width:24px;text-align:center;color:var(--brand2);font-weight:700">→</td><td><b>待定</b></td><td><span class="kind a">待定</span></td><td><br/><span style="color:var(--ink2);font-size:11px">代码无"盖章回传"节点（回单与开票解耦）——需对口径</span></td></tr><tr><td>不开票<br/><code>NO_INVOICE_PENDING</code></td><td style="width:24px;text-align:center;color:var(--brand2);font-weight:700">→</td><td><b>不开票</b><br/><code>NONE</code></td><td><span class="kind g">代码映射</span></td><td><br/><span style="color:var(--ink2);font-size:11px">InvoiceStateNone / INV_NO_INVOICE_NEEDED</span></td></tr><tr><td>已归档（开票完成）<br/><code>ARCHIVED</code></td><td style="width:24px;text-align:center;color:var(--brand2);font-weight:700">→</td><td><b>已开票</b><br/><code>ISSUED</code></td><td><span class="kind g">代码映射</span></td><td><br/><span style="color:var(--ink2);font-size:11px">InvoiceStateIssued / INV_INVOICED</span></td></tr><tr><td>已取消<br/><code>CANCELED</code></td><td style="width:24px;text-align:center;color:var(--brand2);font-weight:700">→</td><td><b>待定</b></td><td><span class="kind a">待定</span></td><td><br/><span style="color:var(--ink2);font-size:11px">代码无取消态（FAILED 表达失败）——需对口径</span></td></tr>
+  </table>
+</div>
+
+<h2 id="s6"><span class="no">6</span>差异与待定项 <span class="hint">需对口径</span></h2>
+<div class="tblcard">
+  <table>
+    <tr><th>#</th><th>旧状态</th><th>项目现状</th><th>待定说明</th></tr>
+    <tr><td>1</td><td>订单已撤回/作废（CANCELED）</td><td>ORD 段无取消终态，仅 ORD_REJECTED</td><td>取消用 REJECTED 表达，还是新增 CANCELLED 终态</td></tr>
+    <tr><td>2</td><td>发货单已取消/已驳回</td><td>SHP 无取消/驳回态</td><td>如何表达取消/驳回</td></tr>
+    <tr><td>3</td><td>待上传回单（RECEIPT_PENDING）</td><td>回单不卡发货（回单状态与开票解耦）</td><td>回单状态在哪表达</td></tr>
+    <tr><td>4</td><td>待填写开票信息（INVOICE_INFO_PENDING）</td><td>开票信息在 INV 段（INV_INVOICE_APPLYING）</td><td>发货环节是否保留开票信息填写</td></tr>
+    <tr><td>5</td><td>待客户盖章回传（STAMP_RETURN_PENDING）</td><td>代码无盖章回传节点</td><td>盖章回传流程是否保留</td></tr>
+  </table>
+</div>
+
+<h2 id="s7"><span class="no">7</span>事件动作码 <span class="hint">118 种 · 系统内部</span></h2>
+<div class="tblcard">
+  <div class="biz"><span class="lab">商务视角</span>这些是系统自己记的流水账，<b>平时看不到</b>，迁移时原样保留、不影响业务。其中约 30 种是历史修数据痕迹（"已修复""已回滚"），也会保留，方便查问题。</div>
+  <div class="tech"><span class="lab">技术视角</span>事件 status 是动作码（非状态），进事件链 append-only；按 5 类承载：完成 / 流转中 / 终态 / 系统动作 / 修复类。修复类（约 30 个）同步保留但不驱动业务状态机。</div>
+  <details>
+    <summary><b>（可选）</b>展开看 4 个环节的动作码清单</summary>
+    <div class="inner">
+      <b>订单环节 32 种：</b>APPROVAL_INSTANCE_CREATED、APPROVAL_TRANSITION_VALIDATION_FAILED、CANCELED、CANCELING、CANCEL_REQUESTED、CHAIRMAN_APPROVED、CHAIRMAN_PENDING、CHAIRMAN_SKIPPED、CONTRACT_FINALIZATION_FAILED_CONTINUED、CONTRACT_FINALIZATION_REPAIRED、CONTRACT_FINALIZED、CONTRACT_STUB_CREATED、CUSTOMER_CONTRACT_NO_REPAIRED、CUSTOMER_CONTRACT_RESTAMPED、CUSTOMER_ORDER_STAMP_FILES_UPLOADED、DUPLICATE_REMOVED、MANAGER_APPROVED、MANAGER_REJECTED、MANAGER_SKIPPED、ORDER_AMOUNT_REPAIRED、ORDER_APPROVAL_TASK_LINK_REPAIRED、ORDER_BITABLE_SYNC_SUCCEEDED、ORDER_PRODUCT_NAME_CORRECTED、ORDER_SUBMIT_ACCEPTED、ORDER_SUBMIT_RECEIVED、STOCK_PREPARE_TRIGGER_REQUESTED、SUPERVISOR_APPROVAL_VALIDATION_FAILED、SUPERVISOR_APPROVED、SUPERVISOR_PENDING、SUPERVISOR_REJECTED、TEST_ORDER_CREATED、WAREHOUSE_CANCEL_NOTICE_QUEUED<br/><br/>
+      <b>备货环节 24 种：</b>AI_PERIODIC_CHECK_PASSED、AI_WAREHOUSE_CHECK_PASSED、BUSINESS_WAREHOUSE_CORRECTED、BUSINESS_WAREHOUSE_PENDING、BUSINESS_WAREHOUSE_REJECTED、BUSINESS_WAREHOUSE_SUBMITTED、EMAIL_ARCHIVE_CREATED、FINANCE_PAYMENT_CONFIRMED、FINANCE_PAYMENT_PENDING、OUTBOUND_ORDER_GENERATED、OUTBOUND_ORDER_GENERATING、OUTBOUND_ORDER_REGENERATED_FOR_WAREHOUSE、SHIPMENT_FLOW_CREATED、SHIPMENT_FLOW_CREATE_FAILED、SHIPMENT_FLOW_QUEUED、STOCK_PREPARE_ARCHIVED、STOCK_PREPARE_CANCELED、STOCK_PREPARE_CREATED_WAITING、STOCK_RESERVATION_APPROVED、STOCK_RESERVATION_PENDING、STOCK_RESERVATION_REJECTED、STOCK_RESERVATION_WAREHOUSE_NOTICE_SENT、WAREHOUSE_CANCEL_NOTICE_CONFIRMED、WAREHOUSE_CANCEL_NOTICE_SENT<br/><br/>
+      <b>发货环节 46 种：</b>APPROVER_TOKEN_ROTATED、COMBINED_INVOICE_REQUEST_QTY_AMOUNT_REPAIRED、COMPLETION_EVIDENCE_APPROVER_REPAIRED、COMPLETION_EVIDENCE_APPROVER_REPLACED、COMPLETION_EVIDENCE_BACKLOG_REMINDER_SENT、COMPLETION_EVIDENCE_DELAY_REMINDER_SENT、COMPLETION_EVIDENCE_PENDING、COMPLETION_EVIDENCE_SUBMITTED、COMPLETION_EVIDENCE_TASK_REISSUED、DELIVERY_COMPLETION_CHECK_PASSED、DELIVERY_ORDER_ARCHIVED、EMAIL_ARCHIVE_CREATED、INVOICE_FLOW_QUEUED、INVOICE_INFO_PENDING、INVOICE_INFO_REASSIGNED_TO_SALES、INVOICE_INFO_REJECTED、INVOICE_INFO_RESTORED、INVOICE_INFO_RESTORED_CURRENT_STATE、INVOICE_INFO_SALES_UTF8_REPAIRED、INVOICE_INFO_SUBMITTED、INVOICE_NOT_REQUIRED、LOGISTICS_IN_TRANSIT、NEXT_STOCK_PREPARE_CREATED、NO_INVOICE_FLOW_QUEUED、OPEN_METHOD_TASK_REBUILT、RECEIPT_APPROVER_REPAIRED_AFTER_WAREHOUSE_CORRECTION、RECEIPT_APPROVER_REPAIRED_AFTER_WAREHOUSE_CORRECTION_UTF8、SHIPMENT_CANCELED、SHIPMENT_CREATED_WAITING、SHIPMENT_NESTED_OUTBOUND_ALIGNED、SHIPMENT_RESET_TO_WAREHOUSE_PENDING、SHIPMENT_RESTORED_TO_RECEIPT_AFTER_ROLLBACK、SHIPMENT_ROLLED_BACK_TO_WAREHOUSE、SHIPMENT_ROLLED_BACK_TO_WAREHOUSE_PENDING、SHIPMENT_WAREHOUSE_AND_OUTBOUND_REPAIRED、STOCK_PROGRESS_UPDATED、WAREHOUSE_CANCEL_NOTICE_CONFIRMED、WAREHOUSE_CANCEL_NOTICE_FAILED、WAREHOUSE_CANCEL_NOTICE_SENT、WAREHOUSE_CORRECTION_OUTBOUND_REGENERATED、WAREHOUSE_SHIPMENT_DELAY_REMINDER_SENT、WAREHOUSE_SHIPPED、WAREHOUSE_SHIPPED_NOTICE_SENT、WAREHOUSE_SHIP_PENDING、WAREHOUSE_SHIP_REJECTED、WAREHOUSE_TRANSFERRED<br/><br/>
+      <b>开票环节 16 种：</b>AI_CONTRACT_EXECUTION_AUDIT_PASSED、ARCHIVE_EMAIL_CREATED、COMBINED_INVOICE_MODE_TEXT_REPAIRED、COMBINED_INVOICE_QTY_AMOUNT_REPAIRED、CUSTOMER_ORDER_STAMP_RETURN_PENDING、CUSTOMER_ORDER_STAMP_RETURN_SUBMITTED、INVOICE_APPLICATION_SUBMITTED、INVOICE_APPLY_CC_CREATED、INVOICE_ARCHIVED、INVOICE_CANCELED、INVOICE_CREATED_WAITING、INVOICE_FINAL_CC_SYNCED、NO_INVOICE_SALE_HANDLED、NO_INVOICE_SALE_PARTIAL_APPROVED、NO_INVOICE_SALE_WAITING、STAMP_RETURN_PENDING
+    </div>
+  </details>
+</div>
+
+<h2 id="s8"><span class="no">8</span>落点 <span class="hint">代码单一事实源 · G5/G6</span></h2>
+<div class="tblcard">
+  <table>
+    <tr><th>目标表.列</th><th>代码事实源</th><th>说明</th></tr>
+    <tr><td><code>orders.state</code></td><td>state.go ORD/STK/SHP/INV 34 状态</td><td>以代码状态为准（非四节点名）；G6 补 CHECK 直接引用代码枚举</td></tr>
+    <tr><td><code>stock_prepares.state</code></td><td>state.go STK 段</td><td>以代码状态为准；G6 补 CHECK</td></tr>
+    <tr><td><code>shipments.state</code></td><td>ShipmentState OPEN/SHIPPED/CLOSED</td><td>已定 CHECK，与代码一致</td></tr>
+    <tr><td><code>invoices.state</code></td><td>InvoiceState PENDING/PROCESSING/ISSUED/FAILED/NONE</td><td>已定 CHECK，与代码一致</td></tr>
+    <tr><td><code>approval_tasks.state</code></td><td>CHECK(PENDING/APPROVED/REJECTED/RETURNED/ESCALATED/CANCELLED)</td><td>已定；审批进度落此表</td></tr>
+    <tr><td><code>approval_tasks.kind</code></td><td>G5 未定义</td><td>kind 规范待定（代码未定义取值）</td></tr>
+  </table>
+  <div class="note blue"><span class="tt">映射器落点</span>本表第 2-6 节「源状态码 → 代码状态」即 T3 同步 Job 映射器的状态转换配置；差异项对完口径后冻结。</div>
+</div>
+
+
+<footer>
+  <span>B2B Order Fulfillment · v0.1 Release Prep</span>
+  <span>T1.3 · 状态语义映射设计 · 2026-08-17</span>
+  <span>代码事实源 · 差异标注</span>
+</footer>
+
+</div>
+<a class="backtop" href="#" title="回顶部">↑</a>
+</body>
+</html>

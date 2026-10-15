@@ -1,0 +1,56 @@
+# 本地 Windows PostgreSQL 模式
+#
+# 用法：
+#   1. 先在 Windows PostgreSQL 中创建 b2b_pilot 数据库并执行 migrations。
+#   2. docker compose -f docker-compose.yml -f docker-compose.local-pg.yml up -d --build
+#
+# 原 docker-compose.yml 仍保留 Docker PostgreSQL 模式；本文件只替换本地开发时的数据库连接。
+services:
+  # 禁用 Docker PostgreSQL 与容器迁移服务；本机 psql 负责迁移。
+  postgres:
+    profiles: ["docker-pg"]
+
+  migrate:
+    profiles: ["docker-pg"]
+
+  temporal:
+    environment:
+      POSTGRES_SEEDS: host.docker.internal
+      POSTGRES_USER: postgres
+      POSTGRES_PWD: postgres
+
+  api:
+    environment:
+      B2B_PG_DSN: postgres://postgres:postgres@host.docker.internal:5432/b2b_pilot?sslmode=disable
+    depends_on: !override
+      spicedb:
+        condition: service_healthy
+      spicedb-schema:
+        condition: service_completed_successfully
+      temporal:
+        condition: service_healthy
+
+  worker:
+    environment:
+      B2B_PG_DSN: postgres://postgres:postgres@host.docker.internal:5432/b2b_pilot?sslmode=disable
+    depends_on: !override
+      spicedb-schema:
+        condition: service_completed_successfully
+      temporal:
+        condition: service_healthy
+
+  wecom:
+    environment:
+      B2B_PG_DSN: postgres://postgres:postgres@host.docker.internal:5432/b2b_pilot?sslmode=disable
+    depends_on: !override
+      api:
+        condition: service_healthy
+
+  sync:
+    environment:
+      B2B_PG_DSN: postgres://postgres:postgres@host.docker.internal:5432/b2b_pilot?sslmode=disable
+    command: ["-config", "/etc/sync/sync.json",
+              "-dsn", "postgres://postgres:postgres@host.docker.internal:5432/b2b_pilot?sslmode=disable",
+              "-interval", "5m",
+              "-state-file", "/tmp/sync-last-ok"]
+    depends_on: !override []

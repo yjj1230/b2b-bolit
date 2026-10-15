@@ -1,0 +1,32 @@
+# project/views/real-wecom-evidence-plan.yaml —— real_wecom 现场证据采集计划
+# 目标：把 demo-boundary 的 real_wecom=UNKNOWN 17/17 变成可执行、可签字的采集任务。
+# 每个场景一条 evidence task；全部 UNCOLLECTED 前不得在 demo-boundary 写 real_wecom=yes。
+schema: ECM-REAL-WECOM-PLAN/v1
+generated_at: 2026-08-20T20:00:00+00:00
+generated_by: assistant（第 17 轮证据收敛）
+verdict_rule: 只有带时间戳截图/录屏/curl 输出 + 现场 owner 签字后，才能把对应 demo-boundary 行改为 yes。
+
+scenes:
+  - {scene: XS1,   owner: field-tech,       evidence_type: [screenshot, curl_output], task_ref: "W-T04/E-T06", steps: "真实销售账号打开企微工作台→查订单详情→核对字段/详情跳转", acceptance: "截图显示订单详情与旧系统一致；curl /api/v1/orders/{id} 200"}
+  - {scene: XS2,   owner: field-tech,       evidence_type: [screenshot], task_ref: "E-T06", steps: "虹励企微打开 /assistant→授权→填写下单→提交", acceptance: "下单成功且飞书出现待办；截图含时间"}
+  - {scene: XS3,   owner: field-tech,       evidence_type: [screenshot], task_ref: "W-T05", steps: "真实客户群触发智能下单确认卡→点击确认", acceptance: "确认卡到达本人、点击后只成单一笔"}
+  - {scene: XS4,   owner: field-tech,       evidence_type: [screenshot], task_ref: "W-T04", steps: "销售打开工作台查看待办/驳回建议字段", acceptance: "待办列表可见，字段按角色投影"}
+  - {scene: XS5,   owner: product-wecom,    evidence_type: [screenshot], task_ref: "v0.2", steps: "物流图片生成功能尚未实现；本期记录 demo 与生产差异", acceptance: "差异清单签字，禁止宣称已实现"}
+  - {scene: XSZG1, owner: sales-mgr,        evidence_type: [screenshot], task_ref: "W-T03", steps: "真实主管企微收到审价卡→通过/驳回", acceptance: "通过/驳回各一单走通，回调 200"}
+  - {scene: XSZL1, owner: field-tech,       evidence_type: [screenshot], task_ref: "W-T04", steps: "销售助理打开 /assistant→选归属销售→代下单", acceptance: "归属销售锁定 readonly；订单进入飞书流"}
+  - {scene: XSZL2, owner: field-tech,       evidence_type: [screenshot], task_ref: "W-T04", steps: "客户群打开 H5→自动带出客户与归属销售→下单", acceptance: "群上下文正确、归属销售不可改"}
+  - {scene: SW1,   owner: commerce,         evidence_type: [screenshot], task_ref: "v0.2", steps: "v0.2 商务备货/发货/开票（本期只采集旧飞书基线）", acceptance: "采集旧飞书基线截图，作为 v0.2 对照"}
+  - {scene: SW2,   owner: commerce,         evidence_type: [screenshot, curl_output], task_ref: "E-T06", steps: "商务打开 /ops 全量订单视图", acceptance: "订单列表可打开，与同步数据条数一致"}
+  - {scene: SW3,   owner: commerce,         evidence_type: [screenshot], task_ref: "v0.2", steps: "v0.2 工作台待办（本期记录 demo 现状）", acceptance: "demo 现状截图归档"}
+  - {scene: CW1,   owner: finance,          evidence_type: [screenshot], task_ref: "v0.2", steps: "v0.2 财务上传开票凭证（本期采集旧飞书基线）", acceptance: "旧飞书基线截图归档"}
+  - {scene: CW2,   owner: finance,          evidence_type: [screenshot], task_ref: "v0.2", steps: "v0.2 无回单开票（本期采集旧飞书基线）", acceptance: "旧飞书基线截图归档"}
+  - {scene: CG1,   owner: warehouse,        evidence_type: [screenshot], task_ref: "v0.2", steps: "v0.2 仓管确认接受发货（本期采集旧飞书基线）", acceptance: "旧飞书基线截图归档"}
+  - {scene: CG2,   owner: warehouse,        evidence_type: [screenshot], task_ref: "v0.2", steps: "v0.2 仓管确认已发货（本期采集旧飞书基线）", acceptance: "旧飞书基线截图归档"}
+  - {scene: CG3,   owner: warehouse,        evidence_type: [screenshot], task_ref: "W-T06", steps: "仓库群回单图片→机器人抓取→凭证登记（群升级前手动上传备选）", acceptance: "群未升级时手动上传走通并截图"}
+  - {scene: DSZ1,  owner: chairman,         evidence_type: [screenshot], task_ref: "v0.3", steps: "v0.3 董事长终审（本期采集旧飞书基线）", acceptance: "旧飞书基线截图归档"}
+
+summary:
+  total_scenes: 17
+  v0_1_collectable_now: 9
+  v0_2_v0_3_or_baseline_only: 8
+  status: ALL_UNCOLLECTED

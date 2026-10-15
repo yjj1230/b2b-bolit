@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>03 · 测试设计 · B2B 订单履约验证项目</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+SC:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:#f5f4ed; --paper2:#efeee5; --ink:#1f1d18; --ink2:#6b665b;
+    --ink3:#3a382f; --blue:#1B365D; --rule:#d4d1c5;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif; line-height:1.6;}
+  .wrap{max-width:1100px; margin:0 auto; padding:48px 40px 80px;}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;}
+  .folio{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--rule); padding-bottom:10px;
+    font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink2);}
+  .folio a{color:var(--ink2); border:none;}
+  .folio a:hover{color:var(--blue);}
+  .tag{display:inline-block; padding:3px 10px; font-size:11px; letter-spacing:.16em; background:var(--paper2); color:var(--blue);}
+  .kicker{display:flex; align-items:baseline; gap:12px; margin-top:48px;}
+  h1{font-size:clamp(32px,5vw,50px); line-height:1.12; font-weight:500; margin-top:14px; letter-spacing:-.01em;}
+  .lede{margin-top:18px; font-size:17px; line-height:1.7; color:var(--ink3); max-width:760px;}
+  h2{font-size:23px; font-weight:600; margin:52px 0 14px; color:var(--blue); display:flex; align-items:baseline; gap:12px; border-top:1px solid var(--rule); padding-top:26px;}
+  h2 .no{font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.12em;}
+  h3{font-size:17.5px; font-weight:600; margin:30px 0 10px; color:var(--ink);}
+  h3 .no{color:var(--blue); font-family:'IBM Plex Mono',monospace; font-size:12px; margin-right:8px;}
+  p{margin:10px 0; color:var(--ink3);}
+  ul,ol{margin:10px 0 10px 26px; color:var(--ink3);}
+  li{margin:5px 0;}
+  a{color:var(--blue); text-decoration:none; border-bottom:1px solid var(--rule);}
+  a:hover{border-bottom-color:var(--blue);}
+  blockquote{border-left:2px solid var(--blue); padding:10px 18px; margin:16px 0; background:var(--paper2); font-style:italic;}
+  table{width:100%; border-collapse:collapse; font-size:12.8px;}
+  .table-wrap{overflow-x:auto; margin:16px 0 24px; border:1px solid var(--rule);}
+  .table-wrap table{margin:0;}
+  th{background:var(--paper2); color:var(--blue); text-align:left; font-weight:600; padding:8px 10px; border-bottom:1.5px solid var(--blue); font-size:12px; white-space:nowrap;}
+  td{padding:8px 10px; border-bottom:1px solid var(--rule); vertical-align:top; color:var(--ink3);}
+  tr:nth-child(even) td{background:#faf9f3;}
+  tr:hover td{background:#f0ede0;}
+  .mermaid{background:var(--paper); border:1px solid var(--rule); padding:18px; overflow-x:auto; text-align:center; margin:20px 0;}
+  .mermaid svg{max-width:100%; height:auto;}
+  .mermaid svg.statediagram span,.mermaid svg.statediagram div{color:#1f1d18 !important;}
+  .mermaid svg.statediagram text{fill:#1f1d18 !important;}
+  figcaption{text-align:center; font-size:12px; color:var(--ink2); margin:-10px 0 26px; font-style:italic;}
+  code{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace; font-size:12.5px; background:var(--paper2); padding:1px 4px;}
+  pre{background:var(--paper2); border:1px solid var(--rule); padding:16px 18px; overflow-x:auto; font-size:12.8px; line-height:1.55; margin:14px 0;}
+  pre code{background:none; padding:0;}
+  footer.colophon{margin-top:56px; padding-top:14px; border-top:1px solid var(--rule); display:flex; justify-content:space-between;
+    font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink2); flex-wrap:wrap; gap:8px;}
+  footer.colophon a{color:var(--ink2); border:none;}
+  footer.colophon a:hover{color:var(--blue);}
+  .toc{border:1px solid var(--rule); background:var(--paper2); padding:18px 24px; margin:26px 0;}
+  .toc .tt{font-size:11px; letter-spacing:.2em; color:var(--blue); margin-bottom:8px;}
+  .toc a{display:block; padding:3px 0; color:var(--ink3); border:none;}
+  .toc a:hover{color:var(--blue);}
+  .toc .mono{font-size:12px; color:var(--blue); margin-right:8px;}
+  @media(max-width:720px){.wrap{padding:28px 18px 60px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="folio">
+    <span><a href="index.html">← Docs</a> · B2B Order Fulfillment</span>
+    <span>03 · Testing</span>
+    <span>L0-L3 · 49 Score Cards</span>
+  </header>
+
+  <div class="kicker">
+    <span class="tag">Testing · 测试设计</span>
+    <span class="mono" style="font-size:11px; letter-spacing:.18em; color:var(--ink2);">验证所有设计</span>
+  </div>
+
+  <h1>测试设计<br/><span style="font-style:italic; color:var(--blue);">L 级别分层 × Score Card</span></h1>
+
+  <p class="lede">验证核心图谱（<span class="mono">01-core-graph.html</span>）与架构（<span class="mono">02-architecture.html</span>）中每一个 CQ 与防线。结构范式来源：<span class="mono">pilot_app/docs/03-testing.md</span>（含其复盘修正：L1 真 PG 直连 + spicedb testserver、L2 纯 TestSuite 无服务依赖）。</p>
+
+  <nav class="toc">
+    <div class="tt">CONTENTS · 目录</div>
+    <a href="#s1"><span class="mono">1</span>分层策略（L0-L3）</a>
+    <a href="#s2"><span class="mono">2</span>Score Card（L0×10 · L1×16 · L2×17 · L3×6 = 49 例）</a>
+    <a href="#s3"><span class="mono">3</span>覆盖率策略</a>
+    <a href="#s4"><span class="mono">4</span>CQ → 测试 roundtrip 映射</a>
+    <a href="#s5"><span class="mono">5</span>测试基础设施</a>
+  </nav>
+
+  <h2 id="s1"><span class="no">1 ·</span> 分层策略（L0-L3）</h2>
+  <pre class="mermaid">
+flowchart TB
+    L0["L0 单元&lt;br/&gt;纯 Go，零依赖&lt;br/&gt;domain: FSM/值对象/守恒/幂等/authz 纯函数"] --> L1
+    L1["L1 集成&lt;br/&gt;真 PG + spicedb testserver&lt;br/&gt;约束/行锁/单事务/权限矩阵/caveat"] --> L2
+    L2["L2 端到端&lt;br/&gt;Temporal TestSuite + fakeStore&lt;br/&gt;四流程全链/补偿/Timer/预订单"] --> L3
+    L3["L3 系统验证&lt;br/&gt;并发/对账/审计脚本 + 覆盖率门禁 + roundtrip"]
+  </pre>
+  <div class="table-wrap">
+  <table>
+    <tr><th>层级</th><th>范围</th><th>工具/依赖</th><th>运行频率</th></tr>
+    <tr><td><strong>L0 单元</strong></td><td>FSM 状态迁移穷举（4 业务流程 + 预订单）、数量/金额值对象、守恒断言、幂等键规范、授权决策纯函数、回单分流判定</td><td>纯 <span class="mono">go test</span>（表驱动）</td><td>每次提交</td></tr>
+    <tr><td><strong>L1 集成</strong></td><td>repo×PostgreSQL（CHECK 约束、行锁并发、单事务守恒、迁移、待办检索）、authz×SpiceDB（权限矩阵、ReBAC 层级、caveat 时效）、BFF 字段投影</td><td>真 PG（<span class="mono">PILOT_TEST_PG_DSN</span>）+ <span class="mono">spicedb serve-testing</span>；<span class="mono">//go:build integration</span></td><td>每次提交</td></tr>
+    <tr><td><strong>L2 端到端</strong></td><td>四分支全链路 happy path / 退回拒绝 / 补偿 / Timer 催办 / 幂等重放 / 预订单确认流 / 授权拒绝</td><td>Temporal TestSuite + 内存 fakeStore/fakeStarter + httptest（纯库）</td><td>每次合并</td></tr>
+    <tr><td><strong>L3 系统验证</strong></td><td>并发守恒、全库对账、覆盖率门禁、图谱 roundtrip、审计链回放、种子数据可重复</td><td><span class="mono">scripts/</span>（reconcile / audit / concurrency / seeddata）+ <span class="mono">make cover</span></td><td>每个里程碑</td></tr>
+  </table>
+  </div>
+  <blockquote>沿用 pilot_app 复盘的诚实原则：<strong>Score Card 先行，覆盖率只是反向校验</strong>——每个测试从场景倒推而来，覆盖率是结果不是目标。</blockquote>
+
+  <h2 id="s2"><span class="no">2 ·</span> Score Card（用例清单）</h2>
+  <blockquote>每行 9 列：<strong>ID | 场景 | 业务流程环节 | 系统 | 组件 | 代码位置 | 上下游依赖 | 风险评估 | 倒推影响面</strong>（影响面 = 该测试失败时倒推哪个设计点被破坏）。</blockquote>
+
+  <h3><span class="no">L0 ·</span> 单元（10 例）</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>ID</th><th>场景</th><th>环节</th><th>系统</th><th>组件</th><th>代码位置</th><th>依赖</th><th>风险</th><th>倒推影响面</th></tr>
+    <tr><td class="mono">L0-01</td><td>ORD FSM 全迁移穷举（合法+非法，含 A/B/C/D/E 修改分类）</td><td>ORD·全部</td><td>领域层</td><td>FSM 表驱动</td><td class="mono">domain/ord.go</td><td>无</td><td>高：非法迁移=错单错批</td><td>图谱 §2.2 状态图；CQ-04</td></tr>
+    <tr><td class="mono">L0-02</td><td>STK FSM 穷举（款到/非款到/转仓/退回）</td><td>STK·全部</td><td>领域层</td><td>FSM</td><td class="mono">domain/stk.go</td><td>无</td><td>高：备货审批错序=履约失真</td><td>图谱 §2.3；CQ-05/06</td></tr>
+    <tr><td class="mono">L0-03</td><td>SHP FSM 穷举（分批/退回/转仓/完成条件）</td><td>SHP·全部</td><td>领域层</td><td>FSM</td><td class="mono">domain/shp.go</td><td>无</td><td>高：发货状态失真（订单提交≠已履约）</td><td>图谱 §2.4；CQ-07</td></tr>
+    <tr><td class="mono">L0-04</td><td>INV FSM 穷举（四分流/开票状态/例外）</td><td>INV·全部</td><td>领域层</td><td>FSM</td><td class="mono">domain/inv.go</td><td>无</td><td>高：开票状态失真=业财不符</td><td>图谱 §2.5；CQ-09/10</td></tr>
+    <tr><td class="mono">L0-05</td><td>PreOrder FSM 穷举（确认/修改/忽略/升级）</td><td>企微·预订单</td><td>领域层</td><td>FSM</td><td class="mono">domain/preorder.go</td><td>无</td><td>高：AI 路径越界=误建正式订单</td><td>图谱 §2.6；CQ-11</td></tr>
+    <tr><td class="mono">L0-06</td><td>数量/金额值对象（零/负/溢出拒绝）</td><td>全部</td><td>领域层</td><td>值对象</td><td class="mono">domain/qty.go</td><td>无</td><td>高：数量错误全系统传导</td><td><span class="mono">order_items.quantity</span> 语义</td></tr>
+    <tr><td class="mono">L0-07</td><td>守恒断言纯函数（备货≤订单、发货≤备货、开票≤发货）</td><td>全部</td><td>领域层</td><td>守恒函数</td><td class="mono">domain/consistency.go</td><td>无</td><td>高：守恒失效=超发/超开票</td><td>图谱 §1.2 constraints；CQ-06/07/09</td></tr>
+    <tr><td class="mono">L0-08</td><td>幂等键规范（构造/解析/校验，预订单/订单/发货/开票）</td><td>全部</td><td>领域层</td><td>幂等值对象</td><td class="mono">domain/idem.go</td><td>无</td><td>高：幂等失效=重放重复生效</td><td>架构 §5 三层幂等；CQ-11</td></tr>
+    <tr><td class="mono">L0-09</td><td>授权决策纯函数（角色×动作矩阵，StaticChecker 对照表）</td><td>全部</td><td>授权</td><td>纯函数</td><td class="mono">authz/checker.go</td><td>无</td><td>中：对照表漂移=越权/误拒</td><td>CQ-01；schema.zed</td></tr>
+    <tr><td class="mono">L0-10</td><td>回单分流判定（款到/有回单/超 5 天/提前申请）</td><td>INV·分流</td><td>领域层</td><td>纯函数</td><td class="mono">domain/receipt.go</td><td>无</td><td>中：分流错=回单卡开票或绕过例外</td><td>图谱 §2.5；CQ-10</td></tr>
+  </table>
+  </div>
+
+  <h3><span class="no">L1 ·</span> 集成（16 例）</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>ID</th><th>场景</th><th>环节</th><th>系统</th><th>组件</th><th>代码位置</th><th>依赖</th><th>风险</th><th>倒推影响面</th></tr>
+    <tr><td class="mono">L1-01</td><td>CHECK 约束：负库存/负数量/超量发货被拒</td><td>全部</td><td>PostgreSQL</td><td>repo</td><td class="mono">repo/inventory.go</td><td>真 PG</td><td>高：约束失效=负库存/超发</td><td>架构 §4 防线 1；CQ-06/07/08</td></tr>
+    <tr><td class="mono">L1-02</td><td>幂等唯一：msgid/订单/发货/开票键冲突路径（含<strong>跨租户同 idempotency_key 各自生效</strong>）</td><td>全部</td><td>PostgreSQL</td><td>repo</td><td class="mono">repo/order.go</td><td>真 PG</td><td>高：唯一失效=重复生效</td><td>架构 §4 防线 3；CQ-11/14</td></tr>
+    <tr><td class="mono">L1-03</td><td>行锁并发：并发发货扣库存不超卖</td><td>SHP·实发</td><td>PostgreSQL</td><td>repo</td><td class="mono">repo/shipment.go</td><td>真 PG</td><td>高：竞态=超卖</td><td>架构 §4 防线 2；CQ-08/14</td></tr>
+    <tr><td class="mono">L1-04</td><td>单事务：发货+库存扣减原子提交/回滚</td><td>SHP·实发</td><td>PostgreSQL</td><td>repo</td><td class="mono">repo/shipment.go</td><td>真 PG</td><td>高：半生效=发货了库存没扣</td><td>架构 §4 防线 4；CQ-08</td></tr>
+    <tr><td class="mono">L1-05</td><td>单事务：开票数量+金额双守恒（按 order_item 聚合有效 shipment_items，任一维度超限均拒绝）</td><td>INV·开票</td><td>PostgreSQL</td><td>repo</td><td class="mono">repo/invoice.go</td><td>真 PG</td><td>高：开票守恒失效=业财不符</td><td>架构 §4 防线 4/5；CQ-09</td></tr>
+    <tr><td class="mono">L1-06</td><td>迁移校验：001-003 幂等可重跑</td><td>全部</td><td>PostgreSQL</td><td>migrations</td><td class="mono">migrations/*.sql</td><td>真 PG</td><td>中：schema 漂移=迁移失败</td><td>CQ-12 事件链表结构</td></tr>
+    <tr><td class="mono">L1-07</td><td>权限矩阵：角色×资源×动作全组合（rebac 场景 A–H 八类：account_owner 开备货单 / prestock.owner 改额度·发货 / warehouse_operator 确认·驳回 / customer_contact 物流视图·上传凭证 / requester 作废 / uploader 凭证版本 / 跨租户拒绝 / 跨仓拒绝）</td><td>全部</td><td>SpiceDB</td><td>authz</td><td class="mono">authz/integration_test.go</td><td>spicedb testserver</td><td>高：越权=数据泄露/误拒</td><td>CQ-01/02/15；schema.zed</td></tr>
+    <tr><td class="mono">L1-08</td><td>ReBAC 层级：客户 account_owner 传播到订单/备货单（新对象自动可见）；customer_contact → shipment 物流视图传播</td><td>全部</td><td>SpiceDB</td><td>authz</td><td class="mono">authz/integration_test.go</td><td>spicedb testserver</td><td>高：层级失效=ReBAC 核心不成立</td><td>CQ-02；schema.zed</td></tr>
+    <tr><td class="mono">L1-15</td><td>Outbox 投影：业务事务写 outbox_event → 投影器同步 SpiceDB 关系（幂等重放；场景 G 代办 TTL 删除 / 场景 H 联系人 Delete+Write）</td><td>授权</td><td>PostgreSQL+SpiceDB</td><td>repo+authz</td><td class="mono">authz/projector.go</span> + <span class="mono">repo/outbox.go</span></td><td>真 PG + spicedb testserver</td><td>高：投影失效=业务库关系与授权判定漂移</td><td>CQ-02/13；02 §2.3</td></tr>
+    <tr><td class="mono">L1-16</td><td>凭证链只追加：版本递增/并发唯一/回放全版本/篡改与跨租户拒绝</td><td>INV·凭证</td><td>PostgreSQL</td><td>repo</td><td class="mono">repo/evidence.go</td><td>真 PG</td><td>高：凭证可覆盖=回单状态失真</td><td>CQ-15；图谱 §1.2 UPLOADS</td></tr>
+    <tr><td class="mono">L1-09</td><td>caveat 时效：代办授权到期即失效、续期生效</td><td>授权</td><td>SpiceDB</td><td>authz</td><td class="mono">authz/integration_test.go</td><td>spicedb testserver</td><td>高：时效失效=离职/过期代办仍可操作</td><td>CQ-13</td></tr>
+    <tr><td class="mono">L1-10</td><td>仓管只读投影：本仓订单可访问、跨仓拒绝，响应剥离价格/金额（BFF）</td><td>SHP·视图</td><td>BFF</td><td>api</td><td class="mono">api/projection.go</td><td>真 PG + SpiceDB</td><td>高：仓管不可用或见价=业务红线破坏</td><td>CQ-02/03；图谱 §1.4</td></tr>
+    <tr><td class="mono">L1-11</td><td>待办检索：approval_tasks 按 assignee/kind/state</td><td>审批</td><td>PostgreSQL</td><td>repo</td><td class="mono">repo/approval.go</td><td>真 PG</td><td>中：待办失真=审批卡死</td><td>CQ-05；图谱 §2.2</td></tr>
+    <tr><td class="mono">L1-12</td><td>分域事件链：ORD/STK/SHP/INV/PreOrder 状态迁移与对应事件同事务 append-only</td><td>全部</td><td>PostgreSQL</td><td>repo</td><td class="mono">repo/events.go</td><td>真 PG</td><td>高：事件断链=审计不可信</td><td>架构 §4 防线 6；CQ-12</td></tr>
+    <tr><td class="mono">L1-13</td><td>库存聚合对账：∑发货 vs 订单量（SQL 聚合）</td><td>全部</td><td>PostgreSQL</td><td>repo</td><td class="mono">repo/consistency.go</td><td>真 PG</td><td>中：聚合错=守恒假绿</td><td>CQ-06/07；架构 §4 防线 5</td></tr>
+    <tr><td class="mono">L1-14</td><td>企微存档游标 checkpoint 原子性（seq 持久化）</td><td>企微·S2</td><td>PostgreSQL</td><td>repo</td><td class="mono">repo/cursor.go</td><td>真 PG</td><td>高：游标丢失=5 天窗口漏消息</td><td>CQ-11；07 §2</td></tr>
+  </table>
+  </div>
+
+  <h3><span class="no">L2 ·</span> 端到端（15 例）</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>ID</th><th>场景</th><th>环节</th><th>系统</th><th>组件</th><th>代码位置</th><th>依赖</th><th>风险</th><th>倒推影响面</th></tr>
+    <tr><td class="mono">L2-01</td><td>快速下单 happy path：ORD→STK→SHP→INV→CLOSED 全链</td><td>全部</td><td>全系统</td><td>workflows+api</td><td class="mono">workflows/order.go</td><td>TestSuite</td><td>高：主链路断裂=系统不可用</td><td>图谱 §2.1；CQ-04</td></tr>
+    <tr><td class="mono">L2-02</td><td>A/B/C/D/E 修改分类表驱动：回审价/直达发货/重生成合同/重生成后直达/静默修改，均生成 revision 与 resubmit 链</td><td>ORD·修改</td><td>全系统</td><td>workflows+api</td><td class="mono">workflows/order.go</td><td>TestSuite</td><td>高：分类错误=漏审或履约错序</td><td>图谱 §2.2；CQ-04/05/12</td></tr>
+    <tr><td class="mono">L2-03</td><td>主管拒绝→订单 REJECTED（资金无副作用）</td><td>ORD·审价</td><td>全系统</td><td>workflows</td><td class="mono">workflows/order.go</td><td>TestSuite</td><td>中：拒绝后仍可推进=状态失真</td><td>图谱 §2.2；CQ-04</td></tr>
+    <tr><td class="mono">L2-04</td><td>C/D 级董事长审批链（通过/拒绝）</td><td>ORD·董事长</td><td>全系统</td><td>workflows+api</td><td class="mono">workflows/order.go</td><td>TestSuite</td><td>高：C/D 漏审=越权成交</td><td>CQ-05；图谱 §1.2 grade</td></tr>
+    <tr><td class="mono">L2-05</td><td>合同生成校验：要素不全→补全重校验</td><td>ORD·合同</td><td>全系统</td><td>workflows</td><td class="mono">workflows/order.go</td><td>TestSuite</td><td>中：合同失真=履约无据</td><td>图谱 §2.2</td></tr>
+    <tr><td class="mono">L2-06</td><td>款到发货：财务未确认不能发发货命令</td><td>STK·财务</td><td>全系统</td><td>workflows</td><td class="mono">workflows/stk.go</td><td>TestSuite</td><td>高：未到账发货=资金风险</td><td>图谱 §2.3；CQ-05</td></tr>
+    <tr><td class="mono">L2-07</td><td>非款到发货：跳过财务确认直达发货分配</td><td>STK·分流</td><td>全系统</td><td>workflows</td><td class="mono">workflows/stk.go</td><td>TestSuite</td><td>中：分流错=流程卡死/漏检</td><td>图谱 §2.3</td></tr>
+    <tr><td class="mono">L2-08</td><td>部分发货→按计划继续→累计满额→全部发货</td><td>SHP·分批</td><td>全系统</td><td>workflows</td><td class="mono">workflows/shp.go</td><td>TestSuite</td><td>高：分批错=订单永远不完成</td><td>图谱 §2.4；CQ-07</td></tr>
+    <tr><td class="mono">L2-09</td><td>仓管退回/转仓（TransferWorkflow 子流程）</td><td>SHP·退回</td><td>全系统</td><td>workflows</td><td class="mono">workflows/transfer.go</td><td>TestSuite</td><td>中：转仓断=货物悬挂</td><td>图谱 §2.4；CQ-06</td></tr>
+    <tr><td class="mono">L2-10</td><td>合同完成可先申请；实际开票时数量/金额任一超过有效发货可开余额→拒绝并补偿</td><td>INV·开票</td><td>全系统</td><td>workflows+api</td><td class="mono">workflows/inv.go</td><td>TestSuite</td><td>高：入口或双维守恒错误=业财不符</td><td>CQ-09；架构 §4 防线 5/ADR</td></tr>
+    <tr><td class="mono">L2-11</td><td>无回单超 5 天 Timer → 例外开票子流程</td><td>INV·例外</td><td>全系统</td><td>workflows</td><td class="mono">workflows/exception.go</td><td>TestSuite</td><td>高：Timer 失效=回单卡开票</td><td>图谱 §2.5；CQ-10</td></tr>
+    <tr><td class="mono">L2-12</td><td>预订单全链：消息→预订单→确认→正式订单（幂等重放同键）</td><td>企微·S2</td><td>全系统</td><td>workflows+api+wecom</td><td class="mono">workflows/preorder.go</td><td>TestSuite</td><td>高：AI 越界/重放重复=误建订单</td><td>图谱 §2.6；CQ-11</td></tr>
+    <tr><td class="mono">L2-13</td><td>预订单 24h 未确认 Timer 升级（ESCALATED）</td><td>企微·S2</td><td>全系统</td><td>workflows</td><td class="mono">workflows/preorder.go</td><td>TestSuite</td><td>中：升级失效=消息沉没</td><td>CQ-11；07 §3.4</td></tr>
+    <tr><td class="mono">L2-14</td><td>授权拒绝：无权限提交/审批 403（独立验证者拦截）</td><td>全部</td><td>全系统</td><td>workflows+api</td><td class="mono">workflows/auth.go</td><td>TestSuite</td><td>高：闸门失效=越权操作</td><td>CQ-01；架构 §2.3</td></tr>
+    <tr><td class="mono">L2-15</td><td>凭证链经 HTTP：上传追加版本/回放/权限拒绝（CONTACT 无 append_evidence）</td><td>凭证</td><td>HTTP</td><td>api</td><td class="mono">api/evidence_test.go</td><td>fake+静态判定</td><td>高：越权上传=凭证链不可信</td><td>CQ-15</td></tr>
+    <tr><td class="mono">W5</td><td>企微回调 → HTTP API 动作转接（EventKey 路由/verdict 翻译/幂等回执；07 §4.2）</td><td>企微·S3/S2</td><td>HTTP</td><td>wecom</td><td class="mono">wecom/callback.go + l2_e2e/wecom_callback_e2e_test.go</td><td>单测 + 真 HTTP 全链</td><td>高：回调动作错=企微接入不可用</td><td>07 §4.2</td></tr>
+    <tr><td class="mono">W6</td><td>企微 S1 侧边栏服务端链路（jsapi 双签名/OAuth exchange/context_token 校验；07 §6.1）</td><td>企微·S1</td><td>HTTP</td><td>wecom+api</td><td class="mono">wecom/jsapi.go + l2_e2e/wecom_s1_e2e_test.go</td><td>单测 + E2E</td><td>中：S1 H5 身份/上下文</td><td>07 §6.1</td></tr>
+  </table>
+  </div>
+
+  <h3><span class="no">L3 ·</span> 系统验证（6 例）</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>ID</th><th>场景</th><th>环节</th><th>系统</th><th>组件</th><th>代码位置</th><th>依赖</th><th>风险</th><th>倒推影响面</th></tr>
+    <tr><td class="mono">L3-01</td><td>并发守恒：并发发货扣减/并发开票不超量（脚本压测）</td><td>全部</td><td>PostgreSQL</td><td>scripts</td><td class="mono">scripts/concurrency</td><td>真 PG</td><td>高：单点正确≠饱和正确</td><td>CQ-08/14；防线 2</td></tr>
+    <tr><td class="mono">L3-02</td><td>全库对账：四守恒聚合（∑发货≤订单、∑开票≤∑发货、库存≥0、备货≤订单）</td><td>全部</td><td>PostgreSQL</td><td>scripts</td><td class="mono">scripts/reconcile</td><td>真 PG</td><td>高：样本对账≠全库守恒</td><td>CQ-06/07/08/09；防线 5</td></tr>
+    <tr><td class="mono">L3-03</td><td>覆盖率门禁：domain 100% 硬门禁 + 全仓 ≥85% 实测门禁（目标 ≥98%，差距见 §3）</td><td>全部</td><td>全系统</td><td>Makefile</td><td class="mono">Makefile cover</td><td>全栈</td><td>中：覆盖欠账=隐性缺陷</td><td>全图谱 CQ</td></tr>
+    <tr><td class="mono">L3-04</td><td>图谱 roundtrip：15 CQ 由代码图回答（产出 <span class="mono">docs/05-roundtrip-report.html</span>）</td><td>全部</td><td>代码图</td><td>code-review-graph CLI</td><td class="mono">code-review-graph</td><td>全栈</td><td>中：设计-代码漂移不可发现</td><td>图谱 §2.7</td></tr>
+    <tr><td class="mono">L3-05</td><td>审计链回放：seeddata 事件链断链/合法迁移/终态分录检查</td><td>全部</td><td>PostgreSQL</td><td>scripts</td><td class="mono">scripts/audit</td><td>真 PG</td><td>中：事件链断链未捕获</td><td>CQ-12</td></tr>
+    <tr><td class="mono">L3-06</td><td>种子数据可重复执行（runID 注入，重复跑幂等）</td><td>全部</td><td>PostgreSQL</td><td>scripts</td><td class="mono">scripts/seeddata</td><td>真 PG</td><td>中：脚本不可重跑=验证不可复现</td><td>CQ-12（pilot_app 复盘 R4）</td></tr>
+  </table>
+  </div>
+
+  <p><strong>合计 49 例 = L0×10 + L1×16 + L2×17 + L3×6</strong>，每例绑定至少一个 CQ/防线（见 §4 映射）。</p>
+
+  <h2 id="s3"><span class="no">3 ·</span> 覆盖率策略</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>目标</th><th>值</th><th>实测（M8，docs/06 §2）</th><th>说明</th></tr>
+    <tr><td>domain（FSM/值对象/守恒/幂等）</td><td><strong>100%</strong></td><td><strong>100.0%</strong></td><td>图谱正确性的唯一事实源（硬门禁）</td></tr>
+    <tr><td class="mono">config</td><td>—</td><td><strong>100.0%</strong></td><td></td></tr>
+    <tr><td>authz / api / wecom</td><td>≥98%</td><td>95.7% / 91.5% / 94.5%</td><td>余量为防御性错误分支（含网络/限流）</td></tr>
+    <tr><td>repo / workflows</td><td>≥98%</td><td>80.9% / 86.3%</td><td>余量为 pgx scan error 与每句 SQL 失败返回（触发器级故障注入已覆盖主事务路径）</td></tr>
+    <tr><td class="mono">integration</td><td>≥98%</td><td><strong>100.0%</strong></td><td>含 DemoPolicy 虚拟时长契约（l0_unit 黑盒 + 包内白盒）</td></tr>
+    <tr><td>全仓合计</td><td><strong>≥95%（用户）/ ≥98%（文档）</strong></td><td><strong>87.8%</strong>（门禁 85% + domain 100% 硬门禁）</td><td>差距分析与诚实声明见 docs/06 §2</td></tr>
+  </table>
+  </div>
+  <blockquote>门禁实现沿用 pilot_app：<span class="mono">go test -count=1 -tags integration -coverprofile=coverage.out ./internal/...</span> + awk <strong>数值比较</strong>（吸取复盘 R3：字符串比较会误判）；<span class="mono">wecom</span> 包因企微 SDK 回调签名/加解密为官方库，覆盖率目标略低于 domain，用集成测试 + 脚本兜底。</blockquote>
+  <p><strong>诚实声明</strong>（沿用 pilot_app 复盘）：错误注入（删表/触发器/类型变更）≠ 真实故障形态（网络抖动/磁盘满/企微限流 45009）；覆盖率 100% ≠ 故障注入等价性 100%。</p>
+
+  <h2 id="s4"><span class="no">4 ·</span> CQ → 测试 roundtrip 映射</h2>
+  <blockquote>每个能力问题必须有测试背书；答不出 CQ 的测试、无 CQ 背书的测试，都要被质询。</blockquote>
+  <div class="table-wrap">
+  <table>
+    <tr><th>CQ</th><th>能力问题</th><th>测试背书</th></tr>
+    <tr><td class="mono">CQ-01</td><td>订单操作权限</td><td>L0-09、L1-07、L2-14</td></tr>
+    <tr><td class="mono">CQ-02</td><td>数据可见范围</td><td>L1-07、L1-08、L1-10</td></tr>
+    <tr><td class="mono">CQ-03</td><td>仓管字段投影</td><td>L1-10</td></tr>
+    <tr><td class="mono">CQ-04</td><td>状态与合法迁移</td><td>L0-01/02/03/04、L2-01/02/03/05</td></tr>
+    <tr><td class="mono">CQ-05</td><td>审批链状态</td><td>L0-02、L1-11、L2-02/04/06/07</td></tr>
+    <tr><td class="mono">CQ-06</td><td>备货守恒</td><td>L0-07、L1-01/13、L2-09</td></tr>
+    <tr><td class="mono">CQ-07</td><td>发货守恒/完成条件</td><td>L0-03/07、L1-01/13、L2-08</td></tr>
+    <tr><td class="mono">CQ-08</td><td>库存联动/非负</td><td>L0-06/07、L1-01/03/04、L3-01/02</td></tr>
+    <tr><td class="mono">CQ-09</td><td>开票守恒</td><td>L0-04/07、L1-05、L2-10</td></tr>
+    <tr><td class="mono">CQ-10</td><td>回单状态/四分流</td><td>L0-04/10、L2-11</td></tr>
+    <tr><td class="mono">CQ-11</td><td>预订单幂等</td><td>L0-05/08、L1-02/14、L2-12/13</td></tr>
+    <tr><td class="mono">CQ-12</td><td>事件链回放</td><td>L1-06/12、L3-05/06</td></tr>
+    <tr><td class="mono">CQ-13</td><td>代办有效期</td><td>L1-09</td></tr>
+    <tr><td class="mono">CQ-14</td><td>并发风险面</td><td>L1-02/03、L3-01</td></tr>
+    <tr><td class="mono">CQ-15</td><td>凭证链只追加/回放/上传权限</td><td>L1-16、L2-15</td></tr>
+  </table>
+  </div>
+
+  <h2 id="s5"><span class="no">5 ·</span> 测试基础设施</h2>
+  <ul>
+    <li><strong>L1 前置</strong>：<span class="mono">make up</span> 起测试 PG（端口 55432）+ 迁移；<span class="mono">spicedb serve-testing</span> 需二进制在 PATH（兼容新旧命令名，pilot_app 复盘 R2）。</li>
+    <li><strong>L2 纯库</strong>：Temporal TestSuite + fakeStore（业务故障钩子：守恒失败/库存不足/开票失败）+ fakeStarter（模拟 <span class="mono">ErrWorkflowAlreadyStarted</span> 竞态）。</li>
+    <li><strong>L3 脚本</strong>：<span class="mono">concurrency</span>（并发守恒断言四连）、<span class="mono">reconcile</span>（四守恒全库聚合）、<span class="mono">audit</span>（断链/合法迁移/终态分录）、<span class="mono">seeddata</span>（确定性 UUID + runID）。</li>
+    <li><strong>Makefile 目标</strong>：<span class="mono">test-l0</span> / <span class="mono">test-l1</span>（-tags integration）/ <span class="mono">test-l2</span> / <span class="mono">test-l3</span> / <span class="mono">cover</span> / <span class="mono">l3-seed</span> / <span class="mono">up</span> / <span class="mono">down</span>。</li>
+    <li><strong>tests/ 黑盒套件</strong>（<span class="mono">tests/README.md</span>）：同 L 分层的 HTTP API 视角套件——<span class="mono">tests/l0_unit</span>（导出 API 契约：FSM/守恒/幂等/回单分流/接入层默认值）、<span class="mono">tests/l1_integration</span>（HTTP × 真 PG：幂等/跨租户/事件链/凭证只追加）、<span class="mono">tests/l2_e2e</span>（HTTP 全业务流：款到/非款到/董事长 C-D/部分发货/修改 A-E/拒绝/预订单/凭证/投影；<span class="mono">api.LocalRunner</span> 进程内执行真实工作流）、<span class="mono">tests/l3_system</span>（HTTP 全链 + seeddata/reconcile/audit/concurrency 脚本驱动）。运行：<span class="mono">make test-tests-l0..l3</span> / <span class="mono">make test-tests</span>。与 internal/ 白盒测试互补（白盒在包内保留：覆盖率门禁载体与未导出符号访问）。</li>
+    <li><strong>错误注入</strong>：repo 层（删表/触发器/唯一冲突/关连接池）、workflows 层（fakeStore 故障钩子）、api 层（13 个故障钩子 + 竞态模拟）——支撑覆盖率门禁并证明错误分支行为正确。</li>
+  </ul>
+
+  <footer class="colophon">
+    <span><a href="index.html">← Docs Index</a></span>
+    <span>03 · Testing · B2B Order Fulfillment</span>
+  </footer>
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad:true, theme:'base',
+    themeVariables:{
+      fontFamily:"'Noto Serif SC','Source Serif Pro',serif",
+      primaryColor:'#efeee5', primaryBorderColor:'#1B365D', primaryTextColor:'#1f1d18',
+      lineColor:'#1B365D', secondaryColor:'#f5f4ed', tertiaryColor:'#f5f4ed',
+      edgeLabelBackground:'#f5f4ed', clusterBkg:'#f5f4ed', clusterBorder:'#d4d1c5',
+      stateBkg:'#efeee5', stateBorder:'#1B365D', stateLabel:'#1f1d18',
+      stateLabelColor:'#1f1d18', labelTextColor:'#1f1d18', transitionLabelColor:'#1f1d18',
+      actorBkg:'#efeee5', actorBorder:'#1B365D', actorTextColor:'#1f1d18', actorLineColor:'#1B365D',
+      noteBkg:'#efeee5', noteBorder:'#d4d1c5'
+    },
+    flowchart:{curve:'basis'}, er:{useMaxWidth:true}
+  });
+</script>
+</body>
+</html>

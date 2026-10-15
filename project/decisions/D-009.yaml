@@ -1,0 +1,28 @@
+# D-009 影子系统运行原则补充裁决（用户直接裁决，2026-08-20）
+decision_id: D-009
+choice: >
+  在 D-008「双轨发布」基础上补充两条运行原则：
+  Q1=无托底原则：所有上线的系统（包括影子轨 S 及其全部组件）一律视为必须可用，
+      任何不可用都是故障，按生产故障处理；不设置「影子可降级 / 可不稳定」的托底口径。
+  Q2=全节点覆盖 + 差异映射可接受：影子系统要拿下当前线上飞书三方系统全部数据流程节点；
+      飞书与新系统的状态/事件语义差异必然存在，只要提前完成映射并把未映射/未对齐
+      项标记出来（MAPPING / FSM_GAP / LEGACY_ANOMALY / DATA_GAP 分歧表），
+      差异本身可以接受——阻塞项是「未映射、未标记」，不是「存在差异」。
+rationale: >
+  用户明确：不做系统托底，影子轨上线即生产组件，可用性进入发布门禁与告警口径；
+  全流程节点覆盖是影子轨存在的目的，追求的不是「零差异」而是「差异全部可见、
+  可分类、可裁决」——这直接决定 SH-02/T1.3 映射表、SH-03 全量重放口径、
+  影子审计的状态对齐与分歧清单的验收语义。
+premises:
+  - docs/v0.1/12-shadow-full-flow.html（六条铁律与 A-01..A-06）
+  - project/decisions/D-008.yaml（双轨发布）
+  - project/decisions/D-012.yaml（新单实时增量模式）
+  - project/decisions/D-013.yaml（v0.2/v0.3 最终口径）
+  - 本工作区已实现 shadow-ingest/feed/audit、shadowguard、影子模式工作流并本地全栈预演
+objections: []
+decider: project-owner（用户直接裁决）
+effective_interval: {from: "2026-08-20T00:00:00+00:00", to: null}
+supersedes: []
+review_condition: >
+  R1 影子重放前复核：① 影子栈可用性指标与告警已接入生产口径；② 全部现状数据节点
+  均已映射或标记，UNMAPPED/FSM_GAP 等差异清单在审计报告中可见。

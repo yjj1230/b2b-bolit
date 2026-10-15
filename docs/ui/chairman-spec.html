@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>董事长 · 角色规约页｜长安仁恒</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+SC:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="wecom-tokens.css" />
+<link rel="stylesheet" href="wecom-pc-frame.css" />
+<style>
+  :root{ --paper:#f5f4ed; --paper2:#efeee5; --ink:#1f1d18; --ink2:#6b665b; --ink3:#3a382f; --blue:#1B365D; --rule:#d4d1c5; }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif; line-height:1.6;}
+  .wrap{max-width:960px; margin:0 auto; padding:48px 40px 80px;}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;}
+  .folio{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--rule); padding-bottom:10px; font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink2);}
+  .folio a{color:var(--ink2); border:none;} .folio a:hover{color:var(--blue);}
+  .tag{display:inline-block; padding:3px 10px; font-size:11px; letter-spacing:.16em; background:var(--paper2); color:var(--blue);}
+  .kicker{display:flex; align-items:baseline; gap:12px; margin-top:48px;}
+  h1{font-size:clamp(32px,5vw,50px); line-height:1.12; font-weight:500; margin-top:14px; letter-spacing:-.01em;}
+  .lede{margin-top:18px; font-size:17px; line-height:1.7; color:var(--ink3); max-width:720px;}
+  h2{font-size:23px; font-weight:600; margin:52px 0 14px; color:var(--blue); display:flex; align-items:baseline; gap:12px; border-top:1px solid var(--rule); padding-top:26px;}
+  h2 .no{font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.12em;}
+  h3{font-size:17.5px; font-weight:600; margin:30px 0 10px; color:var(--ink);} h3 .no{color:var(--blue); font-family:'IBM Plex Mono',monospace; font-size:12px; margin-right:8px;}
+  h4{font-size:15.5px; font-weight:600; margin:24px 0 8px; color:var(--ink);}
+  p{margin:10px 0; color:var(--ink3);}
+  a{color:var(--blue); text-decoration:none; border-bottom:1px solid var(--rule);} a:hover{border-bottom-color:var(--blue);}
+  .mermaid{background:var(--paper); border:1px solid var(--rule); padding:18px; overflow-x:auto; text-align:center; margin:20px 0;}
+  .mermaid svg{max-width:100%; height:auto;}
+  figcaption{text-align:center; font-size:12px; color:var(--ink2); margin:-10px 0 26px; font-style:italic;}
+  code{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace; font-size:13px; background:var(--paper2); padding:1px 5px;}
+  footer.colophon{margin-top:56px; padding-top:14px; border-top:1px solid var(--rule); display:flex; justify-content:space-between; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink2); flex-wrap:wrap; gap:8px;}
+  footer.colophon a{color:var(--ink2); border:none;} footer.colophon a:hover{color:var(--blue);}
+  .toc{border:1px solid var(--rule); background:var(--paper2); padding:18px 24px; margin:26px 0;}
+  .toc .tt{font-size:11px; letter-spacing:.2em; color:var(--blue); margin-bottom:8px;}
+  .toc a{display:block; padding:3px 0; color:var(--ink3); border:none;} .toc a:hover{color:var(--blue);}
+  .toc .mono{font-size:12px; color:var(--blue); margin-right:8px;}
+  .ui-step{margin:18px 0 34px;}
+  .ui-step .desc{flex:1 1 300px; min-width:280px;}
+  .ui-step .desc .stepno{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.14em; color:var(--blue);}
+  .ui-step .desc h4{font-size:15px; margin:4px 0 6px;}
+  .ui-step .desc p{font-size:13.5px; margin:6px 0;}
+  .ui-step .desc .hint{font-size:12px; color:var(--ink2); background:var(--paper2); border-left:2px solid var(--rule); padding:6px 10px; margin-top:8px;}
+  .ui-shot{margin-top:12px; display:flex; justify-content:center; flex-wrap:wrap; gap:22px; align-items:flex-start;}
+  .shot-label{flex-basis:100%; text-align:center; font-size:11px; color:var(--ink2); margin-bottom:-14px; letter-spacing:.12em;}
+  @media(max-width:720px){.wrap{padding:28px 18px 60px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="folio">
+    <span><a href="index.html">← Role Specs</a></span>
+    <span>CHAIRMAN · Role Spec</span>
+    <span>董事长 · 2 Block</span>
+  </header>
+
+  <div class="kicker">
+    <span class="tag">Role Spec · 董事长</span>
+    <span class="mono" style="font-size:11px; letter-spacing:.18em; color:var(--ink2);">C/D 大单终审 · 全字段决策</span>
+  </div>
+
+  <h1>董事长<span style="font-style:italic; color:var(--blue);">· 角色规约页</span></h1>
+
+  <p class="lede">董事长 = 租户全量（<span class="mono">tenant->admin</span>），仅 <strong>C/D 大单</strong>（客户等级）进入其终审（具备 <span class="mono">order.approve</span>）。<strong>UI 操作图采用产品稿设计语言</strong>，Tab 裁剪为「待办 / 订单」。本页 2 个 Block。</p>
+
+  <nav class="toc">
+    <div class="tt">CONTENTS · 2 BLOCKS</div>
+    <a href="#b1"><span class="mono">B1</span>C/D 大单终审（待办 Tab）</a>
+    <a href="#b2"><span class="mono">B2</span>决策视图查全量（订单 Tab）</a>
+  </nav>
+
+  <!-- ============ BLOCK 1 ============ -->
+  <h2 id="b1"><span class="no">B1 ·</span> C/D 大单终审（待办 Tab）</h2>
+
+  <h3><span class="no">①</span> 用例图</h3>
+  <pre class="mermaid">
+flowchart LR
+    subgraph ACT1["参与者"]
+        CH1["董事长<br/>(tenant->admin)"]
+        NOTI1["系统/Notifier（非人）"]
+    end
+    subgraph SYS1["企微订单助手（系统边界）"]
+        UC11["(C/D 大单终审)"]
+        UC12["(通过放行)"]
+        UC13["(驳回终态)"]
+    end
+    NOTI1 --> UC11
+    CH1 --> UC11
+    CH1 --> UC12
+    CH1 --> UC13
+  </pre>
+  <figcaption>用例图 B1：仅 C/D 大单进入董事长终审（order.approve）</figcaption>
+
+  <h3><span class="no">②</span> 流程图</h3>
+  <pre class="mermaid">
+flowchart TD
+    A1["待办 Tab「董事长审批」审批条"] --> B1["核对金额/客户等级/审价结论"]
+    B1 --> C1{"通过 / 驳回"}
+    C1 -->|"通过"| D1["chairman-review Signal"]
+    C1 -->|"驳回"| E1["终态驳回"]
+    D1 --> F1["大单终审闸门推进"]
+    E1 --> G1["出站「被驳回」卡片"]
+  </pre>
+  <figcaption>流程图 B1：终审条 → 全字段核对 → 通过放行 / 驳回终态</figcaption>
+
+  <h3><span class="no">③</span> UI 操作图（产品稿企微手机屏幕）</h3>
+
+  <div class="ui-step">
+    <div class="desc">
+      <span class="stepno">操作 1.1</span>
+      <h4>待办 Tab 董事长审批条 + 终审详情</h4>
+      <p>待办 Tab 显示 C/D 大单终审审批条（橙色 tag「需处理」）；点击进入订单详情：金额、客户等级、审价结论、风险提示；底部「通过/驳回」。</p>
+      <div class="hint">董事长可见租户全量（决策需价格/客户等级），仅 C/D 大单进入其审批（07 §4.5.5）。</div>
+    </div>
+        <div class="ui-shot">
+      <div class="shot-label">PC 端 · 企微客户端四栏（侧边栏应用在最右栏）</div>
+      <div class="wc-pc">
+        <div class="tl"><i class="r"></i><i class="y"></i><i class="g"></i></div>
+                <div class="rail">
+          <div class="av">董</div>
+          <div class="nav on"><span class="ico">💬</span>消息<span class="bdg">2</span></div>
+          <div class="nav"><span class="ico">✉</span>邮件</div>
+          <div class="nav"><span class="ico">📄</span>文档</div>
+          <div class="nav"><span class="ico">📅</span>日程</div>
+          <div class="nav"><span class="ico">✓</span>待办</div>
+          <div class="nav"><span class="ico">🎥</span>会议</div>
+          <div class="nav"><span class="ico">🧩</span>工作台</div>
+          <div class="nav"><span class="ico">👥</span>通讯录</div>
+          <div class="nav"><span class="ico">☁</span>微盘</div>
+        </div>
+        <div class="conv">
+          <div class="search"><span class="box">⌕ 搜索</span><span class="plus">＋</span></div>
+          <div class="conv-item on">
+            <div class="cav">天</div>
+            <div class="meta"><div class="nm">董事长审批 · ORD-2026-0117<span class="tm">09:24</span></div><div class="pv">王总：再发5吨膨润土 AB-3…</div></div>
+          </div>
+        </div>
+        <div class="chat">
+          <div class="ch-head"><div><div class="nm">董事长审批 · ORD-2026-0117</div><div class="sub">外部客户群 · 已开启订单助手（演示）</div></div></div>
+          <div class="ch-body">
+            <div class="msg o"><span class="mav">王</span><div class="mb"><div class="who">王志明｜广西天华采购部</div><div class="bub">C 级大单 ORD-2026-0117 已通过审价，等待董事长终审。</div></div></div>
+          </div>
+          <div class="input-area"><span class="tools">☺ ▧ 📁</span><span class="field">输入消息…</span><span class="send">发送</span></div>
+        </div>
+        <div class="aside">
+          <div class="marker">◈ 订单助手 · 我们的应用（侧边栏）</div>
+          <div class="tabs">
+                        <span class="tab on">待办<span class="cnt">1</span></span><span class="tab">订单</span>
+          </div>
+          <div class="content">
+            <div class="pc-appr"><span class="ai">⚠</span><div class="am"><div class="at">董事长审批 · C 级大单</div><div class="as">ORD-2026-0117 · ¥16,000</div></div><span class="pc-tag o">需处理</span><span class="arrow">›</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="wc-phone">
+        <div class="st-bar"><span>9:30</span><span>📶 🔋</span></div>
+        <div class="nav"><span class="back">‹</span><span class="title">订单助手</span><span class="more">⋯</span></div>
+        <div class="wc-full">
+          <div class="aside-tabs">
+            <span class="aside-tab on">待办<span class="cnt">1</span></span><span class="aside-tab">订单</span>
+          </div>
+          <div class="aside-scroll">
+            <div class="wc-approval"><span class="ap-icon">⭐</span><div class="ap-main"><div class="ap-title">董事长审批 · C 级大单</div><div class="ap-sub">ORD-2026-0117 · ¥16,000</div></div><span class="ap-tag">需处理</span><span class="ap-arrow">›</span></div>
+            <div class="wc-detail">
+              <div class="od-head"><span class="od-no">ORD-2026-0117</span><span class="od-state"><span class="state st-approving" style="font-size:10px;padding:2px 6px;border-radius:3px;font-weight:500;">C 级大单</span></span></div>
+              <div class="od-kv">
+                <div class="row"><span class="k">金额</span><span class="v">¥16,000</span></div>
+                <div class="row"><span class="k">客户等级</span><span class="v">C（大单终审）</span></div>
+                <div class="row"><span class="k">审价结论</span><span class="v">已通过（商务）</span></div>
+                <div class="row"><span class="k">账期</span><span class="v">30 天</span></div>
+              </div>
+            </div>
+            <div class="wc-risk warn">
+              <div class="rk-head"><span class="rk-badge">⚠</span><span class="rk-title">大单终审</span></div>
+              <div class="rk-items">
+                <div class="rk-item"><span class="mk warn">!</span><span class="text">通过后订单放行进入备货/发货链；驳回进入终态</span></div>
+              </div>
+            </div>
+            <div class="wc-po-actions"><span class="btn btn-ignore" style="background:#F2F3F5;color:#4E5969;">驳回</span><span class="btn btn-confirm">通过</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ BLOCK 2 ============ -->
+  <h2 id="b2"><span class="no">B2 ·</span> 决策视图查全量（订单 Tab）</h2>
+
+  <h3><span class="no">①</span> 用例图</h3>
+  <pre class="mermaid">
+flowchart LR
+    subgraph ACT2["参与者"]
+        CH2["董事长"]
+    end
+    subgraph SYS2["企微订单助手（系统边界）"]
+        UC21["(查全量订单)"]
+        UC22["(查看大单明细)"]
+    end
+    CH2 --> UC21
+    CH2 --> UC22
+  </pre>
+  <figcaption>用例图 B2：董事长决策视图（全字段，含价格/客户等级）</figcaption>
+
+  <h3><span class="no">②</span> 流程图</h3>
+  <pre class="mermaid">
+flowchart TD
+    A2["「订单」Tab 全量订单"] --> B2["筛选 C/D 大单"]
+    B2 --> C2["订单详情（全字段）"]
+    C2 --> D2["跳转终审（如需）"]
+  </pre>
+  <figcaption>流程图 B2：全量 → 大单筛选 → 详情 → 终审</figcaption>
+
+  <h3><span class="no">③</span> UI 操作图（产品稿企微手机屏幕）</h3>
+
+  <div class="ui-step">
+    <div class="desc">
+      <span class="stepno">操作 2.1</span>
+      <h4>「订单」Tab：全量订单（决策视图）</h4>
+      <p>董事长「订单」Tab 展示租户全量订单，C/D 大单以橙色状态标突出；点击进入详情查看全字段。</p>
+      <div class="hint">决策需价格/客户等级，董事长为全字段投影。</div>
+    </div>
+        <div class="ui-shot">
+      <div class="shot-label">PC 端 · 企微客户端四栏（侧边栏应用在最右栏）</div>
+      <div class="wc-pc">
+        <div class="tl"><i class="r"></i><i class="y"></i><i class="g"></i></div>
+                <div class="rail">
+          <div class="av">董</div>
+          <div class="nav on"><span class="ico">💬</span>消息<span class="bdg">2</span></div>
+          <div class="nav"><span class="ico">✉</span>邮件</div>
+          <div class="nav"><span class="ico">📄</span>文档</div>
+          <div class="nav"><span class="ico">📅</span>日程</div>
+          <div class="nav"><span class="ico">✓</span>待办</div>
+          <div class="nav"><span class="ico">🎥</span>会议</div>
+          <div class="nav"><span class="ico">🧩</span>工作台</div>
+          <div class="nav"><span class="ico">👥</span>通讯录</div>
+          <div class="nav"><span class="ico">☁</span>微盘</div>
+        </div>
+        <div class="conv">
+          <div class="search"><span class="box">⌕ 搜索</span><span class="plus">＋</span></div>
+          <div class="conv-item on">
+            <div class="cav">天</div>
+            <div class="meta"><div class="nm">董事长审批 · ORD-2026-0117<span class="tm">09:24</span></div><div class="pv">王总：再发5吨膨润土 AB-3…</div></div>
+          </div>
+        </div>
+        <div class="chat">
+          <div class="ch-head"><div><div class="nm">董事长审批 · ORD-2026-0117</div><div class="sub">外部客户群 · 已开启订单助手（演示）</div></div></div>
+          <div class="ch-body">
+            <div class="msg o"><span class="mav">王</span><div class="mb"><div class="who">王志明｜广西天华采购部</div><div class="bub">C 级大单 ORD-2026-0117 已通过审价，等待董事长终审。</div></div></div>
+          </div>
+          <div class="input-area"><span class="tools">☺ ▧ 📁</span><span class="field">输入消息…</span><span class="send">发送</span></div>
+        </div>
+        <div class="aside">
+          <div class="marker">◈ 订单助手 · 我们的应用（侧边栏）</div>
+          <div class="tabs">
+                        <span class="tab on">待办<span class="cnt">1</span></span><span class="tab">订单</span>
+          </div>
+          <div class="content">
+            <div class="pc-appr"><span class="ai">⚠</span><div class="am"><div class="at">董事长审批 · C 级大单</div><div class="as">ORD-2026-0117 · ¥16,000</div></div><span class="pc-tag o">需处理</span><span class="arrow">›</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="wc-phone">
+        <div class="st-bar"><span>9:30</span><span>📶 🔋</span></div>
+        <div class="nav"><span class="back">‹</span><span class="title">订单助手</span><span class="more">⋯</span></div>
+        <div class="wc-full">
+          <div class="aside-tabs">
+            <span class="aside-tab">待办<span class="cnt">1</span></span><span class="aside-tab on">订单</span>
+          </div>
+          <div class="aside-scroll">
+            <div class="wc-order">
+              <div class="r1"><span class="no">ORD-2026-0117</span><span class="state st-approving">C 级大单</span></div>
+              <div class="r2"><span class="prod">广西天华 · 膨润土 AB-3</span><span>5 吨</span></div>
+              <div class="r3"><span class="amount">¥16,000</span><span class="progress">终审中</span></div>
+            </div>
+            <div class="wc-order">
+              <div class="r1"><span class="no">ORD-2026-0105</span><span class="state st-approving">D 级大单</span></div>
+              <div class="r2"><span class="prod">宏远铸造 · 膨润土 AB-3</span><span>10 吨</span></div>
+              <div class="r3"><span class="amount">¥28,000</span><span class="progress">终审中</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="colophon">
+    <span><a href="index.html">← Role Specs</a></span>
+    <span>CHAIRMAN · Role Spec · B2B Order Fulfillment</span>
+  </footer>
+</div>
+
+<script>
+  mermaid.initialize({ startOnLoad:true, theme:'base',
+    themeVariables:{ fontFamily:"'Noto Serif SC','Source Serif Pro',serif",
+      primaryColor:'#efeee5', primaryBorderColor:'#1B365D', primaryTextColor:'#1f1d18',
+      lineColor:'#1B365D', secondaryColor:'#f5f4ed', tertiaryColor:'#f5f4ed',
+      edgeLabelBackground:'#f5f4ed', clusterBkg:'#f5f4ed', clusterBorder:'#d4d1c5' },
+    flowchart:{curve:'basis'} });
+</script>
+</body>
+</html>

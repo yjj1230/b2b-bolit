@@ -1,0 +1,17 @@
+{
+  "tenant_id": "chang-an",
+  "corp_id": "ww-prod-xxxxxxxxxxxxxxxx",
+  "domain": "wecom.changan.example.com",
+  "app": {
+    "agent_id": 1000002,
+    "secret": "prod-app-secret",
+    "token": "prod-callback-token",
+    "encoding_aes_key": "43-char-base64-aes-key-for-prod-env"
+  },
+  "archive": {
+    "enabled": false,
+    "publickey_ver": 1,
+    "private_keys": [],
+    "secret": ""
+  }
+}

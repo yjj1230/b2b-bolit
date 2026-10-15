@@ -1,0 +1,47 @@
+{
+  "tenant_id": "chang-an",
+  "sources": [
+    {
+      "name": "feishu_orders_file_fallback",
+      "kind": "file",
+      "path": "data/feishu_orders.jsonl",
+      "cursor_field": "updated_at",
+      "column_map": {
+        "order_id": "order_id",
+        "customer_id": "customer_id",
+        "state": "state",
+        "payment_term": "payment_term",
+        "supplier_channel": "supplier_channel",
+        "idempotency_key": "idempotency_key",
+        "legacy_flow_id": "flow_id",
+        "event_action": "event_action",
+        "event_reason": "event_reason",
+        "operator_id": "operator_open_id",
+        "occurred_at": "occurred_at",
+        "legacy_stage_id": "stage_id",
+        "legacy_instance_id": "instance_id",
+        "legacy_task_id": "task_id",
+        "stage_code": "stage_code"
+      }
+    },
+    {
+      "name": "pgapi_purchase_contracts",
+      "kind": "http",
+      "path": "https://api.renheng.com/pgapi-test/api/db/purchase-contracts",
+      "api_key": "REPLACE_WITH_PGAPI_TEST_API_KEY",
+      "page_size": 200,
+      "cursor_field": "last_modified_time",
+      "column_map": {
+        "order_id": "apply_no",
+        "customer_id": "customer_name",
+        "state": "order_status",
+        "payment_term": "settlement_method",
+        "legacy_flow_id": "apply_no",
+        "legacy_stage_id": "approval_node",
+        "legacy_instance_id": "apply_no",
+        "operator_id": "current_handlers",
+        "occurred_at": "initiated_at"
+      }
+    }
+  ]
+}

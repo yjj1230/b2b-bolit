@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>07 · 企微接入设计 · B2B 订单履约验证项目</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+SC:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:#f5f4ed; --paper2:#efeee5; --ink:#1f1d18; --ink2:#6b665b;
+    --ink3:#3a382f; --blue:#1B365D; --rule:#d4d1c5;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif; line-height:1.6;}
+  .wrap{max-width:960px; margin:0 auto; padding:48px 40px 80px;}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;}
+  .folio{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--rule); padding-bottom:10px;
+    font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink2);}
+  .folio a{color:var(--ink2); border:none;}
+  .folio a:hover{color:var(--blue);}
+  .tag{display:inline-block; padding:3px 10px; font-size:11px; letter-spacing:.16em; background:var(--paper2); color:var(--blue);}
+  .kicker{display:flex; align-items:baseline; gap:12px; margin-top:48px;}
+  h1{font-size:clamp(32px,5vw,50px); line-height:1.12; font-weight:500; margin-top:14px; letter-spacing:-.01em;}
+  .lede{margin-top:18px; font-size:17px; line-height:1.7; color:var(--ink3); max-width:720px;}
+  h2{font-size:23px; font-weight:600; margin:52px 0 14px; color:var(--blue); display:flex; align-items:baseline; gap:12px; border-top:1px solid var(--rule); padding-top:26px;}
+  h2 .no{font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.12em;}
+  h3{font-size:17.5px; font-weight:600; margin:30px 0 10px; color:var(--ink);}
+  h3 .no{color:var(--blue); font-family:'IBM Plex Mono',monospace; font-size:12px; margin-right:8px;}
+  h4{font-size:15.5px; font-weight:600; margin:24px 0 8px; color:var(--ink);}
+  h4 .no{color:var(--blue); font-family:'IBM Plex Mono',monospace; font-size:11px; margin-right:6px;}
+  p{margin:10px 0; color:var(--ink3);}
+  ul,ol{margin:10px 0 10px 26px; color:var(--ink3);}
+  li{margin:5px 0;}
+  a{color:var(--blue); text-decoration:none; border-bottom:1px solid var(--rule);}
+  a:hover{border-bottom-color:var(--blue);}
+  blockquote{border-left:2px solid var(--blue); padding:10px 18px; margin:16px 0; background:var(--paper2); font-style:italic;}
+  table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  .table-wrap{overflow-x:auto; margin:16px 0 24px; border:1px solid var(--rule);}
+  .table-wrap table{margin:0;}
+  th{background:var(--paper2); color:var(--blue); text-align:left; font-weight:600; padding:9px 12px; border-bottom:1.5px solid var(--blue); font-size:12.5px; white-space:nowrap;}
+  td{padding:9px 12px; border-bottom:1px solid var(--rule); vertical-align:top; color:var(--ink3);}
+  tr:nth-child(even) td{background:#faf9f3;}
+  tr:hover td{background:#f0ede0;}
+  .mermaid{background:var(--paper); border:1px solid var(--rule); padding:18px; overflow-x:auto; text-align:center; margin:20px 0;}
+  .mermaid svg{max-width:100%; height:auto;}
+  .mermaid svg.statediagram span,.mermaid svg.statediagram div{color:#1f1d18 !important;}
+  .mermaid svg.statediagram text{fill:#1f1d18 !important;}
+  figcaption{text-align:center; font-size:12px; color:var(--ink2); margin:-10px 0 26px; font-style:italic;}
+  code{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace; font-size:13px; background:var(--paper2); padding:1px 5px;}
+  pre{background:var(--paper2); border:1px solid var(--rule); padding:16px 18px; overflow-x:auto; font-size:12.8px; line-height:1.55; margin:14px 0;}
+  pre code{background:none; padding:0;}
+  footer.colophon{margin-top:56px; padding-top:14px; border-top:1px solid var(--rule); display:flex; justify-content:space-between;
+    font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink2); flex-wrap:wrap; gap:8px;}
+  footer.colophon a{color:var(--ink2); border:none;}
+  footer.colophon a:hover{color:var(--blue);}
+  .toc{border:1px solid var(--rule); background:var(--paper2); padding:18px 24px; margin:26px 0;}
+  .toc .tt{font-size:11px; letter-spacing:.2em; color:var(--blue); margin-bottom:8px;}
+  .toc a{display:block; padding:3px 0; color:var(--ink3); border:none;}
+  .toc a:hover{color:var(--blue);}
+  .toc .mono{font-size:12px; color:var(--blue); margin-right:8px;}
+  @media(max-width:720px){.wrap{padding:28px 18px 60px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="folio">
+    <span><a href="index.html">← Docs</a> · B2B Order Fulfillment</span>
+    <span>07 · WeCom Integration</span>
+    <span>独立生命周期 · 多备案切换</span>
+  </header>
+
+  <div class="kicker">
+    <span class="tag">WeCom Integration · 企微接入设计</span>
+    <span class="mono" style="font-size:11px; letter-spacing:.18em; color:var(--ink2);">横切文档 · 独立演进</span>
+  </div>
+
+  <h1>企微接入设计<br/><span style="font-style:italic; color:var(--blue);">S1-S4 · 会话存档 · 多备案切换</span></h1>
+
+  <p class="lede"><strong>独立文档的原因</strong>（meta.md 指示）：企微接入存在<strong>多备案切换</strong>的可能性——本项目是多租户平台（长安仁恒、智厨等企业主体各自有独立的企微企业、可信域名、应用与 ICP 备案），切换客户/租户即切换备案域名与企微配置。本文档独立于主文档家族（01-06）演进，任何租户接入/切换只改本文档与配置，不动核心图谱。</p>
+
+  <nav class="toc">
+    <div class="tt">CONTENTS · 目录</div>
+    <a href="#s1"><span class="mono">1</span>定位与场景矩阵（S1-S4）</a>
+    <a href="#s2"><span class="mono">2</span>S2 群消息捕捉（会话内容存档）</a>
+    <a href="#s3"><span class="mono">3</span>意图识别与预订单（AI 安全边界）<strong style="color:#c0392b;"> ⛔暂缓</strong></a>
+    <a href="#s4-flow"><span class="mono">4</span>企微 × 流程执行结合（产品设计）</a>
+    <a href="#s4"><span class="mono">5</span>出站通道设计（S3 + S2 确认）</a>
+    <a href="#s5"><span class="mono">6</span>S1 侧边栏 / S4 工作台 H5</a>
+    <a href="#s7"><span class="mono">7</span>多备案切换管理（本文档独立存在的核心理由）</a>
+    <a href="#s8"><span class="mono">8</span>安全与合规清单</a>
+    <a href="#s9"><span class="mono">9</span>测试要点</a>
+    <a href="#s10"><span class="mono">10</span>部署与接手指南</a>
+  </nav>
+
+  <h2 id="s1"><span class="no">1 ·</span> 定位与场景矩阵（S1-S4）</h2>
+  <p>验证项目设计 §6.1 的四类场景，按「消息捕捉强度」排序：</p>
+  <div class="table-wrap">
+  <table>
+    <tr><th>场景</th><th>入口</th><th>能力</th><th>本项目的用途</th><th>优先级</th></tr>
+    <tr><td><strong>S1 聊天工具栏 H5</strong></td><td>单聊 / 客户群 / 工作台三 entry（<span class="mono">single_chat_tools</span> / <span class="mono">group_chat_tools</span> / <span class="mono">normal</span> 分流）</td><td>带群上下文的前端能力（查订单/查库存/人工下单）</td><td>半自动降级路径 + 人工确认界面</td><td>高</td></tr>
+    <tr><td><strong>S2 群消息捕捉 → 预订单</strong></td><td>会话内容存档（外部群唯一官方读取通道）</td><td>「群里一句话 → 预订单 → 人工确认 → 正式订单」</td><td><strong>技术可行性重点验证项</strong></td><td>最高</td></tr>
+    <tr><td><strong>S3 应用消息推送</strong></td><td>应用消息卡片（template_card）</td><td>审批/催办/状态通知，点击回调验签</td><td>审批链通知与待办触达</td><td>高</td></tr>
+    <tr><td><strong>S4 工作台 H5</strong></td><td>工作台应用入口</td><td>无上下文的安全降级视图</td><td>兜底入口</td><td>中</td></tr>
+  </table>
+  </div>
+
+  <p><strong>角色 × 场景可达性矩阵</strong>（角色在哪些场景能做什么；灰色 = 该场景无动作/仅为被捕捉对象。完整逐角色流程与权限 via schema.zed 见 §4.5）：</p>
+  <div class="table-wrap">
+  <table>
+    <tr><th>角色 \ 场景</th><th>S1 侧边栏 H5</th><th>S2 群消息/预订单</th><th>S3 应用卡片</th><th>S4 工作台</th></tr>
+    <tr><td>归属销售</td><td>✅ 查本人订单(全字段)/库存/人工下单</td><td>✅ 预订单确认卡片(确认/修改/忽略)</td><td>✅ 本人订单审批/催办/状态卡片</td><td>✅ 本人待办</td></tr>
+    <tr><td>商务</td><td>✅ 查全量订单/库存</td><td>—（非主路径，可协助）</td><td>✅ 审价/备货/发货任务卡片</td><td>✅ 全量待办</td></tr>
+    <tr><td>仓管</td><td>✅ 查本仓发货单(<strong>剥价</strong>)</td><td>—</td><td>✅ 仓库确认/发货卡片</td><td>✅ 本仓待办</td></tr>
+    <tr><td>财务</td><td>✅ 查全量(视授予)</td><td>—</td><td>✅ 到账确认/回单异常卡片</td><td>✅ 财务待办</td></tr>
+    <tr><td>董事长</td><td>✅ 查全量(决策)</td><td>—</td><td>✅ C/D 大单终审卡片</td><td>✅ 终审待办</td></tr>
+    <tr><td>客户联系人</td><td>✅ 物流视图(<strong>剥金额/内部备注</strong>)</td><td>⬜ 被捕捉对象(非操作者)</td><td>—</td><td>—</td></tr>
+    <tr><td>管理员</td><td>✅ 全量</td><td>✅(可协助建单)</td><td>✅ 全审批委派</td><td>✅ 全量</td></tr>
+  </table>
+  </div>
+
+  <p><strong>交互红线</strong>（AI 安全边界，不可妥协）：</p>
+  <ol>
+    <li><strong>任何生成结果都需人工确认才能成为正式订单</strong>（预订单确认 Signal 前，系统内不存在正式订单）。</li>
+    <li>低置信只发<strong>轻提醒</strong>、不自动建单；高金额/多候选/低置信 → 强制人工确认。</li>
+    <li>出站消息必须可追踪（消息 ID 落库），出站与入站分别验签。</li>
+  </ol>
+
+  <h2 id="s2"><span class="no">2 ·</span> S2 群消息捕捉（主路径：会话内容存档）</h2>
+
+  <h3><span class="no">2.1</span> 为什么是会话存档</h3>
+  <ul>
+    <li>普通自建应用<strong>没有</strong>客户群（外部群）全量消息回调（技术核验报告结论）。</li>
+    <li>外部群读取的<strong>唯一官方通道</strong> = 会话内容存档（付费、按存档账号计、需企业认证 + 员工知情同意 + 外部联系人同意）。</li>
+    <li>明确不采用：微信小程序形态（双套链路）。</li>
+  </ul>
+  <blockquote style="border-left-color:#c0392b; background:#fdf3f3;">
+    <strong>暂缓标注（与 §3.0 一致）</strong>：会话存档<strong>自动拉取循环</strong>（§2.2，即 <span class="mono">GetChatData</span> 主动拉取 → 两段解密 → 归一化 → 触发 <span class="mono">PreOrderWorkflow</span>）当前<strong>暂缓实现、暂缓测试</strong>（2026-08-07 决策，<span class="mono">-tags deferred</span>）。本节拉取架构以<strong>设计态</strong>保留；<strong>不受影响的保留项</strong>：<span class="mono">wecom_archive_cursor</span> 存档游标基础设施（L1-14 <span class="mono">repo/cursor.go</span>）、数据窗口/限流/解密/幂等防线（§2.3）、<strong>预订单确认卡片 → 正式订单</strong>人工段与 S1/S3/S4 降级路径（见 §4）。恢复条件满足（§3.0 四项）后，再由维护者将自动拉取段由灰转实并恢复测试矩阵。
+  </blockquote>
+
+  <h3><span class="no">2.2</span> 拉取架构</h3>
+  <pre class="mermaid">
+flowchart LR
+    subgraph wecom["企业微信侧"]
+        ARC["会话内容存档 SDK&lt;br/&gt;GetChatData 主动拉取(密文)"]
+    end
+    subgraph svc["cmd/wecom 接入服务"]
+        FETCH["拉取循环&lt;br/&gt;seq 游标分页"]
+        DEC["两段解密&lt;br/&gt;RSA私钥解 encrypt_random_key&lt;br/&gt;→ DecryptData"]
+        DEDUP["去重 + msgid checkpoint"]
+        STORE[("PG 原子落库&lt;br/&gt;wecom_archive_cursor")]
+        PARSE["消息归一化&lt;br/&gt;→ 触发 PreOrderWorkflow"]
+    end
+    ARC --> FETCH --> DEC --> DEDUP --> STORE --> PARSE
+  </pre>
+
+  <h3><span class="no">2.3</span> 关键技术参数与防线</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>参数</th><th>值</th><th>防线设计</th></tr>
+    <tr><td>数据窗口</td><td><strong>仅 5 天内可拉取</strong></td><td>持续拉取 + <span class="mono">wecom_archive_cursor</span> 原子 checkpoint（seq 持久化）；L1-14 专项测试</td></tr>
+    <tr><td>分页</td><td>每批 ≤1000 条</td><td>游标翻页，顺序消费</td></tr>
+    <tr><td>限流</td><td>4000 次/分钟；ticket 每企业每小时 400 次（45009 熔断）</td><td>指数退避 + 熔断降级（暂停拉取不丢 checkpoint）</td></tr>
+    <tr><td>解密</td><td>RSA 私钥解 <span class="mono">encrypt_random_key</span>（PKCS#1）→ 与 <span class="mono">encrypt_chat_msg</span> 传 <span class="mono">DecryptData</span></td><td><strong>私钥永不直接解密消息</strong>；密钥轮换按 <span class="mono">publickey_ver</span> 保留历史私钥</td></tr>
+    <tr><td>媒体</td><td>25000 次/分钟 / 512KB 分片</td><td>媒体另路下载，消息文本先行</td></tr>
+    <tr><td>幂等</td><td><span class="mono">(tenant_id, group_id, msg_id)</span> 唯一</td><td>消息只建一个预订单（<span class="mono">pre_orders</span> UK）</td></tr>
+    <tr><td>合规留痕</td><td>员工知情同意 + 外部联系人同意</td><td>同意事件回调落库；原始聊天与订单访问审计</td></tr>
+  </table>
+  </div>
+
+  <h3><span class="no">2.4</span> 合规决策门（Phase 0）</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>决策项</th><th>通过</th><th>降级</th></tr>
+    <tr><td>企业认证 + 付费开通 + 最小存档账号集</td><td>S2 全自动主路径</td><td>S2 半自动：S1 侧边栏 + 人工录入/确认</td></tr>
+    <tr><td>员工知情同意（工作机登录个人微信可被存档）</td><td>存档合法</td><td>仅存档已同意员工</td></tr>
+    <tr><td>外部联系人同意</td><td>群消息可读</td><td>该群降级（不捕捉）</td></tr>
+  </table>
+  </div>
+  <blockquote>决策门输出三分法：<strong>可行 / 有条件可行 / 不可行</strong>（写入 04-development-plan.html §0）。</blockquote>
+
+  <h2 id="s3"><span class="no">3 ·</span> 意图识别与预订单（AI 安全边界）</h2>
+
+  <h3><span class="no">3.0</span> ⛔ 暂缓状态：基于意图识别的企微自动下单（暂缓实现 · 暂缓测试）</h3>
+  <blockquote style="border-left-color:#c0392b; background:#fdf3f3;">
+    <strong>决策（2026-08-07）</strong>：<span class="mono">「群里一句话 → 意图识别 → 自动创建预订单」</span>整段
+    <strong>暂缓实现、暂缓测试</strong>。范围 = 会话存档自动拉取（§2 拉取循环）与意图解析自动建单（§3.1 管线；
+    <span class="mono">internal/wecom/intent.go</span> 与 <span class="mono">cmd/wecom/deferred.go</span> 已移入
+    <span class="mono">-tags deferred</span>，默认构建不含，测试同理）。<br/>
+    <strong>不受影响的保留项</strong>：预订单全链主流程（HTTP 创建预订单 → 人工确认 → 正式订单，tests/l2_e2e
+    <span class="mono">TestE2EPreOrderChain</span>）、<span class="mono">workflows.ParseIntent</span> 确定性校验活动、
+    存档游标基础设施（L1-14 <span class="mono">repo/cursor.go</span>）、S1/S3/S4 与确认卡片的流程结合（见 §4）。
+    <br/><strong>恢复条件（全部满足方可解除）</strong>：① 真实企业会话存档或等效消息通道开通且合规决策门通过（§2.4）；
+    ② LLM 供应商与密钥管理（KMS）就绪；③ SKU 标准型号映射表确定维护人与来源；④ 恢复时同步恢复 §2-§3
+    测试矩阵与门禁条目（<span class="mono">-tags deferred</span> 测试已就位，<span class="mono">go test -tags deferred ./internal/wecom/...</span> 可回归）。
+  </blockquote>
+
+  <h3><span class="no">3.1</span> 处理管线</h3>
+  <pre class="mermaid">
+flowchart LR
+    RAW["原始消息&lt;br/&gt;(存档文本)"] --> NORM["normalize_message&lt;br/&gt;租户/群/消息上下文归一化"]
+    NORM --> LLM["parse_intent&lt;br/&gt;LLM 只产结构化候选&lt;br/&gt;(SKU/数量/价格/意图版本)"]
+    LLM --> DET["resolve_sku&lt;br/&gt;产品归一化(标准型号映射)"]
+    DET --> VAL["validate&lt;br/&gt;确定性代码校验&lt;br/&gt;权限/库存/价格/客户等级"]
+    VAL --> CONF["should_confirm&lt;br/&gt;高金额/多候选/低置信?"]
+    CONF -->|"否,校验通过"| PC["PENDING_CONFIRM&lt;br/&gt;推销售确认卡片"]
+    CONF -->|"是(低置信/多候选)"| AMB["AMBIGUOUS&lt;br/&gt;轻提醒(不自动建单)"]
+    AMB -->|销售修正确认| PC
+    AMB -->|销售忽略| IG["IGNORED"]
+    PC --> SIGNAL["销售确认 Signal&lt;br/&gt;→ 生成正式订单(幂等键)"]
+  </pre>
+
+  <h3><span class="no">3.3</span> 确定性校验清单（LLM 永不直接决定）</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>校验项</th><th>规则</th><th>失败处理</th></tr>
+    <tr><td>SKU 归一化</td><td>标准型号映射表（维护人待确认；主数据现状见 08-external-integration.html §1.4 #7）</td><td>多候选 → AMBIGUOUS</td></tr>
+    <tr><td>数量</td><td>&gt; 0、≤ 上限（防误触大单）</td><td>修正确认</td></tr>
+    <tr><td>价格</td><td>客户等级价格表，LLM 不报价（主数据现状见 08-external-integration.html §1.4 #6）</td><td>只提示、不自动承诺</td></tr>
+    <tr><td>库存</td><td>目标仓库可承诺量</td><td>提示缺货，仍可预订单</td></tr>
+    <tr><td>权限</td><td>消息发送者 = 归属销售/代办（SpiceDB）</td><td>忽略 + 审计</td></tr>
+    <tr><td>幂等</td><td><span class="mono">pre:&lt;tenant&gt;:&lt;group&gt;:&lt;msgid&gt;:&lt;intent_version&gt;</span></td><td>同键同 payload 返回既有预订单</td></tr>
+  </table>
+  </div>
+
+  <h3><span class="no">3.4</span> 确认与升级</h3>
+  <ul>
+    <li><strong>确认</strong>：应用消息 <span class="mono">template_card</span>（确认 / 修改 / 忽略 三按钮），点击回调验签 → Signal → <span class="mono">PreOrderWorkflow</span>。</li>
+    <li><strong>修改</strong>：销售改数量/产品后确认（MODIFIED → ORDER_REQUESTED）。</li>
+    <li><strong>升级</strong>：24h 未处理 → Timer 升级（ESCALATED，重新推送 + 抄送主管）；48h 仍未处理 → 人工兜底（业务链接）。</li>
+    <li><strong>出站回复</strong>：被动回复按协议用流式消息/模板卡片（text 仅欢迎语）；<span class="mono">response_url</span> 主动回复 <strong>1 小时有效、只能调用一次</strong>，需幂等处理（过期 → 改走应用消息）。</li>
+  </ul>
+
+  <h2 id="s4-flow"><span class="no">4 ·</span> 企微 × 流程执行结合（产品设计）</h2>
+  <p><strong>架构约束（与 02-architecture.html §2.1 一致）</strong>：企微 = <strong>建构于底层 HTTP API 之上的特定应用转接层</strong>——
+  每个企微交互最终都映射为一次 HTTP API 调用（信号 / 查询 / 预订单动作），转接层不承载任何业务逻辑。
+  因此「企微接入后」与「直接 HTTP」的行为等价——<span class="mono">scripts/fullchain</span> 与 tests/l2_e2e
+  独立走通全部 HTTP 流程，即为企微接入的等价验证（见 §4.4）。</p>
+
+  <h3><span class="no">4.1</span> 交互映射（用户视角全景 + 技术总表）</h3>
+  <p><strong>本节视角 = 交互点</strong>（从「哪个企微控件」出发）。若你更习惯从「<strong>哪个角色</strong>」出发，见 §4.5 按角色的企微订单全流程（含每角色 tabular 表与权限/投影核对）；若你要的是<strong>图</strong>（世界知识图谱 + 任务图谱），见 §4.6 双 graph。本节、§4.5、§4.6 三处是同一事实的三种投影，可交叉校验。§4.1 内部又分两层：<strong>①用户视角交互全景</strong>（何时 · 何位置 · 何交互 · 技术链路）与 <strong>②技术映射总表</strong>（HTTP 动作细节 / 通道 / 权限，服务端视角）。</p>
+  <p><strong>① 用户视角交互全景</strong>（何时 · 何位置 · 何交互 · 技术链路；<span style="color:#c0392b;">不含 §3 自动意图识别生成订单（已暂缓）</span>，其中 S2 预订单确认为<strong>人工确认</strong>场景、保留）。企微 API ↔ 本系统 HTTP API 的对应关系即「建构于底层 HTTP API 之上的特定应用转接层」的具体化（§4 开头架构约束）：</p>
+  <div class="table-wrap">
+  <table>
+    <tr><th>场景</th><th>用户在企微的位置（UI 入口）</th><th>触发时机</th><th>用户得到的交互（感知）</th><th>企微 API / 能力</th><th>本系统 HTTP API</th><th>流程效果</th></tr>
+    <tr><td><strong>S3 审批卡片</strong>「通过 / 驳回」</td><td>企微「工作台 → 自建应用」消息列表 / 单聊会话中的<strong>应用消息卡片</strong>（template_card）</td><td>订单进入人工闸门（审价 / 仓管 / 财务到账 / 董事长 C-D / 开票 / 回单例外）时推送</td><td>收到待审批卡片，点击「通过 / 驳回」按钮</td><td>应用消息发送 <span class="mono">template_card</span>；按钮点击 → 回调 <span class="mono">POST /wecom/callback/{tenant}</span>（VerifyCallback 验签 + EventKey 路由，§4.2）</td><td><span class="mono">POST /api/v1/orders/{id}/signal/{stage}</span>（<span class="mono">verdict=APPROVED|REJECTED</span>）</td><td>对应人工闸门推进（不可绕过）；驳回进终态或驳回链</td></tr>
+    <tr><td><strong>S3 催办卡片</strong>点击</td><td>同上（应用消息卡片）</td><td>闸门任务 24h 未处理 → Timer 升级推送（48h 抄送主管）</td><td>收到催办卡片，点击回到原审批操作</td><td>应用消息 + 回调（同审批卡片，EventKey 指向原任务）</td><td>同审批卡片 Signal</td><td>过期任务重新进入人工闸门</td></tr>
+    <tr><td><strong>S2 预订单确认卡片</strong>「确认 / 修改 / 忽略」</td><td>同上（应用消息卡片，三按钮）</td><td>预订单进入 <span class="mono">PENDING_CONFIRM</span>（人工确认；<strong>确认前无正式订单</strong>）</td><td>收到预订单候选卡片，选择确认 / 修改数量后确认 / 忽略</td><td>应用消息 <span class="mono">template_card</span>；回调 EventKey <span class="mono">preorder:confirm|modify|ignore</span>（§4.2）</td><td><span class="mono">POST /api/v1/preorders/{id}/signal/preorder-confirm|preorder-ignore</span>（修改 = confirm + <span class="mono">confirmed:false</span>）</td><td>预订单 → 派生正式订单（幂等键 <span class="mono">pre:…</span>）/ 修改重试 / 忽略终态</td></tr>
+    <tr><td><strong>S1 侧边栏</strong>查订单 / 查库存</td><td>单聊 / 客户群<strong>聊天窗口底部工具栏</strong>（聊天工具栏 H5，三入口分流 <span class="mono">single_chat_tools</span> / <span class="mono">group_chat_tools</span> / <span class="mono">normal</span>）</td><td>销售与客户对话中主动点开工具栏</td><td>H5 面板内查订单 / 查库存，视图按角色投影（仓管剥价、客户联系人剥金额/内部备注）</td><td>JS-SDK <span class="mono">ww.register</span>（企业签名）+ <span class="mono">ww.agentConfig</span>（应用签名）双票据；OAuth <span class="mono">snsapi_base</span> 静默授权；<span class="mono">X-WeCom-Context</span> 服务端签发</td><td><span class="mono">GET /api/v1/wecom/jsapi-config</span>（双签名）、<span class="mono">POST /api/v1/auth/exchange</span>、<span class="mono">GET /api/v1/orders/{id}</span>（BFF 投影）等</td><td>视图查询（CQ-03 场景 D 投影规则）；服务端重新授权身份与上下文，不信任前端</td></tr>
+    <tr><td><strong>S1 侧边栏</strong>人工下单 / 发货数量</td><td>同上（聊天工具栏 H5）</td><td>人工操作（半自动降级路径）</td><td>H5 表单填写下单信息 / 发货数量（部分/整批）</td><td>同上（JS-SDK 双票据 + OAuth 静默授权）</td><td><span class="mono">POST /api/v1/orders</span>、<span class="mono">ship-action</span>（含数量；卡片「是/否」无数量参数，不适用）</td><td>业务动作执行（下单 / 发货闸门推进），授权经 SpiceDB</td></tr>
+    <tr><td><strong>S4 工作台</strong>待办列表</td><td>企微「工作台」应用 H5 入口（<span class="mono">normal</span> 分流）</td><td>用户打开工作台应用</td><td>待办列表（按 assignee/kind/state），点击跳转审批卡片或订单详情</td><td>OAuth 授权进入（工作台入口）</td><td><span class="mono">GET /api/v1/todos?assignee=&amp;kind=&amp;state=</span></td><td>待办检索（CQ-05），兜底入口；不做敏感操作只做跳转</td></tr>
+    <tr><td><strong>出站：状态变更通知</strong></td><td>企微应用消息会话（聊天窗口内消息卡片）</td><td>订单状态变更（发货 / 开票 / 关闭等），工作流活动触发</td><td>收到 <span class="mono">ORDER_EVENT</span> 状态卡片（只读），可点击跳转 S1/H5 详情</td><td>应用消息发送（<strong>出站无入站回调</strong>）；<span class="mono">Gateway.SendCard</span> + 消息 ID 落库可追踪</td><td>—（出站；工作流活动 → Notifier → <span class="mono">Gateway.SendCard</span>）</td><td>通知触达对应角色 assignee（接收人 = 审批链路由，见 08-external-integration.html §1.4 #8）</td></tr>
+    <tr><td><strong>出站：回单异常卡片</strong></td><td>同上（应用消息卡片）</td><td>非款到 5 天无回单 → Timer 触发（08-external-integration.html §1.2 <span class="mono">ReceiptPolicy</span>）</td><td>收到回单异常卡片，点击进入回单例外审核</td><td>应用消息 + 回调（EventKey 指向回单例外任务）</td><td><span class="mono">receipt-exception</span> 审核 Signal（§4.2 路由）</td><td>回单例外流程推进（财务/销售）</td></tr>
+  </table>
+  </div>
+  <p><strong>② 技术映射总表</strong>（HTTP 动作细节 / 通道 / 触发方式 / 权限判定；与上表同一场景集合，偏服务端视角）：</p>
+  <div class="table-wrap">
+  <table>
+    <tr><th>企微交互点</th><th>通道</th><th>触发方式</th><th>HTTP API 调用</th><th>流程执行效果</th><th>权限（服务端判定）</th></tr>
+    <tr><td>S3 审批卡片「通过 / 驳回」</td><td>应用消息 template_card</td><td>按钮点击 → 回调 <span class="mono">POST /wecom/callback/{tenant}</span></td><td><span class="mono">POST /api/v1/orders/{id}/signal/{price-review|warehouse-confirm|payment-confirm|chairman-review|invoice-issued|receipt-ex-review}</span></td><td>对应人工闸门推进（verdict APPROVED/REJECTED）</td><td>卡片 assignee（回调回执用户经 <span class="mono">X-User-Id</span> 映射）</td></tr>
+    <tr><td>S3 催办卡片点击</td><td>template_card</td><td>同上</td><td>同审批卡片</td><td>过期任务重新进入人工闸门</td><td>同 assignee</td></tr>
+    <tr><td>发货数量操作（部分/整批）</td><td>S1 侧边栏 / H5 表单</td><td>人工输入数量</td><td><span class="mono">ship-action</span>（含数量；卡片「是/否」无数量参数，不适用）</td><td>发货闸门推进</td><td>仓管</td></tr>
+    <tr><td>S2 预订单确认卡片「确认 / 修改 / 忽略」</td><td>template_card（三按钮）</td><td>回调</td><td><span class="mono">POST /api/v1/preorders/{id}/signal/preorder-confirm|preorder-ignore</span>（修改=confirm+confirmed:false）</td><td>预订单 → 派生正式订单 / 修改重试 / 忽略终态（人工闸门：确认前无正式订单）</td><td>归属销售（SpiceDB 校验；本地 StaticChecker）</td></tr>
+    <tr><td>S1 侧边栏「查订单 / 查库存」</td><td>聊天工具栏 H5</td><td>JS-SDK + OAuth 静默授权</td><td><span class="mono">GET /api/v1/orders/{id}</span>（BFF 投影）等</td><td>视图（仓管剥价、客户联系人剥金额/内部备注）</td><td>按角色投影（CQ-03、场景 D）</td></tr>
+    <tr><td>S4 工作台「待办列表」</td><td>工作台 H5</td><td>OAuth</td><td><span class="mono">GET /api/v1/todos?assignee=&amp;kind=&amp;state=</span></td><td>待办检索（CQ-05），点击转审批卡片</td><td>按角色</td></tr>
+    <tr><td>出站：状态变更通知</td><td>应用消息卡片</td><td>工作流活动触发（无 HTTP 入站）</td><td>—（出站；活动 → Notifier → Gateway.SendCard）</td><td>审批/催办/状态/回单异常卡片推送，消息 ID 落库可追踪</td><td>接收人 = 对应角色 assignee</td></tr>
+  </table>
+  </div>
+
+  <h3><span class="no">4.2</span> 回调协议与路由（EventKey → HTTP 动作）</h3>
+  <p>回调经 <span class="mono">VerifyCallback</span> 验签后，按按钮 <span class="mono">EventKey</span> 前缀路由（
+  <span class="mono">internal/wecom.CallbackHandler</span> + <span class="mono">HTTPActionClient</span>）：</p>
+  <div class="table-wrap">
+  <table>
+    <tr><th>EventKey</th><th>语义</th><th>HTTP 动作（ActionClient）</th><th>失败处理</th></tr>
+    <tr><td><span class="mono">approve:&lt;taskID&gt;</span></td><td>审批通过</td><td>按 task 上下文定位订单与信号名，<span class="mono">verdict=APPROVED</span></td><td>任务已决/状态不匹配 → 409 幂等回执（不重复推进）</td></tr>
+    <tr><td><span class="mono">reject:&lt;taskID&gt;</span></td><td>审批驳回</td><td><span class="mono">verdict=REJECTED</span>（终态或驳回链）</td><td>同上</td></tr>
+    <tr><td><span class="mono">preorder:confirm:&lt;preOrderID&gt;</span></td><td>确认预订单</td><td><span class="mono">preorder-confirm</span> <span class="mono">{"confirmed":true,...}</span></td><td>非 PENDING_CONFIRM → 409 幂等回执</td></tr>
+    <tr><td><span class="mono">preorder:ignore:&lt;preOrderID&gt;</span></td><td>忽略预订单</td><td><span class="mono">preorder-ignore</span></td><td>同上</td></tr>
+    <tr><td><span class="mono">preorder:modify:&lt;preOrderID&gt;</span></td><td>修改候选后确认</td><td><span class="mono">preorder-confirm</span> + <span class="mono">{"confirmed":false}</span>（工作流 preConfirmStep 语义；无独立 modify 信号）</td><td>同上</td></tr>
+    <tr><td>未知前缀</td><td>—</td><td>拒绝 + 审计事件</td><td>400（不落业务）</td></tr>
+  </table>
+  </div>
+
+  <p><strong>S3 审批卡片点击 → 流程推进（时序）</strong>：</p>
+  <pre><code class="language-mermaid">sequenceDiagram
+    participant U as 主管（企微客户端）
+    participant W as cmd/wecom（转接层）
+    participant A as cmd/api（HTTP API）
+    participant WF as 工作流（LocalRunner/Worker）
+    U->>W: 点击卡片「通过」（回调 POST /wecom/callback/{tenant}）
+    W->>W: VerifyCallback 验签（query 签名 + 加密 body）
+    W->>W: CallbackHandler 解析 EventKey（approve:&lt;taskID&gt;）
+    W->>A: POST /api/v1/orders/{id}/signal/{stage}（X-User-Id 映射回执用户）
+    A->>WF: 信号投递（人工闸门不可绕过）
+    WF-->>WF: 状态推进（守恒断言 / 事件链落库）
+    WF->>W: 出站活动 NotifyApproval → Gateway.SendCard
+    W-->>U: 新状态卡片（消息 ID 落库）</code></pre>
+
+  <p><strong>S2 预订单确认卡片 → 正式订单（时序）</strong>：</p>
+  <pre><code class="language-mermaid">sequenceDiagram
+    participant U as 销售（企微客户端）
+    participant W as cmd/wecom（转接层）
+    participant A as cmd/api（HTTP API）
+    participant WF as PreOrderWorkflow
+    U->>W: 点击「确认」（回调）
+    W->>W: 验签 + EventKey（preorder:confirm:&lt;id&gt;）
+    W->>A: POST /api/v1/preorders/{id}/signal/preorder-confirm
+    A->>WF: 确认信号（人工闸门）
+    WF->>A: PRE_ORDER_REQUESTED + 派生正式订单（幂等键 pre:…）
+    A-->>U: 出站卡片「已生成正式订单 ORD-…」（含订单链接）</code></pre>
+
+  <p><strong>回调路由决策</strong>：</p>
+  <pre><code class="language-mermaid">flowchart TD
+    CB["回调 POST /wecom/callback/{tenant}"] --> V["VerifyCallback<br/>(验签+解密)"]
+    V -->|"验签失败"| REJ["400 拒绝 + 审计"]
+    V -->|"通过"| EK["CallbackHandler<br/>解析 EventKey"]
+    EK -->|"approve:/reject:"| OS["订单 Signal<br/>(HTTP ActionClient)"]
+    EK -->|"preorder:confirm:/ignore:/modify:"| PS["预订单 Signal"]
+    EK -->|"未知前缀"| UN["400 拒绝 + 审计"]
+    OS --> R1["409 幂等回执<br/>(任务已决/状态不匹配)"]
+    PS --> R2["409 幂等回执"]
+    OS --> OK1["200 流程推进"]
+    PS --> OK2["200 流程推进"]</code></pre>
+
+  <h3><span class="no">4.3</span> 出站通知映射（状态 → 卡片）</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>流程时机 / 状态</th><th>卡片类型（Kind）</th><th>接收人</th><th>对应信号/动作</th></tr>
+    <tr><td>进入审价/仓管/财务等人工闸门</td><td><span class="mono">PRICE</span> / <span class="mono">WAREHOUSE</span> / <span class="mono">PAYMENT</span> 待审批卡片</td><td>对应角色 assignee</td><td>点击 → approve/reject 信号</td></tr>
+    <tr><td>预订单确认待处理</td><td><span class="mono">PREORDER_CONFIRM</span>（确认/修改/忽略三按钮）</td><td>归属销售</td><td>点击 → preorder 信号</td></tr>
+    <tr><td>订单状态变更（发货/开票/关闭等）</td><td><span class="mono">ORDER_EVENT</span> 状态卡片</td><td>相关角色</td><td>只读（跳转 S1/H5 详情）</td></tr>
+    <tr><td>非款到 5 天无回单</td><td>回单异常卡片（Timer 触发）</td><td>财务/销售</td><td>点击 → receipt-exception 审核信号</td></tr>
+    <tr><td>预订单 24h 未确认</td><td>催办卡片（Timer 升级）</td><td>销售 + 抄送主管</td><td>点击 → 确认/忽略</td></tr>
+  </table>
+  </div>
+
+  <h3><span class="no">4.4</span> HTTP API 等价性验证（企微接入前先行完成）</h3>
+  <ol>
+    <li><strong>独立测试用例</strong>：tests/l2_e2e 20 个 HTTP 全流程用例（含 W5 回调转接）（款到/非款到/董事长 C-D/部分发货/修改 A-E/拒绝/预订单/凭证链/投影/幂等重放），与企微转接层完全相同的调用面（X-User-Id 头 + JSON 端点）。</li>
+    <li><strong>可运行 demo</strong>：<span class="mono">go run ./scripts/fullchain -dsn "…"</span>——进程内真实装配（真 PG + LocalRunner + Static 策略 + wecom mock 出站），22 步走通订单全链（6 信号 → INV_CLOSED + 26 事件链）/ 凭证链（v1/v2 + 场景 D 403）/ 预订单链（确认 → 派生订单）/ 待办 / 出站卡片留痕；退出码 0 = PASS，可作验收证据。</li>
+    <li><strong>等价性声明</strong>：转接层（§4.2）只做「验签 → EventKey 解析 → HTTP 动作」，业务语义全部在 API 层——故企微接入后行为 = HTTP API 行为，本节即接入前的完整验证基线。</li>
+  </ol>
+
+    <h3><span class="no">4.5</span> 按角色的企微订单全流程（覆盖全生命周期）</h3>
+  <p><strong>本节的定位</strong>：把 §4.1 的「交互点 × 流程执行」总表，从<em>交互点</em>视角翻转成<em>角色</em>视角——回答每个角色在企微加持下「<strong>看见什么 → 能做什么 → 触发什么 → 看到什么反馈</strong>」。角色模型以 01-core-graph.html §1.2 本体 <span class="mono">User</span> 与 <span class="mono">schema.zed</span> 四种授权对象（<span class="mono">order</span> / <span class="mono">prestock</span> / <span class="mono">shipment</span> / <span class="mono">evidence</span>）为唯一事实源，字段级投影由 BFF 依据「授权判定结果 + 角色」执行（CQ-03，schema 注释已声明）。企微 = 转接层，本节每个「能做什么」最终都可坍缩为一次 HTTP API 调用（§4 约束）。</p>
+
+  <p><strong>角色清单与权限投影</strong>（来自 01 §1.2 本体 + schema.zed；非人角色「系统/Notifier」列于末尾）：</p>
+  <div class="table-wrap">
+  <table>
+    <tr><th>角色</th><th>本体 User 例</th><th>SpiceDB permission（相关）</th><th>字段投影（BFF 依据角色）</th><th>可见订单范围</th></tr>
+    <tr><td><strong>归属销售</strong>（Sales）</td><td><span class="mono">alice-sales</span></td><td><span class="mono">order.view/edit</span>（owner + delegate）、<span class="mono">prestock.change_quota/request_shipment/close</span>、<span class="mono">shipment.view/append_evidence/void</span></td><td>全字段（本人订单）</td><td><strong>仅本人负责的客户订单</strong>（ReBAC <span class="mono">OWNS</span>：owner）</td></tr>
+    <tr><td><strong>商务</strong>（Commerce）</td><td><span class="mono">bob-commerce</span></td><td><span class="mono">tenant->ops</span>：order.view/edit/stock/<strong>ship</strong>、prestock 全链（change_quota/request_shipment/close）；审价/备货为<strong>工作流闸门 assignee</strong>；<strong>order.approve 属 reviewer+admin（董事长终审），不属 ops</strong></td><td>全字段（可见价格与内部备注）</td><td><strong>全量</strong>（租户 ops 聚合视图）</td></tr>
+    <tr><td><strong>仓管</strong>（Warehouse）</td><td><span class="mono">carol-wh</span></td><td>经 <span class="mono">warehouse->staff</span> → order.view；经 <span class="mono">warehouse_operator</span>（对象级分配）→ shipment.view / <span class="mono">shipment.confirm</span>（场景 C）/ <span class="mono">order.ship</span>（经 warehouse->manage）；<strong>不获价格字段</strong></td><td><strong>剥价</strong>（无单价，无合计金额）；有数量/仓库分配</td><td><strong>本仓</strong>分配的发货单（<span class="mono">shipment#warehouse_operator</span>）</td></tr>
+    <tr><td><strong>财务</strong>（Finance）</td><td><span class="mono">dave-fin</span></td><td><span class="mono">tenant->accounting</span>：order.confirm_payment（到账确认）；<strong>只读复看依赖租户授予 ops 或 admin 查询，不天然拥有 shipment.view / evidence.view/append</strong></td><td>动作见 confirm_payment；只读投影视授予的 ops/admin 而定</td><td>到账确认：租户全量；只读：随授予</td></tr>
+    <tr><td><strong>董事长</strong>（Chairman）</td><td><span class="mono">erin-chair</span></td><td><span class="mono">tenant->admin</span>：order.approve（C/D 大单终审）</td><td>全字段（决策需价格/客户等级）</td><td>租户全量（仅 C/D 大单进入其审批）</td></tr>
+    <tr><td><strong>客户联系人</strong>（Customer Contact）</td><td><span class="mono">franz-contact</span></td><td><span class="mono">shipment#customer_contact</span>：shipment.view（物流视图）、append_evidence</td><td><strong>剥金额 + 剥内部备注</strong>（仅有物流/签收/凭证字段）</td><td>仅其客户关联的发货单（场景 D）</td></tr>
+    <tr><td><strong>管理员</strong>（Admin）</td><td><span class="mono">admin</span></td><td><span class="mono">tenant->admin</span>（全权限）</td><td>全字段</td><td>租户全量</td></tr>
+    <tr><td><strong>系统 / Notifier</strong>（非人）</td><td>—</td><td>出站活动 → <span class="mono">Gateway.SendCard</span>；入站验签后路由</td><td>仅按接收人角色投影生成卡片载荷</td><td>不持有视图权限，仅作为转接与通知载体</td></tr>
+  </table>
+  </div>
+
+  <p><strong>角色 × S1-S4 通道可达性矩阵</strong>（哪些角色在哪些通道能做什么；灰色 = 该角色在该通道无动作，仅可读或不可及）：</p>
+  <div class="table-wrap">
+  <table>
+    <tr><th>角色 \ 通道</th><th>S1 侧边栏 H5<br/>（查订单/查库存/人工下单）</th><th>S2 群消息 / 预订单</th><th>S3 应用消息卡片（审批/催办/状态）</th><th>S4 工作台 H5（待办/降级视图）</th></tr>
+    <tr><td>归属销售</td><td>✅ 查本人订单（全字段）/ 查库存；可发起人工下单</td><td>✅ 收到预订单确认卡片（S2 确认/修改/忽略）</td><td>✅ 收到本人订单审批/催办/状态卡片；可点击确认</td><td>✅ 本人待办列表</td></tr>
+    <tr><td>商务</td><td>✅ 查全量订单/库存</td><td>—（商务不做群捕捉主路径；可协助）</td><td>✅ 审批/审价/仓管/发货等任务卡片（tenant ops）</td><td>✅ 全量待办</td></tr>
+    <tr><td>仓管</td><td>✅ 查本仓发货单（<strong>剥价</strong>）</td><td>—</td><td>✅ 仓库确认/发货卡片</td><td>✅ 本仓待办</td></tr>
+    <tr><td>财务</td><td>✅ 查全量（财务视角）</td><td>—</td><td>✅ 到账确认/回单异常卡片</td><td>✅ 财务待办</td></tr>
+    <tr><td>董事长</td><td>✅ 查全量（决策视角）</td><td>—</td><td>✅ C/D 大单终审卡片</td><td>✅ 终审待办</td></tr>
+    <tr><td>客户联系人</td><td>✅ 查物流视图（<strong>剥金额/内部备注</strong>）</td><td>—（被捕捉对象，非操作者）</td><td>—（仅收物流/签收凭证相关）</td><td>—</td></tr>
+    <tr><td>管理员</td><td>✅ 全量</td><td>✅（可协助建单）</td><td>✅ 全审批委派</td><td>✅ 全量</td></tr>
+  </table>
+  </div>
+
+  <p><strong>角色流程说明</strong>（每个角色 = 一小节；"触发 → HTTP → 效果 → 反馈"以 01 状态机 &amp; §4.2 EventKey 路由为基准）：</p>
+
+  <h4><span class="no">4.5.1</span> 归属销售（Sales）—— 本人负责客户订单的主控角色</h4>
+  <p><strong>看见什么</strong>：仅<em>本人负责</em>的客户（ReBAC <span class="mono">OWNS</span>）订单。在 S1 侧边栏看到订单全字段（含价格/账期/内部备注），在 S4 工作台看到本人待办（CQ-05），在 S3 收到「审价已通过」「备货已确认」「发货已就绪」「回单异常」等状态卡片。</p>
+  <p><strong>能做什么</strong>（四个阶段）：
+  <ul>
+    <li><strong>建单 / 预订单</strong>：S1 侧边栏人工录入 → 创建订单（<span class="mono">POST /api/v1/orders</span>）；S2 收到预订单确认卡片 → 「确认 / 修改 / 忽略」（<span class="mono">preorder-confirm|-ignore|modify</span>），人工确认前系统内<strong>不生成正式订单</strong>（AI 安全边界）。</li>
+    <li><strong>备货</strong>：可发起/查看备货状态（<span class="mono">prestock.view</span>），备货审批由商务/仓管负责。</li>
+    <li><strong>发货</strong>：作为 <span class="mono">requester</span> 查看发货/上传凭证（<span class="mono">shipment.append_evidence</span>，场景 D）；发起人可在 30 分钟窗口内作废（<span class="mono">void</span>，场景 F）。</li>
+    <li><strong>闭环</strong>：跟踪开票与到账状态；收到回单异常卡片可查看触发审核。</li>
+  </ul></p>
+  <p><strong>触发与反馈</strong>：销售每次动作 = 一次 HTTP 调用 → 工作流推进 → 出站卡片回执（消息 ID 落库可追踪）。销售是<strong>唯一</strong>能在 S2 确认预订单的角色（归属校验 SpiceDB + 本地 StaticChecker）。</p>
+
+  <div class="table-wrap">
+  <table>
+    <tr><th>阶段</th><th>企微交互点</th><th>通道</th><th>触发方式</th><th>HTTP API 调用</th><th>流程执行效果</th><th>权限（服务端）</th><th>数据投影（可见字段）</th><th>出站反馈</th><th>幂等 / 失败处理</th></tr>
+    <tr><td>建单-人工</td><td>S1 侧边栏「新建订单」表单</td><td>S1 H5</td><td>JS-SDK + OAuth 静默授权 + 服务端重认证</td><td><span class="mono">POST /api/v1/orders</span></td><td>创建 Order（PENDING 进入主链）</td><td><span class="mono">order.edit</span>（owner）</td><td>全字段（本人订单）</td><td>状态卡片「订单已创建 ORD-…」</td><td>400 参数 / 409 幂等（重复提交）</td></tr>
+    <tr><td>建单-预订单</td><td>S2 预订单确认卡片（确认/修改/忽略）</td><td>S2 template_card</td><td>回调 <span class="mono">POST /wecom/callback/{tenant}</span> → EventKey <span class="mono">preorder:*</span></td><td><span class="mono">POST /api/v1/preorders/{id}/signal/preorder-confirm|-ignore</span>（修改=<span class="mono">confirmed:false</span>）</td><td>预订单 → <strong>派生正式订单</strong>（幂等键 <span class="mono">pre:…</span>）/ 忽略终态</td><td>归属销售（SpiceDB + StaticChecker）</td><td>确认卡片显示候选（SKU/数量/价格）</td><td>「已生成正式订单 ORD-…」含链接</td><td>非 PENDING_CONFIRM → 409 幂等回执（不重复推进）</td></tr>
+    <tr><td>备货查看</td><td>S1 详情「备货状态」</td><td>S1 H5</td><td>视图</td><td>—（视图）</td><td>—</td><td><span class="mono">prestock.view</span>（owner）</td><td>全字段（本人订单）</td><td>—</td><td>—</td></tr>
+    <tr><td>发货</td><td>S1 详情「上传凭证」</td><td>S1 H5</td><td>上传签收/回单图片</td><td><span class="mono">shipment.append_evidence</span>（凭证只追加，CQ-15）</td><td>凭证 v 版本追加（可回放）</td><td><span class="mono">append_evidence</span>（requester）</td><td>全字段 + 凭证列表</td><td>凭证已登记卡片</td><td>409 重复版本 / 401 非授权上传者</td></tr>
+    <tr><td>作废</td><td>S1 详情「作废发货」</td><td>S1 H5</td><td>30 分钟窗口内操作</td><td><span class="mono">shipment#void</span></td><td>void（场景 F）</td><td><span class="mono">void</span>（requester + caveat 30min）</td><td>全字段</td><td>已作废卡片</td><td>超窗 → 403（caveat 失败）</td></tr>
+    <tr><td>闭环</td><td>S3 回单异常卡片（只读跳转）</td><td>S3</td><td>Timer 触发 → 通知推送</td><td>—</td><td>无回单 5 天进入例外审核（CQ-10）</td><td>只读</td><td>全字段 + 回单状态汇总</td><td>「回单异常」卡片</td><td>—</td></tr>
+  </table>
+  </div>
+
+  <h4><span class="no">4.5.2</span> 商务（Commerce）—— 租户 ops，全量主控/审批</h4>
+  <p><strong>看见什么</strong>：租户全量订单（<span class="mono">tenant->ops</span> 聚合视图），含价格/账期/内部备注。S3 收到审价、备货确认、仓库确认等审批/确认卡片；S4 看到全量待办。</p>
+  <p><strong>能做什么</strong>：作为租户 ops，商务承担<strong>审价</strong>（price-review，改价/确认价）、<strong>备货审批</strong>（预定量/到款/仓库分配）、<strong>发货确认</strong>等主要业务闸门。每个审批都是卡片点击 → <span class="mono">approve:&lt;taskID&gt;</span> 或 <span class="mono">reject:&lt;taskID&gt;</span> → 对应 Signal。</p>
+  <p><strong>触发与反馈</strong>：S3 卡片回调 → HTTP Signal → 工作流闸门推进 → 出站状态卡片。商务与销售的区别：商务<strong>可见全量</strong>且可承接<strong>他人</strong>订单的审批，销售仅本人订单。</p>
+
+  <div class="table-wrap">
+  <table>
+    <tr><th>阶段</th><th>企微交互点</th><th>通道</th><th>触发方式</th><th>HTTP API 调用</th><th>流程执行效果</th><th>权限（服务端）</th><th>数据投影</th><th>出站反馈</th><th>幂等 / 失败</th></tr>
+    <tr><td>审价</td><td>S3「待审价」卡片 通过/驳回</td><td>S3 template_card</td><td>回调 → <span class="mono">approve:&lt;taskID&gt;</span> / <span class="mono">reject:&lt;taskID&gt;</span></td><td><span class="mono">POST /api/v1/orders/{id}/signal/price-review</span>（verdict）</td><td>价格闸门推进/驳回链</td><td>工作流 reviewer assignee（商务经 ops 可见全量）</td><td>全字段（需看价格）</td><td>「审价已通过」卡片</td><td>任务已决 → 409 幂等</td></tr>
+    <tr><td>备货审批</td><td>S3「待备货确认」卡片</td><td>S3</td><td>回调 approve/reject</td><td><span class="mono">signal/stock-prepare-review</span></td><td>备货聚合推进（预定量/到款/仓库）</td><td><span class="mono">prestock.change_quota/close</span>（ops）</td><td>全字段</td><td>「备货确认」卡片</td><td>409 幂等</td></tr>
+    <tr><td>发货确认</td><td>S3「待发货确认」卡片</td><td>S3</td><td>回调 approve</td><td><span class="mono">signal/ship-confirmed</span></td><td>发货闸门推进（CQ-07 守恒）</td><td><span class="mono">order.ship</span>（tenant->ops + warehouse->manage；发货确认走 order 级 ship，仓管经 warehouse_operator 分配）</td><td>全字段</td><td>「已发货」卡片</td><td>超发拒绝 / 409</td></tr>
+    <tr><td>开票</td><td>S3「待开票」/ S4 待办</td><td>S3/S4</td><td>回调 / H5</td><td><span class="mono">signal/invoice-issued</span></td><td>开票闸门（CQ-09 不超发货）</td><td>工作流 assignee（可含 ops；非独立 permission）</td><td>全字段</td><td>「已开票」卡片</td><td>409</td></tr>
+  </table>
+  </div>
+
+  <h4><span class="no">4.5.3</span> 仓管（Warehouse）—— 本仓发货，剥价视图</h4>
+  <p><strong>看见什么</strong>：<strong>仅本仓</strong>分配的发货单（<span class="mono">shipment#warehouse_operator</span>）；通过 <span class="mono">warehouse.staff</span> 获得 <span class="mono">order.view</span> 但<strong>不获得价格字段</strong>——BFF 投影剥价（CQ-03，schema 注释）。数量、仓库分配、收货地址可见。</p>
+  <p><strong>能做什么</strong>：查看待发货、执行<strong>仓库确认</strong>（<span class="mono">shipment.confirm</span>，场景 C）与<strong>发货数量录入</strong>（部分/整批，S1 侧边栏表单，因卡片「是/否」无数量参数故走 H5）、上传发货凭证（场景 C/D）。</p>
+  <p><strong>触发与反馈</strong>：S1 侧边栏发货操作 → <span class="mono">ship-action</span>（含数量）→ 发货闸门推进；S3 仓库确认卡片 → <span class="mono">warehouse-confirm</span> Signal（<span class="mono">shipment.confirm</span>，warehouse_operator + admin）。反馈 = 「已发货」「待回单」卡片。</p>
+
+  <div class="table-wrap">
+  <table>
+    <tr><th>阶段</th><th>企微交互点</th><th>通道</th><th>触发方式</th><th>HTTP API 调用</th><th>流程执行效果</th><th>权限（服务端）</th><th>数据投影</th><th>出站反馈</th><th>幂等 / 失败</th></tr>
+    <tr><td>查看待发货</td><td>S1 侧边栏「本仓发货单」</td><td>S1 H5</td><td>OAuth + 服务端重认证</td><td><span class="mono">GET …/shipments（本仓）</span></td><td>物流视图（<strong>无价格</strong>）</td><td><span class="mono">warehouse_operator</span> / <span class="mono">warehouse->staff</span></td><td>数量/仓库/地址，<strong>剥价</strong></td><td>—</td><td>—</td></tr>
+    <tr><td>仓库确认</td><td>S3「待确认」卡片 通过</td><td>S3</td><td>回调 approve</td><td><span class="mono">signal/warehouse-confirm</span></td><td>仓管闸门推进</td><td><span class="mono">shipment.confirm</span>（warehouse_operator + tenant->admin，场景 C）；<span class="mono">shipment.view</span>（warehouse_operator）</td><td>剥价视图</td><td>「仓库已确认」卡片</td><td>409 幂等</td></tr>
+    <tr><td>发货录入</td><td>S1 表单「发货数量」部分/整批</td><td>S1 H5</td><td>人工输入数量</td><td><span class="mono">ship-action</span>（含数量）</td><td>发货闸门推进（CQ-07）</td><td><span class="mono">warehouse->manage</span> / ship</td><td>剥价视图 + 数量</td><td>「已发货 N 件」卡片</td><td>超发拒绝（守恒）/409</td></tr>
+    <tr><td>回单确认</td><td>S1 上传回单凭证</td><td>S1 H5</td><td>上传凭据</td><td><span class="mono">shipment.append_evidence</span>（场景 C 仓管也可传）</td><td>凭证版本追加</td><td><span class="mono">append_evidence</span>（warehouse_operator）</td><td>剥价视图</td><td>「回单已登记」卡片</td><td>409 重复版本</td></tr>
+  </table>
+  </div>
+
+  <h4><span class="no">4.5.4</span> 财务（Finance）—— 到账确认为主，开票/回单异常按工作流委派</h4>
+  <p><strong>看见什么</strong>：<span class="mono">confirm_payment = reviewer + tenant->accounting + tenant->admin</span> 是财务<em>专属</em>授权——到账确认面向租户全量订单（需价格/账期核算）。订单/回单的<strong>只读复看不天然拥有</strong>（财务不在 <span class="mono">shipment.view</span> / <span class="mono">evidence.view/append</span> 中），依赖租户为其授予 <span class="mono">tenant->ops</span> 或经 <span class="mono">admin</span> 代办。S3 收到「待确认到账」卡片（到账确认为财务硬闸门），开票/回单异常按工作流 assignee 委派（可分配财务或 ops）。</p>
+  <p><strong>能做什么</strong>：<strong>确认到账</strong>（<span class="mono">confirm_payment</span>，财务专属）、承接委派的<strong>开票</strong>（<span class="mono">invoice-issued</span>）与<strong>回单异常</strong>（receipt-exception）闸门——后者为工作流 assignee 判定，非财务专属 permission，与 §4.1 总表「S3 审批卡片 assignee 映射」一致。</p>
+  <p><strong>触发与反馈</strong>：S3 卡片点击 → Signal → 工作流推进（款到才发货、开票不超发货）→ 出站状态卡片。</p>
+
+  <div class="table-wrap">
+  <table>
+    <tr><th>阶段</th><th>企微交互点</th><th>通道</th><th>触发方式</th><th>HTTP API 调用</th><th>流程执行效果</th><th>权限（服务端）</th><th>数据投影</th><th>出站反馈</th><th>幂等 / 失败</th></tr>
+    <tr><td>到账确认</td><td>S3「待确认到账」卡片</td><td>S3</td><td>回调 approve</td><td><span class="mono">signal/payment-confirm</span></td><td>款到闸门（款到单才放行发货）</td><td><span class="mono">confirm_payment</span>（reviewer + tenant->accounting + admin）</td><td>全字段 + 金额（需核算）</td><td>「已到账」卡片</td><td>409 幂等</td></tr>
+    <tr><td>开票</td><td>S3「待开票」/ S4</td><td>S3/S4</td><td>回调 / H5</td><td><span class="mono">signal/invoice-issued</span></td><td>开票闸门（CQ-09 双维度不超发货）</td><td>工作流 assignee（可含财务；非财务专属 permission）</td><td>随授予的视图</td><td>「已开票」卡片</td><td>409</td></tr>
+    <tr><td>回单异常</td><td>S3「回单异常」卡片</td><td>S3</td><td>Timer 触发 → 回调审核</td><td><span class="mono">signal/receipt-ex-review</span></td><td>例外审核（CQ-10）</td><td>工作流 assignee（可含财务）</td><td>随授予的视图</td><td>「回单异常已处理」卡片</td><td>409</td></tr>
+  </table>
+  </div>
+
+  <h4><span class="no">4.5.5</span> 董事长（Chairman）—— C/D 大单终审</h4>
+  <p><strong>看见什么</strong>：租户全量（<span class="mono">tenant->admin</span>），仅 <strong>C/D 大单</strong>（客户等级）进入其终审（具备 <span class="mono">order.approve</span>）。</p>
+  <p><strong>能做什么</strong>：对董事长审批卡（chairman-review）点<strong>通过</strong>或<strong>驳回</strong>。通过后订单放行进入后续备货/发货链。</p>
+  <p><strong>触发与反馈</strong>：S3 卡片 → <span class="mono">chairman-review</span> Signal → 大单终审闸门推进 → 「已批准」/驳回卡片。</p>
+
+  <div class="table-wrap">
+  <table>
+    <tr><th>阶段</th><th>企微交互点</th><th>通道</th><th>触发方式</th><th>HTTP API 调用</th><th>流程执行效果</th><th>权限（服务端）</th><th>数据投影</th><th>出站反馈</th><th>幂等 / 失败</th></tr>
+    <tr><td>C/D 终审</td><td>S3「董事长审批」卡片 通过/驳回</td><td>S3 template_card</td><td>回调 approve/reject</td><td><span class="mono">signal/chairman-review</span></td><td>大单终审闸门推进/终态驳回</td><td><span class="mono">order.approve</span>（tenant->admin）</td><td>全字段（价格/客户等级）</td><td>「已批准」「被驳回」卡片</td><td>409 幂等</td></tr>
+  </table>
+  </div>
+
+  <h4><span class="no">4.5.6</span> 客户联系人（Customer Contact）—— 物流视图，剥金额/内部备注</h4>
+  <p><strong>看见什么</strong>：仅其客户关联发货单（<span class="mono">shipment#customer_contact</span>，场景 D）的<strong>物流视图</strong>——<strong>不显示金额、不显示内部备注</strong>（CQ-03 字段级投影，BFF 剥离；schema 注释明确「客户联系人拥有 shipment.view（物流视图），但不获得价格/内部备注」）。可见发货进度、签收凭证、回单状态。</p>
+  <p><strong>能做什么</strong>：查看物流状态、上传签收/回单凭证（<span class="mono">shipment.append_evidence</span>，场景 D 客户也可传）。<strong>不做业务操作</strong>（不能审批/改单/看价）。</p>
+  <p><strong>触发与反馈</strong>：S1 侧边栏以客户联系人身份进入 → 物流视图查询；上传凭证 → 凭证登记卡片（若开通出站则通知销售）。</p>
+
+  <div class="table-wrap">
+  <table>
+    <tr><th>阶段</th><th>企微交互点</th><th>通道</th><th>触发方式</th><th>HTTP API 调用</th><th>流程执行效果</th><th>权限（服务端）</th><th>数据投影</th><th>出站反馈</th><th>幂等 / 失败</th></tr>
+    <tr><td>物流视图</td><td>S1 侧边栏「我的物流」</td><td>S1 H5</td><td>OAuth + 服务端重认证 + 群/客户上下文</td><td><span class="mono">GET …/shipments（本客户）</span></td><td>物流视图（<strong>剥金额/内部备注</strong>）</td><td><span class="mono">customer_contact</span>（场景 D）</td><td>仅物流/凭证字段</td><td>—</td><td>—</td></tr>
+    <tr><td>凭证上传</td><td>S1 上传签收/回单</td><td>S1 H5</td><td>上传凭据</td><td><span class="mono">shipment.append_evidence</span></td><td>凭证版本追加</td><td><span class="mono">append_evidence</span>（customer_contact）</td><td>仅凭证视图</td><td>「签收已登记」卡片（可选）</td><td>409 重复版本</td></tr>
+  </table>
+  </div>
+
+  <h4><span class="no">4.5.7</span> 系统 / Notifier（非人角色）—— 转接与通知载体</h4>
+  <p>非人角色，承载<strong>入站验签路由</strong>与<strong>出站通知</strong>：
+  <ul>
+    <li><strong>入站</strong>：<span class="mono">VerifyCallback</span> 验签 → <span class="mono">CallbackHandler</span> 解析 EventKey → <span class="mono">HTTPActionClient</span> 调 HTTP API（§4.2），不持有业务权限、不做业务判定。</li>
+    <li><strong>出站</strong>：工作流活动 → Notifier → <span class="mono">Gateway.SendCard</span>，按接收人角色投影生成卡片载荷，消息 ID 落库可追踪（AI 安全边界 ③）。</li>
+    <li><strong>Timers</strong>：24h 预订单升级、无回单 5 天例外、30min void 窗口——由工作流 Timer 触发，经 Notifier 推送催办/回单异常卡片。</li>
+  </ul></p>
+
+  <h4><span class="no">4.5.8</span> 代办与有效期（CQ-13，跨角色）</h4>
+  <p>任何需要<strong>审批/确认</strong>的角色（销售、商务、仓管等）都可被<strong>代办授权</strong>：<span class="mono">DELEGATED_TO</span>（caveat <span class="mono">expiry_ok</span> 有效期）。代理人在企微中的动作与本人等价（<span class="mono">order.delegate</span> / <span class="mono">prestock.delegate</span>），但：
+  <ul>
+    <li>到期前：<span class="mono">delegate</span> 权限生效，代办可审批/确认（卡片 assignee 映射为代办）。</li>
+    <li>到期后（CQ-13 场景 D 403）：<span class="mono">expiry_ok</span> caveat 失败 → 服务端即时拒绝（403），<strong>代办过期不持有残留权限</strong>；Outbox 同步删除 TTL 到期元组。</li>
+    <li>企微视角：到期后代办点击卡片 → <span class="mono">X-User-Id</span> 映射 → SpiceDB <span class="mono">expiry_ok</span> 校验失败 → 409/403 幂等回执「任务已过期」。<strong>不会</strong>因代办过期造成越权推进。</li>
+  </ul></p>
+
+  <blockquote><strong>暂缓段角色流程（§3.0 灰标）</strong>：会话存档<strong>自动拉取</strong>（§2）与意图解析<strong>自动建单</strong>（§3.1）<strong>暂缓</strong>。因此本节<strong>不绘制</strong>「群消息 → 自动捕捉 → 自动生成预订单」自动段；只绘制「<strong>预订单确认卡片 → 正式订单</strong>」人工段（4.5.1 建单-预订单行）——该段是保留主流程，不依赖意图识别。恢复条件满足（§3.0）后，再补充自动捕捉段的销售角色流程。</blockquote>
+
+  <h3><span class="no">4.6</span> 订单履约企微版双 graph（范围收窄到企微版）</h3>
+  <p><strong>本节把目光收窄到「企微加持下的订单履约」</strong>：以 01-core-graph.html 的核心图谱与 spec/philosophy/story.html 的方法论为基底，只保留与企微通道相关的节点与任务，构建<strong>双图</strong>——①<strong>世界知识图谱</strong>（企微版本体的静态结构：谁、经什么通道、看到什么、能做什么、映射到什么 HTTP），②<strong>任务图谱</strong>（企微版 FSM + 编排：状态如何被企微交互推进、闸门如何被人工触发、出站通知何时发出）。双图共同回答 story.html 的判据：图里每个节点/边都对应一个可复现的判定或动作，没有悬空的「魔法」。</p>
+  <p><strong>范围边界（与核心图谱的关系）</strong>：本双图<strong>不再绘制</strong> 01 中与企微无关的通用落地细节（如库存批次内部扣减、开票税率明细），只保留「企微可感知/可触发/可见」的子图；企微 = 转接层，故任务图谱中每个企微交互都以「→ HTTP API」为落点，业务状态机本身在 01；<strong>§3.0 暂缓段</strong>（会话存档自动拉取 → 意图解析自动建单）以<strong>灰色虚线</strong>标注为「未激活」，不属于当前可执行子图。</p>
+
+  <h4><span class="no">4.6.1</span> 世界知识图谱（企微版本体）</h4>
+  <p>节点分四类：<strong>角色</strong>（含非人 Notifier）、<strong>通道</strong>（S1-S4）、<strong>卡片/交互</strong>（卡片 Kind + EventKey）、<strong>HTTP 端点</strong>（转接落点）。边分三类：<strong>可触发</strong>（角色→卡片/端点）、<strong>映射为</strong>（卡片→HTTP 动作）、<strong>投影为/受限于</strong>（角色→可见字段/权限）。暂缓节点 <span class="mono">ArchCache</span>（会话存档自动拉取）与 <span class="mono">IntentAuto</span>（意图自动建单）以灰色虚线标注未激活。</p>
+  <pre class="mermaid">
+flowchart LR
+    subgraph ROLES["角色（世界·静态）"]
+        SALES["归属销售<br/>order.owner"]
+        COMMERCE["商务<br/>tenant->ops"]
+        WAREHOUSE["仓管<br/>warehouse.staff·剥价"]
+        FINANCE["财务<br/>tenant->accounting"]
+        CHAIRMAN["董事长<br/>tenant->admin·C/D"]
+        CONTACT["客户联系人<br/>customer_contact·剥金额/内部备注"]
+        ADMIN["管理员<br/>tenant->admin"]
+        NOTIFIER["系统/Notifier<br/>(非人)"]
+    end
+    subgraph CH["通道 S1-S4"]
+        S1["S1 侧边栏 H5<br/>查订单/查库存/人工下单"]
+        S2["S2 群消息/预订单<br/>确认卡片"]
+        S3["S3 应用消息卡片<br/>审批/催办/状态"]
+        S4["S4 工作台 H5<br/>待办/降级视图"]
+    end
+    subgraph CARD["卡片 Kind + EventKey"]
+        C_PREORDER["预订单确认卡片<br/>preorder:confirm/ignore/modify"]
+        C_APPROVE["审批卡片<br/>approve:|reject:&lt;taskID&gt;"]
+        C_CHAIR["董事长审批卡<br/>chairman-review"]
+        C_PAY["到账卡<br/>payment-confirm"]
+        C_RECEIPT["回单异常卡<br/>receipt-ex-review"]
+        C_ESCALATE["预订单催办卡<br/>Timer 24h 升级"]
+    end
+    subgraph HTTP_EP["HTTP API（转接落点）"]
+        H_ORDERS["POST /api/v1/orders"]
+        H_PREORDER["POST /api/v1/preorders/{id}/signal/preorder-confirm|-ignore"]
+        H_PRICE["signal/price-review"]
+        H_STOCK["signal/stock-prepare-review"]
+        H_SHIP["ship-action / signal/ship-confirmed / warehouse-confirm"]
+        H_PAY["signal/payment-confirm"]
+        H_INV["signal/invoice-issued"]
+        H_CHAIR["signal/chairman-review"]
+        H_RECEIPT["signal/receipt-ex-review"]
+        H_TODO["GET /api/v1/todos（CQ-05）"]
+        H_VIEW["GET /api/v1/orders/{id}（BFF 投影·CQ-03）"]
+        H_APPEND["shipment.append_evidence（凭证只追加·CQ-15）"]
+    end
+    subgraph DEFERRED["§3.0 暂缓（未激活·灰边）"]
+        ARCHCACHE["会话存档自动拉取<br/>Intent 拉取循环"]
+        INTENTAUTO["意图解析自动建单<br/>parse_intent"]
+    end
+
+    SALES -->|"确认/修改/忽略(归属校验)"| C_PREORDER
+    C_PREORDER -->|"映射为"| H_PREORDER
+    SALES -->|"人工下单"| H_ORDERS
+    COMMERCE -->|"审价/备货/发货确认"| C_APPROVE
+    COMMERCE -->|"映射为"| H_PRICE
+    COMMERCE -->|"映射为"| H_STOCK
+    WAREHOUSE -->|"仓库确认/发货录入"| H_SHIP
+    WAREHOUSE -->|"投影为·剥价"| H_VIEW
+    FINANCE -->|"到账/开票/回单异常"| C_PAY
+    FINANCE -->|"映射为"| H_PAY
+    FINANCE -->|"映射为"| H_INV
+    FINANCE -->|"映射为"| H_RECEIPT
+    CHAIRMAN -->|"C/D 大单终审"| C_CHAIR
+    CHAIRMAN -->|"映射为"| H_CHAIR
+    CONTACT -->|"物流视图·剥金额/内部备注"| H_VIEW
+    CONTACT -->|"上传凭证"| H_APPEND
+    WAREHOUSE -->|"回单凭证"| H_APPEND
+    NOTIFIER -->|"出站 SendCard"| S3
+    NOTIFIER -->|"入站验签→EventKey→HTTP"| H_ORDERS
+    S1 -->|"投影为"| H_VIEW
+    S4 -->|"查询待办"| H_TODO
+    C_RECEIPT -->|"映射为"| H_RECEIPT
+    NOTIFIER -->|"Timer 触发"| C_ESCALATE
+    ARCHCACHE -.->|"暂缓:自动拉取"| INTENTAUTO
+    INTENTAUTO -.->|"暂缓:自动建单"| C_PREORDER
+  </pre>
+
+  <h4><span class="no">4.6.2</span> 任务图谱（企微版 FSM + 编排）</h4>
+  <p>任务图谱回答「<strong>一笔订单在企微加持下如何被一步步推进</strong>」。它以 01 的订单主链状态机（ORD/STK/SHP/INV）为基座，叠加<strong>人工闸门</strong>（每个闸门都要卡片/表单确认）、<strong>出站通知时序</strong>、<strong>预订单确认子流程</strong>。<strong>自动捕捉段（灰边虚线）</strong>未激活：当前只有「预订单确认卡片 → 正式订单」人工段生效。每个状态迁移的「原因」都落到一次 HTTP 调用或出站事件（story.html 的可复现证据）。</p>
+  <pre class="mermaid">
+flowchart LR
+    subgraph PREORDER["预订单子流程（S2 人工段·保留）"]
+        PO["预订单 PENDING_CONFIRM"]
+        PO -->|"确认 preorder-confirm"| ORDER["正式订单 ORDER_REQUESTED"]
+        PO -->|"修改 preorder-confirm{confirmed:false}"| PO2["重新候选"]
+        PO -->|"忽略 preorder-ignore"| POGONE["忽略终态"]
+        PO -->|"Timer 24h"| ESC["催办(抄送主管)"]
+        ESC --> PO
+    end
+    subgraph MAIN["订单主链（01 状态机·企微闸门）"]
+        ORDER -->|"审价 price-review"| PRICED["价格已审"]
+        PRICED -->|"(C/D 大单) chairman-review"| CHAIR["董事长批"]
+        CHAIR -->|"stock-prepare-review"| STK["备货"]
+        STK -->|"ship-action / ship-confirmed / warehouse-confirm"| SHP["发货"]
+        SHP -->|"invoice-issued"| INV["开票"]
+        FINANCE_B["财务支付确认"] -->|"payment-confirm(款到)"| PRICED
+    end
+    subgraph OUTBOUND["出站通知时序（Notifier）"]
+        E1["订单创建"]-->N1["已创建卡→销售"]
+        E2["审价通过"]-->N2["已审价卡→销售"]
+        E3["发货"]-->N3["已发货卡→销售/仓管"]
+        E4["无回单5天"]-->N4["回单异常卡→财务/销售"]
+        N2 --> N3
+    end
+    ORDER -.->|"暂缓:自动建单段"| PO
+  </pre>
+
+  <p><strong>双图如何回读（Roundtrip）</strong>：世界知识图谱 ↔ schema.zed 四种授权对象（每个角色节点都能在 SpiceDB 找到对应 permission，每个投影边都能在 BFF 投影器找到实现）；任务图谱 ↔ 01 状态机 + tests/l2_e2e（每个闸门迁移都有对应 Signal 测试，W5 回调转接、L2-12 预订单链、L2-13 24h 升级、L1-14 游标）。任何「机器人说了算、无人确认」的捷径在图里都不存在——<strong>每个正式订单之前必有一个人工确认节点</strong>（story.html 哲学 ①）。</p>
+  <blockquote><strong>暂缓段在图中的处理</strong>：世界知识图谱中 <span class="mono">ArchCache</span>（会话存档自动拉取）与 <span class="mono">IntentAuto</span>（意图自动建单）以灰色虚线标注「未激活」；任务图谱中「订单 ← 自动建单段」也以灰色虚线标明由 §3.0 暂缓排除。这些节点是<strong>设计态存在、运行态未激活</strong>，恢复条件满足后（§3.0 四项）由维护者将灰边转实、补对应测试。</blockquote>
+
+  <h2 id="s4"><span class="no">5 ·</span> 出站通道设计（S3 + S2 确认）</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>通道</th><th>用途</th><th>关键点</th></tr>
+    <tr><td>应用消息 <span class="mono">template_card</span></td><td>审批通知 / 催办 / 状态卡片（S3）；预订单确认卡片（S2）</td><td>点击回调验签（query 签名 + 加密 body）；按钮 <span class="mono">key</span> 携带 task/pre_order 上下文</td></tr>
+    <tr><td>客户群消息（<span class="mono">appchat</span> 应用消息群发）</td><td>向客户群反馈处理结果</td><td><strong>按租户核验</strong>：消息绑定租户，跨租户禁止；需群主/管理员配置</td></tr>
+    <tr><td><span class="mono">response_url</span></td><td>机器人被动回复后的主动补充</td><td>1 小时一次性；幂等键防重</td></tr>
+    <tr><td>业务链接 H5</td><td>兜底：超时/复杂场景转人工界面</td><td>跳转 S1 侧边栏/H5</td></tr>
+  </table>
+  </div>
+  <p><strong>上下文绑定表 <span class="mono">wecom_context_bindings</span></strong>（对应 02-architecture.html §3.1）：<span class="mono">(tenant_id, external_user_id/group_id, binding)</span>，记录「客户群/外部用户 → 租户 + 归属销售」的绑定关系——客户群消息按租户核验（出站不可跨租户）、消息发送者权限判定（§3.2 权限校验）都以该表为输入。</p>
+  <p><strong>审批链通知映射</strong>（S3）：主管审价 → 卡片「待审价」；仓管确认 → 「待确认」；财务到账 → 「待确认到账」；无回单 5 天 → 「回单异常」；24h 未确认预订单 → 「催办」。点击即调审批 Signal，全链留痕。</p>
+
+  <h2 id="s5"><span class="no">6 ·</span> S1 侧边栏 / S4 工作台 H5</h2>
+
+  <h3><span class="no">6.1</span> 侧边栏（S1）<strong style="color:#1a7f37;"> ✅ 服务端能力已实现（2026-08-07）</strong></h3>
+  <p><strong>服务端能力</strong>（<span class="mono">internal/wecom/jsapi.go</span> + cmd/api：<span class="mono">GET /api/v1/wecom/jsapi-config</span> 双签名、<span class="mono">POST /api/v1/auth/exchange</span> OAuth 交换、<span class="mono">X-WeCom-Context</span> 服务端签发校验；对齐 v2 bff-api；W6 E2E）。<strong>前端 H5</strong>（三入口分流 / ww.register 双签名 / 会话缓存）参考 v2 <span class="mono">apps/wecom-miniapp</span>，属外部前端工程，不在本仓库范围。</p>
+  <ul>
+    <li>三入口分流：单聊 <span class="mono">single_chat_tools</span> / 客户群 <span class="mono">group_chat_tools</span> / 工作台 <span class="mono">normal</span>；JS-SDK <span class="mono">ww.register</span> 企业签名 + <span class="mono">ww.agentConfig</span> 应用签名双票据。</li>
+    <li>OAuth <span class="mono">snsapi_base</span> 静默授权；服务端重新授权身份 + 上下文（客户/群），<strong>不信任前端传入身份</strong>。</li>
+    <li>能力：查订单/查库存/人工下单（复用 API 层，授权经 SpiceDB）。</li>
+  </ul>
+
+  <h3><span class="no">6.2</span> 工作台（S4）</h3>
+  <ul>
+    <li>无群上下文的安全降级视图（待办列表、消息中心）；不做敏感操作，只做跳转。</li>
+  </ul>
+
+  <h3><span class="no">6.3</span> 通用要求</h3>
+  <ul>
+    <li>可信域名/回调域：<strong>公网 HTTPS + ICP 备案</strong>，不支持 IP、不填 localhost；本地联调用 HTTPS 反向代理（移动端不走 hosts）。</li>
+    <li>OAuth 回调域与 JS-SDK 域名一致；Token + 43 位 EncodingAESKey 配置管理。</li>
+    <li>URL 验证：GET 1 秒内响应解密 echostr（不能加引号/BOM/换行）；消息回调 POST body 为 <span class="mono">{"encrypt":...}</span>，签名在 query。</li>
+  </ul>
+
+  <h2 id="s7"><span class="no">7 ·</span> 多备案切换管理（本文档独立存在的核心理由）</h2>
+
+  <h3><span class="no">7.1</span> 问题定义</h3>
+  <p>每个租户 = 一个企微企业 = 一套独立配置：<strong>ICP 备案域名 + 证书 + 自建应用（AgentID/Secret）+ Token/EncodingAESKey + 会话存档密钥对 + 回调地址</strong>。客户接入/切换时，备案主体、域名、应用参数全部更换；若把企微配置硬编码进主设计，切换一次就要改核心文档与代码。</p>
+
+  <h3><span class="no">7.2</span> 配置模型</h3>
+  <pre><code># 租户级企微配置（示例，实际存 DB 或加密配置文件，按租户加载）
+tenants:
+  chang-an:                    # 长安仁恒
+    corp_id: ww-xxxx
+    domain: wecom.changan.example.com      # 该租户 ICP 备案域名
+    tls_cert: ref://certs/changan.pem
+    app:
+      agent_id: 1000002
+      secret: ref://secrets/changan-app
+      token: ref://secrets/changan-token
+      encoding_aes_key: ref://secrets/changan-aes
+    archive:                   # 会话存档
+      enabled: true
+      publickey_ver: 4
+      private_keys: [ref://secrets/changan-archive-v4, ref://secrets/changan-archive-v3]
+      cursor_ckpt: chang-an
+  zhichu:                      # 智厨（演示对照，接入时启用）
+    domain: wecom.zhichu.example.com
+    ...</code></pre>
+
+  <h3><span class="no">7.3</span> 切换流程（接入新客户）</h3>
+  <ol>
+    <li>新租户备案域名就绪（ICP + HTTPS 证书）→ 写入配置。</li>
+    <li>企微侧创建自建应用 / 配置回调域 → 回填 <span class="mono">app</span> 配置。</li>
+    <li>会话存档开通 + 密钥对生成 → 回填 <span class="mono">archive</span> 配置（保留历史 <span class="mono">publickey_ver</span> 私钥）。</li>
+    <li><span class="mono">cmd/wecom</span> 按 <span class="mono">Host/CorpId</span> 路由到租户配置（回调域名天然隔离），配置热加载。</li>
+    <li>切换验证：<span class="mono">GET /wecom/healthz/&lt;tenant&gt;</span> 探测三通道（存档拉取 / 回调验签 / 出站）。</li>
+  </ol>
+
+  <h3><span class="no">7.4</span> 隔离与安全</h3>
+  <ul>
+    <li>回调域名隔离 → 请求按 <span class="mono">Host</span> 路由租户，<strong>跨租户配置不可达</strong>。</li>
+    <li>密钥一律引用外部存储（KMS/环境变量），不入代码库。</li>
+    <li>租户级审计：存档拉取断点、出站消息、私钥访问、原始聊天访问全部留痕（复用 CQ-12 事件链纪律）。</li>
+    <li>多备案的<strong>测试环境</strong>：用企微沙箱/测试企业 + HTTPS 隧道（如 cloudflared）模拟备案域名，CI 中仅 L1 级覆盖（L1-14 游标测试 + 回调验签单测），真实备案域名的进程级 E2E 在 Phase 3 人工验收。</li>
+  </ul>
+
+  <h2 id="s8"><span class="no">8 ·</span> 安全与合规清单</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>项</th><th>要求</th></tr>
+    <tr><td>入站验签</td><td>回调 URL 验证 + 消息体解密 + 重放防护（msgid/时间戳）</td></tr>
+    <tr><td>出站验签</td><td>response_url 一次性、应用消息按租户核验</td></tr>
+    <tr><td>密钥管理</td><td>私钥仅存 KMS/环境变量；存档私钥按 publickey_ver 保留历史</td></tr>
+    <tr><td>合规</td><td>企业认证、付费开通、员工知情同意、外部联系人同意、同意事件留痕</td></tr>
+    <tr><td>审计</td><td>原始聊天存<strong>独立加密可过期存档</strong>（TTL + 清理任务）、访问审计；事件链仅存意图特征与 <span class="mono">archive_ref</span>；存档游标可回放；拉取断点监控</td></tr>
+    <tr><td>AI 边界</td><td>LLM 只产候选、确定性校验、人工确认硬闸门、低置信只轻提醒</td></tr>
+  </table>
+  </div>
+  <blockquote><strong>原始聊天留存策略</strong>（对齐原系统 <span class="mono">external_instances.response_evidence_path</span> 模式）：原始消息文本不进入业务库与事件链——<span class="mono">PreOrderCaptured</span> 事件仅记录意图特征（intent_features：SKU 候选/数量/置信度）与存档引用（archive_ref）；原始文本存入独立加密存储（可配置 TTL，如 30 天），配定期清理任务与访问审计；删除清理不影响事件链回放与合规审计。合规验收证据 = 业务库零原始文本的静态检查 + 清理任务执行日志。</blockquote>
+
+  <h2 id="s9"><span class="no">9 ·</span> 测试要点与验收门禁（对应 03-testing.html）</h2>
+
+  <h3><span class="no">9.1</span> 自动化主矩阵（纳入正式 Score Card）</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>用例</th><th>级别</th><th>验证内容</th><th>验收属性</th></tr>
+    <tr><td class="mono">L1-14</td><td>L1</td><td>存档游标 checkpoint 原子性（模拟拉取中断/重启）——<strong>独立保留</strong>（游标基础设施，不依赖意图识别）</td><td>主矩阵</td></tr>
+    <tr><td class="mono">L2-12</td><td>L2</td><td>预订单全链：预订单 → 确认 → 正式订单（幂等重放；<span class="mono">tests/l2_e2e TestE2EPreOrderChain</span>）——「消息 →」自动解析段随 §3.0 暂缓（<span class="mono">-tags deferred</span>）</td><td>主矩阵</td></tr>
+    <tr><td class="mono">L2-13</td><td>L2</td><td>24h Timer 升级（ESCALATED；保留，预订单确认闸门主流程）</td><td>主矩阵</td></tr>
+    <tr><td class="mono">L0-05/08/10</td><td>L0</td><td>预订单 FSM、幂等键、分流判定（纯函数；保留）</td><td>主矩阵</td></tr>
+    <tr><td class="mono">W5 回调 → 流程动作转接</td><td>L2</td><td>EventKey 路由 → HTTP API 动作（approve/reject/preorder-confirm/ignore/modify）：验签后动作执行、未知前缀拒绝、幂等回执（§4.2）</td><td><strong>主矩阵 ✅ 已落地</strong>（tests/l2_e2e <span class="mono">TestE2EWeComCallbackAdapter</span>：回调驱动订单全链/驳回/预订单确认/修改/幂等回执）</td></tr>
+    <tr><td><strong>W1 回调验签与解密</strong></td><td>L1</td><td>回调验签（篡改/重放拒绝）、两段解密（错误密钥/密钥轮换按 publickey_ver）</td><td><strong>正式验收门禁</strong></td></tr>
+    <tr><td><strong>W2 多租户配置隔离</strong></td><td>L3</td><td>租户 A 配置不可被租户 B 请求命中（Host/CorpId 路由 + 跨租户拒绝）</td><td><strong>正式验收门禁</strong></td></tr>
+  </table>
+  </div>
+  <blockquote>W1/W2 已从「补充用例」升级为<strong>正式验收门禁</strong>（M8 DoD 必绿项），不再独立于主矩阵编号；「回调验签」「多租户隔离」是本项目对外承诺（企微接入安全性 + 多备案切换）的核心证据。</blockquote>
+
+  <h3><span class="no">9.2</span> 真实环境 E2E 门禁（Phase 3 人工验收，Fake 门禁证据化）</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>门禁</th><th>内容</th><th>Fake 门禁（自动化前置）</th><th>真实环境（Phase 3 人工）</th></tr>
+    <tr><td><strong>W3 会话存档拉取 E2E</strong></td><td>真实企业 + 备案域名端到端（拉取→解密→预订单→确认卡片）</td><td>Mock 通道全链全绿（L1-14 + L2-12/13 + W1）</td><td>沙箱/测试企业 + HTTPS 隧道人工验收，<strong>单独记录证据</strong></td></tr>
+    <tr><td><strong>W4 S1-S4 交互 E2E</strong></td><td>侧边栏 / 群消息 / 应用卡片 / 工作台真实交互</td><td>H5 路由 + 双票据 + 回调 Mock 全绿</td><td>真实企微客户端人工验收，<strong>单独记录证据</strong></td></tr>
+  </table>
+  </div>
+  <blockquote>诚实声明（同 pilot_app 复盘 R6 教训）：真实 E2E 不入自动化门禁，但<strong>必须显式记录未覆盖清单与验收证据</strong>——不得以「Fake 全绿」冒充真实可用；Fake 全绿是真实验收的<strong>前置条件</strong>而非替代。</blockquote>
+
+  <h2 id="s10"><span class="no">10 ·</span> 部署与接手指南</h2>
+  <p>目的：让接手的同事<strong>三分钟起环境、一条命令跑企微测试、按清单部署真实企微</strong>。
+  三路径总览：</p>
+  <div class="table-wrap"><table>
+    <tr><th>路径</th><th>形态</th><th>企微通道</th><th>起环境</th><th>验证</th></tr>
+    <tr><td>① 本地开发</td><td>go run（cmd/api + cmd/wecom）</td><td class="mono">mock</td><td><span class="mono">make up</span>（测试 PG）→ <span class="mono">go run ./cmd/api</span></td><td><span class="mono">curl :18080/healthz</span>；<span class="mono">make test-tests</span></td></tr>
+    <tr><td>② 容器部署（演示/验收）</td><td>docker compose 8 服务</td><td class="mono">mock</td><td><span class="mono">docker compose up -d --build</span>（api :18080 / wecom :18081）</td><td><span class="mono">make test-tests</span> + <span class="mono">make test-wecom</span>；<span class="mono">scripts/fullchain</span> 全链 demo</td></tr>
+    <tr><td>③ 真实企微（测试企业）</td><td>docker compose + official 通道</td><td class="mono">official</td><td>按 §10.2 清单配置环境变量与回调</td><td>§10.3 验证步骤 + W3/W4 人工验收（§9.2）</td></tr>
+  </table></div>
+
+  <h3><span class="no">10.1</span> 测试入口速查（L 层 / 企微 W 系列）</h3>
+  <div class="table-wrap"><table>
+    <tr><th>命令</th><th>内容</th><th>覆盖/风险评估位置</th></tr>
+    <tr><td class="mono">make test-tests-l0</td><td>L0 黑盒契约（FSM/守恒/幂等/回单分流/接入层/模型 snake_case）</td><td>docs/09 §2</td></tr>
+    <tr><td class="mono">make test-tests-l1</td><td>L1 HTTP×真 PG（幂等/跨租户/事件链/凭证）</td><td>docs/09 §1</td></tr>
+    <tr><td class="mono">make test-tests-l2</td><td>L2 全业务流 E2E（21 用例，含 W5/W6）</td><td>docs/09 §2</td></tr>
+    <tr><td class="mono">make test-tests-l3</td><td>L3 系统验证（seeddata/reconcile/audit/concurrency + 覆盖率门禁）</td><td>docs/03 §L3 行</td></tr>
+    <tr><td class="mono">make test-wecom</td><td>企微 W 系列：W1/W2 单测 + W5/W6 E2E + deferred 回归（mock 全覆盖）</td><td>docs/09 §2 企微行；tests/README「企微 L 层」</td></tr>
+    <tr><td class="mono">go run ./scripts/fullchain</td><td>HTTP API 全流程可运行 demo（22 步，退出码验收）</td><td>docs/09 §4</td></tr>
+    <tr><td class="mono">make cover</td><td>覆盖率门禁（全仓 ≥85% + domain 100% 硬门禁 + 8 包齐全）</td><td>docs/03 §3</td></tr>
+  </table></div>
+
+  <h3><span class="no">10.2</span> 真实企微部署清单（路径 ③）</h3>
+  <ol>
+    <li><strong>前置申请</strong>（企业微信管理后台 / 开发者中心）：创建<strong>自建应用</strong>，取得 <span class="mono">corp_id</span>（企业 ID）、<span class="mono">agent_id</span>（应用 ID）、<span class="mono">secret</span>（应用密钥）；配置<strong>接收消息服务器</strong>：回调 URL（<span class="mono">https://&lt;备案域名&gt;/wecom/callback/&lt;tenant_id&gt;</span>）、<span class="mono">token</span>、<span class="mono">encoding_aes_key</span>（43 位随机 base64）；配置<strong>网页授权及 JS-SDK 可信域名</strong>（S1 侧边栏）、<strong>可信 IP</strong>（服务器出口 IP，access_token 调用白名单）。</li>
+    <li><strong>租户配置</strong>：复制 <span class="mono">config/wecom-tenant.example.json</span> → <span class="mono">wecom-tenant.json</span>，填入上述值（<span class="mono">archive.enabled=false</span> 时存档段不启用——会话存档需企业认证 + 单独开通，属 §3.0 暂缓段前置）。</li>
+    <li><strong>部署</strong>：<span class="mono">docker compose up -d --build</span> 后设置并重启 wecom 服务：
+      <pre><code class="language-bash">docker compose exec wecom env \
+  B2B_WECOM_PROVIDER=official \
+  B2B_WECOM_TENANT_CFG=/config/wecom-tenant.json \
+  B2B_API_ADDR=http://api:8080 \
+  # 或写入 compose 环境变量后 docker compose up -d wecom
+</code></pre>
+      <span class="mono">wecom-tenant.json</span> 挂载进容器（compose volume）。回调链路：企微 → 回调域名（HTTPS 反向代理）→ wecom 服务 :18081 → <span class="mono">VerifyCallback</span> 验签 → <span class="mono">CallbackHandler</span> → HTTP API（<span class="mono">B2B_API_ADDR</span>）。</li>
+  </ol>
+
+  <h3><span class="no">10.3</span> 验证步骤（真实企微测试企业）</h3>
+  <ol>
+    <li><span class="mono">curl https://&lt;域名&gt;/wecom/healthz</span> → <span class="mono">{"status":"ok","provider":"official"}</span>（容器内 <span class="mono">curl :18081/wecom/healthz</span> 等价）。</li>
+    <li>企微后台「接收消息服务器」点<strong>保存</strong> → 企微发送 URL 验证请求 → wecom 服务 <span class="mono">VerifyURL</span> 应答（W1 已用同算法单测覆盖；此处验证真实密钥）。</li>
+    <li><strong>W3 门禁（会话存档）</strong>：archive.enabled=false 时明确不启用（暂缓段，§3.0）；恢复条件满足后按 §2.3 配 <span class="mono">private_keys/secret</span> 并人工验收。</li>
+    <li><strong>W4 门禁（S1-S4 交互）</strong>：侧边栏入口（三入口分流 + 双票据签名 + OAuth exchange → 查订单）、应用消息卡片（审批点击 → 回调 → 流程推进，对照 W5 语义）、S2 确认卡片。逐项记录证据（截图 + 日志 + 时间戳）到 §9.2 表格。</li>
+    <li><strong>出站通知</strong>：走完一笔订单（对照 <span class="mono">scripts/fullchain</span> 的信号序列，用 H5/接口驱动），核对审批/状态/回单异常卡片到达对应成员。</li>
+  </ol>
+
+  <h3><span class="no">10.4</span> 故障排查速查</h3>
+  <div class="table-wrap"><table>
+    <tr><th>现象</th><th>原因/检查</th></tr>
+    <tr><td>official 启动报 <span class="mono">B2B_WECOM_TENANT_CFG 必需</span></td><td>未提供租户配置 JSON（§10.2 步骤 2）</td></tr>
+    <tr><td>回调 URL 验证失败</td><td>token/encoding_aes_key 与后台不一致；域名未备案/未解析；反向代理未透传 query 与 body</td></tr>
+    <tr><td>access_token 报 40102/40013</td><td>corp_id/secret 错误或服务器 IP 不在可信 IP 白名单</td></tr>
+    <tr><td>卡片按钮点击无反应</td><td>回调 EventKey 未达 <span class="mono">B2B_API_ADDR</span>（wecom→api 网络）；动作 502 = 信号被 API 层拒绝（任务已决/状态不匹配，幂等语义，对照 07 §4.2）</td></tr>
+    <tr><td>S1 双签名报 invalid signature</td><td>jsapi-config 的 url 参数必须为 H5 当前完整 URL（含 hash 前部分）；可信域名未配置</td></tr>
+  </table></div>
+
+  <footer class="colophon">
+    <span><a href="index.html">← Docs Index</a></span>
+    <span>07 · WeCom Integration · B2B Order Fulfillment</span>
+  </footer>
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad:true, theme:'base',
+    themeVariables:{
+      fontFamily:"'Noto Serif SC','Source Serif Pro',serif",
+      primaryColor:'#efeee5', primaryBorderColor:'#1B365D', primaryTextColor:'#1f1d18',
+      lineColor:'#1B365D', secondaryColor:'#f5f4ed', tertiaryColor:'#f5f4ed',
+      edgeLabelBackground:'#f5f4ed', clusterBkg:'#f5f4ed', clusterBorder:'#d4d1c5',
+      stateBkg:'#efeee5', stateBorder:'#1B365D', stateLabel:'#1f1d18',
+      stateLabelColor:'#1f1d18', labelTextColor:'#1f1d18', transitionLabelColor:'#1f1d18',
+      actorBkg:'#efeee5', actorBorder:'#1B365D', actorTextColor:'#1f1d18', actorLineColor:'#1B365D',
+      noteBkg:'#efeee5', noteBorder:'#d4d1c5'
+    },
+    flowchart:{curve:'basis'}, er:{useMaxWidth:true}
+  });
+  // 补齐 <code class="language-mermaid"> 块（时序图/路由图）的渲染：startOnLoad 只处理 .mermaid 类
+  mermaid.run({ querySelector: 'code.language-mermaid' }).catch(() => {});
+</script>
+</body>
+</html>

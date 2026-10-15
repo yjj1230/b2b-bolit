@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>架构验证：平台骨架 × 业务内核 融合分析</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({ startOnLoad: true, theme: "base", securityLevel: "loose",
+      themeVariables: {
+        primaryColor: "#eaf2f5", primaryBorderColor: "#527581", primaryTextColor: "#17252a",
+        secondaryColor: "#eef4eb", tertiaryColor: "#fff4df", lineColor: "#7b8a8e",
+        clusterBkg: "#f8faf9", clusterBorder: "#cfd9d7",
+        fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif", fontSize: "14px"
+      }, flowchart: { curve: "basis", htmlLabels: true, useMaxWidth: true }
+    });
+  </script>
+  <style>
+    :root {
+      --ink: #17252a; --muted: #637176; --canvas: #f4f6f4; --paper: #ffffff; --line: #d5dddb;
+      --teal: #315f6b; --teal-soft: #eaf2f5; --green: #587252; --green-soft: #eef4eb;
+      --amber: #986c2d; --amber-soft: #fff4df; --red: #98524b; --red-soft: #fbeeed;
+      --purple: #6b4f8a; --purple-soft: #f3edf8; --service: #2e6780; --service-soft: #e6f0f5;
+    }
+    * { box-sizing: border-box; } html { scroll-behavior: smooth; }
+    body { margin: 0; color: var(--ink); background: var(--canvas);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; line-height: 1.73; }
+    .page { max-width: 1140px; margin: 0 auto; padding: 44px 24px 64px; }
+    header { position: relative; overflow: hidden; padding: 40px 44px 36px; color: #f4f9f9; background: #1a3b44; border-radius: 8px; box-shadow: 0 14px 36px rgba(23, 37, 42, 0.07); }
+    .eyebrow { margin: 0 0 9px; color: #b3d2d9; font-size: 13px; font-weight: 700; }
+    h1 { margin: 0; max-width: 840px; font-size: clamp(28px, 4.2vw, 44px); line-height: 1.16; }
+    .lead { max-width: 820px; margin: 18px 0 0; color: #d0dfe2; font-size: 15px; }
+    .hero-line { width: 64px; height: 3px; margin-top: 22px; background: #d5a85d; }
+    .verdict { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; margin-top: 26px; background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.14); }
+    .verdict div { min-height: 82px; padding: 14px 16px; background: rgba(26,59,68,.88); }
+    .verdict strong { display: block; color: #ffffff; font-size: 15px; }
+    .verdict span { display: block; margin-top: 4px; color: #b5cfd4; font-size: 12px; line-height: 1.5; }
+    nav { display: flex; flex-wrap: wrap; gap: 5px; margin: 12px 0 0; }
+    nav a { padding: 6px 10px; color: var(--teal); background: var(--teal-soft); border: 1px solid #ccdde3; border-radius: 5px; text-decoration: none; font-size: 13px; font-weight: 600; }
+    nav a:hover { background: #d7e8ee; }
+    section { margin-top: 22px; padding: 28px 34px; background: var(--paper); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 4px 20px rgba(23,37,42,0.03); }
+    h2 { margin: 0 0 12px; padding-bottom: 8px; border-bottom: 2px solid var(--teal-soft); color: var(--teal); font-size: 21px; }
+    h3 { margin: 28px 0 10px; font-size: 16px; color: var(--ink); } h3:first-child { margin-top: 0; }
+    p { margin: 8px 0; font-size: 14px; } .desc { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+    .callout { margin: 16px 0; padding: 13px 17px; border-left: 4px solid var(--teal); background: var(--teal-soft); border-radius: 0 6px 6px 0; font-size: 14px; color: #314054; }
+    .callout.green { border-left-color: var(--green); background: var(--green-soft); } .callout.green strong { color: var(--green); }
+    .callout.amber { border-left-color: var(--amber); background: var(--amber-soft); }
+    .callout.red { border-left-color: var(--red); background: var(--red-soft); }
+    .callout.service { border-left-color: var(--service); background: var(--service-soft); }
+    .callout strong { color: var(--teal); } .callout.service strong { color: var(--service); }
+    .mermaid-wrap { width: 100%; overflow-x: auto; padding: 12px 4px; background: #fcfdfd; border: 1px solid #edf1f4; border-radius: 8px; }
+    .mermaid { min-width: 680px; display: flex; justify-content: center; } .caption { margin: 6px 0 0; color: var(--muted); font-size: 12px; text-align: center; }
+    table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 13px; background: var(--paper); }
+    th, td { padding: 10px 12px; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { background: var(--teal-soft); color: var(--teal); font-weight: 700; white-space: nowrap; }
+    td:first-child { font-weight: 600; } tr:nth-child(even) td { background: #fafcfb; }
+    .yes { color: var(--green); font-weight: 700; } .partial { color: var(--amber); font-weight: 700; }
+    .pillar-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 14px 0; }
+    .pillar-card { padding: 16px; background: #f8faf9; border: 1px solid var(--line); border-radius: 6px; border-top: 3px solid var(--teal); }
+    .pillar-card.service-card { border-top-color: var(--service); }
+    .pillar-card h4 { margin: 0 0 6px; font-size: 14px; }
+    .pillar-card p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+    .pillar-card .score { display: block; margin-bottom: 8px; font-size: 11px; font-weight: 700; }
+    .pillar-card .score.excellent { color: var(--green); } .pillar-card .score.good { color: var(--teal); }
+    .fusion-item { margin: 12px 0; padding: 15px 18px; background: var(--green-soft); border: 1px solid #cddcc7; border-radius: 6px; }
+    .fusion-item h4 { margin: 0 0 6px; color: var(--green); font-size: 14px; } .fusion-item p { margin: 0; font-size: 13px; }
+    .gap-item { margin: 12px 0; padding: 15px 18px; background: var(--red-soft); border: 1px solid #e6c9c6; border-radius: 6px; }
+    .gap-item.amber { background: var(--amber-soft); border-color: #e8d8b5; }
+    .gap-item h4 { margin: 0 0 6px; color: var(--red); font-size: 14px; }
+    .gap-item.amber h4 { color: var(--amber); } .gap-item p { margin: 0; font-size: 13px; }
+    .path-trace { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+    .path-trace > div { padding: 18px; border: 1px solid var(--line); border-radius: 6px; }
+    .path-trace > div:first-child { border-top: 4px solid var(--amber); }
+    .path-trace > div:last-child { border-top: 4px solid var(--purple); }
+    .path-trace h4 { margin: 0 0 8px; font-size: 14px; }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .evo-stage { display: grid; grid-template-columns: 60px minmax(0, 1fr); gap: 0; margin: 8px 0; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+    .evo-stage .stage-num { display: flex; align-items: center; justify-content: center; background: var(--teal); color: #fff; font-size: 20px; font-weight: 700; }
+    .evo-stage .stage-body { padding: 14px 16px; background: #f8faf9; }
+    .evo-stage .stage-body h4 { margin: 0 0 4px; font-size: 14px; }
+    .evo-stage .stage-body p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+    footer { margin-top: 28px; color: var(--muted); text-align: center; font-size: 12px; }
+    @media (max-width: 800px) { .page { padding: 24px 14px; } header, section { padding: 24px 20px; } .verdict { grid-template-columns: 1fr; } .pillar-grid, .path-trace, .two-col { grid-template-columns: 1fr; } .evo-stage { grid-template-columns: 44px 1fr; } }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <p class="eyebrow">ARCHITECTURE VALIDATION</p>
+      <h1>平台骨架能否承载业务内核？</h1>
+      <p class="lead">
+        将平台架构——核心领域层为语义心脏、业务服务层为三层粒度引擎、两条数据供应链为动脉、LLM Wiki 为个人记忆——
+        放入业务对话的上下文，逐一验证：每一层是否真正加速了业务？ 三条张力和四个决策点是否被架构化解？
+      </p>
+      <div class="hero-line"></div>
+      <div class="verdict">
+        <div><strong>✅ 可以承载</strong><span>工单驱动 · 领域中枢 · 三层服务粒度 · 双供应链——与业务内核高度匹配</span></div>
+        <div><strong>⚠ 三个补丁</strong><span>工单需"会话"扩展 · Wiki审批链需运营落地 · 流程服务与工单的关系需细化</span></div>
+        <div><strong>🎯 路径已收敛</strong><span>渐进变革和Agent原生共用同一领域层+服务层，在架构层面不再矛盾</span></div>
+      </div>
+      <nav>
+        <a href="#recap">架构速览</a>
+        <a href="#mapping">模块映射</a>
+        <a href="#tensions">张力与决策点</a>
+        <a href="#pillars">底座验证</a>
+        <a href="#fusion">融合点</a>
+        <a href="#gaps">断层</a>
+        <a href="#evolution">演进路径</a>
+      </nav>
+    </header>
+
+    <!-- ========== 一、架构速览 ========== -->
+    <section id="recap">
+      <h2>一、要验证的架构</h2>
+      <p class="desc">
+        平台采用六层星型拓扑。中枢（核心领域层）定义所有业务对象、装配两供应链数据、执行字段级授权。
+        <strong>引擎（业务服务层）以三层粒度承接编排：</strong>原子服务（单个不可拆能力）、流程服务（原子+审批+决策预组合）、Agent 自主编排（基于上下文自由选取）。
+        LLM Wiki 存于内部供应链，是 Agent 和个人私有记忆。统一网关是外部供应链的唯一通道。
+      </p>
+      <div class="mermaid-wrap">
+        <div class="mermaid">
+flowchart TB
+    subgraph Top["上层 · 需求入口与编排"]
+        A["场景入口层"] --> T["工单服务层"]
+        T --> B["业务服务层<br/>原子服务 · 流程服务 · Agent自主编排"]
+    end
+    subgraph Heart["中枢"]
+        C["★ 核心领域层<br/>对象 · 关系 · 装配 · 授权"]
+    end
+    subgraph Supply["底层 · 双数据供应链"]
+        D["内部供应链<br/>DB · 知识 · 图谱 · LLM Wiki"]
+        E["外部供应链<br/>统一网关 · ERP · CRM · 财务"]
+    end
+    Top --> Heart
+    D --> C
+    E --> C
+    C -.-> B
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 二、模块映射 ========== -->
+    <section id="mapping">
+      <h2>二、10 个业务模块到 6 层架构的映射</h2>
+      <p class="desc">每个模块标注它消耗哪些平台层、需要定义什么业务差异化内容。v3 视角下，模块接入的服务可以是原子或流程。</p>
+      <table>
+        <thead><tr><th style="width:11%">业务模块</th><th style="width:7%">入口</th><th style="width:7%">工单</th><th style="width:8%">服务</th><th style="width:7%">领域</th><th style="width:8%">数据</th><th style="width:7%">网关</th><th style="width:45%">业务需定义什么</th></tr></thead>
+        <tbody>
+          <tr><td>1. 研究智能体</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td>行业分析模板、信息源配置。服务形态：原子服务（全网抓取、竞品分析）</td></tr>
+          <tr><td>2. 线索智能体</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td>线索录入源、补全规则、评分模型。服务形态：<strong>流程服务</strong>（录入→补全→评分→转客户）</td></tr>
+          <tr><td>3. 客户画像智能体</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="partial">—</td><td>画像模板、销售输入表单。服务形态：原子服务（查画像、写画像）</td></tr>
+          <tr><td>4. 销售准备智能体</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="partial">—</td><td>话术库、问题库、注意事项模板</td></tr>
+          <tr><td>5. 样品智能体</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td>申请规则、状态机、评估表。服务形态：<strong>流程服务</strong>（查客户→推样品→申请→审批→物流追踪→反馈收集）</td></tr>
+          <tr><td>6. 运营智能体</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td>SOP模板、推送规则、洞察触发器</td></tr>
+          <tr><td>7. 成交智能体</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td>报价/合同模板、审批流。服务形态：<strong>流程服务</strong>（报价→法务审批→合同生成→盖章→寄出）</td></tr>
+          <tr><td>8. 履约智能体</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td>交付状态机、回款提醒、续费触发</td></tr>
+          <tr><td>9. 人与团队</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="partial">—</td><td>销售画像、培训模块、激励规则</td></tr>
+          <tr><td>10. 中后台</td><td class="yes">✓</td><td class="partial">部分</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td>业财映射、BI指标、凭证模板</td></tr>
+        </tbody>
+      </table>
+      <div class="callout green">
+        <strong>✅ 结论：</strong>10 模块全员可映射。v3 的三层服务粒度使得模块接入时的服务形态选择更加精准——高确定性场景用流程服务（如订单审批），低确定性场景留给 Agent 自主编排（如线索挖掘）。
+      </div>
+    </section>
+
+    <!-- ========== 三、张力与决策点 ========== -->
+    <section id="tensions">
+      <h2>三、三条张力 + 四个决策点：架构如何回应</h2>
+
+      <h3>张力 1：变革管理 vs 系统设计</h3>
+      <p>A 主张"从订单切入、COO 角色进入组织"——这是变革管理智慧。危险在于：切入点可能在架构上锁死功能模块式思维。</p>
+      <div class="callout service">
+        <strong>架构回应：</strong>核心领域层中枢强制了"所有数据必经领域层装配"的纪律——订单模块的数据无法成为孤岛。<br><br>
+        <strong>v3 新增回应——流程服务的三条渐进演进路径：</strong>"订单审批流程"可以设计为<strong>先人审、后 AI</strong>的流程服务。
+        Pilot 阶段：人工审批节点。灰度阶段：AI 辅助审批（Agent 给建议，人决策）。成熟阶段：策略驱动路由（简单场景自动批）。
+        <strong>这意味着：</strong>团队可以先按 A 的"让销售有安全感"的方式上线（人审为主），在同一个流程服务版本体系中逐步将节点替换为 AI 决策——<strong>不需要"推翻重做"，只需要"升级流程服务的版本"。</strong>
+      </div>
+
+      <h3>张力 2：线性管道 vs 非线性网络</h3>
+      <p>A 的模块带有销售漏斗线性隐喻。Agent 不会线性工作——它可能同时做人像、研究竞品、准备话术。</p>
+      <div class="callout service">
+        <strong>架构回应：</strong>领域层中枢的星型拓扑不强制顺序。v3 的<strong>三层粒度共存</strong>是关键：流程服务提供了"确定性编排"的安全感（你知道会发生什么步骤），Agent 自主编排提供了"非确定性探索"的效率（同时查多源数据）。
+        两者可以共存于同一个工单——工单触发一个流程服务（路径确定），流程中的某个步骤又可以由 Agent 自主决定调用哪些原子服务（路径不确定）。<br><br>
+        <strong>乐高比喻精准：</strong>流程服务是用几块原子积木搭好的大积木——它本身安全、可预测。Agent 可以拿它，也可以绕过它直接用原子积木。两者不互斥。
+      </div>
+
+      <h3>张力 3：产品化 vs 项目制</h3>
+      <p>A 的场景大图是产品蓝图还是解决方案目录？</p>
+      <div class="callout">
+        <strong>架构回应：</strong>双数据供应链 + 领域对象是<strong>产品化核心引擎</strong>。外部供应链的可配置性（不同客户接不同 ERP）是<strong>项目制适配层</strong>。流程服务同样——流程的节点编排是产品化的（订单审批流程的结构是标准的），但审批节点的参与者、阈值、策略可以根据客户配置。<strong>产品化的是"能力"，项目制的是"参数"。</strong>
+      </div>
+
+      <h3>D1：流程 AI 化 vs AI 重新定义销售</h3>
+      <div class="callout">
+        <strong>架构给出的路径：</strong>不需要选边。流程服务作为"确定性编排"的容器，Agent 自主编排作为"非确定性探索"的容器，两者在同一服务层共存。
+        初期以流程服务为主（贴合现有销售流程，客户能理解），同时在 LLM Wiki 中积累经验数据。
+        当数据支撑足够时，Agent 开始在自主编排中调用这些流程服务——<strong>流程被"内化"为 Agent 工具箱中的一块积木</strong>，不再是一个强制经过的管道。
+        这是从"流程 AI 化"到"AI 重新定义销售"的自然演进路径，不需要架构变更，只需要在同一个服务层上调整编排模式的占比。
+      </div>
+
+      <h3>D2："从订单切入"的隐性陷阱</h3>
+      <div class="callout service">
+        <strong>架构在技术和行为两个层面回应：</strong>技术层面——领域层中枢阻止数据孤岛。行为层面——流程服务的渐进演进路径（人审→AI辅助→策略驱动）给了团队一条<strong>可操作、可度量的过渡路径</strong>。
+        不需要在 Pilot 中就证明 Agent 能自主编排——只需要证明流程服务能从"人工审批"升级到"AI 辅助审批"。
+        这个升级本身就是 Agent 能力的一次小规模验证。
+      </div>
+
+      <h3>D3：优先级缺乏决策框架（非架构问题）</h3>
+      <div class="callout amber">
+        架构提供辅助：三层粒度模型让"做不做得了"的评估更精确——如果模块的核心是流程服务（如订单审批、合同签署），接入成本可控（先上人工审批版本）。如果核心要求 Agent 自主编排（如线索挖掘），需要更多数据积累和模型调优，可以后置。<strong>但完整的四维优先级框架仍需产品管理独立建立。</strong>
+      </div>
+
+      <h3>D4："中台/后台"边界模糊</h3>
+      <div class="callout green">
+        <strong>已消除。</strong>业务服务层（编排）≠ 核心领域层（装配）≠ 数据供应链（输送）。三层服务粒度进一步澄清了"编排层"的内部结构。
+      </div>
+    </section>
+
+    <!-- ========== 四、底座验证 ========== -->
+    <section id="pillars">
+      <h2>四、底座验证</h2>
+      <div class="pillar-grid">
+        <div class="pillar-card"><span class="score excellent">✅ 优秀</span><h4>① 统一身份与待办</h4><p>ReBAC 七视角精准匹配 A 的 6+6 角色协同场景。</p></div>
+        <div class="pillar-card"><span class="score excellent">✅ 优秀</span><h4>② 工单：上下文模板</h4><p>"自然语言→工单"是平台与业务对话最精准的契合点。</p></div>
+        <div class="pillar-card service-card"><span class="score excellent">✅ 优秀</span><h4>③ 业务服务层 · 三层粒度</h4><p><strong>v3 核心：</strong>原子+流程+自主编排共存。流程服务的渐进演进路径直接回应了 A 的变革管理策略和 D2 的陷阱。</p></div>
+      </div>
+      <div class="pillar-grid" style="margin-top:10px;">
+        <div class="pillar-card"><span class="score excellent">✅ 优秀</span><h4>④ 核心领域层</h4><p>四个能力维度（对象/关系/装配/授权）回应了数据沉睡、口径不一、授权分散的深层担忧。</p></div>
+        <div class="pillar-card"><span class="score excellent">✅ 优秀</span><h4>⑤ 数据知识 + LLM Wiki</h4><p>加密 SQLite 个人笔记补齐了"隐性知识→结构化经验"的转化链。</p></div>
+        <div class="pillar-card"><span class="score good">✅ 良好</span><h4>⑥ 网关 + 双数据供应链</h4><p>外部供应链 + 2→1→N 拓扑。微信消息拉取是 Pilot 待验证项。</p></div>
+      </div>
+    </section>
+
+    <!-- ========== 五、融合点 ========== -->
+    <section id="fusion">
+      <h2>五、关键融合点</h2>
+
+      <div class="fusion-item"><h4>🎯 "自然语言→工单"是两者共同的 DNA</h4><p>A 的 COO 工作模式——接收模糊指令、补全上下文、执行动作、反馈结果——正是工单层的系统化表述。</p></div>
+      <div class="fusion-item"><h4>🎯 ReBAC 授权把模糊权限结构化了</h4><p>七个授权视角让 A 在客户现场可以用结构化卡片替代"不同人看到不同东西"的模糊描述。</p></div>
+      <div class="fusion-item"><h4>🎯 LLM Wiki = "体感"的系统化容器</h4><p>加密 SQLite，Agent 帮你写、帮你查——不侵入、不强制、不暴露的认知外化工具。</p></div>
+      <div class="fusion-item"><h4>🎯 领域对象使模块可重组</h4><p>模块是流动的消费者，领域对象是稳定的基础。模块合并或拆分不需要动平台架构。</p></div>
+      <div class="fusion-item"><h4>🎯 流程服务的渐进演进 = A 的"先活下来"策略的技术化</h4><p>这是 v3 新增的融合点。A 说"上来就搞销售容易引起应急反应"——流程服务允许<strong>先上线人工审批版本</strong>（和销售现有工作方式一样），然后在同一流程的后续版本中逐步替换为 AI 辅助或自动审批。这不是"先做一个传统系统再重构成 AI 系统"——这是<strong>同一个流程服务的版本演进</strong>。A 的变革管理智慧和 B 的 Agent 原生架构，在流程服务的版本生命周期中和谐共存。</p></div>
+      <div class="fusion-item"><h4>🎯 复盘飞轮 + 流程服务 = 审批节点的数据驱动优化</h4><p>"主管审批节点平均耗时 4h，通过率 99.2%"——这个信号天然从流程服务执行日志中产生。复盘飞轮将其转化为"该节点可被 AI 策略替代"的建议，业务审批后触发流程服务版本升级。数据驱动，不是拍脑袋。</p></div>
+    </section>
+
+    <!-- ========== 六、断层 ========== -->
+    <section id="gaps">
+      <h2>六、需要注意的断层</h2>
+
+      <div class="gap-item">
+        <h4>🔴 断层 1：工单的"一件事一个诉求" vs Agent 的跨诉求行为</h4>
+        <p>工单模型假设一件事有一个明确诉求。但 Agent 行为常跨工单。流程服务部分缓解了这个问题（一个流程服务封装了完整的审批链路），但跨工单的 Agent 上下文维护仍缺少一等公民的<strong>"会话/任务"抽象</strong>。LLM Wiki 可以做跨工单的记忆桥接，但这是间接手段。</p>
+      </div>
+      <div class="gap-item amber">
+        <h4>🟠 断层 2：流程服务与工单模型的关系需要细化</h4>
+        <p><strong>v3 引入的新问题。</strong>工单服务负责"诉求结构化"，流程服务负责"执行编排"。一个工单可能触发一个流程服务，一个流程服务可能在执行过程中产生子工单（审批待办）——两者的生命周期如何协同？工单的状态（待处理/处理中/已完成）和流程的状态（审批中/已通过/已驳回）如何映射？这些需要在实现阶段明确定义，否则可能出现"工单显示已完成但流程还在审批中"的不一致。</p>
+      </div>
+      <div class="gap-item amber">
+        <h4>🟠 断层 3：场景大图的模块分解未用领域对象视角重审</h4>
+        <p>当前映射表接受了 A 的模块分解。但三层粒度模型打开了一个新的审视角度——哪些模块应该是流程服务而非独立模块？例如"成交智能体"的核心是"报价→法务审批→合同生成"流程服务，可能不需要一个独立的智能体模块。</p>
+      </div>
+      <div class="gap-item amber">
+        <h4>🟡 断层 4：LLM Wiki 的升级审批链需要运营落地</h4>
+        <p>架构已定义了从"个人笔记"到"团队知识"的转化机制，但审批链的具体角色和节奏需要在 Pilot 运营中磨合。</p>
+      </div>
+    </section>
+
+    <!-- ========== 七、演进路径 ========== -->
+    <section id="evolution">
+      <h2>七、建议演进路径</h2>
+
+      <div class="evo-stage">
+        <div class="stage-num">1</div>
+        <div class="stage-body">
+          <h4>打好平台骨架 + 订单审批流程服务 Pilot</h4>
+          <p>核心领域层+工单层+服务层+网关最小可用版本。定义和实现<strong>"订单审批流程服务"</strong>——此时审批节点为人工审批。验证：数据全程经领域层装配、流程服务可注册/调用/版本化、工单与流程的状态协同正确。</p>
+        </div>
+      </div>
+      <div class="evo-stage">
+        <div class="stage-num">2</div>
+        <div class="stage-body">
+          <h4>验证流程服务的渐进演进 + Agent 自主编排</h4>
+          <p>将订单审批流程中的某个审批节点升级为<strong>"AI 辅助审批"</strong>（Agent 给建议，人决策）——在一个小范围灰度中验证升级对审批耗时和正确率的影响。同时选择样品智能体验证 Agent 自主编排。</p>
+        </div>
+      </div>
+      <div class="evo-stage">
+        <div class="stage-num">3</div>
+        <div class="stage-body">
+          <h4>建立"经验→知识"转化飞轮</h4>
+          <p>复盘飞轮启动——追踪流程服务的审批节点耗时/通过率，识别可被 AI 替代的节点；追踪 Wiki 笔记的跨个体检索频率，识别可升级的隐性知识。</p>
+        </div>
+      </div>
+      <div class="evo-stage">
+        <div class="stage-num">4</div>
+        <div class="stage-body">
+          <h4>横向扩展 + 必要时引入"会话/任务"抽象</h4>
+          <p>按价值优先级接入更多业务模块。如果跨工单 Agent 行为成为瓶颈，引入"会话/任务"层。如果流程服务与工单的协同出现明显不一致，细化两者的状态映射。</p>
+        </div>
+      </div>
+
+      <div class="callout green" style="margin-top:18px;">
+        <strong>演进策略：</strong>用 A 的渐进节奏（先订单审核），在流程服务的版本体系中埋下 Agent 演进路径（先人审→后 AI），在同一个领域层上支持确定性编排和自主编排的共存。
+        核心引擎不变——变的是<strong>服务层的编排模式占比</strong>和<strong>流程服务中审批节点的类型</strong>。
+      </div>
+    </section>
+
+    <footer>
+      基于 platform_design_v3.html 与 business_analysis.html 的交叉验证分析
+    </footer>
+  </main>
+</body>
+</html>

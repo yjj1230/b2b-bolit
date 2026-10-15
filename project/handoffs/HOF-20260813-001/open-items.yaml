@@ -1,0 +1,163 @@
+# project/handoffs/HOF-20260813-001/open-items.yaml
+# 交接时点未闭合事项（§10 / A.6 步骤 5 恢复开放状态用）
+# 每条：{id, title, kind, risk, owner, status, note}
+open_items:
+  - id: OI-001
+    title: 机制激活四件套（ECM-ACT-001）——YAML Schema / canonicalizer / 状态机与决策表测试向量 / 可重放 validator
+    kind: mechanism
+    risk: R3
+    owner: UNKNOWN
+    status: OPEN
+    note: 未交付前 current.yaml 不得标 ACTIVE；scripts/ecm_selfcheck.py 仅为 bootstrap 自检器，非正式 validator
+  - id: OI-002
+    title: 激活测试 10 类场景（ECM-ACT-002）与校准回放（calibration-cases.yaml SIM-01..06 执行）
+    kind: mechanism
+    risk: R2
+    owner: UNKNOWN
+    status: OPEN
+  - id: OI-003
+    title: M2 抽取业务 claims——36 条已落库（交互形态 15/签收凭证链 8/权限交集 7/企微交互 6 + demo 边界标注 17 场景）
+    kind: claim
+    risk: R2
+    owner: business-owner/product-owner/tech-owner（需 owner 确认）
+    status: IN_PROGRESS
+    note: 2026-08-14 基于最新原始需求（spec/Demo意见收集_文字版.html）修订+新增 8 条
+          （EVT-000022）；签收链前提冲突已闭合（CHAIN-010 -> SUPERSEDED）；M2 退出条件
+          （R2/R3 100% 有 owner/source/decision 状态）首批 34 条均已满足；
+          2026-08-19 新增 XSZL2 与订单详情 claims（EVT-000039），用例总表已同步（EVT-000040）；
+          剩余：17 场景×评审 29 共识的逐条映射与 17 个 demo 场景覆盖核对
+  - id: OI-011
+    title: 用例总表 v2 同步任务（范围扩大：XS2 交互/XS6 已删/XSZL1 单页/XS1 订单 Home/发给客户）
+    kind: doc
+    risk: R1
+    owner: product-owner
+    status: DONE
+    note: 2026-08-19 以 demo 为最高裁决完成同步：XS6 移除、XS2/XSZL1 改为单页长表单、
+          新增 XSZL2、XS1 订单 Home/发给客户、终端 PC/移动切换、订单详情通用页（EVT-000040）
+  - id: OI-012
+    title: 签收凭证链真实业务流文档（宇航+红利）——意见收集已部分背书，终稿仍需对照
+    kind: business
+    risk: R2
+    owner: business-fulfillment
+    status: OPEN
+    note: 原始需求第 6 项已确认正确业务关系（司机→仓管→凭证机器人；运满满直传），
+          CLM-RECEIPT-CHAIN-001/002/011 已据其更新；业务流终稿仍需对照（OI-012 本体）
+  - id: OI-013
+    title: M3 建追踪边时核对 17 场景 backend 实现深度并更新 demo-boundary 标注
+    kind: verification
+    risk: R2
+    owner: tech-owner
+    status: OPEN
+    note: 当前 backend_api 为 route-level 证据（api/v1/orders、preorders、todos）；
+          real_wecom 全部 UNKNOWN
+  - id: OI-004
+    title: R2/R3 声明的独立验收 oracle（SIM-05：无 oracle 回到 UNVERIFIED，禁止仅凭绿灯交付）
+    kind: verification
+    risk: R3
+    owner: qa-owner
+    status: OPEN
+  - id: OI-005
+    title: owner 确认——M0 manifest 的 owner_inferred 由业务/产品/技术/验收 owner 逐域确认
+    kind: governance
+    risk: R2
+    owner: UNKNOWN
+    status: OPEN
+  - id: OI-006
+    title: docs/用例总表.html 的 STALE_VIEW 同步任务（OBS-01：4 步向导 vs 单页长表单）
+    kind: doc
+    risk: R1
+    owner: product-owner
+    status: DONE
+    note: 2026-08-19 已随 OI-011 一并完成；用例总表与 demo 对齐（EVT-000040）
+  - id: OI-007
+    title: demo 物流小程序 vs 图片发群 的阶段声明（OBS-02：vNext deferred vs v0 当前）
+    kind: claim
+    risk: R2
+    owner: product-owner
+    status: OPEN
+  - id: OI-008
+    title: 根 HTML 与 ECM-1.0.0.html 的一致性维护（bootstrap 提案 vs 冻结指南）
+    kind: mechanism
+    risk: R1
+    owner: tech-owner
+    status: OPEN
+    note: 根 HTML 加指针声明后与冻结副本分叉是预期状态；激活时应由正式发布物替代
+  - id: OI-009
+    title: 首次真实迭代（按 ECM 双循环执行一次 INGEST..BASELINE）验证机制可操作性
+    kind: mechanism
+    risk: R2
+    owner: UNKNOWN
+    status: OPEN
+    note: 这是“可启动后续迭代”的验收动作：下次迭代应产出 ArtifactChanged 事件与声明级差异
+  - id: OI-010
+    title: CHANGELOG 记录的文档内部不一致（calibration.corpus 路径 §07 示例 vs 目录树）的人工裁决
+    kind: mechanism
+    risk: R1
+    owner: tech-owner
+    status: OPEN
+    note: 规范源已按目录树落定；HTML 指南需在下次修订时同步
+  - id: OI-014
+    title: D-006 pgAPI 拆分验证（go build/test 全绿、pgapi/orderdata 单测、L1 迁移 007 真实 PG 验证）
+    kind: verification
+    risk: R2
+    owner: tech-owner/qa-owner
+    status: OPEN
+    note: >
+      2026-08-18 在 10.0.2.160 完成自动可验证部分：go build/vet 全绿；make test-l0/l1/l2、
+      test-tests-l1/l2/l3 全绿；coverage 门禁 85.4%（domain 100%）；007 真实 PG 验证 FK=0；
+      一次性真实 pgAPI 服务 smoke 与 Go 客户端 CRUD 契约验证通过（证据见
+      docs/history/pgapi-d006-verification-20260818.html）。剩余：真实 CARH 环境只读 smoke
+      由用户/现场执行（用户 2026-08-18 裁决本地验证已足够）。
+  - id: OI-015
+    title: 旧主数据 ID → pgAPI record_id 真实数据回填（scripts/pgapi_backfill dry-run 后人工确认并 -apply）
+    kind: migration
+    risk: R2
+    owner: tech-owner/business-owner
+    status: OPEN
+    note: >
+      2026-08-18 已在一次性库验证工具全链路：dry-run 4/4 MATCH、-apply 改写 7 类引用列、
+      未匹配 dry-run exit 2 且零写入（证据见 docs/history/evidence/pgapi-d006-20260818/）。
+      真实 CARH 数据 dry-run、人工确认与生产 apply 仍待用户/现场安排；任何未匹配/歧义不得强行 apply。
+  - id: OI-016
+    title: 企微订单 → 购销合同表写路径（D-007：下一迭代启用；U2 apply_no upsert）
+    kind: feature
+    risk: R2
+    owner: tech-owner/现场程序员
+    status: OPEN
+    note: >
+      2026-08-18 裁决：v0.1 只读可见，写路径下一迭代启用。待办：pgAPI purchase-contracts
+      补 25 个映射字段（initiated_at/settlement_method/currency/freight_amount/current_handlers/
+      is_shipped/customer_level/outbound_no/outbound_files/receipt_files/invoice_apply_files/
+      invoice_files/packaging_requirement/other_files/ship_no/contract_stamp_files/warehouse/
+      batch_no/batch_ship_qty/cum_shipped_qty/pending_ship_qty/customer_contract_files/
+      unit_price_detail/qty_detail/proxy_user）+ apply_no 唯一 upsert；b2b 补 PurchaseContractWrite/
+      CreatePurchaseContract/单位换算/状态映射；上线前复核 U2 白名单。
+  - id: OI-017
+    title: 销售助理全场景页面 + 订单详情页落地（docs/ui assistant-spec、order-detail-spec、demo XSZL2、claims 36 条）
+    kind: feature
+    risk: R2
+    owner: product-owner/tech-owner
+    status: DONE
+    note: >
+      2026-08-19 需求：销售助理全场景（XSZL1 工作台代下 + XSZL2 客户群入口代下）在企微 PC 端 +
+      手机端实现；订单详情作为通用页面实现（全字段 + 剥价）。已新增 docs/ui/assistant-spec.html、
+      docs/ui/order-detail-spec.html、demo XSZL2 场景、bridge_ui 订单详情查看、CLM-ORDER-ENTRY-
+      ASSISTANT-002 与 CLM-ORDER-DETAIL-001；用例总表已同步。后续 M3 再核对后端详情投影与真实企微链路。
+  - id: OI-018
+    title: 企微现场 V-A..V-F 验收（按 staff_scene_v0.1.html 执行；备案域名已就绪）
+    kind: verification
+    risk: R2
+    owner: tech-owner/现场程序员
+    status: OPEN
+    note: >
+      2026-08-19 代码侧已实现：GET /assistant 销售助理 H5/PC 页面、official JSAPI/OAuth/群上下文、
+      template_card、SendGroupCard、测试+生产租户配置注入（config/wecom-tenant.{test,prod}.example.json、
+      docker-compose 注入 B2B_WECOM_TENANT_CFG_FILE）。现场待办：填真实测试/生产租户 JSON、群绑定 SQL、
+      V-A..V-F 逐项验收并回填 v0.1发布过程跟踪.html；旧系统 T-01 仍需在 tripartite-approval 仓库执行。
+
+open_conflicts: []
+open_risks:
+  - R3: 机制未激活，ECM 门禁不生效；后续 Agent 必须先按 A.4/A.5 判定状态再动作
+  - R3: claims 未抽取，文档/demo/代码之间的差异只能人工发现（OBS-01..06 即例证）
+waiting_requests: []
+exemptions: []

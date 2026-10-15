@@ -1,0 +1,14 @@
+# b2b_pilot_v3 部署辅助工具镜像（seedrel 授权 seed / seeddata 演示数据）
+FROM golang:1.25-alpine AS build
+WORKDIR /src
+ENV GOPROXY=https://goproxy.cn,direct
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 go build -o /out/seedrel ./scripts/seedrel && \
+    CGO_ENABLED=0 go build -o /out/seeddata ./scripts/seeddata
+
+FROM alpine:3.20
+COPY --from=build /out/seedrel /usr/local/bin/seedrel
+COPY --from=build /out/seeddata /usr/local/bin/seeddata
+ENTRYPOINT ["seedrel"]

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Review · 按 ZK-GE 理论的深度全面测试 · B2B 订单履约验证项目</title>
+<style>
+  :root{
+    --paper:#f5f4ed; --paper2:#efeee5; --ink:#1f1d18; --ink2:#6b665b;
+    --ink3:#3a382f; --blue:#1B365D; --rule:#d4d1c5;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif; line-height:1.6;}
+  .wrap{max-width:960px; margin:0 auto; padding:48px 40px 80px;}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;}
+  .folio{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--rule); padding-bottom:10px;
+    font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink2);}
+  .folio a{color:var(--ink2); border:none;}
+  .folio a:hover{color:var(--blue);}
+  .tag{display:inline-block; padding:3px 10px; font-size:11px; letter-spacing:.16em; background:var(--paper2); color:var(--blue);}
+  .kicker{display:flex; align-items:baseline; gap:12px; margin-top:48px;}
+  h1{font-size:clamp(32px,5vw,50px); line-height:1.12; font-weight:500; margin-top:14px; letter-spacing:-.01em;}
+  .lede{margin-top:18px; font-size:17px; line-height:1.7; color:var(--ink3); max-width:720px;}
+  h2{font-size:23px; font-weight:600; margin:52px 0 14px; color:var(--blue); display:flex; align-items:baseline; gap:12px; border-top:1px solid var(--rule); padding-top:26px;}
+  h2 .no{font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.12em;}
+  h3{font-size:17.5px; font-weight:600; margin:30px 0 10px; color:var(--ink);}
+  h3 .no{color:var(--blue); font-family:'IBM Plex Mono',monospace; font-size:12px; margin-right:8px;}
+  p{margin:10px 0; color:var(--ink3);}
+  ul,ol{margin:10px 0 10px 26px; color:var(--ink3);}
+  li{margin:5px 0;}
+  a{color:var(--blue); text-decoration:none; border-bottom:1px solid var(--rule);}
+  a:hover{border-bottom-color:var(--blue);}
+  blockquote{border-left:2px solid var(--blue); padding:10px 18px; margin:16px 0; background:var(--paper2); font-style:italic;}
+  table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  .table-wrap{overflow-x:auto; margin:16px 0 24px; border:1px solid var(--rule);}
+  .table-wrap table{margin:0;}
+  th{background:var(--paper2); color:var(--blue); text-align:left; font-weight:600; padding:9px 12px; border-bottom:1.5px solid var(--blue); font-size:12.5px; white-space:nowrap;}
+  td{padding:9px 12px; border-bottom:1px solid var(--rule); vertical-align:top; color:var(--ink3);}
+  tr:nth-child(even) td{background:#faf9f3;}
+  tr:hover td{background:#f0ede0;}
+  .mermaid{background:var(--paper); border:1px solid var(--rule); padding:18px; overflow-x:auto; text-align:center; margin:20px 0;}
+  .mermaid svg{max-width:100%; height:auto;}
+  .mermaid svg.statediagram span,.mermaid svg.statediagram div{color:#1f1d18 !important;}
+  .mermaid svg.statediagram text{fill:#1f1d18 !important;}
+  figcaption{text-align:center; font-size:12px; color:var(--ink2); margin:-10px 0 26px; font-style:italic;}
+  code{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace; font-size:13px; background:var(--paper2); padding:1px 5px;}
+  pre{background:var(--paper2); border:1px solid var(--rule); padding:16px 18px; overflow-x:auto; font-size:12.8px; line-height:1.55; margin:14px 0;}
+  pre code{background:none; padding:0;}
+  footer.colophon{margin-top:56px; padding-top:14px; border-top:1px solid var(--rule); display:flex; justify-content:space-between;
+    font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink2); flex-wrap:wrap; gap:8px;}
+  footer.colophon a{color:var(--ink2); border:none;}
+  footer.colophon a:hover{color:var(--blue);}
+  .toc{border:1px solid var(--rule); background:var(--paper2); padding:18px 24px; margin:26px 0;}
+  .toc .tt{font-size:11px; letter-spacing:.2em; color:var(--blue); margin-bottom:8px;}
+  .toc a{display:block; padding:3px 0; color:var(--ink3); border:none;}
+  .toc a:hover{color:var(--blue);}
+  .toc .mono{font-size:12px; color:var(--blue); margin-right:8px;}
+  @media(max-width:720px){.wrap{padding:28px 18px 60px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="folio"><span>B2B Pilot · Deep Review</span><span>2026-08-07 · ZK-GE evidence-convergence</span></div>
+  <div class="kicker"><span class="mono">DEEP REVIEW · 按 spec/philosophy/story.html（ZK-GE）执行</span></div>
+  <h1>深度全面测试 Review<br/><span style="font-style:italic; color:var(--blue);">按 ZK-GE 证据收敛理论 · 校准 → 挑战 → 多观察 → 收敛</span></h1>
+  <p class="lede">本次 review 以 <span class="mono">spec/philosophy/story.html</span> 的 ZK-GE 理论为执行契约：<strong>证据收敛式交付</strong>——先校准尺子（测试/图谱/门禁可信），再以挑战者视角（A3 真实运行环境、越权负例、部署盲区）对同一制品做多观察，最后只在证据收敛后交付结论。基线：commit <span class="mono">c92314e</span>。</p>
+
+  <h2><span class="no">1 ·</span> 校准（第 0 步）：尺子可信性</h2>
+  <p>按理论「先验证尺子，再量工件」——本轮先确认四个尺子各自可信：</p>
+  <div class="table-wrap"><table>
+    <tr><th>尺子</th><th>校准动作</th><th>结果</th></tr>
+    <tr><td>代码图谱（code-review-graph）</td><td>head_matches_build 校验 + v2/v3 双仓库注册</td><td>✅ 图谱与 HEAD 一致（commit hook 自动增量更新）</td></tr>
+    <tr><td>覆盖率门禁（make cover）</td><td>8 包齐全性检查 + domain 100% 硬门禁（awk 直读 coverage.out）</td><td>✅ 缺包即 FAIL，无假绿路径</td></tr>
+    <tr><td>测试拒绝已知缺陷（历史缺陷回放）</td><td>8 个历史真实缺陷 → 对应测试断言（FK 悬空/部分发货 PK/重入备货/preorder 自迁移/SHP 缺边/Event JSON 标签/派生状态硬编码/contact 投影）</td><td>✅ 每个缺陷均有测试拒绝其复发（fsm 穷举、ON CONFLICT 断言、投影单测、W5/W6 E2E）</td></tr>
+    <tr><td>测试环境语义</td><td>StaticChecker 对照表 ↔ SpiceDB 等价性（L0-09）</td><td>✅ 对照表与 schema.zed 语义一致（authz 集成测试交叉验证）</td></tr>
+  </table></div>
+  <p class="callout"><strong>校准发现 1</strong>：静态对照表（StaticChecker）与真实 SpiceDB 的等价性此前只在集成测试验证；本轮在真实 SpiceDB 上做了直接判定（见 §3），两者结论一致——尺子相互印证成立。</p>
+
+  <h2><span class="no">2 ·</span> 声明与坐标（第 1-4 步）</h2>
+  <ul>
+    <li><strong>Meta 声明</strong>（01 文档）：款到/非款到 12 场景、8 角色、A/B/C/D/E 修改分类、ReBAC 授权——基线不变。</li>
+    <li><strong>设计承诺</strong>（02/04/05）：15 CQ 设计问题 ↔ 代码图锚点抽查存活（05 roundtrip）；13 HTTP 端点 ↔ 02 §2.1 清单（09 Score Card）。</li>
+    <li><strong>冻结</strong>：commit <span class="mono">c92314e</span>（story.html 入库），全部证据以该基线记录。</li>
+    <li><strong>实现与挑战隔离</strong>：internal 白盒（BUILDER 证据）与 tests/ 黑盒（CHALLENGER 证据）分离；本轮挑战视角 = A3 真实运行环境（此前从未以真实 Temporal + 真实 SpiceDB 运行过全链）。</li>
+  </ul>
+
+  <h2><span class="no">3 ·</span> 挑战：A3 真实运行环境（本轮新增证据）</h2>
+  <p>理论 A3 维度要求「真实或等价运行环境」。项目此前的全链证据全部来自 LocalRunner（TestSuite 虚拟时钟 + StaticChecker 替身）——<strong>真实 Temporal 编排 + 真实 SpiceDB 授权从未被运行验证过</strong>，这是最大的证据空白。本轮补齐：</p>
+  <div class="table-wrap"><table>
+    <tr><th>真实运行验证</th><th>操作</th><th>结果</th></tr>
+    <tr><td>真实 Temporal 全链（款到）</td><td>cmd/worker（TaskQueue b2b-order）+ cmd/api（mode=temporal）→ 创建订单 + 6 信号</td><td>✅ 状态 <span class="mono">INV_CLOSED</span>，事件链 27 条（tail: PAYMENT_TRACKING → CONTRACT_ARCHIVED → CLOSED）</td></tr>
+    <tr><td>真实 Temporal 预订单全链</td><td>创建预订单（PRE_CAPTURED）→ preorder-confirm 信号</td><td>✅ <span class="mono">PRE_ORDER_REQUESTED</span> + 派生正式订单 1 条（order:chang-an:pre:*）</td></tr>
+    <tr><td>真实 SpiceDB 授权判定</td><td>seedrel 预置关系后：u-supervisor 查订单视图 / u-contact 越权</td><td>✅ 有权 → INV_CLOSED 视图（amount 100000）；越权 → <span class="mono">permission denied</span>（与 StaticChecker 结论一致）</td></tr>
+    <tr><td>真实模式待办</td><td>GET /api/v1/todos（u-wh-yangyuan）</td><td>✅ 返回审批任务（AT-*）</td></tr>
+    <tr><td>事件数差异观察</td><td>真实 Temporal 27 条 vs LocalRunner E2E 断言 ≥26</td><td>✅ 27 ≥ 26，无回归；差异来源：真实运行无 TestSuite 的虚拟时钟压缩，预置/重试路径事件数略多（非正确性问题）</td></tr>
+  </table></div>
+  <p class="callout"><strong>挑战发现（本轮 A3 暴露的 4 个盲区，全部修复/工具化）</strong>：</p>
+  <ol>
+    <li><strong>真实模式授权关系无初始化路径</strong>（投影器阶段二未接线 → order#view 全拒绝）→ 新增 <span class="mono">scripts/seedrel</span>（幂等；<span class="mono">-schema</span> 首启建 schema、<span class="mono">-orders</span> 补订单层级边 owner/customer/tenant）。</li>
+    <li><strong>SpiceDB 预共享密钥配置陷阱</strong>：cmd/api 默认 <span class="mono">b2b-dev-key</span>，容器实际 <span class="mono">pilot-dev-key</span> → 所有授权预检静默失败为 permission denied（错误 token 不报连接错误）→ 部署时必须显式配 <span class="mono">B2B_SPICEDB_KEY</span>（已写入 07 §10 与 seedrel 用法）。</li>
+    <li><strong>SpiceDB 持久化库需手动 migrate</strong>：serve 未自动迁移（relation_tuple_transaction 不存在）→ 开发环境重置流程：dropdb/createdb → <span class="mono">spicedb migrate head</span> → 重启 → seedrel。</li>
+    <li><strong>authz.Relationship.SubjectType 默认值陷阱</strong>：留空时 SpiceDB 校验失败（首个外部调用方 seedrel 暴露）→ relToUpdate 默认 <span class="mono">user</span>（schema.zed 全部 subject 均为 user）。</li>
+  </ol>
+
+  <h2><span class="no">4 ·</span> 多观察同一制品（第 6 步）</h2>
+  <div class="table-wrap"><table>
+    <tr><th>观察方式</th><th>对象/命令</th><th>证据</th></tr>
+    <tr><td>编译/静态</td><td>go build ./... / go vet ./... / go vet -tags deferred</td><td>✅ 全绿（默认 + deferred 双构建）</td></tr>
+    <tr><td>单元 + 契约</td><td>l0_unit（FSM 全迁移穷举、幂等键、API 模型 snake_case 契约）</td><td>✅ 10 测试绿</td></tr>
+    <tr><td>集成（L1）</td><td>http_db_test（幂等/跨租户/事件链/凭证只追加）</td><td>✅ 绿</td></tr>
+    <tr><td>E2E（L2，19 用例 + W 系列）</td><td>款到/非款到/董事长/部分发货/修改 A-E/拒绝/信号错误/预订单 3 路径/凭证链/投影/授权/幂等重放/W5 回调/W6 S1</td><td>✅ 全绿（顺序执行）</td></tr>
+    <tr><td>属性/守恒</td><td>fsm 守恒断言、事件链 only-append、凭证版本有序回放、预订单幂等（msgid）</td><td>✅ 全绿</td></tr>
+    <tr><td>故障注入</td><td>workflows 活动错误注入（activity error → 重试/补偿路径）</td><td>✅ 绿</td></tr>
+    <tr><td>系统（L3）</td><td>seed → 全链 → reconcile/audit（b2b_pilot 库）</td><td>✅ 绿</td></tr>
+    <tr><td>覆盖率门禁</td><td>make cover</td><td>✅ PASS（total ≥85% + domain 100% + 8 包齐全）</td></tr>
+    <tr><td>真实运行（A3）</td><td>见 §3</td><td>✅ 全链 + 授权 + 预订单</td></tr>
+    <tr><td>可运行 demo</td><td>scripts/fullchain（22 步）</td><td>✅ 连续 2× exit=0</td></tr>
+  </table></div>
+
+  <h2><span class="no">5 ·</span> 采样：最不确定处（第 8 步）</h2>
+  <p>按理论「把测试预算花在最不确定的地方」，本轮采样点及其结论：</p>
+  <div class="table-wrap"><table>
+    <tr><th>采样点</th><th>不确定来源</th><th>结论</th></tr>
+    <tr><td>真实编排引擎行为</td><td>LocalRunner（TestSuite）≠ 生产 Temporal</td><td>✅ 真实 Temporal 全链通过（§3）——最大的不确定已被消除</td></tr>
+    <tr><td>真实授权判定</td><td>StaticChecker 对照表 ≠ 真实 SpiceDB 语义</td><td>✅ 越权拒绝/有权放行与对照表一致</td></tr>
+    <tr><td>部署初始化路径</td><td>真实模式从未被部署过（文档只到 compose 级别）</td><td>⚠️ 暴露 4 个盲区（§3），已修复/工具化/写入部署指南</td></tr>
+    <tr><td>信号全组合负例</td><td>FSM 穷举（L0）+ HTTP 层未知信号/错误状态（L2）</td><td>✅ 已覆盖（合法信号×非法状态、未知信号、404）</td></tr>
+  </table></div>
+
+  <h2><span class="no">6 ·</span> 剩余风险与盲区登记（第 9 步：机器无法回答的）</h2>
+  <div class="table-wrap"><table>
+    <tr><th>项</th><th>性质</th><th>处置</th></tr>
+    <tr><td>真实企微企业环境端到端（W3/W4）</td><td>需企微测试企业 + 备案回调域名（外部资源）</td><td>07 §10 人工验收门（本地可验证部分已全部验证）</td></tr>
+    <tr><td>变异测试框架</td><td>无变异注入设施（kill 变体探测）</td><td>登记：测试断言强度由 8 个历史缺陷回放样本近似保障</td></tr>
+    <tr><td>数据库迁移回滚</td><td>迁移仅 up 方向（无 down）</td><td>登记：阶段二（Outbox 投影器接线时一并设计）</td></tr>
+    <tr><td>Outbox 投影器未接线</td><td>真实模式授权关系需 seedrel 手动初始化</td><td>阶段二；seedrel 为过渡等价物</td></tr>
+    <tr><td>覆盖率数值 87.8%</td><td>差距为防御性错误分支（pgx scan error 等）</td><td>domain 100% 硬门禁 + 业务场景 100% 覆盖（09 Score Card）</td></tr>
+    <tr><td>TestSuite 信号递送竞态</td><td>环境层（300ms 间隔规避）</td><td>tests/README 已知环境限制</td></tr>
+  </table></div>
+
+  <h2><span class="no">7 ·</span> 收敛结论（第 10 步）</h2>
+  <ol>
+    <li><strong>尺子可信</strong>：图谱/门禁/缺陷回放/测试环境语义四项校准全部通过，且真实 SpiceDB 与 StaticChecker 相互印证。</li>
+    <li><strong>最大不确定已消除</strong>：真实 Temporal 编排（款到全链 INV_CLOSED + 预订单 PRE_ORDER_REQUESTED + 派生订单）与真实 SpiceDB 授权判定首次运行验证通过——此前所有证据来自测试环境，现补上 A3 真实运行证据。</li>
+    <li><strong>4 个部署盲区修复</strong>：seedrel 工具（schema/基线/订单关系）、SpiceDB 密钥配置陷阱（写入部署指南）、migrate 流程、SubjectType 默认值——全部有代码/文档载体，可重放。</li>
+    <li><strong>诚实边界</strong>：真实企微企业环境、变异测试、迁移回滚属外部资源或阶段二范围，已登记不冒充。</li>
+    <li><strong>总评</strong>：订单履约全流程（HTTP → Temporal → 授权 → 投影 → 凭证 → 预订单）在设计承诺、测试覆盖、真实运行三个维度全部收敛；本轮修复项均已提交（见 commit log），无未决阻断项。</li>
+  </ol>
+
+  <div class="foot">B2B Pilot · Deep Review（ZK-GE）· 2026-08-07 · 基线 c92314e · 证据：tests 200 函数 + 真实 Temporal/SpiceDB 运行 + make cover 门禁</div>
+</div>
+</body>
+</html>

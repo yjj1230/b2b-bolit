@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>B2B 订单履约 · 渐进式发布计划（v0.1 → v0.4 · 飞书审批逐步淡化）</title>
+<script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+mermaid.initialize({ startOnLoad: true, theme: "base", themeVariables: {
+  primaryColor: "#eef3f9", primaryBorderColor: "#1f4f86", primaryTextColor: "#20282f",
+  lineColor: "#9fb0c4", secondaryColor: "#eef6f1", tertiaryColor: "#faf4e6",
+  fontSize: "16px", fontFamily: '"PingFang SC","Microsoft YaHei",sans-serif'
+}, flowchart: { useMaxWidth: true, htmlLabels: true, curve: "basis" } });
+</script>
+<style>
+:root{
+  --ink:#20282f; --sub:#5d6772; --line:#e3e7ed; --bg:#f7f8fa;
+  --blue:#1f4f86; --blue-soft:#eef3f9; --green:#2e6b4e; --green-soft:#eef6f1;
+  --amber:#9c6307; --amber-soft:#faf4e6; --red:#a83c3c; --red-soft:#f9efef;
+  --purple:#5b4e96; --purple-soft:#f1eefa; --cyan:#0f6b7d; --cyan-soft:#ecf5f7;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); line-height:1.75; -webkit-font-smoothing:antialiased;}
+.wrap{max-width:1080px; margin:0 auto; padding:0 24px 72px;}
+/* ---------- Hero (light, crisp) ---------- */
+.hero{background:#ffffff; border-bottom:1px solid var(--line); box-shadow:0 1px 2px rgba(16,24,40,.03); padding:46px 24px 38px; text-align:center;}
+.hero .kicker{display:inline-block; font-size:12.5px; letter-spacing:.14em; color:var(--blue); background:var(--blue-soft); border:1px solid #d8e2ef; padding:4px 14px; border-radius:999px; margin-bottom:16px; font-weight:600;}
+.hero h1{font-size:30px; font-weight:700; letter-spacing:.01em; color:#16202b;}
+.hero .sub{margin-top:12px; font-size:15px; color:var(--sub); max-width:780px; margin-left:auto; margin-right:auto;}
+.hero .badges{margin-top:26px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;}
+.hero .badge{background:#f8f9fb; border:1px solid var(--line); border-radius:8px; padding:10px 16px; font-size:13px; color:#3c4551; text-align:left;}
+.hero .badge b{display:block; font-size:12.5px; color:var(--blue); margin-bottom:3px; letter-spacing:.03em; font-weight:600;}
+/* ---------- Sections ---------- */
+section{margin-top:48px;}
+h2{font-size:22px; font-weight:700; display:flex; align-items:center; gap:10px; margin-bottom:5px; color:#16202b;}
+h2 .no{background:var(--blue); color:#fff; width:30px; height:30px; border-radius:6px; display:inline-flex; align-items:center; justify-content:center; font-size:15px; flex:0 0 auto;}
+.sec-sub{color:var(--sub); font-size:14px; margin-bottom:20px; max-width:880px;}
+h3{font-size:16px; margin:24px 0 10px; color:#20282f;}
+/* ---------- Cards ---------- */
+.grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:14px;}
+.card{background:#fff; border:1px solid var(--line); border-radius:10px; padding:18px 20px; box-shadow:0 1px 2px rgba(16,24,40,.04);}
+.card h4{font-size:15px; margin-bottom:8px; display:flex; align-items:center; gap:8px;}
+.card p{font-size:13.5px; color:#3c4551;}
+.tag{display:inline-block; font-size:12px; border-radius:999px; padding:2px 10px; margin-left:auto; flex:0 0 auto;}
+/* ---------- Version sections (light, accent bar) ---------- */
+.version{border-radius:12px; overflow:hidden; border:1px solid var(--line); background:#fff; margin-top:26px; box-shadow:0 1px 2px rgba(16,24,40,.04);}
+.version .head{padding:18px 24px; color:#16202b; display:flex; align-items:center; gap:14px; flex-wrap:wrap; border-bottom:1px solid var(--line);}
+.version .head h3{color:#16202b; margin:0; font-size:18px;}
+.version .head .ver{font-size:12px; background:#eef1f6; border:1px solid var(--line); color:var(--sub); border-radius:6px; padding:2px 10px; font-weight:600;}
+.version .head .period{margin-left:auto; font-size:12.5px; color:var(--sub);}
+.v1 .head{background:#eef3f9; border-left:4px solid var(--blue);}
+.v2 .head{background:#ecf5f7; border-left:4px solid var(--cyan);}
+.v3 .head{background:#f1eefa; border-left:4px solid var(--purple);}
+.v4 .head{background:#eef6f1; border-left:4px solid var(--green);}
+.version .body{padding:8px 24px 24px;}
+.effect{background:var(--blue-soft); border-left:4px solid var(--blue); border-radius:8px; padding:14px 18px; margin:18px 0;}
+.v2 .effect{background:var(--cyan-soft); border-left-color:var(--cyan);}
+.v3 .effect{background:var(--purple-soft); border-left-color:var(--purple);}
+.v4 .effect{background:var(--green-soft); border-left-color:var(--green);}
+.effect .lead{font-weight:600; font-size:15px; margin-bottom:6px; color:#20282f;}
+.effect ul{margin:0 0 0 18px;}
+.effect li{font-size:14px; margin:3px 0; color:#37424f;}
+.fade{background:#f9efef; border-left:4px solid #c05050; border-radius:8px; padding:12px 18px; margin:14px 0 4px; font-size:13.5px; color:#6b3a3a;}
+.fade b{color:#a83c3c;}
+.meta{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:12px; margin-top:16px;}
+.meta .m{background:#fafbfc; border:1px solid var(--line); border-radius:8px; padding:12px 16px; font-size:13.5px;}
+.meta .m b{display:block; font-size:12.5px; color:var(--sub); margin-bottom:4px; letter-spacing:.04em; font-weight:600;}
+.meta .m code{background:#eef1f5; border-radius:4px; padding:1px 6px; font-size:12px;}
+/* ---------- Tables ---------- */
+table{width:100%; border-collapse:collapse; background:#fff; border-radius:10px; overflow:hidden; border:1px solid var(--line); font-size:13.5px;}
+th{background:#f4f6f9; text-align:left; padding:11px 14px; font-weight:600; color:#37424f; border-bottom:1px solid var(--line); white-space:nowrap;}
+td{padding:10px 14px; border-bottom:1px solid #eef0f3; vertical-align:top;}
+tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:#fafbfc;}
+.pill{display:inline-block; border-radius:999px; padding:1px 10px; font-size:12px; font-weight:600;}
+.pill.g{background:var(--green-soft); color:var(--green);}
+.pill.b{background:var(--blue-soft); color:var(--blue);}
+.pill.a{background:var(--amber-soft); color:var(--amber);}
+.pill.p{background:var(--purple-soft); color:var(--purple);}
+.pill.c{background:var(--cyan-soft); color:var(--cyan);}
+.pill.n{background:#f1f3f6; color:#5d6772;}
+.pill.r{background:var(--red-soft); color:var(--red);}
+/* ---------- Mermaid ---------- */
+.diagram{background:#fff; border:1px solid var(--line); border-radius:10px; padding:20px 16px; margin:14px 0 6px; overflow:auto;}
+/* ---------- Legend & step visuals ---------- */
+.legend{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 12px;}
+.legend .lg{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:4px 13px;color:#3c4551;}
+.legend .dot{width:13px;height:13px;border-radius:4px;display:inline-block;border:1px solid rgba(0,0,0,.12);}
+.step-title{font-size:15.5px;font-weight:700;margin:26px 0 2px;color:#20282f;display:flex;align-items:center;gap:9px;flex-wrap:wrap;}
+.step-title .badge{font-size:12px;font-weight:600;border-radius:6px;padding:2px 11px;color:#fff;}
+.step-sub{font-size:13px;color:var(--sub);margin-bottom:4px;}
+/* ---------- Principles ---------- */
+.principles{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px;}
+.principles .p{background:#fff; border:1px solid var(--line); border-radius:10px; padding:16px 18px;}
+.principles .p .n{width:26px; height:26px; border-radius:6px; background:var(--blue); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; margin-bottom:8px;}
+.principles .p b{display:block; font-size:14.5px; margin-bottom:4px;}
+.principles .p span{font-size:13px; color:#4b5563;}
+.note{background:var(--amber-soft); border:1px solid #e7dcc0; border-radius:8px; padding:14px 18px; font-size:13.5px; color:#6b4d12; margin-top:18px;}
+.note b{color:var(--amber);}
+footer{margin-top:56px; text-align:center; color:var(--sub); font-size:12.5px; border-top:1px solid var(--line); padding-top:22px;}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <span class="kicker">B2B 订单履约系统 · 发布规划</span>
+  <h1>渐进式发布计划 <span style="opacity:.75">v0.1 → v0.4 → 取代飞书</span></h1>
+  <p class="sub">每周一版 · 逐角色点亮业务流 · 数据范围渐进扩大 · <b>最终目标：以企微版流程取代飞书三方审批流</b>。<br>每个版本迁移一批「办理动作」进入新系统；v0.4 后迁移两级终审，完成真相源切换，飞书三方审批流整体下线（保留历史归档）。</p>
+  <div class="badges">
+    <div class="badge"><b>用户</b>销售助手 → 商务 → 仓管·财务 → 销售 → 全员</div>
+    <div class="badge"><b>流程覆盖</b>下单 → 备货 → 发货·开票 → 全流程 → 含两级终审</div>
+    <div class="badge"><b>飞书轨迹</b>照旧 → 备货迁出 → 发货/开票迁出 → 仅剩终审 → 整体下线</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- ============ 1. 渐进切换 · 流程可视化 ============ -->
+<section>
+  <h2><span class="no">1</span>渐进切换 · 流程可视化</h2>
+  <p class="sec-sub">同一张业务流程图，逐版「点亮」迁入新系统的环节（彩色 = 已由新系统接管，灰色 = 仍在飞书）。方框 = 环节，颜色 = 接管版本；每版发布后飞书人工待办范围缩小一块。</p>
+
+  <div class="legend">
+    <span class="lg"><span class="dot" style="background:#eef4ff;border-color:#2f5fc0"></span>v0.1 销售助手：下单 / 信息确认</span>
+    <span class="lg"><span class="dot" style="background:#ecfeff;border-color:#0e7490"></span>v0.2 商务：备货</span>
+    <span class="lg"><span class="dot" style="background:#f4f1fc;border-color:#7c3aed"></span>v0.3 仓管·财务：发货 / 到款 / 开票</span>
+    <span class="lg"><span class="dot" style="background:#f0f7f1;border-color:#15803d"></span>v0.4 销售：销售环节 / 发群守门员</span>
+    <span class="lg"><span class="dot" style="background:#fff7ed;border-color:#b45309"></span>0.5 两级终审迁入 → 飞书下线</span>
+    <span class="lg"><span class="dot" style="background:#f3f4f6;border-color:#9ca3af"></span>飞书原生（尚未迁移）</span>
+  </div>
+
+  <div class="step-title"><span class="badge" style="background:#1d4ed8">v0.1</span>第 1 周 · 销售助手上线</div>
+  <p class="step-sub">只迁「下单入口 + 信息确认（自动）」；审批与后续环节全部仍在飞书 —— 取代尚未实质开始。</p>
+  <div class="diagram">
+<pre class="mermaid">
+flowchart TB
+    classDef v1 fill:#eef4ff,stroke:#2f5fc0,color:#1d4ed8
+    classDef v2 fill:#ecfeff,stroke:#0e7490,color:#0e7490
+    classDef v3 fill:#f4f1fc,stroke:#7c3aed,color:#6d4fc4
+    classDef v4 fill:#f0f7f1,stroke:#15803d,color:#15803d
+    classDef v5 fill:#fff7ed,stroke:#b45309,color:#b45309
+    classDef old fill:#f3f4f6,stroke:#9ca3af,color:#6b7280
+    N1["① 下单创建"]:::v1
+    N2["② 信息确认<br/>（自动通过）"]:::v1
+    N3["③ 主管审批"]:::old
+    N4["④ 董事长终审<br/>C/D 级"]:::old
+    N5["⑤ 备货<br/>商务填写发货仓"]:::old
+    N6["⑥ 财务确认到款<br/>款到类"]:::old
+    N7["⑦ 仓库发货"]:::old
+    N8["⑧ 上传回单"]:::old
+    N9["⑨ 填写开票信息"]:::old
+    N10["⑩ 开票申请"]:::old
+    N11["⑪ 盖章回传"]:::old
+    N12["⑫ 归档 / 台账"]:::old
+    G["发群守门员<br/>（横切）"]:::old
+    N1 --> N2 --> N3
+    N3 -.->|"A/B 级直入备货"| N5
+    N3 --> N4 --> N5
+    N5 --> N6
+    N5 -.->|"非款到直入"| N7
+    N6 --> N7
+    N7 --> N8 --> N9 --> N10 --> N11 --> N12
+    N9 -.-> G
+</pre>
+  </div>
+
+  <div class="step-title"><span class="badge" style="background:#0e7490">v0.2</span>第 2 周 · 商务接入 —— 首个环节执行迁移</div>
+  <p class="step-sub">「备货 · 商务填写发货仓」迁入新系统：商务不再打开飞书办备货，审批中心该环节只显示已办；其余仍在飞书。</p>
+  <div class="diagram">
+<pre class="mermaid">
+flowchart TB
+    classDef v1 fill:#eef4ff,stroke:#2f5fc0,color:#1d4ed8
+    classDef v2 fill:#ecfeff,stroke:#0e7490,color:#0e7490
+    classDef v3 fill:#f4f1fc,stroke:#7c3aed,color:#6d4fc4
+    classDef v4 fill:#f0f7f1,stroke:#15803d,color:#15803d
+    classDef v5 fill:#fff7ed,stroke:#b45309,color:#b45309
+    classDef old fill:#f3f4f6,stroke:#9ca3af,color:#6b7280
+    N1["① 下单创建"]:::v1
+    N2["② 信息确认<br/>（自动通过）"]:::v1
+    N3["③ 主管审批"]:::old
+    N4["④ 董事长终审<br/>C/D 级"]:::old
+    N5["⑤ 备货<br/>商务填写发货仓"]:::v2
+    N6["⑥ 财务确认到款<br/>款到类"]:::old
+    N7["⑦ 仓库发货"]:::old
+    N8["⑧ 上传回单"]:::old
+    N9["⑨ 填写开票信息"]:::old
+    N10["⑩ 开票申请"]:::old
+    N11["⑪ 盖章回传"]:::old
+    N12["⑫ 归档 / 台账"]:::old
+    G["发群守门员<br/>（横切）"]:::old
+    N1 --> N2 --> N3
+    N3 -.->|"A/B 级直入备货"| N5
+    N3 --> N4 --> N5
+    N5 --> N6
+    N5 -.->|"非款到直入"| N7
+    N6 --> N7
+    N7 --> N8 --> N9 --> N10 --> N11 --> N12
+    N9 -.-> G
+</pre>
+  </div>
+
+  <div class="step-title"><span class="badge" style="background:#7c3aed">v0.3</span>第 3 周 · 仓管与财务接入</div>
+  <p class="step-sub">「财务确认到款 / 仓库发货 / 上传回单 / 开票申请」迁入新系统：仓管、财务不再打开飞书；飞书剩余：主管、董事长、开票信息、盖章回传。</p>
+  <div class="diagram">
+<pre class="mermaid">
+flowchart TB
+    classDef v1 fill:#eef4ff,stroke:#2f5fc0,color:#1d4ed8
+    classDef v2 fill:#ecfeff,stroke:#0e7490,color:#0e7490
+    classDef v3 fill:#f4f1fc,stroke:#7c3aed,color:#6d4fc4
+    classDef v4 fill:#f0f7f1,stroke:#15803d,color:#15803d
+    classDef v5 fill:#fff7ed,stroke:#b45309,color:#b45309
+    classDef old fill:#f3f4f6,stroke:#9ca3af,color:#6b7280
+    N1["① 下单创建"]:::v1
+    N2["② 信息确认<br/>（自动通过）"]:::v1
+    N3["③ 主管审批"]:::old
+    N4["④ 董事长终审<br/>C/D 级"]:::old
+    N5["⑤ 备货<br/>商务填写发货仓"]:::v2
+    N6["⑥ 财务确认到款<br/>款到类"]:::v3
+    N7["⑦ 仓库发货"]:::v3
+    N8["⑧ 上传回单"]:::v3
+    N9["⑨ 填写开票信息"]:::old
+    N10["⑩ 开票申请"]:::v3
+    N11["⑪ 盖章回传"]:::old
+    N12["⑫ 归档 / 台账"]:::old
+    G["发群守门员<br/>（横切）"]:::old
+    N1 --> N2 --> N3
+    N3 -.->|"A/B 级直入备货"| N5
+    N3 --> N4 --> N5
+    N5 --> N6
+    N5 -.->|"非款到直入"| N7
+    N6 --> N7
+    N7 --> N8 --> N9 --> N10 --> N11 --> N12
+    N9 -.-> G
+</pre>
+  </div>
+
+  <div class="step-title"><span class="badge" style="background:#15803d">v0.4</span>第 4 周 · 销售全员接入</div>
+  <p class="step-sub">「填写开票信息 / 盖章回传 / 发群守门员」迁入新系统：销售不再打开飞书办理任何环节；飞书仅剩主管、董事长两级终审。</p>
+  <div class="diagram">
+<pre class="mermaid">
+flowchart TB
+    classDef v1 fill:#eef4ff,stroke:#2f5fc0,color:#1d4ed8
+    classDef v2 fill:#ecfeff,stroke:#0e7490,color:#0e7490
+    classDef v3 fill:#f4f1fc,stroke:#7c3aed,color:#6d4fc4
+    classDef v4 fill:#f0f7f1,stroke:#15803d,color:#15803d
+    classDef v5 fill:#fff7ed,stroke:#b45309,color:#b45309
+    classDef old fill:#f3f4f6,stroke:#9ca3af,color:#6b7280
+    N1["① 下单创建"]:::v1
+    N2["② 信息确认<br/>（自动通过）"]:::v1
+    N3["③ 主管审批"]:::old
+    N4["④ 董事长终审<br/>C/D 级"]:::old
+    N5["⑤ 备货<br/>商务填写发货仓"]:::v2
+    N6["⑥ 财务确认到款<br/>款到类"]:::v3
+    N7["⑦ 仓库发货"]:::v3
+    N8["⑧ 上传回单"]:::v3
+    N9["⑨ 填写开票信息"]:::v4
+    N10["⑩ 开票申请"]:::v3
+    N11["⑪ 盖章回传"]:::v4
+    N12["⑫ 归档 / 台账"]:::old
+    G["发群守门员<br/>（横切）"]:::v4
+    N1 --> N2 --> N3
+    N3 -.->|"A/B 级直入备货"| N5
+    N3 --> N4 --> N5
+    N5 --> N6
+    N5 -.->|"非款到直入"| N7
+    N6 --> N7
+    N7 --> N8 --> N9 --> N10 --> N11 --> N12
+    N9 -.-> G
+</pre>
+  </div>
+
+  <div class="step-title"><span class="badge" style="background:#b45309">0.5</span>取代完成 · 两级终审迁入，飞书三方审批流下线</div>
+  <p class="step-sub">主管审批、董事长终审迁入新系统 + 真相源切换；全部环节由企微版流程接管，飞书转为历史只读归档（观察期保留回滚通道）。</p>
+  <div class="diagram">
+<pre class="mermaid">
+flowchart TB
+    classDef v1 fill:#eef4ff,stroke:#2f5fc0,color:#1d4ed8
+    classDef v2 fill:#ecfeff,stroke:#0e7490,color:#0e7490
+    classDef v3 fill:#f4f1fc,stroke:#7c3aed,color:#6d4fc4
+    classDef v4 fill:#f0f7f1,stroke:#15803d,color:#15803d
+    classDef v5 fill:#fff7ed,stroke:#b45309,color:#b45309
+    classDef old fill:#f3f4f6,stroke:#9ca3af,color:#6b7280
+    N1["① 下单创建"]:::v1
+    N2["② 信息确认<br/>（自动通过）"]:::v1
+    N3["③ 主管审批"]:::v5
+    N4["④ 董事长终审<br/>C/D 级"]:::v5
+    N5["⑤ 备货<br/>商务填写发货仓"]:::v2
+    N6["⑥ 财务确认到款<br/>款到类"]:::v3
+    N7["⑦ 仓库发货"]:::v3
+    N8["⑧ 上传回单"]:::v3
+    N9["⑨ 填写开票信息"]:::v4
+    N10["⑩ 开票申请"]:::v3
+    N11["⑪ 盖章回传"]:::v4
+    N12["⑫ 归档 / 台账"]:::v4
+    G["发群守门员<br/>（横切）"]:::v4
+    N1 --> N2 --> N3
+    N3 -.->|"A/B 级直入备货"| N5
+    N3 --> N4 --> N5
+    N5 --> N6
+    N5 -.->|"非款到直入"| N7
+    N6 --> N7
+    N7 --> N8 --> N9 --> N10 --> N11 --> N12
+    N9 -.-> G
+</pre>
+  </div>
+  <p class="sec-sub" style="margin-top:10px;">读图方式：同一张业务流程图逐版点亮——彩色环节 = 该版起由企微版流程接管；灰色 = 仍在飞书办理。每版发布后，飞书审批中心的人工待办范围即缩小为「灰色环节」。</p>
+</section>
+
+<!-- ============ 2. 切换稳定性五原则 ============ -->
+<section>
+  <h2><span class="no">2</span>切换稳定性 · 五条铁律</h2>
+  <p class="sec-sub">「淡化飞书」不是切换开关，而是逐环节的渐进迁移。以下五条保证任何一步出错都能原地退回。</p>
+  <div class="principles">
+    <div class="p"><span class="n">1</span><b>真相单源</b><span>迁移期间，业务状态机始终由旧系统推进（新系统办理 → 受信通道执行 → 飞书实例同步显示已办）；0.5 完成真相源切换（一次性数据迁移 + 逐日对账）后，新系统成为唯一真相源——这是「取代」的最后一环。</span></div>
+    <div class="p"><span class="n">2</span><b>执行权按环节迁移</b><span>每个环节独立开关：开了，该环节在新系统办理；关了，立即退回飞书办理。环节之间互不影响。</span></div>
+    <div class="p"><span class="n">3</span><b>旧系统仅两处小改</b><span>① 信息确认自动通过 + 独立审批人配置（v0.1）；② 受信办理通道（v0.2 起，一次改造四版复用）。不修任何历史问题。</span></div>
+    <div class="p"><span class="n">4</span><b>数据单向只读</b><span>旧系统 → 新系统同步幂等批次，可重放、可停止；执行通道只推进状态、不触碰原始数据文件。</span></div>
+    <div class="p"><span class="n">5</span><b>每日对账 + 体验验收</b><span>订单数/状态分布逐日对账；每版以「该角色体验清单」验收，迁移环节连续 N 天执行一致后才算稳定。</span></div>
+  </div>
+  <div class="note"><b>数据范围扩大规则：</b>先「摘要 + 抽样核对」→ 再「全量 + 逐日对账」→ 最后「权限规则化」。每一层数据打开前，先由目标角色 1 人试用一周，人工核对无误后才放量。</div>
+</section>
+
+<!-- ============ 3. 版本详情 ============ -->
+<section>
+  <h2><span class="no">3</span>版本详情（效果视角）</h2>
+  <p class="sec-sub">每个版本描述「谁、从此能做什么、飞书退到什么程度」；技术动作仅一行概括。</p>
+
+  <!-- v0.1 -->
+  <div class="version v1">
+    <div class="head">
+      <span class="ver">v0.1</span>
+      <h3>销售助手上线：企微端下单，飞书审批照旧</h3>
+      <span class="period">第 1 周 · 用户：销售助手（虹励，唯一）</span>
+    </div>
+    <div class="body">
+      <div class="effect">
+        <div class="lead">发布后效果</div>
+        <ul>
+          <li><b>用户：</b>销售助手虹励一人先用起来——在企微侧边栏/群聊确认卡里下单（人工下单、代下单），无需再打开飞书创建页。</li>
+          <li><b>流程覆盖：</b>下单 → <b>信息确认自动通过</b>（无需她点）→ 主管/董事长审批照常在飞书推进 → 她在新系统随时看到订单走到哪一步。</li>
+          <li><b>体验闭环：</b>下单成功即见「已进入审批」；被驳回 → 看到原因 → 一键复制重提；点「查看完整流程」直达飞书侧全流程详情页。</li>
+          <li><b>对业务零扰动：</b>审批人看到的仍是标准飞书待办；飞书 H5 老用户的下单链路完全不变。</li>
+        </ul>
+      </div>
+      <div class="fade"><b>飞书取代进度：</b>本期仅「下单入口」迁入新系统，审批中心的人工待办范围不变——这是淡化的起点，不急于推进。</div>
+      <div class="meta">
+        <div class="m"><b>迁移的环节</b>下单（创建入口）· 信息确认（自动通过）</div>
+        <div class="m"><b>数据范围</b>仅「自建单」——不拉取存量全量，零历史包袱</div>
+        <div class="m"><b>技术动作</b>下单桥接模块（OAuth 授权 + 调用旧系统创建接口 + 幂等回写）；旧系统小改 ①（自动确认 + 独立审批人配置）</div>
+        <div class="m"><b>验收 / 回滚</b>体验闭环 6 项通过；关闭「下单开关」即退回，飞书侧无任何残留</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- v0.2 -->
+  <div class="version v2">
+    <div class="head">
+      <span class="ver">v0.2</span>
+      <h3>商务接入：备货环节迁入新系统，飞书首个环节淡出</h3>
+      <span class="period">第 2 周 · 用户：+ 商务</span>
+    </div>
+    <div class="body">
+      <div class="effect">
+        <div class="lead">发布后效果</div>
+        <ul>
+          <li><b>用户：</b>商务角色接入新系统（虹励的商务身份 + 后续商务同事逐批加白名单）。</li>
+          <li><b>流程覆盖（首个执行迁移）：</b><b>备货环节（商务填写发货仓）在新系统直接办理</b>——商务看到「待我备货」清单，在新系统完成选仓/计划发货日期/收货信息/通过或驳回，<b>不再需要打开飞书</b>；飞书审批中心该环节自动显示已办，主管/董事长等后续节点照常在飞书推进。</li>
+          <li><b>商务视角升级：</b>订单全景总览（所有订单一屏看状态/节点/处理人），为对账与调度提供统一视图。</li>
+          <li><b>数据范围首扩：</b>同步扩到备货相关订单——抽样核对备货字段与状态映射后放量。</li>
+        </ul>
+      </div>
+      <div class="fade"><b>飞书取代进度：</b>备货环节（商务填写发货仓）的人工待办从飞书审批中心消失——飞书侧首次出现「环节级淡出」，并作为后续环节迁移的样板。</div>
+      <div class="meta">
+        <div class="m"><b>迁移的环节</b>备货 · 商务填写发货仓（执行迁入新系统）</div>
+        <div class="m"><b>数据范围</b>+ 备货单摘要（stock_prepares）· 按商务 or-sign 归属过滤</div>
+        <div class="m"><b>技术动作</b>商务身份接入；旧系统小改 ②（受信办理通道：新系统办理 → 旧系统状态机推进 + 飞书实例同步）；同步扩展备货实体；权限规则</div>
+        <div class="m"><b>验收 / 回滚</b>商务体验清单 + 备货单对账零偏差 + 执行一致性校验（新系统办理结果 = 旧系统状态机结果）；关闭「备货环节开关」即退回飞书办理</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- v0.3 -->
+  <div class="version v3">
+    <div class="head">
+      <span class="ver">v0.3</span>
+      <h3>仓管与财务接入：发货 / 到款 / 开票环节迁入新系统</h3>
+      <span class="period">第 3 周 · 用户：+ 仓管 · + 财务</span>
+    </div>
+    <div class="body">
+      <div class="effect">
+        <div class="lead">发布后效果</div>
+        <ul>
+          <li><b>用户：</b>仓管（含各外租仓库）、财务接入新系统。</li>
+          <li><b>流程覆盖（执行迁移）：</b><b>发货环节（仓库发货、上传回单/完成信息）与财务环节（确认到款、开票申请）在新系统直接办理</b>——仓管看到「待我发货 / 待回单」清单（按仓库维度过滤），在新系统完成发货数量/物流/回单上传；财务看到「待确认到款 / 待开票」清单，在新系统完成到款确认/开票申请。<b>两者都不再需要打开飞书</b>。</li>
+          <li><b>多角色协同视角：</b>每笔订单在一条时间线上展示「谁在办、办到哪」；仓库维度数据（发货/回单）首次进入新系统。</li>
+          <li><b>数据范围第三扩：</b>同步扩展发货单与开票单摘要——按仓库/供方维度抽样核对后放量。</li>
+        </ul>
+      </div>
+      <div class="fade"><b>飞书取代进度：</b>发货、回单、到款确认、开票申请四类人工待办从飞书审批中心消失；飞书侧剩余：信息确认（自动）、主管审批、董事长终审、盖章回传、开票信息填写等销售环节。</div>
+      <div class="meta">
+        <div class="m"><b>迁移的环节</b>发货（仓库发货/上传回单）· 财务（确认到款/开票申请）</div>
+        <div class="m"><b>数据范围</b>+ 发货单 / 开票单摘要（shipments / invoices）· 按仓库、款到维度过滤</div>
+        <div class="m"><b>技术动作</b>仓管/财务身份接入；受信办理通道扩展两类环节；同步扩展两实体；视图与权限规则</div>
+        <div class="m"><b>验收 / 回滚</b>两角色体验清单 + 发货/开票对账零偏差 + 执行一致性校验；环节开关独立回滚</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- v0.4 -->
+  <div class="version v4">
+    <div class="head">
+      <span class="ver">v0.4</span>
+      <h3>销售全员接入：全流程迁入新系统，飞书仅剩两级终审</h3>
+      <span class="period">第 4 周 · 用户：+ 销售（全员）</span>
+    </div>
+    <div class="body">
+      <div class="effect">
+        <div class="lead">发布后效果</div>
+        <ul>
+          <li><b>用户：</b>销售全员接入——每个人在企微端自助下单/代下单，查看自己的客户订单全景（按销售归属裁剪）。</li>
+          <li><b>流程覆盖（销售环节执行迁移）：</b>信息确认（本人办理）、开票信息填写、客户订单盖章回传在新系统直接办理；<b>发客户群消息（守门员确认：任何内容发客户群前销售点一次确认，全程留痕）</b>——销售不再需要打开飞书办理任何环节。</li>
+          <li><b>数据全量就绪：</b>存量订单全量同步完成（首跑全量 + 逐日增量对账）；可见性按「角色 × 环节」权限矩阵裁剪。</li>
+          <li><b>里程碑：</b>除主管/董事长两级终审外，<b>全部业务环节的办理动作已迁入新系统</b>——飞书审批中心进入「仅剩两级终审」状态，为 0.5 的最终淡出备齐数据底座。</li>
+        </ul>
+      </div>
+      <div class="fade"><b>飞书取代进度：</b>飞书审批中心只剩<b>主管审批、董事长终审</b>两级人工待办（审批人继续在飞书操作）；其余环节在审批中心仅显示「已办」结果。这是取代前的最后状态——0.5 完成两级终审迁入与真相源切换后，飞书三方审批流整体下线（第 6 节）。</div>
+      <div class="meta">
+        <div class="m"><b>迁移的环节</b>信息确认 · 开票信息填写 · 盖章回传 · 发群守门员</div>
+        <div class="m"><b>数据范围</b>全量订单（存量+增量）· 权限矩阵裁剪 · 逐日对账</div>
+        <div class="m"><b>技术动作</b>销售批量身份接入；同步收官；守门员模块；权限规则全量；受信办理通道收口</div>
+        <div class="m"><b>验收 / 回滚</b>全员体验清单 + 连续 N 天对账零偏差；任一环节开关可回滚至飞书办理</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 4. 数据范围演进 ============ -->
+<section>
+  <h2><span class="no">4</span>数据范围演进：最难的部分，最稳的走法</h2>
+  <p class="sec-sub">数据「范围扩大」分两层：<b>同步深度</b>（哪些实体进入新系统）与<b>可见性</b>（谁能看到什么）。管道一次建成，范围逐版打开。</p>
+  <div class="diagram">
+<pre class="mermaid">
+flowchart TB
+    L0["同步管道（v0.1 一次建成）<br/>旧系统 → 新系统 PG：单向只读 · 幂等批次 · 敏感零残留<br/>每日自动对账：订单数 / 状态分布"]
+    L1["v0.1 范围：仅自建单<br/>不拉存量 · 无历史包袱"]
+    L2["v0.2 范围：+ 备货单<br/>按商务归属过滤 · 抽样核对后放量"]
+    L3["v0.3 范围：+ 发货单 / 开票单<br/>按仓库 / 款到维度过滤 · 对账放量"]
+    L4["v0.4 范围：全量订单<br/>存量全量 + 增量 · 权限矩阵裁剪"]
+    L0 --> L1 --> L2 --> L3 --> L4
+</pre>
+  </div>
+  <table style="margin-top:14px;">
+    <thead><tr><th>数据打开步骤</th><th>动作</th><th>放行条件</th></tr></thead>
+    <tbody>
+      <tr><td>① 摘要试点</td><td>目标角色 1 人试用新实体视图，人工核对字段与状态</td><td>抽样核对无差异</td></tr>
+      <tr><td>② 全量同步</td><td>开启该实体全量同步 + 逐日对账</td><td>连续 3 天对账零偏差</td></tr>
+      <tr><td>③ 权限规则化</td><td>从「白名单试用」切换为「角色规则自动裁剪」</td><td>权限矩阵回归通过（谁能看/谁不能看逐项验证）</td></tr>
+      <tr><td>④ 回滚预案</td><td>任何一步异常：关闭该实体同步或回退权限规则</td><td>旧系统无任何写回，随时可退</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 5. 环节覆盖与迁移映射 ============ -->
+<section>
+  <h2><span class="no">5</span>环节覆盖与迁移映射</h2>
+  <p class="sec-sub"><span class="pill b">新系统办理</span> = 该环节办理动作已迁入新系统（飞书不再产生该环节人工待办）；<span class="pill n">飞书原生</span> = 仍在飞书办理（待后续迁移）；<span class="pill a">自动</span> = 系统自动处理，无人办理。</p>
+  <div class="diagram">
+  <table>
+    <thead><tr><th>业务环节（飞书节点）</th><th>办理角色</th><th>迁入版本</th><th>办理位置</th></tr></thead>
+    <tbody>
+      <tr><td>下单（订单创建）</td><td>销售 / 销售助手 / 商务</td><td><span class="pill b">v0.1</span> → <span class="pill g">v0.4</span></td><td><span class="pill b">新系统办理</span>（企微发起 · 旧系统收单）</td></tr>
+      <tr><td>信息确认</td><td>提交人（销售/代办）</td><td><span class="pill b">v0.1 自动</span>（新系统通道）</td><td><span class="pill a">自动通过</span>（飞书 H5 用户照旧）</td></tr>
+      <tr><td>主管审批（审价）</td><td>主管</td><td>0.5 评估</td><td><span class="pill n">飞书原生</span>（不受迁移影响）</td></tr>
+      <tr><td>董事长终审（C/D 级）</td><td>董事长</td><td>0.5 评估</td><td><span class="pill n">飞书原生</span>（不受迁移影响）</td></tr>
+      <tr><td>备货 · 商务填写发货仓</td><td>商务</td><td><span class="pill c">v0.2</span></td><td><span class="pill b">新系统办理</span></td></tr>
+      <tr><td>备货 · 财务确认到款（款到类）</td><td>财务</td><td><span class="pill p">v0.3</span></td><td><span class="pill b">新系统办理</span></td></tr>
+      <tr><td>发货 · 仓库发货</td><td>仓管</td><td><span class="pill p">v0.3</span></td><td><span class="pill b">新系统办理</span></td></tr>
+      <tr><td>发货 · 上传回单/完成信息</td><td>仓管</td><td><span class="pill p">v0.3</span></td><td><span class="pill b">新系统办理</span></td></tr>
+      <tr><td>发货 · 填写开票信息</td><td>提交人（销售）</td><td><span class="pill g">v0.4</span></td><td><span class="pill b">新系统办理</span></td></tr>
+      <tr><td>开票 · 开票申请</td><td>财务 / 销售</td><td><span class="pill p">v0.3</span> / <span class="pill g">v0.4</span></td><td><span class="pill b">新系统办理</span></td></tr>
+      <tr><td>开票 · 客户订单盖章回传</td><td>销售 / 代办</td><td><span class="pill g">v0.4</span></td><td><span class="pill b">新系统办理</span></td></tr>
+      <tr><td>发客户群消息（守门员）</td><td>销售</td><td><span class="pill g">v0.4</span></td><td><span class="pill b">新系统办理</span>（企微发群）</td></tr>
+      <tr><td>归档 / 台账</td><td>全员</td><td><span class="pill b">v0.1 起</span></td><td>新系统跳转飞书侧全流程详情页（只读）</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="note"><b>说明：</b>主管与董事长不在四版用户范围内，其审批是「取代」的最后两级——v0.4 前保持不变（刻意安排：两级终审是最高风险的审批，最后迁移）；0.5 完成迁入与真相源切换后，飞书三方审批流整体下线。</div>
+</section>
+
+<!-- ============ 6. 飞书取代路线图 ============ -->
+<section>
+  <h2><span class="no">6</span>飞书取代路线图（淡化 → 下线）</h2>
+  <p class="sec-sub">「取代」= 飞书审批中心的人工待办范围逐版缩小，最终全部迁入新系统并完成真相源切换，飞书三方审批流整体下线；已迁环节在飞书审批中心保留「已办」结果与历史记录，全程可作为回滚通道。</p>
+  <div class="diagram">
+<pre class="mermaid">
+flowchart TB
+    S0["现状<br/>飞书承担全部环节<br/>人工办理"]
+    S1["v0.1<br/>下单迁出（入口）<br/>信息确认自动"]
+    S2["v0.2<br/>备货迁出"]
+    S3["v0.3<br/>发货/回单/到款/开票迁出"]
+    S4["v0.4<br/>销售环节迁出<br/>仅剩主管·董事长终审"]
+    S5["0.5<br/>两级终审迁入 + 真相源切换<br/>飞书三方审批流整体下线<br/>（历史只读归档 · 观察期回滚通道）"]
+    S0 --> S1 --> S2 --> S3 --> S4 --> S5
+</pre>
+  </div>
+  <table style="margin-top:14px;">
+    <thead><tr><th>节点</th><th>飞书审批中心剩余人工待办</th><th>前提条件</th></tr></thead>
+    <tbody>
+      <tr><td>v0.1 后</td><td>全部环节（不含自动确认）——取代未实质开始</td><td>下单链路稳定 1 周</td></tr>
+      <tr><td>v0.2 后</td><td>主管 · 董事长 · 发货 · 回单 · 到款 · 开票 · 销售环节</td><td>备货迁移执行一致性 N 天零偏差</td></tr>
+      <tr><td>v0.3 后</td><td>主管 · 董事长 · 销售环节（信息确认/开票信息/盖章回传）</td><td>发货/财务迁移执行一致性 N 天零偏差</td></tr>
+      <tr><td>v0.4 后</td><td><b>主管审批 · 董事长终审（仅两级）</b></td><td>全量数据对账零偏差 + 全员体验验收</td></tr>
+      <tr><td><b>0.5 取代完成</b></td><td><b>无——飞书三方审批流下线</b>（历史只读归档；观察期保留回滚通道）</td><td>两级终审迁入验收 + 真相源切换（状态机/数据迁入新系统）+ 业务方确认</td></tr>
+    </tbody>
+  </table>
+  <div class="note"><b>取代完成定义（0.5 验收）：</b>① 全部环节办理动作在新系统完成；② 业务真相源从旧系统 JSONL 切换至新系统 PG（一次性数据迁移 + 逐日对账）；③ 飞书三方审批流停止接收新审批单，转为历史只读归档；④ 观察期（建议 2–4 周）内保留回滚通道——任意环节开关关闭即回飞书，业务不中断；⑤ 观察期满且无回滚需求，正式宣告取代完成。</div>
+</section>
+
+<!-- ============ 7. 每周迭代节奏 ============ -->
+<section>
+  <h2><span class="no">7</span>每周迭代节奏（四版 = 四周）</h2>
+  <p class="sec-sub">固定节奏保证每版有充足的测试窗口、数据对账窗口与回退窗口。</p>
+  <div class="diagram">
+<pre class="mermaid">
+flowchart TB
+    A["周一<br/>发版（环节开关开启）"] --> B["周二–周四<br/>回归测试 + 逐日数据对账<br/>+ 执行一致性校验"]
+    B --> C["周五<br/>目标角色体验验收"]
+    C --> D{"验收通过？"}
+    D -->|"是"| E["放量 + 下周版本开发"]
+    D -->|"否"| F["关闭该版环节开关回滚<br/>修复后下周重发"]
+    F --> A
+</pre>
+  </div>
+  <table style="margin-top:14px;">
+    <thead><tr><th>周</th><th>版本</th><th>上线角色</th><th>迁移环节</th><th>数据范围</th><th>验收口</th></tr></thead>
+    <tbody>
+      <tr><td>第 1 周</td><td><span class="pill b">v0.1</span></td><td>销售助手（虹励）</td><td>下单入口 · 信息确认自动</td><td>自建单</td><td>体验闭环 6 项</td></tr>
+      <tr><td>第 2 周</td><td><span class="pill c">v0.2</span></td><td>+ 商务</td><td>备货（商务填写发货仓）</td><td>+ 备货单</td><td>商务体验 + 对账 + 执行一致性</td></tr>
+      <tr><td>第 3 周</td><td><span class="pill p">v0.3</span></td><td>+ 仓管 / 财务</td><td>发货/回单 · 到款/开票</td><td>+ 发货单 / 开票单</td><td>两角色体验 + 对账 + 执行一致性</td></tr>
+      <tr><td>第 4 周</td><td><span class="pill g">v0.4</span></td><td>+ 销售（全员）</td><td>信息确认/开票信息/盖章回传 · 守门员</td><td>全量 + 权限矩阵</td><td>全员体验 + 连续对账</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 8. 风险与待决 ============ -->
+<section>
+  <h2><span class="no">8</span>需要你知晓的风险与待决项</h2>
+  <table>
+    <thead><tr><th>项</th><th>说明</th><th>影响与处置</th></tr></thead>
+    <tbody>
+      <tr><td>审批人配置现状</td><td>旧系统默认审批人配置中，主管/董事长位置指向了不处理业务的程序员账号</td><td>新系统订单使用独立审批人配置（真实主管/董事长）；默认配置维持现状不动</td></tr>
+      <tr><td>受信办理通道（旧系统第二处小改）</td><td>执行迁移的技术前提：新系统办理 → 旧系统状态机推进 + 飞书实例同步</td><td><b>已验证成立</b>（备货/发货/开票 decision 只需 approver_token、支持文件上传）；v0.2 前完成，一次改造四版复用；另需临时修补两点：受信端点加并发锁、传真实办理人（当前为占位符）</td></tr>
+      <tr><td>数据不丢失 / 无死路（专项）</td><td>8 个 P0 点：JSONL 级全量迁移（含事件链）、存量待办规则、开票按真实任务定义、0.5 前新系统详情页+附件自立、T1.3 五项目拍板、真相源切换仪式等</td><td><b>均有兜底方案</b>，详见 <code>docs/发布计划可行性验证.md</code>（第 4/5/7 节）——按 P0-1…P0-8 顺序逐条堵上即安全推进</td></tr>
+      <tr><td>企微备案域名</td><td>群聊入口依赖企业微信备案域名就绪</td><td>未就绪前：先用 PC 订单后台 / 侧边栏上线，数据链路不受影响</td></tr>
+      <tr><td>状态口径 5 项</td><td>旧系统与新系统状态枚举的 5 处语义差异待业务拍板</td><td>只影响「状态回显」展示用词，不阻塞迁移；v0.2 数据范围扩大前拍板即可</td></tr>
+      <tr><td>真实审批人名单</td><td>独立审批人配置需要真实主管 / 董事长 / 财务的飞书账号</td><td>v0.1 前提供销售助手所需；v0.2 前补齐商务/财务</td></tr>
+      <tr><td>历史订单可见性</td><td>存量订单全量同步安排在 v0.4</td><td>v0.1–v0.3 阶段新系统只显示自建单与当期范围——刻意的「小步走」</td></tr>
+      <tr><td>流程小修 / 飞书端临时修补</td><td>发布过程中主要流程不变，允许节点增删、字段调整、顺序微调；优先在飞书端临时性修补（飞书是执行真相）</td><td>受信办理通道按 task_id 粒度天然兼容节点级小修；字段映射（同步/受信通道）配置驱动，小修只改配置；<b>唯一硬约束：0.5 真相源切换前流程冻结</b></td></tr>
+      <tr><td>两级终审的迁入与下线</td><td>0.5 把主管/董事长终审迁入新系统，完成真相源切换后飞书三方审批流整体下线</td><td><b>已定方向</b>（用户确认：核心目的是推企微版流程上线、取代飞书三方审批流）；时点以 v0.4 数据验证与业务确认为准；下线后保留历史只读归档与观察期回滚通道</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<footer>
+  B2B 订单履约系统 · 渐进式发布计划（v0.1 → v0.4 · 取代飞书三方审批流） · 生成 2026-08-18<br>
+  详细设计与代码级依据：<code>docs/B2B_V01_对比与同步设计_20260818.md</code>（决策记录 / 生产配置审计 / 未决项清单） · 可行性验证：<code>docs/发布计划可行性验证.md</code>
+</footer>
+
+</div>
+</body>
+</html>

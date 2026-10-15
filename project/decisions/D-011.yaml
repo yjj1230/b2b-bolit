@@ -1,0 +1,38 @@
+# D-011 影子系统持续发布与「近乎真实系统」等效设计（用户直接裁决，2026-08-20）
+decision_id: D-011
+choice: >
+  在 D-008/D-009/D-010 基础上补充两条方向：
+  Q1=持续发布验证线：影子系统的发布不绑定 v0.1/v0.2 单次窗口；v0.1 上线后
+      允许按验证需要多次发布影子系统（映射表、种子集、审计工具、摄入/重放
+      工具等），以加速验证收敛。每次影子发布仍必须通过：六条铁律、启动守卫、
+      零出站/零回写哨兵、全量重放（S-铁5）；A 轨不因影子发布而重新发布。
+  Q2=近乎真实系统的等效设计：影子轨通过「六同原则」保证等效性——
+      ① 同代码同镜像：shadow-* 与 A 轨构建自同一提交、同一 Dockerfile，
+         OrderWorkflow/PreOrderWorkflow/domain/repo 完全同一份代码，Shadow 只改
+         Timer 与出站行为；② 同数据：真实只读源，完整事件链，同一 SanitizeRow；
+         ③ 同状态机：不设 shadow-only FSM 分支，shadow-inject 只注入与 Timer
+         等价的分支；④ 同执行环境：真实 PG/Temporal/SpiceDB 引擎（SpiceDB 由
+         memory 升级为 postgres 存储作为默认，重启不丢授权图）；⑤ 同查询面：
+         shadow-api 复用 api 二进制与投影代码，仅换白名单与租户；⑥ 同审计：
+         事件链、守恒、待办与 A 轨同一 repo 事务。
+      显式例外只有四类：零出站通知器（mock 记录不发送）、零回写（无桥接/写凭据）、
+      无公网入口、PRE/Gatekeeper 内部种子。除这四类外，影子轨应被当作
+      「A 轨下一版本在真实数据上的预演」，A 轨发布 workflow/domain 变更前，
+      以影子真实数据验证通过为前置证据。
+rationale: >
+  用户希望加速验证：影子系统需要成为一条可独立高频发布的内部验证线，而不是
+  一次性交付物；同时影子结论要能直接回答「真实系统能不能接住真实数据」，
+  所以影子与真实系统的任何行为差异都必须是被显式声明的例外，而不是实现
+  漂移。多次发布解决了映射/分歧修复的迭代速度；六同原则解决了结论可信度。
+premises:
+  - project/decisions/D-008.yaml / D-009.yaml / D-010.yaml / D-012.yaml / D-013.yaml
+  - docs/v0.1/12-shadow-full-flow.html（六条铁律、A-01..A-06）
+  - 本工作区代码事实：shadow-* 与 A 轨共用 workflows/domain/repo/api 代码
+objections: []
+decider: project-owner（用户直接裁决）
+effective_interval: {from: "2026-08-20T00:00:00+00:00", to: null}
+supersedes: []
+review_condition: >
+  ① 每次影子发布前检查「六同原则」差异清单并更新文档；② 任一 workflow/domain
+  变更必须先过影子全量重放再进入 A 轨；③ SpiceDB postgres 化与影子-非影子
+  对拍测试（同信号序列事件链一致）补齐后，A 轨发布门禁开始引用影子等效证据。

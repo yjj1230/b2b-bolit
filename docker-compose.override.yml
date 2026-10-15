@@ -1,0 +1,94 @@
+# 部署端口调整（121.40.226.192 / b2b_pilot 服务器）
+#   postgres 15432 → 25432：15432 被 pilot-db-tunnel SSH 隧道占用
+#   api      18080 → 28080：18080 被 enterprise-ai-assistant systemd 服务占用
+#   spicedb 15051 / temporal 17233 / wecom 18081 保持不变（空闲）
+#
+# 上游 compose 四处缺陷修复（部署实测）：
+#   1) spicedb serve 缺 --grpc-preshared-key → 启动即退出（key 用服务端默认 b2b-dev-key，config.go 默认值）
+#   2) temporal 引用镜像内不存在的 dynamicconfig 文件 → 退出；改用默认配置
+#   3) spicedb v1.39.1 镜像无 healthcheck 子命令 → 恒 unhealthy 卡死 api 启动；升 v1.56.0（旧服务器同款）
+#   4) spicedb-schema 命令缺 --grpc-preshared-key 且 relationship touch 不写 schema；改为 schema write
+services:
+  postgres:
+    ports: !override
+      - "25432:5432"
+  api:
+    ports: !override
+      - "28080:8080"
+    environment: !override
+      B2B_PG_DSN: postgres://postgres:postgres@b2b-replica:5432/b2b_pilot?sslmode=disable
+      B2B_SPICEDB_ADDR: spicedb:50051
+      B2B_TEMPORAL_ADDR: temporal:7233
+      B2B_HTTP_ADDR: :8080
+      B2B_WECOM_PROVIDER: ${B2B_WECOM_PROVIDER:-mock}
+      B2B_WECOM_TENANT_CFG: /etc/b2b/wecom-tenant.json
+      B2B_WECOM_CONTEXT_SECRET: ${B2B_WECOM_CONTEXT_SECRET:-b2b-dev-context-secret}
+      B2B_PGAPI_API_KEY: ${B2B_PGAPI_API_KEY:-}
+      B2B_PGAPI_BASE_URL: ${B2B_PGAPI_BASE_URL:-}
+      B2B_PGAPI_ARCHIVE_ENABLED: ${B2B_PGAPI_ARCHIVE_ENABLED:-false}
+      B2B_FEISHU_BRIDGE_ENABLED: ${B2B_FEISHU_BRIDGE_ENABLED:-false}
+      B2B_FEISHU_BRIDGE_BASE_URL: ${B2B_FEISHU_BRIDGE_BASE_URL:-}
+      B2B_FEISHU_BRIDGE_APP_ID: ${B2B_FEISHU_BRIDGE_APP_ID:-}
+      B2B_FEISHU_BRIDGE_REDIRECT_URI: ${B2B_FEISHU_BRIDGE_REDIRECT_URI:-}
+    depends_on: !override
+      postgres:
+        condition: service_healthy
+      spicedb:
+        condition: service_started
+      spicedb-schema:
+        condition: service_completed_successfully
+      temporal:
+        condition: service_healthy
+  spicedb:
+    image: !override authzed/spicedb:v1.56.0
+    command: !override
+      - serve
+      - --grpc-addr=0.0.0.0:50051
+      - --http-addr=0.0.0.0:8443
+      - --grpc-preshared-key=b2b-dev-key
+      - --datastore-engine=memory
+      - --log-level=warn
+    # authzed 镜像为 distroless：无 shell、无 healthcheck 子命令 → 禁用健康检查（进程退出即容器退出，足够）
+    healthcheck: !override
+      test: ["NONE"]
+  temporal:
+    environment: !override
+      DB: postgres12
+      DB_PORT: "5432"
+      POSTGRES_USER: postgres
+      POSTGRES_PWD: postgres
+      POSTGRES_SEEDS: b2b-replica
+  # spicedb-schema 重定义为 seedrel（部署辅助镜像）：写 schema.zed + 基线授权关系（幂等）
+  # 注意：spicedb 为内存态，容器重建后需重跑（up -d 即自动执行）
+  spicedb-schema:
+    image: !override pilot_v3-tools:latest
+    entrypoint: !override ["/usr/local/bin/seedrel"]
+    command: !override
+      - -spicedb
+      - spicedb:50051
+      - -token
+      - b2b-dev-key
+      - -schema
+      - /schema.zed
+    volumes: !override
+      - ./schema.zed:/schema.zed:ro
+    depends_on: !override
+      spicedb:
+        condition: service_started
+
+  worker:
+    environment:
+      B2B_PG_DSN: postgres://postgres:postgres@b2b-replica:5432/b2b_pilot?sslmode=disable
+  wecom:
+    environment:
+      B2B_PG_DSN: postgres://postgres:postgres@b2b-replica:5432/b2b_pilot?sslmode=disable
+  sync:
+    environment:
+      B2B_PG_DSN: postgres://postgres:postgres@b2b-replica:5432/b2b_pilot?sslmode=disable
+    command: !override
+      - -config
+      - /etc/sync/sync.json
+      - -dsn
+      - postgres://postgres:postgres@b2b-replica:5432/b2b_pilot?sslmode=disable
+    healthcheck: !override
+      test: ["NONE"]

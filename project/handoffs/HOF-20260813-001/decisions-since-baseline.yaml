@@ -1,0 +1,57 @@
+# project/handoffs/HOF-20260813-001/decisions-since-baseline.yaml
+# 自上次已接受 baseline 以来的决策（§10）。baseline = NONE（尚无已发布 baseline），
+# 故本文件 = 本次 bootstrap 的全部决策摘要；完整记录见 project/decisions/D-001..D-013.yaml。
+decisions:
+  - decision_id: D-001
+    choice: 采用 ECM 1.0.0 作为项目迭代机制（bootstrap 落库控制面）
+    decider: project-governance（reasonix-executor）
+    recorded_at: 2026-08-13T08:37:00+00:00
+  - decision_id: D-002
+    choice: M0 冻结现状索引（213 制品登记 manifest，不移动文件）
+    decider: project-governance（reasonix-executor）
+    recorded_at: 2026-08-13T08:37:00+00:00
+  - decision_id: D-003
+    choice: 建立四个 claims 域占位，M2 再抽取具体声明
+    decider: project-governance（reasonix-executor）
+    recorded_at: 2026-08-13T08:37:00+00:00
+  - decision_id: D-004
+    choice: 机制状态标 PROPOSED 不激活（ECM-ACT-001 硬约束）
+    decider: project-governance（reasonix-executor）
+    recorded_at: 2026-08-13T08:37:00+00:00
+  - decision_id: D-005
+    choice: bootstrap handoff 协议适用，acceptance.decision=NOT_APPLICABLE
+    decider: project-governance（reasonix-executor）
+    recorded_at: 2026-08-13T08:37:00+00:00
+  - decision_id: D-006
+    choice: 数据库访问二分（流程引擎直连 PG；products/customers/purchase-contracts 经 pgAPI；产品/客户写接口同步接入）
+    decider: project-owner（用户裁决）
+    recorded_at: 2026-08-17T00:00:00+00:00
+  - decision_id: D-007
+    choice: 合同写路径下一迭代启用；状态回写采用 apply_no upsert；发布拓扑采用备库提升为可写副本
+    decider: project-owner（用户裁决）
+    recorded_at: 2026-08-18T07:40:00+00:00
+  - decision_id: D-008
+    choice: 双轨发布——A 轨对外（桥接+订单视图），S 轨影子真实数据预演完整状态机，随 v0.1 同发、仅内部
+    decider: project-owner（用户裁决）
+    recorded_at: 2026-08-20T00:00:00+00:00
+  - decision_id: D-009
+    choice: 影子无托底、全节点覆盖、差异映射可接受；未映射/未标记差异才是阻塞
+    decider: project-owner（用户裁决）
+    recorded_at: 2026-08-20T00:00:00+00:00
+  - decision_id: D-010
+    choice: 影子独立环境（自带 shadow-temporal，零共享面），v0.3 后撤销，容量按 ≤1 万条/天
+    decider: project-owner（用户裁决）
+    recorded_at: 2026-08-20T00:00:00+00:00
+  - decision_id: D-011
+    choice: 影子 v0.1 后多次发布（S 线高频/F 线影子先行）+ 六同原则与四类显式例外
+    decider: project-owner（用户裁决）
+    recorded_at: 2026-08-20T00:00:00+00:00
+  - decision_id: D-012
+    choice: 影子轨改为新单实时增量模式（hook 驱动，存量不前置；重放=上线以来新单全集+种子）
+    decider: project-owner（用户裁决）
+    recorded_at: 2026-08-20T16:10:00+00:00
+  - decision_id: D-013
+    choice: v0.2=数据正式迁入新系统（唯一真相，除销售/主管/董事长外全部上企微）；v0.3=企微体系发布完成+全量迁完+影子撤销；存量订单同步已裁决 v0.1 不做
+    decider: project-owner（用户裁决）
+    recorded_at: 2026-08-20T16:12:00+00:00
+

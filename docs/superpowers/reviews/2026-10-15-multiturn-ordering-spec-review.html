@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spec 评审 · Agent 多轮下单与订单草稿归并</title>
+<style>
+  :root{
+    --bg:#f7f8fa; --card:#ffffff; --ink:#1f2328; --ink-2:#57606a; --ink-3:#8b949e;
+    --line:#e6e8eb; --line-2:#d0d7de;
+    --red:#cf222e; --red-bg:#fff0ee; --amber:#9a6700; --amber-bg:#fff8e6;
+    --green:#1a7f37; --green-bg:#eaf7ee; --blue:#0969da; --blue-bg:#eef4ff;
+    --mono:'Cascadia Code','SF Mono',Consolas,Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+    line-height:1.7;font-size:15px}
+  .wrap{max-width:1080px;margin:0 auto;padding:48px 28px 80px}
+  header{border-bottom:2px solid var(--line-2);padding-bottom:22px;margin-bottom:34px}
+  h1{font-size:27px;margin:0 0 10px;letter-spacing:-.4px}
+  .meta{color:var(--ink-3);font-size:13.5px;display:flex;gap:18px;flex-wrap:wrap}
+  .meta b{color:var(--ink-2);font-weight:600}
+  h2{font-size:20px;margin:44px 0 16px;padding-left:12px;border-left:4px solid var(--blue)}
+  h3{font-size:16.5px;margin:26px 0 10px;color:var(--ink)}
+  p{margin:10px 0}
+  code{font-family:var(--mono);background:#eff1f3;padding:1.5px 6px;border-radius:5px;
+    font-size:13px;color:#0a3069}
+  pre{background:#0d1117;color:#e6edf3;padding:16px 18px;border-radius:10px;overflow-x:auto;
+    font-family:var(--mono);font-size:12.8px;line-height:1.6;margin:14px 0}
+  pre code{background:none;color:inherit;padding:0}
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13.6px;background:var(--card);
+    border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+  th,td{padding:10px 13px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:#f2f4f6;font-weight:600;color:var(--ink-2);font-size:13px;
+    white-space:nowrap;border-bottom:2px solid var(--line-2)}
+  tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:#fafbfc}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px 22px;
+    margin:16px 0;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+  .tag{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:20px;
+    letter-spacing:.3px;white-space:nowrap}
+  .t-block{background:var(--red-bg);color:var(--red);border:1px solid #ffcdc6}
+  .t-warn{background:var(--amber-bg);color:var(--amber);border:1px solid #f3e0a6}
+  .t-ok{background:var(--green-bg);color:var(--green);border:1px solid #b9e5c5}
+  .t-info{background:var(--blue-bg);color:var(--blue);border:1px solid #c8ddff}
+  .t-gray{background:#f0f1f3;color:var(--ink-2);border:1px solid var(--line-2)}
+  .score{display:flex;gap:14px;flex-wrap:wrap;margin:22px 0}
+  .score .box{flex:1;min-width:150px;background:var(--card);border:1px solid var(--line);
+    border-radius:12px;padding:16px 18px;text-align:center}
+  .score .n{font-size:26px;font-weight:700;letter-spacing:-.5px}
+  .score .l{font-size:12.5px;color:var(--ink-3);margin-top:4px}
+  .callout{border-left:4px solid var(--blue);background:var(--blue-bg);padding:14px 18px;
+    border-radius:0 8px 8px 0;margin:16px 0}
+  .callout.red{border-color:var(--red);background:var(--red-bg)}
+  .callout.amber{border-color:var(--amber);background:var(--amber-bg)}
+  .callout.green{border-color:var(--green);background:var(--green-bg)}
+  .callout p:first-child{margin-top:0} .callout p:last-child{margin-bottom:0}
+  .issue{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--red);
+    border-radius:0 10px 10px 0;padding:16px 20px;margin:16px 0}
+  .issue.w{border-left-color:var(--amber)}
+  .issue.s{border-left-color:var(--green)}
+  .issue h4{margin:0 0 8px;font-size:15.5px;display:flex;align-items:center;gap:10px}
+  .issue .id{font-family:var(--mono);color:var(--ink-3);font-size:13px;font-weight:600}
+  .kv{font-size:13.4px}
+  .kv b{color:var(--ink-2);font-weight:600}
+  ul,ol{margin:10px 0;padding-left:24px}
+  li{margin:6px 0}
+  .scroll{overflow-x:auto}
+  .num{font-variant-numeric:tabular-nums}
+  hr{border:none;border-top:1px solid var(--line);margin:34px 0}
+  .foot{color:var(--ink-3);font-size:12.5px;margin-top:40px;padding-top:18px;
+    border-top:1px solid var(--line);text-align:center}
+  .yes{color:var(--green);font-weight:700}
+  .no{color:var(--red);font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Spec 评审 · Agent 多轮下单与订单草稿归并设计</h1>
+  <div class="meta">
+    <span><b>评审对象</b> 2026-10-15-agent-multiturn-ordering-design.md</span>
+    <span><b>上游真源</b> 2026-10-14 企业级闭环设计</span>
+    <span><b>评审日期</b> 2026-10-15</span>
+    <span><b>方法</b> 对照 internal/ 真实代码逐条核验</span>
+  </div>
+</header>
+
+<div class="callout green">
+  <p><b>一句话结论：</b>方案的<b>分层思想是教科书级的</b>——"LLM 只提取候选、确定性代码裁决、版本化草稿、人工闸门"这条主线完全正确，方向不需要改。但这份 spec 目前是<b>设计稿（草案）</b>而非可实施规格：它画的目标状态与仓库现有<b>数据模型、状态机、Parser 接口</b>存在 4 处硬冲突，且有 5 处关键语义留白。按现状直接进入 plan 阶段，实现期必然返工。</p>
+</div>
+
+<div class="score">
+  <div class="box"><div class="n" style="color:var(--green)">A−</div><div class="l">架构思想</div></div>
+  <div class="box"><div class="n" style="color:var(--amber)">B−</div><div class="l">方案完整性</div></div>
+  <div class="box"><div class="n" style="color:var(--red)">C+</div><div class="l">与现有代码契合度</div></div>
+  <div class="box"><div class="n" style="color:var(--amber)">B</div><div class="l">可测试性</div></div>
+  <div class="box"><div class="n" style="color:var(--amber)">C</div><div class="l">边界清晰度</div></div>
+</div>
+
+<h2>一、承重事实核对（点评的地基）</h2>
+<p>先核了 spec「当前代码的适配点」一节的自述，再核代码本身。四处的差异是后文所有问题的根，先摆出来：</p>
+
+<div class="scroll">
+<table>
+<thead><tr><th>#</th><th>spec 的陈述</th><th>代码真实状态</th><th>判定</th></tr></thead>
+<tbody>
+<tr>
+  <td class="num">1</td>
+  <td>"同一订单的多轮消息可以<b>归并到同一份预订单草稿</b>"</td>
+  <td><code>pre_orders</code> 的幂等约束是 <code>UNIQUE(tenant_id, group_id, msg_id)</code>，<code>CreatePreOrder</code> 是"<b>一消息 → 一预订单</b>"</td>
+  <td><span class="tag t-block">硬冲突</span></td>
+</tr>
+<tr>
+  <td class="num">2</td>
+  <td>"LLM 不应每轮重新生成完整订单，而应返回<b>本轮字段变化</b> <code>changes:{...}</code>"</td>
+  <td><code>IntentParser.Parse</code> 返回 <code>[]byte</code>，<code>LLMParser.Parse</code> 直接 <code>Decode(&amp;cands)</code> 成 <code>[]IntentCandidate</code>——是<b>候选数组</b>不是补丁</td>
+  <td><span class="tag t-block">契约冲突</span></td>
+</tr>
+<tr>
+  <td class="num">3</td>
+  <td>"新消息补充 → 新 DraftVersion，回 <code>PRE_COLLECTING</code>"</td>
+  <td><code>PreOrderFSM</code> 里<b>没有</b> <code>PRE_COLLECTING</code>；<code>PRE_PENDING_CONFIRM</code> 的出边只有 Confirmed/Modified/Ignored/Escalated，<b>无回退边</b></td>
+  <td><span class="tag t-block">FSM 不支持</span></td>
+</tr>
+<tr>
+  <td class="num">4</td>
+  <td>"确认卡片必须绑定草稿版本；旧卡片不能确认新版本"</td>
+  <td><code>ValidatePreOrderDraft</code> 已实现 <code>draft_version_conflict</code>；migration 009 的 <code>pre_order_drafts</code> 不可变版本表已建</td>
+  <td><span class="tag t-ok">准确</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h2>二、架构层面：这份设计的成功之处</h2>
+
+<div class="card">
+<h3>1. "不确定性隔离带"划得非常干净</h3>
+<p>spec 把系统切成三段——<b>LLM 只产候选（不可信）→ 确定性策略裁决（可信）→ 人工确认（最终权威）</b>。这是 AI 落地企业交易类系统的正解，也是这份设计最值钱的部分。尤其"<code>deriveOrder</code> 只能读取已确认草稿中的规范化字段，不得重新依赖模型猜测"这一条，把模型幻觉的影响彻底封在派生边界之外。</p>
+</div>
+
+<div class="card">
+<h3>2. 不可变草稿版本 + 卡片版本闸门</h3>
+<p>"每轮合并产生不可变 DraftVersion、确认必须携带版本号、版本不匹配则拒绝"——这是解决"用户在多轮对话中点了旧卡片"这类经典并发问题的标准解法。migration 009 已经把 <code>pre_order_drafts</code> 的 <code>UNIQUE(tenant_id, pre_order_id, draft_version)</code> 和"仅一个 CURRENT"的部分唯一索引落地了，底座在。</p>
+</div>
+
+<div class="card">
+<h3>3. 字段优先级是显式的</h3>
+<p>"人工修改 &gt; 用户明确补充 &gt; 已确认草稿 &gt; 模型推断"——把冲突解决规则写成了有序链，而不是散落在 if-else 里。这条链本身就是最好的测试用例来源（见第四节）。</p>
+</div>
+
+<div class="card">
+<h3>4. 会话选择优先级是"确定性序列"</h3>
+<p>1) 显式"继续补充" → 2) 引用消息 → 3) 消息含订单号 → 4) 群内唯一未过期会话 → 5) 相似度候选。<b>前 4 条全是确定性的</b>，第五条明确降级为"候选匹配 + 无法确定则 <code>PRE_AMBIGUOUS</code>"。这个"能确定就确定、不能确定就交给人工"的排序是正确的。</p>
+</div>
+
+<hr>
+
+<h2>三、问题清单（分三级）</h2>
+
+<h3><span class="tag t-block">阻断级</span> 必须在写 plan 前解决</h3>
+
+<div class="issue">
+<h4><span class="id">B-1</span> 归并载体缺失：<code>pre_orders</code> 的幂等粒度与目标矛盾</h4>
+<p>spec 引入了 <code>OrderConversation</code> 概念，但<b>没有说明它将如何改变 <code>pre_orders</code> 的幂等键语义</b>。现状：</p>
+<pre><code>-- migrations/003_preorder.sql
+UNIQUE (tenant_id, group_id, msg_id)   -- 一消息一预订单
+</code></pre>
+<p>而 spec 要的是"产品 / 数量 / 地址分三轮 → <b>同一个预订单</b>"。实现路径只有两条，spec 必须二选一并写明：</p>
+<ul>
+  <li><b>方案 A（推荐）</b>：新增 <code>order_conversations</code> 表，幂等键降为 <code>(tenant_id, group_id, msg_id)</code> 的<b>事件</b>级去重，预订单改由 <code>session_id</code> 派生。这是对比 003 的破坏性变更，需要新 migration + 回填脚本。</li>
+  <li><b>方案 B</b>：保留 msg 级 ID，靠 <code>OrderConversation.session_id</code> 做外部聚合，多轮 = 多条 <code>pre_orders</code> + 一个 conversation。但这与 spec 中"归并为同一预订单草稿"的表述不符，且会让 <code>PRE_*</code> 状态机含义失真。</li>
+</ul>
+<div class="callout red">
+<p><b>为什么是阻断级：</b>这个选择决定了 <code>CreatePreOrder</code>、<code>wecomPreKey</code>、<code>pre_order_events</code>、状态机归属<b>全部四条主链</b>的改法。选错方向，plan 里前 3 个 task 都要重写。</p>
+</div>
+</div>
+
+<div class="issue">
+<h4><span class="id">B-2</span> DraftVersion 里到底存"累积态"还是"增量"——承重语义未定义</h4>
+<p>spec 的例子是<b>累积态</b>：</p>
+<pre><code>Draft v1：product = C68
+Draft v2：product = C68, quantity = 100
+Draft v3：product = C68, quantity = 100, address = 上海
+</code></pre>
+<p>但代码里 <code>CreatePreOrderDraftVersion</code> 写入的 <code>Candidate</code> 字段，是<b>本轮 parser 的输出</b>（见 <code>agent_default.go</code> 第 55–59 行，直接传 <code>candidates</code>，即本轮 Parse 结果）。也就是说 v2 里并不会自动包含 v1 的 C68。</p>
+<p>结论：spec 描述的"合并"这个动作，<b>在代码里根本不存在</b>——目前没有"读取当前草稿 + 应用补丁 + 写回累积态"的合并器。<code>internal/agentorder/</code> 只有 <code>policy.go</code>（策略），没有 <code>merger.go</code>。</p>
+<div class="callout amber">
+<p><b>需要明确：</b>① 每版 <code>draft.candidate</code> 存累积完整态，还是只存增量 diff（累积态可由回放重建）？② 合并器归谁（新包 <code>internal/agentorder/merger.go</code>？）？③ 合并器是"纯函数"还是"带 IO"——若纯，就能表驱动测；这是可测试性的关键。</p>
+</div>
+</div>
+
+<div class="issue">
+<h4><span class="id">B-3</span> 状态机图与 <code>PreOrderFSM</code> 事实矛盾，spec 会给实现者画错图</h4>
+<p>spec §状态机调整 画的：</p>
+<pre><code>PRE_PENDING_CONFIRM
+    ├─ 新消息补充 → 新 DraftVersion，回 PRE_COLLECTING   ← 这条边不存在
+</code></pre>
+<p>实际 <code>internal/domain/preorder.go</code> 里 <code>PRE_PENDING_CONFIRM</code> 的出边是：</p>
+<pre><code>StatePrePendingConfirm: {
+    StatePreConfirmed, StatePreModified, StatePreIgnored, StatePreEscalated,
+},
+</code></pre>
+<p>spec 自己也意识到问题，写了"如果暂时不扩展状态枚举，现有 <code>PRE_INTENT_PARSING</code> 可以临时承载 <code>PRE_COLLECTING</code> 语义"——<b>但这个权宜之计不成立</b>：<code>PRE_INTENT_PARSING</code> 的出边只有 <code>PENDING_CONFIRM</code> / <code>AMBIGUOUS</code> / <code>IGNORED</code>，既没有自环（继续收集），也没有从 PENDING_CONFIRM 回来的边。所以无论用哪个状态，<b>"补充消息后回收集态"这条迁移都会被 <code>domain.PreOrderFSM.Validate</code> 直接拒绝</b>。</p>
+<p><b>修法：</b>spec 必须同时给出 <code>PreOrderFSM</code> 的<b>完整边表变更</b>（新增 <code>PRE_COLLECTING</code> 及其出入边、以及 PENDING_CONFIRM → COLLECTING 的回退边），而不是只画一张目标图。</p>
+</div>
+
+<div class="issue">
+<h4><span class="id">B-4</span> "旧卡片被拒绝"在 Temporal 语义下会<b>终止 workflow</b>，spec 未定义其存活</h4>
+<p>这是最隐蔽也最危险的一条。当前确认路径：</p>
+<pre><code>// internal/workflows/preorder.go  case "confirm":
+if err := act(ctx, ActValidatePreDraft, ...).Get(ctx, nil); err != nil {
+    return err        // ← Activity error 直接让 workflow 返回失败
+}
+</code></pre>
+<p><code>ValidatePreOrderDraft</code> 在版本冲突时返回 <code>draft_version_conflict</code> 错误。在 Temporal 里，<b>这个 error 冒泡到 workflow 顶层 = workflow 执行失败终止</b>，而不是"提示用户刷新卡片后继续等待"。于是：</p>
+<ul>
+  <li>用户点了旧卡片 → 预订单 workflow 挂掉 → 之后即使点对卡片也没 workflow 接信号了。</li>
+  <li>spec 说"拒绝并要求刷新卡片"，但<b>没定义拒绝后 workflow 是否存活</b>。</li>
+</ul>
+<div class="callout red">
+<p><b>正确语义应是：</b>版本冲突是<b>可恢复的业务拒绝</b>——记录一次 <code>STALE_CARD_REJECTED</code> 审计，回发"卡片已过期请刷新"，<b>workflow 继续回到选择器等待</b>（<code>continue</code> 而非 <code>return err</code>）。只有真正的系统错误才 return。spec 需要明确这条，否则 plan 会照抄现在的错误写法。</p>
+</div>
+</div>
+
+<h3><span class="tag t-warn">重要级</span> 会导致实现期分歧</h3>
+
+<div class="issue w">
+<h4><span class="id">W-1</span> "相似度候选匹配"（优先级 #5）是确定性裂缝</h4>
+<p>spec 通篇强调"确定性归并"，但优先级 #5 写的是"使用可配置的短时间窗口和<b>字段相似度</b>作为候选匹配"。相似度本质是启发式，与全文基调矛盾，且它直接决定了 <code>PRE_AMBIGUOUS</code> 的触发边界。</p>
+<p><b>建议：</b>把它明确定义为"<b>仅生成候选项、必须经用户确认才可归并</b>"，且默认阈值与"多候选即 AMBIGUOUS"的判定条件要写死；否则测试无法构造边界。</p>
+</div>
+
+<div class="issue w">
+<h4><span class="id">W-2</span> 两套超时机制职责重叠：<code>expires_at</code> vs <code>EscalateAfter</code></h4>
+<p>草稿表有 <code>expires_at</code>，workflow 有 24h <code>EscalateAfter</code> Timer。spec 分别提了"草稿过期率"和"超时升级"，<b>但从没说两者关系</b>：</p>
+<ul>
+  <li>草稿 <code>expires_at</code> 到期后，草稿是作废？<code>OrderConversation</code> 转 <code>EXPIRED</code>？<code>pre_order</code> 转什么状态？</li>
+  <li>24h Timer 升级到 <code>PRE_ESCALATED</code> 时，草稿是否过期？两个时间常量谁大谁小？</li>
+</ul>
+<p>状态机里有 <code>PRE_ESCALATED</code> 但<b>没有 <code>PRE_EXPIRED</code></b>，而 <code>OrderConversation.status</code> 枚举里又有 <code>EXPIRED</code>。两套实体的超时状态不咬合，是明确的语义空白。</p>
+</div>
+
+<div class="issue w">
+<h4><span class="id">W-3</span> 并发控制对象与机制未定</h4>
+<p>spec 说"同一 <code>session_id</code> 同时只允许一个合并事务执行"。但代码锁的是 <code>pre_orders</code> 行（<code>preorder_drafts.go</code> 第 55 行 <code>SELECT ... FOR UPDATE</code> on <code>pre_orders</code>）。引入 <code>OrderConversation</code> 后：</p>
+<ul>
+  <li>锁对象应是 conversation 还是 pre_order？两者若是 1:N（方案 B）就更复杂。</li>
+  <li>spec 同时提了"数据库锁<b>或</b>乐观版本号"——这两者是不同实现，plan 需要唯一答案。当前代码是<b>悲观锁（FOR UPDATE）+ 版本重读</b>，spec 应与之对齐或明确替换。</li>
+</ul>
+</div>
+
+<div class="issue w">
+<h4><span class="id">W-4</span> "原始消息必须先落库"缺少承载表</h4>
+<p>spec §消息表至少保存 列了 6 类字段（原文哈希、回复消息 ID、解析状态、重试次数、<code>session_id</code>…），但我核过全部 <code>migrations/*.sql</code>：<b>不存在</b> <code>inbound_messages</code> / <code>wecom_messages</code> 之类的原始消息表。现有表只有 <code>pre_orders</code>（msg 级）和 <code>pre_order_events</code>（状态事件）。</p>
+<p><b>这是新增表，spec 必须给出表名、主键与幂等键、以及与 <code>pre_order_events</code> 的边界</b>（两者都记消息，别重复）。</p>
+</div>
+
+<div class="issue w">
+<h4><span class="id">W-5</span> <code>correlation_id</code> 生成规则随归并而变，未更新</h4>
+<p>代码里 <code>deriveOrder</code> 目前用 <code>tenant:group:msg</code> 拼 correlation（<code>preorder.go</code> 第 300 行）。归并之后"一条订单对应多条消息"，<b>msg 已不再是有效标识</b>。spec 要求"按 correlation_id 查完整链路"，却没定义它应该锚定到 <code>session_id</code> 还是根消息。不改就会导致链路查询在多轮场景下断链。</p>
+</div>
+
+<h3><span class="tag t-ok">建议级</span> 打磨项</h3>
+<ul>
+  <li><b>S-1</b> 监控指标"错误归并率"缺真相源——没有人工标注或影子对账就无法计算，需定义口径。</li>
+  <li><b>S-2</b> 乱序消息"一律转人工"过重。企微会话存档按 seq 递增，乱序主要出现在回补/重放；建议分级：同窗口内乱序可缓冲等待，跨时间窗才转人工。</li>
+  <li><b>S-3</b> spec 未定义 <code>OrderConversation</code> 的<b>并发上限</b>（同一群/同一用户能同时开多少个会话），这是防滥用与资源边界的必要参数。</li>
+  <li><b>S-4</b> 未说明"已确认会话拒绝吸收新消息"后，<b>新消息应自动开新会话还是静默丢弃</b>——当前措辞是"创建新会话或人工关联"，但自动创建需要客户归属判定，属未闭合逻辑。</li>
+</ul>
+
+<hr>
+
+<h2>四、你要的技巧：用 spec 派生测试用例</h2>
+
+<div class="callout green">
+<p><b>这个方法有个正式名字：Specification by Example / 验收测试矩阵（Acceptance Test Matrix）。</b>核心洞察是——<b>spec 里写不出 Given/When/Then 的句子，就是 spec 的漏洞</b>。测试用例不是"顺带产出"，而是<b>用来给 spec 做压力测试、把模糊地带照出来的探针</b>。你记住的"把边界搞清楚"，机制就在这里。</p>
+</div>
+
+<h3>4.1 六条转换规则（把 spec 条文机械地映射成用例）</h3>
+
+<div class="scroll">
+<table>
+<thead><tr><th>spec 里的句式</th><th>转换成的测试类型</th><th>作用</th></tr></thead>
+<tbody>
+<tr><td>"必须达到 …"</td><td><span class="tag t-ok">正向用例</span></td><td>证明能力存在</td></tr>
+<tr><td>"明确不做 …"</td><td><span class="tag t-block">负向用例</span></td><td>证明边界不可逾越（<b>价值最高</b>）</td></tr>
+<tr><td>"优先级 1&gt;2&gt;3"</td><td><span class="tag t-info">边界用例</span></td><td>命中第 N 条即停、第 N+1 条不触发</td></tr>
+<tr><td>"短时间窗口 / 有限次数 / 24h"</td><td><span class="tag t-warn">参数化边界</span></td><td>⚠️ 模糊量词 = 找不到边界 = <b>spec 漏洞</b></td></tr>
+<tr><td>"无法确定 / 语义不明确"</td><td><span class="tag t-warn">决策表穷举</span></td><td>⚠️ 说"不明确"却不给判定 = <b>spec 漏洞</b></td></tr>
+<tr><td>"按 … 顺序处理"（7 步合并）</td><td><span class="tag t-info">序列/短路用例</span></td><td>前步失败后续不得执行</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>4.2 从本 spec 派生的验收矩阵（节选，含判定性标注）</h3>
+<p>每行左侧是 spec 原文落点，右侧是可直接写进 <code>tests/l2_e2e</code> 的用例。最后一列 <b>可判定性</b>是重点——凡标 <span class="no">✗</span> 的，都是 spec 现在写不清楚、必须先补的地方。</p>
+
+<div class="scroll">
+<table>
+<thead><tr><th>ID</th><th>Given / When / Then</th><th>来源条款</th><th>可判定</th></tr></thead>
+<tbody>
+<tr><td class="num">TC-01</td><td><b>G</b> 同一群同一用户，无任何进行中会话<br><b>W</b> 依次发 "SKU-C68"、"100件"、"送到上海"<br><b>T</b> 最终只产生 <b>1</b> 个预订单，草稿累积为 {C68,100,上海}</td><td>必须达到 #1</td><td class="yes">✓</td></tr>
+<tr><td class="num">TC-02</td><td><b>G</b> 同群同时两条独立订单（用户 A 要 C68，用户 B 要 D90）<br><b>W</b> 交错发送 4 条消息<br><b>T</b> 产生 <b>2</b> 个预订单，字段无交叉污染</td><td>必须达到 #2</td><td class="yes">✓</td></tr>
+<tr><td class="num">TC-03</td><td><b>G</b> 已有草稿 v1(product=C68)<br><b>W</b> 重放同一条 msg_id<br><b>T</b> 不新增 DraftVersion，返回既有结果，模型<b>不被重复调用</b></td><td>幂等/上线验收 #1</td><td class="yes">✓</td></tr>
+<tr><td class="num">TC-04</td><td><b>G</b> 卡片绑定 v2<br><b>W</b> 期间新消息产生 v3，随后点旧卡片 v2<br><b>T</b> 确认被拒 + 提示刷新，且 <b>workflow 仍存活</b>，再点 v3 可成功</td><td>上线验收 #4</td><td class="no">✗ 存活语义未定义（见 B-4）</td></tr>
+<tr><td class="num">TC-05</td><td><b>G</b> 草稿 v1 product=C68<br><b>W</b> 下一条消息只说 "D90"（无"改成"）<br><b>T</b> <b>保留 C68</b>，生成冲突待确认，<b>不得</b>静默覆盖</td><td>确定性合并规则 #5</td><td class="no">✗ "语义不明确"未给判定条件</td></tr>
+<tr><td class="num">TC-06</td><td><b>G</b> 草稿已有 quantity=100（用户明确）<br><b>W</b> 模型本轮推断 quantity=50<br><b>T</b> 保留 100（用户补充 &gt; 模型推断），记录降级</td><td>字段优先级链</td><td class="yes">✓</td></tr>
+<tr><td class="num">TC-07</td><td><b>G</b> 销售已在后台手改 quantity=200<br><b>W</b> 用户又发 "100件"<br><b>T</b> 保留 200（人工 &gt; 用户补充）</td><td>字段优先级链</td><td class="yes">✓</td></tr>
+<tr><td class="num">TC-08</td><td><b>G</b> 发送者非客户归属销售<br><b>W</b> 发送完整订单<br><b>T</b> 状态转 <code>PRE_IGNORED</code>，<b>不建单</b>，写审计</td><td>明确不做 + 07§3.2</td><td class="yes">✓</td></tr>
+<tr><td class="num">TC-09</td><td><b>G</b> workflow 在 <code>PRE_PENDING_CONFIRM</code><br><b>W</b> 新消息补充 address<br><b>T</b> 生成 v_new，状态<b>回到收集态</b>，旧卡片失效</td><td>状态机调整</td><td class="no">✗ 迁移边不存在（见 B-3）</td></tr>
+<tr><td class="num">TC-10</td><td><b>G</b> 必填字段缺 receive_address<br><b>W</b> 用户点确认<br><b>T</b> <b>不</b>派生正式订单，回到补全</td><td>上线验收 #6</td><td class="yes">✓</td></tr>
+<tr><td class="num">TC-11</td><td><b>G</b> 字段齐全但<b>未经销售确认</b><br><b>W</b> 用户自然语言说"直接下单"<br><b>T</b> <b>不</b>生成正式订单（绕过被拒）</td><td>明确不做</td><td class="yes">✓</td></tr>
+<tr><td class="num">TC-12</td><td><b>G</b> 模型不可用<br><b>W</b> 新消息到达<br><b>T</b> 原文不丢，进重试队列；超限后转人工</td><td>上线验收 #8</td><td class="no">✗ "有限次数"未量化</td></tr>
+<tr><td class="num">TC-13</td><td><b>G</b> 已确认会话<br><b>W</b> 同会话再来新消息<br><b>T</b> <b>不</b>吸收进已确认草稿（开新会话或人工），已派生订单数恒为 1</td><td>并发边界</td><td class="no">✗ "或人工"分支未闭合（见 S-4）</td></tr>
+<tr><td class="num">TC-14</td><td><b>G</b> 会话 A 与 B 同群，消息指代不明确（如只写"改 100"）<br><b>W</b> 发送<br><b>T</b> 转 <code>PRE_AMBIGUOUS</code>，要求用户选订单，<b>不得</b>自动合并</td><td>会话选择 §</td><td class="no">✗ 相似度阈值未给（见 W-1）</td></tr>
+<tr><td class="num">TC-15</td><td><b>G</b> 合并事务执行中<br><b>W</b> 并发第二条消息<br><b>T</b> 串行化，版本号严格递增，无后写覆盖先写</td><td>并发 #2</td><td class="no">✗ 锁对象/机制未定（见 W-3）</td></tr>
+<tr><td class="num">TC-16</td><td><b>G</b> 草稿已达 <code>expires_at</code><br><b>W</b> 用户继续发送<br><b>T</b> ？？？（spec 未定义）</td><td>草稿过期</td><td class="no">✗ 语义空白（见 W-2）</td></tr>
+<tr><td class="num">TC-17</td><td><b>G</b> 数据库已完成派单事务<br><b>W</b> outbox 启动 Temporal 失败<br><b>T</b> 草稿不回滚，事件进 outbox 重试，最终 workflow 启动成功或进死信</td><td>并发/失败 #6</td><td class="yes">✓</td></tr>
+<tr><td class="num">TC-18</td><td><b>G</b> 已派生订单<br><b>W</b> 按 <code>correlation_id</code> 反查<br><b>T</b> 能串起 原始消息→会话选择→LLM→合并→草稿→策略→确认→订单→workflow</td><td>监控与审计</td><td class="no">✗ correlation 锚点未定（见 W-5）</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout amber">
+<p><b>矩阵读法：</b>18 条里 <b>10 条可判、8 条标 ✗</b>。这 8 条不是"测试没写好"——它们精确对应了第三节的 B-1~B-4 和 W-1~W-5。<b>这就是这个技巧的价值：写测试的过程本身就是最便宜的 spec 评审，它把"读起来挺顺"的文档里所有没想清楚的地方逼了出来。</b></p>
+</div>
+
+<h3>4.3 落到工程里：建议的目录与门禁</h3>
+<pre><code>tests/l2_e2e/
+  agent_ordering_e2e_test.go        # TC-01..TC-11 正向/负向
+  agent_ordering_boundary_test.go   # TC-12..TC-18 边界,含 fake clock
+  testdata/
+    acceptance_matrix.md            # 上表落成 markdown,每条用例 ↔ spec 条款双向可溯
+
+internal/agentorder/
+  merger.go / merger_test.go        # 表驱动：合并器纯函数（B-2 的产出）
+  policy.go（已存在）
+</code></pre>
+<p>把矩阵写成 <code>testdata/acceptance_matrix.md</code> 并给每条用例标注 spec 行号，就得到了一条可溯链：<b>spec 条款 ↔ 用例 ↔ 代码</b>。spec 改动时，哪些用例要跟着改一目了然——这就是"spec 驱动开发"闭环的锚。</p>
+
+<hr>
+
+<h2>五、建议的下一步（按优先级）</h2>
+<ol>
+  <li><b>先补 B-2 的语义（最高优先）</b>：明确 DraftVersion 存累积态还是增量，并定义合并器的契约与归属。这一条不解决，plan 第 1 个 task 就没法写。</li>
+  <li><b>再定 B-1 的数据模型</b>：<code>OrderConversation</code> 与 <code>pre_orders</code> 的关系（方案 A/B 二选一）+ 新增 inbound 消息表（W-4）。这两个决定了 migration 009 之后要不要再加 010。</li>
+  <li><b>修正 B-3 的 FSM 边表</b>，把 <code>PreOrderFSM</code> 的完整变更写进 spec；顺带解决 W-2 的 <code>PRE_EXPIRED</code> 缺失。</li>
+  <li><b>修 B-4 的 Temporal 语义</b>：把版本冲突改成"可恢复拒绝"（<code>continue</code>），并补一条回归用例（TC-04）。这是一条真 bug 级修正，不改上线后会踩。</li>
+  <li><b>把 8 条 ✗ 用例的判定条件写进 spec</b>，让矩阵全部变 <span class="yes">✓</span>——这就是 spec 从"设计稿"升级为"可实施规格"的完成信号。</li>
+  <li>以上完成后再进入 plan 阶段（现有 plan 是 10-14 那份企业级计划的延续，需要按本 spec 的修正同步更新）。</li>
+</ol>
+
+<div class="foot">
+  评审基于 2026-10-15 仓库快照 · 对照文件：specs/2026-10-15-agent-multiturn-ordering-design.md、specs/2026-10-14-agent-ordering-enterprise-design.md、internal/domain/preorder.go、internal/wecom/intent.go、internal/workflows/preorder.go、internal/repo/preorder_drafts.go、migrations/003、009
+</div>
+
+</div>
+</body>
+</html>

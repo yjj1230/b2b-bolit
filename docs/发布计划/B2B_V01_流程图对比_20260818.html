@@ -1,0 +1,142 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">
+<title>三方审批 vs v0.1：业务主流程对比（2026-08-18）</title>
+<script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+mermaid.initialize({ startOnLoad: true, theme: "default", flowchart: { useMaxWidth: true, htmlLabels: true, curve: "basis" } });
+</script>
+<style>
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;margin:24px auto;max-width:1100px;padding:0 16px;color:#1f2329;background:#f7f8fa}
+h1{font-size:22px}h2{font-size:18px;margin-top:40px;border-bottom:1px solid #e5e7eb;padding-bottom:8px}
+.diagram{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;margin:16px 0;overflow:auto}
+.note{color:#666;font-size:13px;line-height:1.7;margin-top:8px}
+code{background:#f0f1f3;border-radius:4px;padding:1px 5px;font-size:12.5px}
+</style></head><body>
+<h1>三方审批 vs b2b_pilot_v3 v0.1：业务主流程对比</h1>
+<p class="note">生成 2026-08-18 · 依据代码与 docs/v0.1、spec/ 文档 · 完整分析（含决策记录/审计/未决项）见 <code>docs/B2B_V01_对比与同步设计_20260818.md</code> · 发布计划见 <code>docs/渐进式发布计划.html</code> · 可行性验证见 <code>docs/发布计划可行性验证.md</code> · 最终目标：以企微版流程取代飞书三方审批流（v0.1–v0.4 逐版迁移，0.5 取代完成）；图三是 v0.1 阶段目标模型，执行迁移路线见发布计划</p>
+<h2>图一：三方审批现状业务主流程（代码级）</h2><div class="diagram"><pre class="mermaid">
+flowchart TD
+    START([&quot;销售员/代办人从飞书 H5 创建订单&lt;br/&gt;POST /external-orders/create&quot;]) --&gt; S0[&quot;系统：客户多维表同步 →&lt;br/&gt;生成草稿合同/导入客户合同 →&lt;br/&gt;创建飞书外部审批实例 external_instance&quot;]
+    S0 --&gt; ORD1
+
+    subgraph ORD[&quot;① 订单创建审批 ORD&quot;]
+        ORD1[&quot;信息确认 MANAGER_PENDING&lt;br/&gt;提交人(销售员/代办人)&lt;br/&gt;核对客户/商品/合同/金额/收货信息&quot;]
+        ORD2[&quot;主管审批 SUPERVISOR_PENDING&lt;br/&gt;主管：审价、客户等级、商务合理性&quot;]
+        ORD3{&quot;客户等级&lt;br/&gt;C/D？&quot;}
+        ORD4[&quot;董事长审批 CHAIRMAN_PENDING&lt;br/&gt;董事长终审&quot;]
+    end
+
+    ORD1 --&gt;|同意| ORD2
+    ORD2 --&gt;|同意| ORD3
+    ORD2 --&gt;|拒绝| REJ1[&quot;REJECTED 终态&lt;br/&gt;订单终止，可重新提交&quot;]
+    ORD3 --&gt;|&quot;是（C/D）&quot;| ORD4
+    ORD3 --&gt;|&quot;否（A/B）&quot;| CON1
+    ORD4 --&gt;|同意| CON1[&quot;系统：生成正式盖章合同&lt;br/&gt;创建唯一备货审批实例&quot;]
+    ORD4 --&gt;|拒绝| REJ1
+
+    subgraph STK[&quot;② 备货审批 STK&quot;]
+        STK0{&quot;结算方式&lt;br/&gt;是否款到类？&quot;}
+        STK1[&quot;备货预定 STOCK_RESERVATION&lt;br/&gt;仓库：备货/库存确认&quot;]
+        STK2[&quot;财务确认到款 FINANCE_CONFIRM_PAYMENT&lt;br/&gt;财务：应收/实收/到账时间&quot;]
+        STK3[&quot;商务填写发货仓 BUSINESS_FILL_WAREHOUSE&lt;br/&gt;商务：发货仓/计划发货日期/收货信息&quot;]
+    end
+
+    CON1 --&gt; STK0
+    STK0 --&gt;|&quot;结算方式恰为『款到发货』&quot;| STK1
+    STK0 --&gt;|&quot;其他款到类（先款/款到/预付/现款/提货前付款）&quot;| STK2
+    STK0 --&gt;|&quot;非款到发货&quot;| STK3
+    STK1 --&gt;|同意| STK2
+    STK2 --&gt;|同意| STK3
+    STK3 --&gt;|同意&lt;br/&gt;生成出库单| CON2[&quot;系统：创建发货审批实例&quot;]
+    STK1 --&gt;|拒绝| REJ2[&quot;REJECTED 终态&quot;]
+    STK2 --&gt;|拒绝| REJ2
+    STK3 --&gt;|拒绝| REJ2
+
+    subgraph SHP[&quot;③ 发货审批 SHP&quot;]
+        SHP1[&quot;仓库发货 WAREHOUSE_SHIP&lt;br/&gt;仓管：实际数量/物流/分批&lt;br/&gt;数量约束 0 &lt; 实发 ≤ 计划&quot;]
+        SHP2[&quot;上传回单/完成信息 COMPLETION_EVIDENCE&lt;br/&gt;回单附件必填&quot;]
+        SHP3{&quot;填写开票信息 INVOICE_INFO_FILL&lt;br/&gt;提交人：是否需要开票？&quot;}
+    end
+
+    CON2 --&gt; SHP1
+    SHP1 --&gt;|同意（可分批发货，&lt;br/&gt;未发完回备货层续批）| SHP2
+    SHP2 --&gt;|同意| SHP3
+    SHP1 --&gt;|拒绝| REJ3[&quot;REJECTED 终态&quot;]
+    SHP3 --&gt;|&quot;不开票 → 系统归档&quot;| ARC[&quot;SYSTEM_ARCHIVED 归档&lt;br/&gt;多维表格台账同步&quot;]
+    SHP3 --&gt;|&quot;开票（单订单/合并开票）&quot;| INV1
+
+    subgraph INV[&quot;④ 开票审批 INV&quot;]
+        INV1[&quot;开票申请 SALES_INVOICE_APPLY&lt;br/&gt;开票信息在发货阶段(INVOICE_INFO_FILL)已填&lt;br/&gt;系统生成开票申请 Excel；本节点为抄送(cc)，非任务&quot;]
+        INV1B{&quot;发票模式？&quot;}
+        INV2[&quot;客户订单盖章回传&lt;br/&gt;CUSTOMER_ORDER_STAMP_RETURN&lt;br/&gt;销售/代办办理，附件可选&quot;]
+        INV8[&quot;无票销售 NO_INVOICE_SALE&lt;br/&gt;客户确定永久不开票&quot;]
+        INVX[&quot;代码已定义但当前创建路径不可达的深链：&lt;br/&gt;销售确认 SALES_CONFIRM → 财务开票 → 财务上传发票 →&lt;br/&gt;销售接收发票 → 回款跟进&quot;]
+    end
+
+    INV1 --&gt; INV1B
+    INV1B --&gt;|&quot;开票&quot;| INV2
+    INV1B --&gt;|&quot;无票销售（会签）&quot;| INV8
+    INV8 --&gt; INV2
+    INV2 --&gt; ARC
+    INV2 --&gt;|拒绝| REJ4[&quot;REJECTED 终态&quot;]
+    INVX -.-&gt;|&quot;（未接线）&quot;| ARC
+
+    ARC --&gt; END([&quot;订单工作台 / 商务对账台 / 监管台查询&quot;])
+
+</pre></div><h2>图二：v0.1 设计流程（docs/v0.1 已核对流程）</h2><div class="diagram"><pre class="mermaid">
+flowchart TD
+    N1[&quot;N1 下单&lt;br/&gt;销售(XS2人工 / XS3智能确认卡) / 助理(XSZL1/2代下) / 商务(虹励 约20%)&lt;br/&gt;幂等键防重复 → 已开单&quot;]
+    N2[&quot;N2 审价审批 XSZG1&lt;br/&gt;销售主管：审批即审价&lt;br/&gt;单价受限、风控额度校验&quot;]
+    N3{&quot;客户等级&lt;br/&gt;C/D？&quot;}
+    N4[&quot;N3 董事长终审 DSZ1&lt;br/&gt;仅 C/D 级进入&lt;br/&gt;驳回=终态+出站被驳回卡片&quot;]
+    N5[&quot;N4 备货 SW1&lt;br/&gt;商务：选备货仓+收货地址+备注&lt;br/&gt;备货守恒 ∑确认量≤订单量；锁库存暂不做&quot;]
+    N6[&quot;N5 发货 CG1/CG2&lt;br/&gt;仓管：①确认接受 ②确认发货&lt;br/&gt;守恒校验 超发拦截&quot;]
+    N7[&quot;N6 开票 CW1/CW2&lt;br/&gt;财务：订单后台上传凭证→AI识别匹配&lt;br/&gt;多单合并开票（发票-订单分离、关联可追加）&lt;br/&gt;无回单→例外审核（规则待确认 A5）&quot;]
+    N8[&quot;N7 回单 CG3&lt;br/&gt;仓库群(企微群)→凭证机器人抓取→OCR→登记归档&lt;br/&gt;凭证只追加 版本单调&quot;]
+    N9[&quot;闭环&lt;br/&gt;回单闭合 · 回款跟踪&quot;]
+
+    N1 --&gt; N2
+    N2 --&gt; N3
+    N3 --&gt;|&quot;A/B 级&quot;| N5
+    N3 --&gt;|&quot;C/D 级&quot;| N4
+    N4 --&gt;|通过| N5
+    N4 --&gt;|驳回| X1[&quot;已驳回 终态&quot;]
+    N5 --&gt;|通过→备货单→发货单| N6
+    N5 --&gt;|驳回| X2[&quot;通知销售 可修改重提&quot;]
+    N6 --&gt; N7
+    N7 --&gt; N8
+    N8 --&gt; N9
+
+    N6 -.-&gt;|&quot;横切 N8 守门员：&lt;br/&gt;任何内容发客户群前销售确认&quot;| G[&quot;发客户群内容&lt;br/&gt;订单卡片/物流图片/发票&quot;]
+
+</pre></div><h2>图三：目标模型（v0.1 销售助手下单 + 飞书流续跑）</h2><div class="diagram"><pre class="mermaid">
+flowchart LR
+    subgraph V01[&quot;v0.1（Go + PG + 企微，Docker）——全部新增开发量在此&quot;]
+        A[&quot;销售助手（虹励/助理）&lt;br/&gt;企微群聊确认卡 / 侧边栏 / 工作台&quot;]
+        BR[&quot;下单桥接模块（v0.1 新增）&lt;br/&gt;①代理飞书 OAuth 换 create-order token（2h 缓存）&lt;br/&gt;②调旧系统既有创建接口（幂等）&quot;]
+        PG[(&quot;PG：本系统订单&lt;br/&gt;flow_id/instance_id/状态摘要&quot;)]
+        SY[&quot;cmd/sync（已有，配多维表源）&lt;br/&gt;存量订单列表摘要&quot;]
+    end
+    subgraph OLD[&quot;三方审批系统（仅一处针对性小改：自动确认+profile 注入；其余零改动）&quot;]
+        OA[&quot;POST /api/approval/feishu-user-by-code&lt;br/&gt;（既有：code 换 create-order token）&quot;]
+        API[&quot;POST /external-orders/create&lt;br/&gt;（既有：创建订单+审批实例+合同+通知+台账）&quot;]
+        JL[(&quot;16 个 JSONL + 附件&lt;br/&gt;+ 多维表台账（best-effort）&quot;)]
+        FL[&quot;GET /flows/:flow_id&lt;br/&gt;（既有：只读全流程详情页）&quot;]
+    end
+    subgraph FS[&quot;飞书&quot;]
+        EX[&quot;三方审批实例（审批中心）&lt;br/&gt;信息确认/主管/董事长/备货/发货/开票&quot;]
+        BT[&quot;多维表流程表&lt;br/&gt;（状态/节点/处理人/链接）&quot;]
+    end
+    A --&gt; BR
+    BR --&gt;|&quot;① 授权（首次/过期）&quot;| OA
+    OA --&gt;|&quot;create-order token&quot;| BR
+    BR --&gt;|&quot;② 下单（Bearer token + 幂等键）&quot;| API
+    API --&gt; JL
+    JL &lt;--&gt;|&quot;③ 审批实例创建/动作回调（旧系统既有机制）&quot;| EX
+    BR -.-&gt;|&quot;④ 回写 flow_id/instance_id 到 v0.1 PG&quot;| PG
+    JL -.-&gt;|&quot;⑤ best-effort 同步（旧系统既有）&quot;| BT
+    SY --&gt;|&quot;⑥ v0.1 周期拉取（存量+状态回显）&quot;| BT
+    SY --&gt; PG
+    A --&gt;|&quot;⑦ 详情跳转（v0.1 只存 flow_id，无需 token）&quot;| FL
+    FL -.-&gt;|&quot;实时读 JSONL 渲染&quot;| JL
+
+</pre></div></body></html>

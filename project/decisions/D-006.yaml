@@ -1,0 +1,20 @@
+# D-006 pgAPI 数据库访问二分调整授权（bootstrap exception，由用户裁决）
+decision_id: D-006
+choice: >
+  授权在 ECM 1.0.0 仍为 PROPOSED（BOOTSTRAP_DIAGNOSTIC）的情况下执行本次业务架构调整：
+  流程引擎数据继续由 internal/repo 直连 PostgreSQL；订单数据实体（products/customers/
+  purchase-contracts）改为经 pgAPI HTTP API 访问。产品/客户写操作同样接入 pgAPI
+  POST/PATCH（Q3=B，现场程序员支持写入）。
+rationale: >
+  用户作为项目 owner 于 2026-08-17 明确裁决：Q1=A（bootstrap exception，不伪造 ECM ACTIVE）、
+  Q2=A（pgAPI record_id 为唯一外部引用；去除本地 customers/products 外键；本地两表降级
+  为 legacy 只读归档）、Q3=B（接入 pgAPI 产品/客户写接口）。
+premises:
+  - spec/pgAPI-接口文档.md v1.1 为 pgAPI 接口事实源（products/customers/purchase-contracts）
+  - ECM current.status=PROPOSED，本次不是机制激活，不产生 ACTIVE 指针
+  - pgAPI 写接口由现场程序员支持，接入前需在测试环境验证
+objections: []
+decider: project-owner（用户直接裁决，记录为 bootstrap exception）
+effective_interval: {from: "2026-08-17T00:00:00+00:00", to: null}
+supersedes: []
+review_condition: ECM 激活（OI-001/OI-002 关闭）时复核本例外是否仍需要保留

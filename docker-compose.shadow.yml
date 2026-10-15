@@ -1,0 +1,276 @@
+# docker-compose.shadow.yml —— 影子全流程预演（docs/v0.1/12-shadow-full-flow.html §7）
+# 独立 compose 项目：docker compose -p b2b-shadow -f docker-compose.shadow.yml up
+# 六条铁律：零客户触达 · 零出站 · 零回写 · 零污染生产 · 可重建重放 · 影子故障不动 A 轨。
+# D-010：影子轨单独一套环境——本 compose 自带 shadow-temporal（独立 Temporal 实例），
+#        不再依赖宿主 17233；影子容器无法解析 A 轨任何主机名，共享面为零。
+
+x-shadow-env: &shadow-env
+  # A-01 启动守卫（internal/shadowguard）在六个二进制入口 fail-fast；违反任一即拒绝启动
+  B2B_SHADOW_MODE: "true"
+  B2B_PG_DSN: postgres://postgres:postgres@shadow-postgres:5432/b2b_shadow?sslmode=disable
+  B2B_SPICEDB_ADDR: shadow-spicedb:50051
+  B2B_SPICEDB_KEY: b2b-shadow-dev-key
+  B2B_TEMPORAL_ADDR: shadow-temporal:7233
+  B2B_TEMPORAL_NS: b2b-shadow
+  B2B_TASK_QUEUE: b2b-shadow-order
+  B2B_WECOM_PROVIDER: mock          # S-铁2 零出站：只记录不发送
+  B2B_FEISHU_BRIDGE_ENABLED: "false" # S-铁3 零回写
+  B2B_WECOM_TENANT_CFG: /etc/b2b/wecom-tenant.json
+  B2B_V01_PRINCIPALS: ${B2B_SHADOW_PRINCIPALS:-dev-a:ADMIN,audit-b:AUDITOR}
+  B2B_SHADOW_PRINCIPALS: ${B2B_SHADOW_PRINCIPALS:-dev-a:ADMIN,audit-b:AUDITOR}
+  # 影子租户审批人路由：u-shadow-*（008 影子种子；与 A 轨 u-* 全局主键隔离）
+  B2B_ASSIGNEE_SUPERVISOR: u-shadow-supervisor
+  B2B_ASSIGNEE_CHAIRMAN: u-shadow-chairman
+  B2B_ASSIGNEE_OP: u-shadow-op
+  B2B_ASSIGNEE_ACCOUNTING: u-shadow-accounting
+  B2B_ASSIGNEE_SALES: u-shadow-sales
+  B2B_ASSIGNEE_WAREHOUSE_PREFIX: u-shadow-wh-
+  B2B_ASSIGNEE_WAREHOUSE_DEFAULT: u-shadow-wh-yangyuan
+  # 影子 worker/api 只读使用 pgAPI 真实主数据（生产注入只读凭据；示例留空）
+  B2B_PGAPI_BASE_URL: ${B2B_PGAPI_BASE_URL:-https://api.renheng.com/pgapi}
+  # 影子专用只读 key（HR2）：与 A 轨 B2B_PGAPI_API_KEY 隔离，禁止写接口
+  B2B_PGAPI_API_KEY: ${B2B_SHADOW_PGAPI_API_KEY:-}
+  B2B_PGAPI_TIMEOUT: ${B2B_PGAPI_TIMEOUT:-10}
+
+services:
+  shadow-postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: b2b_shadow
+    ports:
+      - "127.0.0.1:15433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d b2b_shadow"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+
+  # D-010：影子轨独立环境 —— 自带 Temporal 实例（与 A 轨 17233 零共享）；
+  # 每天 ≤1 万条事件的数据量下，auto-setup 单实例资源足够。
+  shadow-temporal:
+    image: temporalio/auto-setup:1.24.2
+    environment:
+      - DB=postgres12
+      - DB_PORT=5432
+      - POSTGRES_USER=postgres
+      - POSTGRES_PWD=postgres
+      - POSTGRES_SEEDS=shadow-postgres
+      - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/docker.yaml
+    depends_on:
+      shadow-postgres:
+        condition: service_healthy
+    healthcheck:
+      # auto-setup:1.24.2 只监听容器 IP，不监听 127.0.0.1；镜像内仅有 config/dynamicconfig/docker.yaml
+      test: ["CMD-SHELL", "tctl --address $$(hostname -i):7233 namespace list >/dev/null 2>&1 || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 60
+      start_period: 30s
+
+  # A-02：先应用顶层 001-007，再应用 migrations/shadow/008；DSN 固定为 b2b_shadow。
+  # 迁移前置守卫（C7 收敛）：入口先 shell 断言库名必须是 b2b_shadow，再允许执行任何 DDL。
+  shadow-migrate:
+    image: postgres:16-alpine
+    depends_on:
+      shadow-postgres:
+        condition: service_healthy
+    volumes:
+      - ./migrations:/migrations:ro
+    entrypoint: >
+      sh -c 'DSN="postgres://postgres:postgres@shadow-postgres:5432/b2b_shadow?sslmode=disable";
+             case "$$DSN" in *"/b2b_shadow"*) echo "guard ok: b2b_shadow";; *) echo "shadow guard rejected DSN"; exit 1;; esac;
+             for f in /migrations/*.sql; do
+               echo "applying $$f";
+               psql "$$DSN" -v ON_ERROR_STOP=1 -f $$f || exit 1;
+             done;
+             for f in /migrations/shadow/*.sql; do
+               echo "applying shadow $$f";
+               psql "$$DSN" -v ON_ERROR_STOP=1 -f $$f || exit 1;
+             done'
+
+  shadow-spicedb:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: shadow-spicedb
+    command: serve --grpc-addr 0.0.0.0:50051 --http-addr 0.0.0.0:8443 --http-enabled --datastore-engine memory --grpc-preshared-key b2b-shadow-dev-key --log-level warn
+    ports:
+      - "127.0.0.1:15052:50051"
+    healthcheck:
+      # 官方镜像无 shell，v1.39.1 无 healthcheck 子命令 → 用镜像内置 gRPC 探针
+      test: ["CMD", "/usr/local/bin/spicedb-healthcheck", "-addr", "127.0.0.1:50051", "-token", "b2b-shadow-dev-key"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+
+  # 影子 SpiceDB 关系基线（与生产 SpiceDB 完全隔离；memory datastore）
+  # 必须先写 schema.zed：v1.39 CLI 无 schema/relationship 子命令，seedrel 同时承担 schema 写入
+  shadow-seedrel:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: seedrel
+    depends_on:
+      shadow-spicedb:
+        condition: service_healthy
+    volumes:
+      - ./schema.zed:/schema.zed:ro
+    command: ["-spicedb", "shadow-spicedb:50051", "-token", "b2b-shadow-dev-key", "-schema", "/schema.zed"]
+
+  # SH-04：真实事件只读摄入（周期 5m，幂等批次；真相区 → 影子库）
+  shadow-ingest:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: shadow-ingest
+    restart: unless-stopped
+    environment:
+      <<: *shadow-env
+      SHADOW_INGEST_CONFIG: /etc/b2b/ingest.json
+    command: ["-config", "/etc/b2b/ingest.json",
+              "-dsn", "postgres://postgres:postgres@shadow-postgres:5432/b2b_shadow?sslmode=disable",
+              "-interval", "5m",
+              "-state-file", "/tmp/shadow-ingest-last-ok"]
+    volumes:
+      # 不挂 /etc/shadow/*：alpine 基础镜像已有 /etc/shadow 口令文件，bind 目标会冲突
+      - ./config/shadow-ingest.example.json:/etc/b2b/ingest.json:ro
+      - ./config/wecom-tenant.test.example.json:/etc/b2b/wecom-tenant.json:ro
+      - ./data:/data
+    depends_on:
+      shadow-migrate:
+        condition: service_completed_successfully
+      shadow-postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "test -f /tmp/shadow-ingest-last-ok && test $$(( $$(date +%s) - $$(stat -c %Y /tmp/shadow-ingest-last-ok) )) -lt 900 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 5m
+
+  # SH-07：源事件 → Signal 翻译投递（单 flow 串行、幂等）
+  shadow-feed:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: shadow-feed
+    restart: unless-stopped
+    environment:
+      <<: *shadow-env
+      SHADOW_FEED_CONFIG: /etc/b2b/feed.json
+    command: ["-config", "/etc/b2b/feed.json",
+              "-dsn", "postgres://postgres:postgres@shadow-postgres:5432/b2b_shadow?sslmode=disable",
+              "-interval", "1m",
+              "-state-file", "/tmp/shadow-feed-last-ok"]
+    volumes:
+      - ./config/shadow-feed.example.json:/etc/b2b/feed.json:ro
+      - ./config/wecom-tenant.test.example.json:/etc/b2b/wecom-tenant.json:ro
+    depends_on:
+      shadow-migrate:
+        condition: service_completed_successfully
+      shadow-postgres:
+        condition: service_healthy
+      shadow-temporal-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD-SHELL", "test -f /tmp/shadow-feed-last-ok && test $$(( $$(date +%s) - $$(stat -c %Y /tmp/shadow-feed-last-ok) )) -lt 300 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 2m
+
+  # 影子 worker：全量 OrderWorkflow / PreOrderWorkflow（Shadow=true 由 feed 传入）
+  shadow-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: worker
+    restart: unless-stopped
+    environment:
+      <<: *shadow-env
+      # worker 经 pgAPI 读取客户/产品主数据（影子区只读凭据；生产写凭据绝不挂载）
+      B2B_PGAPI_BASE_URL: ${B2B_PGAPI_BASE_URL:-https://api.renheng.com/pgapi}
+      B2B_PGAPI_API_KEY: ${B2B_SHADOW_PGAPI_API_KEY:?B2B_SHADOW_PGAPI_API_KEY (read-only) must be set for shadow-worker}
+      B2B_PGAPI_TIMEOUT: ${B2B_PGAPI_TIMEOUT:-10}
+      B2B_WECOM_TENANT_CFG: /etc/b2b/wecom-tenant.json
+    volumes:
+      - ./config/wecom-tenant.test.example.json:/etc/b2b/wecom-tenant.json:ro
+    depends_on:
+      shadow-migrate:
+        condition: service_completed_successfully
+      shadow-spicedb:
+        condition: service_healthy
+      shadow-seedrel:
+        condition: service_completed_successfully
+      shadow-temporal-init:
+        condition: service_completed_successfully
+
+  # 影子 API：127.0.0.1:18082 内部查询（桥接禁用、白名单收紧；身份 = B2B_SHADOW_PRINCIPALS）
+  shadow-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: shadow-api
+    environment:
+      <<: *shadow-env
+      B2B_HTTP_ADDR: :8080
+      B2B_WECOM_CONTEXT_SECRET: ${B2B_WECOM_CONTEXT_SECRET:-b2b-shadow-context-secret}
+      B2B_WECOM_TENANT_CFG: /etc/b2b/wecom-tenant.json
+    volumes:
+      - ./config/wecom-tenant.test.example.json:/etc/b2b/wecom-tenant.json:ro
+    depends_on:
+      shadow-migrate:
+        condition: service_completed_successfully
+      shadow-spicedb:
+        condition: service_healthy
+      shadow-seedrel:
+        condition: service_completed_successfully
+      shadow-temporal-init:
+        condition: service_completed_successfully
+    ports:
+      - "127.0.0.1:18082:8080"
+    healthcheck:
+      # 影子白名单收紧后 /healthz 也走 principal 校验：取 B2B_SHADOW_PRINCIPALS 首项作为探针身份
+      test: ["CMD-SHELL", "PID=\"$${B2B_SHADOW_PRINCIPALS%%:*}\"; wget -qO- --header=\"X-User-Id: $$PID\" http://localhost:8080/healthz || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  # SH-08：每日审计（四张数 markdown + JSON → logs/audit/shadow/）
+  shadow-audit:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: shadow-audit
+    restart: unless-stopped
+    environment:
+      <<: *shadow-env
+      SHADOW_REPORT_DIR: /logs/audit/shadow
+    command: ["-tenant", "chang-an-shadow", "-interval", "24h", "-state-file", "/tmp/shadow-audit-last-ok"]
+    volumes:
+      - ./logs:/logs
+    depends_on:
+      shadow-migrate:
+        condition: service_completed_successfully
+      shadow-postgres:
+        condition: service_healthy
+    healthcheck:
+      # 报告超 26h 未更新 = 告警（12-shadow §7.2）
+      test: ["CMD-SHELL", "test -f /tmp/shadow-audit-last-ok && test $$(( $$(date +%s) - $$(stat -c %Y /tmp/shadow-audit-last-ok) )) -lt 93600 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 2m
+
+  # 一次性：在影子自带的 shadow-temporal 注册独立 namespace b2b-shadow（A-03 逻辑隔离）
+  # 用本地已有的 auto-setup 镜像代替 admin-tools（内含 tctl，避免额外拉取 registry）
+  shadow-temporal-init:
+    image: temporalio/auto-setup:1.24.2
+    entrypoint: ["sh", "-c"]
+    restart: "no"
+    depends_on:
+      shadow-temporal:
+        condition: service_healthy
+    command: ["tctl --address shadow-temporal:7233 --namespace b2b-shadow namespace register --retention 14 || tctl --address shadow-temporal:7233 --namespace b2b-shadow namespace update --retention 14"]

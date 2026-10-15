@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>企微技术调研 · 沟通通道矩阵 + 可行性落地映射｜长安仁恒订单助手</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+SC:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="wecom-tokens.css" />
+<style>
+  /* ===== 页面基座（沿用 spec 页纸感风格 + wecom token） ===== */
+  :root{
+    --paper:#f5f4ed; --paper2:#efeee5; --ink:#1f1d18; --ink2:#6b665b;
+    --ink3:#3a382f; --blue:#1B365D; --rule:#d4d1c5; --red:#c0392b; --green:#1a7f37;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif; line-height:1.6; overflow-x:hidden;}
+  .wrap{max-width:1180px; margin:0 auto; padding:48px 40px 80px;}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;}
+  .folio{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--rule); padding-bottom:10px;
+    font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink2);}
+  .folio a{color:var(--ink2); border:none;}
+  .folio a:hover{color:var(--blue);}
+  .tag{display:inline-block; padding:3px 10px; font-size:11px; letter-spacing:.16em; background:var(--paper2); color:var(--blue);}
+  .kicker{display:flex; align-items:baseline; gap:12px; margin-top:48px; flex-wrap:wrap;}
+  h1{font-size:clamp(30px,4.6vw,46px); line-height:1.12; font-weight:500; margin-top:14px; letter-spacing:-.01em;}
+  .lede{margin-top:18px; font-size:16.5px; line-height:1.7; color:var(--ink3); max-width:860px;}
+  h2{font-size:22px; font-weight:600; margin:48px 0 14px; color:var(--blue); display:flex; align-items:baseline; gap:10px; border-top:1px solid var(--rule); padding-top:26px;}
+  h2 .no{font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.12em;}
+  h3{font-size:17px; font-weight:600; margin:26px 0 10px; color:var(--ink);}
+  h4{font-size:14.5px; font-weight:600; margin:18px 0 6px; color:var(--ink);}
+  p{margin:9px 0; color:var(--ink3);}
+  a{color:var(--blue); text-decoration:none; border-bottom:1px solid var(--rule);}
+  a:hover{border-bottom-color:var(--blue);}
+  code{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace; font-size:12.5px; background:var(--paper2); padding:1px 5px; border-radius:3px;}
+  ul,ol{margin:8px 0 8px 26px; color:var(--ink3);}
+  li{margin:4px 0;}
+  .mermaid{background:#fff; border:1px solid var(--rule); padding:16px; overflow-x:auto; text-align:center; margin:18px 0;}
+  .mermaid svg{max-width:100%; height:auto;}
+  figcaption{text-align:center; font-size:12px; color:var(--ink2); margin:-8px 0 22px; font-style:italic;}
+  /* ===== 元信息卡 ===== */
+  .meta-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; margin:22px 0 6px;}
+  .meta-card{border:1px solid var(--rule); background:var(--paper2); padding:14px 16px;}
+  .meta-card .k{font-size:10.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--blue); margin-bottom:6px;}
+  .meta-card .v{font-size:13px; color:var(--ink3); line-height:1.55;}
+  .meta-card .v .ok{color:var(--green); font-weight:600;}
+  /* ===== 目录 ===== */
+  .toc{border:1px solid var(--rule); background:var(--paper2); padding:16px 24px; margin:22px 0;}
+  .toc .tt{font-size:11px; letter-spacing:.2em; color:var(--blue); margin-bottom:8px;}
+  .toc a{display:inline-block; padding:3px 14px 3px 0; color:var(--ink3); border:none; font-size:13.5px;}
+  .toc a:hover{color:var(--blue);}
+  /* ===== 表格 ===== */
+  .table-wrap{overflow-x:auto; margin:14px 0 8px; border:1px solid var(--rule); background:#fff;}
+  table{width:100%; border-collapse:collapse; font-size:12.8px;}
+  th{background:var(--blue); color:#fff; text-align:left; font-weight:600; padding:6px 8px; border-bottom:1.5px solid var(--blue); font-size:11.5px; overflow-wrap:anywhere;}
+  td{padding:6px 8px; border-bottom:1px solid var(--rule); vertical-align:top; color:var(--ink3); overflow-wrap:anywhere;}
+  tr:nth-child(even) td{background:#faf9f3;}
+  tr:hover td{background:#f2efe3;}
+  td .n{color:var(--blue); font-weight:600; white-space:nowrap;}
+  td .tech{color:var(--green); font-weight:600;}
+  td .cls{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace; font-size:11px; color:#7a5a1e; background:var(--paper2); padding:0 4px; border-radius:3px;}
+  td .flag{font-size:11px; padding:1px 6px; border-radius:3px; white-space:nowrap;}
+  .flag.y{background:rgba(255,125,0,.14); color:#b45309;}
+  .flag.g{background:rgba(26,127,55,.12); color:var(--green);}
+  .flag.b{background:rgba(27,54,93,.1); color:var(--blue);}
+  .flag.r{background:rgba(192,57,43,.1); color:var(--red);}
+  /* ===== 步骤条（PART E） ===== */
+  .step-flow{counter-reset:sf; border:1px solid var(--rule); background:#fff; padding:18px 22px; margin:14px 0;}
+  .step-flow .sf-item{counter-increment:sf; padding:8px 0 8px 46px; position:relative; border-bottom:1px dashed var(--rule);}
+  .step-flow .sf-item:last-child{border-bottom:none;}
+  .step-flow .sf-item::before{content:counter(sf); position:absolute; left:0; top:8px; width:30px; height:30px; border-radius:50%;
+    background:var(--green); color:#fff; font-family:'IBM Plex Mono',monospace; font-size:13px; display:flex; align-items:center; justify-content:center;}
+  .step-flow .sf-item .t{font-size:14px; font-weight:600; color:var(--ink);}
+  .step-flow .sf-item .d{font-size:12.8px; color:var(--ink3); margin-top:2px;}
+  .sec-box{border:1px solid var(--rule); background:#fff; padding:18px 22px; margin:14px 0;}
+  .sec-box .sno{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.14em; color:var(--blue);}
+  .sec-box .ep{font-size:12px; color:var(--ink2); margin:4px 0 0;}
+  .sec-box .ep a{color:var(--blue);}
+  /* 角色徽标 */
+  .role-badge{display:inline-block; padding:2px 10px; font-size:11px; letter-spacing:.14em; background:var(--paper2); color:var(--blue); border:1px solid var(--rule);}
+  .role-badge.hot{background:#fdf3f3; color:#c0392b;}
+  /* 可折叠角色区块 */
+  details.role-block{border:1px solid var(--rule); margin:18px 0; background:#fff;}
+  details.role-block>summary{cursor:pointer; padding:14px 20px; font-size:15.5px; font-weight:600; color:var(--blue); background:var(--paper2); list-style:none; display:flex; align-items:center; gap:12px; flex-wrap:wrap;}
+  details.role-block>summary::-webkit-details-marker{display:none;}
+  details.role-block>summary::before{content:"▸"; transition:transform .15s;}
+  details.role-block[open]>summary::before{transform:rotate(90deg);}
+  details.role-block>summary .sub{font-size:12px; font-weight:400; color:var(--ink2); letter-spacing:.06em;}
+  details.role-block .body{padding:6px 20px 18px;}
+  details.role-block .desc{margin:10px 0 6px; font-size:13px; color:var(--ink3);}
+  /* 细节分析小节 */
+  .sec-box{border:1px solid var(--rule); background:#fff; padding:18px 22px; margin:14px 0;}
+  .sec-box .sno{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.14em; color:var(--blue);}
+  .sec-box h3{display:flex; align-items:baseline; gap:10px; margin-top:2px;}
+  .sec-box .flow{font-family:'IBM Plex Mono',monospace; font-size:12px; background:var(--paper2); padding:8px 12px; border-left:2px solid var(--blue); margin:8px 0; overflow-x:auto; white-space:pre-wrap;}
+  .warn{border-left:2px solid var(--warn,#FF7D00); background:rgba(255,125,0,.06); padding:10px 14px; margin:10px 0; font-size:13px; color:var(--ink3);}
+  .oknote{border-left:2px solid var(--green); background:rgba(26,127,55,.06); padding:10px 14px; margin:10px 0; font-size:13px; color:var(--ink3);}
+  footer.colophon{margin-top:56px; padding-top:14px; border-top:1px solid var(--rule); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;
+    font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink2);}
+  footer.colophon a{color:var(--ink2); border:none;}
+  @media(max-width:720px){
+    .wrap{padding:28px 18px 60px;}
+    th{font-size:10.5px; padding:5px 6px;}
+    td{font-size:11.5px; padding:5px 6px;}
+    .sec-box{padding:14px 14px;}
+    .meta-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="folio">
+    <span><a href="index.html">← Role Specs</a></span>
+    <span>WeCom Tech Survey · Feasibility Map</span>
+    <span>长安仁恒 · 企微订单助手</span>
+  </header>
+
+  <div class="kicker">
+    <span class="tag">Tech Survey · 技术调研报告</span>
+    <span class="mono" style="font-size:11px; letter-spacing:.18em; color:var(--ink2);">Part A 通道矩阵 → Part B 角色×场景 → Part C 技术主轴 → Part D 实施细节</span>
+  </div>
+
+  <h1>企微技术调研<br/><span style="font-style:italic; color:var(--blue);">沟通通道 → 角色场景 → 呈现形态 → 企微实现技术 → 代码与测试</span></h1>
+
+  <p class="lede">本报告基于 <span class="mono">docs/ui/</span> 全部 11 份文档（index.html + wecom-tokens.css + wecom-pc-frame.css + 7 份角色 spec）的深度阅读，配合企微开放平台官方文档验证（聊天工具栏接口 path/91789、获取当前客户群的群 ID path/100747、上下游聊天工具栏 path/95709、获取上下游联系人 ID path/100367 等），先以<strong>客户 ↔ 销售实际沟通工具</strong>为全局视角梳理 4 类通道（Part A），再将 <strong>21 个角色场景</strong>逐一映射到通道与企微实现技术（Part B/C），最后给出实施细节分析（Part D）。</p>
+
+  <!-- ============ 元信息 ============ -->
+  <div class="meta-grid">
+    <div class="meta-card"><div class="k">来源文件（已深度阅读）</div><div class="v">
+      docs/ui/index.html · wecom-tokens.css · wecom-pc-frame.css ·<br/>
+      sales / commerce / warehouse / finance / chairman / contact / admin-spec.html（7 份，21 Block）
+    </div></div>
+    <div class="meta-card"><div class="k">事实源核对</div><div class="v">
+      docs/07-wecom-integration.html ✅ · docs/07a-wecom-interaction-prd.html ✅ ·<br/>
+      spec/ui/wecom-sidebar/（12 文件产品稿）✅ —— 组件与符号逐一命中
+    </div></div>
+    <div class="meta-card"><div class="k">平台能力验证</div><div class="v">
+      企微官方文档 path/91789 · 100747 · 100746 · 100520-100524 ✅<br/>
+      <span class="ok">聊天侧边栏 H5 / 移动端工具栏 / 群上下文 / JS-SDK 媒体 / 双票据 OAuth 全部官方支持</span>
+    </div></div>
+    <div class="meta-card"><div class="k">结论</div><div class="v">
+      21 场景 <span class="ok">全部可实现</span>；4 类通道中 C1-C4（有企微参与）<span class="ok">全部可触达</span>；<br/>纯个微↔个微（无企微参与）❌ 不可触达（需引导客户入企微）；S2 会话存档需付费
+    </div></div>
+  </div>
+
+  <nav class="toc">
+    <div class="tt">CONTENTS</div>
+    <a href="#partA">Part A · 沟通通道矩阵（4 类通道 C1-C4）</a>
+    <a href="#partB">Part B · 角色 × 场景表（7 张）</a>
+    <a href="#partC">Part C · 企微技术主轴统一表</a>
+    <a href="#partD">Part D · 技术实施细节分析</a>
+    <a href="#arch">技术架构图</a>
+    <a href="#partE">Part E · 参考资料（MoChat 企微配置手册汇总）</a>
+  </nav>
+
+  <!-- ================================================================ -->
+  <!-- ========================== PART A ============================= -->
+  <!-- ================================================================ -->
+  <h2 id="partA"><span class="no">PART A ·</span> 沟通通道矩阵 —— 客户 ↔ 销售实际工具 × 企微触达能力</h2>
+  <p>以<strong>客户与销售之间实际使用的沟通工具组合</strong>为全局视角，共 4 类通道（C1-C4）。核心结论：<strong>只要会话中有企微参与（销售侧用企微客户端），订单助手即可触达</strong>；纯个微↔个微（双方均无企微参与）企微应用无法触达，需引导客户进入企微体系。本系统 spec 的主战场（「广西天华 · 供应协同群」= 企微成员 + 个微客户的<strong>外部客户群</strong>）落在 C2。</p>
+
+  <div class="table-wrap"><table>
+    <tr>
+      <th>通道</th><th>客户侧工具</th><th>销售侧工具</th><th>典型会话</th><th>侧边栏应用（S1）</th><th>工具栏入口 / 全屏 H5</th><th>消息卡片推送（S3）</th><th>身份识别与群解析</th><th>群上下文（chatId）</th><th>限制与降级</th>
+    </tr>
+    <tr>
+      <td><span class="n">C1</span><br/><span class="flag g">可触达</span></td>
+      <td>个微（微信用户）</td>
+      <td>企微（外部联系人单聊）</td>
+      <td>销售 ↔ 客户 1 对 1 私聊（微信好友形态）</td>
+      <td>✅ 外部联系人单聊可见（entry=single_chat_tools，3.0.24+）</td>
+      <td>✅ 移动端工具栏入口 + 全屏 H5</td>
+      <td>✅ 客户联系 API 可向 external_userid 发送应用消息卡片</td>
+      <td>✅ ww.getCurExternalContact（path/100746）→ external_userid；unionid 关联（path/95900）</td>
+      <td>—（单聊无群 ID，走客户维度）</td>
+      <td>需客户联系权限；仅「客户」（非「其他外部联系人」）可管理；侧边栏仅外部会话可见</td>
+    </tr>
+    <tr>
+      <td><span class="n">C2</span><br/><span class="flag g">可触达 · 主战场</span></td>
+      <td>个微（多个微信用户）</td>
+      <td>企微（外部客户群）</td>
+      <td>「供应协同群」：1 个企微成员 + N 个微信客户</td>
+      <td>✅ 外部客户群可见（entry=group_chat_tools，3.0.24+；需客户联系权限）</td>
+      <td>✅ 工具栏入口 + 全屏 H5（spec 主形态）</td>
+      <td>✅ 应用消息可发到客户群会话（template_card）；群发消息到客户群（93556）</td>
+      <td>✅ ww.getCurExternalChat（path/100747）→ chatId；获取客户群详情 → external_userid 列表</td>
+      <td>✅ 群名 + 客户等级头（.wc-group-ctx）</td>
+      <td>需客户联系权限；S2 会话存档读取群消息需付费开通</td>
+    </tr>
+    <tr>
+      <td><span class="n">C3</span><br/><span class="flag g">可触达</span></td>
+      <td>企微（他企业成员）</td>
+      <td>企微（外部联系人 1 对 1 / 上下游）</td>
+      <td>企业间单聊（普通外部企微用户 / 上下游企业成员）</td>
+      <td>✅ 外部企微联系人单聊可见（single_chat_tools）；上下游体系用<b>上下游聊天工具栏</b>（path/95709）</td>
+      <td>✅ 工具栏 + 全屏 H5</td>
+      <td>✅ 应用消息卡片（客户联系/上下游范围内）</td>
+      <td>✅ 普通：getCurExternalContact；上下游：获取上下游联系人 ID（path/100367）→ open_userid + corpId</td>
+      <td>—（单聊）</td>
+      <td>上下游需企业互联/上下游关系；互联群功能需开启</td>
+    </tr>
+    <tr>
+      <td><span class="n">C4</span><br/><span class="flag g">可触达</span></td>
+      <td>企微（多企业成员）</td>
+      <td>企微（上下游/企业互联群）</td>
+      <td>上下游协作群：多企业企微成员同群（互联群）</td>
+      <td>✅ 上下游聊天工具栏（path/95709）+ 获取上下游互联群 ID（path/100368）</td>
+      <td>✅ 工具栏 + 全屏 H5</td>
+      <td>✅ 应用消息卡片（互联群会话）</td>
+      <td>✅ 上下游互联群 ID → 群详情 → 各企业成员（corpId + open_userid）；ww.createCorpGroupChat 可建互联群（path/94430，需开启互联群功能）</td>
+      <td>✅ 互联群上下文</td>
+      <td>需开启互联群功能；仅局校互联和上下游企业可调用；含外部联系人时群上限 40 人</td>
+    </tr>
+    <tr>
+      <td><span class="n">C0</span><br/><span class="flag r">不可触达</span></td>
+      <td>个微</td>
+      <td>个微（纯微信，无企微参与）</td>
+      <td>销售未用企微：微信 1 对 1 / 微信群</td>
+      <td>❌ 无企微客户端，侧边栏不存在</td>
+      <td>❌ 无法挂载</td>
+      <td>❌ 无法推送</td>
+      <td>❌ 无企微身份体系</td>
+      <td>❌</td>
+      <td><strong>降级路径</strong>：引导客户添加企微/进入客户群（「联系我」插件 path/93071、群活码），或改用微信小程序/公众号方案（非本系统范围）</td>
+    </tr>
+  </table></div>
+
+  <pre class="mermaid">
+%%{init: {"flowchart": {"nodeSpacing": 85, "rankSpacing": 75}}}%%
+flowchart TB
+    subgraph CUST["客户侧"]
+        W1["个微用户（微信）"]
+        W2["企微用户（他企业）"]
+    end
+    subgraph CH["沟通通道"]
+        subgraph CHW["个微客户通道 · C1-C2"]
+            C1["C1 · 个微↔企微 1对1<br/>(single_chat_tools)"]
+            C2["C2 · 个微↔企微 外部客户群<br/>(group_chat_tools) ★主战场"]
+        end
+        subgraph CHQ["企微客户通道 · C3-C4"]
+            C3["C3 · 企微↔企微 1对1<br/>(single_chat_tools / 上下游)"]
+            C4["C4 · 企微↔企微 互联群<br/>(上下游聊天工具栏)"]
+        end
+    end
+    C0["C0 · 个微↔个微 纯微信<br/>(无企微参与 ❌)"]
+    subgraph SALES["销售侧（企微客户端）"]
+        S1["聊天工具栏 · 侧边栏 H5"]
+        S2["移动端工具栏 · 全屏 H5"]
+        S3["消息卡片 template_card"]
+    end
+    %% 基础触达线 0-7（深蓝实线，沿用全局 lineColor）
+    W1 --> C1 --> S1
+    W1 --> C2 --> S1
+    W2 --> C3
+    W2 --> C4
+    C3 --> S1
+    C4 --> S1
+    %% S2 移动端工具栏·全屏 H5 可触达 4 通道（索引 8-11，企微绿虚线）
+    C1 -.-> S2
+    C2 -.-> S2
+    C3 -.-> S2
+    C4 -.-> S2
+    %% S3 消息卡片 template_card 可触达 4 通道（索引 12-15，橙色虚线）
+    C1 -.-> S3
+    C2 -.-> S3
+    C3 -.-> S3
+    C4 -.-> S3
+    %% C0 纯微信转化引导（索引 16-17，灰色虚线）
+    C0 -.引导客户入企微（联系我/群活码）.-> C1
+    C0 -.引导客户入企微（联系我/群活码）.-> C2
+    %% 连线着色：S2 企微绿 / S3 橙色 / C0 灰色
+    linkStyle 8,9,10,11 stroke:#07C160,stroke-width:2px,color:#07C160
+    linkStyle 12,13,14,15 stroke:#FF7D00,stroke-width:2px,color:#FF7D00
+    linkStyle 16,17 stroke:#86909C,stroke-width:1.5px,color:#86909C
+  </pre>
+  <figcaption>图 1：沟通通道拓扑 —— C1-C4 只要有企微参与即可触达（侧边栏/工具栏/卡片），C0 纯个微不可达，需转化引导<br/>
+    <span style="color:#07C160; font-weight:600;">● 绿色虚线</span> = 移动端工具栏·全屏 H5 触达　
+    <span style="color:#FF7D00; font-weight:600;">● 橙色虚线</span> = 消息卡片 template_card 推送　
+    <span style="color:#86909C; font-weight:600;">● 灰色虚线</span> = C0 纯微信转化引导</figcaption>
+
+  <!-- ================================================================ -->
+  <!-- ========================== PART B ============================= -->
+  <!-- ================================================================ -->
+  <h2 id="partB"><span class="no">PART B ·</span> 角色 × 场景表 —— 每个角色的全部流程及其企微呈现</h2>
+  <p>共 7 张表、21 个场景（按 Block 计），每场景一行；同一 Block 内的多个操作步骤在「操作流程概要」列内完整列出，<strong>无任何遗漏</strong>。列含义：<strong>通道</strong> = 该场景跑在 Part A 的哪类沟通通道上（spec 主场景为 C2 外部客户群，单聊变体为 C1，工作台为 normal 无会话通道）；<strong>呈现形态</strong> = spec UI 操作图中的真实呈现（PC 四栏 / 移动端手机屏 / 全屏 H5）；<strong>企微实现技术</strong> = 支撑该呈现的企微平台能力（官方已验证）；<strong>组件类</strong> = 现有 wecom-tokens.css / wecom-pc-frame.css 中可复用的代码块；<strong>数据示例</strong> = spec 虚拟演示数据（企业=长安仁恒，客户=广西天华，商品=膨润土 AB-3）。</p>
+
+  <details class="role-block" open>
+    <summary><span class="role-badge hot">SALES</span> 归属销售 <span class="sub">5 Block · 全流程主控 · 3 Tab（待办/订单/下单）</span></summary>
+    <div class="body">
+      <p class="desc">销售是唯一可在 S2 确认自动下单的角色（归属校验 SpiceDB OWNS + 本地 StaticChecker）。入口 = S1 聊天工具栏（单聊/客户群）+ S4 工作台。</p>
+      <div class="table-wrap"><table>
+        <tr><th>Block</th><th>通道</th><th>场景名</th><th>操作流程概要</th><th>呈现形态</th><th>企微实现技术</th><th>组件类（现有代码块）</th><th>数据示例</th></tr>
+        <tr><td><span class="n">B1</span></td><td><span class="flag g">C2</span>/<span class="flag g">C1</span></td><td>查订单（S1 侧边栏 · 订单 Tab）</td>
+          <td>① 客户群聊天窗口工具栏点「订单助手」→ 全屏 H5（默认待办 Tab）② 切「订单」Tab → 当前客户订单列表 → 详情（履约时间线）③ 上传签收/回单凭证</td>
+          <td>PC 四栏最右栏侧边栏应用 / 移动端工具栏入口 → 全屏 H5</td>
+          <td><span class="tech">聊天工具栏应用</span>（侧边栏 H5 容器）+ <span class="tech">ww.getContext</span> entry 分流 + <span class="tech">群上下文 ww.getCurExternalChat</span></td>
+          <td><span class="cls">.wc-aside .wc-tabs .wc-group-ctx .wc-order .wc-tl-* .wc-phone .wc-full</span></td>
+          <td>广西天华·供应协同群（8）；ORD-2026-0117 待价格审批 ¥16,000</td></tr>
+        <tr><td><span class="n">B2</span></td><td><span class="flag g">C2</span></td><td>人工下单（S1 · 下单 Tab 分步表单）</td>
+          <td>① 下单 Tab → 5 步分步表单：客户（群上下文预选）→ 风控审计 → 合同校验（框架合同自动填价）→ 填写明细 → 提交确认 ② 成功态：订单已提交 + 订单号 + 进入审批流说明；409 幂等提示</td>
+          <td>全屏 H5「下单」Tab 表单 + 成功态</td>
+          <td><span class="tech">H5 原生表单</span> + <span class="tech">OAuth 静默授权</span> + 服务端 POST /api/v1/orders（幂等键）</td>
+          <td><span class="cls">.wc-steps .wc-form-row .wc-tip .wc-success</span></td>
+          <td>膨润土 AB-3 5 吨 · 华南仓 · 交期 2026-08-15；ORD-20260811-0109</td></tr>
+        <tr><td><span class="n">B3</span></td><td><span class="flag g">C2</span></td><td>自动下单确认卡（S2 · 待办 Tab）</td>
+          <td>① 待办 Tab 顶部自动下单确认卡：AI 识别来源引用原文（po-origin）+ 字段明细 + 风险提示 + 三按钮（忽略/修改/确认）② 确认 → 卡片原位刷新「已生成正式订单」+ 订单号；非待确认态 → 409「该自动下单已被处理」</td>
+          <td>全屏 H5「待办」Tab 卡片（含编辑态、置灰终态）</td>
+          <td><span class="tech">待办检索（CQ-05）</span> + <span class="tech">preorder-confirm / preorder-ignore 信号</span>（幂等键派生正式订单）</td>
+          <td><span class="cls">.wc-preorder .wc-po-origin .wc-po-fields .wc-po-actions .wc-po-result</span></td>
+          <td>DRAFT-2026-0036 · 5 吨 · ¥16,000 · 合同 HT-2025-0038（框架）→ ORD-2026-0118</td></tr>
+        <tr><td><span class="n">B4</span></td><td><span class="flag g">C2</span>/<span class="flag g">C1</span></td><td>审批/催办/状态（S3 · 待办 Tab）</td>
+          <td>① 工作流活动触发出站通知 → 待办 Tab 审批条聚合 ② 类型分流：状态 → 详情只读跳转；催办 → 橙色 tag「需处理」；回单异常 → 例外审核</td>
+          <td>全屏 H5「待办」Tab 审批条列表</td>
+          <td><span class="tech">应用消息卡片 template_card</span>（出站通知）+ 待办检索 CQ-05</td>
+          <td><span class="cls">.wc-approval .wc-sec-title .wc-tag(橙)</span></td>
+          <td>自动下单确认·已超 24h（需处理）；回单异常·已超期 3 天</td></tr>
+        <tr><td><span class="n">B5</span></td><td><span class="flag b">—</span></td><td>工作台待办（S4 · 待办 Tab）</td>
+          <td>① 企微「工作台」打开「长安仁恒订单助手」→ OAuth 授权进入 → 默认待办 Tab（本人待办）② 点击条目 → 按类型跳转原 S3 卡片/确认卡片；下拉刷新（CQ-05）；无群上下文时隐藏群上下文头</td>
+          <td>工作台应用 → 全屏 H5（与侧边栏同一套页面）</td>
+          <td><span class="tech">工作台应用入口</span>（normal entry）+ 待办检索 CQ-05（只聚合与跳转，不做敏感操作）</td>
+          <td><span class="cls">.wc-page-header .wc-aside .wc-approval</span></td>
+          <td>长安仁恒订单助手；待办 2（需要我处理 / 进行中）</td></tr>
+      </table></div>
+    </div>
+  </details>
+
+  <details class="role-block">
+    <summary><span class="role-badge">COMMERCE</span> 商务 <span class="sub">3 Block · 租户 ops · Tab 裁剪为「待办 / 订单」</span></summary>
+    <div class="body">
+      <p class="desc">商务 = 租户 ops，可见全量订单（含价格/账期/内部备注），可承接他人订单的审批（审价/备货/发货/开票四大闸门）。</p>
+      <div class="table-wrap"><table>
+        <tr><th>Block</th><th>通道</th><th>场景名</th><th>操作流程概要</th><th>呈现形态</th><th>企微实现技术</th><th>组件类（现有代码块）</th><th>数据示例</th></tr>
+        <tr><td><span class="n">B1</span></td><td><span class="flag g">C2</span></td><td>查全量订单（订单 Tab）</td>
+          <td>① 侧边栏进入（OAuth 静默授权）→ 服务端重认证 → ops 聚合视图 ② 切「订单」Tab → 租户全量订单（跨客户）③ 按状态/客户/金额筛选 → 订单详情（全字段）</td>
+          <td>PC 四栏侧边栏 / 全屏 H5「订单」Tab</td>
+          <td><span class="tech">聊天工具栏应用</span> + <span class="tech">tenant→ops 全量投影</span>（SpiceDB）</td>
+          <td><span class="cls">.wc-order .wc-group-ctx</span></td>
+          <td>ORD-2026-0117 广西天华 ¥16,000 B 级；ORD-2026-0108 宏远铸造 ¥9,600 A 级</td></tr>
+        <tr><td><span class="n">B2</span></td><td><span class="flag g">C2</span></td><td>审批卡片：审价/备货/发货/开票（待办 Tab）</td>
+          <td>① 待办审批条列表 → 点击分流：审价（核对金额/客户等级）→ 备货（核对预定量/到款/仓库）→ 发货（核对发货数量）→ 开票（核对开票金额不超发货）② 通过/驳回 → approve:/reject: Signal → 闸门推进 → 出站状态卡通知销售</td>
+          <td>全屏 H5「待办」Tab 审批条 + 详情</td>
+          <td><span class="tech">template_card 出站</span> + <span class="tech">审批信号</span>（审价/备货/发货/开票 Signal → 闸门推进）</td>
+          <td><span class="cls">.wc-approval .wc-detail .wc-tag(橙)</span></td>
+          <td>审价 ORD-2026-0117 需处理；备货 ORD-2026-0112 已到账</td></tr>
+        <tr><td><span class="n">B3</span></td><td><span class="flag b">—</span></td><td>工作台全量待办（待办 Tab）</td>
+          <td>① 打开工作台（normal 入口）→ 默认待办 Tab（全量）② 超时条目橙色 tag 置顶 ③ 点击条目 → 跳转对应审批卡片（不做敏感操作）</td>
+          <td>工作台应用 → 全屏 H5</td>
+          <td><span class="tech">工作台应用入口</span> + 待办检索 CQ-05（全量视图）</td>
+          <td><span class="cls">.wc-approval .wc-sec-title</span></td>
+          <td>审价·已超 24h（置顶）；备货确认 ORD-2026-0112</td></tr>
+      </table></div>
+    </div>
+  </details>
+
+  <details class="role-block">
+    <summary><span class="role-badge">WAREHOUSE</span> 仓管 <span class="sub">3 Block · 剥价视图 · Tab 裁剪为「待办 / 订单」</span></summary>
+    <div class="body">
+      <p class="desc">仓管仅见本仓分配的发货单（shipment#warehouse_operator），经 warehouse.staff 获得 order.view 但不获得价格字段——BFF 投影剥价（CQ-03），UI 金额列整体不渲染。</p>
+      <div class="table-wrap"><table>
+        <tr><th>Block</th><th>通道</th><th>场景名</th><th>操作流程概要</th><th>呈现形态</th><th>企微实现技术</th><th>组件类（现有代码块）</th><th>数据示例</th></tr>
+        <tr><td><span class="n">B1</span></td><td><span class="flag g">C2</span></td><td>本仓发货单剥价视图 + 发货数量录入（订单 Tab）</td>
+          <td>① 订单 Tab 展示本仓发货单（金额列不渲染）→ 详情（数量/仓库/地址）② 发货数量录入（部分/整批，预填可发量）③ 超发 → 红色校验「超出可发数量」禁止提交；≤ 可发量 → 提交 ship-action（含数量）→ 发货闸门推进（CQ-07 守恒）</td>
+          <td>全屏 H5「订单」Tab 剥价列表 + 发货数量表单</td>
+          <td><span class="tech">聊天工具栏应用</span> + <span class="tech">BFF 字段投影剥价（CQ-03）</span> + <span class="tech">ship-action 信号</span>（守恒防线 CQ-07）</td>
+          <td><span class="cls">.wc-order（金额行不渲染） .wc-form-row .wc-risk</span></td>
+          <td>ORD-2026-0118 膨润土 AB-3 5 吨 华南仓；可发 5 吨</td></tr>
+        <tr><td><span class="n">B2</span></td><td><span class="flag g">C2</span></td><td>仓库确认/发货（待办 Tab）</td>
+          <td>① 待办 Tab「仓库确认」审批条（剥价视图）→ 核对仓库/分配数量 ② 通过 → warehouse-confirm Signal → 仓管闸门推进；驳回 → 驳回链；409 幂等 / 403 失效</td>
+          <td>全屏 H5「待办」Tab 审批条</td>
+          <td><span class="tech">template_card 出站</span> + <span class="tech">warehouse-confirm 信号</span>（warehouse_operator + admin）</td>
+          <td><span class="cls">.wc-approval</span></td>
+          <td>仓库确认 ORD-2026-0112 华南仓 分配 2 吨</td></tr>
+        <tr><td><span class="n">B3</span></td><td><span class="flag g">C2</span></td><td>回单凭证上传（待办 Tab）</td>
+          <td>① 待办「回单凭证」→ 详情凭证区 ② 选择图片（≤9 张）→ 逐张上传进度条 ③ 凭证列表追加 +「已登记」；409 重复版本 → toast「该凭证已登记」；凭证只追加（CQ-15），历史版本可回放</td>
+          <td>全屏 H5 详情凭证区 + 上传进度条</td>
+          <td><span class="tech">JS-SDK ww.chooseImage / ww.uploadImage</span> + <span class="tech">append_evidence</span>（凭证只追加 CQ-15，409 幂等）</td>
+          <td><span class="cls">.wc-tip .wc-detail .wc-tl-*</span></td>
+          <td>ORD-2026-0108 凭证 v3（只追加可回放）</td></tr>
+      </table></div>
+    </div>
+  </details>
+
+  <details class="role-block">
+    <summary><span class="role-badge">FINANCE</span> 财务 <span class="sub">3 Block · 款到才发货 · Tab 裁剪为「待办 / 订单」</span></summary>
+    <div class="body">
+      <p class="desc">confirm_payment = reviewer + tenant→accounting + tenant→admin 是财务专属授权——到账确认面向租户全量订单（需价格/账期核算）。</p>
+      <div class="table-wrap"><table>
+        <tr><th>Block</th><th>通道</th><th>场景名</th><th>操作流程概要</th><th>呈现形态</th><th>企微实现技术</th><th>组件类（现有代码块）</th><th>数据示例</th></tr>
+        <tr><td><span class="n">B1</span></td><td><span class="flag g">C2</span></td><td>到账确认（待办 Tab）</td>
+          <td>① 待办 Tab「确认到账」审批条 → 核对应到金额/账期/流水匹配 ② 确认 → payment-confirm Signal → 款到闸门放行；驳回 → 驳回链</td>
+          <td>全屏 H5「待办」Tab 审批条 + 确认详情</td>
+          <td><span class="tech">template_card 出站</span> + <span class="tech">payment-confirm 信号</span> + confirm_payment 专属授权（非财务 403）</td>
+          <td><span class="cls">.wc-approval .wc-detail</span></td>
+          <td>ORD-2026-0110 应到 ¥6,800 流水已匹配</td></tr>
+        <tr><td><span class="n">B2</span></td><td><span class="flag g">C2</span></td><td>开票（待办 Tab）</td>
+          <td>① 开票审批条 → 订单详情卡（开票金额/已发货数量/开票规则「不超发货」CQ-09）② 确认开票 invoice-issued → 开票闸门推进</td>
+          <td>全屏 H5 订单详情卡（od-kv 字段行 + od-state 状态）</td>
+          <td><span class="tech">template_card 出站</span> + <span class="tech">invoice-issued 信号</span>（开票金额不超发货 CQ-09）</td>
+          <td><span class="cls">.wc-detail（od-kv / od-state） .wc-approval</span></td>
+          <td>ORD-2026-0108 开票金额 ¥9,600 · 已发货 3 吨（整批）</td></tr>
+        <tr><td><span class="n">B3</span></td><td><span class="flag g">C2</span></td><td>回单异常（待办 Tab）</td>
+          <td>① Timer：非款到 5 天无回单 → 待办 Tab 回单异常审批条（橙色 tag「已超期 3 天」）② 点击「处理异常」→ receipt-exception 审核 Signal → 例外审核推进（CQ-10）</td>
+          <td>全屏 H5「待办」Tab 审批条 + 异常详情（风险提示）</td>
+          <td><span class="tech">template_card 出站</span> + <span class="tech">Timer 触发（CQ-10）</span> + <span class="tech">receipt-exception 信号</span>（工作流 assignee 判定，非财务专属）</td>
+          <td><span class="cls">.wc-approval .wc-risk .wc-warn</span></td>
+          <td>ORD-2026-0102 非款到单 · 5 天无回单 · 已超期 3 天</td></tr>
+      </table></div>
+    </div>
+  </details>
+
+  <details class="role-block">
+    <summary><span class="role-badge">CHAIRMAN</span> 董事长 <span class="sub">2 Block · 大单终审 · Tab 裁剪为「待办 / 订单」</span></summary>
+    <div class="body">
+      <p class="desc">董事长 = 租户全量（tenant→admin），仅 C/D 大单（客户等级）进入其终审（具备 order.approve）；决策需价格/客户等级，全字段投影。</p>
+      <div class="table-wrap"><table>
+        <tr><th>Block</th><th>通道</th><th>场景名</th><th>操作流程概要</th><th>呈现形态</th><th>企微实现技术</th><th>组件类（现有代码块）</th><th>数据示例</th></tr>
+        <tr><td><span class="n">B1</span></td><td><span class="flag g">C2</span></td><td>C/D 大单终审（待办 Tab）</td>
+          <td>① 待办 Tab「董事长审批」审批条（橙色 tag「需处理」）→ 终审详情：金额/客户等级/审价结论/风险提示 ② 通过 → chairman-review Signal → 大单终审闸门推进；驳回 → 终态驳回 → 出站「被驳回」卡片</td>
+          <td>全屏 H5「待办」Tab 审批条 + 终审详情（通过/驳回双按钮）</td>
+          <td><span class="tech">template_card 出站</span> + <span class="tech">chairman-review 信号</span> + order.approve（仅 C/D 大单，SpiceDB 过滤）</td>
+          <td><span class="cls">.wc-approval .wc-detail .wc-risk</span></td>
+          <td>ORD-2026-0117 C 级大单 ¥16,000 审价已通过；ORD-2026-0105 D 级 ¥28,000</td></tr>
+        <tr><td><span class="n">B2</span></td><td><span class="flag g">C2</span></td><td>决策视图查全量（订单 Tab）</td>
+          <td>① 订单 Tab → 租户全量订单（全字段）② 筛选 C/D 大单（橙色状态标突出）③ 详情 → 跳转终审（如需）</td>
+          <td>全屏 H5「订单」Tab 全量列表</td>
+          <td><span class="tech">聊天工具栏应用</span> + tenant→admin 全字段投影</td>
+          <td><span class="cls">.wc-order .wc-grade .wc-tag(橙)</span></td>
+          <td>ORD-2026-0117 终审中；ORD-2026-0105 D 级大单 10 吨</td></tr>
+      </table></div>
+    </div>
+  </details>
+
+  <details class="role-block">
+    <summary><span class="role-badge">CONTACT</span> 客户联系人 <span class="sub">2 Block · 物流视图 · 剥金额/内部备注</span></summary>
+    <div class="body">
+      <p class="desc">客户联系人仅见其客户关联发货单（shipment#customer_contact，场景 D）的物流视图——不显示金额、不显示内部备注（CQ-03 字段级投影）。</p>
+      <div class="table-wrap"><table>
+        <tr><th>Block</th><th>通道</th><th>场景名</th><th>操作流程概要</th><th>呈现形态</th><th>企微实现技术</th><th>组件类（现有代码块）</th><th>数据示例</th></tr>
+        <tr><td><span class="n">B1</span></td><td><span class="flag g">C2</span></td><td>我的物流视图（订单 Tab · 剥金额/内部备注）</td>
+          <td>① 订单 Tab → 本客户发货单（物流视图：发货进度/物流单号/预计送达；金额行不渲染、无内部备注）② 签收后回单状态更新</td>
+          <td>全屏 H5「订单」Tab 剥金额变体</td>
+          <td><span class="tech">聊天工具栏应用</span> + <span class="tech">shipment#customer_contact 关联</span> + CQ-03 字段级投影（shipment.view 无价格/备注）</td>
+          <td><span class="cls">.wc-order（去金额变体）</span></td>
+          <td>ORD-2026-0118 运输中 · 德邦 DBL2026073000387；ORD-2026-0112 预计 07-30 送达</td></tr>
+        <tr><td><span class="n">B2</span></td><td><span class="flag g">C2</span></td><td>签收凭证上传（待办 Tab）</td>
+          <td>① 待办 Tab「签收凭证」审批条 → 选择签收/回单图片 ② 上传进度条 ③ 凭证版本追加（只追加 CQ-15）→「签收已登记」动态；409 重复 → toast；若开通出站则通知销售</td>
+          <td>全屏 H5「待办」Tab + 上传进度条</td>
+          <td><span class="tech">JS-SDK ww.chooseImage / ww.uploadImage</span> + append_evidence（CQ-15 只追加）</td>
+          <td><span class="cls">.wc-tip .wc-approval</span></td>
+          <td>ORD-2026-0112 凭证 v2（只追加可回放）</td></tr>
+      </table></div>
+    </div>
+  </details>
+
+  <details class="role-block">
+    <summary><span class="role-badge">ADMIN</span> 管理员 <span class="sub">3 Block · 全量/委派 · Tab 裁剪为「待办 / 订单」</span></summary>
+    <div class="body">
+      <p class="desc">管理员 = tenant→admin（全权限）：全量查询、全审批委派、可协助建单。</p>
+      <div class="table-wrap"><table>
+        <tr><th>Block</th><th>通道</th><th>场景名</th><th>操作流程概要</th><th>呈现形态</th><th>企微实现技术</th><th>组件类（现有代码块）</th><th>数据示例</th></tr>
+        <tr><td><span class="n">B1</span></td><td><span class="flag g">C1</span>/<span class="flag g">C2</span></td><td>全量查询（订单 Tab）</td>
+          <td>① S1 侧边栏 / S4 工作台进入 → 订单 Tab 全量订单（含所有客户）② 按客户/状态/金额筛选 ③ 订单详情（全字段）④ 协助建单（下单 Tab）</td>
+          <td>PC 四栏侧边栏 / 全屏 H5「订单」Tab</td>
+          <td><span class="tech">聊天工具栏应用</span> + <span class="tech">工作台应用入口</span> + tenant→admin 全权限全字段投影</td>
+          <td><span class="cls">.wc-order .wc-form-row</span></td>
+          <td>审价委派·已超 24h（商务 李经理）；ORD-2026-0110 待到账 ¥6,800</td></tr>
+        <tr><td><span class="n">B2</span></td><td><span class="flag g">C1</span>/<span class="flag g">C2</span></td><td>审批委派（待办 Tab）</td>
+          <td>① 待办 Tab 超时任务审批条（橙色「需处理」）→ 委派详情：当前 assignee + 新 assignee 下拉 ② 确认委派 → 卡片 assignee 更新（order.delegate，动作与本人等价）→ 原 assignee 收到通知</td>
+          <td>全屏 H5「待办」Tab 委派表单</td>
+          <td><span class="tech">template_card 出站</span>（通知原 assignee）+ <span class="tech">order.delegate 委派动作</span>（SpiceDB 关系更新）</td>
+          <td><span class="cls">.wc-approval .wc-form-row .wc-detail</span></td>
+          <td>审价委派 ORD-2026-0117 · 商务 李经理 → 赵经理</td></tr>
+        <tr><td><span class="n">B3</span></td><td><span class="flag g">C1</span>/<span class="flag g">C2</span></td><td>代办授权（待办 Tab）</td>
+          <td>① 待办 Tab「代办授权」→ 选择代办人 + 权限范围 + 设置有效期（如 7 天）② DELEGATED_TO 元组落库 ③ 有效期内代办可审批/确认；到期 → expiry_ok caveat 失败 → 403「任务已失效或您无操作权限」</td>
+          <td>全屏 H5「待办」Tab 授权表单 + 生效列表</td>
+          <td><span class="tech">template_card 出站</span> + <span class="tech">DELEGATED_TO 元组 + expiry_ok caveat</span>（到期服务端即时拒绝 403，代办不持残留权限）</td>
+          <td><span class="cls">.wc-approval .wc-form-row .wc-risk .wc-tag(橙)</span></td>
+          <td>张销售 → 王销售 · 08-09 → 08-16（7 天）· order.delegate / prestock.delegate</td></tr>
+      </table></div>
+    </div>
+  </details>
+
+  <!-- ================================================================ -->
+  <!-- ========================== PART B ============================= -->
+  <!-- ================================================================ -->
+  <h2 id="partC"><span class="no">PART C ·</span> 企微实现技术主轴统一表 —— 一条技术辐射全部覆盖场景</h2>
+  <p>以<strong>企微实现技术</strong>为主轴，逐条给出：覆盖场景（角色/Block）、<strong>适用通道（Part A 的 C1-C4）</strong>、呈现形式、技术要点、大体如何实现、对应代码块（已有 CSS 类 / 准备增加模块）、如何测试。<span class="flag g">G</span> = 官方能力已验证；<span class="flag b">B</span> = 平台标准/前端能力；<span class="flag y">Y</span> = 条件可行（付费/依赖外部）；<span class="flag r">R</span> = 风险需降级；适用通道「—」= 无会话通道（工作台 normal / 纯文档）。</p>
+
+  <div class="table-wrap"><table>
+    <tr>
+      <th>#</th><th>企微实现技术</th><th>覆盖场景（角色/Block）</th><th>适用通道</th><th>呈现形式</th><th>技术要点</th><th>大体如何实现</th><th>对应代码块（已有 / 准备增加）</th><th>如何测试</th>
+    </tr>
+    <tr>
+      <td><span class="n">T1</span></td><td><span class="flag g">C1-C4</span></td><td><span class="tech">聊天工具栏应用（侧边栏 H5 容器）</span> <span class="flag g">官方</span></td>
+      <td>全部角色 × S1 场景（Sales B1/B2、Commerce B1/B2、Warehouse B1、Finance B1-B3、Chairman B1/B2、Contact B1、Admin B1/B2/B3）</td>
+      <td>PC 四栏最右栏侧边栏（.wc-pc .aside「我们的应用」）/ 移动端工具栏入口</td>
+      <td>企微官方「聊天工具栏接口」（path/91789）：自建应用页面可配置到聊天工具栏；仅外部联系人会话显示；ww.getContext 返回 entry=single_chat_tools / group_chat_tools（3.0.24+）</td>
+      <td>管理后台创建自建应用 → 应用详情配置「聊天工具栏」页面 URL → 可信域名 + 校验文件；H5 内 ww.register + ww.agentConfig 签名后按 entry 分流渲染</td>
+      <td>已有：<span class="cls">.wc-aside .wc-tabs .wc-pc（grid 52/210/1fr/250） .aside .marker</span>；准备增加：entry 分流路由模块（frontend router）</td>
+      <td>企微管理后台配置后，用外部联系人会话打开侧边栏；开发者工具 + 真机验证 PC/移动端四栏形态</td>
+    </tr>
+    <tr>
+      <td><span class="n">T2</span></td><td><span class="flag g">C1-C4</span></td><td><span class="tech">移动端聊天工具栏入口 + 全屏 H5</span> <span class="flag g">官方</span></td>
+      <td>全部角色移动端（同 T1 场景的移动端形态；Sales B1 操作 1.1 为典型）</td>
+      <td>聊天窗口输入框上方聊天工具栏「订单助手」→ 全屏 H5 webview（含系统导航头）</td>
+      <td>工具栏支持 h5/小程序；与 PC 共用同一聊天工具栏配置；官方提供工具栏控制 JSAPI（隐藏聊天附件栏发送按钮 path/100748）</td>
+      <td>同一应用配置自动出现在移动端工具栏；H5 全屏打开后默认落在「待办」Tab（产品稿行为）</td>
+      <td>已有：<span class="cls">.wc-phone .wc-full .wc-tabs</span>；准备增加：移动端入口参数（entry=group_chat_tools → 默认 Tab 路由）</td>
+      <td>真机企微 App 外部联系人会话 → 点工具栏「订单助手」→ 验证全屏 H5 与默认 Tab</td>
+    </tr>
+    <tr>
+      <td><span class="n">T3</span></td><td><span class="flag g">—</span></td><td><span class="tech">工作台应用入口（normal）</span> <span class="flag g">官方</span></td>
+      <td>Sales B5、Commerce B3、Admin B1（S4 工作台场景）</td>
+      <td>企微「工作台」应用图标 → 全屏 H5（与侧边栏同一套页面，无群上下文头）</td>
+      <td>工作台入口为 normal entry（无群/客户上下文）——安全降级视图：只做待办聚合与跳转，不做敏感操作（07 §6.2）</td>
+      <td>管理后台勾选工作台可见；H5 内 getContext=normal 时隐藏群上下文头、禁用需上下文的操作</td>
+      <td>已有：<span class="cls">.wc-page-header .wc-approval .wc-sec-title</span>；准备增加：normal 模式上下文守卫（前端守卫 + 后端 BFF 校验）</td>
+      <td>工作台打开应用 → 验证无群上下文头、待办聚合与跳转正常、敏感操作被拦截</td>
+    </tr>
+    <tr>
+      <td><span class="n">T4</span></td><td><span class="flag g">C1/C2/C3/C4</span></td><td><span class="tech">群/客户上下文获取（ww.getContext + ww.getCurExternalChat + ww.getCurExternalContact）</span> <span class="flag g">官方</span></td>
+      <td>所有 S1 侧边栏场景的上下文头与数据过滤（Sales B1、Commerce B1、Warehouse B1、Contact B1、Admin B1）</td>
+      <td>群上下文头（群名 + 客户等级徽标）驱动订单/待办数据范围</td>
+      <td>ww.getContext 获取 entry；ww.getCurExternalChat（path/100747，2.8.17+，需客户联系权限）返回 chatId → 服务端映射客户；ww.getCurExternalContact（path/100746）返回客户 ID；仅聊天工具栏入口可调用</td>
+      <td>前端签名后调用 → chatId/externalUserId 传服务端 → 服务端重认证身份与上下文（X-WeCom-Context，不信任前端）→ ReBAC OWNS 过滤数据</td>
+      <td>已有：<span class="cls">.wc-group-ctx .wc-grade</span>；准备增加：wecom-context SDK 封装（jsapi-config 签名 → getContext → 上下文状态注入）</td>
+      <td>分别从单聊/客户群/工作台入口进入，断言 entry 与 chatId 正确；无权限企业账号 → 验证 fail 分支与降级提示</td>
+    </tr>
+    <tr>
+      <td><span class="n">T5</span></td><td><span class="flag g">C1-C4</span></td><td><span class="tech">身份鉴权链（OAuth snsapi_base 静默授权 + 双票据签名 + X-WeCom-Context）</span> <span class="flag g">官方</span></td>
+      <td>全部场景的进入前提（每个 Block 流程图第一步）</td>
+      <td>进入 H5 时静默完成：签名 → 授权 → 服务端重认证（不可感知）</td>
+      <td>ww.register（企业签名 path/94313）+ ww.agentConfig（应用签名）双票据；OAuth2 构造授权链接 scope=snsapi_base 静默；code → 服务端换 userid；服务端签发 X-WeCom-Context 头重认证（07 §6.1：GET /api/v1/wecom/jsapi-config、POST /api/v1/auth/exchange）</td>
+      <td>H5 启动 → 请求 jsapi-config（双签名）→ ww.config/ww.agentConfig → OAuth 静默跳转 → code 换 token → 后续请求带 X-WeCom-Context</td>
+      <td>已有：无（spec 静态页无鉴权）；准备增加：auth 模块（jsapi-config API + exchange API + token 存储与刷新）</td>
+      <td>未登录态进入 → 断言静默授权完成、身份正确；伪造 X-WeCom-Context → 断言服务端拒绝；可见范围外成员 → 403</td>
+    </tr>
+    <tr>
+      <td><span class="n">T6</span></td><td><span class="flag g">C1-C4</span></td><td><span class="tech">应用消息卡片出站（template_card）</span> <span class="flag g">官方</span></td>
+      <td>S3 审批/催办/状态通知：Sales B4、Commerce B2/B3、Warehouse B2、Finance B1-B3、Chairman B1、Admin B2/B3、Contact B2（通知销售）</td>
+      <td>企微聊天窗口内应用消息卡片（审批条/状态卡），点击回调验签</td>
+      <td>服务端应用消息推送（template_card）→ 会话内卡片；点击卡片 → 回调 URL 验签 → 打开 H5 对应详情页（07 §5 出站通道设计）；与 H5 待办 Tab 聚合（CQ-05）互为补充</td>
+      <td>工作流活动（Signal 触发）→ Notifier 服务 → template_card 推送 → 用户点击 → 深链跳转 H5 对应卡片</td>
+      <td>已有：<span class="cls">.wc-approval .wc-tag(橙) .pc-appr</span>；准备增加：出站通知服务 + 回调验签中间件 + 深链路由（card://preorder/{id}）</td>
+      <td>触发工作流活动 → 断言卡片到达正确成员会话；点击卡片 → 断言验签通过并跳转正确详情；篡改回调签名 → 拒绝</td>
+    </tr>
+    <tr>
+      <td><span class="n">T7</span></td><td><span class="flag g">C1-C4</span></td><td><span class="tech">JS-SDK 媒体能力（ww.chooseImage / ww.uploadImage）</span> <span class="flag g">官方</span></td>
+      <td>凭证上传：Warehouse B3（回单 ≤9 张）、Contact B2（签收凭证）、Sales B1（上传签收/回单凭证）</td>
+      <td>详情页凭证区：选择图片（拍照/相册）→ 逐张上传进度条 → 凭证列表追加「已登记」</td>
+      <td>官方图像模块（选择图片 path/100520、上传图片 path/100522、预览 100521、下载 100523、获取本地图片 100524）；凭证只追加（CQ-15）+ 409 重复版本幂等</td>
+      <td>H5 内 ww.chooseImage 选图（count≤9）→ ww.uploadImage 拿 media_id → 服务端 append_evidence（版本递增）→ 列表追加缩略图</td>
+      <td>已有：<span class="cls">.wc-tip .wc-tl-*</span>；准备增加：凭证上传组件（选图 → 进度条 → 版本列表）+ media 上传 API</td>
+      <td>真机拍照/相册选 9 张上传 → 断言逐张进度与登记；重复提交同版本 → 断言 409 toast；无签名调用 → 断言 fail 分支</td>
+    </tr>
+    <tr>
+      <td><span class="n">T8</span></td><td><span class="flag g">C1-C4</span></td><td><span class="tech">H5 表单交互（原生表单 + 步骤指示器 + 校验）</span> <span class="flag b">前端</span></td>
+      <td>数据录入类：Sales B2（下单 5 步表单）、Warehouse B1（发货数量）、Admin B2（委派下拉）/B3（代办授权）、Sales B3（修改数量）</td>
+      <td>全屏 H5 分步表单 / 卡片内嵌表单 / 下拉选择</td>
+      <td>原生 HTML 表单即可（产品稿 36px 高 input/select、focus 绿边、step-indicator）；金额额度提示「本次金额 ¥16,000，在额度内」；超发红色校验（CQ-07 守恒 UI 化）</td>
+      <td>纯前端组件：步骤条 + 表单卡 + 前端校验（额度/超发即时反馈）→ 提交服务端（409 幂等保护）</td>
+      <td>已有：<span class="cls">.wc-steps .wc-form-row .wc-risk .wc-tip .wc-success</span>；准备增加：表单校验规则库（额度/守恒/必填）</td>
+      <td>表单走查：超发输入 → 断言红色拦截；额度超限 → 断言提示；提交重复点击 → 断言 409 幂等</td>
+    </tr>
+    <tr>
+      <td><span class="n">T9</span></td><td><span class="flag g">C1-C4</span></td><td><span class="tech">审批卡 / 自动下单卡 / 详情卡 / 时间线 UI 组件</span> <span class="flag b">前端（已有）</span></td>
+      <td>所有审批/状态呈现：Sales B3/B4、Commerce B2/B3、Warehouse B2、Finance B1-B3、Chairman B1、Admin B2/B3</td>
+      <td>待办 Tab 审批条列表 / 自动下单三按钮卡 / 订单详情卡（od-kv）/ 履约时间线</td>
+      <td>纯 CSS 组件已全部存在（产品稿组件名在 wecom-tokens.css 逐一命中）：approval-item、preorder-card、po-origin/po-actions、order-detail-card、order-success、时间线 wc-tl-*</td>
+      <td>直接复用现有组件类渲染数据；状态映射（待审价/待到账/备货中/终审中…）+ 信号结果反馈（成功态/409/403）</td>
+      <td>已有：<span class="cls">.wc-approval .wc-preorder .wc-po-* .wc-detail .wc-success .wc-tl-* .pc-appr .pc-tag(.b/.g/.o)</span></td>
+      <td>组件快照测试（每个状态渲染正确）；点击分流 → 断言跳转目标；409/403 错误态断言</td>
+    </tr>
+    <tr>
+      <td><span class="n">T10</span></td><td><span class="flag g">—</span></td><td><span class="tech">mermaid 渲染（用例图/流程图）</span> <span class="flag b">前端库</span> <span class="flag y">CDN 注意</span></td>
+      <td>spec 文档页自身（非运行系统）：全部 7 份 spec 的用例图 + 流程图</td>
+      <td>文档内 mermaid 图（flowchart LR/TD + 主题变量与 spec 页一致）</td>
+      <td>mermaid@10.9.1 前端库，webview/浏览器内可渲染；生产文档需本地打包 mermaid.min.js（国内 CDN 可达性风险）</td>
+      <td>spec 页 <code>&lt;script&gt;</code> 引入 CDN + mermaid.initialize（主题变量 primaryColor #1B365D 等）；生产化改为自托管</td>
+      <td>已有：spec 页面 <span class="cls">pre.mermaid</span> 块 + 初始化脚本；准备增加：离线打包 mermaid.min.js</td>
+      <td>浏览器打开 spec 页 → 断言全部图渲染无报错；断网 → 断言页面其余内容不受影响</td>
+    </tr>
+    <tr>
+      <td><span class="n">T11</span></td><td><span class="flag g">C1-C4</span></td><td><span class="tech">设计 token 与响应式（wecom-tokens.css / wc-pc 四栏壳）</span> <span class="flag b">前端（已有）</span></td>
+      <td>全部角色全部场景的视觉基座</td>
+      <td>移动端浅色（#F4F5F7/#07C160/#1F2329）+ PC 暗色（#202124）双主题</td>
+      <td>21 个 CSS 变量 + 41 个 wc-* 组件类 + .wc-pc 四栏 grid（52/210/1fr/250）——产品稿 token 已完整落地</td>
+      <td>引用 wecom-tokens.css；运行系统 H5 复用同一 token 体系保证与 spec 一致</td>
+      <td>已有：<span class="cls">:root 变量（--wc-brand #07C160 等） .wc-* 组件 .wc-pc 壳</span></td>
+      <td>视觉走查（对照产品稿截图）；窄屏/宽屏响应式断言（四栏→单栏折叠）</td>
+    </tr>
+    <tr>
+      <td><span class="n">T12</span></td><td><span class="flag g">C1-C4</span></td><td><span class="tech">数据层：虚拟演示 → 真实 API + SpiceDB 鉴权投影</span> <span class="flag b">后端（规划）</span></td>
+      <td>全部场景的数据来源与权限边界（CQ-03 剥价 / CQ-05 待办 / CQ-07 守恒 / CQ-09 开票 / CQ-10 异常 / CQ-13 委派 / CQ-15 凭证）</td>
+      <td>spec 静态卡片 → 真实接口（GET /api/v1/orders/{id}、/api/v1/todos、POST /api/v1/orders、ship-action 等，07 §6 已定义）</td>
+      <td>BFF 按角色投影字段（剥价/剥备注）；SpiceDB ReBAC（OWNS/DELEGATED_TO caveat expiry_ok/tenant→ops 等）服务端强制；幂等键（409）+ 403 失效拒绝</td>
+      <td>前端接真实 API → BFF 投影 → SpiceDB 鉴权 → 信号驱动工作流闸门；虚拟演示数据（长安仁恒/广西天华/膨润土 AB-3）作为 mock 层保留</td>
+      <td>已有：无（spec 静态数据）；准备增加：BFF 投影层（CQ-03）、SpiceDB schema.zed 已设计（07 §4.5）、API 客户端模块</td>
+      <td>角色×数据断言：仓管接口响应无价格字段；到期代办调用 → 403；重复提交 → 409；mock/真实数据切换开关</td>
+    </tr>
+    <tr>
+      <td><span class="n">T13</span></td><td><span class="flag g">C2</span></td><td><span class="tech">会话内容存档 → 群消息捕捉 → AI 自动下单（S2）</span> <span class="flag y">条件可行</span></td>
+      <td>Sales B3（自动下单确认卡的数据来源：客户群内一句话 → 自动下单候选）</td>
+      <td>「待办」Tab 自动下单确认卡（po-origin 引用群内原话 + AI 识别标记）</td>
+      <td>依赖企微「会话内容存档」官方接口（企业认证 + 付费开通 + 员工知情同意）；AI 意图识别 spec 标注「⛔暂缓」；半自动降级路径 = 人工录入/确认不受影响（07 §2 决策门三分法）</td>
+      <td>存档回调 → 消息解析 → AI 提取（产品/数量/金额/客户）→ 自动下单候选（DRAFT-*）→ 销售确认 → 幂等键派生正式订单</td>
+      <td>已有：<span class="cls">.wc-preorder .wc-po-origin</span>（确认卡 UI 已就绪）；准备增加：存档接收服务 + AI 意图解析模块（暂缓）+ 自动下单存储</td>
+      <td>条件具备后：构造存档消息 → 断言自动下单候选生成与字段提取准确率；未开通存档 → 断言降级路径可用</td>
+    </tr>
+  </table></div>
+
+  <!-- ================================================================ -->
+  <!-- ========================== PART C ============================= -->
+  <!-- ================================================================ -->
+  <h2 id="partD"><span class="no">PART D ·</span> 技术实施层面的主要细节分析</h2>
+
+  <div class="sec-box">
+    <span class="sno">D1</span>
+    <h3>身份鉴权与可见范围</h3>
+    <p>运行系统进入 H5 的统一鉴权链（官方能力，07 §6.1 设计一致）：</p>
+    <div class="flow">H5 启动
+ → GET /api/v1/wecom/jsapi-config（服务端算 ww.register 企业签名 + ww.agentConfig 应用签名，双票据）
+ → ww.config + ww.agentConfig（前端注入）
+ → OAuth2 静默授权（scope=snsapi_base，无感知跳转）
+ → code → POST /api/v1/auth/exchange → 服务端换 userid + 签发会话
+ → 后续请求携带 X-WeCom-Context（服务端重认证身份与上下文，不信任前端传入身份）</div>
+    <ul>
+      <li><strong>可见范围</strong>：管理后台自建应用 → 「可见范围」勾选成员/部门；范围外成员进入 → 官方直接拦截。</li>
+      <li><strong>客户联系权限</strong>：T4 的 ww.getCurExternalChat 需要应用开通「客户联系」功能且用户配置了客户联系（path/100747 使用限制）。</li>
+      <li><strong>多租户/多备案切换</strong>：07 文档核心议题——各企业主体（长安仁恒、智厨…）有独立企微企业、可信域名、应用与 ICP 备案；切换租户只改配置不动核心图谱。</li>
+    </ul>
+  </div>
+
+  <div class="sec-box">
+    <span class="sno">D2</span>
+    <h3>侧边栏应用注册与配置流程（管理后台操作清单）</h3>
+    <ol>
+      <li>企微管理后台 → 应用管理 → 创建自建应用（获取 AgentId / Secret / CorpId）。</li>
+      <li>应用详情 → 「聊天工具栏」：配置 H5 页面 URL（如 <span class="mono">https://app.tenant.cn/wecom/order-assistant</span>）——PC 侧边栏与移动端工具栏自动生效（同一配置，企微 2.8.10+）。</li>
+      <li>应用详情 → 「工作台」勾选展示（S4 入口）。</li>
+      <li>「网页授权及 JS-SDK」：配置可信域名 + 下载校验文件放服务器根目录（域名安全校验）。</li>
+      <li>「客户联系」：开通功能权限（T4 群上下文必需）。</li>
+      <li>「会话内容存档」（S2 可选）：企业认证 + 付费开通 + 员工知情同意流程。</li>
+      <li>发布后：外部联系人会话 → 聊天工具栏 → 验证侧边栏 H5；工作台 → 验证 normal 入口。</li>
+    </ol>
+    <div class="oknote">spec 中"PC 四栏最右栏绿色标注『我们的应用』"即聊天工具栏在 PC 客户端的呈现位置；"移动端工具栏『订单助手』入口"即同一配置在移动端的呈现——两者同源，无额外开发。</div>
+  </div>
+
+  <div class="sec-box">
+    <span class="sno">D3</span>
+    <h3>H5 前端架构（单容器 + 3 Tab + 入口分流）</h3>
+    <ul>
+      <li><strong>单容器</strong>：侧边栏 H5 与工作台共用同一套页面（产品稿行为）——一个 <span class="cls">.wc-aside</span> 容器内 3 Tab（待办/订单/下单），按角色裁剪（销售 3 Tab、商务/仓管/财务/董事长/管理员 2 Tab）。</li>
+      <li><strong>入口分流</strong>：getContext → single_chat_tools（单聊工具栏）/ group_chat_tools（群聊工具栏，显示群上下文头）/ normal（工作台，隐藏上下文头、只读降级）。</li>
+      <li><strong>群上下文头</strong>：<span class="cls">.wc-group-ctx</span>（群名 + 客户等级徽标）仅在 group_chat_tools 渲染，驱动数据范围（该客户订单/待办）。</li>
+      <li><strong>静态 → 动态</strong>：当前 spec 页面为静态 UI 卡片（虚拟演示数据）；运行系统将同一组件树接真实 API，数据驱动渲染。</li>
+      <li><strong>mermaid</strong>：仅用于文档/规约页（用例图/流程图），不进入运行系统 UI；生产文档自托管 mermaid.min.js。</li>
+    </ul>
+  </div>
+
+  <div class="sec-box">
+    <span class="sno">D4</span>
+    <h3>JS-SDK 能力清单与降级策略</h3>
+    <div class="table-wrap"><table>
+      <tr><th>能力</th><th>官方 JSAPI</th><th>本系统用途</th><th>降级策略</th></tr>
+      <tr><td>图像选择/上传</td><td>ww.chooseImage / ww.uploadImage（path/100520/100522）</td><td>回单/签收凭证上传（Warehouse B3、Contact B2、Sales B1）</td><td>签名失败 → 回退 <span class="cls">input[type=file]</span> 原生上传（H5 通用）</td></tr>
+      <tr><td>群/客户上下文</td><td>ww.getContext / ww.getCurExternalChat / ww.getCurExternalContact（100747/100746）</td><td>群上下文头 + 数据范围（T4）</td><td>无权限或非工具栏入口 → 降级为 normal 模式（无上下文）</td></tr>
+      <tr><td>扫码/定位/分享</td><td>ww.scanQRCode（90492）/ 定位（100577）/ 分享到会话（100749）</td><td>规划中（扫码验单、定位仓点）</td><td>同 JS-SDK fail 分支处理，提供 H5 替代</td></tr>
+      <tr><td>应用签名</td><td>ww.register + ww.agentConfig（94313）</td><td>全部 JSAPI 前置</td><td>签名接口失败 → 错误页 + 重试（jsapi-config 缓存 7200s）</td></tr>
+    </table></div>
+  </div>
+
+  <div class="sec-box">
+    <span class="sno">D5</span>
+    <h3>PC / 移动端响应式与设计 token</h3>
+    <ul>
+      <li>两套主题已就绪：移动端浅色 token（--wc-*：bg #F4F5F7、brand #07C160、radius 6px）+ PC 暗色 token（--pc-bg #202124、--pc-blue #2F7EDB）。</li>
+      <li>PC 四栏壳 <span class="cls">.wc-pc</span> 为 grid 布局（52px 导航栏 / 210px 会话列表 / 1fr 聊天 / 250px 侧边栏），栏 4 <span class="cls">.aside</span> 即企微侧边栏应用本体。</li>
+      <li>运行系统实际载体：移动端为主（企微手机 App webview 全屏 H5）+ PC 端侧边栏（250px 窄栏）——窄栏需响应式收敛（卡片密度、字段省略）；spec 的 375px 手机 mock 与 250px 侧边栏共用同一组件，靠 token 与容器媒体查询适配。</li>
+    </ul>
+  </div>
+
+  <div class="sec-box">
+    <span class="sno">D6</span>
+    <h3>数据层：虚拟演示 → 真实 API 对接</h3>
+    <ul>
+      <li><strong>现状</strong>：spec 页面全部为静态虚拟数据（企业=长安仁恒、客户=广西天华、商品=膨润土 AB-3、订单 ORD-2026-xxxx、凭证 vN）。</li>
+      <li><strong>目标 API 面</strong>（07 §6 已定义）：GET /api/v1/wecom/jsapi-config、POST /api/v1/auth/exchange、GET /api/v1/orders/{id}（BFF 投影）、GET /api/v1/todos（CQ-05）、POST /api/v1/orders（幂等）、ship-action、审批/确认信号端点、凭证 append_evidence。</li>
+      <li><strong>权限强制</strong>：BFF 字段投影（CQ-03 剥价/剥备注）为第一道闸；SpiceDB ReBAC（schema.zed，07 §4.5）为第二道闸（OWNS、tenant→*、DELEGATED_TO + expiry_ok caveat）；幂等键（409）与失效拒绝（403）服务端统一。</li>
+      <li><strong>迁移策略</strong>：保留虚拟数据为 mock 层（开发/演示），环境变量切换真实 API。</li>
+    </ul>
+  </div>
+
+  <div class="sec-box">
+    <span class="sno">D7</span>
+    <h3>测试策略</h3>
+    <ul>
+      <li><strong>企微开发者工具</strong>：调试台可注入签名/入口参数（entry、chatId），模拟工具栏/工作台入口；用于 T1-T5 的入口分流与上下文断言。</li>
+      <li><strong>测试企业 + 真机</strong>：外部联系人会话（单聊/客户群）验证侧边栏与工具栏；工作台验证 normal 入口；拍照/相册上传真机走查（T7）。</li>
+      <li><strong>权限矩阵测试</strong>：7 角色 × S1-S4 场景可达性矩阵（07 §1）逐一断言；仓管/客户联系人接口响应不含价格字段；到期代办 403；重复提交 409。</li>
+      <li><strong>组件层</strong>：现有 spec 静态页即视觉基线（快照对照）；信号成功态/409/403 三态渲染断言。</li>
+      <li><strong>文档层</strong>：mermaid 渲染回归（打开无报错）；CDN 失效时页面降级可用。</li>
+    </ul>
+  </div>
+
+  <div class="sec-box">
+    <span class="sno">D8</span>
+    <h3>通道适配层（C1-C4 路由 / 降级 / 身份映射）</h3>
+    <p>运行系统需要在 H5 前端与 BFF 各设一层「通道适配」，让同一套组件在 4 类通道下正确路由与降级：</p>
+    <div class="table-wrap"><table>
+      <tr><th>通道</th><th>入口识别</th><th>身份映射</th><th>上下文注入</th><th>降级规则</th></tr>
+      <tr><td><span class="n">C1</span> 个微↔企微 1对1</td><td>ww.getContext → single_chat_tools</td><td>ww.getCurExternalContact → external_userid → 客户档案</td><td>客户级上下文（无群头，显示客户头）</td><td>无客户联系权限 → 隐藏需上下文操作（normal 化）</td></tr>
+      <tr><td><span class="n">C2</span> 外部客户群 ★</td><td>ww.getContext → group_chat_tools</td><td>ww.getCurExternalChat → chatId → 群-客户映射（服务端）</td><td>群上下文头（.wc-group-ctx：群名 + 客户等级）</td><td>getCurExternalChat fail → 降级 C1 客户级或 normal</td></tr>
+      <tr><td><span class="n">C3</span> 企微↔企微 1对1</td><td>single_chat_tools / 上下游聊天工具栏</td><td>getCurExternalContact 或 获取上下游联系人 ID（open_userid + corpId）→ 企业客户档案</td><td>客户级上下文（跨企业）</td><td>非上下游关系 → 按普通外部联系人处理</td></tr>
+      <tr><td><span class="n">C4</span> 企微↔企微 互联群</td><td>上下游聊天工具栏（path/95709）</td><td>获取上下游互联群 ID（path/100368）→ 群详情 → corpId + open_userid 成员</td><td>互联群上下文头</td><td>未开启互联群功能 → 群 ID 获取失败 → 提示并降级</td></tr>
+      <tr><td><span class="n">C0</span> 纯个微</td><td>—（无企微入口）</td><td>—</td><td>—</td><td>业务前置：引导客户加企微/入群（「联系我」path/93071、群活码），H5 不可达</td></tr>
+    </table></div>
+    <ul>
+      <li><strong>前端适配</strong>：统一 context hook（entry + chatId/externalUserId + 身份），组件按 context 渲染（有群头/无群头/无上下文）。</li>
+      <li><strong>BFF 适配</strong>：X-WeCom-Context 携带通道标识（channel: C1-C4）+ 会话标识（chatId / external_userid / open_userid+corpId），服务端重认证后按通道选择数据范围与投影（客户维度 / 群维度 / 全量）。</li>
+      <li><strong>出站适配</strong>：Notifier 按接收方身份选择推送通道（内部成员 userid → 内部会话卡片；外部联系人 external_userid → 客户联系消息；上下游 open_userid → 上下游消息），接收方不在任何通道 → 仅待办聚合兜底。</li>
+    </ul>
+  </div>
+
+  <div class="sec-box">
+    <span class="sno">D9</span>
+    <h3>风险与未决项</h3>
+    <div class="warn"><strong>R1 · S2 会话内容存档（条件可行）</strong>：需企业认证 + 付费开通 + 员工知情同意（外部联系人同意）；AI 意图识别标注「⛔暂缓」。降级：S1 半自动路径（人工录入/确认）已覆盖，不影响主流程。</div>
+    <div class="warn"><strong>R2 · 外网资源国内可达性</strong>：Google Fonts（Source Serif Pro/Noto Serif SC）国内不可达（回退 Georgia/Songti SC，视觉降级）；jsdelivr CDN（mermaid）可用性不稳。对策：字体与 mermaid 均本地化打包。</div>
+    <div class="warn"><strong>R3 · 侧边栏可见性约束</strong>：聊天工具栏仅外部联系人会话显示（内部群/内部单聊不显示）——业务场景恰为外部客户群，无冲突，但测试时须用外部联系人。</div>
+    <div class="warn"><strong>R4 · 上下文接口权限</strong>：ww.getCurExternalChat 需客户联系权限 + 应用签名校验；未开通时 getCurExternalChat 返回 fail（no permission），必须走 normal 降级。</div>
+    <div class="oknote"><strong>已消除的疑虑</strong>：聊天侧边栏 H5、移动端工具栏入口、工作台 H5、template_card 出站、JS-SDK 媒体、双票据 OAuth——全部官方能力（path/91789、100746、100747、100748、100520-100524），spec 中的呈现形态与官方能力一一对应。</div>
+  </div>
+
+  <!-- ============ 架构图 ============ -->
+  <h2 id="arch"><span class="no">ARCH ·</span> 技术架构图（企微入口 → H5 → 服务端）</h2>
+  <pre class="mermaid">
+flowchart TB
+    subgraph WECOM["企业微信客户端"]
+        A1["聊天工具栏·侧边栏 H5<br/>(PC 四栏右栏 / 移动端工具栏)"]
+        A2["工作台应用<br/>(normal 入口)"]
+        A3["聊天窗口应用消息卡片<br/>(template_card 出站)"]
+    end
+    subgraph H5["订单助手 H5（单容器 · 3 Tab · 角色裁剪）"]
+        B1["ww.register + ww.agentConfig 双票据"]
+        B2["ww.getContext → entry 分流<br/>single / group / normal"]
+        B3["ww.getCurExternalChat → chatId<br/>群上下文头 · 数据范围"]
+        B4["待办 / 订单 / 下单<br/>审批条 · 自动下单卡 · 表单 · 凭证上传"]
+    end
+    subgraph SVC["服务端"]
+        C1["OAuth snsapi_base 静默授权<br/>/api/v1/auth/exchange"]
+        C2["X-WeCom-Context 重认证<br/>（不信任前端身份）"]
+        C3["BFF 字段投影（CQ-03 剥价/剥备注）"]
+        C4["SpiceDB ReBAC<br/>OWNS · DELEGATED_TO+expiry_ok · tenant→*"]
+        C5["业务信号 → 工作流闸门<br/>幂等 409 · 失效 403"]
+        C6["Notifier → template_card 出站"]
+    end
+    A1 --> B1 --> B2 --> B3 --> B4
+    A2 --> B1
+    A3 -. 点击卡片深链跳转 .-> B4
+    B4 --> C2 --> C3 --> C4 --> C5
+    C1 --> C2
+    C5 --> C6 -.-> A3
+  </pre>
+  <figcaption>图 2：企微订单助手技术架构 —— 入口分流 → 双票据鉴权 → 上下文获取 → 组件渲染 → 服务端重认证 → 投影鉴权 → 信号推进 → 出站通知闭环</figcaption>
+
+  <!-- ============ PART E：参考资料 ============ -->
+  <h2 id="partE"><span class="no">PART E ·</span> 参考资料 —— MoChat 企微配置手册汇总</h2>
+  <p class="desc">以下内容汇总自 MoChat 开源项目的企微配置手册（<span class="mono">mochat.wiki/wework/</span>），为企微后台配置的操作级参考：授权绑定、密钥获取、侧边栏应用、开放平台、养号防封与企微/个微对比。每条均标注来源链接；内容为社区实操经验，与官方文档配合使用（官方能力以 <span class="mono">developer.work.weixin.qq.com</span> 为准）。</p>
+
+  <div class="sec-box">
+    <span class="sno">E1</span>
+    <h3>如何授权绑定企业微信（6 步）</h3>
+    <p class="ep">来源：<a href="https://mochat.wiki/wework/how-to-authorize.html" target="_blank">mochat.wiki/wework/how-to-authorize.html</a></p>
+    <div class="step-flow">
+      <div class="sf-item"><div class="t">① 添加企业微信号</div><div class="d">本系统【系统设置】→【授权管理】→【添加企业微信号】，填写 CorpId 与 Secret（获取方式见 E2）。</div></div>
+      <div class="sf-item"><div class="t">② 通讯录同步 · 设置接收事件服务器</div><div class="d">企微后台【管理工具】→【通讯录同步】→ 设置接收事件服务器：填入本系统提供的 URL / Token / EncodingAESKey。<strong>注意：不要点企微后台的「随机获取」按钮（无效）</strong>，须从本系统复制。</div></div>
+      <div class="sf-item"><div class="t">③ 外部联系人事件服务器</div><div class="d">企微后台【客户联系人】→【客户】→ API → 设置接收事件服务器：同样填入本系统的 URL / Token / EncodingAESKey（外部联系人专用，与通讯录的密钥不同）。</div></div>
+      <div class="sf-item"><div class="t">④ 外部沟通管理 · 成员使用权限</div><div class="d">企微后台【我的企业】→【外部沟通管理】→ 成员使用权限 → 将对应成员加入。</div></div>
+      <div class="sf-item"><div class="t">⑤ 客户联系 · 权限配置</div><div class="d">企微后台【客户联系】→【权限配置】→ 修改「客户联系和客户群」使用范围 → 将对应成员加入。</div></div>
+    </div>
+    <div class="oknote"><strong>与本项目的关系</strong>：步骤②③的回调 URL/Token/AESKey 即 <span class="mono">docs/07-wecom-integration.html</span> 中「接收消息服务器」（回调 URL + token + encoding_aes_key）的配置来源；步骤④⑤即「客户联系」权限前置（聊天工具栏可见性前提，与官方文档 path/91789 一致）。</div>
+  </div>
+
+  <div class="sec-box">
+    <span class="sno">E2</span>
+    <h3>如何获得 CorpId 和 Secret（密钥来源对照）</h3>
+    <p class="ep">来源：<a href="https://mochat.wiki/wework/get-corpid-secret.html" target="_blank">mochat.wiki/wework/get-corpid-secret.html</a></p>
+    <div class="table-wrap"><table>
+      <tr><th>参数</th><th>获取位置（企微管理后台 work.weixin.qq.com/wework_admin）</th><th>用途</th></tr>
+      <tr><td class="n">CorpID</td><td>【我的企业】→ 企业ID</td><td>企业身份标识（所有 API 调用前提）</td></tr>
+      <tr><td class="n">通讯录管理 Secret</td><td>【管理工具】→【通讯录同步】</td><td>通讯录同步、成员/部门 API</td></tr>
+      <tr><td class="n">外部联系人 Secret</td><td>【客户联系】→【客户】→ 点开 API 小按钮</td><td>客户联系 API（外部联系人/客户群/群发）</td></tr>
+      <tr><td class="n">AgentId / 应用 Secret</td><td>【应用管理】→【应用】→ 自建应用详情（见 E3）</td><td>应用级 API 与消息推送</td></tr>
+    </table></div>
+    <div class="warn"><strong>密钥安全</strong>：CorpId/Secret 属最高敏感级凭证，须经 KMS/环境变量注入，不入代码库（与 07 文档 L674 一致）。</div>
+  </div>
+
+  <div class="sec-box">
+    <span class="sno">E3</span>
+    <h3>如何添加侧边栏应用（6 步）</h3>
+    <p class="ep">来源：<a href="https://mochat.wiki/wework/add-sidebar-app.html" target="_blank">mochat.wiki/wework/add-sidebar-app.html</a></p>
+    <div class="step-flow">
+      <div class="sf-item"><div class="t">① 创建自建应用</div><div class="d">企微后台【应用管理】→【应用】→ 创建应用。</div></div>
+      <div class="sf-item"><div class="t">② 配置应用（AgentId / Secret）</div><div class="d">在自建应用详情获取 AgentId 与 Secret，填入本系统【企微管理】→【聊天侧边栏】对应位置。</div></div>
+      <div class="sf-item"><div class="t">③ 设置可信域名</div><div class="d">应用详情 →【网页授权及 JS-SDK】→ 配置可信域名（公网 HTTPS + 备案，见 07 L631）。</div></div>
+      <div class="sf-item"><div class="t">④ 客户联系 API 可调用应用</div><div class="d">企微后台【客户联系】→【客户】→ API → 配置可调用应用。</div></div>
+      <div class="sf-item"><div class="t">⑤ 配置到聊天工具栏</div><div class="d">应用详情 →【配置到聊天工具栏】→ 设置访问页面：<span class="mono">https://h5.example.com?agentId=1&pageFlag=customer</span>（URL 带 agentId + pageFlag 参数）。</div></div>
+      <div class="sf-item"><div class="t">⑥ 客户端验证</div><div class="d">企微客户端 → 选择客户 → 右侧查看聊天侧边栏。若提示「此员工未关联子账户」，需将后台账号与企微员工绑定。</div></div>
+    </div>
+    <div class="oknote"><strong>与本项目的关系</strong>：步骤⑤的「URL 带 agentId+pageFlag」模式即本项目侧边栏 URL 生成器的参数化方式（应用主页 vs 自定义 URL 双类型，见 <span class="mono">企微自定义应用的形式_v2_调研.html P2</span>）；步骤⑥的账号绑定对应 07 文档「账号一对一绑定」。</div>
+  </div>
+
+  <div class="sec-box">
+    <span class="sno">E4</span>
+    <h3>如何配置微信开放平台（第三方平台）</h3>
+    <p class="ep">来源：<a href="https://mochat.wiki/wework/open-platform.html" target="_blank">mochat.wiki/wework/open-platform.html</a></p>
+    <div class="step-flow">
+      <div class="sf-item"><div class="t">① 登录微信开放平台</div><div class="d">open.weixin.qq.com → 账号密码登录。</div></div>
+      <div class="sf-item"><div class="t">② 创建第三方平台</div><div class="d">菜单【第三方平台】→【创建第三方平台】→ 填基本信息；权限建议勾选公众号相关全部权限。</div></div>
+      <div class="sf-item"><div class="t">③ 填写开发资料</div><div class="d">授权事件接收 URL + 消息与事件接收 URL（<span class="mono">https://api.yourdomain.com/.../authEventCallback</span> 等）；生成消息校验 Token 与加解密 Key（43 位 base64）。</div></div>
+      <div class="sf-item"><div class="t">④ 提交 + 全网发布</div><div class="d">提交成功后回列表 → 详情 → 全网发布。发布未通过时清除 <span class="mono">mc:easywechat.kernel.access_token.*</span> 缓存重试。</div></div>
+      <div class="sf-item"><div class="t">⑤ 获取配置写入 .env</div><div class="d">详情页获取 APPID / APPSECRET / Token / AESKey → 填入 <span class="mono">.env</span>（WECHAT_OPEN_PLATFORM_*）→ 重启服务。</div></div>
+    </div>
+    <div class="warn"><strong>component_verify_ticket 排错</strong>：该 ticket 只能由微信服务器每 10 分钟推送一次、无法主动获取；报错 <span class="mono">component_verify_ticket does not exist in cache</span> 时，可调用 <span class="mono">api_start_push_ticket</span> 接口触发推送，或等待 10 分钟再测试（官方排错指南：developers.weixin.qq.com/doc/oplatform/Third-party_Platforms/2.0/troubleshooting/component_verify_ticket_troubleshooting.html）。</div>
+    <div class="oknote"><strong>与本项目的关系</strong>：开放平台第三方平台用于公众号/小程序身份互通（UnionID 打通流量池）；本项目 S1-S4 走自建应用形态，<strong>暂不需要开放平台</strong>——仅当要打通公众号/小程序时启用。</div>
+  </div>
+
+  <div class="sec-box">
+    <span class="sno">E5</span>
+    <h3>养号、防封、加人机制（实操经验）</h3>
+    <p class="ep">来源：<a href="https://mochat.wiki/wework/use-faq.html" target="_blank">mochat.wiki/wework/use-faq.html</a></p>
+    <div class="table-wrap"><table>
+      <tr><th>机制</th><th>数值/规则</th><th>本项目提示</th></tr>
+      <tr><td class="n">好友总量</td><td>新号 5000，申请扩容后可达 2w</td><td>集团客户规模小，无压力</td></tr>
+      <tr><td class="n">主动添加</td><td>新号 ≤60/日，高权重老号 ≤100/日；二维码加人通过率最高，手机号搜索效率最低（走服务通知）</td><td>销售加客户用「联系我」活码</td></tr>
+      <tr><td class="n">被动添加</td><td>新号 ~400/日，高权重老号 ~1200/日；限流时暂停 24h</td><td>活码单号可达 4000+（官方「联系我」）</td></tr>
+      <tr><td class="n">封号三级</td><td>初级=限流降权（24h/3×24h/7×24h 自动恢复）；中级=封员工号（可申诉）；高级=封企业主体（需执照+法人身份证+盖章授权书申诉）</td><td>严禁刷单/骚扰/灰黑产</td></tr>
+      <tr><td class="n">养号要素</td><td>实名认证（企业+个人）；高权重个微注册；日常活跃（功能使用/客户沟通/内部聊天）；开通企业微信支付</td><td>上线前先养号 30 天</td></tr>
+      <tr><td class="n">认证差异</td><td>未认证：员工仅 200 人/客户 1000 人/群 2000 人，对外收款与直播不可用；认证后 2000 员工号</td><td><strong>必须认证</strong>（本项目依赖客户联系）</td></tr>
+    </table></div>
+  </div>
+
+  <div class="sec-box">
+    <span class="sno">E6</span>
+    <h3>企业微信 vs 个人微信（选型对照）</h3>
+    <p class="ep">来源：<a href="https://mochat.wiki/wework/weixin-compare-wework.html" target="_blank">mochat.wiki/wework/weixin-compare-wework.html</a></p>
+    <div class="table-wrap"><table>
+      <tr><th>维度</th><th>企业微信</th><th>个人微信</th><th>对 B2B 履约的意义</th></tr>
+      <tr><td class="n">品牌背书</td><td>自带企业品牌名称</td><td>客户自行备注</td><td>客户信任</td></tr>
+      <tr><td class="n">客户资源归属</td><td><strong>属于公司</strong>，支持离职/在职一键分配</td><td>属于个人，离职流失</td><td>客户资产保全（对应 07 继承场景）</td></tr>
+      <tr><td class="n">好友上限</td><td>2w（超 5000 扩容）</td><td>5040</td><td>规模无压力</td></tr>
+      <tr><td class="n">单日主动添加</td><td>60-300，限 12-24h</td><td>30-40，限 24h</td><td>触达效率</td></tr>
+      <tr><td class="n">单日被动添加</td><td>500-5000，限 12-24h</td><td>~150</td><td>活码引流</td></tr>
+      <tr><td class="n">朋友圈</td><td>每天 1 条（可标签分组）；单向互动</td><td>不限条数；双向互动</td><td>营销弱于个微（本项目无营销）</td></tr>
+      <tr><td class="n">社群管理</td><td><strong>原生支持</strong>：欢迎语/关键词回复/去重/防骚扰/活码（1 码 5 群）/禁言（内部群）</td><td>需第三方工具</td><td>供应协同群运营</td></tr>
+      <tr><td class="n">数据统计</td><td><strong>客户/群聊多维统计</strong>（添加/流失/聊天/群成员）</td><td>不支持</td><td>运营分析</td></tr>
+      <tr><td class="n">开放 API</td><td><strong>完整开放</strong>（UnionID 打通公众号/小程序/H5 流量池）</td><td>无官方 API</td><td>本项目 S1-S4 全部依赖</td></tr>
+    </table></div>
+    <div class="oknote"><strong>结论</strong>：B2B 订单履约场景必须选企微——客户资产归属、开放 API、社群管理三项是本项目的硬前提，个人微信均不满足。</div>
+  </div>
+
+  <footer class="colophon">
+    <span><a href="index.html">← Role Specs</a></span>
+    <span>WeCom Tech Survey · 基于 11 份 docs/ui 文档 + 企微官方文档验证 + MoChat 配置手册</span>
+    <span>Part A 4 通道 · Part B 21 场景 · Part C 13 技术 · Part D 9 小节 · Part E 6 参考</span>
+  </footer>
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad:true, theme:'base',
+    themeVariables:{
+      fontFamily:"'Noto Serif SC','Source Serif Pro',serif",
+      primaryColor:'#efeee5', primaryBorderColor:'#1B365D', primaryTextColor:'#1f1d18',
+      lineColor:'#1B365D', secondaryColor:'#f5f4ed', tertiaryColor:'#f5f4ed',
+      edgeLabelBackground:'#f5f4ed', clusterBkg:'#f5f4ed', clusterBorder:'#d4d1c5'
+    },
+    flowchart:{curve:'basis'}
+  });
+</script>
+</body>
+</html>

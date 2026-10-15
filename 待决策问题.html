@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>待决策问题 · b2b_pilot_v3 · v0.1 发布 / 影子轨 / v0.2 路线</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+SC:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:#f5f4ed; --paper2:#efeee5; --ink:#1f1d18; --ink2:#6b665b;
+    --ink3:#3a382f; --blue:#1B365D; --rule:#d4d1c5; --amber:#8a6d3b; --red:#9b3b3b; --green:#3b6d3b;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif; line-height:1.6;}
+  .wrap{max-width:1020px; margin:0 auto; padding:48px 40px 80px;}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;}
+  .folio{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--rule); padding-bottom:10px;
+    font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink2); flex-wrap:wrap; gap:8px;}
+  .folio a{color:var(--ink2); border:none;}
+  .folio a:hover{color:var(--blue);}
+  .tag{display:inline-block; padding:3px 10px; font-size:11px; letter-spacing:.16em; background:var(--paper2); color:var(--blue);}
+  .tag.red{background:#f3e3e3; color:var(--red);}
+  .tag.amber{background:#f3ecdc; color:var(--amber);}
+  .tag.green{background:#e3f0e3; color:var(--green);}
+  .kicker{display:flex; align-items:baseline; gap:12px; margin-top:48px; flex-wrap:wrap;}
+  h1{font-size:clamp(30px,4.6vw,46px); line-height:1.14; font-weight:500; margin-top:14px; letter-spacing:-.01em;}
+  .lede{margin-top:18px; font-size:16.5px; line-height:1.7; color:var(--ink3); max-width:800px;}
+  h2{font-size:23px; font-weight:600; margin:52px 0 14px; color:var(--blue); display:flex; align-items:baseline; gap:12px; border-top:1px solid var(--rule); padding-top:26px;}
+  h2 .no{font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.12em;}
+  h3{font-size:17.5px; font-weight:600; margin:34px 0 10px; color:var(--ink); border-bottom:1px solid var(--rule); padding-bottom:6px;}
+  h3 .no{color:var(--blue); font-family:'IBM Plex Mono',monospace; font-size:12px; margin-right:8px;}
+  p{margin:10px 0; color:var(--ink3);}
+  ul,ol{margin:10px 0 10px 26px; color:var(--ink3);}
+  li{margin:5px 0;}
+  a{color:var(--blue); text-decoration:none; border-bottom:1px solid var(--rule);}
+  a:hover{border-bottom-color:var(--blue);}
+  blockquote{border-left:2px solid var(--blue); padding:10px 18px; margin:16px 0; background:var(--paper2); font-style:italic;}
+  table{width:100%; border-collapse:collapse; font-size:13px;}
+  .table-wrap{overflow-x:auto; margin:16px 0 24px; border:1px solid var(--rule);}
+  .table-wrap table{margin:0;}
+  th{background:var(--paper2); color:var(--blue); text-align:left; font-weight:600; padding:9px 12px; border-bottom:1.5px solid var(--blue); font-size:12px; white-space:nowrap;}
+  td{padding:8px 12px; border-bottom:1px solid var(--rule); vertical-align:top; color:var(--ink3);}
+  tr:nth-child(even) td{background:#faf9f3;}
+  tr:hover td{background:#f0ede0;}
+  td code{font-size:11.5px;}
+  code{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace; font-size:13px; background:var(--paper2); padding:1px 5px;}
+  .meta{font-size:12.5px; margin:10px 0 4px;}
+  .meta table td:first-child{white-space:nowrap; color:var(--blue); font-weight:600; width:110px;}
+  .langs{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:12px 0 8px;}
+  .lang{background:var(--paper2); border:1px solid var(--rule); border-left:3px solid var(--blue); padding:12px 14px; font-size:13px;}
+  .lang.scene{border-left-color:var(--green);}
+  .lang.biz{border-left-color:var(--amber);}
+  .lang.tech{border-left-color:var(--blue);}
+  .lang .tt{display:block; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.18em; margin-bottom:6px; color:var(--blue);}
+  .lang.scene .tt{color:var(--green);}
+  .lang.biz .tt{color:var(--amber);}
+  .lang p{margin:4px 0; font-size:13px;}
+  .lang code{font-size:11.5px;}
+  .opts{background:#fff; border:1px dashed var(--rule); padding:10px 14px; margin:8px 0 18px; font-size:12.5px; color:var(--ink3);}
+  .opts .tt{font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.18em; color:var(--blue); display:block; margin-bottom:4px;}
+  .opts ul{margin:4px 0 4px 20px;}
+  .opts li{margin:3px 0;}
+  footer.colophon{margin-top:56px; padding-top:14px; border-top:1px solid var(--rule); display:flex; justify-content:space-between;
+    font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink2); flex-wrap:wrap; gap:8px;}
+  footer.colophon a{color:var(--ink2); border:none;}
+  footer.colophon a:hover{color:var(--blue);}
+  .toc{border:1px solid var(--rule); background:var(--paper2); padding:18px 24px; margin:26px 0;}
+  .toc .tt{font-size:11px; letter-spacing:.2em; color:var(--blue); margin-bottom:8px;}
+  .toc a{display:block; padding:3px 0; color:var(--ink3); border:none;}
+  .toc a:hover{color:var(--blue);}
+  .toc .mono{font-size:12px; color:var(--blue); margin-right:8px;}
+  .note{background:#f3ecdc; border:1px solid #d8c9a3; padding:12px 16px; margin:16px 0; font-size:13.5px; color:var(--ink3);}
+  .note .tt{font-size:10.5px; letter-spacing:.18em; color:var(--amber); font-family:'IBM Plex Mono',monospace;}
+  @media(max-width:860px){.langs{grid-template-columns:1fr;}}
+  @media(max-width:720px){.wrap{padding:28px 18px 60px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="folio">
+    <span><a href="docs/v0.1/index.html">docs/v0.1</a> · <a href="README.md">README</a></span>
+    <span>待决策问题 · Decision Register</span>
+    <span>v0.1 发布 / 影子轨 / v0.2 路线</span>
+  </header>
+
+  <div class="kicker">
+    <span class="tag">待决策问题登记册</span>
+    <span class="tag">41 项登记在册</span> <span class="tag red">阻塞 v0.1：9（7 已解决 / 1 部分 / 1 未决）</span> <span class="tag amber">影响 v0.1：12（影子方向已拍板）</span> <span class="mono" style="font-size:11px; letter-spacing:.18em; color:var(--ink2);">20 项不影响 v0.1 · 2026-08-20 · 7f4ec57</span>
+    <span class="mono" style="font-size:11px; letter-spacing:.18em; color:var(--ink2);">每项按场景语言 · 业务语言 · 技术语言三视角说明</span>
+  </div>
+
+  <h1>待决策问题<br/><span style="font-style:italic; color:var(--blue);">谁来决定 · 卡住什么 · 怎么决</span></h1>
+
+  <p class="lede">把当前项目所有<strong>尚未裁决、但会影响发布或后续版本</strong>的问题汇总在一处。每个问题都用三种语言说明：<strong>场景语言</strong>讲「真实世界里谁在什么时候遇到什么情况」；<strong>业务语言</strong>讲「对流程、钱、责任和人的影响」；<strong>技术语言</strong>讲「落到哪些表、状态迁移、接口、配置与代码」。每项末尾给出候选选项与决策判据。</p>
+
+  <nav class="toc">
+    <div class="tt">CONTENTS · 目录</div>
+    <a href="#g1"><span class="mono">组1</span>v0.1 业务规则与现场确认（D-01..D-12）</a>
+    <a href="#g2"><span class="mono">组2</span>v0.1 发布阻塞与重新评审（R-01..R-10）</a>
+    <a href="#g3"><span class="mono">组3</span>影子全流程预演（SH-01..SH-08）</a>
+    <a href="#g4"><span class="mono">组4</span>v0.2 / v0.3 路线（V2-01..V2-11）</a>
+    <a href="#g5"><span class="mono">附录</span>已冻结/已暂缓、不列为待决策的项</a>
+  </nav>
+
+  <div class="note">
+    <div class="tt">使用约定</div>
+    <strong>状态</strong>：<span class="tag red">未决</span> 无方案或无owner；<span class="tag amber">部分已定</span> 方案已出、缺确认或落档；<span class="tag green">待落档</span> 已口头裁决、只差写入决策记录。<br/><strong>v0.1 发布影响</strong>：<span class="tag red">阻塞 v0.1</span> 不裁决则对应门禁/发布动作无法通过；<span class="tag amber">影响 v0.1</span> 不阻塞主链 GO，但改变范围、配置、证据或影子轨发布物；<span style="color:var(--ink2);">无</span> 只影响后续版本或影子内部流程，对 v0.1 发布不打标。<br/>
+    <strong>时点</strong>：R1 = 测试环境发布 · G2 = 生产 Go/No-Go · R2 = 生产发布 · 第2次/第3次 = 渐进发布计划后续刀。<br/>
+    <strong>2026-08-20 快照</strong>：测试服务器实况已并入（新系统 pilot_v3@85eb85d / 旧系统 tripartite-approval@f3ed1f80（+e9505509/d7dcb649 信息确认豁免））；本仓影子全流程代码已 commit <code>4e53763</code>。与 v0.1 直接相关的 21 项逐项证据见 <a href="待决策问题_v0.1发布相关.html">待决策问题_v0.1发布相关.html</a>（已合并原「-已更新」文件）。<br/>
+    <strong>关闭方式</strong>：每项裁决后必须三回填——回填本文档（状态/结论/日期）、回填对应设计文档、写入 <code>project/decisions/</code> 或发布证据包，不允许「口头定了但文档没动」。
+  </div>
+
+  <!-- ===================== 组1 ===================== -->
+  <h2 id="g1"><span class="no">组1 ·</span> v0.1 业务规则与现场确认（D-01..D-12）</h2>
+  <p>来源：<code>docs/v0.1/02-product.html §4</code>、<code>05-business-flow.html</code>、<code>docs/10-v0.1-release-prep.html</code>。这些问题的答案决定 v0.1 面向虹励的流程细节能否固化。</p>
+
+  <!-- D-01 -->
+  <h3 id="D-01"><span class="no">D-01</span> 无回单开票规则（A5 / P1）</h3>
+  <div class="table-wrap meta"><table>
+    <tr><td>所属</td><td>v0.1 开票流程 CW2（N6 异常）</td><td>建议决策人</td><td>宋主任 / 财务负责人 / 张总，经虹励收集结论</td></tr>
+    <tr><td>阻塞</td><td>无回单开票用例 N-07 只能「标待确认」，无法固化断言</td><td>最迟时点</td><td>v0.1 上线前给出方向；细化规则可随后一版固化</td><td>状态</td><td><span class="tag red">未决</span></td><td>v0.1 发布影响</td><td><span class="mono" style="font-size:11px; color:var(--ink2);">无 · 规则待确认、随版标注；首刀不执行无回单开票</span></td></tr>
+  </table></div>
+  <div class="langs">
+    <div class="lang scene"><span class="tt">场景语言 · SCENE</span>
+      <p>8 月 20 日，财务在待办里看到 ORD-2026-0102：广西天华的货已发 5 天，司机说签收单还没寄回来，销售说客户已经口头确认收货。财务盯着「驳回 / 放行」两个按钮：放行就是无回单开票，但公司到底允不允许？放行之后谁负责追回单？</p>
+    </div>
+    <div class="lang biz"><span class="tt">业务语言 · BUSINESS</span>
+      <p>这是开票环节唯一的「规则本身待确认」项。允许无回单开票会加速回款，但把「发货真实性」的证明责任后移；不允许则资金可能因回单延迟多压约 30 天，需要按利息折算损失金额。文档要求整理「现状—问题—建议」并算这笔账，让宋主任/财务负责人/张总拍板。</p>
+    </div>
+    <div class="lang tech"><span class="tt">技术语言 · TECH</span>
+      <p>流程链已实现：<code>INV_READY_FOR_INVOICE</code> 无回单超 5 天 → <code>INV_RECEIPT_EX_REVIEWING</code>，财务经 <code>receipt-ex-review</code> 信号 APPROVED（可带 <code>DeadlineDays</code> 限时放行）/ REJECTED。决策落点：默认是否允许、限时天数、是否按金额/客户等级分级；决定后固化 N-07 测试断言与配置参数。</p>
+    </div>
+  </div>
+  <div class="opts"><span class="tt">选项与判据</span>
+    <ul>
+      <li>A. 允许无回单开票（配 5/10/N 天补回单时限）——回款快，风险后移；</li>
+      <li>B. 不允许，必须补回单——最保守，压资金；</li>
+      <li>C. 分级：小金额放行、大金额必须回单——需要金额阈值。判据：资金利息账 + 历史坏单率。</li>
+    </ul>
+  </div>
+
+  <!-- D-02 -->
+  <h3 id="D-02"><span class="no">D-02</span> 多单合并开票的业财归属（A4 / P4）</h3>
+  <div class="table-wrap meta"><table>
+    <tr><td>所属</td><td>v0.1 开票流程 CW1（N6 主路径）</td><td>建议决策人</td><td>惊蜇（业财口径）</td></tr>
+    <tr><td>阻塞</td><td>三金额（收款/发货/开票）的核算口径与未开票额度归属</td><td>最迟时点</td><td>v0.1 上线前确认口径；上线后报表按此口径冻结</td><td>状态</td><td><span class="tag red">未决</span></td><td>v0.1 发布影响</td><td><span class="mono" style="font-size:11px; color:var(--ink2);">无 · 首刀不含合并开票执行</span></td></tr>
+  </table></div>
+  <div class="langs">
+    <div class="lang scene"><span class="tt">场景语言 · SCENE</span>
+      <p>客户一笔 10 万元回款打到账上，财务把发票关联了订单 1（3 万）和订单 2（7 万），三天后发现漏了订单 3（1 万），又追加关联。月底对账时会计问：这 10 万到底算哪个客户、哪个销售的收款业绩？未开票额度挂在哪个订单上由谁继续开？</p>
+    </div>
+    <div class="lang biz"><span class="tt">业务语言 · BUSINESS</span>
+      <p>多单合并开票让「一笔款跨多笔订单」成为正式业务，但业财归属（应收账款、销售业绩、开票额度跟随）没定。归属口径错，月底对账和提成都会乱；demo 已标注「业财归属待找惊蜇确认」。</p>
+    </div>
+    <div class="lang tech"><span class="tt">技术语言 · TECH</span>
+      <p>落点：<code>invoice_order_links</code>（发票↔订单多对多、可追加）、<code>invoices</code> 三金额列、<code>GET /orders/{id}/invoice-summary</code> 未开票额度投影。归属规则决定关联表的记账字段语义（按实收逐笔 / 按发票总额分摊 / 业务方指定）与守恒基准校验口径。</p>
+    </div>
+  </div>
+  <div class="opts"><span class="tt">选项与判据</span>
+    <ul>
+      <li>A. 逐订单按实收归属——最精确，财务录入成本高；</li>
+      <li>B. 按发票总额在关联订单间按发货额分摊——规则简单，可能有尾差；</li>
+      <li>C. 业务方指定归属 + 系统只做记录——灵活，依赖人工纪律。判据：财务月底对账的工作量可承受度。</li>
+    </ul>
+  </div>
+
+  <!-- D-03 -->
+  <h3 id="D-03"><span class="no">D-03</span> 发群守门员直发规则表（A3 / P5）</h3>
+  <div class="table-wrap meta"><table>
+    <tr><td>所属</td><td>v0.1 发群守门员 N8（XS1/XS5/CW1 横切）</td><td>建议决策人</td><td>商务 / 销售侧 + 项目 owner</td></tr>
+    <tr><td>阻塞</td><td>0.1 已定「全部强制确认」；不阻塞 0.1，但决定后续放行节奏</td><td>最迟时点</td><td>0.1 上线后一周内出第一版规则表</td><td>状态</td><td><span class="tag amber">部分已定</span></td><td>v0.1 发布影响</td><td><span class="mono" style="font-size:11px; color:var(--ink2);">无 · 0.1 已定全量强制</span></td></tr>
+  </table></div>
+  <div class="langs">
+    <div class="lang scene"><span class="tt">场景语言 · SCENE</span>
+      <p>销售每天要发十几条内容到客户群：订单卡片、物流图片、发票。每发一条都要再点一次守门员确认，销售觉得慢，问：物流图片能不能直接发？发票是不是必须确认？老板说先全部强制、以后再放。</p>
+    </div>
+    <div class="lang biz"><span class="tt">业务语言 · BUSINESS</span>
+      <p>「先收紧后放行」是既定原则，但放行规则表 P5 还没定：哪些内容类型可直发、哪些必须审核，与客户类型/订单状态是否有关。规则表决定销售的沟通效率与误发风险之间的平衡。</p>
+    </div>
+    <div class="lang tech"><span class="tt">技术语言 · TECH</span>
+      <p><code>GatekeeperFSM</code>（Pending → Confirmed/Cancelled）与 <code>GatekeeperContentHash</code> 幂等已实现；规则表未来落为内容类型白名单策略（<code>requires_confirmation</code> 判定），0.1 配置为全量强制。决定后更新 03/05 文档与策略配置测试。</p>
+    </div>
+  </div>
+  <div class="opts"><span class="tt">选项与判据</span>
+    <ul>
+      <li>A. 0.1 后继续全强制，观察两周再放行——最稳；</li>
+      <li>B. 先放行纯状态类卡片（物流进度），金额/发票类保持强制——折中；</li>
+      <li>C. 维持全强制直到 0.2。判据：误发事故率 + 销售效率损失。</li>
+    </ul>
+  </div>
+
+  <!-- D-04 -->
+  <h3 id="D-04"><span class="no">D-04</span> 仓库群升级企微群（A6 / P2）</h3>
+  <div class="table-wrap meta"><table>
+    <tr><td>所属</td><td>v0.1 回单流程 CG3（N7）</td><td>建议决策人</td><td>虹励 + 两个外租仓仓管 + 企微管理员</td></tr>
+    <tr><td>阻塞</td><td>回单凭证机器人自动抓取（N-10 真实验收）</td><td>最迟时点</td><td>越早越好；升级前走手动上传 Tab 备选</td><td>状态</td><td><span class="tag red">未决</span></td><td>v0.1 发布影响</td><td><span class="mono" style="font-size:11px; color:var(--ink2);">无 · 首刀不含回单自动化</span></td></tr>
+  </table></div>
+  <div class="langs">
+    <div class="lang scene"><span class="tt">场景语言 · SCENE</span>
+      <p>司机把签收单拍照发给仓管，仓管转发到微信群。虹励这边希望：仓管直接把回单发到企微仓库群，机器人自动抓图、OCR 识别、匹配订单、归档。现在的问题是：仓库群还是普通微信群，机器人进不去，得先升级。</p>
+    </div>
+    <div class="lang biz"><span class="tt">业务语言 · BUSINESS</span>
+      <p>升级企微群是回单自动化的前置动作，需要虹励补仓库群现状截图、说服两个外租仓配合换群，并确认「司机由仓管联系、虹励与司机不直接沟通」的现状。升级前不影响业务（手动上传等价），但回单闭环的时效和人力成本更高。</p>
+    </div>
+    <div class="lang tech"><span class="tt">技术语言 · TECH</span>
+      <p>升级后录入 <code>wecom_context_bindings</code>（仓库群 chat_id → tenant + warehouse_id），群图片回调进入 <code>wecom.ReceiptRobot</code> 的 RuleRecognizer OCR 接线，凭证落 <code>evidence_versions</code> 只追加；升级前 N-10 只能以手动上传等价验证。决策：何时升级、几个群、绑定映射谁录入。</p>
+    </div>
+  </div>
+  <div class="opts"><span class="tt">选项与判据</span>
+    <ul>
+      <li>A. 08-21 前升级 + 绑定——回单自动化随 v0.1 上线；</li>
+      <li>B. 上线后一周内补升级——先手动、后自动；</li>
+      <li>C. 长期手动上传，不升级。判据：仓管配合度 + 回单量。</li>
+    </ul>
+  </div>
+
+  <!-- D-05 -->
+  <h3 id="D-05"><span class="no">D-05</span> 缺货业务数据收集（A1 / P3）</h3>
+  <div class="table-wrap meta"><table>
+    <tr><td>所属</td><td>库存管理需求（0.1 不做锁库存，0.2+ 立项）</td><td>建议决策人</td><td>商务 / 产品（到岗后）</td></tr>
+    <tr><td>阻塞</td><td>库存管理需求的量化依据</td><td>最迟时点</td><td>0.1 运行期间持续收集</td><td>状态</td><td><span class="tag amber">部分已定</span></td><td>v0.1 发布影响</td><td><span class="mono" style="font-size:11px; color:var(--ink2);">无 · 锁库存 0.1 暂缓</span></td></tr>
+  </table></div>
+  <div class="langs">
+    <div class="lang scene"><span class="tt">场景语言 · SCENE</span>
+      <p>商务备货时发现膨润土 AB-3 又没货，销售已经第三次跟客户改交期。产品岗还没到，没人说得清「款到发货的单子里有多少比例缺货」「哪些产品经常缺」。锁库存不做，但缺货数据得先记下来。</p>
+    </div>
+    <div class="lang biz"><span class="tt">业务语言 · BUSINESS</span>
+      <p>缺货比例和常缺货产品清单是未来库存管理（锁库存、安全库存）立项的输入。0.1 不阻塞，但数据不从现在开始收集，产品到岗后又要从零调研。</p>
+    </div>
+    <div class="lang tech"><span class="tt">技术语言 · TECH</span>
+      <p>0.1 已执行「发货不扣库存」，<code>inventory_items</code> 保留只读；缺货数据先以文档口径收集（缺货订单数/产品/时长），可选在影子轨增加缺货信号统计。决策：收集频率、统计口径、负责人。</p>
+    </div>
+  </div>
+  <div class="opts"><span class="tt">选项与判据</span>
+    <ul>
+      <li>A. 每周人工统计（Excel）——轻；</li>
+      <li>B. 影子轨顺带采集缺货事件——自动化；</li>
+      <li>C. 等产品到岗再开始。判据：0.2 是否准备提库存需求。</li>
+    </ul>
+  </div>
+
+  <!-- D-06 -->
+  <h3 id="D-06"><span class="no">D-06</span> 转仓子流程是否在 0.1 启用（M5）</h3>
+  <div class="table-wrap meta"><table>
+    <tr><td>所属</td><td>STK 备货异常路径（TransferWorkflow）</td><td>建议决策人</td><td>业务方（虹励/仓管） + 技术负责人</td></tr>
+    <tr><td>阻塞</td><td>0.1 转仓场景可用性；当前文档标「保留待确认」</td><td>最迟时点</td><td>0.1 上线前给出结论</td><td>状态</td><td><span class="tag red">未决</span></td><td>v0.1 发布影响</td><td><span class="mono" style="font-size:11px; color:var(--ink2);">无 · 首刀不在新系统办理备货</span></td></tr>
+  </table></div>
+  <div class="langs">
+    <div class="lang scene"><span class="tt">场景语言 · SCENE</span>
+      <p>仓管收到备货单：客户要 5 吨膨润土，但本仓只有 3 吨，另一个外租仓有货。仓管想申请转仓，可 demo 里从没演示过这一步。0.1 万一真发生，是让系统走转仓流程，还是退回给商务人工处理？</p>
+    </div>
+    <div class="lang biz"><span class="tt">业务语言 · BUSINESS</span>
+      <p>转仓涉及两个外租仓之间的调拨责任、运费和时间。0.1 用户只有虹励一人，仓管仍在飞书操作；如果 0.1 实际不会发生转仓，就不值得把未演示的路径开放给真实单。</p>
+    </div>
+    <div class="lang tech"><span class="tt">技术语言 · TECH</span>
+      <p>代码已实现：<code>STK_WAREHOUSE_CONFIRM → TRANSFER_REQUESTED</code>、<code>transfer-decision</code> 信号、转仓子流程内联逻辑；当前标注可用性待确认。启用 = 补业务确认 + N 用例 + 影子轨观察；禁用 = 保留代码，转仓需求人工退回销售。</p>
+    </div>
+  </div>
+  <div class="opts"><span class="tt">选项与判据</span>
+    <ul>
+      <li>A. 0.1 启用——能力更全但未验证；</li>
+      <li>B. 0.1 禁用、人工兜底（推荐）——先跑通主路径；</li>
+      <li>C. 0.2 随仓管迁入再启用。判据：真实外租仓之间是否确有调拨需求。</li>
+    </ul>
+  </div>
+
+  <!-- D-07 -->
+  <h3 id="D-07"><span class="no">D-07</span> 作废发货 void 是否启用（M7）</h3>
+  <div class="table-wrap meta"><table>
+    <tr><td>所属</td><td>SHP 发货纠错（30min 窗口 caveat）</td><td>建议决策人</td><td>业务方（财务/仓管） + 技术负责人</td></tr>
+    <tr><td>阻塞</td><td>发货输错后的纠错路径；当前设计保留、未实现操作入口</td><td>最迟时点</td><td>0.1 上线前说明兜底方式即可；正式启用可 0.2</td><td>状态</td><td><span class="tag amber">部分已定</span></td><td>v0.1 发布影响</td><td><span class="mono" style="font-size:11px; color:var(--ink2);">无 · 首刀不在新系统办理发货</span></td></tr>
+  </table></div>
+  <div class="langs">
+    <div class="lang scene"><span class="tt">场景语言 · SCENE</span>
+      <p>仓管手滑把「实发 5 吨」点成了「实发 15 吨」，守恒校验拦住了（15 &gt; 应发 5），他改成 5 吨通过。但如果是发货确认之后才发现发错仓库，有没有一个 30 分钟内作废重发的按钮？</p>
+    </div>
+    <div class="lang biz"><span class="tt">业务语言 · BUSINESS</span>
+      <p>作废窗口是发货纠错的安全阀：有它，仓管可以自助纠正；没有它，错发只能线下找财务/主管走人工红冲。0.1 仓管不在新系统操作，这个问题的紧迫性取决于 0.2 三角色迁入时点。</p>
+    </div>
+    <div class="lang tech"><span class="tt">技术语言 · TECH</span>
+      <p>设计中保留了 void + 30min caveat，但当前没有信号/API 路径。启用需要新增 void 信号、发货单作废状态与红冲事件、caveat 过期校验；不启用则错发走线下流程，发货单状态不可逆。</p>
+    </div>
+  </div>
+  <div class="opts"><span class="tt">选项与判据</span>
+    <ul>
+      <li>A. 0.1 不做，人工兜底（默认）；</li>
+      <li>B. 0.2 随仓管迁入实现最小 void；</li>
+      <li>C. 0.1 就实现。判据：历史错发频率。</li>
+    </ul>
+  </div>
+
+  <!-- D-08 -->
+  <h3 id="D-08"><span class="no">D-08</span> 真实主数据与人员清单确认（T2.2）</h3>
+  <div class="table-wrap meta"><table>
+    <tr><td>所属</td><td>v0.1 数据线（客户/产品/仓库/人员）</td><td>建议决策人</td><td>虹励确认清单 + 现场程序员录入</td></tr>
+    <tr><td>阻塞</td><td>仓库清单与企微 users 表待补；pgAPI record_id 映射待回填</td><td>最迟时点</td><td>G1 前（原 08-19；No-Go 后随新窗口）</td><td>状态</td><td><span class="tag amber">部分已解决</span></td><td>v0.1 发布影响</td><td><span class="tag amber">影响 v0.1</span> <span class="mono" style="font-size:11px;">真实主数据决定下单可用性与状态回显</span></td></tr>
+  </table></div>
+  <div class="langs">
+    <div class="lang scene"><span class="tt">场景语言 · SCENE</span>
+      <p>联调时系统里是演示数据：北京华信、电机、华南仓、张三。上线后虹励打开「我的订单」看到的必须是广西天华、膨润土 AB-3、两个真实外租仓和真实同事，否则第一眼就不信系统。</p>
+    </div>
+    <div class="lang biz"><span class="tt">业务语言 · BUSINESS</span>
+      <p>主数据的准确性决定订单归属、审批推送和业务信任。需要业务方确认：真实客户清单（含等级 A-D 与归属销售）、产品清单、两个外租仓名称、0.1 涉及的人员名单。</p>
+    </div>
+    <div class="lang tech"><span class="tt">技术语言 · TECH</span>
+      <p>T2.2：从飞书订单反查 distinct customer_name/product_name 录入 <code>customers/products</code>，仓库录入 <code>warehouses</code>，人员经企微通讯录同步进 <code>users</code>（含 wecom_user_id）；涉及 pgAPI record_id 映射与 <code>pgapi_entity_mappings</code> 回填。<strong>2026-08-20 实测：多维表已录 9 真实客户 / 100+ 产品 / 9 真实订单；白名单已配（俞家俊/王杰/陈虹励）；残留=两个外租仓清单、users 表 wecom_user_id、record_id 回填。</strong></p>
+    </div>
+  </div>
+  <div class="opts"><span class="tt">选项与判据</span>
+    <ul>
+      <li>A. 飞书反查 + 手工录入（推荐）；</li>
+      <li>B. 企微通讯录同步 + 角色手工标注；</li>
+      <li>C. 两者结合。判据：数据量与现场人员配合度。</li>
+    </ul>
+  </div>
+
+  <!-- D-09 -->
+  <h3 id="D-09"><span class="no">D-09</span> 审批人分配与角色映射确认（T2.3 / T-03）</h3>
+  <div class="table-wrap meta"><table>
+    <tr><td>所属</td><td>v0.1 审批路由（审价/终审/备货/仓管/财务）</td><td>建议决策人</td><td>业务方指定人选 + 旧系统管理员配置</td></tr>
+    <tr><td>阻塞</td><td>V01 审批角色已配；真实销售主管待业务方替换（不影响测试闭环）</td><td>最迟时点</td><td>G1 前必须完成（P0）</td><td>状态</td><td><span class="tag green">已解决</span></td><td>v0.1 发布影响</td><td><span class="tag red">阻塞 v0.1</span> <span class="mono" style="font-size:11px;">P0-1 审批路由，虹励订单卡单</span></td></tr>
+  </table></div>
+  <div class="langs">
+    <div class="lang scene"><span class="tt">场景语言 · SCENE</span>
+      <p>虹励下了一单，订单进入主管审批。如果没人明确「谁是虹励订单的主管、董事长、财务、仓管」，旧系统就会按默认配置推到王杰头上；王杰可能根本不管这单，订单就卡住了。</p>
+    </div>
+    <div class="lang biz"><span class="tt">业务语言 · BUSINESS</span>
+      <p>审批人分配是审批流能跑通的前提。需要业务方明确：谁审价（主管）、谁终审 C/D 大单（董事长）、谁管备货（商务）、谁确认到款与开票（财务）、哪个仓管管哪个仓。配错 = 卡单或推错人，是发布红线 P0-1。</p>
+    </div>
+    <div class="lang tech"><span class="tt">技术语言 · TECH</span>
+      <p>落点：旧系统 <code>approval_profiles</code> 新增 V01_SALES_ASSISTANT 并显式配 TEST_SUPERVISOR / TEST_CHAIRMAN；新系统 <code>B2B_ASSIGNEE_*</code> 替换 workflows 中 <code>u-supervisor/u-chairman/u-op/u-wh-*/u-accounting</code> 五处默认路由；真实 open_id 映射需逐人核对。<strong>2026-08-20 实测：approval_role_map.json 已建 V01 档（审批=王杰、业务=马弘毅），open_id 对齐当前飞书应用 cli_aad5dd8a70f8dcc5，0 个跨应用；残留=真实主管/董事长替换与生产侧双人复核。</strong></p>
+    </div>
+  </div>
+  <div class="opts"><span class="tt">选项与判据</span>
+    <ul>
+      <li>A. 沿用现有人名（需业务方逐岗确认，推荐）；</li>
+      <li>B. 0.1 先只配主管 + 商务，其余按飞书现状；</li>
+      <li>C. 等企微通讯录同步后再配。判据：谁能在 08-21 前给出名单。</li>
+    </ul>
+  </div>
+
+  <!-- D-10 -->
+  <h3 id="D-10"><span class="no">D-10</span> 客户群 / 仓库群绑定清单（T4.4）</h3>
+  <div class="table-wrap meta"><table>
+    <tr><td>所属</td><td>企微上下文绑定（wecom_context_bindings）</td><td>建议决策人</td><td>虹励 / 商务 + 企微管理员</td></tr>
+    <tr><td>阻塞</td><td>群入口自动带出客户与归属销售（XSZL2）；仓库群回单（CG3）</td><td>最迟时点</td><td>R1 测试环境验证前提供测试绑定；R2 前提供生产绑定</td><td>状态</td><td><span class="tag red">未决</span></td><td>v0.1 发布影响</td><td><span class="tag amber">影响 v0.1</span> <span class="mono" style="font-size:11px;">群入口与回单绑定；PC 兜底可降级</span></td></tr>
+  </table></div>
+  <div class="langs">
+    <div class="lang scene"><span class="tt">场景语言 · SCENE</span>
+      <p>销售助理在「广西天华客户群」里打开订单助手，系统应该自动带出客户=广西天华、归属销售=张销售且锁定不可改。反过来，仓管在仓库群发一张回单照片，机器人要知道这张单属于哪个仓库。</p>
+    </div>
+    <div class="lang biz"><span class="tt">业务语言 · BUSINESS</span>
+      <p>绑定清单是群入口的业务地图：每个客户群对应一个客户 + 归属销售；每个仓库群对应一个外租仓。绑错会导致订单归属错、回单匹配错，直接影响业务信任。</p>
+    </div>
+    <div class="lang tech"><span class="tt">技术语言 · TECH</span>
+      <p>落点：<code>wecom_context_bindings</code>（chat_id → tenant_id + customer_id/sales_id 或 warehouse_id）；T4.4 现场录入真实群 ID；群上下文进入 H5 表单预填与 ReceiptRobot 路由。决策：全部群清单、归属销售/仓库映射、录入人。</p>
+    </div>
+  </div>
+  <div class="opts"><span class="tt">选项与判据</span>
+    <ul>
+      <li>A. 先录核心客户群，仓库群等升级（D-04）再录；</li>
+      <li>B. 一次性全量录入（推荐，清单简单）；</li>
+      <li>C. 由虹励在界面自助维护（需新功能，0.1 不做）。</li>
+    </ul>
+  </div>
+
+  <!-- D-11 -->
+  <h3 id="D-11"><span class="no">D-11</span> 供方分流 → 财务确认路由沿用确认（T2.3 #9）</h3>
+  <div class="table-wrap meta"><table>
+    <tr><td>所属</td><td>STK 备货闸门分流（款到 / 非款到）</td><td>建议决策人</td><td>业务方（财务 + 虹励）</td></tr>
+    <tr><td>阻塞</td><td>备货是否需要财务确认到账的路径判定</td><td>最迟时点</td><td>v0.1 上线前确认；不确认则沿用现状配置</td><td>状态</td><td><span class="tag amber">部分已定</span></td><td>v0.1 发布影响</td><td><span class="mono" style="font-size:11px; color:var(--ink2);">无 · 首刀不执行备货链</span></td></tr>
+  </table></div>
+  <div class="langs">
+    <div class="lang scene"><span class="tt">场景语言 · SCENE</span>
+      <p>一笔「款到发货」的订单，备货前财务要先确认钱到账；一笔「非款到」订单，商务选完仓就直接发发货单。真实业务里，供方渠道 A/B 的订单是否都还按这条规则分流？</p>
+    </div>
+    <div class="lang biz"><span class="tt">业务语言 · BUSINESS</span>
+      <p>分流规则决定财务在备货链上的参与点和责任。若真实结算方式与文档不一致，订单会走错闸门（该确认到款的不确认、不该确认的等财务）。</p>
+    </div>
+    <div class="lang tech"><span class="tt">技术语言 · TECH</span>
+      <p>落点：<code>StkFSM</code> 的 <code>WAREHOUSE_CONFIRMED → PAYMENT_CONFIRMING</code>（款到）/ <code>→ SHIP_ORDER_ISSUED</code>（非款到），由 <code>orders.payment_term</code> 驱动；财务 assignee 走 D-09 的审批人映射。确认后写入配置/文档并补一条真实单验证。</p>
+    </div>
+  </div>
+  <div class="opts"><span class="tt">选项与判据</span>
+    <ul>
+      <li>A. 完全沿用文档分流（推荐）；</li>
+      <li>B. 个别供方渠道特殊处理（需给出清单）；</li>
+      <li>C. 0.1 全部按非款到直发（财务不介入，风险高）。</li>
+    </ul>
+  </div>
+
+  <!-- D-12 -->
+  <h3 id="D-12"><span class="no">D-12</span> 第 1 次发布 P1 项取舍（复制重提 / 存量同步 / 企微精装修）</h3>
+  <div class="table-wrap meta"><table>
+    <tr><td>所属</td><td>v0.1 发布范围（MVP 边界）</td><td>建议决策人</td><td>项目 owner</td></tr>
+    <tr><td>阻塞</td><td>08-21 窗口工作量；不影响核心闭环</td><td>最迟时点</td><td>范围单签字时一并裁决</td><td>状态</td><td><span class="tag green">已决：严格 MVP（D-013，2026-08-20）</span></td><td>v0.1 发布影响</td><td><span class="tag amber">影响 v0.1</span> <span class="mono" style="font-size:11px;">发布范围与工作量边界</span></td></tr>
+  </table></div>
+  <div class="langs">
+    <div class="lang scene"><span class="tt">场景语言 · SCENE</span>
+      <p>虹励问：订单被驳回后能不能一键复制重提？历史订单什么时候能在「我的订单」里看到？企微页面是不是太简陋？每一项都合理，但 08-21 前不一定都做得完。</p>
+    </div>
+    <div class="lang biz"><span class="tt">业务语言 · BUSINESS</span>
+      <p>发布范围蔓延会拖垮窗口。MVP 已定义：授权→下单→飞书待办→状态回显→详情跳转。复制重提是体验增强（P1），存量订单同步是数据可见性（P1），企微精装修不阻塞 PC 兜底。需要明确哪几项进这一刀。</p>
+    </div>
+    <div class="lang tech"><span class="tt">技术语言 · TECH</span>
+      <p>复制重提 = 新 API（复制 payload + 新幂等键）；存量同步依赖 T1/T2 调研与 pgAPI approval-flows 源接线；企微精装修是前端工作量。三者都有独立开关，可后置不互相阻塞。决策：MVP / MVP+复制重提 / 全做。</p>
+    </div>
+  </div>
+  <div class="opts"><span class="tt">选项与判据</span>
+    <ul>
+      <li>A. 严格 MVP（推荐）；</li>
+      <li>B. MVP + 复制重提；</li>
+      <li>C. 全部纳入。判据：虹励最小可用体验 vs 发布时间。</li>
+    </ul>
+  </div>
+  <div class="action" style="background:#e3f0e3;border-color:#a7c4a7;"><span class="tt" style="color:#3b6d3b;">✅ 已解决 · RESOLVED（2026-08-20 · D-013）</span><ol><li>采纳严格 MVP：v0.1 = 授权 → 下单 → 飞书待办 → 状态回显 → 详情跳转 + 影子新单实时重放（D-012）。</li><li>复制重提、存量订单同步、企微精装修全部标 v0.2/v0.3。<b>存量订单同步已裁决：v0.1 不做，归 v0.2 数据迁入。</b></li><li>范围单按此口径更新签字。</li></ol></div>
+
+  <!-- ===================== 组2 ===================== -->
+  <h2 id="g2"><span class="no">组2 ·</span> v0.1 发布阻塞与重新评审（R-01..R-10）</h2>
+  <p>来源：<code>spec/evidence/第一次发布-Go-NoGo结论.md</code>、<code>v0.1发布过程跟踪.html</code>。这是 No-Go 后「重新评审条件」的逐项决策。</p>
+
+  <!-- R-01 -->
+  <h3 id="R-01"><span class="no">R-01</span> 新系统唯一仓库 / 分支 / 提交 / 部署目录（EX-01）</h3>
+  <div class="table-wrap meta"><table>
+    <tr><td>所属</td><td>发布物基线（线 A / 线 E）</td><td>建议决策人</td><td>项目 owner + 现场程序员</td></tr>
+    <tr><td>阻塞</td><td>发布、回滚、审计的前提；测试服务器基线已冻结</td><td>最迟时点</td><td>G1 前</td><td>状态</td><td><span class="tag green">已解决</span></td><td>v0.1 发布影响</td><td><span class="tag red">阻塞 v0.1</span> <span class="mono" style="font-size:11px;">发布物基线与回滚依据</span></td></tr>
+  </table></div>
+  <div class="langs">
+    <div class="lang scene"><span class="tt">场景语言 · SCENE</span>
+      <p>现场程序员打开生产服务器，发现跑的是 b2b_pilot_v2 的 bf6a9cb7，而我们这几天改的都是 v3。到底哪个仓库、哪个分支、哪个提交是 08-21 要发的东西？发错了连回滚都不知道回哪。</p>
+    </div>
+    <div class="lang biz"><span class="tt">业务语言 · BUSINESS</span>
+      <p>发布物唯一性是发布纪律的根：范围、证据、回滚、责任都绑定在一个确定版本上。当前两个仓库并存是现场取证发现的最大阻塞（EX-01）。</p>
+    </div>
+    <div class="lang tech"><span class="tt">技术语言 · TECH</span>
+      <p>冻结 <code>git remote/branch/commit/tag</code>、镜像 digest、migrations 版本，写入《0.1 发布物清单》（A-08）；部署目录与发布包一一对应。<strong>2026-08-20 实测：新系统 pilot_v3@85eb85d → /opt/pilot_v3（121.40.226.192）；旧系统 feat_v0.1@f3ed1f80 → /root/tripartite-approval-v2（121.43.58.1:3002）；本仓影子实现 commit 4e53763。</strong></p>
+    </div>
+  </div>
+  <div class="opts"><span class="tt">选项与判据</span>
+    <ul>
+      <li>A. 确认 b2b_pilot_v3 feat_v0.1 为唯一发布基线（推荐）；</li>
+      <li>B. 先合入 main 再冻结 tag；</li>
+      <li>C. 现场继续用 v2 并打补丁（否决风险高）。判据：哪条线包含 bridge + 全部 v0.1 已提交证据。</li>
+    </ul>
+  </div>
+
+  <!-- R-02 -->
+  <h3 id="R-02"><span class="no">R-02</span> bridge 部署与业务库初始化（EX-02 / EX-04 现场）</h3>
+  <div class="table-wrap meta"><table>
+    <tr><td>所属</td><td>v0.1 应用部署（线 A + 数据线）</td><td>建议决策人</td><td>现场程序员（部署责任人）</td></tr>
+    <tr><td>阻塞</td><td>测试环境 bridge/业务库已就绪；生产环境仍未部署</td><td>最迟时点</td><td>R1 发布前</td><td>状态</td><td><span class="tag green">已解决（测试环境）</span></td><td>v0.1 发布影响</td><td><span class="tag red">阻塞 v0.1</span> <span class="mono" style="font-size:11px;">下单入口与业务库（S1 成功标准）</span></td></tr>
+  </table></div>
+  <div class="langs">
+    <div class="lang scene"><span class="tt">场景语言 · SCENE</span>
+      <p>虹励点「飞书授权」，页面请求 <code>/api/v1/bridge/auth-url</code>，服务器返回 404；就算接口在，数据库里连订单表都没有。下单这件事在测试环境都还没真正成立。</p>
+    </div>
+    <div class="lang biz"><span class="tt">业务语言 · BUSINESS</span>
+      <p>S1「授权→下单成功」是 v0.1 的第一成功标准。接口没部署、库没建，等于这一刀还没开始。此问题不解决，后续 UAT、Go/No-Go 全部无意义。</p>
+    </div>
+    <div class="lang tech"><span class="tt">技术语言 · TECH</span>
+      <p>部署本仓 api（<code>B2B_FEISHU_BRIDGE_ENABLED=true</code>）→ 目标库应用 migrations 001-007 → spicedb schema touch + seedrel → 验证 <code>/healthz</code> 与 auth-url 非 404。<strong>2026-08-20 实测：api 28080 healthy；auth-url 200（原 404 消除）；/assistant、/bridge、wecom 网关 /assistant /bridge /healthz 全 200；PG 已播种 8 用户/2 订单/4 仓、seedrel 就绪。生产部署按 R1→R2 门禁原样执行。</strong></p>
+    </div>
+  </div>
+  <div class="opts"><span class="tt">选项与判据</span>
+    <ul>
+      <li>A. R1 测试环境先部署验证，通过后 R2 原样执行（推荐）；</li>
+      <li>B. 双环境同时部署（省时但风险集中）。判据：R1 证据质量。</li>
+    </ul>
+  </div>
+
+  <!-- R-03 -->
+  <h3 id="R-03"><span class="no">R-03</span> V01 profile 与 TEST_SUPERVISOR / TEST_CHAIRMAN 配置（EX-03）</h3>
+  <div class="table-wrap meta"><table>
+    <tr><td>所属</td><td>旧系统配置（线 F / T-03，P0-1）</td><td>建议决策人</td><td>业务方指定审批人 + 旧系统管理员</td></tr>
+    <tr><td>阻塞</td><td>V01 档已显式配置，不再 fallback 卡单；真实人选待替换</td><td>最迟时点</td><td>G1 前（P0）</td><td>状态</td><td><span class="tag green">已解决</span></td><td>v0.1 发布影响</td><td><span class="tag red">阻塞 v0.1</span> <span class="mono" style="font-size:11px;">P0-1 审批人配置</span></td></tr>
+  </table></div>
+  <div class="langs">
+    <div class="lang scene"><span class="tt">场景语言 · SCENE</span>
+      <p>虹励的订单进入旧飞书审批流后，「信息确认」自动过了，下一步该主管审批。但旧系统里没有给 v0.1 配主管，默认 fallback 到王杰；王杰的待办里冒出一张他不知情的订单。</p>
+    </div>
+    <div class="lang biz"><span class="tt">业务语言 · BUSINESS</span>
+      <p>P0-1 明确：TEST_SUPERVISOR 漏配会卡单，TEST_CHAIRMAN 建议配（C/D 大单）。需要业务方明确虹励订单的主管与董事长是谁，并由旧系统管理员完成配置。</p>
+    </div>
+    <div class="lang tech"><span class="tt">技术语言 · TECH</span>
+      <p>旧系统 <code>approval_profiles</code> 新增 <code>V01_SALES_ASSISTANT</code>；TEST_SUPERVISOR 必配（否则 fallback 王杰）、TEST_CHAIRMAN 建议配张有连。<strong>2026-08-20 实测：V01 档 TEST_SUPERVISOR/TEST_CHAIRMAN/MANAGER=王杰，业务角色（备货/发货/开票）=马弘毅；审批定义重建 9ADFD966、回调/challenge 全通。</strong></p>
+    </div>
+  </div>
+  <div class="opts"><span class="tt">选项与判据</span>
+    <ul>
+      <li>A. 业务方今天给出名单，现场立即配置（推荐）；</li>
+      <li>B. 先配主管，董事长暂空（C/D 单会卡）；</li>
+      <li>C. 配置双人复核后上生产。判据：P0-1 不堵上不发刀。</li>
+    </ul>
+  </div>
+
+  <!-- R-04 -->
+  <h3 id="R-04"><span class="no">R-04</span> 旧系统唯一小改是否执行 / 何时上生产（EX-04）</h3>
+  <div class="table-wrap meta"><table>
+    <tr><td>所属</td><td>旧系统代码改动（线 F / T-01，唯一允许的小改）</td><td>建议决策人</td><td>项目 owner + 旧系统负责人</td></tr>
+    <tr><td>阻塞</td><td>唯一小改已实现并部署测试环境；待 B2B_V01_ 真实下单联调验证</td><td>最迟时点</td><td>G1 前（P0）</td><td>状态</td><td><span class="tag green">已解决</span></td><td>v0.1 发布影响</td><td><span class="tag red">阻塞 v0.1</span> <span class="mono" style="font-size:11px;">P0 · 信息确认卡单</span></td></tr>
+  </table></div>
+  <div class="langs">
+    <div class="lang scene"><span class="tt">场景语言 · SCENE</span>
+      <p>虹励在新系统提交订单，订单进入旧系统后停在「信息确认」等提交人确认。方案是旧系统识别 <code>B2B_V01_</code> 前缀自动确认，但这段代码现在还没写。旧系统是生产命脉，改还是不改、谁改、怎么证明不影响普通订单？</p>
+    </div>
+    <div class="lang biz"><span class="tt">业务语言 · BUSINESS</span>
+      <p>这是整个 v0.1 唯一允许的旧系统代码改动，且只影响 v0.1 前缀订单。不动它，虹励体验闭环断在第一步；动它，必须独立测试证明普通订单行为零变化（旧系统零回滚铁律）。</p>
+    </div>
+    <div class="lang tech"><span class="tt">技术语言 · TECH</span>
+      <p><code>submitExternalOrder.ts</code> 创建处：识别 <code>order:chang-an:v01:</code> 或 <code>B2B_V01_</code> 前缀 → 复用 decision 自动确认「信息确认」（意见注明系统自动确认）→ 注入 V01 profile。<strong>2026-08-20 实测：externalOrders.ts + submitExternalOrder.ts 小改已实现并部署测试环境 3002，tsc 0 错误，已推送 feat_v0.1 @ f3ed1f80；残留=真实 B2B_V01_ 下单闭环（R-06）。</strong></p>
+    </div>
+  </div>
+  <div class="opts"><span class="tt">选项与判据</span>
+    <ul>
+      <li>A. 按方案执行小改（推荐，已收敛到一处）；</li>
+      <li>B. 不改旧系统，由虹励手动点信息确认（体验差）；</li>
+      <li>C. 改新系统桥接层绕过（不可行：旧系统状态机不接受）。判据：风险与体验的平衡 + 独立测试证据。</li>
+    </ul>
+  </div>
+
+  <!-- R-05 -->
+  <h3 id="R-05"><span class="no">R-05</span> 回调白名单 / 可信 IP / 企微主页指向（G8 / T4.1）</h3>
+  <div class="table-wrap meta"><table>
+    <tr><td>所属</td><td>飞书 + 企微后台配置（线 W / T4.1）</td><td>建议决策人</td><td>企微管理员 / 飞书管理员 + 运维</td></tr>
+    <tr><td>阻塞</td><td>飞书白名单与网页授权已通过；企微回调 URL/可信 IP 为人工残留项</td><td>最迟时点</td><td>R1 测试环境联调前（测试配置）；R2 前（生产配置）</td><td>状态</td><td><span class="tag green">已解决</span></td><td>v0.1 发布影响</td><td><span class="tag red">阻塞 v0.1</span> <span class="mono" style="font-size:11px;">渠道配置缺失即入口不可用</span></td></tr>
+  </table></div>
+  <div class="langs">
+    <div class="lang scene"><span class="tt">场景语言 · SCENE</span>
+      <p>虹励点「授权」跳到飞书，飞书说回调地址不在白名单；好不容易回到企微，主页打开的却是旧备货/发货页面。每一步都像是系统没接上。</p>
+    </div>
+    <div class="lang biz"><span class="tt">业务语言 · BUSINESS</span>
+      <p>后台配置是渠道的「钥匙」：飞书重定向白名单决定 OAuth 是否可用；企微可信 IP 决定 access_token 是否可用；主页指向决定用户进对入口。缺一项，渠道就断一项。</p>
+    </div>
+    <div class="lang tech"><span class="tt">技术语言 · TECH</span>
+      <p>飞书应用后台加 v0.1 回调地址到重定向白名单；企微应用可信 IP 加部署机出口 IP；应用主页/菜单切到 <code>/assistant</code>。<strong>2026-08-20 实测：飞书白名单已配 3 个 URL、网页授权通过（code 兑换 + 身份匹配 success）；企微 official（agent 1000007）已启用、jsapi 双签名就绪；残留=企微后台回调 URL 指向 /wecom/callback/chang-an 的人工切换与可信 IP 核对。</strong></p>
+    </div>
+  </div>
+  <div class="opts"><span class="tt">选项与判据</span>
+    <ul>
+      <li>A. 测试环境先配齐并截图，生产紧随（推荐）；</li>
+      <li>B. 等生产一起配（会拖 R1 联调）。判据：管理员审批等待时间。</li>
+    </ul>
+  </div>
+
+  <!-- R-06 -->
+  <h3 id="R-06"><span class="no">R-06</span> 真实授权下单联调（GAP-04）</h3>
+  <div class="table-wrap meta"><table>
+    <tr><td>所属</td><td>v0.1 测试环境验收（R1ACC / V-C）</td><td>建议决策人</td><td>虹励 + 现场程序员 B</td></tr>
+    <tr><td>阻塞</td><td>S1/S2 成功标准只有 mock 证据、无真实链路证据</td><td>最迟时点</td><td>R1 验收前</td><td>状态</td><td><span class="tag amber">部分进展</span></td><td>v0.1 发布影响</td><td><span class="tag red">阻塞 v0.1</span> <span class="mono" style="font-size:11px;">R1 验收与 G2 的真实证据</span></td></tr>
+  </table></div>
+  <div class="langs">
+    <div class="lang scene"><span class="tt">场景语言 · SCENE</span>
+      <p>代码测试全绿，但虹励还没用自己的真实飞书账号在测试环境点过一遍：授权 → 填单 → 提交 → 飞书出现待办 → 列表回显状态。这最后一步联调由谁在什么时间陪她跑？</p>
+    </div>
+    <div class="lang biz"><span class="tt">业务语言 · BUSINESS</span>
+      <p>真实验收是 mock 全绿的下一层证据（发布跟踪 §9.2 诚实声明）：只有虹励真实走通 1–2 笔，S1/S2 才算闭环，UAT 才有签字基础。</p>
+    </div>
+    <div class="lang tech"><span class="tt">技术语言 · TECH</span>
+      <p>R1 测试环境执行：auth-url → callback → POST /external-orders/create → submission-status 回写 flow_id/instance_id → 重复提交验证幂等 409 → 飞书待办与列表截图。<strong>2026-08-20 进展：真实账号授权链路已实测（code 兑换 + 身份匹配 success）；完整「授权→B2B_V01_ 下单→飞书待办→状态回显」待约虹励联调。</strong></p>
+    </div>
+  </div>
+  <div class="opts"><span class="tt">选项与判据</span>
+    <ul>
+      <li>A. R1 发布当天做（推荐，紧跟 smoke）；</li>
+      <li>B. R1 前提前约虹励做；</li>
+      <li>C. 只用测试账号代跑（不满足 UAT 签字要求）。判据：虹励时间 + 环境就绪度。</li>
+    </ul>
+  </div>
+
+  <!-- R-07 -->
+  <h3 id="R-07"><span class="no">R-07</span> 发布窗口是否顺延 / 新的 R1-R2 日期（No-Go 结论）</h3>
+  <div class="table-wrap meta"><table>
+    <tr><td>所属</td><td>发布执行（线 E 总窗口）</td><td>建议决策人</td><td>项目 owner</td></tr>
+    <tr><td>阻塞</td><td>现场 No-Go + 多项 P0 未堵上；08-21 是否仍为生产发布日</td><td>最迟时点</td><td>G1 评审时给出新窗口</td><td>状态</td><td><span class="tag red">未决</span></td><td>v0.1 发布影响</td><td><span class="tag amber">影响 v0.1</span> <span class="mono" style="font-size:11px;">发布窗口与 R1/R2 日期</span></td></tr>
+  </table></div>
+  <div class="langs">
+    <div class="lang scene"><span class="tt">场景语言 · SCENE</span>
+      <p>08-20 当日：四条直接阻塞已关掉五条测试环境侧的对应动作（R-01..R-05），但可写副本/回填（R-08）、虹励真实下单闭环（R-06）与 UAT/Go-No-Go（R-10）仍未完成。团队需要按最新状态裁决：R1 何时发、R2 排在哪天。</p>
+    </div>
+    <div class="lang biz"><span class="tt">业务语言 · BUSINESS</span>
+      <p>发布窗口是业务承诺与风险控制的交点。三条铁律要求「P0 不堵上对应的刀不发、先 R1 后 R2、NO-GO 顺延绝不压缩验证」。顺延不是失败，是纪律。</p>
+    </div>
+    <div class="lang tech"><span class="tt">技术语言 · TECH</span>
+      <p>依据发布跟踪线 E 门禁 G1/G2/G4 与重新评审条件倒排新日期；R1CFG/R2CFG 冻结、镜像 digest、值班表全部跟随新窗口。候选：D 日顺延 1 天 / R1 先发 R2 顺延 / 重排整周。</p>
+    </div>
+  </div>
+  <div class="opts"><span class="tt">选项与判据</span>
+    <ul>
+      <li>A. 08-21 不变，压缩验证（违反铁律，不推荐）；</li>
+      <li>B. R1 顺延 1–2 天，R2 按 R1 结果再定（推荐）；</li>
+      <li>C. 整周重排。判据：R-01..R-05 的实际关闭速度。</li>
+    </ul>
+  </div>
+
+  <!-- R-08 -->
+  <h3 id="R-08"><span class="no">R-08</span> 可写副本提升与回填 dry-run FAIL 处置（O 线）</h3>
+  <div class="table-wrap meta"><table>
+    <tr><td>所属</td><td>主备库 / 可写副本 / 回填（线 O，D-007 P3）</td><td>建议决策人</td><td>运维 + 现场程序员 + 项目 owner</td></tr>
+    <tr><td>阻塞</td><td>v0.1 运行底座（S3）；回填 FAIL 意味着历史单不可见</td><td>最迟时点</td><td>G1（提升与 dry-run 完成）</td><td>状态</td><td><span class="tag green">已解决</span></td><td>v0.1 发布影响</td><td><span class="tag red">阻塞 v0.1</span> <span class="mono" style="font-size:11px;">数据底座 G1 门禁</span></td></tr>
+  </table></div>
+  <div class="langs">
+    <div class="lang scene"><span class="tt">场景语言 · SCENE</span>
+      <p>按 D-007，发布前要把备库提升成可写副本，v0.1 跑在副本上，主库继续同步。回填工具 dry-run 跑出来 3 条 FAIL：一条客户匹配不上，两条合同字段形状异常。这 3 条算不算发布阻塞？</p>
+    </div>
+    <div class="lang biz"><span class="tt">业务语言 · BUSINESS</span>
+      <p>可写副本是发布的数据底座：副本异常回切主库，商务无损。回填 FAIL 直接影响历史订单可见性——业务方需要明确「哪些 FAIL 可接受、哪些必须清」。文档口径是 FAIL 上报 owner、绝不 apply。</p>
+    </div>
+    <div class="lang tech"><span class="tt">技术语言 · TECH</span>
+      <p>O-06 备库 promote runbook；O-07 migrations 001-007 应用；O-08 <code>pgapi_backfill -dry-run</code> 输出 MATCH/FAIL 清单；pgAPI 连接口径（CARH_DB_* / API_KEY）随副本切换。决策：FAIL 裁决人、接受标准、差异清零时间。</p>
+    </div>
+  </div>
+  <div class="opts"><span class="tt">选项与判据</span>
+    <ul>
+      <li>A. 任何 FAIL 均阻塞 G1（最严）；</li>
+      <li>B. FAIL 分类：客户/产品类阻塞，合同扩展字段可裁决放行（推荐）；</li>
+      <li>C. 全部放行只记录（风险高）。判据：FAIL 是否影响虹励可见订单。</li>
+    </ul>
+  </div>
+
+  <!-- R-09 -->
+  <h3 id="R-09"><span class="no">R-09</span> 企微通道不可达时的回退裁决（G9）</h3>
+  <div class="table-wrap meta"><table>
+    <tr><td>所属</td><td>v0.1 入口策略（PC 兜底 vs 企微）</td><td>建议决策人</td><td>项目 owner + 虹励</td></tr>
+    <tr><td>阻塞</td><td>V-A..V-F 未全绿时，v0.1 是否照发、虹励用什么入口</td><td>最迟时点</td><td>G2 前明确</td><td>状态</td><td><span class="tag amber">部分已定</span></td><td>v0.1 发布影响</td><td><span class="tag amber">影响 v0.1</span> <span class="mono" style="font-size:11px;">入口降级策略</span></td></tr>
+  </table></div>
+  <div class="langs">
+    <div class="lang scene"><span class="tt">场景语言 · SCENE</span>
+      <p>备案域名已就绪，但若企微侧边栏签名失败、卡片收不到，虹励怎么办？方案是先用 PC 订单后台（bridge_ui.html）下单和查单，企微作为增量入口后补。</p>
+    </div>
+    <div class="lang biz"><span class="tt">业务语言 · BUSINESS</span>
+      <p>入口降级不影响下单闭环本身：PC 页面可以完成授权、下单、状态回显。需要老板拍板「企微不绿是否算发布成功」，以及虹励能否接受先用 PC。</p>
+    </div>
+    <div class="lang tech"><span class="tt">技术语言 · TECH</span>
+      <p><code>/bridge</code> PC 页面与 <code>/assistant</code> 已实现；企微未过 = 关闭企微入口 + V-A..V-F 挂黄，API 与数据线照常验收。<strong>2026-08-20 实测：PC 兜底 /wecom/bridge、/wecom/assistant、api /assistant、/bridge 全 200；企微 official 模式已启用；正式回退口径仍待 owner + 虹励拍板落档。</strong></p>
+    </div>
+  </div>
+  <div class="opts"><span class="tt">选项与判据</span>
+    <ul>
+      <li>A. PC 先行，企微全绿后补开（推荐）；</li>
+      <li>B. 企微不绿不发；</li>
+      <li>C. R1 允许 PC、R2 必须企微。判据：虹励接受度 + 备案域名已就绪的剩余风险。</li>
+    </ul>
+  </div>
+
+  <!-- R-10 -->
+  <h3 id="R-10"><span class="no">R-10</span> UAT 签字与 Go/No-Go 五张表（含影子证据）</h3>
+  <div class="table-wrap meta"><table>
+    <tr><td>所属</td><td>发布执行（G2 门禁）</td><td>建议决策人</td><td>虹励（UAT）+ 业务 owner（签字）+ 发布指挥</td></tr>
+    <tr><td>阻塞</td><td>G2 生产放行决策的输入完整度</td><td>最迟时点</td><td>G2 会议前</td><td>状态</td><td><span class="tag red">未决</span></td><td>v0.1 发布影响</td><td><span class="tag red">阻塞 v0.1</span> <span class="mono" style="font-size:11px;">G2 放行决策输入</span></td></tr>
+  </table></div>
+  <div class="langs">
+    <div class="lang scene"><span class="tt">场景语言 · SCENE</span>
+      <p>生产发布前，虹励要在生产配置的预演环境走完 UAT 脚本并签字；发布指挥要凑齐范围达成、数据校验、UAT、预演、回退演练五张表。现在新增了影子轨，第五张表要不要加影子证据？</p>
+    </div>
+    <div class="lang biz"><span class="tt">业务语言 · BUSINESS</span>
+      <p>UAT 签字是业务方对「这一刀可以发」的正式承诺；五张表任何缺项都意味着 G2 没有决策依据。影子轨作为内部预演，其隔离与零出站证据也应进表，但不与客户体验项混权。</p>
+    </div>
+    <div class="lang tech"><span class="tt">技术语言 · TECH</span>
+      <p>B-07 UAT 脚本 v2 + 签字归档；Go/No-Go 五张表 + R1 证据包；新增影子轨证据（零出站哨兵、R1 影子重放基线）作为第五张表的附页。决策：签字人、会议时间、影子证据是否作为 G2 硬项。</p>
+    </div>
+  </div>
+  <div class="opts"><span class="tt">选项与判据</span>
+    <ul>
+      <li>A. 影子证据入表但不阻塞客户轨 GO（推荐，对应 12-shadow 文档口径）；</li>
+      <li>B. 影子证据为硬项，不绿不 GO；</li>
+      <li>C. 影子证据只进复盘不进门禁。判据：影子轨是「内部预演」的定位。</li>
+    </ul>
+  </div>
+
+  <!-- ===================== 组3 ===================== -->
+  <h2 id="g3"><span class="no">组3 ·</span> 影子全流程预演（SH-01..SH-08）</h2>
+  <p>来源：<code>docs/v0.1/12-shadow-full-flow.html</code>。影子轨整体方向已定（随 v0.1 同发、全栈形态），以下是其中仍待拍板的执行级决策。</p>
+  <div class="note"><span class="tt">状态更新 · 2026-08-20 · 7f4ec57</span><br/>代码侧 SH-01..SH-09/13/14/15 已实现、本地全栈预演通过并 commit <code>4e53763</code>；D-008（双轨）、D-009（无托底 / 全节点覆盖+差异映射可接受）、D-010（独立环境自带 shadow-temporal、v0.3 后撤销、≤1 万条/天）、D-011（多次发布 + 六同原则）四份决策已落档；D-012（新单实时增量模式）、D-013（v0.2 数据迁入新系统 / v0.3 企微体系发布完成）已落档。HR1：真实 status 映射基线 + JSONL 形态适配已按 tripartite-approval@f3ed1f80 完成，待业务签字与 detail 字段名冻结；HR2：pgAPI 只读凭据未决；SH-10/11/12 待环境执行；A13 影子驱动源推荐「影子侧种子」。逐项评审见 <code>v0.1发布影子系统待定.html</code>。</div>
+
+  <!-- SH-01 -->
+  <h3 id="SH-01"><span class="no">SH-01</span> D-008 决策记录与发布范围单更新（影子轨正式入版）</h3>
+  <div class="table-wrap meta"><table>
+    <tr><td>所属</td><td>影子轨立项 / 发布范围</td><td>建议决策人</td><td>项目 owner（方向已口头裁决，待落档）</td></tr>
+    <tr><td>阻塞</td><td>发布物清单未含影子容器与门禁章节</td><td>最迟时点</td><td>G1 前</td><td>状态</td><td><span class="tag green">已落档（D-008..D-011 · 4e53763）</span></td><td>v0.1 发布影响</td><td><span class="tag amber">影响 v0.1</span> <span class="mono" style="font-size:11px;">影子轨入发布物与门禁</span></td></tr>
+  </table></div>
+  <div class="langs">
+    <div class="lang scene"><span class="tt">场景语言 · SCENE</span>
+      <p>我们已经说好：完整状态机随 v0.1 一起发，但只给自己人做预演。可发布范围单上还写着「仅虹励 + 桥接」，现场同事拿着单子不知道影子栈该不该部署。</p>
+    </div>
+    <div class="lang biz"><span class="tt">业务语言 · BUSINESS</span>
+      <p>影子轨不进客户范围，但要进发布物、门禁、回滚手册和资源预算。不落档，它就是「口头功能」，出了分歧无法追责，也无法在 G2 引用其证据。</p>
+    </div>
+    <div class="lang tech"><span class="tt">技术语言 · TECH</span>
+      <p><strong>2026-08-20：</strong><code>project/decisions/D-008..D-011.yaml</code> 已写入并 commit；影子代码/迁移/compose/Makefile 一并提交。<strong>剩余：</strong>《0.1 发布物清单》增加 shadow 镜像 digest、E 线 runbook 增加影子轨起停与回滚章节、发布范围单签字。</p>
+    </div>
+  </div>
+  <div class="opts"><span class="tt">选项与判据</span>
+    <ul>
+      <li>A. 按用户裁决直接落 D-008（推荐）；</li>
+      <li>B. 再开一次评审会后落档。判据：是否还有人对「同发 + 全栈」有异议。</li>
+    </ul>
+  </div>
+
+  <!-- SH-02 -->
+  <h3 id="SH-02"><span class="no">SH-02</span> 影子事件源与权威映射表冻结（T1.3 升级版）</h3>
+  <div class="table-wrap meta"><table>
+    <tr><td>所属</td><td>影子数据线（摄入 + 事件→信号翻译）</td><td>建议决策人</td><td>现场程序员 + 业务方（虹励/财务/仓管侧逐条确认）</td></tr>
+    <tr><td>阻塞</td><td>影子预演结论的可信度；映射错=审计错</td><td>最迟时点</td><td>影子 R1 重放前冻结</td><td>状态</td><td><span class="tag amber">部分已定：真实 status 基线 + JSONL 适配完成，待业务签字</span></td><td>v0.1 发布影响</td><td><span class="tag amber">影响 v0.1</span> <span class="mono" style="font-size:11px;">影子 R1 重放与映射冻结</span></td></tr>
+  </table></div>
+  <div class="langs">
+    <div class="lang scene"><span class="tt">场景语言 · SCENE</span>
+      <p>飞书那边一次「主管通过」在 JSONL 里到底叫什么？「仓库发货 5 吨」的 5 吨存在哪个字段？如果翻译表没逐条核对，影子轨可能把「主管退回」当成「主管通过」，预演结论全错。</p>
+    </div>
+    <div class="lang biz"><span class="tt">业务语言 · BUSINESS</span>
+      <p>事件→信号映射是影子轨的「翻译官」，也是 v0.2 飞书通道复用的资产。业务方要确认每个动作的语义边界，特别是驳回/退回/转仓这类易混动作。</p>
+    </div>
+    <div class="lang tech"><span class="tt">技术语言 · TECH</span>
+      <p><strong>2026-08-20：</strong><code>config/shadow-feed.example.json</code> 已按 <code>tripartite-approval@f3ed1f80</code> 真实 status 枚举重写（35 条规则，含 ignore 语义）；<code>config/shadow-ingest.example.json</code> 适配真实 JSONL：决策事件无顶层 flow_id → <code>join_source</code> 按 instance_id 关联 orders.jsonl、嵌套 detail → FileFetcher 紧凑序列化。依赖 T1.1（16 表实际字段）与 T1.3（升级为状态+事件动作语义映射）；产出权威版并 git 冻结；未知事件一律 UNMAPPED 分歧。剩余：权威源裁决、业务逐条签字、detail 字段名冻结。</p>
+    </div>
+  </div>
+  <div class="opts"><span class="tt">选项与判据</span>
+    <ul>
+      <li>A. pgAPI approval-flows 为主源、JSONL 事件表补齐阶段细节（推荐）；</li>
+      <li>B. JSONL 全量为主源；</li>
+      <li>C. 双源对账互为校验。判据：T1.1 调研结果。</li>
+    </ul>
+  </div>
+
+  <!-- SH-03 -->
+  <h3 id="SH-03"><span class="no">SH-03</span> 影子重放口径：新单实时增量模式（D-012）</h3>
+  <div class="table-wrap meta"><table>
+    <tr><td>所属</td><td>影子轨首次运行（shadow-ingest / shadow-feed）</td><td>建议决策人</td><td>项目 owner（已裁决）+ 技术负责人</td></tr>
+    <tr><td>阻塞</td><td>已消除：不再依赖存量数据</td><td>最迟时点</td><td>T3 hook 主通道结论在影子 R1 前落档</td><td>状态</td><td><span class="tag green">已决：新单实时增量（D-012，2026-08-20）</span></td><td>v0.1 发布影响</td><td><span class="tag amber">影响 v0.1</span> <span class="mono" style="font-size:11px;">影子首跑覆盖口径</span></td></tr>
+  </table></div>
+  <div class="langs">
+    <div class="lang scene"><span class="tt">场景语言 · SCENE</span>
+      <p>客户在飞书下单 / 审批的同时，旧系统埋点（或飞书事件订阅）把新单事件实时推给影子；影子跟着把同一笔订单的完整流程重演一遍。历史存量不参与，目标是连续迭代验证 v0.2 的安全性。</p>
+    </div>
+    <div class="lang biz"><span class="tt">业务语言 · BUSINESS</span>
+      <p>v0.2 将数据正式迁入新系统（唯一真相），除销售 / 主管 / 董事长外全部岗位切到企微；v0.1 + 影子轨提前完成 v0.2 前的流程校验测试。影子只需证明能接住新单形状，采集必须准确（丢单=采集故障），重放结果允许与飞书不一致——差异即校验尺子。</p>
+    </div>
+    <div class="lang tech"><span class="tt">技术语言 · TECH</span>
+      <p>主通道：旧系统埋点或飞书事件订阅（T3 调研定）→ shadow-ingest 按新单水位过滤 → 幂等落 shadow_source_events → shadow-feed 翻译 Signal；JSONL / 列表每日对账兜底。修复后重放「受影响批次 + 上线以来新单全集 + 种子集」。</p>
+    </div>
+  </div>
+  <div class="opts"><span class="tt">选项与判据</span>
+    <ul>
+      <li>A. 新单实时增量 + 种子补边（<strong>已按 D-012 选定</strong>，推荐）；</li>
+      <li>B. 存量全量重放（降级为可选：仅当后续需要历史覆盖率时启动）；</li>
+      <li>C. 当前态接续（不再推荐，漏前半段差异）。</li>
+    </ul>
+  </div>
+
+  <!-- SH-04 -->
+  <h3 id="SH-04"><span class="no">SH-04</span> 影子部署拓扑确认（Temporal / SpiceDB / PG 置备）</h3>
+  <div class="table-wrap meta"><table>
+    <tr><td>所属</td><td>影子栈部署（docker-compose.shadow.yml）</td><td>建议决策人</td><td>运维 + 技术负责人</td></tr>
+    <tr><td>阻塞</td><td>影子专用环境的资源落实与部署验证</td><td>最迟时点</td><td>影子栈进入 R1 发布物前</td><td>状态</td><td><span class="tag green">方向已定：独立环境（D-010）</span></td><td>v0.1 发布影响</td><td><span class="tag amber">影响 v0.1</span> <span class="mono" style="font-size:11px;">影子栈部署拓扑</span></td></tr>
+  </table></div>
+  <div class="langs">
+    <div class="lang scene"><span class="tt">场景语言 · SCENE</span>
+      <p>生产主机上要再加一套影子栈：它和生产共用 Temporal 集群会不会拖慢真实审批卡片的推进？SpiceDB 能不能用内存实例？影子库的数据从哪条管线置备？运维需要一张明确的拓扑图。</p>
+    </div>
+    <div class="lang biz"><span class="tt">业务语言 · BUSINESS</span>
+      <p>影子轨铁律 6：影子故障不动 A 轨。拓扑选择直接决定这条铁律的物理强度，也决定主机资源和运维责任边界。</p>
+    </div>
+    <div class="lang tech"><span class="tt">技术语言 · TECH</span>
+      <p><strong>2026-08-20（D-010）：</strong><code>docker-compose.shadow.yml</code> 已自带 <code>shadow-temporal</code> 独立实例（连 shadow-postgres），不再共享宿主 17233；独立 <code>shadow-spicedb</code>（memory）与 <code>shadow-postgres</code>（127.0.0.1:15433）；独立 compose 项目 <code>-p b2b-shadow</code>，影子容器不可解析 A 轨任何主机名，<strong>共享面为零</strong>。待运维：目标环境起栈、端口回环/防火墙核对、探针与告警。</p>
+    </div>
+  </div>
+  <div class="opts"><span class="tt">选项与判据</span>
+    <ul>
+      <li>A. 独立 compose 项目 + 共用 Temporal（推荐，隔离审计 A-04 要求）；</li>
+      <li>B. Temporal 也独立实例（隔离最强，资源最多）；</li>
+      <li>C. 全部共用 + 影子租户（最省，隔离最弱，审计已否）。判据：主机资源、A 轨 SLO、12-shadow 附录 A 验收口径。</li>
+    </ul>
+  </div>
+
+  <!-- SH-05 -->
+  <h3 id="SH-05"><span class="no">SH-05</span> 影子审计指标阈值与 v0.2 Go 门槛审批</h3>
+  <div class="table-wrap meta"><table>
+    <tr><td>所属</td><td>影子审计口径 / v0.2 门禁</td><td>建议决策人</td><td>项目 owner + 技术负责人</td></tr>
+    <tr><td>阻塞</td><td>v0.2 数据迁入新系统的客观放行标准</td><td>最迟时点</td><td>影子 R1 基线报告后确认，v0.2 前冻结</td><td>状态</td><td><span class="tag amber">部分已定</span></td><td>v0.1 发布影响</td><td><span class="mono" style="font-size:11px; color:var(--ink2);">无 · v0.2 Go 门槛</span></td></tr>
+  </table></div>
+  <div class="langs">
+    <div class="lang scene"><span class="tt">场景语言 · SCENE</span>
+      <p>影子报告出来：边覆盖 45%，还有 2 个 P1 分歧。老板问：这算可以开始迁商务/财务/仓管，还是继续修？没人拍过「多少算够」。</p>
+    </div>
+    <div class="lang biz"><span class="tt">业务语言 · BUSINESS</span>
+      <p>阈值就是 v0.2 的 Go/No-Go 线：太松，带着问题让真人办理；太紧，v0.2 永远发不出去。业务方需要理解并批准这个线，而不是技术单方定。</p>
+    </div>
+    <div class="lang tech"><span class="tt">技术语言 · TECH</span>
+      <p>文档草案：四主段 happy path 真实数据 100%、总边覆盖 ≥60%（稀缺边 seed 补齐）、无未裁决 P0/P1、连续 7 日无新增 P0/P1、卡住清单 N 天阈值。决策：具体数字与例外升级路径。</p>
+    </div>
+  </div>
+  <div class="opts"><span class="tt">选项与判据</span>
+    <ul>
+      <li>A. 批准草案阈值（推荐）；</li>
+      <li>B. 放宽为 happy path 100% + P0=0，P1 可带条件；</li>
+      <li>C. 收紧为总边 ≥80%。判据：v0.2 前影子可运行天数。</li>
+    </ul>
+  </div>
+
+  <!-- SH-06 -->
+  <h3 id="SH-06"><span class="no">SH-06</span> PRE / Gatekeeper 影子种子场景范围</h3>
+  <div class="table-wrap meta"><table>
+    <tr><td>所属</td><td>影子轨全量 79 边覆盖的补齐方式</td><td>建议决策人</td><td>技术负责人 + 测试负责人</td></tr>
+    <tr><td>阻塞</td><td>PRE 13 边 + Gatekeeper 2 边无真实数据来源时的覆盖口径</td><td>最迟时点</td><td>影子 R1 重放前给出种子清单</td><td>状态</td><td><span class="tag amber">方向已定：内部 seed 补齐并标 source=seed</span></td><td>v0.1 发布影响</td><td><span class="tag amber">影响 v0.1</span> <span class="mono" style="font-size:11px;">影子 R1 全量边覆盖验收</span></td></tr>
+  </table></div>
+  <div class="langs">
+    <div class="lang scene"><span class="tt">场景语言 · SCENE</span>
+      <p>0.1 自动下单没开，没有真实群消息生成预订单；也没有真实客户群发消息。PRE 和守门员这些边怎么练？总不能为了凑覆盖率给客户发测试卡片。</p>
+    </div>
+    <div class="lang biz"><span class="tt">业务语言 · BUSINESS</span>
+      <p>种子场景能证明「代码路径可用」，但不能冒充真实业务证据。报告里必须分清哪些边是真实数据覆盖、哪些是内部种子覆盖，老板看数时才不会被误导。</p>
+    </div>
+    <div class="lang tech"><span class="tt">技术语言 · TECH</span>
+      <p>PRE：内部种子事件集（DRAFT → 确认/修改/忽略/升级 → 正式订单）走 <code>PreOrderWorkflow</code>；Gatekeeper：内部测试账号在 shadow-api 跑 Pending → Confirmed/Cancelled；<code>shadow_coverage.source</code> 区分 real/seed。决策：种子场景清单与执行频率。</p>
+    </div>
+  </div>
+  <div class="opts"><span class="tt">选项与判据</span>
+    <ul>
+      <li>A. 按 FSM 边逐条造最小种子（推荐）；</li>
+      <li>B. 只跑 happy path，异常边挂「未覆盖」；</li>
+      <li>C. 等真实自动下单恢复再补。判据：v0.2 是否涉及 PRE/守门员能力。</li>
+    </ul>
+  </div>
+
+  <!-- SH-07 -->
+  <h3 id="SH-07"><span class="no">SH-07</span> 影子分歧处置权限与 v0.2 阻塞口径</h3>
+  <div class="table-wrap meta"><table>
+    <tr><td>所属</td><td>分歧分类裁决（FSM_GAP / LEGACY_ANOMALY 等）</td><td>建议决策人</td><td>技术负责人 + 业务方 + 项目 owner</td></tr>
+    <tr><td>阻塞</td><td>每条 P0/P1 的「谁拍板、谁修、修到哪」</td><td>最迟时点</td><td>首次影子分歧评审会前定好流程</td><td>状态</td><td><span class="tag amber">部分已定</span></td><td>v0.1 发布影响</td><td><span class="mono" style="font-size:11px; color:var(--ink2);">无 · v0.2 阻塞口径/影子运行流程</span></td></tr>
+  </table></div>
+  <div class="langs">
+    <div class="lang scene"><span class="tt">场景语言 · SCENE</span>
+      <p>影子轨报出两条：一是「飞书允许无回单开票、我们的 FSM 也能走，但映射表没配」；二是「飞书自己有一单状态跳得莫名其妙」。前者改配置，后者该谁认账？谁决定它算不算 bug？</p>
+    </div>
+    <div class="lang biz"><span class="tt">业务语言 · BUSINESS</span>
+      <p>分歧裁决 = 责任归属：是我们的状态机要改，还是旧系统脏数据、还是同步缺口。没有明确裁决人，分歧清单只会越堆越多，v0.2 门禁失去意义。</p>
+    </div>
+    <div class="lang tech"><span class="tt">技术语言 · TECH</span>
+      <p><code>shadow_divergences</code> 四分类 + severity + owner + fix_commit + replay_run_id；FSM_GAP 改 domain/workflows + L0-L3；LEGACY_ANOMALY 列 v0.3 清洗清单。决策：分类裁决人、P0/P1 定义、接受例外流程、评审会节奏。</p>
+    </div>
+  </div>
+  <div class="opts"><span class="tt">选项与判据</span>
+    <ul>
+      <li>A. 每周影子分歧评审会，P0 当日裁决（推荐）；</li>
+      <li>B. 技术先修，业务后补认；</li>
+      <li>C. 全部等 v0.2 前一次清。判据：分歧产生速度。</li>
+    </ul>
+  </div>
+
+  <!-- SH-08 -->
+  <h3 id="SH-08"><span class="no">SH-08</span> 影子数据生命周期与实施排期</h3>
+  <div class="table-wrap meta"><table>
+    <tr><td>所属</td><td>影子运维（保留期/备份/清理） + SH-01..SH-12 排期</td><td>建议决策人</td><td>运维 + 项目 owner</td></tr>
+    <tr><td>阻塞</td><td>teardown runbook 与责任人落实</td><td>最迟时点</td><td>v0.3 上线前写好 runbook</td><td>状态</td><td><span class="tag green">方向已定：v0.3 后撤销（D-010）</span></td><td>v0.1 发布影响</td><td><span class="tag amber">影响 v0.1</span> <span class="mono" style="font-size:11px;">影子轨排期与数据合规</span></td></tr>
+  </table></div>
+  <div class="langs">
+    <div class="lang scene"><span class="tt">场景语言 · SCENE</span>
+      <p>影子库每天复制一批真实订单，里面是客户和金额数据。放多久？删不删？另外，离发布只剩一天，SH-01..SH-12 是挤进这周，还是和 v0.1 并行、晚两天补上？</p>
+    </div>
+    <div class="lang biz"><span class="tt">业务语言 · BUSINESS</span>
+      <p>第二份副本意味着敏感数据暴露面扩大一倍，必须明确保留期与访问人；排期则决定影子轨是「随 v0.1 同发」还是「挂着名义后补」——用户已要求同发，需要把资源落实。</p>
+    </div>
+    <div class="lang tech"><span class="tt">技术语言 · TECH</span>
+      <p><strong>2026-08-20（D-010）：</strong>影子库运行到 v0.3 正式上线后撤销；撤销前按 D-011 可多次发布影子系统；teardown=归档报告/分歧/覆盖基线 → 停栈 → drop b2b_shadow → 回收只读凭据；不设常规备份（可从真相源重建）。剩余：teardown runbook 定稿、开发/运维/审计三责任人指定。</p>
+    </div>
+  </div>
+  <div class="opts"><span class="tt">选项与判据</span>
+    <ul>
+      <li>A. 保留 30 天、随 R1/R2 同发（推荐）；</li>
+      <li>B. 保留 90 天、单独排期；</li>
+      <li>C. 影子轨延迟到 R2 后一周（与用户裁决冲突）。判据：合规要求与开发人力。</li>
+    </ul>
+  </div>
+
+  <!-- ===================== 组4 ===================== -->
+  <h2 id="g4"><span class="no">组4 ·</span> v0.2 / v0.3 路线（V2-01..V2-11）</h2>
+  <p>来源：<code>v0.2_设计_preview.html</code>（讨论稿）与 <code>docs/发布计划v2/渐进式发布计划v2.html</code>。这些不阻塞 v0.1 第一刀，但越早裁决，影子轨与 v0.2 施工方向越稳。</p>
+
+  <!-- V2-01 -->
+  <h3 id="V2-01"><span class="no">V2-01</span> 是否采纳「旧复杂流程冻结 + 单节点飞书 + 新系统当真相」路线</h3>
+  <div class="table-wrap meta"><table>
+    <tr><td>所属</td><td>v0.2 总体路线（preview 核心结论）</td><td>建议决策人</td><td>项目 owner</td></tr>
+    <tr><td>阻塞</td><td>v0.2 所有设计与施工的方向</td><td>最迟时点</td><td>v0.2 设计定稿前</td><td>状态</td><td><span class="tag red">未决</span></td><td>v0.1 发布影响</td><td><span class="mono" style="font-size:11px; color:var(--ink2);">无 · v0.2+ 路线</span></td></tr>
+  </table></div>
+  <div class="langs">
+    <div class="lang scene"><span class="tt">场景语言 · SCENE</span>
+      <p>v0.2 时商务/财务/仓管在企微办理，销售/主管/董事长还要用飞书。preview 的答案是：旧飞书复杂流程不再接新单、冻结归档；飞书侧只新建几个单节点审批给这三个角色；新系统当唯一状态机和数据真相。</p>
+    </div>
+    <div class="lang biz"><span class="tt">业务语言 · BUSINESS</span>
+      <p>这条路线把「v0.3 全量切换=重新发一次项目」的问题消解成「回填+对账」，是 preview 多轮讨论后的最优解。但它意味着旧系统提前退出业务，需要老板确认业务上可接受。</p>
+    </div>
+    <div class="lang tech"><span class="tt">技术语言 · TECH</span>
+      <p>采纳后：新系统补全 v0.2 全流程能力（信号/待办/通用 REST）；新建轻量飞书通道服务；旧复杂流程只读归档；<code>internal/bridge</code> 作为临时兼容层逐步退场。影子轨的映射与对账资产直接复用到这条路线。</p>
+    </div>
+  </div>
+  <div class="opts"><span class="tt">选项与判据</span>
+    <ul>
+      <li>A. 采纳 preview 路线（推荐）；</li>
+      <li>B. 维持原受信通道路线（旧系统继续当真相）；</li>
+      <li>C. 双路线并行评估到 v0.1 后再定。判据：对旧系统改造的容忍度 + 最终下飞书的决心。</li>
+    </ul>
+  </div>
+
+  <!-- V2-02 -->
+  <h3 id="V2-02"><span class="no">V2-02</span> 飞书通道服务部署形态</h3>
+  <div class="table-wrap meta"><table>
+    <tr><td>所属</td><td>v0.2 飞书通道服务</td><td>建议决策人</td><td>架构师 + 旧系统负责人</td></tr>
+    <tr><td>阻塞</td><td>通道服务的开发归属与运维边界</td><td>最迟时点</td><td>v0.2 设计定稿前</td><td>状态</td><td><span class="tag red">未决</span></td><td>v0.1 发布影响</td><td><span class="mono" style="font-size:11px; color:var(--ink2);">无 · v0.2+</span></td></tr>
+  </table></div>
+  <div class="langs">
+    <div class="lang scene"><span class="tt">场景语言 · SCENE</span>
+      <p>销售在飞书点「同意」审价，这个动作要经过一个「飞书通道服务」翻译成新系统信号。这个服务放在旧系统仓库里当模块，还是独立部署一个服务、甚至独立飞书应用？</p>
+    </div>
+    <div class="lang biz"><span class="tt">业务语言 · BUSINESS</span>
+      <p>部署形态决定谁维护、谁上线、故障时谁背锅。旧系统仓库内模块最省事但耦合旧系统；独立服务最干净但要新应用/新域名/新审批。</p>
+    </div>
+    <div class="lang tech"><span class="tt">技术语言 · TECH</span>
+      <p>候选：旧系统仓库内独立模块（复用现有 Express/审批定义）/ 独立 Go/Node 服务 + 新飞书自建应用 / 复用旧应用多 approval_code。影响 open_id 映射、回调签名、关联表与发布流程。</p>
+    </div>
+  </div>
+  <div class="opts"><span class="tt">选项与判据</span>
+    <ul>
+      <li>A. 独立轻量服务 + 独立飞书应用（preview 倾向）；</li>
+      <li>B. 旧系统仓库内模块（快但继续耦合）；</li>
+      <li>C. 复用旧应用多 approval_code。判据：旧系统冻结承诺是否包含其代码仓库。</li>
+    </ul>
+  </div>
+
+  <!-- V2-03 -->
+  <h3 id="V2-03"><span class="no">V2-03</span> 销售「信息确认」节点保留还是并入下单</h3>
+  <div class="table-wrap meta"><table>
+    <tr><td>所属</td><td>v0.2 销售下单流程</td><td>建议决策人</td><td>业务方（销售/主管）+ 项目 owner</td></tr>
+    <tr><td>阻塞</td><td>飞书单节点流程数量与下单体验</td><td>最迟时点</td><td>v0.2 设计定稿前</td><td>状态</td><td><span class="tag red">未决</span></td><td>v0.1 发布影响</td><td><span class="mono" style="font-size:11px; color:var(--ink2);">无 · v0.2+</span></td></tr>
+  </table></div>
+  <div class="langs">
+    <div class="lang scene"><span class="tt">场景语言 · SCENE</span>
+      <p>v0.2 销售在飞书 H5 下单，下完单还要不要多一步「信息确认」？旧流程有这一步（提交人核对），v0.1 对虹励的桥接单已经自动确认跳过。</p>
+    </div>
+    <div class="lang biz"><span class="tt">业务语言 · BUSINESS</span>
+      <p>保留节点多一次人工核对、少一份误下单风险；并入下单则销售少一步、主管审批更快。取决于公司对下单准确率的容忍度。</p>
+    </div>
+    <div class="lang tech"><span class="tt">技术语言 · TECH</span>
+      <p>保留 = 飞书侧多一个单节点审批 + 新系统多一个确认信号；并入 = <code>POST /api/v1/orders</code> 创建后直接推进至 <code>ORD_PRICE_REVIEWING</code>。映射表与影子轨相应调整。</p>
+    </div>
+  </div>
+  <div class="opts"><span class="tt">选项与判据</span>
+    <ul>
+      <li>A. 并入下单（体验顺，推荐先评估）；</li>
+      <li>B. 保留独立节点（稳）；</li>
+      <li>C. 大单保留、小单并入。判据：误下单历史频率。</li>
+    </ul>
+  </div>
+
+  <!-- V2-04 -->
+  <h3 id="V2-04"><span class="no">V2-04</span> 主管/董事长待办下发：轮询还是 webhook</h3>
+  <div class="table-wrap meta"><table>
+    <tr><td>所属</td><td>v0.2 飞书通道（待办推送）</td><td>建议决策人</td><td>技术负责人 + 业务方（时效要求）</td></tr>
+    <tr><td>阻塞</td><td>审批人多久能在飞书看到待办</td><td>最迟时点</td><td>v0.2 设计定稿前</td><td>状态</td><td><span class="tag red">未决</span></td><td>v0.1 发布影响</td><td><span class="mono" style="font-size:11px; color:var(--ink2);">无 · v0.2+</span></td></tr>
+  </table></div>
+  <div class="langs">
+    <div class="lang scene"><span class="tt">场景语言 · SCENE</span>
+      <p>销售主管在公司群里问：订单都提交十分钟了，飞书怎么还没待办？技术方案有两条：通道服务每分钟轮询新系统待办接口，或者新系统在有待办时主动发个通用 webhook 告诉通道。</p>
+    </div>
+    <div class="lang biz"><span class="tt">业务语言 · BUSINESS</span>
+      <p>轮询有分钟级延迟（preview 判断业务可接受）；webhook 近实时但要新系统增加出站通知机制。主管/董事长是低频审批人，延迟几分钟通常无感。</p>
+    </div>
+    <div class="lang tech"><span class="tt">技术语言 · TECH</span>
+      <p>轮询：通道服务调 <code>GET /api/v1/todos?assignee=...&state=PENDING</code>；webhook：新系统发通用 HTTP webhook（不算飞书支持）+ 签名/重试。决策：先轮询（推荐）还是直接 webhook，或轮询 + 关键节点 webhook 混合。</p>
+    </div>
+  </div>
+  <div class="opts"><span class="tt">选项与判据</span>
+    <ul>
+      <li>A. 先轮询，v0.3 按需升级 webhook（推荐）；</li>
+      <li>B. 直接 webhook；</li>
+      <li>C. 混合。判据：审批人对延迟的实际敏感度。</li>
+    </ul>
+  </div>
+
+  <!-- V2-05 -->
+  <h3 id="V2-05"><span class="no">V2-05</span> 存量单收口规则（P0-2）</h3>
+  <div class="table-wrap meta"><table>
+    <tr><td>所属</td><td>v0.2 新旧流程边界（存量单）</td><td>建议决策人</td><td>业务方 + 项目 owner</td></tr>
+    <tr><td>阻塞</td><td>v0.2 发布当天进行中订单走哪条流程</td><td>最迟时点</td><td>第 2 次发布前（P0-2）</td><td>状态</td><td><span class="tag red">未决</span></td><td>v0.1 发布影响</td><td><span class="mono" style="font-size:11px; color:var(--ink2);">无 · 第 2 次发布前</span></td></tr>
+  </table></div>
+  <div class="langs">
+    <div class="lang scene"><span class="tt">场景语言 · SCENE</span>
+      <p>v0.2 上线那一刻，飞书里还有几十笔进行中的备货/发货/开票单。这些单继续在飞书办完，还是切到新系统？销售会不会两边都有待办？</p>
+    </div>
+    <div class="lang biz"><span class="tt">业务语言 · BUSINESS</span>
+      <p>存量单规则（新单新办法、存量单飞书走完）是第 2 次发布前必须定稿的 P0-2。规则不清，业务方会在两个系统之间来回找单，甚至双通道并发办同一单。</p>
+    </div>
+    <div class="lang tech"><span class="tt">技术语言 · TECH</span>
+      <p>候选：按 flow_id 批次生效 / 按发布时间点切 / 按角色分。实现上需要一个「切换开关」判定订单走新流程还是旧流程；影子轨的存量订单处理经验（PREFIX_GAP 等）可直接参考。</p>
+    </div>
+  </div>
+  <div class="opts"><span class="tt">选项与判据</span>
+    <ul>
+      <li>A. 新单新办法 + 存量单飞书走完（preview 默认，推荐）；</li>
+      <li>B. 按时间点整体切换；</li>
+      <li>C. 按角色分批切换。判据：存量单数量与收口时长。</li>
+    </ul>
+  </div>
+
+  <!-- V2-06 -->
+  <h3 id="V2-06"><span class="no">V2-06</span> 历史附件迁移范围</h3>
+  <div class="table-wrap meta"><table>
+    <tr><td>所属</td><td>v0.3 历史数据回填（附件）</td><td>建议决策人</td><td>业务方 + 运维 + 项目 owner</td></tr>
+    <tr><td>阻塞</td><td>回填工程范围与旧系统只读保留期</td><td>最迟时点</td><td>v0.3 回填方案设计前</td><td>状态</td><td><span class="tag red">未决</span></td><td>v0.1 发布影响</td><td><span class="mono" style="font-size:11px; color:var(--ink2);">无 · v0.3 回填</span></td></tr>
+  </table></div>
+  <div class="langs">
+    <div class="lang scene"><span class="tt">场景语言 · SCENE</span>
+      <p>历史订单有合同、出库单、回单照片、发票。v0.3 回填时是全部搬到新系统对象存储，还是新系统只迁订单/事件链，附件留在旧系统继续只读访问 6 个月？</p>
+    </div>
+    <div class="lang biz"><span class="tt">业务语言 · BUSINESS</span>
+      <p>附件迁移是回填工程的大头，涉及存储成本、敏感文件安全和「旧系统要保留多久」。业务方要权衡：查历史附件频率 vs 迁移投入。</p>
+    </div>
+    <div class="lang tech"><span class="tt">技术语言 · TECH</span>
+      <p>全量迁：文件本体迁对象存储（租户隔离+SSE），路径引用迁 <code>evidence_versions</code>；不迁：新系统只存引用，详情跳旧系统只读（旧系统保留 6 个月）。影子轨的文件摄入/对账脚本可复用。</p>
+    </div>
+  </div>
+  <div class="opts"><span class="tt">选项与判据</span>
+    <ul>
+      <li>A. 订单/事件链全迁 + 附件按需后迁（推荐）；</li>
+      <li>B. 全量迁；</li>
+      <li>C. 附件不迁、旧系统保留只读 6 个月。判据：历史附件查询频率与存储成本。</li>
+    </ul>
+  </div>
+
+  <!-- V2-07 -->
+  <h3 id="V2-07"><span class="no">V2-07</span> v0.3 是否正式定义为「数据回填 + 对账验收」</h3>
+  <div class="table-wrap meta"><table>
+    <tr><td>所属</td><td>v0.3 版本定义</td><td>建议决策人</td><td>项目 owner</td></tr>
+    <tr><td>阻塞</td><td>团队对 v0.3 的定位与工作量认知</td><td>最迟时点</td><td>v0.2 定稿时一并确认</td><td>状态</td><td><span class="tag red">未决</span></td><td>v0.1 发布影响</td><td><span class="mono" style="font-size:11px; color:var(--ink2);">无 · v0.3 定义</span></td></tr>
+  </table></div>
+  <div class="langs">
+    <div class="lang scene"><span class="tt">场景语言 · SCENE</span>
+      <p>preview 说 v0.3 不再是「重新发一次项目的大切换」，而是一次数据回填 + 四层对账 + 旧系统归档。团队听到这个定义，排期和压力完全不一样。</p>
+    </div>
+    <div class="lang biz"><span class="tt">业务语言 · BUSINESS</span>
+      <p>版本定义决定资源投入和风险预期：按「切换项目」对待要单独排演练窗口；按「数据迁移验收」对待则嵌入常规迭代。preview 结论是后者。</p>
+    </div>
+    <div class="lang tech"><span class="tt">技术语言 · TECH</span>
+      <p>定义变更影响：migrations 排期、回填批次（migration_batches 幂等）、四层对账脚本、旧系统只读归档策略；影子轨 SH 系列直接作为 v0.3 的演练资产。需老板签字确认。</p>
+    </div>
+  </div>
+  <div class="opts"><span class="tt">选项与判据</span>
+    <ul>
+      <li>A. 正式采纳 preview 定义（推荐）；</li>
+      <li>B. 仍按切换项目对待；</li>
+      <li>C. 等 v0.2 上线后再评估。判据：v0.2 全流程建设是否真的如期完成。</li>
+    </ul>
+  </div>
+
+  <!-- V2-08 -->
+  <h3 id="V2-08"><span class="no">V2-08</span> 第 2 次发布角色灰度顺序与开票范围修正（P0-4）</h3>
+  <div class="table-wrap meta"><table>
+    <tr><td>所属</td><td>v0.2 数据迁入与三角色迁入边界</td><td>建议决策人</td><td>业务方 + 项目 owner</td></tr>
+    <tr><td>阻塞</td><td>商务/财务/仓管三角色的放行顺序与「开票盖章回传」是否留到 v0.3</td><td>最迟时点</td><td>第 2 次发布前（P0-4）</td><td>状态</td><td><span class="tag amber">部分已定</span></td><td>v0.1 发布影响</td><td><span class="mono" style="font-size:11px; color:var(--ink2);">无 · 第 2 次发布前</span></td></tr>
+  </table></div>
+  <div class="langs">
+    <div class="lang scene"><span class="tt">场景语言 · SCENE</span>
+      <p>v0.2 要一次迁三个角色，但谁先灰度？商务先办备货，还是财务先确认到款？另外开票「盖章回传」是销售的动作，放在 v0.2 还是 v0.3？preview 说留 v0.3。</p>
+    </div>
+    <div class="lang biz"><span class="tt">业务语言 · BUSINESS</span>
+      <p>角色灰度顺序影响业务连续性和故障面；开票范围必须早说清，否则财务会以为 v0.2 能办盖章回传，结果没有入口。这是 P0-4：边界不清会返工。</p>
+    </div>
+    <div class="lang tech"><span class="tt">技术语言 · TECH</span>
+      <p>三个角色共用受信办理通道，按角色开关 + flow_id 批次灰度；v0.2 范围=备货选仓/确认到款/发货/回单，盖章回传与开票信息填写留 v0.3。决策：灰度顺序（建议商务→财务→仓管或商务→仓管→财务）与开关策略。</p>
+    </div>
+  </div>
+  <div class="opts"><span class="tt">选项与判据</span>
+    <ul>
+      <li>A. 商务 → 仓管 → 财务（按流程上下游，推荐）；</li>
+      <li>B. 商务 → 财务 → 仓管（按款到链路）；</li>
+      <li>C. 三角色同批全开。判据：哪个角色在飞书有最多存量待办。</li>
+    </ul>
+  </div>
+
+  <!-- V2-09 -->
+  <h3 id="V2-09"><span class="no">V2-09</span> 受信通道两个补丁的归属与批准（P0-3）</h3>
+  <div class="table-wrap meta"><table>
+    <tr><td>所属</td><td>第 2 次发布命门（受信办理通道）</td><td>建议决策人</td><td>项目 owner + 旧系统负责人</td></tr>
+    <tr><td>阻塞</td><td>新系统办理结果写回旧系统的真实性（operator）与防双办（幂等锁）</td><td>最迟时点</td><td>第 2 次发布前（P0-3）</td><td>状态</td><td><span class="tag red">未决</span></td><td>v0.1 发布影响</td><td><span class="mono" style="font-size:11px; color:var(--ink2);">无 · 第 2 次发布前</span></td></tr>
+  </table></div>
+  <div class="langs">
+    <div class="lang scene"><span class="tt">场景语言 · SCENE</span>
+      <p>商务在企微点「备货通过」，新系统要调旧系统 decision 接口推进。问题：旧系统审计记录里操作人是占位符 "(stock-prepare-web-approver)"，查不出是谁办的；而且新系统待办和飞书残留待办可能同时点同一个任务，谁能办两次？</p>
+    </div>
+    <div class="lang biz"><span class="tt">业务语言 · BUSINESS</span>
+      <p>真实操作人决定审计可追溯（谁办的要能查）；幂等锁防止双通道并发办同一单造成业务混乱。两者都是第 2 次发布前必须补齐的 P0-3，且都动旧系统。</p>
+    </div>
+    <div class="lang tech"><span class="tt">技术语言 · TECH</span>
+      <p>补丁 1：受信端点透传新系统用户身份替换占位符；补丁 2：旧系统或新系统侧加 task_id 级幂等锁（重复办理返回 ALREADY）。需要决定：放在旧系统（推荐，权威）还是新系统侧锁 + 旧系统终态检测兜底。</p>
+    </div>
+  </div>
+  <div class="opts"><span class="tt">选项与判据</span>
+    <ul>
+      <li>A. 两个补丁都落旧系统（推荐，真相侧兜底）；</li>
+      <li>B. operator 落旧系统、幂等锁落新系统；</li>
+      <li>C. 都在新系统（旧系统仍可被飞书残留待办绕过）。判据：旧系统改动容忍度。</li>
+    </ul>
+  </div>
+
+  <!-- V2-10 -->
+  <h3 id="V2-10"><span class="no">V2-10</span> T1.3 状态语义拍板（G7 / P0-7）与 pgAPI 切换后定位（G12 / P0-10）</h3>
+  <div class="table-wrap meta"><table>
+    <tr><td>所属</td><td>状态机接轨 + 真相源演进（两项数据决策）</td><td>建议决策人</td><td>业务方 + 数据方 + 项目 owner</td></tr>
+    <tr><td>阻塞</td><td>新系统状态机接住所有中间状态；防止 pgAPI 镜像覆盖新真相</td><td>最迟时点</td><td>第 3 次切换前必须拍板；影子轨需要其前半段（T1.3 映射）提前冻结</td><td>状态</td><td><span class="tag amber">部分已定</span></td><td>v0.1 发布影响</td><td><span class="tag amber">影响 v0.1</span> <span class="mono" style="font-size:11px;">T1.3 状态/事件映射是影子轨与同步前置</span></td></tr>
+  </table></div>
+  <div class="langs">
+    <div class="lang scene"><span class="tt">场景语言 · SCENE</span>
+      <p>飞书状态叫「已驳回 / 待发货 / 已开票」，新系统叫 <code>ORD_REJECTED / SHP_SHIP_ASSIGNING / INV_INVOICED</code>。哪五个关键状态语义必须一一对应？另外，切换后 pgAPI 还在从飞书同步旧数据，会不会把新系统的真相又覆盖回旧值？</p>
+    </div>
+    <div class="lang biz"><span class="tt">业务语言 · BUSINESS</span>
+      <p>状态语义映射错，订单会在两个系统显示两种状态，业务方不知道该信谁；pgAPI 定位不清，切换后的台账镜像可能反过来污染新真相。这两项是第 3 次发布前的硬决策（G7/G12）。</p>
+    </div>
+    <div class="lang tech"><span class="tt">技术语言 · TECH</span>
+      <p><strong>2026-08-20：</strong>真实 status ↔ Signal 对照表已按旧系统代码 f3ed1f80 生成（业务签字前为代码事实基线）。T1.3 升级为「状态 + 事件动作语义映射」并冻结（影子轨 SH-02 复用）；G12 选项：切换后停飞书→pgAPI 上游同步，pgAPI 只读历史 / 新系统接管写 approval-flows 作为台账镜像。决策：映射权威表 + pgAPI 写入归属。</p>
+    </div>
+  </div>
+  <div class="opts"><span class="tt">选项与判据</span>
+    <ul>
+      <li>A. T1.3 先冻结（影子轨前置），pgAPI 定位随 v0.2 定（推荐）；</li>
+      <li>B. 两项都拖到第 3 次前再拍（风险高）；</li>
+      <li>C. pgAPI 切换后由新系统接管写入。判据：影子轨对映射表的依赖时间。</li>
+    </ul>
+  </div>
+
+  <!-- V2-11 -->
+  <h3 id="V2-11"><span class="no">V2-11</span> 自动下单恢复条件与影子 PRE 数据的替代口径</h3>
+  <div class="table-wrap meta"><table>
+    <tr><td>所属</td><td>自动下单（会话存档 + 意图解析，M2/M3）与 PRE 影子覆盖</td><td>建议决策人</td><td>项目 owner + 技术负责人</td></tr>
+    <tr><td>阻塞</td><td>PRE 状态机何时有真实数据；0.1 影子轨只能用种子</td><td>最迟时点</td><td>备案/LLM 供应商就绪时评审；不影响 v0.1</td><td>状态</td><td><span class="tag amber">部分已定</span></td><td>v0.1 发布影响</td><td><span class="mono" style="font-size:11px; color:var(--ink2);">无 · 0.1 自动段已暂缓</span></td></tr>
+  </table></div>
+  <div class="langs">
+    <div class="lang scene"><span class="tt">场景语言 · SCENE</span>
+      <p>客户在企微群里说「再订 5 吨膨润土」，系统应该自动生成一张 DRAFT 卡等销售确认。这个能力因为企微会话存档备案没完成、LLM 供应商没定，现在开不了。影子轨里 PRE 的 13 条边只能拿内部种子练。</p>
+    </div>
+    <div class="lang biz"><span class="tt">业务语言 · BUSINESS</span>
+      <p>自动下单恢复涉及备案合规、AI 供应商成本和评测集，是独立决策门。恢复前 PRE 只能人工确认段运行；业务方需要知道「什么时候能回来」。</p>
+    </div>
+    <div class="lang tech"><span class="tt">技术语言 · TECH</span>
+      <p>恢复条件（07 §3.0）：企微会话存档备案完成、LLM 供应商与评测集就绪、SKU 映射表补齐；代码在 <code>-tags deferred</code> 保留。恢复后影子 PRE 从种子切换为真实群消息源。</p>
+    </div>
+  </div>
+  <div class="opts"><span class="tt">选项与判据</span>
+    <ul>
+      <li>A. 备案完成后单独立项恢复（推荐）；</li>
+      <li>B. 与 v0.2 一并恢复；</li>
+      <li>C. 长期停用、删除 deferred 代码（不推荐）。判据：备案与供应商时间表。</li>
+    </ul>
+  </div>
+
+  <!-- ===================== 附录 ===================== -->
+  <h2 id="g5"><span class="no">附录 ·</span> 已冻结/已暂缓、不列为待决策的项</h2>
+  <p>这些项目前有明确结论（暂缓/保留/启用），不是待决策问题；列出是为了划清边界，避免把「已决定的事」反复拿出来讨论。</p>
+
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>编号</th><th>事项</th><th>当前结论</th><th>再次打开的触发条件</th></tr></thead>
+    <tbody>
+      <tr><td>M1</td><td>锁库存 / 库存扣减链路</td><td>0.1 暂缓，表与约束保留</td><td>D-05 缺货数据齐备 + 产品到岗后</td></tr>
+      <tr><td>M2</td><td>会话存档自动拉取</td><td>0.1 暂缓（备案未完成）</td><td>企微会话存档备案完成</td></tr>
+      <tr><td>M3</td><td>意图解析自动建单</td><td>0.1 暂缓，人工确认段保留</td><td>LLM 供应商 + 评测集 + SKU 映射就绪</td></tr>
+      <tr><td>M4</td><td>Outbox 投影器消费侧</td><td>v0.1 已启用投影器（AUTH-03 收敛）</td><td>阶段二场景（代办 TTL / 联系人变更）</td></tr>
+      <tr><td>M6</td><td>客户联系人角色视图</td><td>0.1 不启用，表保留</td><td>客户自助物流查询需求</td></tr>
+      <tr><td>M8</td><td>多租户扩展</td><td>0.1 单租户（长安仁恒）</td><td>新客户签约</td></tr>
+      <tr><td>A8</td><td>自动下单移出一期</td><td>已裁决（同城企微备案未完成）</td><td>V2-11</td></tr>
+      <tr><td>D-006</td><td>流程数据 PG / 订单实体 pgAPI 二分</td><td>已裁决（Q1=A, Q2=A, Q3=B）</td><td>ECM 激活时复核</td></tr>
+      <tr><td>D-007</td><td>RHCRM 数据源 × v0.1 发布策略</td><td>已裁决（Q1=B 只读合同、Q2=U2、Q3=P3 可写副本）</td><td>合同写路径下一迭代上线前复核</td></tr>
+      <tr><td>影子轨形态</td><td>全栈影子栈随 v0.1 同发 + 独立环境 + v0.3 撤销</td><td>D-008..D-013 已落档（2026-08-20 · 7f4ec57）</td><td>发布范围单签字 / 发布物清单 / E 线 runbook 影子章节</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="note">
+    <div class="tt">关闭一个待决策问题的标准动作</div>
+    ① 决策人给出结论与日期 → ② 回填本登记册（状态改为「已决」，写结论）→ ③ 更新受影响的设计文档/配置/测试 → ④ 代码或配置变更提交并过门禁 → ⑤ 证据（截图/签字/提交号）入 <code>spec/evidence/</code> 或 <code>docs/history/</code>。只开会不下文档，不算关闭。
+  </div>
+
+  <footer class="colophon">
+    <span><a href="docs/v0.1/12-shadow-full-flow.html">12 · Shadow Full-Flow</a> · <a href="docs/发布计划v2/渐进式发布计划v2.html">发布计划 v2</a></span>
+    <span>待决策问题 · Decision Register</span>
+    <span>41 项登记 · 阻塞 9（7/1/1）· 影响 12 · 2026-08-20 · 7f4ec57</span>
+  </footer>
+
+</div>
+</body>
+</html>

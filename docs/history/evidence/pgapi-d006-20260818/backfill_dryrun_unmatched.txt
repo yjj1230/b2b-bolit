@@ -1,0 +1,9 @@
+MATCH customer cust-0001                -> rec_cust_0001            by customer_name
+MATCH customer cust-0002                -> rec_cust_0002            by customer_name
+MATCH product  prod-c68                 -> rec_prod_c68             by spec
+MATCH product  prod-d90                 -> rec_prod_d90             by spec
+FAIL  product prod-zzz (NOPE/不存在的产品): no exact product_name/spec match in pgAPI
+summary: customers=2 products=3 matched=4 problems=1
+backfill aborted: unresolved legacy ids; no data was modified
+exit status 2
+exit=1

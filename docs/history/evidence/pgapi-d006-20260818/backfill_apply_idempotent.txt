@@ -1,0 +1,7 @@
+MATCH customer cust-0001                -> rec_cust_0001            by customer_name
+MATCH customer cust-0002                -> rec_cust_0002            by customer_name
+MATCH product  prod-c68                 -> rec_prod_c68             by spec
+MATCH product  prod-d90                 -> rec_prod_d90             by spec
+summary: customers=2 products=2 matched=4 problems=0
+backfill applied: 4 mappings committed
+exit=0

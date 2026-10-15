@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>B2B 订单履约验证项目 · 文档索引</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+SC:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:#f5f4ed; --paper2:#efeee5; --ink:#1f1d18; --ink2:#6b665b;
+    --ink3:#3a382f; --blue:#1B365D; --rule:#d4d1c5;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif; line-height:1.6;}
+  .wrap{max-width:920px; margin:0 auto; padding:48px 40px 80px;}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;}
+  .folio{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--rule); padding-bottom:10px;
+    font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink2);}
+  .tag{display:inline-block; padding:3px 10px; font-size:11px; letter-spacing:.16em; background:var(--paper2); color:var(--blue);}
+  h1{font-size:clamp(34px,5.5vw,56px); line-height:1.12; font-weight:500; margin-top:14px; letter-spacing:-.01em;}
+  .lede{margin-top:18px; font-size:17.5px; line-height:1.7; color:var(--ink3); max-width:700px;}
+  .kicker{display:flex; align-items:baseline; gap:12px; margin-top:48px;}
+  h2{font-size:22px; font-weight:600; margin:44px 0 14px; color:var(--blue); display:flex; align-items:baseline; gap:10px;}
+  h2 .no{font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.12em;}
+  p{margin:10px 0; color:var(--ink3);}
+  a{color:var(--blue); text-decoration:none; border-bottom:1px solid var(--rule);}
+  a:hover{border-bottom-color:var(--blue);}
+  table{width:100%; border-collapse:collapse; margin:16px 0 24px; font-size:13.5px;}
+  th{background:var(--paper2); color:var(--blue); text-align:left; font-weight:600; padding:9px 12px; border-bottom:1.5px solid var(--blue); font-size:12.5px;}
+  td{padding:9px 12px; border-bottom:1px solid var(--rule); vertical-align:top; color:var(--ink3);}
+  tr:nth-child(even) td{background:#faf9f3;}
+  tr:hover td{background:#f0ede0;}
+  .doc-card{display:block; border:1px solid var(--rule); padding:22px 24px; margin:18px 0; color:var(--ink); transition:border-color .15s;}
+  .doc-card:hover{border-color:var(--blue);}
+  .doc-card .dno{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.14em; color:var(--blue);}
+  .doc-card .dt{font-size:20px; font-weight:600; margin:6px 0 6px;}
+  .doc-card .dd{font-size:14px; color:var(--ink2);}
+  .doc-card .role{display:inline-block; margin-top:10px; font-size:11px; letter-spacing:.12em; background:var(--paper2); color:var(--blue); padding:2px 8px;}
+  .mermaid{background:var(--paper); border:1px solid var(--rule); padding:18px; overflow-x:auto; text-align:center; margin:20px 0;}
+  .mermaid svg{max-width:100%; height:auto;}
+  .mermaid svg.statediagram span,.mermaid svg.statediagram div{color:#1f1d18 !important;}
+  .mermaid svg.statediagram text{fill:#1f1d18 !important;}
+  .table-wrap{overflow-x:auto; margin:16px 0 24px; border:1px solid var(--rule);}
+  .table-wrap table{margin:0;}
+  code{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace; font-size:13px; background:var(--paper2); padding:1px 5px;}
+  pre{background:var(--paper2); border:1px solid var(--rule); padding:16px 18px; overflow-x:auto; font-size:13px; line-height:1.55; margin:14px 0;}
+  pre code{background:none; padding:0;}
+  footer.colophon{margin-top:56px; padding-top:14px; border-top:1px solid var(--rule); display:flex; justify-content:space-between;
+    font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink2);}
+  @media(max-width:720px){.wrap{padding:28px 20px 60px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="folio">
+    <span>B2B · Order Fulfillment</span>
+    <span>Docs Index · v1.0</span>
+    <span>Go · PG · SpiceDB · Temporal · WeCom</span>
+  </header>
+
+  <div class="kicker">
+    <span class="tag">Documentation</span>
+    <span class="mono" style="font-size:11px; letter-spacing:.18em; color:var(--ink2);">索引 · Index</span>
+  </div>
+
+  <h1>长安仁恒订单履约<br/><span style="font-style:italic; color:var(--blue);">验证项目 · 文档家族</span></h1>
+
+  <p class="lede">Go · PostgreSQL · SpiceDB（RBAC/ReBAC）· Temporal · 企业微信 —— 长安仁恒订单履约闭环（ORD → STK → SHP → INV）baseline 版本：业务流落地 + 技术实施的整合验证，兼作对外客户演示样板。八份文档以「核心图谱」为起点向外派生，最终以 roundtrip 闭环回到图谱验收；企微接入独立成文（多备案切换）。</p>
+
+  <div style="border:1.5px solid var(--blue); background:var(--paper2); padding:18px 22px; margin:28px 0;">
+    <div style="font-size:11px; letter-spacing:.2em; color:var(--blue); font-family:'IBM Plex Mono',monospace; margin-bottom:6px;">★ 最新发布版 · 0.1 订单助手（08-21 上线 · 仅虹励商务）</div>
+    <p style="margin:0 0 8px; color:var(--ink3);">以 <strong>ord_fulfill demo</strong> 为裁决源的 11 章节重构文档家族：双 graph / 产品 / 交互 / 架构 / 业务流程 / 企微对接 / 数据库 / API / 测试 / 部署 / 迁移。0.1 上线方式：不打扰现有飞书流程，原审批流不停，数据同步进本系统流里可见可操作。</p>
+    <a href="v0.1/index.html" style="font-weight:600;">进入 v0.1 文档家族 →</a>
+    <span style="margin:0 10px; color:var(--ink2);">·</span>
+    <a href="gap-analysis.md">差距分析（gap-analysis.md）</a>
+  </div>
+
+  <h2><span class="no">01</span> 文档家族</h2>
+  <p>阅读顺序 = 编号顺序（05 / 06 为实施后回填的报告模板）：</p>
+
+  <a class="doc-card" href="01-core-graph.html">
+    <span class="dno">01 · CORE GRAPH</span>
+    <div class="dt">核心图谱 · 世界知识图谱 + 任务图谱</div>
+    <div class="dd">15 个能力问题 + 本体 + ER + SpiceDB schema + 事件图；ORD/STK/SHP/INV 四流程 + 预订单状态机与编排规则。</div>
+    <span class="role">🧭 所有设计的核心与起点</span>
+  </a>
+
+  <a class="doc-card" href="02-architecture.html">
+    <span class="dno">02 · ARCHITECTURE</span>
+    <div class="dt">架构设计</div>
+    <div class="dd">总体架构、Temporal 主流程/子流程/Signal/Timer、SpiceDB 三层授权、数据库设计、7 层业务守恒防线、幂等、ADR。</div>
+    <span class="role">派生自核心图谱</span>
+  </a>
+
+  <a class="doc-card" href="03-testing.html">
+    <span class="dno">03 · TESTING</span>
+    <div class="dt">测试文档 · L 级别分层 + Score Card</div>
+    <div class="dd">L0-L3 分层、49 个用例 Score Card、覆盖率门禁（domain 100% 硬门禁 / 全仓 85% 门禁，目标 ≥98%）、CQ → 测试 roundtrip 映射。</div>
+    <span class="role">验证所有设计</span>
+  </a>
+
+  <a class="doc-card" href="04-development-plan.html">
+    <span class="dno">04 · DEVELOPMENT PLAN</span>
+    <div class="dt">开发计划</div>
+    <div class="dd">Phase 0 决策门、M0-M8 里程碑、行动清单、DoD、关键路径、投入预估（约 16 人日）、验收口径。</div>
+    <span class="role">行动计划</span>
+  </a>
+
+  <a class="doc-card" href="05-roundtrip-report.html">
+    <span class="dno">05 · ROUNDTRIP REPORT</span>
+    <div class="dt">图谱 Roundtrip 验证报告（模板）</div>
+    <div class="dd">实施后回填：15 个 CQ 由 code-review-graph 读回代码图逐条回答，预填设计期预期锚点与验收判据。</div>
+    <span class="role">里程碑验收</span>
+  </a>
+
+  <a class="doc-card" href="06-testing-retrospective.html">
+    <span class="dno">06 · TESTING RETROSPECTIVE</span>
+    <div class="dt">测试复盘（模板）</div>
+    <div class="dd">实施后回填：覆盖率实测、风险登记 R1-Rn、倒推影响面五梯队、经验教训（含 pilot_app 复盘教训预埋）。</div>
+    <span class="role">里程碑复盘</span>
+  </a>
+
+  <a class="doc-card" href="07-wecom-integration.html">
+    <span class="dno">07 · WECOM INTEGRATION</span>
+    <div class="dt">企微接入设计（独立生命周期）</div>
+    <div class="dd">S1-S4 场景、会话内容存档（5 天窗口/两段解密/checkpoint）、意图识别 AI 安全边界、出站通道、多备案切换管理。</div>
+    <span class="role">横切文档 · 独立演进 · 业务流事实源</span>
+  </a>
+
+  <a class="doc-card" href="07a-wecom-interaction-prd.html">
+    <span class="dno">07A · INTERACTION PRD</span>
+    <div class="dt">企微交互 PRD · UI 层面（与 07 互补）</div>
+    <div class="dd">UI 交互规范：S1 侧边栏 H5（三入口/面板 IA/字段投影）、S2 预订单确认卡片（三按钮/升级）、S3 应用消息卡片（审批/催办/状态/回单异常）、S4 工作台、反馈三态与错误文案、W4 交互验收清单（U1-U14）。</div>
+    <span class="role">呈现层规范 · 每节标注 → 07 来源</span>
+  </a>
+
+  <a class="doc-card" href="ui/index.html">
+    <span class="dno">07B · UI ROLE VIEWS</span>
+    <div class="dt">企微交互规约 · 按角色视角（用例图/流程图/UI 操作图）</div>
+    <div class="dd">7 个角色各一页：销售/商务/仓管/财务/董事长/客户联系人/管理员，每页 N 个 Block，每个 Block = 用例图 + 流程图 + UI 操作图（每个操作给一段说明 + PC 端四栏图 + 移动端手机屏幕图）。企业=长安仁恒 · 客户=广西天华 · 商品=膨润土 AB-3。</div>
+    <span class="role">交互规约 · 严格遵循企微现实（产品稿 wecom-sidebar）</span>
+  </a>
+
+  <a class="doc-card" href="08-external-integration.html">
+    <span class="dno">08 · EXTERNAL INTEGRATION</span>
+    <div class="dt">外部依赖接入层（Integration Layer）</div>
+    <div class="dd">外部依赖全景（企微/飞书多维表格）、业务配置数据接口（催办/回单/修改分类/自动审批）、<strong>业务依赖数据（主数据）审计</strong>（客户等级/审批人分配/SKU 映射等 11 项）、DynamicSource 契约、演进路径与 ADR。</div>
+    <span class="role">接入类专项架构 · 独立演进</span>
+  </a>
+
+  <a class="doc-card" href="09-http-api-scorecard.html">
+    <span class="dno">09 · HTTP API SCORE CARD</span>
+    <div class="dt">HTTP API 视角业务测试 Score Card</div>
+    <div class="dd">13 端点 × 设计对照贯通矩阵、15 业务场景的覆盖率/风险性/影响面评估、HTTP 全流程贯通结论。</div>
+    <span class="role">HTTP 视角评估 · 持续更新</span>
+  </a>
+
+  <h2><span class="no">02</span> Roundtrip 闭环</h2>
+
+  <pre class="mermaid">
+flowchart LR
+    CQ["能力问题 CQ-01..15&lt;br/&gt;(01-core-graph §1.1)"] -->|规格| ONT["本体 / 状态图&lt;br/&gt;(01-core-graph)"]
+    ONT -->|落地| CODE["代码&lt;br/&gt;(02-architecture 包结构)"]
+    CODE -->|验证| TST["测试&lt;br/&gt;(03-testing Score Card)"]
+    TST -->|"全绿 + 覆盖率门禁"| RT["code-review-graph 读回代码&lt;br/&gt;回答 15 个 CQ"]
+    RT -->|"答不出 → 修正"| ONT
+    RT -->|通过| DONE["✅ 里程碑验收&lt;br/&gt;(04-development-plan DoD)"]
+  </pre>
+
+  <h2><span class="no">03</span> 方法论来源</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>来源</th><th>内容</th></tr>
+    <tr><td class="mono">spec/graph-engineering.html</td><td>Graph Engineering 通用方法论：知识图谱 × 任务图、能力问题驱动本体、每个阶段都验证</td></tr>
+    <tr><td class="mono">spec/code-graph-engineering-philosophy.html</td><td>代码世界的应用：业务是图、类型即本体、roundtrip 闭环</td></tr>
+    <tr><td class="mono">pilot_app/docs/</td><td>本文档家族的结构范式来源：银行账户三流程 pilot，已完成 10/10 CQ roundtrip 验证</td></tr>
+  </table>
+  </div>
+
+  <footer class="colophon">
+    <span>Set in Source Serif Pro · Noto Serif SC · IBM Plex Mono</span>
+    <span>B2B Pilot v3 · Docs</span>
+  </footer>
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad:true, theme:'base',
+    themeVariables:{
+      fontFamily:"'Noto Serif SC','Source Serif Pro',serif",
+      primaryColor:'#efeee5', primaryBorderColor:'#1B365D', primaryTextColor:'#1f1d18',
+      lineColor:'#1B365D', secondaryColor:'#f5f4ed', tertiaryColor:'#f5f4ed',
+      edgeLabelBackground:'#f5f4ed', clusterBkg:'#f5f4ed', clusterBorder:'#d4d1c5',
+      stateBkg:'#efeee5', stateBorder:'#1B365D', stateLabel:'#1f1d18',
+      stateLabelColor:'#1f1d18', labelTextColor:'#1f1d18', transitionLabelColor:'#1f1d18',
+      actorBkg:'#efeee5', actorBorder:'#1B365D', actorTextColor:'#1f1d18', actorLineColor:'#1B365D',
+      noteBkg:'#efeee5', noteBorder:'#d4d1c5'
+    },
+    flowchart:{curve:'basis'}, er:{useMaxWidth:true}
+  });
+</script>
+</body>
+</html>

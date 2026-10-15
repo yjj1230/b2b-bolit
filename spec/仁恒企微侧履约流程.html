@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="仁恒企微侧履约流程：企微拉群、标签运营、入群欢迎语、会话存档、拉群SOP、群消息运营时序" />
+<title>仁恒企微侧履约流程 — 内部流程 SOP</title>
+<style>
+  :root {
+    --bg: #f5f7fa;
+    --paper: #ffffff;
+    --ink: #0e1322;
+    --muted: #5a647a;
+    --line: #e2e6ee;
+    --line-strong: #c8cfdb;
+    --accent: #4a36e3;
+    --accent-soft: #ece8ff;
+    --warn: #b8741a;
+    --positive: #1f8a5a;
+    --display: 'Charter', 'Songti SC', 'STSong', Georgia, serif;
+    --body: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', Inter, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 14.5px; line-height: 1.65; }
+  .page { max-width: 1080px; margin: 28px auto; padding: 0 32px 64px; }
+
+  header.top { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--line); margin-bottom: 28px; flex-wrap: wrap; gap: 8px; }
+  .top-left { display: flex; align-items: center; gap: 14px; }
+  .crumb { font-family: var(--mono); font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .pill.draft { background: var(--accent-soft); color: var(--accent); }
+  .pill.dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .top-actions { display: flex; gap: 8px; font-size: 12.5px; color: var(--muted); flex-wrap: wrap; }
+  .top-actions span { padding: 4px 10px; border: 1px solid var(--line); border-radius: 8px; }
+
+  h1 { font-family: var(--display); font-size: 40px; line-height: 1.12; letter-spacing: -0.01em; margin: 8px 0 8px; font-weight: 700; }
+  .summary { font-size: 16px; color: var(--muted); max-width: 66ch; margin: 0 0 26px; }
+  .meta-row { display: flex; gap: 32px; margin: 14px 0 36px; padding: 16px 22px; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; font-size: 13px; flex-wrap: wrap; }
+  .meta-row span strong { display: block; font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 4px; font-weight: 500; }
+
+  nav.toc { margin: 0 0 8px; padding: 20px 24px; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; }
+  nav.toc h2 { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0 0 12px; }
+  nav.toc ol { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
+  nav.toc a { color: var(--accent); text-decoration: none; }
+  nav.toc a:hover { text-decoration: underline; }
+  nav.toc .sub { color: var(--muted); }
+
+  section { margin-top: 40px; }
+  h2 { font-family: var(--display); font-size: 24px; margin: 0 0 4px; letter-spacing: -0.005em; }
+  h2 small { display: block; font-family: var(--body); font-size: 13px; color: var(--muted); font-weight: 400; margin-top: 4px; line-height: 1.5; letter-spacing: 0; }
+  h3 { font-family: var(--display); font-size: 17px; margin: 22px 0 10px; }
+  .chapter-num { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; background: var(--accent); color: #fff; font-family: var(--mono); font-weight: 700; font-size: 13px; margin-right: 10px; vertical-align: -8px; }
+
+  .panel { padding: 20px 24px; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; }
+  .steps { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+  .step { padding: 14px 18px; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: baseline; }
+  .step-num { width: 26px; height: 26px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); display: inline-flex; align-items: center; justify-content: center; font-family: var(--mono); font-weight: 600; font-size: 12px; flex-shrink: 0; }
+  .step-text { font-size: 14.5px; }
+  .step-text code, .inline-code { font-family: var(--mono); font-size: 12.5px; background: var(--accent-soft); color: var(--accent); padding: 1px 6px; border-radius: 5px; }
+  .step-text ul { margin: 6px 0 0; padding-left: 18px; }
+  .step-text li { margin: 3px 0; }
+
+  table { width: 100%; border-collapse: collapse; margin-top: 14px; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  th, td { padding: 12px 18px; text-align: left; font-size: 13.5px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); background: #f8fafd; }
+  tr:last-child td { border-bottom: none; }
+
+  .note { padding: 14px 18px; background: var(--accent-soft); border-left: 3px solid var(--accent); border-radius: 6px; font-size: 13.5px; margin-top: 12px; }
+  .note.warn { background: #fdf3e3; border-left-color: var(--warn); }
+  .empty { padding: 20px 24px; background: var(--paper); border: 1px dashed var(--line-strong); border-radius: 10px; color: var(--muted); font-size: 13.5px; margin-top: 12px; }
+  .ref { display: flex; align-items: center; gap: 10px; padding: 14px 18px; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; margin-top: 12px; font-size: 14px; }
+  .ref a { color: var(--accent); text-decoration: none; font-weight: 600; }
+  .ref a:hover { text-decoration: underline; }
+
+  .flow-wrap { margin-top: 14px; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 16px; text-align: center; }
+  .flow-wrap img { max-width: 100%; max-height: 720px; border-radius: 6px; }
+  .flow-wrap figcaption { font-size: 12px; color: var(--muted); margin-top: 10px; font-family: var(--mono); }
+
+  .quote-block { margin-top: 12px; display: flex; flex-direction: column; gap: 10px; }
+  .quote-item { padding: 14px 18px; background: var(--paper); border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 6px; font-size: 14px; }
+
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-family: var(--mono); background: var(--accent-soft); color: var(--accent); margin-left: 8px; vertical-align: 1px; }
+  .tag.rec { background: #e6f6ee; color: var(--positive); }
+
+  footer { margin-top: 60px; padding-top: 18px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; font-family: var(--mono); font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; flex-wrap: wrap; gap: 8px; }
+
+  @media (max-width: 880px) {
+    h1 { font-size: 30px; }
+    .page { padding: 0 18px 48px; }
+    .meta-row { gap: 18px; }
+    .step { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="top">
+    <div class="top-left">
+      <span class="crumb">Feishu Wiki / 履约流程</span>
+      <span class="pill draft"><span class="pill dot"></span>内部 SOP</span>
+    </div>
+    <div class="top-actions">
+      <span>Owner · 吴宇航</span>
+      <span>Updated · 8月5日 16:03</span>
+      <span>来源 · 飞书云文档</span>
+    </div>
+  </header>
+
+  <h1>仁恒企微侧履约流程</h1>
+  <p class="summary">企微侧的客户履约标准作业流程：从企微拉群、客户标签运营、入群欢迎语配置，到会话存档合规留痕与群消息运营。</p>
+
+  <div class="meta-row">
+    <span><strong>所属组织</strong>上海同成和光科技有限公司</span>
+    <span><strong>文档作者</strong>吴宇航</span>
+    <span><strong>最近修改</strong>8月5日 16:03</span>
+    <span><strong>文档类型</strong>流程 SOP</span>
+    <span><strong>可见范围</strong>外部</span>
+  </div>
+
+  <nav class="toc" aria-label="目录">
+    <h2>目录</h2>
+    <ol>
+      <li><a href="#flow">履约总览流程图</a></li>
+      <li><a href="#ch1">壹、企微拉群</a></li>
+      <li>
+        <a href="#ch2">贰、企微运营</a>
+        <ol class="sub">
+          <li><a href="#s2-1">一、标签运营</a></li>
+          <li><a href="#s2-2">二、配入群欢迎语</a></li>
+          <li><a href="#s2-3">三、开会话存档（合规留痕）</a></li>
+        </ol>
+      </li>
+      <li><a href="#ch3">叁、群消息运营（时序表）</a></li>
+      <li><a href="#appendix">附：企微运营-拉群SOP</a></li>
+    </ol>
+  </nav>
+
+  <section id="flow">
+    <h2>履约总览流程图<small>从客户联系到回款、再到服务开通的完整链路。</small></h2>
+    <figure class="flow-wrap">
+      <img src="仁恒企微侧履约流程_流程图.png" alt="仁恒企微侧履约流程图：客户联系 → 客户群 → 群标签 → 新建标签组 → 出库 → 生成发货单 → 物流单号 → 物流在途报损 → 确认门禁 → 发票开具 → MSDS/检验报告分发 → 补提货单 → 回款 → 客户确认货没问题 → 系统识别自动转入服务开通" />
+      <figcaption>图：仁恒企微侧履约流程总览（来源：飞书文档内嵌图片）</figcaption>
+    </figure>
+  </section>
+
+  <section id="ch1">
+    <h2><span class="chapter-num">壹</span>企微拉群<small>客户服务群如何从 0 到 1 建立。</small></h2>
+    <div class="ref">
+      <span>📎</span>
+      <span>本环节引用子文档：<a href="#appendix">企微运营-拉群SOP</a>（群命名规则 + 两套拉群方案 + 欢迎语模板）</span>
+    </div>
+  </section>
+
+  <section id="ch2">
+    <h2><span class="chapter-num">贰</span>企微运营<small>群建立之后的日常运营配置。</small></h2>
+
+    <h3 id="s2-1">一、标签运营</h3>
+    <div class="steps">
+      <div class="step"><span class="step-num">1</span><span class="step-text">进入 <span class="inline-code">客户联系 → 客户群 → 群标签</span>。</span></div>
+      <div class="step"><span class="step-num">2</span><span class="step-text">点「新建标签组」，建以下标签组与标签：</span></div>
+    </div>
+    <table>
+      <thead>
+        <tr><th>标签组</th><th>标签内容</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>行业/品类</strong></td><td>涂料、造纸、日化、环保、石油、医药、农业、饲料…（按实际客户补全）</td></tr>
+        <tr><td><strong>客户分级</strong></td><td>KA战略、A重点、B常规、新客</td></tr>
+        <tr><td><strong>履约阶段</strong></td><td>待发货、已发货在途、已签收待验收、已验收待开票、已完成</td></tr>
+        <tr><td><strong>异常状态</strong></td><td>售后中</td></tr>
+        <tr><td><strong>客户成员角色</strong></td><td>采购、收货人、技术、决策人</td></tr>
+      </tbody>
+    </table>
+    <div class="steps">
+      <div class="step"><span class="step-num">3</span><span class="step-text">建群后，在 <span class="inline-code">群设置 → 群标签</span>，按《群标签配置表》手动打静态 + 成员标签；履约阶段后续每次沟通更新。</span></div>
+    </div>
+
+    <h3 id="s2-2">二、配入群欢迎语</h3>
+    <div class="steps">
+      <div class="step"><span class="step-num">1</span><span class="step-text">进入 <span class="inline-code">客户联系 → 配置 → 欢迎语（入群欢迎语）</span>。</span></div>
+    </div>
+
+    <h3 id="s2-3">三、开会话存档（合规留痕）</h3>
+    <div class="steps">
+      <div class="step"><span class="step-num">1</span><span class="step-text">进入 <span class="inline-code">管理工具 → 会话内容存档</span>。</span></div>
+      <div class="step"><span class="step-num">2</span><span class="step-text">按公司合规要求开通并配置可见范围（需企业认证 + 员工告知）。</span></div>
+      <div class="step"><span class="step-num">3</span><span class="step-text">存档是后续 NLU 训练语料与异常追溯的数据底座；开通后告知陈虹励 / 销售。</span></div>
+    </div>
+  </section>
+
+  <section id="ch3">
+    <h2><span class="chapter-num">叁</span>群消息运营<small>群内各履约节点的消息时序与执行方式（内嵌表格）。</small></h2>
+    <table>
+      <thead>
+        <tr><th style="width:56px">时序</th><th>节点</th><th>群消息内容（客户在群内看到/可做）</th><th>当前执行</th><th>终态</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>①</strong></td><td>销售下单</td><td>订单指令在群内发起（现状虹励代录）</td><td>虹励人工</td><td>系统自动</td></tr>
+        <tr><td><strong>③</strong></td><td>出库生成</td><td>发货单 + 质检单（既有标准模板）</td><td>虹励/系统同步</td><td>系统自动</td></tr>
+        <tr><td><strong>④</strong></td><td>交运发出</td><td>已发出 + 物流单号（主触点）</td><td>虹励人工</td><td>系统自动</td></tr>
+        <tr><td><strong>⑤</strong></td><td>物流在途</td><td>物流播报（人工仅发已发出+派送；自动每日11:00批量）</td><td>虹励人工</td><td>系统自动</td></tr>
+        <tr><td><strong>⑥</strong></td><td>物流签收</td><td>「已签收」播报（≠客户验收）</td><td>虹励人工</td><td>系统自动</td></tr>
+        <tr><td><strong>⑦</strong></td><td>收货确认</td><td>确认门：客户确认「货没问题」</td><td>虹励人工</td><td>系统识别+自动流转</td></tr>
+        <tr><td><strong>⑧</strong></td><td>发票开具</td><td>电子发票同步客户群</td><td>虹励/财务人工</td><td>系统自动</td></tr>
+        <tr><td><strong>⑨</strong></td><td>资质文件</td><td>MSDS + 检测报告 + 资质</td><td>虹励人工</td><td>系统自动</td></tr>
+        <tr><td><strong>⑩</strong></td><td>售后异常</td><td>群内统一入口承接</td><td>虹励人工</td><td>人工+工具辅助</td></tr>
+        <tr><td><strong>⑪</strong></td><td>补货提醒</td><td>复购/周期提醒（可选）</td><td>虹励人工</td><td>系统自动</td></tr>
+      </tbody>
+    </table>
+    <div class="note">注：时序表中②（下单后至出库前）未列出，原表从①直接跳到③。</div>
+  </section>
+
+  <section id="appendix">
+    <h2>附：企微运营-拉群SOP<small>子文档 · 最近修改：8月5日 16:00 · 对应「壹、企微拉群」环节</small></h2>
+
+    <h3>一、群命名规则</h3>
+    <div class="panel">
+      <p style="margin:0"><code class="inline-code">仁恒服务群-客户公司名-行业</code></p>
+      <p style="margin:10px 0 0; color:var(--muted)">例：仁恒服务群-菜花科技-涂料</p>
+    </div>
+
+    <h3>二、拉群SOP · 方案一：陈虹励群主</h3>
+    <div class="steps">
+      <div class="step"><span class="step-num">1</span><span class="step-text"><strong>陈虹励用企微发起群聊</strong>，一次性拉入：
+        <ul>
+          <li>财务（企微）</li>
+          <li>销售（企微）</li>
+          <li><strong>陈虹励自己的个微</strong></li>
+        </ul>
+        <div class="note warn" style="margin-top:8px">前 5 个群左右三方均<strong>无需同意</strong>，建群时直接进。因含陈虹励个微这一外部联系人，群<strong>从创建起就是外部群</strong>。但 5 个后仍需每个进群人员点击邀请卡片同意，方可进群。</div>
+      </span></div>
+      <div class="step"><span class="step-num">2</span><span class="step-text"><strong>陈虹励发任意一句话</strong>（1）—— 群正式生效、对客户可见。</span></div>
+      <div class="step"><span class="step-num">3</span><span class="step-text"><strong>销售拉外部客户</strong>：销售（成员）把客户（外部联系人）拉进该群。<br>客户无需同意。</span></div>
+      <div class="step"><span class="step-num">4</span><span class="step-text"><strong>改名</strong>：改为 <span class="inline-code">仁恒服务群-客户名-行业</span>（非群主亦可改，建议陈虹励统一改）。</span></div>
+      <div class="step"><span class="step-num">5</span><span class="step-text">发完整欢迎语 + 商务/财务/销售亮身份。</span></div>
+      <div class="step"><span class="step-num">6</span><span class="step-text">履约服务启动。</span></div>
+    </div>
+
+    <h3>二、拉群SOP · 方案二：「创建新外部群」触发流 <span class="tag rec">★推荐</span></h3>
+    <div class="steps">
+      <div class="step"><span class="step-num">1</span><span class="step-text"><strong>陈虹励用企微发起群聊</strong>，一次性拉入：
+        <ul>
+          <li>财务（企微）</li>
+          <li>销售（企微）</li>
+        </ul>
+        <div class="note" style="margin-top:8px">纯内部群，用于前期沟通 + 触发外部群。三方均<strong>无需同意</strong>，建群时直接进。发送任意一条消息后，销售财务对该群可见。</div>
+      </span></div>
+      <div class="step"><span class="step-num">2</span><span class="step-text"><strong>销售在预备群内拉客户</strong>：销售点右上角「…」→「添加群成员」→ 搜索并选中外部客户（如"赤鲸 @微信"）。</span></div>
+      <div class="step"><span class="step-num">3</span><span class="step-text"><strong>弹出提示框</strong>："需创建一个新的外部群才能支持添加外部联系人加入到群聊" —— 下方有「取消」「创建」。</span></div>
+      <div class="step"><span class="step-num">4</span><span class="step-text"><strong>销售点「创建」</strong>：系统自动生成<strong>全新外部群</strong>（非原群升级）。
+        <ul>
+          <li>销售自动成为新群<strong>群主</strong>；客户<strong>自动进群，无需同意</strong>。</li>
+          <li>同时给原预备群成员（陈虹励、财务）发<strong>邀约卡片</strong>。</li>
+        </ul>
+      </span></div>
+      <div class="step"><span class="step-num">5</span><span class="step-text"><strong>陈虹励 / 财务点卡片进入新群</strong>：各自点企微消息里的卡片即可进群（无需额外审批）。</span></div>
+      <div class="step"><span class="step-num">6</span><span class="step-text"><strong>改名</strong>：改为 <span class="inline-code">仁恒服务群-客户公司名-行业</span>（非群主亦可改，建议陈虹励统一改或销售按模板改）。</span></div>
+      <div class="step"><span class="step-num">7</span><span class="step-text">发完整欢迎语 + 商务/财务/销售亮身份。</span></div>
+      <div class="step"><span class="step-num">8</span><span class="step-text">履约服务启动（发货通知 / 文件自动发 / 进度同步…）。</span></div>
+      <div class="step"><span class="step-num">9</span><span class="step-text"><strong>返回「订单预备群」</strong>：对每个新客户重复步骤 1~7，系统为每个客户生成一个独立的全新外部群。</span></div>
+    </div>
+
+    <h3>三、欢迎语模板</h3>
+    <div class="quote-block">
+      <div class="quote-item">您好！欢迎加入「仁恒服务群」。本群为长安仁恒（HK.08139）为您专属设立的订单履约与服务群，您后续的发货、文件、售后将统一在此同步。</div>
+      <div class="quote-item">欢迎进群 👋 这是您的专属仁恒服务群，发货 / 开票 / 售后都在这里对接。</div>
+      <div class="quote-item">[X总] 您好，很高兴由我（陈虹励）全程陪跑您这边的订单，这是咱们长安仁恒的专属服务群，以后有订单，售后，发货等，群里喊一声就行，我们第一时间跟进。</div>
+    </div>
+  </section>
+
+  <footer>
+    <span>仁恒企微侧履约流程</span>
+    <span>上海同成和光科技有限公司 · 2026</span>
+  </footer>
+</div>
+</body>
+</html>

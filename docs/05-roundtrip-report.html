@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>05 · Roundtrip 验证报告 · B2B 订单履约验证项目</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+SC:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:#f5f4ed; --paper2:#efeee5; --ink:#1f1d18; --ink2:#6b665b;
+    --ink3:#3a382f; --blue:#1B365D; --rule:#d4d1c5;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif; line-height:1.6;}
+  .wrap{max-width:960px; margin:0 auto; padding:48px 40px 80px;}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;}
+  .folio{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--rule); padding-bottom:10px;
+    font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink2);}
+  .folio a{color:var(--ink2); border:none;}
+  .folio a:hover{color:var(--blue);}
+  .tag{display:inline-block; padding:3px 10px; font-size:11px; letter-spacing:.16em; background:var(--paper2); color:var(--blue);}
+  .kicker{display:flex; align-items:baseline; gap:12px; margin-top:48px;}
+  h1{font-size:clamp(32px,5vw,50px); line-height:1.12; font-weight:500; margin-top:14px; letter-spacing:-.01em;}
+  .lede{margin-top:18px; font-size:17px; line-height:1.7; color:var(--ink3); max-width:720px;}
+  h2{font-size:23px; font-weight:600; margin:52px 0 14px; color:var(--blue); display:flex; align-items:baseline; gap:12px; border-top:1px solid var(--rule); padding-top:26px;}
+  h2 .no{font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.12em;}
+  p{margin:10px 0; color:var(--ink3);}
+  ul,ol{margin:10px 0 10px 26px; color:var(--ink3);}
+  li{margin:5px 0;}
+  a{color:var(--blue); text-decoration:none; border-bottom:1px solid var(--rule);}
+  a:hover{border-bottom-color:var(--blue);}
+  blockquote{border-left:2px solid var(--blue); padding:10px 18px; margin:16px 0; background:var(--paper2); font-style:italic;}
+  table{width:100%; border-collapse:collapse; font-size:13px;}
+  .table-wrap{overflow-x:auto; margin:16px 0 24px; border:1px solid var(--rule);}
+  .table-wrap table{margin:0;}
+  th{background:var(--paper2); color:var(--blue); text-align:left; font-weight:600; padding:9px 12px; border-bottom:1.5px solid var(--blue); font-size:12.5px; white-space:nowrap;}
+  td{padding:9px 12px; border-bottom:1px solid var(--rule); vertical-align:top; color:var(--ink3);}
+  tr:nth-child(even) td{background:#faf9f3;}
+  tr:hover td{background:#f0ede0;}
+  .todo{display:inline-block; width:15px; text-align:center; color:var(--blue); font-family:'IBM Plex Mono',monospace;}
+  code{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace; font-size:13px; background:var(--paper2); padding:1px 5px;}
+  pre{background:var(--paper2); border:1px solid var(--rule); padding:16px 18px; overflow-x:auto; font-size:12.8px; line-height:1.55; margin:14px 0;}
+  pre code{background:none; padding:0;}
+  footer.colophon{margin-top:56px; padding-top:14px; border-top:1px solid var(--rule); display:flex; justify-content:space-between;
+    font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink2); flex-wrap:wrap; gap:8px;}
+  footer.colophon a{color:var(--ink2); border:none;}
+  footer.colophon a:hover{color:var(--blue);}
+  @media(max-width:720px){.wrap{padding:28px 18px 60px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="folio">
+    <span><a href="index.html">← Docs</a> · B2B Order Fulfillment</span>
+    <span>05 · Roundtrip Report</span>
+    <span>15 CQ ← Code Graph</span>
+  </header>
+
+  <div class="kicker">
+    <span class="tag">Roundtrip Report · 图谱验证报告</span>
+    <span class="mono" style="font-size:11px; letter-spacing:.18em; color:var(--ink2);">里程碑验收 · M8 回填</span>
+  </div>
+
+  <h1>图谱 Roundtrip<br/><span style="font-style:italic; color:var(--blue);">验证报告</span></h1>
+
+  <p class="lede"><strong>实施后回填（M8）</strong>：用 code-review-graph 把代码读回成图、回答 <span class="mono">01-core-graph.html</span> 的 15 个能力问题。</p>
+
+  <h2><span class="no">1 ·</span> 抽取结果</h2>
+  <ul>
+    <li>解析文件：<strong>75 个</strong>（Go + SQL + zed；含 cmd/、internal/、migrations/、scripts/）</li>
+    <li>图节点 / 边：<strong>780 / 7832</strong>（postprocess=full，含 FTS 索引 780 行）</li>
+    <li>执行流：流程检测已启用；社区聚类：文件级分组（igraph 不可用时降级）</li>
+    <li>对应 commit：<strong>20d8962（M8a 系统验证）</strong></li>
+  </ul>
+  <pre><code>code-review-graph build --repo .
+# Full build: 75 files, 780 nodes, 7832 edges (postprocess=full)</code></pre>
+
+  <h2><span class="no">2 ·</span> 15 个能力问题的代码图回答</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>#</th><th>能力问题</th><th>预期图锚点（设计时）</th><th>实际图锚点（实施后）</th><th>测试背书</th><th>结论</th></tr>
+    <tr><td class="mono">CQ-01</td><td>订单操作权限</td><td><span class="mono">authz.Checker.Check</span> + schema.zed order permission</td><td><span class="mono">internal/authz/checker.go:66</span> Checker 接口 + <span class="mono">schema.zed</span> prestock/shipment/evidence/order 定义（8 细粒度：create_prestock/change_quota/request_shipment/confirm/reject/append_evidence/void/close）+ <span class="mono">internal/authz/spicedb.go:60</span> SpiceDBClient.Check（FullyConsistent）</td><td>L1-07 / L2-14</td><td>✅</td></tr>
+    <tr><td class="mono">CQ-02</td><td>数据可见范围</td><td>schema.zed <span class="mono">order.view</span> owner/delegate/customer/warehouse.staff/tenant 路径</td><td><span class="mono">schema.zed</span> order.view = owner + delegate + customer-&gt;account_owner/delegate + warehouse-&gt;staff + tenant-&gt;ops/admin；prestock/shipment 对象级 view（含 customer_contact 物流视图）；ReBAC 层级经 customer/warehouse/tenant 层级边</td><td>L1-07 / L1-08 / L1-10 / L1-15</td><td>✅</td></tr>
+    <tr><td class="mono">CQ-03</td><td>仓管字段投影</td><td><span class="mono">warehouse-&gt;staff</span> 只读路径 + <span class="mono">api/projection.go</span> 剥离 unit_price_cents</td><td><span class="mono">internal/api/projection.go:27</span> ProjectOrder：WAREHOUSE 角色剥离 UnitPriceCents/AmountCents；HTTP 侧 <span class="mono">internal/api/server.go:253</span> handleGetOrder 应用投影</td><td>L1-10 / TestHTTPWarehouseProjection</td><td>✅</td></tr>
+    <tr><td class="mono">CQ-04</td><td>状态与合法迁移</td><td><span class="mono">domain.ord.go/stk.go/shp.go/inv.go</span> transitionTable</td><td><span class="mono">internal/domain/fsm.go:18</span> 表驱动 FSM + <span class="mono">ord.go/stk.go/shp.go/inv.go/preorder.go</span> 五张迁移表；<span class="mono">internal/workflows/order.go:195</span> validateFSM 防线（每次 setState 前置校验）</td><td>L0-01..05 / L2-01..03 / L2-08</td><td>✅</td></tr>
+    <tr><td class="mono">CQ-05</td><td>审批链状态</td><td><span class="mono">repo.ApprovalTasks</span> + <span class="mono">approval_tasks</span> 表 + Signal 编排</td><td><span class="mono">internal/repo/approval.go:15</span> CreateApprovalTask（PENDING 去重）/ListApprovalTasks 检索；<span class="mono">internal/workflows/order.go</span> ordPriceStep/stkPaymentStep 等 Signal 闸门；DECISION 信号携带 taskID 裁决落库</td><td>L1-11 / L2-02 / L2-04 / L2-06</td><td>✅</td></tr>
+    <tr><td class="mono">CQ-06</td><td>备货守恒</td><td><span class="mono">stock_prepares/stock_prepare_items</span> + <span class="mono">domain.Consistent(备货≤订单)</span> + CHECK 约束</td><td><span class="mono">internal/domain/consistency.go:30</span> AssertPrepareWithinOrder + <span class="mono">internal/repo/txwrappers.go:50</span> ReserveStockTx（同事务）+ 迁移 002 <span class="mono">stock_prepares</span> CHECK(planned_qty&gt;0)</td><td>L0-07 / L1-01 / L1-13</td><td>✅</td></tr>
+    <tr><td class="mono">CQ-07</td><td>发货守恒/完成条件</td><td><span class="mono">∑shipments.shipped_qty vs order_items.quantity</span> 聚合</td><td><span class="mono">internal/repo/txwrappers.go:100</span> SumShippedByOrderItem 聚合 + <span class="mono">internal/domain/consistency.go:52</span> ShipCompletion + <span class="mono">internal/workflows/order.go:926</span> shpCompletionStep 分批判定</td><td>L0-03/07 / L2-08 / L1-13</td><td>✅</td></tr>
+    <tr><td class="mono">CQ-08</td><td>库存联动/非负</td><td><span class="mono">ApplyShipment</span> 单事务 + <span class="mono">SELECT FOR UPDATE</span> + CHECK(qty&gt;=0)</td><td><span class="mono">internal/repo/shipment.go:44</span> ApplyShipment（发货+明细+扣库存+事件单事务）+ <span class="mono">internal/repo/inventory.go:45</span> LockInventory（FOR UPDATE）+ 迁移 001 <span class="mono">inventory_items CHECK(qty&gt;=0)</span></td><td>L1-03 / L1-04 / L3-01（并发脚本 8 并发 3 成功 5 守恒拒绝）</td><td>✅</td></tr>
+    <tr><td class="mono">CQ-09</td><td>开票守恒</td><td>双维（金额+数量）≤ 有效发货</td><td><span class="mono">internal/repo/invoice.go:20</span> ApplyInvoice（按 order_item 聚合有效 shipment_items，双维断言）+ <span class="mono">internal/domain/consistency.go:62</span> AssertInvoiceWithinShipped；开票量=有效发货量（<span class="mono">order.go</span> invInvoiceStep）</td><td>L1-05 / L2-10 / L0-07</td><td>✅</td></tr>
+    <tr><td class="mono">CQ-10</td><td>回单状态/分流</td><td>回单分流判定 + 5 天 Timer</td><td><span class="mono">internal/domain/receipt.go:24</span> ClassifyReceipt 四分流 + <span class="mono">internal/workflows/order.go:968</span> invReceiptStep（5 天 Timer → RECEIPT_EXCEPTION）+ invExceptionStep</td><td>L0-10 / L2-11</td><td>✅</td></tr>
+    <tr><td class="mono">CQ-11</td><td>预订单全链幂等</td><td><span class="mono">pre_orders</span> msgid 唯一 + 订单幂等键</td><td><span class="mono">internal/repo/preorder.go:25</span> CreatePreOrder（UNIQUE(tenant,group,msgid)）+ <span class="mono">internal/workflows/preorder.go</span> PreOrderWorkflow（确认 Signal → deriveOrder 订单键派生）+ <span class="mono">internal/domain/idem.go:40</span> 键规范；企微侧 <span class="mono">internal/wecom/intent.go</span> MockParser（LLM 只产候选）</td><td>L1-02 / L2-12 / L2-13 / TestHTTPPreOrderChain</td><td>✅</td></tr>
+    <tr><td class="mono">CQ-12</td><td>事件链回放</td><td>五域事件表 append-only</td><td><span class="mono">internal/repo/approval.go:180</span> ListOrderEvents/ListPreOrderEvents + 迁移 001-003 五张事件表（仅 INSERT，无 UPDATE/DELETE 路径）+ <span class="mono">scripts/audit</span> 断链/合法迁移/终态分录检查</td><td>L1-12 / L3-05（audit 真库全绿）</td><td>✅</td></tr>
+    <tr><td class="mono">CQ-13</td><td>代办时效</td><td>caveat expiry_ok</td><td><span class="mono">schema.zed</span> caveat expiry_ok(expires_at, now)（v1.39 语法校准：参数注入 now）+ <span class="mono">internal/authz/spicedb.go:118</span> WriteCaveatedRelationship + <span class="mono">internal/authz/spicedb.go:60</span> Check 注入 now（单一时间源）</td><td>L1-09 / L1-07 场景 6/7</td><td>✅</td></tr>
+    <tr><td class="mono">CQ-14</td><td>并发风险面</td><td>行锁/幂等/单事务</td><td><span class="mono">internal/repo/inventory.go:45</span> FOR UPDATE、<span class="mono">shipment.go</span> 幂等键 ON CONFLICT、<span class="mono">internal/repo/fault_injection_test.go</span> 触发器级中途失败全量回滚、<span class="mono">scripts/concurrency</span> 并发不超卖</td><td>L1-02 / L1-03 / L3-01</td><td>✅</td></tr>
+    <tr><td class="mono">CQ-15</td><td>凭证链只追加/回放/上传权限</td><td>schema.zed evidence definition（uploader）+ repo 只追加版本（MAX+1，无 UPDATE/DELETE 路径）</td><td><span class="mono">internal/repo/evidence.go:25</span> AppendEvidenceTx（行锁 + MAX+1 只追加）+ <span class="mono">migrations/005_evidence.sql</span> evidence_versions（租户复合 PK/FK）+ schema.zed evidence definition（view/append）+ <span class="mono">internal/api/evidence_test.go</span> HTTP 链（L2-15）</td><td>L1-16 / L2-15</td><td>✅</td></tr>
+  </table>
+  </div>
+  <p><strong>15/15 全部由代码图回答</strong>。代码与设计的一致性见 §3 变更记录（roundtrip 纪律：先改文档再改代码均已同步）。</p>
+
+  <h2><span class="no">3 ·</span> 实施中发现的设计偏差（先改文档再改代码）</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>变更</th><th>原因</th><th>是否绑定 CQ</th></tr>
+    <tr><td>schema.zed caveat 语法校准：<span class="mono">expiry_ok(expires_at: timestamp) { expires_at &gt; time.now() }</span> → <span class="mono">expiry_ok(expires_at timestamp, now timestamp) { expires_at &gt; now }</span>，now 由判定侧注入</td><td>SpiceDB v1.33+ 移除冒号类型参数与 CEL time 扩展；文档 §1.4 同步更新</td><td>CQ-13</td></tr>
+    <tr><td>PreOrderWorkflow 升级幂等修正：<span class="mono">ESCALATED → ESCALATED</span> 自迁移禁止</td><td>超期 Timer 重复触发时原实现二次升级执行非法自迁移（真库冒烟暴露；生产 48h 后同触发）；修正为仅首次升级迁移状态，重复升级只重新推送</td><td>CQ-11</td></tr>
+    <tr><td>本地模式授权判定：<span class="mono">LocalRunner 用 StaticChecker 对照表替身</span></td><td>本地模式是「HTTP API + 企微 mock 测试模式」；真 SpiceDB 下无关系写入路径（Outbox 投影器阶段二接入），视图/凭证全 403；与 tests/ E2E 同一判定路径</td><td>CQ-03/13/15</td></tr>
+    <tr><td>本地模式 Timer 策略：<span class="mono">integration.NewDemoPolicy</span>（10s 虚拟时长）</td><td>内嵌 TestSuite 虚拟时钟自动推进 Timer，催办循环 ~100µs/轮 烧穿 10y 运行预算（~0.4s/闸门）；短时长策略使持续等待约 52 分钟才烧穿预算，交互式演示与慢信号测试可用</td><td>全 CQ</td></tr>
+    <tr><td>SHP FSM 增边：<span class="mono">SHP_SHIP_ASSIGNING → SHP_SHIPPED</span>（实发完成直连）</td><td>ship-action 信号在 SHIP_ASSIGNING 闸门直接执行实发（发货+库存扣减单事务）；事件链审计（scripts/audit）暴露中间态 WAREHOUSE_SHIPPING 未经过，FSM 缺直连边</td><td>CQ-04/07</td></tr>
+    <tr><td>SHP FSM 增边：<span class="mono">SHP_SHIP_ASSIGNING → STK_WAREHOUSE_CONFIRMING</span>（未发货转仓）</td><td>设计图仅 PARTIAL_SHIPPED 有转仓边；未发货转仓同语义（业务原图 fig12）</td><td>CQ-06/04</td></tr>
+    <tr><td>STK FSM 增边：<span class="mono">STK_WAREHOUSE_RETURNED → STK_WAREHOUSE_CONFIRMING</span>（退回后重提）</td><td>状态图缺该回边；实现重入路径时暴露</td><td>CQ-04</td></tr>
+    <tr><td><span class="mono">pre_order_events</span> 表补 <span class="mono">action</span> 列</td><td>五域事件表同构（设计遗漏；02 §3.1 字段清单补全）</td><td>CQ-12</td></tr>
+    <tr><td>授权对象升级：prestock/shipment/evidence 一等 definition；customer.owner→account_owner；8 细粒度权限；Outbox 投影器</td><td>rebac_cases_spicedb.html 场景 A–H；人类架构师决策 D1-D4（docs/CHANGELOG-rebac-cases.html §6）</td><td>CQ-01/02/03/13/15</td></tr>
+    <tr><td>Shipment/Transfer/ExceptionInvoice 三个子流程以「内联段函数」实现（shpSegment 内发货/退回/转仓分支、invSegment 例外审核分支、stkTransferStep）</td><td>基线用单 OrderWorkflow 四段编排，状态图语义与设计完全一致；ChildWorkflow 形态留后续迭代</td><td>CQ-04/05/07/10</td></tr>
+    <tr><td><span class="mono">orders.state</span> 常量带阶段前缀（ORD_/STK_/SHP_/INV_/PRE_）</td><td>四分支联合状态跨阶段重名（RETURNED 等），DB 单列状态需无歧义</td><td>CQ-04</td></tr>
+    <tr><td>审批任务 ID 随机化（裁决后同 kind 可重建）</td><td>确定性 ID 使修改 A 类重审无法新建任务（测试暴露的真实缺陷）</td><td>CQ-05</td></tr>
+    <tr><td>开票量 = 有效发货量（非整单）</td><td>部分发货后开票按实发核验（CQ-09 语义落地）</td><td>CQ-09</td></tr>
+  </table>
+  </div>
+
+  <h2><span class="no">4 ·</span> 方法（已执行）</h2>
+  <pre><code>code-review-graph build --repo .            # 75 files, 780 nodes, 7832 edges
+code-review-graph query callers_of ApplyShipment --repo .   # 10 callers（含 ShipAndUpdateOrderTx 与 8 个测试）
+code-review-graph search "OrderWorkflow" --repo .           # FTS 命中</code></pre>
+  <blockquote>方法论：能力问题 → 本体 → 代码 → 图 → 业务问题 → 修正本体（<span class="mono">01-core-graph.html</span> §2.7）。</blockquote>
+
+  <footer class="colophon">
+    <span><a href="index.html">← Docs Index</a></span>
+    <span>05 · Roundtrip Report · B2B Order Fulfillment</span>
+  </footer>
+</div>
+</body>
+</html>

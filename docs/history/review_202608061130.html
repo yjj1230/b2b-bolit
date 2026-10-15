@@ -1,0 +1,188 @@
+<h1>全面评估 · 授权 RBAC+ReBAC 变更闭环后（2026-08-06）</h1>
+<blockquote>方法论：双 graph（meta）→ 架构/开发 → 测试 → roundtrip 验证 → 回到双 graph（`spec/evolve.md`）</blockquote>
+<blockquote>评估对象：git 21 个提交（`af7c8e3` → `b870a1f`），含 M0-M8 全里程碑 + rebac 场景变更闭环（D1-D4）</blockquote>
+<blockquote>基线：docs/01-07 + docs/CHANGELOG-rebac-cases.html + code-review-graph 图（~830 节点）</blockquote>
+<p>---</p>
+<h2>1 · Meta 层评估（01-core-graph 双 graph）</h2>
+<h3>1.1 能力问题（CQ）核对 —— 15/15 有测试背书</h3>
+<table>
+<tr><td>CQ</td><td>能力问题</td><td>测试背书</td><td>状态</td></tr>
+</table>
+<p>|---|---|---|---|</p>
+<table>
+<tr><td>CQ-01</td><td>订单操作权限</td><td>L0-09 / L1-07（+八场景） / L2-14</td><td>✅</td></tr>
+<tr><th>CQ-02</th><th>数据可见范围</th><th>L1-07 / L1-08 / L1-10 / L1-15</th><th>✅</th></tr>
+<tr><td>CQ-03</td><td>仓管字段投影</td><td>L1-10 / TestShipmentProjectionContactView</td><td>✅</td></tr>
+<tr><td>CQ-04</td><td>状态与合法迁移</td><td>L0-01..04 / L2-01..03 / L2-08</td><td>✅</td></tr>
+<tr><td>CQ-05</td><td>审批链状态</td><td>L1-11 / L2-02 / L2-04 / L2-06</td><td>✅</td></tr>
+<tr><td>CQ-06</td><td>备货守恒</td><td>L0-07 / L1-01 / L1-13</td><td>✅</td></tr>
+<tr><td>CQ-07</td><td>发货守恒/完成条件</td><td>L0-03/07 / L2-08 / L1-13</td><td>✅</td></tr>
+<tr><td>CQ-08</td><td>库存联动/非负</td><td>L1-03 / L1-04 / L3-01</td><td>✅</td></tr>
+<tr><td>CQ-09</td><td>开票守恒</td><td>L1-05 / L2-10 / L0-07</td><td>✅</td></tr>
+<tr><td>CQ-10</td><td>回单分流</td><td>L0-10 / L2-11</td><td>✅</td></tr>
+<tr><td>CQ-11</td><td>预订单全链幂等</td><td>L1-02 / L2-12 / L2-13 / TestHTTPPreOrderChain</td><td>✅</td></tr>
+<tr><td>CQ-12</td><td>事件链回放</td><td>L1-12 / L3-05（audit）</td><td>✅</td></tr>
+<tr><td>CQ-13</td><td>代办时效</td><td>L1-09 / L1-07 场景 6/7 / L1-15（场景 G）</td><td>✅</td></tr>
+<tr><td>CQ-14</td><td>并发风险面</td><td>L1-02 / L1-03 / L3-01</td><td>✅</td></tr>
+<tr><td>CQ-15</td><td>凭证只追加（rebac 新增）</td><td>TestShipmentProjectionContactView / evidence definition（L1-07 八场景场景 D）</td><td>✅</td></tr>
+</table>
+<h3>1.2 本体 vs 授权图谱一致性（roundtrip 第一站）</h3>
+<table>
+<tr><td>核对项</td><td>世界知识图谱（01 §1.2）</td><td>授权图谱（schema.zed / 01 §1.4）</td><td>结论</td></tr>
+</table>
+<p>|---|---|---|---|</p>
+<table>
+<tr><td>备货单实体</td><td>StockPrepare ✅（既有）</td><td>prestock definition ✅（D1 新增）</td><td>一致</td></tr>
+<tr><th>发货单实体</th><th>Shipment ✅（既有）</th><th>shipment definition ✅（D1 新增）</th><th>一致</th></tr>
+<tr><td>凭证实体</td><td>Evidence ✅（新增）</td><td>evidence definition ✅（D1 新增）</td><td>一致</td></tr>
+<tr><td>客户负责人</td><td>owner（改名 account_owner）</td><td>customer.account_owner ✅（D2）</td><td>一致（10/11 处同步）</td></tr>
+<tr><td>客户联系人</td><td>CONTACT_OF ✅（新增）</td><td>customer.contact / shipment.customer_contact ✅</td><td>一致</td></tr>
+<tr><td>仓管-发货单</td><td>ASSIGNED_TO ✅（新增）</td><td>shipment.warehouse_operator ✅</td><td>一致</td></tr>
+<tr><td>发货发起人</td><td>REQUESTS ✅（新增）</td><td>shipment.requester ✅</td><td>一致</td></tr>
+<tr><td>凭证上传者</td><td>UPLOADS ✅（新增）</td><td>evidence.uploader ✅</td><td>一致</td></tr>
+<tr><td>作废窗口</td><td>（阶段二）</td><td>shipment.void permission 已建模，caveat 阶段二</td><td>预留一致</td></tr>
+</table>
+<p>**结论**：meta 层无裂缝。rebac 变更闭环把上一轮评估发现的「授权图谱未投影一等对象」裂缝已闭合（CHANGELOG §4.2 的倒推结论 → §7 决策 → 落地）。</p>
+<p>---</p>
+<h2>2 · 架构/开发层评估（02 / 04 vs 代码）</h2>
+<h3>2.1 结构核对</h3>
+<table>
+<tr><td>架构文档组件</td><td>代码落点</td><td>状态</td></tr>
+</table>
+<p>|---|---|---|</p>
+<table>
+<tr><td>cmd/api / cmd/worker / cmd/wecom</td><td>三个可执行 ✅（Dockerfile 多目标构建通过）</td><td>✅</td></tr>
+<tr><th>internal/domain（FSM/值对象/守恒/幂等）</th><th>8 文件 + 值对象</th><th>✅</th></tr>
+<tr><td>internal/authz（Checker/SpiceDB/投影器）</td><td>checker.go / spicedb.go / **projector.go（D4 新增）**</td><td>✅</td></tr>
+<tr><td>internal/repo（事务/行锁/事件链/outbox）</td><td>9 文件 + **outbox.go（D4 新增）**</td><td>✅</td></tr>
+<tr><td>internal/workflows（Order/PreOrder）</td><td>order.go / preorder.go / activities.go</td><td>✅</td></tr>
+<tr><td>internal/api（HTTP/BFF 投影）</td><td>server.go / projection.go（双视图）</td><td>✅</td></tr>
+<tr><td>internal/wecom（wrapper 隔离）</td><td>gateway.go / mock.go / official.go</td><td>✅</td></tr>
+<tr><td>migrations 001-004</td><td>4 个迁移（004 outbox 新增）</td><td>✅</td></tr>
+</table>
+<h3>2.2 开发计划里程碑核对（04）</h3>
+<p>M0 ✅ → M1 ✅ → M2 ✅ → M3 ✅ → M4 ✅（+M4-RBAC 升级）→ M5 ✅ → M6 ✅ → M7 ✅ → M8 ✅。</p>
+<p>DoD：每阶段一个 commit（21 个提交，按里程碑可分 9 组回滚）；覆盖率不倒退门禁（domain 100% 硬门禁）；文档先于代码（rebac 闭环：阶段 1 文档 → 阶段 3 代码）；人工闸门纪律（Signal 无旁路）。</p>
+<p>---</p>
+<h2>3 · 测试层评估（03-testing：Score Card + 覆盖率实测）</h2>
+<h3>3.1 Score Card 全量核对 —— 45/45 落地（44 设计 + L1-15 rebac 新增）</h3>
+<table>
+<tr><td>层</td><td>用例数</td><td>落地测试函数</td><td>状态</td></tr>
+</table>
+<p>|---|---|---|---|</p>
+<table>
+<tr><td>L0</td><td>10</td><td>TestL001..TestL010（domain）+ TestL009（authz StaticChecker）</td><td>✅ 全绿</td></tr>
+<tr><th>L1</th><th>15</th><th>TestL101..TestL114（repo 真 PG）、TestL107/108/109/110 + **TestL107b/107c/115**（authz+SpiceDB）、TestL110（投影）</th><th>✅ 全绿（含 L1-15 Outbox 全链）</th></tr>
+<tr><td>L2</td><td>14</td><td>TestL201..TestL214 + 3 个补充（L203b/L208b/L210b）</td><td>✅ 全绿（Temporal TestSuite 纯库）</td></tr>
+<tr><td>L3</td><td>6</td><td>scripts/{concurrency,reconcile,audit,seeddata} + make cover + roundtrip</td><td>✅ 真库全绿（并发 8 并发 3 成功 5 守恒拒绝）</td></tr>
+<tr><td>补充</td><td>~45</td><td>故障注入（触发器级 5 类）、逐调用点故障注入（30+ 位点）、段恢复全分支、W1 回调验签往返、官方通道 httptest</td><td>✅</td></tr>
+</table>
+<p>**测试规模**：133 个 `func Test` / 25 个测试文件；生产代码 7,753 行 vs 测试代码 6,335 行（测试/生产 ≈ 0.82）。</p>
+<h3>3.2 覆盖率实测（make cover，含 -tags integration）</h3>
+<table>
+<tr><td>包</td><td>实测</td><td>说明</td></tr>
+</table>
+<p>|---|---|---|</p>
+<table>
+<tr><td>domain</td><td>**100.0%**</td><td>正确性核心（FSM 穷举/守恒/幂等），硬门禁</td></tr>
+<tr><th>config</th><th>**100.0%**</th><th></th></tr>
+<tr><td>api</td><td>90.6%</td><td>余量：LocalRunner 日志注入、userOf 兜底</td></tr>
+<tr><td>wecom</td><td>89.7%</td><td>余量：官方通道网络超时分支</td></tr>
+<tr><td>workflows</td><td>84.5%</td><td>余量：各闸门防御性错误返回（逐调用点故障注入已覆盖 30+ 位点）</td></tr>
+<tr><td>authz</td><td>**80.9%**</td><td>⚠️ 从 94.1% 回落：D4 新增 projector.go（~140 行）未完全覆盖（Run 循环/SetLogger/部分错误分支）</td></tr>
+<tr><td>repo</td><td>79.9%</td><td>余量：pgx scan error、每句 SQL 失败返回（触发器级故障注入覆盖主事务路径）</td></tr>
+<tr><td>**全仓**</td><td>**85.4%**（2203/2581）</td><td>门禁 85% + domain 100% 硬门禁；用户目标 95% 差距=防御性错误分支（docs/06 §2 诚实声明）</td></tr>
+</table>
+<h3>3.3 测试基础设施</h3>
+<p>L1 真 PG（b2b_pilot_test + b2b_pilot_rebac_test 独立库避免 schema 重置并行冲突）+ spicedb testserver（v1.39.1，schema 编译门禁）；L2 纯库 TestSuite；L3 脚本 runID 幂等。零静默 Skip（本环境全绿实跑）。</p>
+<p>---</p>
+<h2>4 · Roundtrip 验证（代码图 → 回到 meta）</h2>
+<h3>4.1 抽取</h3>
+<pre>
+code-review-graph build --repo .   → 75 文件 / 780 节点 / 7832 边
+code-review-graph update --repo .  → 增量 13 文件 / 95 节点 / 1133 边（rebac 变更后）
+</pre>
+<h3>4.2 代码图回答 CQ/场景（抽样验证）</h3>
+<table>
+<tr><td>问题</td><td>图锚点（实际）</td><td>结论</td></tr>
+</table>
+<p>|---|---|---|</p>
+<table>
+<tr><td>CQ-01/02 对象级授权</td><td>`schema.zed` prestock/shipment/evidence definition + `internal/authz/checker.go` 8 权限枚举 + `spicedb.go:60` Check</td><td>✅</td></tr>
+<tr><th>CQ-13/场景 G/H</th><th>`internal/authz/projector.go` Projector（delegation.grant/revoke + contact_upsert 映射）+ `internal/repo/outbox.go`</th><th>✅</th></tr>
+<tr><td>CQ-15 凭证只追加</td><td>`internal/api/projection.go` EvidenceVersionView + schema.zed evidence definition</td><td>✅</td></tr>
+<tr><td>CQ-06/07/08/09 守恒</td><td>`repo/txwrappers.go` ReserveStockTx/ShipAndUpdateOrderTx（含 outbox 写入点）+ `domain/consistency.go`</td><td>✅</td></tr>
+<tr><td>调用链完整性</td><td>`callers_of ApplyShipment` = 10 调用点（ShipAndUpdateOrderTx + 8 测试 + 注入）</td><td>✅</td></tr>
+</table>
+<h3>4.3 回到 meta 的一致性结论</h3>
+<p>1. **schema.zed ↔ 01 §1.4**：account_owner/prestock/shipment/evidence 同步（§1.2 核对表）——**无漂移**</p>
+<p>2. **业务写入点 ↔ 02 §2.3 投影规则**：prestock.created/shipment.created/contact_upsert/delegation 四类事件与文档规则一一对应——**无漂移**</p>
+<p>3. **测试 ↔ 03 Score Card**：45/45 落地，CQ→测试映射零漂移（§3.1）</p>
+<p>4. **阶段二边界**：role/role_grant、within_void_window caveat 未越界实现（仅 shipment.void permission 建模）——**范围受控**</p>
+<p>---</p>
+<h2>5 · 风险评估</h2>
+<h3>5.1 既有风险处置（docs/06 R1-R8 复验）</h3>
+<table>
+<tr><td>#</td><td>风险</td><td>处置验证</td></tr>
+</table>
+<p>|---|---|---|</p>
+<table>
+<tr><td>R1</td><td>事务内查 pool</td><td>✅ approval.go 已改同 tx（L1-11 回归绿）</td></tr>
+<tr><th>R2</th><th>连接泄漏挂死</th><th>✅ 测试 env 全部 defer rollback + close 超时护栏</th></tr>
+<tr><td>R3</td><td>跨租户 ID 冲突</td><td>✅ 租户维度派生（L1-02 跨租户断言绿）</td></tr>
+<tr><td>R4</td><td>分批幂等键</td><td>✅ CountShipments 序号派生（L2-08 绿）</td></tr>
+<tr><td>R5</td><td>审批任务重建</td><td>✅ 随机 ID + PENDING 去重（L2-02 A 类绿）</td></tr>
+<tr><td>R6</td><td>awaitGate 催办</td><td>✅ escalated 标记 + continue（TestApprovalEscalation 绿）</td></tr>
+<tr><td>R7</td><td>测试 env 10y timer</td><td>✅ 闸门挂起 timer + 延迟回调驱动（全 L2 绿）</td></tr>
+<tr><td>R8</td><td>开票量=实发</td><td>✅ ActSumShipped 派生（L2-08b 绿）</td></tr>
+</table>
+<h3>5.2 rebac 变更新增风险（本次评估）</h3>
+<table>
+<tr><td>#</td><td>风险</td><td>等级</td><td>处置/残余</td></tr>
+</table>
+<p>|---|---|---|---|</p>
+<table>
+<tr><td>R9</td><td>授权对象迁移破坏性：order 级权限拆分影响 L1-07 等既有测试</td><td>中</td><td>✅ 已处置：L1-07/08 重写并全绿；风险受控（spicedb testserver 无持久数据）</td></tr>
+<tr><th>R10</th><th>Outbox 投影可靠性：投影器故障 → 业务库关系与 SpiceDB 判定漂移</th><th>高</th><th>⚠️ 部分处置：失败标记 FAILED + Requeue 重放（L1-15 验证）；**残余**：Run 循环无退避/死信告警未接（生产监控待接线）</th></tr>
+<tr><td>R11</td><td>L1-15 与 repo 集成测试 schema 重置并行冲突</td><td>中</td><td>✅ 已处置：独立库 b2b_pilot_rebac_test（Makefile up 创建）</td></tr>
+<tr><td>R12</td><td>authz 覆盖率回落（94.1%→80.9%，projector 新增代码）</td><td>低</td><td>⚠️ 残余：projector 的 Run 循环/SetLogger 未覆盖；建议补 2-3 个单测</td></tr>
+<tr><td>R13</td><td>生产迁移元组重投影：owner→account_owner 命名变更需全量重写既有关系</td><td>中</td><td>⚠️ 残余（生产环境）：需一次性重投影脚本（测试环境无持久数据，已规避）</td></tr>
+<tr><td>R14</td><td>customer.contact 变更只同步 customer#contact，shipment#customer_contact 需批量重投影</td><td>中</td><td>⚠️ 残余：contact_upsert 事件未携带 shipment 列表；场景 D 的客户级批量同步待后续（文档标注）</td></tr>
+</table>
+<h3>5.3 残余风险优先级</h3>
+<p>1. **P0**：R10（Outbox 生产可靠性——监控/告警/退避）——上线前必须</p>
+<p>2. **P1**：R13/R14（生产元组重投影脚本 + 客户级 shipment 联系人批量同步）</p>
+<p>3. **P2**：R12（authz 覆盖率补强）、阶段二（role/role_grant、within_void_window caveat）</p>
+<p>---</p>
+<h2>6 · 影响面评估（rebac 变更波及矩阵）</h2>
+<table>
+<tr><td>变更</td><td>波及代码</td><td>波及测试</td><td>波及文档</td><td>回归验证</td></tr>
+</table>
+<p>|---|---|---|---|---|</p>
+<table>
+<tr><td>schema.zed v2（D1/D2/D3）</td><td>authz 枚举/矩阵、L1-07/08 断言</td><td>authz 集成 3 个测试重写</td><td>01 §1.4、05 CQ 锚点</td><td>✅ 全绿</td></tr>
+<tr><th>Outbox 投影器（D4）</th><th>repo/txwrappers（2 个事务写入点）、migrations 004</th><th>新增 L1-15 + outbox 3 个集成测试 + projector 2 个单测</th><th>02 §2.3、03 L1-15</th><th>✅ 全绿</th></tr>
+<tr><td>BFF 双视图投影</td><td>api/projection.go、authz RoleContact</td><td>新增 TestShipmentProjectionContactView</td><td>02 §2.3、05 CQ-03</td><td>✅ 全绿</td></tr>
+<tr><td>测试基础设施</td><td>Makefile（rebac 测试库）</td><td>—</td><td>03 §5</td><td>✅</td></tr>
+</table>
+<p>**影响面结论**：变更集中在 authz/repo/api 三个包（+3 个新文件/1 个新迁移），workflows/domain/wecom 零改动（授权判定经 Checker 接口注入，隔离有效——**wrapper/plugin 设计的价值在此次变更中得到验证**）；全仓覆盖率 85.4%（±0.6pp 波动，authz 回落被新代码分母稀释，绝对值无倒退）。</p>
+<p>---</p>
+<h2>7 · 结论与建议</h2>
+<h3>Score Card 总评</h3>
+<table>
+<tr><td>维度</td><td>评分</td><td>说明</td></tr>
+</table>
+<p>|---|---|---|</p>
+<table>
+<tr><td>设计-代码一致性（roundtrip）</td><td>✅ 通过</td><td>15/15 CQ 有背书、双 graph 无裂缝、schema 与文档零漂移</td></tr>
+<tr><th>测试覆盖</th><th>⚠️ 部分达标</th><th>45/45 Score Card 落地；覆盖率 85.4%（domain/config 100%），距用户 95% 目标差 9.6pp（防御性错误分支，诚实声明于 docs/06 §2）</th></tr>
+<tr><td>风险评估</td><td>⚠️ 2 个 P0/P1 残余</td><td>R10（Outbox 生产可靠性）、R13/R14（生产重投影）</td></tr>
+<tr><td>影响面控制</td><td>✅ 通过</td><td>变更隔离在 3 包，workflows/domain 零波及；21 提交可逐里程碑回滚</td></tr>
+</table>
+<h3>建议行动（按优先级）</h3>
+<p>1. **P0**：Outbox 投影器生产化——Run 循环退避 + 失败告警 + 死信看板（R10）</p>
+<p>2. **P1**：生产元组重投影脚本（owner→account_owner）；contact 变更批量同步 shipment#customer_contact（R13/R14）</p>
+<p>3. **P2**：authz 覆盖率补强（projector Run/SetLogger，目标 85%+）；阶段二评估 role/role_grant 与 within_void_window caveat</p>
+<p>4. **持续**：每里程碑执行本评估模板（meta→测试→meta roundtrip），确保「答不出 CQ 的就是设计裂缝」纪律</p>
+<p>---</p>
+<p>*评估执行：reasonix executor，2026-08-06 11:30（对应 commit b870a1f）*</p></body></html>

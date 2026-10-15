@@ -1,0 +1,37 @@
+# migrations/ECM-0.9.3-to-1.0.0.yaml
+# 机制版本迁移与回滚说明（§07 版本边界 / CHANGELOG）
+# 注意：0.9.3 为**虚拟前序**——仓库不存在真实 0.9.3 制品（bootstrap 首版即 1.0.0）。
+# 本文件仅满足 §07 目录树结构（migrations/ECM-0.9.3-to-1.0.0.yaml）与 rollback_to 占位，
+# 不声称存在可回放的 0.9.3 历史。
+
+from_version: 0.9.3   # 虚拟：无真实制品
+to_version: 1.0.0
+kind: bootstrap
+virtual: true
+reason: 仓库此前无 ECM 控制面；1.0.0 为首个落库版本（PROPOSED，未激活）
+
+migration_steps:
+  - step: 1
+    action: 新增 project/ 控制面目录（§03 目录树）
+    rollback: git rm -r project/
+  - step: 2
+    action: 落库机制双制品 ECM-1.0.0.yaml（规范源）+ ECM-1.0.0.html（冻结指南）
+    rollback: 删除两文件；恢复根 HTML 为唯一载体
+  - step: 3
+    action: '写入 current.yaml 指针（status: PROPOSED，bootstrap 例外）与 project.yaml 项目绑定'
+    rollback: 删除两文件；A.5 步骤 02 恢复为 PROJECT_CONTROL_PLANE_MISSING -> BOOTSTRAP_DIAGNOSTIC
+  - step: 4
+    action: 生成 M0 冻结索引 project/views/artifact-manifest.yaml 与事件流 project/events/project-events.jsonl
+    rollback: 删除两文件（审计流删除需人工确认，append-only 原则下通常保留）
+  - step: 5
+    action: '生成 bootstrap handoff HOF-20260813-001（status: OFFERED）'
+    rollback: 删除 handoffs/ 目录
+
+impact_analysis:
+  - 现有 spec/ docs/ cmd/ internal/ migrations/ tests/ scripts/ 路径与内容均未改变
+  - 现有工具链（Makefile、docker-compose、go test 等）不受影响
+  - 唯一语义变化：根 HTML 增加一行 bootstrap 指针声明（hero-meta），正文未改
+
+activation_required: true
+activation_notes: 本迁移只建立结构；ECM 1.0.0 激活需满足 ECM-ACT-001..004 并经人工批准
+                  后原子更新 current.yaml.status 与 project.yaml.mechanism.status。

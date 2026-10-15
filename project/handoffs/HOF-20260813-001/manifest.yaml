@@ -1,0 +1,43 @@
+# project/handoffs/HOF-20260813-001/manifest.yaml
+# Handoff manifest（§10 最小字段 + A.6/A.7 机器契约）
+# status=OFFERED：bootstrap 模式（§10 例外），本包尚未被独立接手方接受。
+handoff_id: HOF-20260813-001
+status: OFFERED
+bootstrap_mode: true              # §10 bootstrap 例外 / ECM-REC-004；机制 PROPOSED
+mechanism_status: PROPOSED
+from: reasonix-executor (bootstrap, §10 例外)
+created_at: 2026-08-13T08:37:00+00:00
+expires_at: 2026-08-20T08:37:00+00:00
+updated_at: 2026-08-19T17:40:00+00:00   # official 企微接线 + /assistant 页面 + staff_scene_v0.1 + 跟踪页 W 线刷新；status 仍 OFFERED
+updated_by: assistant (D-006/D-007 + 2026-08-19 assistant/order-detail/use-case + official wecom wiring/runbook)
+
+project:
+  repo: b2b_pilot_v3
+  branch: graph_guide
+  commit: e42e3ea05fbad79a5793e3464173df8d92c69df3
+  working_tree_digest: sha256:cbbe49588ceae7b64a69ec51d617b85f31ea7bdf8b6e4f8deeb336a95c36a26f
+  working_tree_note: 仅新增 project/ 控制面与 scripts/ecm_selfcheck.py（未跟踪），无已跟踪文件修改
+
+mechanism:
+  id: ECM
+  version: 1.0.0
+  status: PROPOSED
+  spec_digest: sha256:e8f561b240c0cd571a11eedb5609d96853ecfbe382ee73f81337780679032411
+
+baseline:
+  id: NONE            # 尚无已发布 ECM baseline（ECM-REC-004 / §11）
+  manifest_digest: UNKNOWN
+
+scope_in_progress: bootstrap M0/M1 + ECM 1.0.0 机制双制品落库（不含 M2-M5）
+
+open_items_digest: sha256:1ddc51257558a429d05239ff89503a6bdf55a02b5601c2b078fda43d6d0ae48b
+evidence_index_digest: sha256:4812c9e007fe6db5d9da7ba79c0bd7cb5d6ccad686ebe041487b22e138ec2adc
+
+change_cursor: EVT-000043   # 本轮（EVT-000042..000043）变化自该游标起核对；manifest 已吸收本轮全部变更
+
+next_recommended_action:
+  action: 现场按 staff_scene_v0.1.html 填测试/生产租户配置并执行 V-A..V-F 验收
+  target: staff_scene_v0.1.html + v0.1发布过程跟踪.html（T4.5 回填）
+  reason: 代码侧 official 接线与 H5/PC 页面已提交；下一步是现场真实验收与旧系统 T-01 小改
+
+summary: summary.md

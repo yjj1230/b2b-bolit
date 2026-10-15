@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>企微自定义应用的形式_调研_v2｜企业微信开放平台能力视角</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+SC:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  /* ===== 页面基座（沿用 spec 页纸感风格 + 企微绿 token） ===== */
+  :root{
+    --paper:#f5f4ed; --paper2:#efeee5; --ink:#1f1d18; --ink2:#6b665b;
+    --ink3:#3a382f; --blue:#1B365D; --rule:#d4d1c5; --red:#c0392b; --green:#1a7f37;
+    --wc-green:#07C160;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif; line-height:1.6; overflow-x:hidden;}
+  .wrap{max-width:1180px; margin:0 auto; padding:48px 40px 80px;}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;}
+  .folio{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--rule); padding-bottom:10px;
+    font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink2); flex-wrap:wrap; gap:4px;}
+  .folio a{color:var(--ink2); border:none;}
+  .folio a:hover{color:var(--blue);}
+  .tag{display:inline-block; padding:3px 10px; font-size:11px; letter-spacing:.16em; background:var(--paper2); color:var(--blue);}
+  .tag.green{background:rgba(7,193,96,.1); color:var(--wc-green);}
+  .tag.blue{background:rgba(27,54,93,.1); color:var(--blue);}
+  .kicker{display:flex; align-items:baseline; gap:12px; margin-top:48px; flex-wrap:wrap;}
+  h1{font-size:clamp(30px,4.6vw,46px); line-height:1.12; font-weight:500; margin-top:14px; letter-spacing:-.01em;}
+  .lede{margin-top:18px; font-size:16.5px; line-height:1.7; color:var(--ink3); max-width:960px;}
+  h2{font-size:22px; font-weight:600; margin:48px 0 14px; color:var(--blue); display:flex; align-items:baseline; gap:10px; border-top:1px solid var(--rule); padding-top:26px;}
+  h2 .no{font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.12em;}
+  h3{font-size:17px; font-weight:600; margin:26px 0 10px; color:var(--ink);}
+  h4{font-size:14.5px; font-weight:600; margin:18px 0 6px; color:var(--ink);}
+  p{margin:9px 0; color:var(--ink3);}
+  a{color:var(--blue); text-decoration:none; border-bottom:1px solid var(--rule);}
+  a:hover{border-bottom-color:var(--blue);}
+  code{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace; font-size:12.5px; background:var(--paper2); padding:1px 5px; border-radius:3px;}
+  ul,ol{margin:8px 0 8px 26px; color:var(--ink3);}
+  li{margin:4px 0;}
+  .mermaid{background:#fff; border:1px solid var(--rule); padding:16px; overflow-x:auto; text-align:center; margin:18px 0;}
+  .mermaid svg{max-width:100%; height:auto;}
+  figcaption{text-align:center; font-size:12px; color:var(--ink2); margin:-8px 0 22px; font-style:italic;}
+  /* ===== 元信息卡 ===== */
+  .meta-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; margin:22px 0 6px;}
+  .meta-card{border:1px solid var(--rule); background:var(--paper2); padding:14px 16px;}
+  .meta-card .k{font-size:10.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--blue); margin-bottom:6px;}
+  .meta-card .v{font-size:13px; color:var(--ink3); line-height:1.55;}
+  .meta-card .v .ok{color:var(--green); font-weight:600;}
+  /* ===== 目录 ===== */
+  .toc{border:1px solid var(--rule); background:var(--paper2); padding:16px 24px; margin:22px 0;}
+  .toc .tt{font-size:11px; letter-spacing:.2em; color:var(--blue); margin-bottom:8px;}
+  .toc a{display:inline-block; padding:3px 14px 3px 0; color:var(--ink3); border:none; font-size:13.5px;}
+  .toc a:hover{color:var(--blue);}
+  /* ===== 表格 ===== */
+  .table-wrap{overflow-x:auto; margin:14px 0 8px; border:1px solid var(--rule); background:#fff;}
+  table{width:100%; border-collapse:collapse; font-size:12.8px;}
+  th{background:var(--blue); color:#fff; text-align:left; font-weight:600; padding:6px 8px; border-bottom:1.5px solid var(--blue); font-size:11.5px; overflow-wrap:anywhere;}
+  td{padding:6px 8px; border-bottom:1px solid var(--rule); vertical-align:top; color:var(--ink3); overflow-wrap:anywhere;}
+  tr:nth-child(even) td{background:#faf9f3;}
+  tr:hover td{background:#f2efe3;}
+  td .n{color:var(--blue); font-weight:600; white-space:nowrap;}
+  td .tech{color:var(--green); font-weight:600;}
+  td .cls{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace; font-size:11px; color:#7a5a1e; background:var(--paper2); padding:0 4px; border-radius:3px;}
+  td .flag{font-size:11px; padding:1px 6px; border-radius:3px; white-space:nowrap;}
+  .flag.y{background:rgba(255,125,0,.14); color:#b45309;}
+  .flag.g{background:rgba(26,127,55,.12); color:var(--green);}
+  .flag.b{background:rgba(27,54,93,.1); color:var(--blue);}
+  .flag.r{background:rgba(192,57,43,.1); color:var(--red);}
+  /* ===== 证据块 ===== */
+  .evi{border:1px solid var(--rule); background:#fff; margin:12px 0; padding:12px 16px;}
+  .evi .ehead{font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--green); margin-bottom:6px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px;}
+  .evi .ehead a{color:var(--green); border-bottom-color:rgba(26,127,55,.3); font-size:11px; letter-spacing:0; text-transform:none;}
+  .evi .esrc{font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--ink2); word-break:break-all;}
+  .evi .ep{font-size:13px; color:var(--ink3); margin:4px 0;}
+  .evi .eq{font-family:'IBM Plex Mono',monospace; font-size:12px; background:var(--paper2); padding:8px 12px; border-left:2px solid var(--green); margin:6px 0; overflow-x:auto; white-space:pre-wrap;}
+  /* ===== 步骤条 ===== */
+  .step-flow{counter-reset:sf; border:1px solid var(--rule); background:#fff; padding:18px 22px; margin:14px 0;}
+  .step-flow .sf-item{counter-increment:sf; padding:8px 0 8px 46px; position:relative; border-bottom:1px dashed var(--rule);}
+  .step-flow .sf-item:last-child{border-bottom:none;}
+  .step-flow .sf-item::before{content:counter(sf); position:absolute; left:0; top:8px; width:30px; height:30px; border-radius:50%;
+    background:var(--wc-green); color:#fff; font-family:'IBM Plex Mono',monospace; font-size:13px; display:flex; align-items:center; justify-content:center;}
+  .step-flow .sf-item .t{font-size:14px; font-weight:600; color:var(--ink);}
+  .step-flow .sf-item .d{font-size:12.8px; color:var(--ink3); margin-top:2px;}
+  /* 细节分析小节 */
+  .sec-box{border:1px solid var(--rule); background:#fff; padding:18px 22px; margin:14px 0;}
+  .sec-box .sno{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.14em; color:var(--blue);}
+  .sec-box h3{display:flex; align-items:baseline; gap:10px; margin-top:2px;}
+  .sec-box .flow{font-family:'IBM Plex Mono',monospace; font-size:12px; background:var(--paper2); padding:8px 12px; border-left:2px solid var(--blue); margin:8px 0; overflow-x:auto; white-space:pre-wrap;}
+  .warn{border-left:2px solid var(--warn,#FF7D00); background:rgba(255,125,0,.06); padding:10px 14px; margin:10px 0; font-size:13px; color:var(--ink3);}
+  .oknote{border-left:2px solid var(--green); background:rgba(26,127,55,.06); padding:10px 14px; margin:10px 0; font-size:13px; color:var(--ink3);}
+  .map-card{border:1px solid var(--rule); background:#fff; margin:12px 0; padding:14px 18px;}
+  .map-card .mc-k{font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--wc-green); margin-bottom:4px;}
+  .map-card .mc-t{font-size:15px; font-weight:600; color:var(--ink);}
+  .map-card .mc-d{font-size:13px; color:var(--ink3); margin-top:4px;}
+  /* ===== 样例图画廊 ===== */
+  .gallery{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin:14px 0 8px;}
+  .gallery .shot{border:1px solid var(--rule); background:#fff; padding:8px; text-align:center;}
+  .gallery .shot img{max-width:100%; border:1px solid var(--rule); display:block; margin:0 auto; background:#fff;}
+  .gallery .shot .cap{font-size:11px; color:var(--ink2); margin-top:6px; line-height:1.4;}
+  .gallery .shot .cap .src{display:block; font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:var(--ink2); opacity:.75; margin-top:2px; word-break:break-all;}
+  .gallery .shot .cap .src a{color:var(--ink2); border:none;}
+  .gallery .shot .cap .src a:hover{color:var(--green);}
+  .gallery .shot .cap .tag-lbl{display:inline-block; font-size:10px; letter-spacing:.1em; color:var(--blue); background:rgba(27,54,93,.08); padding:1px 6px; border-radius:3px; margin-bottom:3px;}
+  .gallery.two{grid-template-columns:repeat(auto-fit,minmax(280px,1fr));}
+  footer.colophon{margin-top:56px; padding-top:14px; border-top:1px solid var(--rule); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;
+    font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink2);}
+  footer.colophon a{color:var(--ink2); border:none;}
+  @media(max-width:720px){
+    .wrap{padding:28px 18px 60px;}
+    th{font-size:10.5px; padding:5px 6px;}
+    td{font-size:11.5px; padding:5px 6px;}
+    .sec-box{padding:14px 14px;}
+    .meta-grid{grid-template-columns:1fr;}
+    .step-flow .sf-item{padding-left:40px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="folio">
+    <span><a href="../docs/ui/index.html">← Docs Index</a> · <a href="企微自定义应用的形式_调研.html">v1（纷享视角）</a></span>
+    <span>WeCom Custom App · Official Capability Research v2</span>
+    <span>长安仁恒 · 企微订单助手</span>
+  </header>
+
+  <div class="kicker">
+    <span class="tag blue">Research v2 · 官方能力视角</span>
+    <span class="tag green">事实源：企业微信开放平台官方文档</span>
+    <span class="mono" style="font-size:11px; letter-spacing:.18em; color:var(--ink2);">developer.work.weixin.qq.com → 官方能力 → 技术类型 → 落地映射</span>
+  </div>
+
+  <h1>企微自定义应用的形式_调研 v2<br/><span style="font-style:italic; color:var(--blue);">从企业微信开放平台官方能力出发：企微本身支持哪些技术类型</span></h1>
+
+  <p class="lede">v1 调研以纷享销客帮助中心为事实源，回答了"纷享怎么做"。本 v2 换一个视角：以<strong>企业微信开放平台官方开发者文档（developer.work.weixin.qq.com）</strong>为唯一事实源，回答"<strong>企微本身原生支持哪些技术类型、每个类型官方定义了哪些能力边界</strong>"——即从平台能力清单出发，能做什么、怎么配置、能力上限在哪。纷享销客的角色从"事实源"降级为<strong>旁证</strong>：证明这些官方能力已被商用系统大规模落地（<span class="mono">v1 文档 402e993 已完整调研其实现</span>）。本 v2 中每条能力均标注<strong>官方文档路径</strong>（可点击回验），纷享仅在「旁证」栏出现。</p>
+
+  <!-- ============ 元信息 ============ -->
+  <div class="meta-grid">
+    <div class="meta-card"><div class="k">事实源（本 v2）</div><div class="v">
+      企业微信开放平台官方文档 <span class="mono">developer.work.weixin.qq.com/document</span><br/>
+      覆盖：开发指南 / 服务端API / 客户端API（JS-SDK·小程序·移动端SDK）/ 应用管理 / 客户联系 / 会话存档
+    </div></div>
+    <div class="meta-card"><div class="k">旁证（非事实源）</div><div class="v">
+      纷享销客企微SCRM（<span class="mono">help.fxiaoke.com/86b2</span>）——证明官方能力可商用落地；细节见 <a href="企微自定义应用的形式_调研.html">v1 文档</a>
+    </div></div>
+    <div class="meta-card"><div class="k">视角差异</div><div class="v">
+      v1：<span class="ok">厂商实现视角</span>（纷享做了什么）<br/>
+      v2：<span class="ok">平台能力视角</span>（企微官方定义了什么、边界在哪）
+    </div></div>
+    <div class="meta-card"><div class="k">结论先行</div><div class="v">
+      企微官方原生支持 <span class="ok">4 类应用形态</span>（自建/第三方/代开发/小程序）× <span class="ok">3 大挂载点</span>（聊天工具栏/工作台/消息列）× <span class="ok">3 层 API</span>（服务端/JS-SDK/小程序SDK）——订单履约系统可按「自建应用 + H5」全量覆盖
+    </div></div>
+  </div>
+
+  <nav class="toc">
+    <div class="tt">CONTENTS</div>
+    <a href="#p1">P1 · 官方应用技术类型总览（企微支持哪些形态）</a>
+    <a href="#p2">P2 · 三大挂载点（官方接口定义）</a>
+    <a href="#p3">P3 · 客户端 API 能力（JS-SDK / 小程序 / 移动端SDK）</a>
+    <a href="#p4">P4 · 服务端 API 能力（数据与业务）</a>
+    <a href="#p5">P5 · 特殊能力（会话存档 / 数据与智能专区 / 审批）</a>
+    <a href="#p6">P6 · 订单履约系统 × 官方能力映射</a>
+    <a href="#p7">P7 · 能力边界、风险与结论</a>
+    <a href="#p8">P8 · 回到我们的项目：能做什么 / 不能做什么</a>
+    <a href="#src">附录 · 官方文档证据清单（含纷享旁证对照）</a>
+  </nav>
+
+  <!-- ================================================================ -->
+  <!-- ========================== PART 1 ============================= -->
+  <!-- ================================================================ -->
+  <h2 id="p1"><span class="no">P1 ·</span> 官方应用技术类型总览 —— 企微本身支持哪些形态</h2>
+
+  <p>企业微信官方文档「开发指南 → 快速入门 → 概述」（<a href="https://developer.work.weixin.qq.com/document/path/90556">path/90556</a>）与「服务端API → 开发前必读 → 基本概念介绍」（<a href="https://developer.work.weixin.qq.com/document/path/90665">path/90665</a>）定义了企微应用的完整技术形态。官方将应用分为<strong>企业内部开发</strong>与<strong>服务商模式</strong>两大体系，其下各承载不同的技术类型：</p>
+
+  <div class="mermaid">
+flowchart TB
+    subgraph PLAT["企业微信开放平台（官方分类）"]
+        I["企业内部开发<br/>(企业自研)"]
+        V["服务商模式<br/>(第三方开发)"]
+    end
+    I --> I1["自建应用<br/>(agentid 由企业自管)"]
+    I --> I2["企业小程序<br/>(wx.qy 体系)"]
+    V --> V1["第三方应用<br/>(应用市场分发)"]
+    V --> V2["代开发应用<br/>(服务商代开发·企业授权)"]
+    I1 --> H["页面承载 = H5<br/>(应用主页 / 自定义URL)"]
+    I2 --> M["页面承载 = 小程序<br/>(wx.qy.* API)"]
+    V1 --> H2["页面承载 = H5 / 小程序"]
+    V2 --> H2
+    H --> G1["挂载：聊天工具栏"]
+    H --> G2["挂载：工作台"]
+    M --> G1
+    M --> G2
+    H2 --> G1
+    H2 --> G2
+    G1 --> X["触达：应用消息推送<br/>(服务端 API)"]
+    G2 --> X
+  </div>
+  <figcaption>图 1：企微官方应用技术类型谱系（依据 path/90556 企业内部开发、path/90665 基本概念、path/90513 JS-SDK 概述复现）</figcaption>
+
+  <h3>1.1 官方定义的四类应用形态</h3>
+  <div class="table-wrap"><table>
+    <tr><th>官方类型</th><th>开发者主体</th><th>页面承载技术</th><th>官方文档依据</th><th>关键特征</th><th>旁证（纷享落地）</th></tr>
+    <tr><td class="n">自建应用</td><td>企业自身</td><td>H5 网页（应用主页 / 自定义页面 URL）</td><td><a href="https://developer.work.weixin.qq.com/document/path/90665">90665 基本概念</a>（corpid/agentid/secret）</td><td>agentid 企业自管；可见范围可控；服务端 API 全量开放</td><td>纷享销客CRM 第三方应用（v1 S3）</td></tr>
+    <tr><td class="n">第三方应用</td><td>服务商（ISV）</td><td>H5 / 小程序</td><td><a href="https://developer.work.weixin.qq.com/document/path/90665">90665</a> 服务商模式</td><td>应用市场分发；suite 机制；企业授权安装</td><td>纷享销客CRM 以第三方应用形态分发</td></tr>
+    <tr><td class="n">代开发应用</td><td>服务商代开发，企业自管</td><td>H5 / 小程序</td><td><a href="https://developer.work.weixin.qq.com/document/path/95884">95884 自建应用与第三方应用的对接</a></td><td>企业扫码安装；服务商代维护；<strong>可申请数据与智能专区</strong></td><td>纷享销客代开发应用（会话存档）</td></tr>
+    <tr><td class="n">企业小程序</td><td>企业自身</td><td>小程序（<span class="cls">wx.qy.*</span> API）</td><td><a href="https://developer.work.weixin.qq.com/document/path/92370">92370 小程序关联到企业微信</a>、<a href="https://developer.work.weixin.qq.com/document/path/94321">94321 wx.qy.getContext</a></td><td>免登录（wx.qy.login/code2Session）；可在聊天工具栏/工作台承载；可被客户在小程序中打开</td><td>纷享营销助手-小程序（v1 S3 步骤4）</td></tr>
+  </table></div>
+
+  <h3>1.2 关键官方概念（基本概念介绍）</h3>
+  <div class="evi">
+    <div class="ehead"><span>证据 W1 · 服务端 API 基本概念</span><a href="https://developer.work.weixin.qq.com/document/path/90665" target="_blank">官方文档 ↗</a></div>
+    <div class="eq">corpid：企业 ID（每个企业唯一）<br/>
+userid：成员唯一标识（企业内）<br/>
+agentid：应用唯一标识（每个自建应用/第三方应用各有 agentid）<br/>
+secret：应用密钥（换取 access_token 用）<br/>
+access_token：全局唯一调用凭证（2 小时过期，需缓存刷新）<br/>
+可见范围：应用对成员/部门/标签的可见性配置（控制谁在工作台看到该应用）</div>
+    <p class="ep">官方定义的四要素（corpid/agentid/secret/access_token）即本项目服务端对接企微的握手基础；「可见范围」= 应用权限的 RBAC 基础。</p>
+  </div>
+
+  <!-- ================================================================ -->
+  <!-- ========================== PART 2 ============================= -->
+  <!-- ================================================================ -->
+  <h2 id="p2"><span class="no">P2 ·</span> 三大挂载点 —— 官方接口定义的应用出现位置</h2>
+
+  <p>官方文档明确了企微应用的三类呈现位置，每类都有对应的官方接口/配置入口：</p>
+
+  <h3>2.1 挂载点 A：聊天工具栏（会话侧边栏）—— 外部客户会话上下文</h3>
+  <p>官方「JS-SDK → 聊天工具栏」接口组（<a href="https://developer.work.weixin.qq.com/document/path/91789">path/91789</a>）定义了侧边栏 H5 的会话上下文获取能力——这是本项目订单助手的主形态。</p>
+  <div class="table-wrap"><table>
+    <tr><th>官方接口</th><th>文档路径</th><th>能力</th><th>本项目的用途</th></tr>
+    <tr><td class="n">获取当前客户ID</td><td><a href="https://developer.work.weixin.qq.com/document/path/100746">100746</a></td><td>侧边栏打开时返回当前外部联系人 external_userid</td><td>定位"和谁在谈"→ 查该客户订单/合同/风险</td></tr>
+    <tr><td class="n">获取当前客户群的群ID</td><td><a href="https://developer.work.weixin.qq.com/document/path/100747">100747</a></td><td>客户群会话返回 chat_id</td><td>群上下文 → 该群关联客户（供应协同群 → 客户主体）</td></tr>
+    <tr><td class="n">隐藏聊天附件栏的发送按钮</td><td><a href="https://developer.work.weixin.qq.com/document/path/100748">100748</a></td><td>侧边栏可隐藏底部发送按钮（纯展示态）</td><td>订单详情剥价视图等"只读"场景</td></tr>
+    <tr><td class="n">分享消息到当前会话</td><td><a href="https://developer.work.weixin.qq.com/document/path/100749">100749</a></td><td>侧边栏把 H5 内容/卡片直接发到当前聊天</td><td>把订单卡片/确认单发进群，客户确认</td></tr>
+    <tr><td class="n">ww.getContext</td><td><a href="https://developer.work.weixin.qq.com/document/path/94315">94315</a></td><td>判断 H5 当前所在环境（聊天工具栏/工作台/普通网页）</td><td>同一 H5 在不同挂载点自适应（有无会话上下文）</td></tr>
+  </table></div>
+
+  <div class="gallery two">
+    <div class="shot"><img src="https://wework.qpic.cn/wwpic/602207_OzCYlT1dSJKt0fM_1603863475/0" alt="手机端聊天工具栏挂载效果（官方样例图）" loading="lazy" />
+      <div class="cap"><span class="tag-lbl">样例图 · 手机端挂载效果</span>客户群聊天窗口，输入框上方一行聊天工具栏（对外收款/快捷回复/直播/客户详情）<br/><span class="src">企微官网帮助 <a href="https://work.weixin.qq.com/nl/act/p/2334b6c2dccb44ba" target="_blank">work.weixin.qq.com/nl/act/p/2334b6c2dccb44ba</a></span></div></div>
+    <div class="shot"><img src="https://wework.qpic.cn/wwpic/678477_nOIiw0AbQiuNVPz_1603893164/0" alt="侧边栏客户详情效果（官方样例图）" loading="lazy" />
+      <div class="cap"><span class="tag-lbl">样例图 · 侧边栏详情效果</span>点开工具栏「客户详情」后展示的侧边栏面板（资料/快捷回复/标签）——本项目「订单详情」侧边栏即此形态<br/><span class="src">企微官网帮助 <a href="https://work.weixin.qq.com/nl/act/p/2334b6c2dccb44ba" target="_blank">work.weixin.qq.com/nl/act/p/2334b6c2dccb44ba</a></span></div></div>
+    <div class="shot"><img src="https://wework.qpic.cn/wwpic/183397_x-U_l3s5Q7uBpeN_1603863422/0" alt="聊天工具栏配置页（官方样例图）" loading="lazy" />
+      <div class="cap"><span class="tag-lbl">样例图 · 工具栏配置页</span>「我的工具栏」编辑态：调整顺序/删除 + 「添加应用」（从工作台已有应用选择页面）<br/><span class="src">企微官网帮助 <a href="https://work.weixin.qq.com/nl/act/p/2334b6c2dccb44ba" target="_blank">work.weixin.qq.com/nl/act/p/2334b6c2dccb44ba</a></span></div></div>
+  </div>
+  <figcaption>图 2a：聊天工具栏挂载点官方样例（来源：企业微信官网「聊天工具栏」帮助页）</figcaption>
+
+  <div class="evi">
+    <div class="ehead"><span>证据 W2 · 聊天工具栏接口（官方）</span><a href="https://developer.work.weixin.qq.com/document/path/91789" target="_blank">官方文档 ↗</a></div>
+    <div class="eq">entry 参数：single_chat_tools（单聊工具栏）/ group_chat_tools（群聊工具栏）<br/>
+配置位置：企微管理后台 → 客户联系 → 聊天工具 → 聊天工具栏 → 配置应用页面<br/>
+前置：员工需在「客户联系」使用范围内（external contact 权限）</div>
+    <p class="ep">官方 entry 值即企微对"侧边栏应用"的技术标识；聊天工具栏配置是管理后台原生功能，不需要任何代码。</p>
+  </div>
+
+  <h3>2.2 挂载点 B：工作台自定义展示</h3>
+  <p>官方「应用管理 → 工作台自定义展示」<a href="https://developer.work.weixin.qq.com/document/path/92535">path/92535</a> 提供 4 种工作台模板，让应用在工作台以不同形态呈现：</p>
+  <div class="table-wrap"><table>
+    <tr><th>模板类型</th><th>官方说明</th><th>本项目的对应</th></tr>
+    <tr><td class="n">关键数据型</td><td>展示 1-3 个关键数值 + 跳转链接</td><td>今日待办数/待审订单数/待发货数</td></tr>
+    <tr><td class="n">图片型</td><td>图片 + 标题 + 跳转</td><td>运营 Banner / 公告</td></tr>
+    <tr><td class="n">列表型</td><td>2-5 条链接列表</td><td>快速入口：我的订单/下单/审批</td></tr>
+    <tr><td class="n">webview型</td><td>直接内嵌 H5 页面</td><td>工作台直接打开订单助手 H5（3 Tab）</td></tr>
+  </table></div>
+
+  <div class="gallery">
+    <div class="shot"><img src="https://wework.qpic.cn/wwpic3az/981676_TxIhH987Sm6z-kp_1721209073/0" alt="工作台-关键数据型模板（官方样例图）" loading="lazy" />
+      <div class="cap"><span class="tag-lbl">样例图 · 关键数据型</span>展示 1-3 个关键数值 + 跳转链接<br/><span class="src">官方文档 <a href="https://developer.work.weixin.qq.com/document/path/92535" target="_blank">path/92535</a></span></div></div>
+    <div class="shot"><img src="https://wework.qpic.cn/wwpic3az/461131_9hFGAUVgRl2lVKJ_1721209090/0" alt="工作台-图片型模板（官方样例图）" loading="lazy" />
+      <div class="cap"><span class="tag-lbl">样例图 · 图片型</span>图片 + 标题 + 跳转<br/><span class="src">官方文档 <a href="https://developer.work.weixin.qq.com/document/path/92535" target="_blank">path/92535</a></span></div></div>
+    <div class="shot"><img src="https://wework.qpic.cn/wwpic3az/903304_vJ6JeZZ2QeS9p8O_1721209039/0" alt="工作台-列表型模板（官方样例图）" loading="lazy" />
+      <div class="cap"><span class="tag-lbl">样例图 · 列表型</span>2-5 条链接列表<br/><span class="src">官方文档 <a href="https://developer.work.weixin.qq.com/document/path/92535" target="_blank">path/92535</a></span></div></div>
+    <div class="shot"><img src="https://wework.qpic.cn/wwpic3az/1240_zNhUqAEdQTyEF34_1721210470/0" alt="工作台-webview型模板（官方样例图）" loading="lazy" />
+      <div class="cap"><span class="tag-lbl">样例图 · webview 型</span>直接内嵌 H5 页面<br/><span class="src">官方文档 <a href="https://developer.work.weixin.qq.com/document/path/92535" target="_blank">path/92535</a></span></div></div>
+  </div>
+  <figcaption>图 2b：工作台自定义展示 4 种模板官方样例（来源：企微开放平台文档 path/92535）</figcaption>
+
+  <h3>2.3 挂载点 C：应用消息推送（消息列）</h3>
+  <p>官方「服务端API → 消息推送」<a href="https://developer.work.weixin.qq.com/document/path/90236">path/90236</a>（发送应用消息）与「模板卡片消息」<a href="https://developer.work.weixin.qq.com/document/path/101032">path/101032</a>、<a href="https://developer.work.weixin.qq.com/document/path/94888">path/94888</a>（更新模版卡片）定义了应用主动触达能力：</p>
+  <div class="table-wrap"><table>
+    <tr><th>消息类型</th><th>官方文档</th><th>用途</th></tr>
+    <tr><td class="n">文本/图文/语音/文件</td><td><a href="https://developer.work.weixin.qq.com/document/path/90236">90236</a></td><td>基础通知</td></tr>
+    <tr><td class="n">文本卡片消息（textcard）</td><td><a href="https://developer.work.weixin.qq.com/document/path/90236">90236</a></td><td>带按钮跳转的审批/待办卡</td></tr>
+    <tr><td class="n">模板卡片消息</td><td><a href="https://developer.work.weixin.qq.com/document/path/101032">101032</a>（<span class="cls">template_card</span>）</td><td>订单状态卡：文本通知型/按钮交互型；<strong>可更新（94888）</strong>——预订单确认→已确认 状态翻转</td></tr>
+    <tr><td class="n">任务卡片消息</td><td><a href="https://developer.work.weixin.qq.com/document/path/90248">90248</a></td><td>待办任务，点击回调到服务端</td></tr>
+  </table></div>
+
+  <div class="gallery two">
+    <div class="shot"><img src="https://res.mail.qq.com/node/ww/wwopenmng/images/independent/doc/cardmsg.jpeg" alt="应用消息-文本卡片消息（官方样例图）" loading="lazy" />
+      <div class="cap"><span class="tag-lbl">样例图 · 文本卡片（textcard）</span>带标题/摘要/跳转按钮的审批待办卡<br/><span class="src">官方文档 <a href="https://developer.work.weixin.qq.com/document/path/90236" target="_blank">path/90236</a></span></div></div>
+    <div class="shot"><img src="https://res.mail.qq.com/node/ww/wwopenmng/images/independent/doc/filemsg.jpeg" alt="应用消息-图文消息（官方样例图）" loading="lazy" />
+      <div class="cap"><span class="tag-lbl">样例图 · 图文消息</span>文本 + 图片 + 跳转链接<br/><span class="src">官方文档 <a href="https://developer.work.weixin.qq.com/document/path/90236" target="_blank">path/90236</a></span></div></div>
+    <div class="shot"><img src="https://p.qpic.cn/pic_wework/3478722865/9d9b75910515dfd9064947d1d95e8dd7892670895ddfc0f3/0" alt="应用消息-模板卡片消息（官方样例图）" loading="lazy" />
+      <div class="cap"><span class="tag-lbl">样例图 · 模板卡片（template_card）</span>按钮交互型，可更新状态（预订单确认→已确认）<br/><span class="src">官方文档 <a href="https://developer.work.weixin.qq.com/document/path/90236" target="_blank">path/90236</a></span></div></div>
+  </div>
+  <figcaption>图 2c：应用消息推送官方样例（来源：企微开放平台文档 path/90236 发送应用消息）</figcaption>
+
+  <h3>2.4 挂载点全景（mermaid）</h3>
+  <div class="mermaid">
+flowchart LR
+    subgraph U["企微客户端（官方挂载点）"]
+        U1["聊天工具栏·侧边栏<br/>(外部客户单聊/群聊)"]
+        U2["工作台应用<br/>(4 种模板)"]
+        U3["消息列·应用通知<br/>(template_card)"]
+    end
+    subgraph H5["订单助手 H5（自建应用）"]
+        H1["待办 Tab"]
+        H2["订单 Tab"]
+        H3["下单 Tab"]
+    end
+    subgraph API["官方 API"]
+        A1["JS-SDK: getCurExternalChat<br/>getContext · shareToChat"]
+        A2["服务端: 发送应用消息<br/>更新模板卡片"]
+    end
+    U1 --"入口 entry=single/group_chat_tools"--> H5
+    U2 --"webview 型模板"--> H5
+    U3 --"template_card 跳转 URL"--> H5
+    H5 --"ww.getCurExternalChat 上下文"--> A1
+    SVC["订单履约服务"] --"access_token + agentid"--> A2 -.-> U3
+  </div>
+  <figcaption>图 2：三大挂载点 × 官方 API（依据 91789/92535/90236/101032 复现）</figcaption>
+
+  <!-- ================================================================ -->
+  <!-- ========================== PART 3 ============================= -->
+  <!-- ================================================================ -->
+  <h2 id="p3"><span class="no">P3 ·</span> 客户端 API 能力 —— 侧边栏 H5 能调用什么</h2>
+
+  <p>官方「客户端API → JS-SDK 概述」<a href="https://developer.work.weixin.qq.com/document/path/90513">path/90513</a> 定义：<em>企业微信JS-SDK 是面向网页开发者的、基于企业微信内的网页开发工具包，可调用拍照、选图、语音、位置等手机能力及企业微信分享、扫一扫等特有能力。</em> 与本项目相关的官方能力分组：</p>
+
+  <h3>3.1 JS-SDK 能力分组（官方）</h3>
+  <div class="table-wrap"><table>
+    <tr><th>官方分组</th><th>代表接口</th><th>本项目用途</th></tr>
+    <tr><td class="n">聊天工具栏</td><td><a href="https://developer.work.weixin.qq.com/document/path/100746">获取当前客户ID</a> / <a href="https://developer.work.weixin.qq.com/document/path/100747">群ID</a> / <a href="https://developer.work.weixin.qq.com/document/path/100748">隐藏发送按钮</a> / <a href="https://developer.work.weixin.qq.com/document/path/100749">分享到会话</a></td><td>群上下文路由、只读剥价视图、订单卡发群</td></tr>
+    <tr><td class="n">客户联系</td><td><a href="https://developer.work.weixin.qq.com/document/path/93568">getCurExternalContact</a> / <a href="https://developer.work.weixin.qq.com/document/path/93570">getCurExternalChat</a> / <a href="https://developer.work.weixin.qq.com/document/path/93555">群发消息给客户</a></td><td>单聊客户定位、客户群上下文、批量触达</td></tr>
+    <tr><td class="n">图像</td><td><a href="https://developer.work.weixin.qq.com/document/path/100520">选择图片</a> / <a href="https://developer.work.weixin.qq.com/document/path/100522">上传图片</a></td><td>回单凭证上传（仓管）</td></tr>
+    <tr><td class="n">文件</td><td><a href="https://developer.work.weixin.qq.com/document/path/100538">预览文件</a> / <a href="https://developer.work.weixin.qq.com/document/path/100539">从会话选择文件</a></td><td>合同/质检单预览与转发</td></tr>
+    <tr><td class="n">分享</td><td><a href="https://developer.work.weixin.qq.com/document/path/100501">分享概述</a> / <a href="https://developer.work.weixin.qq.com/document/path/100505">自定义转发到会话</a></td><td>订单卡片分享给客户确认</td></tr>
+    <tr><td class="n">界面</td><td><a href="https://developer.work.weixin.qq.com/document/path/100512">隐藏右上角菜单</a> / <a href="https://developer.work.weixin.qq.com/document/path/100514">关闭当前窗口</a></td><td>全屏 H5 沉浸模式（下单页）</td></tr>
+    <tr><td class="n">数据与智能专区</td><td><a href="https://developer.work.weixin.qq.com/document/path/101499">文档选择</a> / <a href="https://developer.work.weixin.qq.com/document/path/101544">文件选择</a></td><td>（如需）会话内容/文件能力</td></tr>
+  </table></div>
+
+  <div class="warn"><strong>JS-SDK 使用前提（官方）：</strong>需先 <span class="cls">wx.config</span>（corpid + agentid + timestamp + nonceStr + signature，JS-SDK 签名算法 path/90506），且页面必须在企微浏览器内打开。签名用的 jsapi_ticket 需服务端换取。</div>
+
+  <h3>3.2 小程序与移动端 SDK（补充形态）</h3>
+  <div class="table-wrap"><table>
+    <tr><th>形态</th><th>官方文档</th><th>说明</th></tr>
+    <tr><td class="n">企业微信小程序</td><td><a href="https://developer.work.weixin.qq.com/document/path/91506">wx.qy.login</a> / <a href="https://developer.work.weixin.qq.com/document/path/91507">code2Session</a> / <a href="https://developer.work.weixin.qq.com/document/path/94321">wx.qy.getContext</a> / <a href="https://developer.work.weixin.qq.com/document/path/92370">小程序关联到企业微信</a></td><td>免登录（code2Session 换 openid/session_key）；可被聊天工具栏/工作台承载；客户微信侧也可打开</td></tr>
+    <tr><td class="n">移动端 SDK</td><td><a href="https://developer.work.weixin.qq.com/document/path/90294">概述</a>（iOS/Android/Harmony）</td><td>原生 App 集成企微登录/分享；本项目无原生 App，跳过</td></tr>
+  </table></div>
+
+  <div class="oknote"><strong>形态取舍（官方依据）：</strong>H5（JS-SDK）与小程序（wx.qy）都原生支持；H5 对既有 Web 技术栈零迁移成本，小程序免登录但需小程序开发体系。本项目采用 H5 + JS-SDK 即可获得全部订单履约所需能力（上下文/媒体/分享/界面）。</div>
+
+  <!-- ================================================================ -->
+  <!-- ========================== PART 4 ============================= -->
+  <!-- ================================================================ -->
+  <h2 id="p4"><span class="no">P4 ·</span> 服务端 API 能力 —— 数据与业务自动化</h2>
+
+  <p>官方服务端 API（<a href="https://developer.work.weixin.qq.com/document/path/90664">path/90664 开发前必读</a>）覆盖企业数据全量读写。与订单履约系统强相关的能力组：</p>
+
+  <div class="table-wrap"><table>
+    <tr><th>能力组</th><th>官方文档</th><th>本项目用途</th></tr>
+    <tr><td class="n">身份与凭证</td><td><a href="https://developer.work.weixin.qq.com/document/path/91039">获取 access_token</a> / <a href="https://developer.work.weixin.qq.com/document/path/90930">回调配置</a></td><td>服务端握手；事件回调（新客户/新消息/审批事件）</td></tr>
+    <tr><td class="n">通讯录</td><td><a href="https://developer.work.weixin.qq.com/document/path/90193">通讯录管理概述</a>（成员/部门/标签）</td><td>员工 → 角色映射（销售/商务/仓管/财务），组织架构同步</td></tr>
+    <tr><td class="n">客户联系</td><td><a href="https://developer.work.weixin.qq.com/document/path/92110">外部联系人</a> / <a href="https://developer.work.weixin.qq.com/document/path/92114">客户群</a> / <a href="https://developer.work.weixin.qq.com/document/path/92228">客户群发</a></td><td>客户主数据同步、客户群→客户映射、批量通知</td></tr>
+    <tr><td class="n">消息推送</td><td><a href="https://developer.work.weixin.qq.com/document/path/90236">发送应用消息</a> / <a href="https://developer.work.weixin.qq.com/document/path/101032">模板卡片</a> / <a href="https://developer.work.weixin.qq.com/document/path/94888">更新模版卡片</a></td><td>审批待办/状态翻转卡</td></tr>
+    <tr><td class="n">网页授权</td><td><a href="https://developer.work.weixin.qq.com/document/path/91335">OAuth 静默/手动授权</a></td><td>H5 免密登录（scope=snsapi_base 静默获取 userid）</td></tr>
+    <tr><td class="n">应用管理</td><td><a href="https://developer.work.weixin.qq.com/document/path/92535">工作台自定义展示</a> / <a href="https://developer.work.weixin.qq.com/document/path/94598">获取应用</a></td><td>工作台 4 模板配置；应用信息校验</td></tr>
+    <tr><td class="n">审批</td><td><a href="https://developer.work.weixin.qq.com/document/path/97202">应用发起审批</a>（官方原生审批流）</td><td>可选：用企微原生审批做订单审批（vs 自建审批流）</td></tr>
+  </table></div>
+
+  <div class="evi">
+    <div class="ehead"><span>证据 W3 · 网页授权登录（OAuth2）</span><a href="https://developer.work.weixin.qq.com/document/path/91335" target="_blank">官方文档 ↗</a></div>
+    <div class="eq">第一步：跳转授权 URL（redirect_uri + corpid + agentid + scope）<br/>
+scope=snsapi_base → 静默获取 userid（无需用户确认）<br/>
+scope=snsapi_privateinfo → 手动授权，可获手机/邮箱等<br/>
+第二步：用 code 换取 userid（服务端）</div>
+    <p class="ep">这是侧边栏 H5 的免密登录机制——与 <span class="mono">docs/ui/wecom_tech_survey.html</span> 的"双票据 + 静默授权"方案完全一致。</p>
+  </div>
+
+  <!-- ================================================================ -->
+  <!-- ========================== PART 5 ============================= -->
+  <!-- ================================================================ -->
+  <h2 id="p5"><span class="no">P5 ·</span> 特殊能力 —— 会话存档 / 数据与智能专区 / 原生审批</h2>
+
+  <h3>5.1 会话内容存档（合规留痕）</h3>
+  <p>官方「会话内容存档」<a href="https://developer.work.weixin.qq.com/document/path/91360">path/91360</a>：企业可合规获取员工与客户的会话内容（需员工/客户授权 + 购买增值服务）。实现路径官方明确为：</p>
+  <ul>
+    <li>仅<strong>已认证企业</strong>可开通；需上传《会话内容使用授权函》</li>
+    <li>通过「<strong>数据与智能专区</strong>」<a href="https://developer.work.weixin.qq.com/document/path/99941">path/99941</a> 授权后，<span class="cls">meeting_room_id / 文档/文件选择</span>等能力可用</li>
+    <li>会话存档 SDK：<span class="cls">GetChatData</span> 拉取加密消息 → 企业服务端解密 → 存储</li>
+  </ul>
+  <div class="warn"><strong>边界：</strong>会话存档=付费增值 + 授权函 + 代开发/服务商通道（官方 path/91360 明确）；对"群内口头下单审计"场景，这是唯一合规路径，但成本高，非 P0。</div>
+
+  <h3>5.2 官方原生审批流（可选替代自建）</h3>
+  <p>官方「应用发起审批」<a href="https://developer.work.weixin.qq.com/document/path/97202">path/97202</a> 允许自建应用直接发起企微原生审批（模板自定义、控件自定义、审批人/抄送人指定、回调通知）。</p>
+  <div class="table-wrap"><table>
+    <tr><th>方案</th><th>审批载体</th><th>优点</th><th>缺点</th></tr>
+    <tr><td class="n">方案 A：自建审批流</td><td>订单系统内</td><td>审批与订单状态机同源；可编排复杂闸门（审价→到账→备货→发货→开票）</td><td>需自建审批 UI/通知</td></tr>
+    <tr><td class="n">方案 B：企微原生审批</td><td>企微审批应用</td><td>审批 UI/通知/移动端原生；模板控件 API 化（97202）</td><td>审批状态与订单系统需回调同步；复杂多阶段闸门表达受限</td></tr>
+  </table></div>
+  <div class="oknote"><strong>建议：</strong>以方案 A 为主（订单状态机内嵌审批闸门，模板卡片触达），方案 B 作为轻量备选（如内部费用审批）。</div>
+
+  <!-- ================================================================ -->
+  <!-- ========================== PART 6 ============================= -->
+  <!-- ================================================================ -->
+  <h2 id="p6"><span class="no">P6 ·</span> 订单履约系统 × 官方能力映射 —— 我们能做什么</h2>
+
+  <p>以下映射全部以<strong>官方能力</strong>为技术依据，纷享落地仅作"该组合已被商用验证"的旁证：</p>
+
+  <h3>6.1 官方能力 → 订单履约功能映射</h3>
+  <div class="table-wrap"><table>
+    <tr><th>订单履约需求</th><th>官方能力（文档路径）</th><th>技术形态</th><th>优先级</th><th>纷享旁证</th></tr>
+    <tr><td>销售在客户会话查订单</td><td>聊天工具栏 100746/100747 + OAuth 91335</td><td>自建应用 H5 侧边栏</td><td><span class="flag g">P0</span></td><td>CRM 详情侧边栏</td></tr>
+    <tr><td>订单审批待办触达</td><td>模板卡片 101032 + 更新 94888 + 发送 90236</td><td>template_card 按钮卡，状态翻转可更新</td><td><span class="flag g">P0</span></td><td>企微端消息提醒</td></tr>
+    <tr><td>工作台无会话入口</td><td>工作台自定义展示 92535（webview型）</td><td>工作台模板</td><td><span class="flag g">P0</span></td><td>工作台应用入口</td></tr>
+    <tr><td>下单表单（5 步分步）</td><td>JS-SDK 界面 100514/100512 + 选图 100520</td><td>全屏 H5</td><td><span class="flag g">P0</span></td><td>（自研页面）</td></tr>
+    <tr><td>回单凭证上传</td><td>JS-SDK 选图/上传 100520/100522</td><td>H5 上传</td><td><span class="flag g">P0</span></td><td>凭证上传（v1 S5）</td></tr>
+    <tr><td>订单卡分享客户确认</td><td>分享到当前会话 100749 / 自定义转发 100505</td><td>H5 → 会话卡片</td><td><span class="flag b">P1</span></td><td>分享/群发</td></tr>
+    <tr><td>客户主数据同步</td><td>外部联系人 API 92110 + 回调 90930</td><td>服务端同步</td><td><span class="flag b">P1</span></td><td>好友数据同步</td></tr>
+    <tr><td>仓管剥价发货视图</td><td>聊天工具栏 100748（隐藏发送按钮）+ OAuth</td><td>只读 H5 侧边栏</td><td><span class="flag b">P1</span></td><td>发货/回单页</td></tr>
+    <tr><td>群内口头下单审计</td><td>会话存档 91360 + 数据与智能专区 99941</td><td>付费增值 + SDK 解密存储</td><td><span class="flag y">P2</span></td><td>会话存档</td></tr>
+    <tr><td>员工角色组织同步</td><td>通讯录 API 90193 + 标签</td><td>服务端同步</td><td><span class="flag y">P2</span></td><td>账号绑定</td></tr>
+    <tr><td>离职客户继承</td><td>客户联系-继承 92111（分配在职成员/客户群）</td><td>服务端 API</td><td><span class="flag y">P3</span></td><td>在/离职继承</td></tr>
+  </table></div>
+
+  <h3>6.2 技术栈选型结论（官方能力 vs 本项目现状）</h3>
+  <div class="sec-box">
+    <div class="sno">DECISION</div>
+    <h3>技术形态决策</h3>
+    <div class="flow">应用形态：自建应用（agentid 自管，无需服务商）✅ 官方支持 path/90665
+页面承载：H5 + JS-SDK（零迁移，全能力）✅ path/90513
+登录鉴权：OAuth snsapi_base 静默授权 + 服务端 code2userid ✅ path/91335
+会话上下文：getCurExternalChat / 获取当前客户ID/群ID ✅ path/100746-100749
+消息触达：template_card + 更新卡片 ✅ path/101032/94888
+工作台入口：webview 型模板 ✅ path/92535
+审批：自建状态机 + 模板卡片（备选：官方审批 97202）
+审计留痕：会话存档（P2，付费增值）✅ path/91360</div>
+  </div>
+
+  <!-- ================================================================ -->
+  <!-- ========================== PART 7 ============================= -->
+  <!-- ================================================================ -->
+  <h2 id="p7"><span class="no">P7 ·</span> 能力边界、风险与结论</h2>
+
+  <h3>7.1 官方能力边界（必须知道）</h3>
+  <ul>
+    <li><strong>侧边栏仅外部客户会话</strong>：聊天工具栏 entry（single_chat_tools/group_chat_tools）只在与客户单聊/客户群生效（官方 91789）；企业内部会话需工作台入口。</li>
+    <li><strong>JS-SDK 必须在企微浏览器内</strong>：wx.config 签名（90506）+ 企微内打开；普通浏览器访问需降级提示。</li>
+    <li><strong>access_token 2 小时过期</strong>：需服务端缓存刷新（官方 91039），多实例并发需锁。</li>
+    <li><strong>模板卡片更新有时限</strong>：官方规定卡片可更新时长（template_card 更新接口约束），超时需重新发送。</li>
+    <li><strong>会话存档门槛高</strong>：认证企业 + 授权函 + 付费增值（91360），且需代开发/服务商通道启用数据与智能专区。</li>
+    <li><strong>可见范围 = 权限边界</strong>：工作台/侧边栏可见性由应用可见范围控制（90665），角色裁剪需在应用层二次实现（本项目 ReBAC）。</li>
+  </ul>
+
+  <h3>7.2 结论</h3>
+  <div class="oknote">
+    以企微官方文档为据：<strong>「自建应用（H5 + JS-SDK）+ 聊天工具栏（外部会话）+ 工作台（webview 模板）+ 应用消息（template_card）」四件套即覆盖订单履约全部 P0 需求</strong>，全部为官方原生支持、零服务商依赖。会话存档为 P2 付费增值项。纷享销客的商用实现（v1 文档）证明该组合在大规模生产环境可行——但<strong>技术可行性依据来自企微官方文档本身，不依赖任何厂商</strong>。
+  </div>
+
+  <!-- ================================================================ -->
+  <!-- ================== PART 8：回到我们的项目 ===================== -->
+  <!-- ================================================================ -->
+  <h2 id="p8"><span class="no">P8 ·</span> 回到我们的项目 —— 能做什么 / 不能做什么</h2>
+
+  <p>调研的终点是落回本项目。对照项目需求事实源（<span class="mono">docs/07-wecom-integration.html</span> 业务流与转接协议、<span class="mono">docs/07a-wecom-interaction-prd.html</span> UI 呈现层规范、<span class="mono">docs/ui/*-spec.html</span> 7 角色规约页）与企微官方能力，本项目的「能做 / 不能做」清单如下。</p>
+
+  <h3>8.1 项目形态总览（官方能力 → 项目实现）</h3>
+  <div class="table-wrap"><table>
+    <tr><th>官方能力</th><th>项目场景</th><th>实现状态</th><th>证据</th></tr>
+    <tr><td class="n">聊天工具栏 H5（91789/100746/100747）</td><td><strong>S1</strong> 侧边栏：查订单/下单/审批，群上下文路由</td><td><span class="flag g">P0 已实现</span>（jsapi-config 双签名 + OAuth 交换 + X-WeCom-Context 重认证）</td><td>07:L617-620</td></tr>
+    <tr><td class="n">工作台 webview 模板（92535）</td><td><strong>S4</strong> 工作台：无上下文安全降级视图</td><td><span class="flag g">P0 已实现</span>（只聚合与跳转，不做敏感操作）</td><td>07:L626</td></tr>
+    <tr><td class="n">应用消息 template_card（101032/94888）</td><td><strong>S3</strong> 审批/催办/状态卡 + <strong>S2</strong> 预订单确认卡</td><td><span class="flag g">P0 已实现</span>（7 种卡片 Kind，回调验签路由）</td><td>07:L601-612</td></tr>
+    <tr><td class="n">OAuth snsapi_base 静默授权（91335）</td><td>全部 H5 免密登录</td><td><span class="flag g">P0 已实现</span>（服务端重认证，不信任前端身份）</td><td>07:L619-620</td></tr>
+    <tr><td class="n">通讯录/标签 API（90193）</td><td>员工→角色映射、组织同步</td><td><span class="flag b">P2 规划</span></td><td>—</td></tr>
+    <tr><td class="n">客户联系 API（92110/92114）</td><td>客户主数据同步、群→客户绑定</td><td><span class="flag b">P2 规划</span>（wecom_context_bindings 已建表）</td><td>07:L611</td></tr>
+    <tr><td class="n">分享到当前会话（100749）</td><td>订单卡/确认单发群</td><td><span class="flag b">P1 可选</span></td><td>—</td></tr>
+    <tr><td class="n">会话存档（91360/99941）</td><td><strong>S2</strong> 群消息捕捉（自动建单）</td><td><span class="flag y">暂缓</span>（-tags deferred；恢复需 4 项条件）</td><td>07:L139、L187-196</td></tr>
+    <tr><td class="n">应用发起审批（97202）</td><td>审批流</td><td><span class="flag r">不采用</span>（自建状态机 + template_card 决策）</td><td>07:L261-284</td></tr>
+    <tr><td class="n">企业小程序（92370）</td><td>—</td><td><span class="flag r">明确不采用</span>（双套链路）</td><td>07:L136</td></tr>
+  </table></div>
+
+  <h3>8.2 ✅ 我们能做什么（已实现/可做）</h3>
+  <div class="map-card"><div class="mc-k">P0 · 已落地</div><div class="mc-t">S1 侧边栏 + S3 审批卡 + S4 工作台 + S2 人工确认段</div>
+  <div class="mc-d">查订单（群上下文路由到当前客户）、5 步人工下单、预订单确认卡（三按钮：确认/忽略/修改）、7 类审批/状态卡（待审价/仓库确认/到账确认/董事长终审/催办/状态通知/回单异常）、待办聚合、回单凭证上传——全部为企微官方原生能力（聊天工具栏/应用消息/工作台），已按 07 协议落地并有 Fake 通道测试门禁。</div></div>
+  <div class="map-card"><div class="mc-k">P1 · 可做未做</div><div class="mc-t">分享到会话、客户数据同步、仓管剥价发货视图</div>
+  <div class="mc-d">官方接口均存在（100749 分享、92110 外部联系人、100748 隐藏发送按钮支撑只读视图），按需排期即可。</div></div>
+
+  <h3>8.3 ⛔ 我们不能做什么（明确边界）</h3>
+  <div class="table-wrap"><table>
+    <tr><th>#</th><th>不能做</th><th>原因（官方/项目约束）</th><th>证据</th></tr>
+    <tr><td class="n">1</td><td>外部群（客户群）全量消息回调</td><td><strong>普通自建应用无此官方能力</strong>；唯一官方通道 = 会话存档（付费增值）</td><td>07:L134-135；官方 91360</td></tr>
+    <tr><td class="n">2</td><td>「群里一句话 → 自动建单」</td><td>依赖会话存档拉取 + LLM 意图识别——已<strong>暂缓</strong>（合规决策门/KMS/SKU 映射/测试矩阵 4 项恢复条件）</td><td>07:L185-196</td></tr>
+    <tr><td class="n">3</td><td>微信小程序形态</td><td>项目明确不采用（双套链路成本）</td><td>07:L136</td></tr>
+    <tr><td class="n">4</td><td>企微原生审批流</td><td>项目自建审批状态机（闸门可编排），template_card 承载决策</td><td>07:L261-284</td></tr>
+    <tr><td class="n">5</td><td>出站消息已读回执</td><td>企微应用消息<strong>无标准已读回调</strong>（官方能力边界），v1 不展示已读</td><td>07a:L768</td></tr>
+    <tr><td class="n">6</td><td>response_url 主动回复</td><td>官方限制：<strong>1 小时有效、只能调用一次</strong>，过期改走应用消息</td><td>07:L232、L607</td></tr>
+    <tr><td class="n">7</td><td>客户联系人侧边栏入口</td><td>外部联系人能否使用聊天工具栏<strong>待真实企微环境验证</strong>（未决 Q3）</td><td>07a:L766</td></tr>
+    <tr><td class="n">8</td><td>敏感操作放在工作台</td><td>S4 工作台只聚合与跳转，敏感操作走侧边栏/卡片（安全降级）</td><td>07:L626</td></tr>
+    <tr><td class="n">9</td><td>原始聊天文本入业务库</td><td>合规约束：独立加密可过期存档（TTL 30 天），事件链仅存意图特征</td><td>07:L687、L691</td></tr>
+    <tr><td class="n">10</td><td>本地/内网域名直连</td><td>官方要求公网 HTTPS + ICP 备案可信域名（不支持 IP/localhost）</td><td>07:L631</td></tr>
+  </table></div>
+
+  <h3>8.4 结论：项目的技术形态（最终回看）</h3>
+  <div class="sec-box">
+    <div class="sno">FINAL</div>
+    <h3>本项目 = 企微「自建应用 + H5 + JS-SDK + template_card」的标准形态</h3>
+    <div class="flow">官方四件套（P7 结论）与本项目 S1-S4 完全对位：
+• 聊天工具栏（S1）→ 官方 91789/100746/100747 ✅ 已实现
+• 工作台 webview（S4）→ 官方 92535 ✅ 已实现
+• template_card（S3/S2 确认卡）→ 官方 101032/94888 ✅ 已实现
+• OAuth 静默授权 → 官方 91335 ✅ 已实现
+⛔ 边界：外部群自动读消息（会话存档）暂缓；微信小程序/原生审批不采用。
+结论：本项目所需的企微能力 100% 落在官方原生支持范围内，
+当前实现的 S1/S3/S4 无任何官方能力缺口；唯一"想做但暂不能做"的
+S2 自动捕捉段，其官方通道（会话存档 91360）存在但属付费增值，
+须过合规决策门后按 4 项恢复条件解除暂缓。</div>
+  </div>
+
+  <!-- ================================================================ -->
+  <!-- ======================== 附录：证据来源 ======================== -->
+  <!-- ================================================================ -->
+  <h2 id="src"><span class="no">APPENDIX ·</span> 官方文档证据清单（附纷享旁证对照）</h2>
+  <div class="table-wrap"><table>
+    <tr><th>#</th><th>能力</th><th>官方文档（事实源）</th><th>纷享旁证（v1）</th></tr>
+    <tr><td class="n">W1</td><td>基本概念（corpid/agentid/secret/access_token/可见范围）</td><td><a href="https://developer.work.weixin.qq.com/document/path/90665">path/90665</a></td><td>v1 S3 关联配置</td></tr>
+    <tr><td class="n">W2</td><td>企业内部开发概览</td><td><a href="https://developer.work.weixin.qq.com/document/path/90556">path/90556</a></td><td>—</td></tr>
+    <tr><td class="n">W3</td><td>JS-SDK 概述（客户端能力边界）</td><td><a href="https://developer.work.weixin.qq.com/document/path/90513">path/90513</a></td><td>—</td></tr>
+    <tr><td class="n">W4</td><td>聊天工具栏接口</td><td><a href="https://developer.work.weixin.qq.com/document/path/91789">path/91789</a></td><td>v1 S4 侧边栏 5 能力</td></tr>
+    <tr><td class="n">W5</td><td>获取当前客户ID / 群ID / 隐藏发送按钮 / 分享到会话</td><td><a href="https://developer.work.weixin.qq.com/document/path/100746">100746</a> <a href="https://developer.work.weixin.qq.com/document/path/100747">100747</a> <a href="https://developer.work.weixin.qq.com/document/path/100748">100748</a> <a href="https://developer.work.weixin.qq.com/document/path/100749">100749</a></td><td>CRM 详情侧边栏</td></tr>
+    <tr><td class="n">W6</td><td>工作台自定义展示（4 模板）</td><td><a href="https://developer.work.weixin.qq.com/document/path/92535">path/92535</a></td><td>工作台入口</td></tr>
+    <tr><td class="n">W7</td><td>发送应用消息 / 模板卡片 / 更新模版卡片</td><td><a href="https://developer.work.weixin.qq.com/document/path/90236">90236</a> <a href="https://developer.work.weixin.qq.com/document/path/101032">101032</a> <a href="https://developer.work.weixin.qq.com/document/path/94888">94888</a></td><td>v1 S9 消息提醒</td></tr>
+    <tr><td class="n">W8</td><td>网页授权登录 OAuth</td><td><a href="https://developer.work.weixin.qq.com/document/path/91335">path/91335</a></td><td>v1 S3 步骤6 账号绑定</td></tr>
+    <tr><td class="n">W9</td><td>获取 access_token / 回调配置</td><td><a href="https://developer.work.weixin.qq.com/document/path/91039">91039</a> <a href="https://developer.work.weixin.qq.com/document/path/90930">90930</a></td><td>—</td></tr>
+    <tr><td class="n">W10</td><td>客户联系：外部联系人/客户群/群发</td><td><a href="https://developer.work.weixin.qq.com/document/path/92110">92110</a> <a href="https://developer.work.weixin.qq.com/document/path/92114">92114</a> <a href="https://developer.work.weixin.qq.com/document/path/92228">92228</a></td><td>v1 S6 好友同步</td></tr>
+    <tr><td class="n">W11</td><td>通讯录管理（成员/部门/标签）</td><td><a href="https://developer.work.weixin.qq.com/document/path/90193">path/90193</a></td><td>v1 S6 账号绑定</td></tr>
+    <tr><td class="n">W12</td><td>会话内容存档（付费增值）</td><td><a href="https://developer.work.weixin.qq.com/document/path/91360">path/91360</a></td><td>v1 S5 会话存档</td></tr>
+    <tr><td class="n">W13</td><td>数据与智能专区</td><td><a href="https://developer.work.weixin.qq.com/document/path/99941">path/99941</a></td><td>v1 S5</td></tr>
+    <tr><td class="n">W14</td><td>应用发起审批（原生审批流）</td><td><a href="https://developer.work.weixin.qq.com/document/path/97202">path/97202</a></td><td>—</td></tr>
+    <tr><td class="n">W15</td><td>企业小程序（wx.qy.login/code2Session/getContext/关联）</td><td><a href="https://developer.work.weixin.qq.com/document/path/91506">91506</a> <a href="https://developer.work.weixin.qq.com/document/path/91507">91507</a> <a href="https://developer.work.weixin.qq.com/document/path/94321">94321</a> <a href="https://developer.work.weixin.qq.com/document/path/92370">92370</a></td><td>纷享营销助手-小程序</td></tr>
+    <tr><td class="n">W16</td><td>移动端 SDK</td><td><a href="https://developer.work.weixin.qq.com/document/path/90294">path/90294</a></td><td>—</td></tr>
+    <tr><td class="n">W17</td><td>JS-SDK 签名算法</td><td><a href="https://developer.work.weixin.qq.com/document/path/90506">path/90506</a></td><td>—</td></tr>
+  </table></div>
+
+  <footer class="colophon">
+    <span><a href="../docs/ui/index.html">← Docs Index</a> · <a href="企微自定义应用的形式_调研.html">v1（纷享视角）</a></span>
+    <span>WeCom Custom App Research v2 · 事实源：developer.work.weixin.qq.com</span>
+    <span>长安仁恒 · B2B 订单履约</span>
+  </footer>
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad:true, theme:'base',
+    themeVariables:{
+      fontFamily:"'Source Serif Pro','Noto Serif SC',serif",
+      primaryColor:'#f5f4ed', primaryTextColor:'#1f1d18', primaryBorderColor:'#d4d1c5',
+      lineColor:'#1B365D', secondaryColor:'#efeee5', tertiaryColor:'#fff',
+      fontSize:'13px'
+    }
+  });
+</script>
+</body>
+</html>

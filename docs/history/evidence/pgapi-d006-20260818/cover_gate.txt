@@ -1,0 +1,7 @@
+== cover gate tail ==
+b2b_pilot_v3/internal/workflows/preorder.go:273:	getPreOrder			100.0%
+b2b_pilot_v3/internal/workflows/preorder.go:280:	setPreState			66.7%
+b2b_pilot_v3/internal/workflows/preorder.go:288:	strPtr				100.0%
+total:							(statements)			85.4%
+PASS: total coverage 85.4%
+PASS: domain coverage 100.0% (hard gate)

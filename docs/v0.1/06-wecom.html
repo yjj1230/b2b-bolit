@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>06 · 企微对接 · 0.1 订单助手（角色 / 入口 / 回调）</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+SC:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:#f5f4ed; --paper2:#efeee5; --ink:#1f1d18; --ink2:#6b665b;
+    --ink3:#3a382f; --blue:#1B365D; --rule:#d4d1c5; --amber:#8a6d3b; --red:#9b3b3b; --green:#3b6d3b;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif; line-height:1.6;}
+  .wrap{max-width:980px; margin:0 auto; padding:48px 40px 80px;}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;}
+  .folio{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--rule); padding-bottom:10px;
+    font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink2);}
+  .folio a{color:var(--ink2); border:none;}
+  .folio a:hover{color:var(--blue);}
+  .tag{display:inline-block; padding:3px 10px; font-size:11px; letter-spacing:.16em; background:var(--paper2); color:var(--blue);}
+  .tag.red{background:#f3e3e3; color:var(--red);}
+  .tag.amber{background:#f3ecdc; color:var(--amber);}
+  .tag.green{background:#e3f0e3; color:var(--green);}
+  .kicker{display:flex; align-items:baseline; gap:12px; margin-top:48px; flex-wrap:wrap;}
+  h1{font-size:clamp(30px,4.6vw,46px); line-height:1.14; font-weight:500; margin-top:14px; letter-spacing:-.01em;}
+  .lede{margin-top:18px; font-size:16.5px; line-height:1.7; color:var(--ink3); max-width:760px;}
+  h2{font-size:23px; font-weight:600; margin:52px 0 14px; color:var(--blue); display:flex; align-items:baseline; gap:12px; border-top:1px solid var(--rule); padding-top:26px;}
+  h2 .no{font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.12em;}
+  h3{font-size:17.5px; font-weight:600; margin:30px 0 10px; color:var(--ink);}
+  h3 .no{color:var(--blue); font-family:'IBM Plex Mono',monospace; font-size:12px; margin-right:8px;}
+  p{margin:10px 0; color:var(--ink3);}
+  ul,ol{margin:10px 0 10px 26px; color:var(--ink3);}
+  li{margin:5px 0;}
+  a{color:var(--blue); text-decoration:none; border-bottom:1px solid var(--rule);}
+  a:hover{border-bottom-color:var(--blue);}
+  blockquote{border-left:2px solid var(--blue); padding:10px 18px; margin:16px 0; background:var(--paper2); font-style:italic;}
+  table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  .table-wrap{overflow-x:auto; margin:16px 0 24px; border:1px solid var(--rule);}
+  .table-wrap table{margin:0;}
+  th{background:var(--paper2); color:var(--blue); text-align:left; font-weight:600; padding:9px 12px; border-bottom:1.5px solid var(--blue); font-size:12.5px; white-space:nowrap;}
+  td{padding:9px 12px; border-bottom:1px solid var(--rule); vertical-align:top; color:var(--ink3);}
+  tr:nth-child(even) td{background:#faf9f3;}
+  tr:hover td{background:#f0ede0;}
+  td .tag{font-size:10.5px; padding:1px 7px;}
+  .mermaid{background:var(--paper); border:1px solid var(--rule); padding:18px; overflow-x:auto; text-align:center; margin:20px 0;}
+  .mermaid svg{max-width:100%; height:auto;}
+  figcaption{text-align:center; font-size:12px; color:var(--ink2); margin:-10px 0 26px; font-style:italic;}
+  code{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace; font-size:13px; background:var(--paper2); padding:1px 5px;}
+  pre{background:var(--paper2); border:1px solid var(--rule); padding:16px 18px; overflow-x:auto; font-size:12.8px; line-height:1.55; margin:14px 0;}
+  pre code{background:none; padding:0;}
+  footer.colophon{margin-top:56px; padding-top:14px; border-top:1px solid var(--rule); display:flex; justify-content:space-between;
+    font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink2); flex-wrap:wrap; gap:8px;}
+  footer.colophon a{color:var(--ink2); border:none;}
+  footer.colophon a:hover{color:var(--blue);}
+  .toc{border:1px solid var(--rule); background:var(--paper2); padding:18px 24px; margin:26px 0;}
+  .toc .tt{font-size:11px; letter-spacing:.2em; color:var(--blue); margin-bottom:8px;}
+  .toc a{display:block; padding:3px 0; color:var(--ink3); border:none;}
+  .toc a:hover{color:var(--blue);}
+  .toc .mono{font-size:12px; color:var(--blue); margin-right:8px;}
+  .note{background:#f3ecdc; border:1px solid #d8c9a3; padding:12px 16px; margin:16px 0; font-size:13.5px; color:var(--ink3);}
+  .note .tt{font-size:10.5px; letter-spacing:.18em; color:var(--amber); font-family:'IBM Plex Mono',monospace;}
+  @media(max-width:720px){.wrap{padding:28px 18px 60px;}}
+</style>
+<script>
+  mermaid.initialize({startOnLoad:true, theme:'neutral', themeVariables:{primaryColor:'#efeee5', primaryBorderColor:'#1B365D', primaryTextColor:'#1f1d18', lineColor:'#6b665b', secondaryColor:'#f3ecdc', tertiaryColor:'#f5f4ed'}});
+</script>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="folio">
+    <span><a href="index.html">← Docs</a> · B2B Order Fulfillment · <a href="index.html">v0.1</a></span>
+    <span>06 · WeCom</span>
+    <span>角色 · 入口 · 回调</span>
+  </header>
+
+  <div class="kicker">
+    <span class="tag">企微对接 · 0.1 版本</span>
+    <span class="tag red">裁决源：ord_fulfill demo</span>
+    <span class="mono" style="font-size:11px; letter-spacing:.18em; color:var(--ink2);">与 07-wecom-integration 互补 · 以 demo 为准</span>
+  </div>
+
+  <h1>企微对接 · 0.1<br/><span style="font-style:italic; color:var(--blue);">角色 · 操作入口 · 回调接口</span></h1>
+
+  <p class="lede">本文档描述 0.1 版本的企微对接视图：<strong>哪些角色、哪些操作入口、哪些回调接口</strong>，以及 0.1 特殊接入（仓库群升级企微群、凭证机器人抓取、发群守门员、出站通道）。既有 <span class="mono">docs/07-wecom-integration.html</span>（S1-S4 完整设计 + 多备案切换）与 <span class="mono">07a</span>（交互 PRD）保留为完整设计；本文档是 0.1 对接视图，冲突处以 demo 为准。</p><div style="background:#fff7ed;border:1.5px solid #f59e0b;border-radius:10px;padding:10px 14px;margin:14px 0;color:#92400e;font-size:13.5px;"><b>⚠️ 口径提示（D-013）：</b>本文描述企微能力全貌；<b>v0.1 只开放虹励（销售助理）的 /assistant 与 PC /bridge 入口</b>；其它角色入口按 <b>v0.2（商务 / 财务 / 仓管）、v0.3（销售 / 主管 / 董事长）</b>开放。见 <a href="../版本规划.html">版本规划.html</a>。</div>
+
+  <nav class="toc">
+    <div class="tt">CONTENTS · 目录</div>
+    <a href="#s1"><span class="mono">1</span>角色清单 × 操作入口</a>
+    <a href="#s2"><span class="mono">2</span>企微能力接入矩阵（S1-S4 + 0.1 特殊）</a>
+    <a href="#s3"><span class="mono">3</span>回调接口（URL · 验签 · 路由）</a>
+    <a href="#s4"><span class="mono">4</span>出站通道（卡片 · 群消息 · 守门员）</a>
+    <a href="#s5"><span class="mono">5</span>0.1 特殊接入（仓库群 · 凭证机器人 · 上下文绑定）</a>
+    <a href="#s6"><span class="mono">6</span>配置与部署要点</a>
+  </nav>
+
+  <h2 id="s1"><span class="no">1 ·</span> 角色清单 × 操作入口</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>角色</th><th>企微操作入口</th><th>demo 场景</th><th>系统角色/权限</th></tr>
+    <tr><td><strong>销售</strong></td><td>客户群聊天工具栏（侧边栏）· 群内「订单助手」· 手机工作台 · 应用消息（智能下单提醒/审批状态卡）</td><td>XS1-XS5</td><td>SALES（本人订单全字段 + 守门员确认）</td></tr>
+    <tr><td><strong>销售主管</strong></td><td>手机工作台 → 审价待办 · 应用消息（待审价卡片）</td><td>XSZG1</td><td>SUPERVISOR（审价闸门 assignee）</td></tr>
+    <tr><td><strong>商务（虹励）</strong></td><td>群侧边栏 · 订单助手独立入口 · 手机工作台 · <strong>订单后台（PC）</strong></td><td>SW1-SW3</td><td>OP（ops 全量 + 备货/发货/开票闸门）</td></tr>
+    <tr><td><strong>销售助理</strong></td><td>工作台 → 下单 Tab · 客户群入口（自动带出归属销售）</td><td>XSZL1/XSZL2</td><td>OP（代下单 + 归属锁定）</td></tr>
+    <tr><td><strong>财务</strong></td><td><strong>订单后台（PC 主路径）</strong> · 工作台待办（0.1 数据同步可见）</td><td>CW1/CW2</td><td>ACCOUNTING（到账/开票/例外）</td></tr>
+    <tr><td><strong>仓管</strong></td><td><strong>企微仓库群</strong>（回单统一发群）· 本仓待办</td><td>CG1-CG3</td><td>WAREHOUSE（本仓剥价视图）</td></tr>
+    <tr><td><strong>董事长</strong></td><td>手机工作台 → 终审待办 · 应用消息（C/D 终审卡片）</td><td>DSZ1</td><td>CHAIRMAN（C/D 大单终审）</td></tr>
+  </table>
+  </div>
+
+  <h2 id="s2"><span class="no">2 ·</span> 企微能力接入矩阵</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>能力</th><th>企微 API / 形态</th><th>0.1 用途</th><th>状态</th></tr>
+    <tr><td><strong>S1 聊天工具栏 H5</strong></td><td>single_chat_tools / group_chat_tools / normal 三入口 + JS-SDK 双签名（ww.register + ww.agentConfig）+ OAuth snsapi_base 静默授权 + 服务端重认证</td><td>查订单/人工下单/代下单（客户群入口自动带出归属销售）</td><td><span class="tag green">0.1 核心</span></td></tr>
+    <tr><td><strong>S2 群消息/预订单</strong></td><td>会话内容存档（自动拉取）→ 智能下单</td><td>智能下单<strong>人工确认段</strong>（确认卡）；自动捕捉段</td><td><span class="tag amber">人工段启用 · 自动段暂缓</span>（A8）</td></tr>
+    <tr><td><strong>S3 应用消息卡片</strong></td><td>template_card（审批/催办/状态/回单异常）+ 回调验签</td><td>智能下单提醒（私信双通道）、审价/终审卡片、状态通知</td><td><span class="tag green">0.1 核心</span></td></tr>
+    <tr><td><strong>S4 工作台 H5</strong></td><td>工作台应用入口（无上下文安全降级视图）</td><td>销售/商务/主管/财务/董事长待办聚合</td><td><span class="tag green">0.1 核心</span></td></tr>
+    <tr><td><strong>仓库群</strong>（0.1 特殊）</td><td>企微群（外部群形态，升级自沟通群）</td><td>仓管统一发回单 → 凭证机器人抓取</td><td><span class="tag green">启用</span>（群升级 P2 前置）</td></tr>
+    <tr><td><strong>凭证机器人</strong>（0.1 特殊）</td><td>机器人应用消息（可抓取群内图片）</td><td>回单自动抓取识别登记（兜底：无电脑场景凭证）；销售合同回传仍走机器人</td><td><span class="tag green">启用（兜底）</span></td></tr>
+    <tr><td><strong>发群守门员</strong>（0.1 特殊）</td><td>出站群消息前二次确认（应用内确认层）</td><td>订单卡片/物流图片/发票发客户群</td><td><span class="tag green">第一轮强制</span></td></tr>
+    <tr><td><strong>会话存档自动拉取</strong></td><td>GetChatData + 两段解密 + seq checkpoint</td><td>「群里一句话 → 自动建预订单」</td><td><span class="tag amber">暂缓</span>（备案未完成）</td></tr>
+  </table>
+  </div>
+
+  <h2 id="s3"><span class="no">3 ·</span> 回调接口</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>回调</th><th>URL / 触发</th><th>验证</th><th>路由到</th><th>0.1 状态</th></tr>
+    <tr><td><strong>消息回调</strong>（企微 → 本系统）</td><td><code>https://&lt;备案域名&gt;/wecom/callback/&lt;tenant_id&gt;</code></td><td>URL 验证（GET 解密 echostr 1 秒内响应）；POST body <code>{"encrypt":...}</code> + query 签名</td><td>VerifyCallback 验签 → CallbackHandler 解析 EventKey → HTTP API 动作（信号/查询）</td><td><span class="tag green">启用</span></td></tr>
+    <tr><td><strong>审批回调</strong>（卡片按钮）</td><td>template_card 按钮（EventKey：approve:&lt;taskID&gt; / reject:&lt;taskID&gt; / preorder:confirm|ignore|modify / chairman-review / payment-confirm / receipt-ex-review / invoice-issued）</td><td>回调验签 + 按钮 key 上下文</td><td>→ <code>POST /api/v1/orders/{id}/signal/{signal}</code> 或预订单信号（幂等回执）</td><td><span class="tag green">启用</span>（W5 已验证）</td></tr>
+    <tr><td><strong>OAuth 回调</strong>（S1 H5）</td><td>网页授权 snsapi_base → code → <code>POST /api/v1/auth/exchange</code></td><td>服务端重新授权身份 + 上下文（不信任前端传入）</td><td>→ X-WeCom-Context + 角色 + 可见字段集</td><td><span class="tag green">启用</span>（W6 已验证）</td></tr>
+    <tr><td><strong>会话存档回调/拉取</strong></td><td>GetChatData 主动拉取（seq 游标 / 5 天窗口）</td><td>RSA+AES 两段解密 + msgid 幂等</td><td>→ PreOrderWorkflow（自动捕捉段）</td><td><span class="tag amber">暂缓</span>（自动下单移出）</td></tr>
+    <tr><td><strong>JS-SDK 配置</strong></td><td><code>GET /api/v1/wecom/jsapi-config</code></td><td>双签名（企业签名 + 应用签名）</td><td>→ S1 H5 初始化</td><td><span class="tag green">启用</span></td></tr>
+  </table>
+  </div>
+  <p>企微 = 转接层：每个回调最终都映射为一次 HTTP API 调用（信号/查询/预订单动作），转接层不承载任何业务逻辑；因此「企微接入后」与「直接 HTTP」行为等价（<span class="mono">scripts/fullchain</span> 与 <span class="mono">tests/l2_e2e</span> 独立走通全部 HTTP 流程即企微接入的等价验证）。</p>
+
+  <h2 id="s4"><span class="no">4 ·</span> 出站通道</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>通道</th><th>用途</th><th>关键点</th></tr>
+    <tr><td><strong>应用消息 template_card</strong></td><td>审批/催办/状态卡片（S3）；智能下单确认提醒（私信双通道）</td><td>点击回调验签；按钮 key 携带 task/pre_order 上下文；消息 ID 落库可追踪</td></tr>
+    <tr><td><strong>客户群消息</strong>（appchat 应用消息群发）</td><td>向客户群反馈处理结果（守门员确认后）</td><td>按租户核验（跨租户禁止）；<strong>第一轮守门员强制</strong>：销售确认后才发送</td></tr>
+    <tr><td><strong>凭证机器人</strong></td><td>回单抓取登记（入站）；无电脑场景凭证识别（入站）</td><td>OCR 识别 → 匹配订单 → 凭证 v 版本追加（只追加不覆盖）</td></tr>
+    <tr><td><strong>response_url</strong></td><td>机器人被动回复后的主动补充</td><td>1 小时一次性；幂等键防重</td></tr>
+    <tr><td><strong>业务链接 H5</strong></td><td>兜底：超时/复杂场景转人工界面</td><td>跳转 S1 侧边栏/H5</td></tr>
+  </table>
+  </div>
+  <p><strong>审批链通知映射</strong>：主管审价 → 「待审价」卡片；仓管确认 → 「待确认」；财务到账 → 「待确认到账」；无回单 5 天 → 「回单异常」；24h 未确认预订单 → 「催办」；C/D 终审 → 「董事长审批」卡片。点击即调审批 Signal，全链留痕。</p>
+
+  <h2 id="s5"><span class="no">5 ·</span> 0.1 特殊接入</h2>
+
+  <h3><span class="no">5.1</span> 仓库群升级企微群（A6）</h3>
+  <ul>
+    <li>现状纠正：demo 现状「司机私聊仓管 → 转发凭证机器人」是<strong>错的</strong>（虹励与司机无直接沟通）；</li>
+    <li>实际业务：两个外租仓库的仓管把回单<strong>统一发在群聊里</strong> → 仓库群升级为企微群 → 凭证机器人从群里自动抓取/识别/登记归档；</li>
+    <li>前置：虹励需先补仓库群现状截图，并把几个仓库沟通群升级成企微群（P2）；</li>
+    <li>升级前备选：回单走「上传凭证」Tab 手动上传。</li>
+  </ul>
+
+  <h3><span class="no">5.2</span> 凭证机器人抓取（A2 兜底 + A6）</h3>
+  <ul>
+    <li><strong>回单</strong>：从企微仓库群自动抓取回单照片 → OCR 识别签收信息 → 匹配订单 → 登记归档（凭证 v3 只追加）；</li>
+    <li><strong>凭证兜底</strong>：只服务没有电脑操作场景的人（如餐馆类客户、在外跑的销售）；</li>
+    <li><strong>销售合同回传仍走机器人</strong>（销售常在外面跑、没机会对电脑）。</li>
+  </ul>
+
+  <h3><span class="no">5.3</span> 发群守门员（A3）</h3>
+  <ul>
+    <li>任何内容发客户群前必须有销售点一次确认；确认记录 append-only 审计（GatekeeperConfirmed 事件）；</li>
+    <li>先收紧后放行：0.1 全部强制，之后逐步释放自动化；「哪些内容可直发、哪些必须审核」规则表 P5 待确认。</li>
+  </ul>
+
+  <h3><span class="no">5.4</span> 上下文绑定（wecom_context_bindings）</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>绑定</th><th>0.1 用途</th><th>demo 证据</th></tr>
+    <tr><td>客户群 → 租户 + 归属销售</td><td>群内点「订单助手」自动带出客户与归属销售（锁定）</td><td>XSZL2 / XS1 / XS5</td></tr>
+    <tr><td>仓库群 → 租户 + 仓库</td><td>凭证机器人识别回单归属</td><td>CG3</td></tr>
+    <tr><td>外部用户 → 租户 + 身份</td><td>出站消息按租户核验（跨租户禁止）</td><td>—</td></tr>
+  </table>
+  </div>
+
+  <h2 id="s6"><span class="no">6 ·</span> 配置与部署要点</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>项</th><th>0.1 要求</th><th>说明</th></tr>
+    <tr><td>域名与备案</td><td>公网 HTTPS + ICP 备案域名</td><td>回调域与 JS-SDK 域名一致；本地联调用 HTTPS 反向代理（移动端不走 hosts）；0.1 单租户（长安仁恒），多备案配置模型保留（M8）</td></tr>
+    <tr><td>应用配置</td><td>corp_id / agent_id / secret / token / EncodingAESKey</td><td>config/wecom-tenant.json（B2B_WECOM_TENANT_CFG）；敏感值走环境变量/KMS</td></tr>
+    <tr><td>提供方</td><td>B2B_WECOM_PROVIDER = mock（开发）/ official（真实）</td><td>0.1 上线走 official；mock 用于测试</td></tr>
+    <tr><td>回调链路</td><td>企微 → 回调域名（HTTPS 反向代理）→ wecom 服务 :18081 → 验签 → HTTP API</td><td>B2B_API_ADDR 指向 api 服务</td></tr>
+    <tr><td>健康探测</td><td>GET /wecom/healthz（租户维度）</td><td>三通道探测（回调验签/出站/存档拉取——存档暂缓）</td></tr>
+    <tr><td>会话存档</td><td>archive.enabled=false（0.1 不启用）</td><td>备案完成后按 07 §2.3 配置私钥恢复</td></tr>
+  </table>
+  </div>
+  <blockquote>完整设计参考：<span class="mono">docs/07-wecom-integration.html</span>（S1-S4 场景矩阵、会话存档防线、多备案切换、安全合规清单、真实企微部署清单 §10.2/10.3）。0.1 仅取本文档所列子集。</blockquote>
+
+  <footer class="colophon">
+    <span><a href="index.html">← v0.1 Docs</a></span>
+    <span>06 · WeCom · 企微对接章节</span>
+    <span>裁决源 ord_fulfill demo · 2026-08-16</span>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,29 @@
+# D-008 v0.1 双轨发布：对外轨 A + 影子轨 S（设计定稿，2026-08-20）
+decision_id: D-008
+choice: >
+  v0.1 发布从「单轨」改为「双轨」：
+  A · 对外轨（虹励/客户可见）保持现状——桥接下单 → 飞书流续跑 → 我的订单/状态回显；
+  S · 影子轨（仅内部）把已实现的六台状态机（ORD/STK/SHP/INV/PRE/Gatekeeper，
+      52 状态 79 边）+ OrderWorkflow/PreOrderWorkflow 全量发布到生产，在影子区
+      以真实飞书数据驱动运行：影子 API 只绑 127.0.0.1、身份白名单、零出站
+      （WeCom=mock）、零回写（bridge=false、只读源）、独立 PG b2b_shadow /
+      独立 Temporal namespace+task queue / 独立 SpiceDB / 独立 compose 网络，
+      产出覆盖率/分歧/审计报告，为 v0.2 角色迁入提供 Go/No-Go 证据。
+rationale: >
+  代码侧完整状态机与工作流已实现，但 v0.1 生产只用了桥接台账，飞书审批期间这些
+  代码从未在真实业务数据上跑过；发布计划 v2 第 1 次（桥接）与第 2 次（角色迁入）
+  之间没有机制回答「全流程状态机能不能接住飞书真实业务」。影子轨就是这个验证器，
+  其 FSM 边覆盖、分歧清单与映射表直接成为 v0.2 Go/No-Go 与 v0.3 回填的演练资产。
+premises:
+  - docs/v0.1/12-shadow-full-flow.html（本设计的定稿与隔离审计附录 A）
+  - 代码事实：internal/domain 六台 FSM、OrderWorkflow/PreOrderWorkflow 全量、
+    cmd/sync 只读同步、scripts/audit 审计链均已存在
+  - 六条铁律（S-铁1..6）与 A-01..A-06 护栏是影子轨上线硬门禁
+objections: []
+decider: project-owner（设计定稿随 v0.1 发布要求采纳）
+effective_interval: {from: "2026-08-20T00:00:00+00:00", to: null}
+supersedes: []
+review_condition: >
+  影子轨 R1 重放基线报告产出后复核覆盖率口径；任何 FSM_GAP 类分歧修复后必须全量重放。
+  2026-08-20 后续裁决：D-012（新单实时增量模式，存量不前置）、D-013（v0.2 数据迁入新系统、
+  v0.3 企微体系发布完成并撤销影子）；本文档双轨框架不变。

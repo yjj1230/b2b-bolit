@@ -1,0 +1,20 @@
+# project/policies/mechanism/current.yaml
+# 机制版本指针（§07）。本文件只能由激活或回滚操作改变（ECM-ACT-004）。
+# 当前状态：PROPOSED —— bootstrap 例外（附录 A.12 / §10）：
+#   ECM-ACT-001 要求 ACTIVE 同时发布 schema/canonicalizer/测试向量/validator，本次仅交付结构，
+#   故本指针不指向 ACTIVE（附录 A.5 步骤 06 将失败 => 后续 Agent 进入 BOOTSTRAP_DIAGNOSTIC），
+#   也**不是**伪造的 ACTIVE 指针。
+# 激活路径：补齐 ECM-ACT-001 四件套 -> 影子运行 -> 人工批准（activation_decision）-> 原子更新本文件与 project.yaml。
+
+mechanism_id: ECM
+version: 1.0.0
+status: PROPOSED
+
+spec: project/policies/mechanism/ECM-1.0.0.yaml
+guide: project/policies/mechanism/ECM-1.0.0.html
+
+spec_digest: sha256:e8f561b240c0cd571a11eedb5609d96853ecfbe382ee73f81337780679032411
+guide_digest: sha256:62c02ece0e15fc8d93c8097608854d2177ca0e5b28ff6944407a94ca94ea7c9d
+
+activation_decision: NONE   # 人工批准记录（ECM-ACT-004）；NONE = 未激活
+bootstrap: true             # 本次为 bootstrap 落库，机制未生效

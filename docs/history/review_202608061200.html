@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>文档审查记录 · 2026-08-06 12:00</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:ital,wght@0,400;0,500;0,600;1,400&amp;family=Noto+Serif+SC:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --paper: #f5f4ed;
+    --paper2: #efeee5;
+    --ink: #1f1d18;
+    --ink2: #6b665b;
+    --ink3: #3a382f;
+    --blue: #1b365d;
+    --red: #8b2f2f;
+    --amber: #8a5a16;
+    --rule: #d4d1c5;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Source Serif Pro', 'Noto Serif SC', Georgia, 'Songti SC', serif;
+    line-height: 1.65;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 42px 38px 72px; }
+  .mono { font-family: 'IBM Plex Mono', ui-monospace, Menlo, monospace; }
+  .folio {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 10px;
+    color: var(--ink2);
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+  .folio a, a { color: var(--blue); text-decoration: none; border-bottom: 1px solid var(--rule); }
+  a:hover { border-bottom-color: var(--blue); }
+  .kicker { display: flex; align-items: baseline; gap: 12px; margin-top: 44px; }
+  .tag { padding: 3px 10px; background: var(--paper2); color: var(--blue); font-size: 11px; letter-spacing: .12em; }
+  h1 { margin: 14px 0 0; font-size: clamp(31px, 5vw, 51px); line-height: 1.12; font-weight: 500; }
+  .lede { max-width: 760px; margin: 18px 0 0; color: var(--ink3); font-size: 17px; }
+  h2 {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin: 48px 0 14px;
+    padding-top: 24px;
+    border-top: 1px solid var(--rule);
+    color: var(--blue);
+    font-size: 23px;
+  }
+  h2 .no, h3 .no { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: .1em; }
+  h3 { margin: 28px 0 8px; color: var(--ink); font-size: 18px; }
+  p { margin: 10px 0; color: var(--ink3); }
+  ul, ol { margin: 10px 0 10px 24px; padding: 0; color: var(--ink3); }
+  li { margin: 7px 0; }
+  blockquote { margin: 18px 0; padding: 11px 18px; border-left: 2px solid var(--blue); background: var(--paper2); }
+  .summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin: 24px 0 8px;
+  }
+  .summary div { padding: 14px 16px; border: 1px solid var(--rule); background: var(--paper2); }
+  .summary strong { display: block; color: var(--blue); font-size: 20px; }
+  .summary span { color: var(--ink2); font-size: 13px; }
+  .finding { margin: 22px 0 28px; padding: 0 0 4px 18px; border-left: 3px solid var(--red); }
+  .finding.p2 { border-left-color: var(--amber); }
+  .finding h3 { margin-top: 0; }
+  .priority { color: var(--red); font-family: 'IBM Plex Mono', monospace; font-size: 12px; }
+  .finding.p2 .priority { color: var(--amber); }
+  .refs { color: var(--ink2); font-size: 13px; }
+  .table-wrap { overflow-x: auto; margin: 16px 0 24px; border: 1px solid var(--rule); }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th { padding: 9px 12px; background: var(--paper2); border-bottom: 1.5px solid var(--blue); color: var(--blue); text-align: left; white-space: nowrap; }
+  td { padding: 9px 12px; border-bottom: 1px solid var(--rule); vertical-align: top; color: var(--ink3); }
+  tr:nth-child(even) td { background: #faf9f3; }
+  code { padding: 1px 5px; background: var(--paper2); font-family: 'IBM Plex Mono', ui-monospace, Menlo, monospace; font-size: 12.5px; }
+  footer { display: flex; justify-content: space-between; gap: 12px; margin-top: 56px; padding-top: 14px; border-top: 1px solid var(--rule); color: var(--ink2); font-size: 11px; letter-spacing: .1em; }
+  @media (max-width: 720px) {
+    .wrap { padding: 28px 18px 56px; }
+    .folio { flex-wrap: wrap; }
+    .summary { grid-template-columns: 1fr; }
+    footer { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="folio">
+    <span><a href="../index.html">← Docs</a> · Review History</span>
+    <span>2026-08-06 12:00</span>
+    <span>Static Document Review</span>
+  </header>
+
+  <div class="kicker">
+    <span class="tag">文档审查记录</span>
+    <span class="mono" style="font-size:11px; letter-spacing:.12em; color:var(--ink2);">REVIEW · 202608061200</span>
+  </div>
+
+  <h1>设计文档审查<br /><span style="font-style:italic; color:var(--blue);">实施基线前的阻断项</span></h1>
+  <p class="lede">本记录归档对 <span class="mono">docs/</span> 文档家族的静态交叉审查意见。审查以 <span class="mono">spec/meta.md</span> 为任务入口，并核对当前 <span class="mono">spec/</span> 输入、文档之间的派生关系以及已有 pilot_app 的复盘经验。</p>
+
+  <div class="summary">
+    <div><strong>8</strong><span>条主要发现</span></div>
+    <div><strong>8 × P1</strong><span>实现或验收阻断项</span></div>
+    <div><strong>静态审查</strong><span>未修改业务文档，未执行应用测试</span></div>
+  </div>
+
+  <h2><span class="no">01 ·</span> 审查结论</h2>
+  <blockquote><strong>当前文档还不能作为实现基线。</strong> 主要问题集中在授权 schema、跨租户隔离、业务状态覆盖、数量守恒的数据模型和企微验收门禁。HTML 发布页面与 Markdown 内容基本同步，因此这些问题同样存在于发布页面。</blockquote>
+
+  <h2><span class="no">02 ·</span> 主要发现</h2>
+
+  <article class="finding">
+    <h3><span class="priority">P1</span> SpiceDB schema 无法直接加载</h3>
+    <p>文档使用了 pilot_app 复盘中已经修正的点号图遍历语法，如 <code>tenant.ops</code>、<code>customer.owner</code>；同时 <code>order.ship</code> 引用了未声明的 <code>warehouse</code> 关系。按 M1 计划生成并应用 <code>schema.zed</code> 时会直接失败。</p>
+    <p class="refs">依据：<a href="../01-core-graph.md#L230">01-core-graph.md:230</a>、<a href="../01-core-graph.md#L258">01-core-graph.md:258</a>；pilot_app 已使用 <code>bank-&gt;admin</code>，见 <a href="../../../pilot_app/schema.zed#L2">pilot_app/schema.zed:2</a>。</p>
+    <p><strong>建议：</strong>先固定 SpiceDB 版本并让 schema 通过实际编译；补齐订单到仓库的关系，再为每种遍历和 caveat 增加集成测试。</p>
+  </article>
+
+  <article class="finding">
+    <h3><span class="priority">P1</span> 多租户隔离没有落到数据库和 Workflow ID</h3>
+    <p>资源表的 FK 没有限制关联对象属于同一租户；订单、发货、开票和预订单的幂等键又使用全局唯一约束，Temporal Workflow ID 也没有 tenant 前缀。只依赖 SpiceDB 无法弥补数据库层的跨租户错误关联或幂等冲突。</p>
+    <p class="refs">依据：<a href="../02-architecture.md#L145">02-architecture.md:145</a>、<a href="../02-architecture.md#L194">02-architecture.md:194</a>；授权 schema 见 <a href="../01-core-graph.md#L236">01-core-graph.md:236</a>。</p>
+    <p><strong>建议：</strong>使用复合 FK/唯一键（至少包含 <code>tenant_id</code>），Workflow ID 显式包含 tenant，增加跨租户读写、幂等和配置路由测试。</p>
+  </article>
+
+  <article class="finding">
+    <h3><span class="priority">P1</span> 订单修改 A/B/C/D/E 分支没有进入文档闭环</h3>
+    <p>源规格要求修改订单按 A/B/C/D/E 分类进入不同的回审价、重生成合同或静默修改路径。当前 ORD 状态图只有通过、退回和拒绝，没有修改分类、状态迁移、事件字段、数据模型或 Score Card 用例。</p>
+    <p class="refs">依据：<a href="../../spec/验证项目设计.html#L258">验证项目设计.html:258</a>、<a href="../../spec/验证项目设计.html#L461">验证项目设计.html:461</a>；当前状态图见 <a href="../01-core-graph.md#L365">01-core-graph.md:365</a>。</p>
+    <p><strong>建议：</strong>将修改分类定义为 ORD 的显式事件/状态分支，补充修改记录表、权限边界、回退规则、Temporal Signal 及专项测试。</p>
+  </article>
+
+  <article class="finding">
+    <h3><span class="priority">P1</span> 开票是否必须先发货存在直接冲突</h3>
+    <p>源规格写明“订单存在即可开票”，而当前状态机把“未发货就开票”列为非法，并让 INV 从已发货状态开始。这会改变业务流程和验收结果，不能通过实现细节自行决定。</p>
+    <p class="refs">依据：<a href="../../spec/验证项目设计.html#L223">验证项目设计.html:223</a>；当前状态机见 <a href="../01-core-graph.md#L433">01-core-graph.md:433</a>，架构约束见 <a href="../02-architecture.md#L183">02-architecture.md:183</a>。</p>
+    <p><strong>建议：</strong>业务方先确认“订单可申请开票”与“发票金额/数量只能按有效发货核验”两者的关系，再统一状态图、SQL 守恒规则和 L2 用例。</p>
+  </article>
+
+  <article class="finding">
+    <h3><span class="priority">P1</span> 预订单事件无法写入当前事件表</h3>
+    <p>ontology 允许事件挂在 <code>order_id</code> 或 <code>pre_order_id</code> 上，但数据库设计只有 <code>order_events.order_id FK</code>。消息捕捉、意图识别和人工确认发生在正式订单创建前，无法完整进入 CQ-12 的事件链。</p>
+    <p class="refs">依据：<a href="../01-core-graph.md#L211">01-core-graph.md:211</a>、<a href="../01-core-graph.md#L331">01-core-graph.md:331</a>、<a href="../02-architecture.md#L157">02-architecture.md:157</a>。</p>
+    <p><strong>建议：</strong>采用独立的 polymorphic aggregate key，或拆分 <code>pre_order_events</code> 与 <code>order_events</code>；明确正式订单派生前后的审计回放规则。</p>
+  </article>
+
+  <article class="finding">
+    <h3><span class="priority">P1</span> 开票数量守恒缺少可计算的数据模型</h3>
+    <p>约束要求按数量校验，但 <code>invoice_items</code> 只有 <code>shipment_id</code> 和 <code>amount_cents</code>，没有开票数量、订单明细或产品维度。它无法可靠表达部分开票、多次开票或按多个订单合并开票。</p>
+    <p class="refs">依据：<a href="../01-core-graph.md#L106">01-core-graph.md:106</a>、<a href="../02-architecture.md#L152">02-architecture.md:152</a>、<a href="../02-architecture.md#L227">02-architecture.md:227</a>。</p>
+    <p><strong>建议：</strong>增加订单明细/发货明细维度的开票数量分配和唯一性约束；如果实际只验证金额守恒，应同步重写 CQ-09，不再使用“开票量”表述。</p>
+  </article>
+
+  <article class="finding">
+    <h3><span class="priority">P1</span> 企微核心验收没有纳入主测试门禁</h3>
+    <p>回调验签、多租户配置隔离被放在独立补充用例中，真实 S1/S2/S3/S4 E2E 又明确排除自动化门禁；但 M8 只要求 44 个主用例和 L3 全绿。这样可以在没有验证企微核心支柱的情况下完成最终结论。</p>
+    <p class="refs">依据：<a href="../07-wecom-integration.md#L208">07-wecom-integration.md:208</a>、<a href="../07-wecom-integration.md#L219">07-wecom-integration.md:219</a>、<a href="../04-development-plan.md#L37">04-development-plan.md:37</a>；源规格验收要求见 <a href="../../spec/验证项目设计.html#L646">验证项目设计.html:646</a>。</p>
+    <p><strong>建议：</strong>把补充用例纳入正式验收矩阵，至少设置 S1/S2/S3/S4 的真实环境或明确的有证据 Fake 门禁，并单独记录真实 E2E 未覆盖项。</p>
+  </article>
+
+  <article class="finding">
+    <h3><span class="priority">P1</span> 原始聊天留存策略前后不一致</h3>
+    <p>源规格要求原始消息不落业务库；当前事件定义却把 <code>raw</code> 作为事件参数，企微文档还要求原始聊天访问审计，但没有明确脱敏、引用、删除和留存期限边界。若事件链 append-only，原始消息可能被永久保留。</p>
+    <p class="refs">依据：<a href="../../spec/验证项目设计.html#L583">验证项目设计.html:583</a>；当前事件定义见 <a href="../01-core-graph.md#L87">01-core-graph.md:87</a>，审计要求见 <a href="../07-wecom-integration.md#L190">07-wecom-integration.md:190</a>。</p>
+    <p><strong>建议：</strong>事件只保存意图特征和必要引用；原始内容进入独立、加密、可过期的存档区，并补充访问审计、清理任务和合规验收证据。</p>
+  </article>
+
+  <h2><span class="no">03 ·</span> 低优先级文档问题</h2>
+  <p>部分章节引用指向错误：架构文档将存档拉取指向 <code>07 §3</code>，实际内容位于 <code>07 §2</code>；测试文档对游标和 Timer 的引用也有类似偏移。见 <a href="../02-architecture.md#L129">02-architecture.md:129</a> 和 <a href="../03-testing.md#L64">03-testing.md:64</a>。这不改变设计语义，但会增加实施时的查找成本。</p>
+
+  <h2><span class="no">04 ·</span> 审查边界</h2>
+  <ul>
+    <li>审查对象：<span class="mono">docs/</span> Markdown 与对应 HTML，以及 <span class="mono">spec/meta.md</span>、当前 <span class="mono">spec/</span> 输入和 pilot_app 复盘资料。</li>
+    <li>审查方式：静态交叉核对、引用核对和结构一致性检查。</li>
+    <li>本记录生成时未修改业务设计文档，当前仓库也尚未包含可执行的 Go 实现，因此没有执行应用测试。</li>
+  </ul>
+
+  <h2><span class="no">05 ·</span> 建议的解除顺序</h2>
+  <ol>
+    <li>先修正并实际编译 SpiceDB schema，明确租户隔离模型。</li>
+    <li>由业务方确认开票独立性和订单修改 A/B/C/D/E 规则。</li>
+    <li>根据确认结果重画状态图、补齐事件和数量守恒数据模型。</li>
+    <li>将企微合规、真实交互和多租户隔离纳入最终验收门禁。</li>
+  </ol>
+
+  <footer>
+    <span><a href="../index.html">← Docs Index</a></span>
+    <span>Review History · 2026-08-06 12:00</span>
+  </footer>
+</main>
+</body>
+</html>

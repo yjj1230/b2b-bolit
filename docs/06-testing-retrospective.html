@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>06 · 测试复盘 · B2B 订单履约验证项目</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+SC:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:#f5f4ed; --paper2:#efeee5; --ink:#1f1d18; --ink2:#6b665b;
+    --ink3:#3a382f; --blue:#1B365D; --rule:#d4d1c5;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif; line-height:1.6;}
+  .wrap{max-width:960px; margin:0 auto; padding:48px 40px 80px;}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;}
+  .folio{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--rule); padding-bottom:10px;
+    font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink2);}
+  .folio a{color:var(--ink2); border:none;}
+  .folio a:hover{color:var(--blue);}
+  .tag{display:inline-block; padding:3px 10px; font-size:11px; letter-spacing:.16em; background:var(--paper2); color:var(--blue);}
+  .kicker{display:flex; align-items:baseline; gap:12px; margin-top:48px;}
+  h1{font-size:clamp(32px,5vw,50px); line-height:1.12; font-weight:500; margin-top:14px; letter-spacing:-.01em;}
+  .lede{margin-top:18px; font-size:17px; line-height:1.7; color:var(--ink3); max-width:720px;}
+  h2{font-size:23px; font-weight:600; margin:52px 0 14px; color:var(--blue); display:flex; align-items:baseline; gap:12px; border-top:1px solid var(--rule); padding-top:26px;}
+  h2 .no{font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.12em;}
+  h3{font-size:17.5px; font-weight:600; margin:30px 0 10px; color:var(--ink);}
+  h3 .no{color:var(--blue); font-family:'IBM Plex Mono',monospace; font-size:12px; margin-right:8px;}
+  p{margin:10px 0; color:var(--ink3);}
+  ul,ol{margin:10px 0 10px 26px; color:var(--ink3);}
+  li{margin:5px 0;}
+  a{color:var(--blue); text-decoration:none; border-bottom:1px solid var(--rule);}
+  a:hover{border-bottom-color:var(--blue);}
+  blockquote{border-left:2px solid var(--blue); padding:10px 18px; margin:16px 0; background:var(--paper2); font-style:italic;}
+  table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  .table-wrap{overflow-x:auto; margin:16px 0 24px; border:1px solid var(--rule);}
+  .table-wrap table{margin:0;}
+  th{background:var(--paper2); color:var(--blue); text-align:left; font-weight:600; padding:9px 12px; border-bottom:1.5px solid var(--blue); font-size:12.5px; white-space:nowrap;}
+  td{padding:9px 12px; border-bottom:1px solid var(--rule); vertical-align:top; color:var(--ink3);}
+  tr:nth-child(even) td{background:#faf9f3;}
+  tr:hover td{background:#f0ede0;}
+  code{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace; font-size:13px; background:var(--paper2); padding:1px 5px;}
+  pre{background:var(--paper2); border:1px solid var(--rule); padding:16px 18px; overflow-x:auto; font-size:12.8px; line-height:1.55; margin:14px 0;}
+  pre code{background:none; padding:0;}
+  footer.colophon{margin-top:56px; padding-top:14px; border-top:1px solid var(--rule); display:flex; justify-content:space-between;
+    font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink2); flex-wrap:wrap; gap:8px;}
+  footer.colophon a{color:var(--ink2); border:none;}
+  footer.colophon a:hover{color:var(--blue);}
+  @media(max-width:720px){.wrap{padding:28px 18px 60px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="folio">
+    <span><a href="index.html">← Docs</a> · B2B Order Fulfillment</span>
+    <span>06 · Testing Retrospective</span>
+    <span>复盘 · 49 Score Card</span>
+  </header>
+
+  <div class="kicker">
+    <span class="tag">Testing Retrospective · 测试复盘</span>
+    <span class="mono" style="font-size:11px; letter-spacing:.18em; color:var(--ink2);">里程碑复盘 · M8 回填</span>
+  </div>
+
+  <h1>测试复盘<br/><span style="font-style:italic; color:var(--blue);">覆盖率 × 风险 × 倒推影响面</span></h1>
+
+  <p class="lede"><strong>实施后回填（M8）</strong>：核对 48 个 Score Card 用例的落地质量。</p>
+
+  <h2><span class="no">1 ·</span> 执行概况</h2>
+  <ul>
+    <li>Score Card 落地：<strong>49 / 49</strong>（L0×10 + L1×16 + L2×17 + L3×6 全部有对应测试；缺项：无）</li>
+    <li>补充测试（故障注入/边界分支/覆盖率补强，不改变场景映射）：<strong>约 40 个</strong>（触发器级错误注入、逐调用点故障注入 30+ 位点、段恢复全分支、官方通道 httptest、租户配置生产路径、W1 回调验签往返）</li>
+    <li>测试总数：<strong>约 180 个 <span class="mono">func Test</span></strong>（api / authz / domain / repo / workflows / wecom / config / integration；其中 DemoPolicy 契约与 LocalRunner 策略注入/WaitAll 为 2026-08-07 review 后补齐）</li>
+    <li>L1 实跑耗时：repo <strong>约 179s</strong> + authz <strong>约 12s</strong></li>
+    <li>零静默 Skip / 零假绿 / 零空测试确认：✅ 是（L1 PG 不可用时降级 Skip 属设计行为，本环境全绿实跑）</li>
+  </ul>
+
+  <h2><span class="no">2 ·</span> 覆盖率实测</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>包</th><th>目标</th><th>实测</th></tr>
+    <tr><td class="mono">domain</td><td>100%</td><td><strong>100.0%</strong> ✅</td></tr>
+    <tr><td class="mono">config</td><td>—</td><td><strong>100.0%</strong></td></tr>
+    <tr><td class="mono">authz</td><td>≥98%</td><td><strong>95.7%</strong>（余量：mustStruct panic 分支、懒连接构造路径）</td></tr>
+    <tr><td class="mono">api</td><td>≥98%</td><td><strong>91.5%</strong>（余量：userOf 兜底、LocalRunner 日志注入等）</td></tr>
+    <tr><td class="mono">wecom</td><td>≥98%</td><td><strong>94.5%</strong>（余量：官方通道网络超时/限流分支、回调防御分支）</td></tr>
+    <tr><td class="mono">workflows</td><td>≥98%</td><td><strong>86.3%</strong>（余量：各闸门决策分支的防御性错误返回）</td></tr>
+    <tr><td class="mono">repo</td><td>≥98%</td><td><strong>80.9%</strong>（余量：pgx scan error、每句 SQL 的失败返回）</td></tr>
+    <tr><td class="mono">integration</td><td>≥98%</td><td><strong>100.0%</strong> ✅（含 DemoPolicy 虚拟时长契约）</td></tr>
+    <tr><td><strong>全仓</strong></td><td><strong>≥98%（文档）/ ≥95%（用户 dev.md）</strong></td><td><strong>87.8%</strong>（门禁 85% + domain 100% 硬门禁）</td></tr>
+  </table>
+  </div>
+  <p><strong>诚实声明</strong>：</p>
+  <ol>
+    <li>与 95%/98% 目标的差距（约 320 个语句）全部位于<strong>防御性错误分支</strong>：pgx 行扫描错误（需 schema 损坏才能触发）、每句 SQL 的 <span class="mono">if err != nil</span> 返回（已用触发器级故障注入覆盖主事务路径：建单/发货/开票/事件中途失败全量回滚）、以及物理不可达分支（如 ReconcileInventory 的负库存分支被 CHECK(qty&gt;=0) 阻断，是「防线生效」而非「测试缺失」）。</li>
+    <li>错误注入手段（删表/触发器/唯一冲突/关连接池）≠ 真实故障形态（网络抖动/磁盘满/企微限流 45009）；覆盖率 87.8% ≠ 故障注入等价性 100%。</li>
+    <li>正确性核心（domain 100%：FSM 穷举/守恒断言/幂等键/值对象）与防线（CHECK/行锁/幂等/单事务守恒，L1 全绿 + 触发器级回滚验证）均有专项背书。</li>
+  </ol>
+
+  <h2><span class="no">3 ·</span> 风险登记与处置</h2>
+
+  <h3><span class="no">3.1</span> 设计期已登记风险</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>风险</th><th>处置结果</th></tr>
+    <tr><td>企微合规不通过 → S2 降级</td><td>未阻塞：S2 管线（消息→预订单→确认卡片）以 mock 通道全链验证；官方通道封装就绪，选型决策推迟（wrapper 隔离点）</td></tr>
+    <tr><td>5 天窗口丢消息 / 限流</td><td>游标原子 checkpoint（L1-14）+ 单条解密失败不阻塞推进 + 官方通道错误分支测试</td></tr>
+    <tr><td>LLM 意图识别不确定性</td><td>AI 安全边界落地：MockParser 规则（LLM 钩子未接线显式报错），LLM 只产候选 + 确定性校验（workflows.ParseIntent）+ AMBIGUOUS 不自动建单</td></tr>
+    <tr><td>ReBAC caveat 版本兼容</td><td>v1.39 语法实测校准（冒号参数移除、now 注入），schema.zed 编译门禁（L1-07）+ 文档同步</td></tr>
+    <tr><td>覆盖率门禁后期补成本</td><td>已发生：M8 追加约 40 个测试；诚实现值 87.8%（防御分支见 §2 声明）</td></tr>
+    <tr><td>Signal/Timer 编排 bug</td><td>L2 全链 + 虚拟时钟 Timer 测试（5 天回单例外、24h 预订单升级、审批催办）；测试驱动修复 8 个真实编排缺陷（见 §4）</td></tr>
+    <tr><td>业务规则未确认</td><td>默认值落地（回单 5 天/催办 24h/48h），config 可配置 + 文档标注待确认项</td></tr>
+  </table>
+  </div>
+
+  <h3><span class="no">3.2</span> 执行中新暴露风险</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>#</th><th>发现</th><th>根因</th><th>修复</th><th>教训</th></tr>
+    <tr><td class="mono">R1</td><td>事务内查询 pool 导致同事务可见性错误与连接池耗尽</td><td>CreateApprovalTask 冲突分支走 pool</td><td>改走同 tx（approval.go）</td><td>事务内禁止查 pool（单连接纪律）</td></tr>
+    <tr><td class="mono">R2</td><td>测试环境 pool.Close 永久挂死（puddle 等待未释放连接）</td><td>测试 Fatalf 时事务未回滚</td><td>全部 tx 补 defer Rollback + testenv close 超时护栏</td><td>泄漏检测要显式化，静默挂死最致命</td></tr>
+    <tr><td class="mono">R3</td><td>同 idempotency_key 跨租户订单 ID 冲突</td><td>订单 ID 仅由键派生</td><td>ID 含租户维度派生</td><td>多租户任何确定性派生都要带 tenant</td></tr>
+    <tr><td class="mono">R4</td><td>部分发货第二次发货被幂等键拒绝</td><td>发货段序号恒为 1</td><td>按既有发货数派生序号（CountShipments）</td><td>分批场景键设计必须含批次维度</td></tr>
+    <tr><td class="mono">R5</td><td>修改 A 类重审无法新建审批任务</td><td>任务 ID 确定性派生</td><td>ID 随机化 + PENDING 去重</td><td>确定性 ID 要区分「去重键」与「主键」</td></tr>
+    <tr><td class="mono">R6</td><td>awaitGate 催办 Timer 触发后返回 nil 决策</td><td>循环缺 continue</td><td>escalated 标记 + continue</td><td>Timer 分支与决策分支必须互斥返回</td></tr>
+    <tr><td class="mono">R7</td><td>测试 env 10 年 workflow-timeout 自动触发</td><td>闸门无挂起 timer 时 env 触发超时</td><td>所有闸门保持挂起 timer（催办语义）+ 信号经 RegisterDelayedCallback 驱动</td><td>理解测试环境的虚拟时钟模型</td></tr>
+    <tr><td class="mono">R8</td><td>开票按整单数量导致部分发货后守恒失败</td><td>decQty 恒为订单量</td><td>开票量=有效发货量（ActSumShipped）</td><td>守恒校验要与业务语义（实发）一致</td></tr>
+  </table>
+  </div>
+
+  <h2><span class="no">4 ·</span> 覆盖倒推影响面（测试失败 → 设计点）</h2>
+  <ul>
+    <li><strong>第一梯队·守恒</strong>：L1-03/04（行锁/单事务）、L1-05（开票双维）、L3-01（并发脚本）、触发器级回滚验证 → 防线 1/2/4/5</li>
+    <li><strong>第二梯队·幂等</strong>：L1-02（含跨租户）、L2-12/13（预订单双层）、L2-02（修改 revision 链）→ 防线 3/7</li>
+    <li><strong>第三梯队·授权</strong>：L1-07/08/09/10、L2-14 → SpiceDB 唯一判定点 + caveat 时效 + BFF 投影</li>
+    <li><strong>第四梯队·事件链</strong>：L1-12、L3-05（audit 真库）、L3-06（seeddata 幂等）→ 审计回放</li>
+    <li><strong>第五梯队·系统</strong>：L3-02/03/04（reconcile 真库全绿、cover 门禁、roundtrip 15/15）</li>
+  </ul>
+
+  <h2><span class="no">5 ·</span> 经验教训与后续建议</h2>
+  <ol>
+    <li><strong>Score Card 先行、覆盖率是结果不是目标</strong> —— 49 例全部落地，CQ→测试映射零漂移（03-testing.html §4）。</li>
+    <li><strong>测试即设计的验收</strong>：L2 逐调用点故障注入逼出 8 个真实编排缺陷（R1-R8），比覆盖率数字更有价值。</li>
+    <li><strong>企微接入的真实进程级 E2E 未补</strong>：mock 全链已绿（HTTP API + 企微 mock 模式可直接测试），真实 Temporal + 企微沙箱需接入 official 通道后人工验收（W3/W4 证据清单就绪）。</li>
+    <li><strong>LLM 评测集沉淀</strong>：MockParser 规则为基线，LLM 钩子（LLMParser）未接线——选型决策时补评测集与直接确认率实测。</li>
+    <li><strong>覆盖率差距的诚实交代</strong>：87.8% vs 目标 95/98%，全部为防御性错误分支；若需追平，方向是 SQL 层错误注入框架（mock pgx 连接）而非更多端到端测试。</li>
+  </ol>
+
+  <h2><span class="no">6 ·</span> 最终结论</h2>
+  <ul>
+    <li>☑ Score Card 49/49 落地；domain/config 覆盖率 100%；全仓 87.8%（门禁 85% + domain 硬门禁）；零静默 Skip / 零假绿 / 零空测试；CQ→测试映射零漂移。</li>
+    <li>☑ 履约四道防线（CHECK/行锁/幂等/单事务守恒）、授权闸门（SpiceDB 唯一判定点 + caveat）、AI 安全边界（LLM 只产候选 + 人工确认 Signal）均有专项测试背书；并发守恒真库压测通过。</li>
+    <li>⚠️ 剩余风险集中在：真实运行环境（企微 official 接入、Temporal 接线、CI 依赖）、覆盖率与 95% 目标的差距（防御性错误分支，见 §2 声明）、业务规则待确认项（13+1 条）。</li>
+  </ul>
+
+  <footer class="colophon">
+    <span><a href="index.html">← Docs Index</a></span>
+    <span>06 · Testing Retrospective · B2B Order Fulfillment</span>
+  </footer>
+</div>
+</body>
+</html>

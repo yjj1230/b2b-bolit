@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>文档审查记录 · 2026-08-06 13:21</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+SC:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root { --paper:#f5f4ed; --paper2:#efeee5; --ink:#1f1d18; --ink2:#6b665b; --ink3:#3a382f; --blue:#1b365d; --red:#8b2f2f; --amber:#8a5a16; --rule:#d4d1c5; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink); font-family:'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif; line-height:1.65; }
+  .wrap { max-width:980px; margin:0 auto; padding:42px 38px 72px; }
+  .mono { font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace; }
+  .folio { display:flex; justify-content:space-between; gap:18px; border-bottom:1px solid var(--rule); padding-bottom:10px; color:var(--ink2); font-size:11px; letter-spacing:.12em; text-transform:uppercase; }
+  .folio a, a { color:var(--blue); text-decoration:none; border-bottom:1px solid var(--rule); }
+  a:hover { border-bottom-color:var(--blue); }
+  .kicker { display:flex; align-items:baseline; gap:12px; margin-top:44px; }
+  .tag { padding:3px 10px; background:var(--paper2); color:var(--blue); font-size:11px; letter-spacing:.12em; }
+  h1 { margin:14px 0 0; font-size:clamp(31px,5vw,51px); line-height:1.12; font-weight:500; }
+  .lede { max-width:780px; margin:18px 0 0; color:var(--ink3); font-size:17px; }
+  h2 { display:flex; align-items:baseline; gap:12px; margin:48px 0 14px; padding-top:24px; border-top:1px solid var(--rule); color:var(--blue); font-size:23px; }
+  h2 .no, h3 .no { font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.1em; }
+  h3 { margin:28px 0 8px; color:var(--ink); font-size:18px; }
+  p { margin:10px 0; color:var(--ink3); }
+  ul, ol { margin:10px 0 10px 24px; padding:0; color:var(--ink3); }
+  li { margin:7px 0; }
+  blockquote { margin:18px 0; padding:11px 18px; border-left:2px solid var(--blue); background:var(--paper2); }
+  .summary { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:24px 0 8px; }
+  .summary div { padding:14px 16px; border:1px solid var(--rule); background:var(--paper2); }
+  .summary strong { display:block; color:var(--blue); font-size:20px; }
+  .summary span { color:var(--ink2); font-size:13px; }
+  .finding { margin:22px 0 28px; padding:0 0 4px 18px; border-left:3px solid var(--red); }
+  .finding.p2 { border-left-color:var(--amber); }
+  .finding h3 { margin-top:0; }
+  .priority { color:var(--red); font-family:'IBM Plex Mono',monospace; font-size:12px; }
+  .finding.p2 .priority { color:var(--amber); }
+  .refs { color:var(--ink2); font-size:13px; }
+  .table-wrap { overflow-x:auto; margin:16px 0 24px; border:1px solid var(--rule); }
+  table { width:100%; border-collapse:collapse; font-size:13.5px; }
+  th { padding:9px 12px; background:var(--paper2); border-bottom:1.5px solid var(--blue); color:var(--blue); text-align:left; white-space:nowrap; }
+  td { padding:9px 12px; border-bottom:1px solid var(--rule); vertical-align:top; color:var(--ink3); }
+  tr:nth-child(even) td { background:#faf9f3; }
+  code { padding:1px 5px; background:var(--paper2); font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace; font-size:12.5px; }
+  footer { display:flex; justify-content:space-between; gap:12px; margin-top:56px; padding-top:14px; border-top:1px solid var(--rule); color:var(--ink2); font-size:11px; letter-spacing:.1em; }
+  @media (max-width:720px) { .wrap { padding:28px 18px 56px; } .folio { flex-wrap:wrap; } .summary { grid-template-columns:1fr; } footer { flex-wrap:wrap; } }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="folio">
+    <span><a href="../index.html">← Docs</a> · Review History</span>
+    <span>2026-08-06 13:21</span>
+    <span>Static Document Review</span>
+  </header>
+
+  <div class="kicker">
+    <span class="tag">文档审查记录</span>
+    <span class="mono" style="font-size:11px; letter-spacing:.12em; color:var(--ink2);">REVIEW · 202608061321</span>
+  </div>
+
+  <h1>设计文档审查<br /><span style="font-style:italic; color:var(--blue);">对齐三方存储 schema 后的剩余风险</span></h1>
+  <p class="lede">本记录复核 <span class="mono">docs/</span> 当前 Markdown 与发布版 HTML，并以 <span class="mono">spec/meta.md</span>、<span class="mono">spec/biz/飞书三方审批系统存储表及字段说明.md</span>、两个表头 Excel 及历史 review 为依据。上一轮意见已先落到设计文档；以下只列仍需业务决策或实施证据关闭的问题。</p>
+
+  <div class="summary">
+    <div><strong>3</strong><span>条剩余发现</span></div>
+    <div><strong>2 × P1</strong><span>实现或验收阻断项</span></div>
+    <div><strong>静态审查</strong><span>未执行 Go/PG/SpiceDB/企微运行测试</span></div>
+  </div>
+
+  <h2><span class="no">01 ·</span> 审查结论</h2>
+  <blockquote><strong>文档结构已基本具备实施基线条件，但还不能宣称业务规则和运行证据已经闭环。</strong> 本轮已将 STK 备货、分域事件、租户复合 FK、迁移阶段映射、INV 七节点、仓管只读投影和 A/B/C/D/E Score Card 写入设计；剩余风险集中在开票入口决策、可执行授权验证，以及敏感迁移资料的证据治理。</blockquote>
+
+  <h2><span class="no">02 ·</span> 剩余发现</h2>
+
+  <article class="finding">
+    <h3><span class="priority">P1</span> 开票入口规则仍未取得业务确认</h3>
+    <p>当前设计采用“合同完成即可申请，实际开票时按有效发货的数量与金额核验”的折中方案；状态图已经允许从 <code>READY_FOR_INVOICE</code> 进入申请，但文档仍明确标注来源规格与早期“未发货不可开票”冲突，ADR 也把它列为待业务确认。原三方 schema 只证明存在 <code>available_invoice_amount</code> 与 <code>available_invoice_qty</code>，并不能单独证明申请入口规则。</p>
+    <p class="refs">依据：<a href="../01-core-graph.md#L545">01-core-graph.md:545-555</a>、<a href="../01-core-graph.md#L562">01-core-graph.md:562-563</a>、<a href="../02-architecture.md#L240">02-architecture.md:240-245</a>；源字段见 <a href="../../spec/biz/飞书三方审批系统存储表及字段说明.md#L408">schema 说明:408-409</a>。</p>
+    <p><strong>建议：</strong>由业务方书面选择“可先申请”或“必须先有部分/全部发货”，并将选择同步到 INV 状态入口、L0-04/L2-10、L3-02 对账规则和验收脚本。不能以当前折中默认值代替决策门。</p>
+  </article>
+
+  <article class="finding">
+    <h3><span class="priority">P1</span> 授权与复合 FK 仍缺少可执行验证</h3>
+    <p>文档现在给出了 SpiceDB 版本假设、<code>warehouse-&gt;staff</code> 只读路径、BFF 价格字段投影，以及“所有 FK 必须包含 <code>tenant_id</code>”的约束，但仓库中仍没有实际的 <code>schema.zed</code>、PostgreSQL migration 或 L1 集成测试可供编译和运行。仅凭设计文本无法确认箭头语法、关系类型、复合 FK 和仓管投影在同一实现中成立。</p>
+    <p class="refs">依据：<a href="../01-core-graph.md#L251">01-core-graph.md:251-359</a>、<a href="../02-architecture.md#L143">02-architecture.md:143-172</a>、<a href="../03-testing.md#L51">03-testing.md:51-64</a>；M1/M4 门禁见 <a href="../04-development-plan.md#L31">04-development-plan.md:31-37</a>。</p>
+    <p><strong>建议：</strong>M1 先提交真实 <code>schema.zed</code> 和迁移 SQL，固定 SpiceDB 镜像并执行 schema compile；L1 至少证明“本仓可读但无价格、跨仓拒绝、跨租户拒绝、同键不同租户互不冲突”，失败即阻断后续流程实现。</p>
+  </article>
+
+  <article class="finding p2">
+    <h3><span class="priority">P2</span> 横切归档与敏感字段的迁移治理还不够可验收</h3>
+    <p>本轮已经把 <code>external_instances</code>、后台任务、回调、多维表映射、机器人消息和仓库通知明确为 <code>legacy_*</code> 只读归档，并保留四阶段实例/任务映射。但源 JSONL 仍含 Open ID、访问令牌、文件路径、请求/响应体、审批表单和评论正文；当前迁移章节尚未给每类字段定义脱敏规则、加密边界、TTL、访问角色和迁移后删除证明。</p>
+    <p class="refs">依据：源系统说明中的横切表字段 <a href="../../spec/biz/飞书三方审批系统存储表及字段说明.md#L459">schema 说明:459-627</a> 及敏感字段注意事项 <a href="../../spec/biz/飞书三方审批系统存储表及字段说明.md#L629">schema 说明:629-634</a>；目标归档策略见 <a href="../02-architecture.md#L272">02-architecture.md:272-287</a>。</p>
+    <p><strong>建议：</strong>在迁移前增加字段级 mapping/retention 清单和验收证据：哪些字段进入 PG、哪些只进加密对象存储、谁可访问、保存多久、迁移后如何验证业务库无令牌/原始响应残留。归档数据不得重新触发旧任务或发送旧消息。</p>
+  </article>
+
+  <h2><span class="no">03 ·</span> 本轮已完成的文档修正</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>区域</th><th>已落地修正</th></tr>
+    <tr><td>领域与数据库</td><td>新增独立 <code>stock_prepares</code>/<code>stock_prepare_items</code> 与 STK 事件；SHP 通过 <code>stock_prepare_id</code> 连接，保留分批、出库和回退语义。</td></tr>
+    <tr><td>事件与审批</td><td>ORD/STK/SHP/INV/PreOrder 五类事件分域 append-only；<code>approval_tasks</code> 增加 stage、源 task ID 和 INV 七节点类型。</td></tr>
+    <tr><td>租户与迁移</td><td>明确复合 FK；正式表清单纳入 <code>approval_comments</code>、<code>legacy_flow_mapping</code>、<code>migration_batches</code>；映射覆盖 flow/stage/instance/task 与 resubmit revision。</td></tr>
+    <tr><td>验收与发布版</td><td>Score Card 的 L2-02 覆盖 A/B/C/D/E；roundtrip、Workflow ID、仓管投影、开票双维守恒和 HTML 安全表已同步 Markdown。</td></tr>
+  </table>
+  </div>
+
+  <h2><span class="no">04 ·</span> 审查边界与解除顺序</h2>
+  <ol>
+    <li>先完成开票入口书面决策，并更新 INV 状态图及对应测试断言。</li>
+    <li>提交并编译真实 SpiceDB schema、复合 FK migrations，跑通 L1 权限与租户隔离矩阵。</li>
+    <li>冻结迁移字段级 mapping/retention 清单，再以 JSONL fixture 做快照、事件、守恒和敏感字段残留对账。</li>
+    <li>最后按 07 §8.2 记录 W3/W4 真实企微环境证据；Fake 全绿不能替代真实验收。</li>
+  </ol>
+  <p class="refs">审查方式：静态交叉核对文档、源 schema 字段和 HTML 结构；本记录生成时未执行应用测试，也未将新增 <span class="mono">spec/</span> 参考资料纳入 Git。</p>
+
+  <footer>
+    <span><a href="../index.html">← Docs Index</a></span>
+    <span>Review History · 2026-08-06 13:21</span>
+  </footer>
+</main>
+</body>
+</html>

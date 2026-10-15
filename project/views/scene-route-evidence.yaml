@@ -1,0 +1,30 @@
+# project/views/scene-route-evidence.yaml —— 17 场景 route-level 追踪证据（M3 首批）
+# backend_api 与 project/views/demo-boundary.yaml 对齐：route-level 证据，不等于场景级正确。
+# probes 为静态源码探针：必须在指定源码范围内全部命中。
+schema: ECM-SCENE-ROUTE-EVIDENCE/v1
+generated_at: 2026-08-20T19:40:00+00:00
+generated_by: assistant（基于 HEAD 4a35584）
+search_scope:
+  - internal/api
+  - internal/wecom
+  - internal/bridge
+  - internal/workflows
+  - cmd/wecom
+scenes:
+  - {id: XS1,   backend_api: "yes",    probes: ["GET /api/v1/orders/{orderID}", "GET /api/v1/orders/{orderID}/events", "POST /api/v1/orders/{orderID}/send-to-group"]}
+  - {id: XS2,   backend_api: "yes",    probes: ["POST /api/v1/orders", "POST /api/v1/bridge/orders", "GET /bridge"]}
+  - {id: XS3,   backend_api: "yes",    probes: ["POST /api/v1/preorders", "POST /api/v1/preorders/{preOrderID}/signal/{signal}", "GET /api/v1/preorders/{preOrderID}"]}
+  - {id: XS4,   backend_api: "yes",    probes: ["GET /api/v1/todos"]}
+  - {id: XS5,   backend_api: "UNKNOWN", probes: ["POST /api/v1/orders/{orderID}/send-to-group"], note: "物流图片生成未实现，仅通用发群卡路由"}
+  - {id: XSZG1, backend_api: "yes",    probes: ["SignalPriceReview", "price-review"]}
+  - {id: XSZL1, backend_api: "yes",    probes: ["GET /api/v1/bridge/sales-persons", "POST /api/v1/bridge/orders", "GET /assistant"]}
+  - {id: XSZL2, backend_api: "yes",    probes: ["GET /api/v1/wecom/jsapi-config", "POST /api/v1/auth/exchange", "GET /assistant"]}
+  - {id: SW1,   backend_api: "yes",    probes: ["SignalStockReview", "SignalShipAction", "SignalInvoiceIssued", "SignalReceiptExReview"]}
+  - {id: SW2,   backend_api: "yes",    probes: ["GET /api/v1/orders"]}
+  - {id: SW3,   backend_api: "yes",    probes: ["GET /api/v1/todos"]}
+  - {id: CW1,   backend_api: "yes",    probes: ["POST /api/v1/orders/{orderID}/shipments/{shipmentID}/evidence", "GET /ops"]}
+  - {id: CW2,   backend_api: "yes",    probes: ["SignalReceiptExReview"]}
+  - {id: CG1,   backend_api: "yes",    probes: ["SignalWarehouseConfirm"]}
+  - {id: CG2,   backend_api: "yes",    probes: ["SignalShipAction"]}
+  - {id: CG3,   backend_api: "yes",    probes: ["handleGroupImage", "SignalReceiptProvided"]}
+  - {id: DSZ1,  backend_api: "yes",    probes: ["SignalChairmanReview"]}

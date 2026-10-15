@@ -1,0 +1,24 @@
+# D-007 RHCRM 数据源架构 × v0.1 发布策略（用户裁决，2026-08-18）
+decision_id: D-007
+choice: >
+  基于 spec/RHCRM-订单数据源架构说明.html（commit 070c8d4）对 v0.1 的影响评估，
+  用户裁决三项：
+  Q1=B：v0.1（2026-08-21）只做购销合同表的只读可见（商务通过 pgAPI 查询真实订单），
+       企微订单写回购销合同表的写路径下一迭代启用；
+  Q2=U2：合同表状态回写采用“按 apply_no upsert”——pgAPI 给 purchase-contracts 加
+       apply_no 唯一约束，同号再 POST 即按白名单字段更新，不产生重复行；
+  Q3=P3：发布前把备库提升为可写副本（演练库）运行 v0.1，原主库保持同步与归档，
+       不再以只读流复制备库承载发布。
+rationale: >
+  新架构文档确定“PG 购销合同表为唯一订单源，企微订单经 pgAPI POST 写入”；
+  当前 b2b 无合同写路径、pgAPI 合同表字段暴露不全、且“只允许新增”与状态回写冲突。
+  08-21 时间窗过短，故写路径后置；写机制与拓扑今天冻结，以便 b2b 与现场程序员并行开发。
+premises:
+  - spec/RHCRM-订单数据源架构说明.html（070c8d4）：唯一订单源=购销合同表（PG 8,784 行）
+  - 影响评估：spec/RHCRM-订单数据源架构说明-v0.1影响评估.html（2afd0a1）
+  - 现场同步（客户池/产品池/三方审批→购销合同表）已上线
+objections: []
+decider: project-owner（用户裁决）
+effective_interval: {from: "2026-08-18T00:00:00+00:00", to: null}
+supersedes: []
+review_condition: 合同写路径下一迭代上线前复核 U2 实现与 pgAPI 字段暴露清单

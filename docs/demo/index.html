@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>长安仁恒订单助手 · 产品演示</title>
+<link rel="stylesheet" href="_shared/demo.css?v=pc-rail-blue-001" />
+</head>
+<body>
+
+<header class="demo-top">
+  <a class="back" href="../index.html">← Docs</a>
+  <span class="role-badge">◈ 订单助手 · 产品演示</span>
+  <h1>企微订单助手</h1>
+  <span class="sub" id="demo-device-copy">长安仁恒 × 广西天华 · 膨润土 AB-3 · 移动端演示</span>
+  <div class="spacer"></div>
+  <div class="demo-controls">
+    <div class="device-switch" role="group" aria-label="演示终端">
+      <button id="btn-device-pc" type="button" aria-pressed="false">▣ PC</button>
+      <button id="btn-device-mobile" type="button" aria-pressed="true">▯ 移动</button>
+    </div>
+    <button id="btn-back">◀</button>
+    <button id="btn-step">步进 ›</button>
+    <button id="btn-play" class="primary">▶ 播放</button>
+    <button id="btn-reset">↺ 重置</button>
+    <span class="prog" id="prog-text">0 / 0</span>
+    <div class="progress-track"><div class="fill" id="prog-fill"></div></div>
+  </div>
+  <div class="role-bar">
+    <span class="bar-label">角色</span>
+    <div id="role-tabs" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+  </div>
+</header>
+
+<div class="demo-grid">
+
+  <aside class="demo-col demo-left">
+    <div class="demo-card scene-overview">
+      <h3><span class="tag">当前场景</span></h3>
+      <div class="scene-name" id="scene-name">—</div>
+      <span class="scene-stage" id="scene-stage"></span>
+      <div class="narrative-block">
+        <div class="narrative-label">客户需求</div>
+        <div class="customer-quote" id="scene-need">—</div>
+      </div>
+      <div class="narrative-block">
+        <div class="narrative-label">业务问题</div>
+        <p class="business-problem" id="scene-problem">—</p>
+      </div>
+    </div>
+    <div class="demo-card agent-job-card">
+      <h3>Agent 任务</h3>
+      <div class="agent-chain" id="scene-agent-chain"></div>
+      <div class="boundary-title">人机边界</div>
+      <div class="boundary-grid">
+        <div><span class="boundary-who ai">AI 自动</span><p id="scene-ai-boundary">—</p></div>
+        <div><span class="boundary-who human">人工确认</span><p id="scene-human-boundary">—</p></div>
+      </div>
+    </div>
+    <div class="demo-card validation-card">
+      <h3>本场景验证</h3>
+      <ul class="validation-list" id="scene-validation"></ul>
+      <div class="outcome"><span>业务价值</span><strong id="scene-outcome">—</strong></div>
+    </div>
+    <div class="demo-card">
+      <h3>当前角色场景</h3>
+      <div class="scene-list" id="scene-list"></div>
+    </div>
+  </aside>
+
+  <main class="demo-col demo-stage">
+    <div class="stage-bar">
+      <span id="stage-title">企微移动端 · 手机屏幕（群聊 + 订单助手 H5）</span>
+      <span class="live">LIVE 演示</span>
+    </div>
+    <div class="stage-wrap">
+
+      <!-- PC 企微四栏（保留：商务/财务 PC 必需时的扩展形态） -->
+      <div class="wc-pc no-aside" id="stage-pc">
+        <div class="tl" aria-hidden="true"><i class="r"></i><i class="y"></i><i class="g"></i></div>
+        <div class="rail">
+          <div class="av" id="pc-avatar">李</div>
+          <div class="nav on"><span class="ico">💬</span><span class="lb">消息</span><span class="bdg">2</span></div>
+          <div class="nav"><span class="ico">✉</span><span class="lb">邮件</span></div>
+          <div class="nav"><span class="ico">📄</span><span class="lb">文档</span></div>
+          <div class="nav"><span class="ico">📅</span><span class="lb">日程</span></div>
+          <div class="nav"><span class="ico">🖥</span><span class="lb">会议</span></div>
+          <div class="nav"><span class="ico">▦</span><span class="lb">工作台</span></div>
+          <div class="nav"><span class="ico">⧉</span><span class="lb">通讯录</span></div>
+          <div class="nav"><span class="ico">▣</span><span class="lb">微盘</span></div>
+          <div class="nav rail-more"><span class="ico">✦</span><span class="lb">高级功能</span></div>
+        </div>
+        <div class="conv">
+          <div class="search"><span class="box">⌕ 搜索</span><span class="plus">＋</span></div>
+          <div class="conv-item on">
+            <div class="cav">天</div>
+            <div class="meta"><div class="nm" id="pc-conv-name">广西天华 · 供应协同群<span class="tm">09:24</span></div><div class="pv" id="pc-conv-pv">王总：再发5吨膨润土 AB-3…</div></div>
+          </div>
+          <div class="conv-item">
+            <div class="cav">宏</div>
+            <div class="meta"><div class="nm">宏远铸造采购群</div><div class="pv">赵经理：合同盖章版已发</div></div>
+          </div>
+        </div>
+        <div class="chat">
+          <div class="ch-head"><div><div class="nm" id="pc-chat-name">广西天华 · 供应协同群（8）</div><div class="sub">外部客户群 · 已开启订单助手</div></div></div>
+          <div class="ch-body"></div>
+          <div class="input-area"><span class="tools">☺ ▧ 📁</span><span class="field">输入消息…</span><span class="send">发送</span></div>
+        </div>
+        <div class="aside">
+          <div class="marker">订单助手 · 侧边栏应用</div>
+          <div class="tabs">
+            <span class="tab on">待办<span class="cnt">2</span></span><span class="tab">订单</span><span class="tab">下单</span>
+          </div>
+          <div class="aside-content"></div>
+        </div>
+      </div>
+
+      <!-- 手机壳（企微移动端：群聊 ⇄ 订单助手应用页，单屏内切换） -->
+      <div class="wc-phone" id="stage-phone" style="display:none;">
+        <div class="st-bar"><span>9:30</span><span class="phone-status"><i class="signal">▮▮▮</i><i class="wifi">⌁</i><i class="battery"></i></span></div>
+        <div class="nav"><span class="back">‹</span><span class="title" id="phone-chat-name">广西天华 · 供应协同群</span><span class="call">☎</span><span class="more">•••</span></div>
+        <div class="chat-area">
+          <div class="chat-msgs"></div>
+        </div>
+        <div class="wc-chat-tools">
+          <span class="ct-item hot"><span class="ct-ico">✓</span>订单助手</span>
+          <span class="ct-item"><span class="ct-ico">✎</span>快捷回复</span>
+          <span class="ct-item"><span class="ct-ico">▤</span>商品图册</span>
+          <span class="ct-item"><span class="ct-ico">↗</span>对外收款</span>
+        </div>
+        <div class="input-bar"><span class="mic">🎤</span><span class="field">输入消息...</span><span class="face">☺</span><span class="plus">＋</span></div>
+        <!-- 订单助手应用页：从聊天点击进入（H5 全屏，覆盖聊天，可关闭返回） -->
+        <div class="app-page" id="app-page">
+          <div class="app-page-head">
+            <span class="app-back" id="app-close">‹</span>
+            <span class="app-title" id="app-title">订单助手</span>
+            <span class="app-more">⋯</span>
+          </div>
+          <div class="aside-tabs">
+            <span class="aside-tab on">待办</span><span class="aside-tab">订单</span><span class="aside-tab">下单</span>
+          </div>
+          <div class="aside-scroll"></div>
+        </div>
+        <!-- 手机内浮层：物流图片生成等操作提示叠加在屏幕上 -->
+        <div class="phone-pip" id="phone-pip"></div>
+      </div>
+
+    </div>
+  </main>
+
+  <aside class="demo-col demo-right">
+    <div class="demo-card demo-timeline">
+      <h3>◈ AI Agent 执行记录</h3>
+      <div class="tl-scroll" id="tl-scroll"><div class="tl-empty">等待对话开始…</div></div>
+    </div>
+    <div class="demo-annos">
+      <div class="annos-scroll" id="annos-scroll"><div class="anno-empty">等待对话开始…</div></div>
+    </div>
+  </aside>
+
+</div>
+
+<script>
+window.DEMO_ROLES = [
+  /* ============ 角色 1 · 销售（企微群 · 手机端，5 用例） ============ */
+  {
+    role: 'SALES',
+    roleName: '销售',
+    avatarChar: '李',
+    formFactor: 'mobile',
+    appName: '订单助手',
+    chatName: '广西天华 · 供应协同群',
+    tabs: ['待办', '订单', '下单'],
+    scenarios: [
+      {
+        id: 'XS1',
+        name: '查订单 / 订单详情',
+        stage: '群侧边栏 ·「订单」Tab',
+        painPoint: '客户在群里口头问单 / 催进度，销售要翻聊天记录核对订单。AI 能直接定位到目标订单，但销售仍需要能回到客户订单首页人工翻看、筛选和查找，并把订单信息一键发给客户。',
+        highlights: ['群内消息一键识别问单意图，直达订单详情', '详情页可返回客户订单首页（汇总 + 状态筛选）', '订单详情：履约时间线 · 物流 / 预计送达', '「发给客户」一键发送客户可见订单卡片'],
+        demoGoal: '展示销售 AI 直达订单详情后，返回客户订单首页人工筛选查找，并把订单信息一键发给客户。',
+        initialSide: {
+          tab: '待办', ctx: { name: '广西天华', sub: '供应协同群 · 采购 王志明 · 归属销售 张销售', grade: 'C 级', gradeCls: 'c' },
+          blocks: [{ kind: 'appr-list', items: [{ icon: '⚠', title: '智能下单确认', sub: 'DRAFT-2026-0036 · 待处理', warn: true, tag: '需处理' }] }]
+        },
+        messages: [
+          { type: 'customer', sender: '王志明（采购）', content: '李经理，帮我看看最近这两单的进度' },
+          { type: 'sales', sender: '张销售', content: '好嘞王总，我看下订单助手' },
+          { type: 'sys', content: 'AI 识别「最近两单」问单意图 → 直接打开最匹配订单 ORD-2026-0112 详情（已发货 · 运输中 · 含物流与预计送达）。顶部「‹ 广西天华订单」可返回客户订单首页；点「发给客户」一键发送客户可见卡片', side: { tab: '订单', ctx: { name: '广西天华', sub: '供应协同群 · 采购 王志明 · 归属销售 张销售', grade: 'C 级', gradeCls: 'c' }, blocks: [{ kind: 'detail', back: '广西天华订单', no: 'ORD-2026-0112', state: '已发货', stateCls: 'ship', kv: [{ k: '客户', v: '广西天华 · C 级' }, { k: '产品', v: '膨润土 AB-3（袋装）· 2 吨' }, { k: '物流公司', v: '德邦快递' }, { k: '物流单号', v: 'DBL2026073000387' }, { k: '当前进度', v: '运输中 · 已离开始发站' }, { k: '预计送达', v: '08-01 前' }], tl4: { nodes: ['已开单', '已备货', '已发货', '已开票'], current: 2 }, actions: [{ t: '发给客户', c: 'btn-confirm' }] }] } },
+          { type: 'image', side: 'right', sender: '张销售', imageTitle: '📋 订单信息', imageRows: [
+            { k: '订单号', v: 'ORD-2026-0112' },
+            { k: '产品', v: '膨润土 AB-3（袋装）· 2 吨' },
+            { k: '物流公司', v: '德邦快递' },
+            { k: '物流单号', v: 'DBL2026073000387' },
+            { k: '当前状态', v: '已发货 · 运输中' },
+            { k: '预计送达', v: '08-01 前' }
+          ] },
+          { type: 'sys', content: '销售点「‹ 广西天华订单」→ 进入客户订单首页：汇总「全部 4 · 进行中 2 · 已发货 1 · 已完成 1」+ 状态筛选，销售可人工翻看、筛选、查找', side: { tab: '订单', ctx: { name: '广西天华', sub: '供应协同群 · 采购 王志明 · 归属销售 张销售', grade: 'C 级', gradeCls: 'c' }, blocks: [{ kind: 'customer-order-home', company: '广西天华有限公司', companySub: '客户编号 GXTH-0012 · 负责销售 张销售 · C 级', summary: [
+            { n: '4', label: '全部' },
+            { n: '2', label: '进行中' },
+            { n: '1', label: '已发货' },
+            { n: '1', label: '已完成' }
+          ], filters: [
+            { label: '全部', n: 4, active: true },
+            { label: '进行中', n: 2 },
+            { label: '已发货', n: 1 },
+            { label: '已完成', n: 1 }
+          ], items: [
+            { no: 'ORD-2026-0118', state: '待价格审批', stateCls: 'approving', prod: '膨润土 AB-3', qty: '5 吨', amount: '¥16,000', progress: '待审价', wh: '华南仓', eta: '08-15', tl4c: 0 },
+            { no: 'ORD-2026-0118', state: '备货中', stateCls: 'ship', prod: '膨润土 AB-3', qty: '5 吨', amount: '¥16,000', progress: '备货中', wh: '华南仓', eta: '08-18', tl4c: 1 },
+            { no: 'ORD-2026-0112', state: '已发货', stateCls: 'ship', prod: '膨润土 AB-3（袋装）', qty: '2 吨', amount: '¥6,800', progress: '运输中', wh: '华南仓', eta: '08-01', tl4c: 2 },
+            { no: 'ORD-2026-0102', state: '已开票', stateCls: 'done', prod: '膨润土 AB-3', qty: '3 吨', amount: '¥9,600', progress: '已完成', wh: '华南仓', eta: '07-30', tl4c: 3 }
+          ] }] } },
+          { type: 'sys', content: '切「进行中」筛选 → 列表变 2 笔；打开 ORD-2026-0118 详情（待价格审批 · 未发货），按钮仍为「发给客户」', side: { tab: '订单', ctx: { name: '广西天华', sub: '供应协同群 · 采购 王志明 · 归属销售 张销售', grade: 'C 级', gradeCls: 'c' }, blocks: [{ kind: 'detail', back: '广西天华订单', no: 'ORD-2026-0118', state: '待价格审批', stateCls: 'approving', kv: [{ k: '客户', v: '广西天华 · C 级' }, { k: '产品', v: '膨润土 AB-3 · 5 吨' }, { k: '下单日期', v: '07-28' }, { k: '收货', v: '湖南岳阳 · 云溪区' }, { k: '金额', v: '¥16,000' }, { k: '预计到货', v: '08-15 前' }], tl4: { nodes: ['已开单', '已备货', '已发货', '已开票'], current: 0 }, risk: { title: '审批状态', items: ['主管审价 → C 级董事长终审 → 商务库存/交期确认 → 仓管发货 → 回单 → 财务开票'] }, actions: [{ t: '发给客户', c: 'btn-confirm' }] }] } },
+          { type: 'image', side: 'right', sender: '张销售', imageTitle: '📋 订单信息', imageRows: [
+            { k: '订单号', v: 'ORD-2026-0118' },
+            { k: '产品', v: '膨润土 AB-3 · 5 吨' },
+            { k: '收货', v: '湖南岳阳 · 云溪区' },
+            { k: '当前状态', v: '已下单 · 待价格审批' },
+            { k: '预计到货', v: '08-15 前' }
+          ] },
+          { type: 'sales', sender: '张销售', content: '王总，ORD-0112 已发货预计 08-01 前到，ORD-0118 在价格审批预计 08-15 前到，两单信息都发您了' }
+        ],
+        annotations: [
+          null,
+          { todo: '识别客户问单意图：查看最近两单进度', agentLog: { received: '客户群消息：帮我看看最近这两单的进度', analysis: '识别问单意图，定位目标订单', updates: ['客户诉求→查订单进度'], recommendedAction: '直达命中订单详情' } },
+          { flows: ['AI 问单识别 → 直达订单详情'], fields: { 命中订单: { value: 'ORD-2026-0112（已发货 · 运输中）', status: 'updated' }, 预计送达: { value: '08-01 前（含物流公司/单号）', status: 'updated' } }, agentLog: { received: 'AI 识别问单意图', analysis: '直接打开最匹配订单详情；已发货订单展示物流与预计送达', updates: ['订单详情→ORD-2026-0112'], recommendedAction: '点「发给客户」发送订单卡片' } },
+          { flows: ['发给客户 → 订单卡片发群（已发货含物流/预计送达）'], fields: { 客户卡片: { value: '已发货订单：物流公司/单号/预计送达 08-01 前', status: 'updated' } }, agentLog: { received: '销售点击发给客户', analysis: '系统后台生成客户可见卡片并发送到当前企微群', updates: ['卡片→已发群'], recommendedAction: '客户直接查看卡片' } },
+          { flows: ['返回客户订单首页（汇总 + 筛选）'], fields: { 订单首页: { value: '全部 4 · 进行中 2 · 已发货 1 · 已完成 1', status: 'updated' }, 状态筛选: { value: '全部 / 进行中 / 已发货 / 已完成', status: 'updated' } }, agentLog: { received: '销售点返回', analysis: '进入客户订单首页，可人工翻看与筛选查找', updates: ['首页→已打开'], recommendedAction: '切换状态筛选' } },
+          { flows: ['筛选进行中 → 打开 ORD-2026-0117'], fields: { 筛选结果: { value: '进行中 2 笔（0117 / 0118）', status: 'updated' } }, agentLog: { received: '切换筛选', analysis: '列表按状态变化，点击打开另一笔订单详情', updates: ['订单详情→ORD-2026-0117'], recommendedAction: '点「发给客户」' } },
+          { flows: ['发给客户 → 未发货订单卡片（不含金额）'], fields: { 客户卡片: { value: '未发货订单：已下单 + 预计到货（不含金额）', status: 'updated' } }, agentLog: { received: '销售点击发给客户', analysis: '未发货订单生成「已下单 + 预计到货」卡片，资金信息按权限展示', updates: ['卡片→已发群'], recommendedAction: '客户直接查看卡片' } },
+          { fields: { 订单卡片: { value: '两笔订单信息均已发送客户', status: 'updated' } }, agentLog: { received: '销售回复客户', analysis: '同步两单进度：0112 已发货、0117 待价格审批', updates: [], recommendedAction: '跟踪后续节点' } }
+        ]
+      },
+      {
+        id: 'XS2',
+        name: '人工下单',
+        stage: '群侧边栏 ·「下单」Tab',
+        painPoint: '客户在群里提的新需求不适合智能下单时，销售手工建单：群内客户已确定，合并为单页长表单，字段按群上下文与客户档案最大化预填，减少填写。',
+        highlights: ['单页长表单（客户顶部锁定，不设分步）', '履约信息置顶并标明预填来源', '所有预填值展示来源', '提交页展示完整审批与履约链'],
+        demoGoal: '展示人工下单单页长表单：默认值最大化预填并标明来源，提交后展示后续流程并回群通知客户。',
+        initialSide: { tab: '下单', blocks: [{ kind: 'long-form', title: '人工下单', ctx: '当前群客户：广西天华（C 级）· 不可更换', groups: [
+          { title: '履约信息', fields: [{ label: '发货仓', value: '华南仓', hint: '来自客户原话“发华南仓”' }, { label: '收货地址', value: '湖南岳阳 · 云溪区', hint: '来自客户档案 · 建议销售确认' }, { label: '收货联系人', value: '王志明 · 138****6208', hint: '来自客户档案 · 建议销售确认' }, { label: '交付方式', value: '物流配送' }] },
+          { title: '客户与归属', fields: [{ label: '主体', value: '长安仁恒（上海）· 模板自动匹配', ro: true }, { label: '客户', value: '广西天华（群上下文）', ro: true }, { label: '销售员', value: '张销售（群上下文锁定）', ro: true }, { label: '代办人', value: '', hint: '可选' }, { label: '客户类型', value: 'C 级（自动带出）', ro: true }] },
+          { title: '结算信息', fields: [{ label: '是否自提', value: '否' }, { label: '结算方式', value: '月结' }, { label: '汇款方式', value: '银行转账' }, { label: '账期', value: '30 天' }] },
+          { title: '合同与附件', fields: [{ label: '客户合同', value: 'HT-2025-0038（框架 · 自动匹配）', ro: true }, { label: '合同编号', value: 'HT-2025-0038', ro: true }, { label: '其他附件', value: '', hint: '送货单 / 标签，可添加' }] },
+          { title: '商品明细', fields: [{ label: '产品名称', value: '膨润土 AB-3' }, { label: '数量（公斤）', value: '5000' }, { label: '单价（元/吨）', value: '¥3,200', hint: '自动带出最近订单单价 · 协议价上限内可改' }, { label: '合计', value: '¥16,000（自动计算）', ro: true }, { label: '包装类型', value: '吨袋' }, { label: '规格', value: '1 吨 / 袋' }, { label: '到货时间', value: '2026-08-15' }, { label: '明细备注', value: '', hint: '可选' }] },
+          { title: '补充说明', fields: [{ label: '特殊规格要求', type: 'check', value: '随货附质检报告（仓库随货带纸质版）' }, { label: '订单备注', value: '', hint: '可选' }] }
+        ], quota: '风控校验：额度使用 76%，本次后仍 76%，在额度内 · 合计 ¥16,000', quotaWarn: true, actions: [{ t: '提交订单', c: 'btn-confirm' }] }] },
+        messages: [
+          { type: 'sys', content: '进入「下单」：群内客户已确定（顶部锁定不可改）。系统先展示履约信息（发货仓 / 收货地址 / 收货联系人），再按「客户与归属 / 结算信息 / 合同与附件 / 商品明细 / 补充说明」组织其余字段；预填值均标明来源', side: { tab: '下单', blocks: [{ kind: 'long-form', title: '人工下单', ctx: '当前群客户：广西天华（C 级）· 不可更换', groups: [
+          { title: '履约信息', fields: [{ label: '发货仓', value: '华南仓', hint: '来自客户原话“发华南仓”' }, { label: '收货地址', value: '湖南岳阳 · 云溪区', hint: '来自客户档案 · 建议销售确认' }, { label: '收货联系人', value: '王志明 · 138****6208', hint: '来自客户档案 · 建议销售确认' }, { label: '交付方式', value: '物流配送' }] },
+          { title: '客户与归属', fields: [{ label: '主体', value: '长安仁恒（上海）· 模板自动匹配', ro: true }, { label: '客户', value: '广西天华（群上下文）', ro: true }, { label: '销售员', value: '张销售（群上下文锁定）', ro: true }, { label: '代办人', value: '', hint: '可选' }, { label: '客户类型', value: 'C 级（自动带出）', ro: true }] },
+          { title: '结算信息', fields: [{ label: '是否自提', value: '否' }, { label: '结算方式', value: '月结' }, { label: '汇款方式', value: '银行转账' }, { label: '账期', value: '30 天' }] },
+          { title: '合同与附件', fields: [{ label: '客户合同', value: 'HT-2025-0038（框架 · 自动匹配）', ro: true }, { label: '合同编号', value: 'HT-2025-0038', ro: true }, { label: '其他附件', value: '', hint: '送货单 / 标签，可添加' }] },
+          { title: '商品明细', fields: [{ label: '产品名称', value: '膨润土 AB-3' }, { label: '数量（公斤）', value: '5000' }, { label: '单价（元/吨）', value: '¥3,200', hint: '自动带出最近订单单价 · 协议价上限内可改' }, { label: '合计', value: '¥16,000（自动计算）', ro: true }, { label: '包装类型', value: '吨袋' }, { label: '规格', value: '1 吨 / 袋' }, { label: '到货时间', value: '2026-08-15' }, { label: '明细备注', value: '', hint: '可选' }] },
+          { title: '补充说明', fields: [{ label: '特殊规格要求', type: 'check', value: '随货附质检报告（仓库随货带纸质版）' }, { label: '订单备注', value: '', hint: '可选' }] }
+        ], quota: '风控校验：额度使用 76%，本次后仍 76%，在额度内 · 合计 ¥16,000', quotaWarn: true, actions: [{ t: '提交订单', c: 'btn-confirm' }] }] } },
+          { type: 'ai-hint', content: '预填来源：产品/数量/发货仓取自群内原话；收货地址和联系人取自客户档案（建议销售过目）；单价来自最近一次订单；合同按主体匹配模板 HT-2025-0038。' },
+          { type: 'sys', content: '销售核对预填信息无误，点「提交订单」→ 订单已提交，展示后续完整流程（主管审价 → C 级董事长终审 → 商务库存/交期确认 → 仓管发货 → 回单 → 财务开票）', side: { tab: '下单', blocks: [
+            { kind: 'success', title: '订单已提交', sub: '已进入审批流：主管审价 → 董事长终审 → 商务库存/交期确认 → 仓管发货 → 回单 → 财务开票', no: 'ORD-20260811-0109', foot: '提交时间 09:32 · 当前节点：待价格审批' },
+            { kind: 'detail', no: 'ORD-20260811-0109', state: '待价格审批', stateCls: 'approving', kv: [{ k: '客户', v: '广西天华 · C 级' }, { k: '产品', v: '膨润土 AB-3 · 5000 公斤' }, { k: '合计', v: '¥16,000' }, { k: '到货时间', v: '2026-08-15' }, { k: '收货', v: '湖南岳阳 · 云溪区' }], tl4: { nodes: ['已开单', '已备货', '已发货', '已开票'], current: 0 }, risk: { title: '后续流程', items: ['主管审价 → 董事长终审 → 商务库存/交期确认 → 仓管发货 → 回单 → 财务开票'] }, actions: [{ t: '回群通知客户', c: 'btn-confirm' }] }
+          ] } },
+          { type: 'sys', content: '提交后群内多一条消息，由销售主动发送通知客户（自动化降级做，不整体替换，避免让销售 surprise）' },
+          { type: 'sales', sender: '张销售', content: '王总，订单已提交，接下来走内部审价与履约确认；仓库发货后我会在群里同步物流。' },
+          { type: 'customer', sender: '王志明（采购）', content: '好的，辛苦，麻烦尽快安排' }
+        ],
+        annotations: [
+          { todo: '单页长表单：核对预填字段后提交（群内客户锁定）', fields: { 客户: { value: '广西天华（群上下文锁定）', status: 'updated' }, 主体: { value: '长安仁恒（上海）· 模板自动匹配', status: 'updated' }, 销售员: { value: '张销售（锁定）', status: 'updated' }, 客户类型: { value: 'B 级（自动带出）', status: 'updated' } }, agentLog: { received: '进入下单', analysis: '群内客户已定，单页长表单；字段按群上下文与档案最大化预填', updates: ['客户→锁定', '主体→自动匹配', '销售员→锁定'], recommendedAction: '核对预填字段' } },
+          { cards: ['最近订单单价卡（协议价上限内）', '主体模板自动匹配卡'], fields: { 单价: { value: '¥3,200 / 吨（自动带出 · 可改）', status: 'updated' }, 合计: { value: '¥16,000（自动计算）', status: 'updated' }, 结算信息: { value: '自提否 / 月结 / 银行转账', status: 'updated' }, 合同: { value: 'HT-2025-0038（框架 · 自动匹配）', status: 'updated' } }, agentLog: { received: '预填来源分析', analysis: '单价取最近历史订单（协议价内）；合同按主体自动匹配模板并展示结果；合计自动计算', updates: ['单价→自动带出', '合同→已匹配'], recommendedAction: '按本次变价修改后提交' } },
+          { flows: ['order.submit（幂等键防重复）'], progress: { currentStage: '已开单', completed: ['下单提交'], pending: ['销售主管价格审批', '商务审核/备货', '仓库发货', '财务开票'] }, agentLog: { received: '提交订单', analysis: '订单要素完整，进入审批流', updates: ['订单→ORD-20260811-0109'], stageChange: '已提交 → 已开单', recommendedAction: '展示后续完整流程' } },
+          { flows: ['回群通知（销售主动发送）'], fields: { 通知: { value: '群内消息由销售主动发送（降级自动化）', status: 'updated' } }, agentLog: { received: '下单完成', analysis: '自动化降级做：销售主动发群通知，避免 surprise', updates: [], recommendedAction: '销售发送群通知' } },
+          null,
+          null
+        ]
+      },
+      {
+        id: 'XS3',
+        name: '智能下单确认卡',
+        stage: '群侧边栏 · 待办 Tab',
+        painPoint: '客户在群里直接说"再发 5 吨"，销售担心漏单、听错数量；AI 识别后若直接下单又有风险，需要人来把关。',
+        highlights: ['AI 从群聊提取下单要素', '引用原文 + 风险提示', '三按钮：忽略 / 修改 / 确认（确认只发生一次）', '确认后完成态展示完整审批链与办理人'],
+        demoGoal: '展示智能下单确认卡：系统生成候选汇总，销售确认后才生成正式订单。',
+        initialSide: {
+          tab: '待办', ctx: { name: '广西天华', sub: '供应协同群 · 采购 王志明 · 归属销售 张销售', grade: 'C 级', gradeCls: 'c' },
+          secTitle: '智能下单确认', secCount: '1',
+          blocks: [{ kind: 'preorder', title: '智能下单待确认', status: 'DRAFT-2026-0036', quote: '“再发 5 吨膨润土 AB-3，还是发华南仓，老规矩，带质检报告”', src: '广西天华 · 王志明 · 今天 09:24', fields: [{ k: '主体', v: '长安仁恒（上海）· 模板自动匹配' }, { k: '产品型号', v: '膨润土 AB-3' }, { k: '数量', v: '5000 公斤' }, { k: '单价', v: '¥3,200 / 吨（最近订单带出）' }, { k: '包装类型', v: '吨袋' }, { k: '账期', v: '30 天' }, { k: '付款方式', v: '月结 30 天' }, { k: '发货仓', v: '华南仓（客户原话）' }, { k: '收货地址', v: '湖南岳阳 · 云溪区（客户档案 · 需确认）' }, { k: '收货联系人', v: '王志明 · 138****6208（客户档案 · 需确认）' }, { k: '交期', v: '2026-08-18' }, { k: '特殊标记', v: '✓ 随货附质检报告' }], hint: '关键履约字段来自客户档案，销售确认前保持 BLOCK；另有近 30 天质量反馈需关注', actions: ['忽略', '修改', '确认'] }]
+        },
+        messages: [
+          { type: 'customer', sender: '王志明（采购）', content: '再发5吨膨润土 AB-3，还是发华南仓，老规矩，带质检报告' },
+          { type: 'ai-hint', content: 'AI 已提取下单要素并匹配框架合同，生成 DRAFT-2026-0036。发货仓来自客户原话；收货地址和联系人来自客户档案，必须由销售确认后才能正式成单。', side: { tab: '待办', ctx: { name: '广西天华', sub: '供应协同群 · 采购 王志明 · 归属销售 张销售', grade: 'C 级', gradeCls: 'c' }, secTitle: '智能下单确认', secCount: '1', blocks: [{ kind: 'preorder', title: '智能下单待确认', status: 'DRAFT-2026-0036', quote: '“再发 5 吨膨润土 AB-3，还是发华南仓，老规矩，带质检报告”', src: '广西天华 · 王志明 · 今天 09:24', fields: [{ k: '主体', v: '长安仁恒（上海）· 模板自动匹配' }, { k: '产品型号', v: '膨润土 AB-3' }, { k: '数量', v: '5000 公斤' }, { k: '单价', v: '¥3,200 / 吨（最近订单带出）' }, { k: '包装类型', v: '吨袋' }, { k: '账期', v: '30 天' }, { k: '付款方式', v: '月结 30 天' }, { k: '发货仓', v: '华南仓（客户原话）' }, { k: '收货地址', v: '湖南岳阳 · 云溪区（客户档案 · 需确认）' }, { k: '收货联系人', v: '王志明 · 138****6208（客户档案 · 需确认）' }, { k: '交期', v: '2026-08-18' }, { k: '特殊标记', v: '✓ 随货附质检报告' }], hint: '关键履约字段来自客户档案，销售确认前保持 BLOCK；另有近 30 天质量反馈需关注', actions: ['忽略', '修改', '确认'] }] } },
+          { type: 'sys', content: '订单机器人已私信提醒销售：「智能下单待确认」DRAFT-2026-0036（待办 + 私信双通道，不依赖进群查看）' },
+          { type: 'sys', content: '销售打开确认卡：核对智能下单汇总信息（含字段来源、发货仓、收货地址、联系人、价格与交期）；客户档案字段需逐项确认，确认无误才点「确认」', side: { tab: '待办', ctx: { name: '广西天华', sub: '供应协同群 · 采购 王志明 · 归属销售 张销售', grade: 'C 级', gradeCls: 'c' }, secTitle: '智能下单确认', secCount: '1', blocks: [{ kind: 'preorder', title: '智能下单待确认', status: 'DRAFT-2026-0036', quote: '“再发 5 吨膨润土 AB-3，还是发华南仓，老规矩，带质检报告”', src: '广西天华 · 王志明 · 今天 09:24', fields: [{ k: '主体', v: '长安仁恒（上海）· 模板自动匹配' }, { k: '产品型号', v: '膨润土 AB-3' }, { k: '数量', v: '5000 公斤' }, { k: '单价', v: '¥3,200 / 吨（最近订单带出）' }, { k: '包装类型', v: '吨袋' }, { k: '账期', v: '30 天' }, { k: '付款方式', v: '月结 30 天' }, { k: '发货仓', v: '华南仓（客户原话）' }, { k: '收货地址', v: '湖南岳阳 · 云溪区（客户档案 · 需确认）' }, { k: '收货联系人', v: '王志明 · 138****6208（客户档案 · 需确认）' }, { k: '交期', v: '2026-08-18' }, { k: '特殊标记', v: '✓ 随货附质检报告' }], actions: ['忽略', '修改', '确认'] }] } },
+          { type: 'sys', content: '销售确认收货地址与联系人后点击「确认」→ 正式订单生成（幂等键防重复）。确认只发生一次：点「确认」后立即成单，不再出现第二个确认页', side: { tab: '待办', ctx: { name: '广西天华', sub: '供应协同群 · 采购 王志明 · 归属销售 张销售', grade: 'C 级', gradeCls: 'c' }, blocks: [{ kind: 'preorder', done: true, title: '智能下单已确认', status: '已完成', doneTitle: '已生成正式订单', doneNo: 'ORD-2026-0118', doneSub: '当前节点：销售主管审价审批（C 级客户通过后进入董事长终审）', timeline: [
+            { name: '已生成正式订单', role: '销售', who: '张销售', status: '已完成', done: true },
+            { name: '销售主管审价审批', role: '销售主管', who: '王主管', status: '待处理', cur: true },
+            { name: 'C 级订单终审', role: '董事长', who: '待分配', status: '待处理' },
+            { name: '库存 / 交期确认', role: '商务', who: '待分配', status: '待处理' },
+            { name: '仓库发货', role: '仓管', who: '待分配', status: '待处理' },
+            { name: '财务开票', role: '财务', who: '待分配', status: '待处理' }
+          ] }] } },
+          { type: 'sys', content: '成单后系统自动生成客户可见卡片，由销售点「发给客户」发到群里：订单尚未发货 → 展示「已下单 + 预计到货」（不含金额）' },
+          { type: 'image', side: 'right', sender: '张销售', imageTitle: '📋 订单已下单', imageRows: [
+            { k: '订单号', v: 'ORD-2026-0118' },
+            { k: '产品', v: '膨润土 AB-3 · 5 吨' },
+            { k: '收货', v: '湖南岳阳 · 云溪区' },
+            { k: '预计到货', v: '08-18 前' }
+          ] },
+          { type: 'sales', sender: '张销售', content: '已生成正式订单 ORD-2026-0118，进入主管审价 → C 级董事长终审 → 库存/交期确认 → 仓管发货；发货后群里同步物流。' }
+        ],
+        annotations: [
+          { todo: '确认 / 修改 / 忽略 智能下单候选 DRAFT-2026-0036', fields: { 产品: { value: '膨润土 AB-3（吨袋）', status: 'updated' }, 数量: { value: '5 吨', status: 'updated' }, 发货仓: { value: '华南仓', status: 'updated' }, 金额: { value: '¥16,000', status: 'updated' } }, agentLog: { received: '群消息：再发5吨膨润土 AB-3', analysis: '提取下单要素：产品型号/数量/包装/质检要求等，生成与人工下单一致的汇总信息', updates: ['DRAFT-2026-0036→待确认'], recommendedAction: '推送确认卡到销售待办' } },
+          { cards: ['客户质量反馈记录卡（近 30 天 1 次）'], todo: '销售核对汇总信息，确认无误后点「确认」', agentLog: { received: '候选生成完成', analysis: '销售打开确认卡核对：原话/主体/产品型号/数量/单价/包装/账期/付款/交期/标记，可修改', updates: [], recommendedAction: '确认或修改候选（AI 不擅自成单）' } },
+          { flows: ['订单机器人私信提醒（待办 + 私信双通道）'], fields: { 提醒: { value: '已私信销售：DRAFT-2026-0036 待确认', status: 'updated' } }, agentLog: { received: '确认卡生成', analysis: '除待办外，订单机器人私信提醒销售，双通道触达', updates: ['提醒→已私信'], recommendedAction: '销售打开确认卡处理' } },
+          { todo: '销售在确认卡核对智能下单汇总信息（原话 / 主体 / 产品型号 / 数量 / 单价 / 包装类型 / 账期 / 付款方式 / 交期 / 特殊标记）', fields: { 汇总信息: { value: 'DRAFT-2026-0036 待确认（引用原话 + 9 项要素，与人工下单一致）', status: 'current' } }, agentLog: { received: '确认卡展示', analysis: '汇总信息完整呈现，销售可核对可修改，点确认才成单', updates: [], recommendedAction: '点「确认」生成正式订单' } },
+          { flows: ['preorder-confirm → 派生正式订单 ORD-2026-0118'], progress: { currentStage: '订单履约', completed: ['智能下单确认'], pending: ['销售主管审价审批', '商务审核/备货', '仓库发货', '财务开票'] }, agentLog: { received: '销售点击确认', analysis: '确认只发生一次：点击确认立即成单，后续不再出现二次确认；归属校验通过，幂等键生成正式订单', updates: ['DRAFT-2026-0036→ORD-2026-0118'], stageChange: '智能下单确认 → 已开单', recommendedAction: '订单进入销售主管审价审批闸门' } },
+          { flows: ['发给客户 → 订单卡片发群'], fields: { 客户卡片: { value: '已下单 + 预计到货（未发货 · 不含金额）', status: 'updated' } }, agentLog: { received: '正式订单生成', analysis: '未发货订单生成「已下单 + 预计到货」卡片（不含金额，按权限在小程序展示），由销售点「发给客户」发到群里', updates: ['订单卡片→已生成'], recommendedAction: '销售点「发给客户」' } },
+          { fields: { 图片: { value: '已发送群聊（订单信息图）', status: 'updated' } }, agentLog: { received: '图片发送', analysis: '图片为普通消息图（无 AI/订单助手标识），客户直接看图', updates: ['订单图片→已发送'], recommendedAction: '向客户同步进度' } },
+          null
+        ]
+      },
+      {
+        id: 'XS4',
+        name: '工作台（全量）',
+        stage: '手机工作台 ·「待办」Tab',
+        painPoint: '订单并行 40–50 笔时不可能逐个进群：工作台聚合本人待办，并把普通补改与已发货后的高风险变更明确分流。',
+        highlights: ['工作台全量待办（订单并行时唯一入口）', '审价驳回 → 销售补改 → 重新提交', '已发货改地址自动转物流异常，不修改主订单', '每项任务显示当前状态、责任人和下一步'],
+        demoGoal: '展示工作台全量待办：驳回补充、评论提醒与智能下单确认集中处理。',
+        initialSide: {
+          tab: '待办',
+          secTitle: '需要我处理', secCount: '4',
+          blocks: [{ kind: 'appr-list', items: [
+            { icon: '⚠', title: '智能下单确认', sub: 'DRAFT-2026-0036 · 已超 24h', warn: true, tag: '需处理' },
+            { icon: '↻', title: '审价驳回 · 待补充', sub: 'ORD-2026-0118 · 主管备注：单价偏高', warn: true, tag: '需处理' },
+            { icon: '⚠', title: '物流异常 · 客户申请改址', sub: 'ORD-2026-0112 · 已发货运输中', warn: true, tag: '需处理' },
+            { icon: '📄', title: '回单异常', sub: 'ORD-2026-0102 · 已超期 5 天', warn: true, tag: '需关注' }
+          ] }]
+        },
+        messages: [
+          { type: 'sys', content: '从手机企微「工作台」打开订单助手：订单并行 40–50 笔时无需逐个进群，工作台聚合本人全部待办（无群上下文）' },
+          { type: 'ai-hint', content: '4 条待办按风险排序：已发货改址属于 BLOCK，必须进入物流异常；审价驳回可补改重提；智能下单待确认；回单异常待跟进。' },
+          { type: 'sys', content: '点击「审价驳回 · 待补充」→ 顶部展示驳回人/驳回时间/驳回原因 → AI 解析驳回意见，展开建议修改字段：原单价 ¥3,200 → 建议 ¥3,000（协议价上限内）→ 修改后重新提交', side: { tab: '待办', blocks: [{ kind: 'detail', no: 'ORD-2026-0118', state: '待补充', stateCls: 'approving', reject: { by: '王主管（销售主管）', time: '08-10 15:30', reason: '单价偏高，请按协议价上限内调整', fix: { label: '本次单价（元/吨）', orig: '¥3,200 / 吨', suggest: '¥3,000 / 吨', basis: '协议价上限内' } }, kv: [{ k: '客户', v: '广西天华 · C 级' }, { k: '产品', v: '膨润土 AB-3 · 5 吨' }], form: { fields: [{ label: '本次单价（元/吨）', value: '3000' }] }, risk: { title: '驳回补充', items: ['仅展开被驳回涉及的字段（单价），其余字段折叠，可点「查看全部订单字段」', '重新提交后回到同一审价节点，保留前次驳回意见与本次修改记录'] }, actions: [{ t: '查看全部订单字段', c: 'btn-ignore' }, { t: '重新提交', c: 'btn-confirm' }] }] } },
+          { type: 'sys', content: '打开“客户申请改址”→ 系统发现 ORD-2026-0112 已发货运输中，禁止直接修改主订单地址；创建物流异常，要求联系承运商评估能否改派', side: { tab: '待办', blocks: [{ kind: 'detail', no: 'ORD-2026-0112', state: '物流异常 · 待评估改派', stateCls: 'approving', kv: [{ k: '客户原话', v: '收货地址改为湖南岳阳 · 云溪区' }, { k: '当前订单地址', v: '广西南宁 · 良庆区（不可直接覆盖）' }, { k: '物流状态', v: '已发货 · 运输中' }, { k: '承运商 / 单号', v: '德邦快递 · DBL2026073000387' }, { k: '申请地址', v: '湖南岳阳 · 云溪区' }], risk: { title: 'BLOCK · 已发货订单不可直接改址', items: ['先联系承运商确认能否拦截或改派', '改派成功后追加物流变更记录；失败则退回、重发或由客户保持原地址签收', '主订单原地址保留，所有变更必须可追溯'] }, actions: [{ t: '联系承运商', c: 'btn-ignore' }, { t: '创建改派申请', c: 'btn-confirm' }] }] } },
+          { type: 'sys', content: '点击「智能下单确认」→ 跳转确认卡：核对后点「确认」→ 正式订单 ORD-2026-0118 生成', side: { tab: '待办', blocks: [{ kind: 'preorder', done: true, title: '智能下单已确认', status: '已完成', doneTitle: '已生成正式订单', doneNo: 'ORD-2026-0118', doneSub: '当前节点：销售主管审价审批（C 级客户通过后进入董事长终审）' }] } },
+          { type: 'sys', content: '待办刷新：驳回已重提；智能下单已确认；改址已转为物流异常并由销售跟进承运商；回单异常仍待处理' }
+        ],
+        annotations: [
+          { flows: ['工作台入口（OAuth 授权）'], agentLog: { received: '打开工作台应用', analysis: '无群上下文，聚合本人全部待办（并行 40–50 笔时唯一入口）', updates: ['待办→4 条'], recommendedAction: '点击条目直达处理' } },
+          { todo: '处理 4 条待办：确认 / 驳回补充 / 评论 / 回单', agentLog: { received: '待办聚合完成', analysis: '超时条目橙色置顶，类型分流', updates: [], recommendedAction: '优先超时条目' } },
+          { flows: ['审价驳回 → 解析驳回意见 → 建议修改字段 → 重新提交'], fields: { 建议修改字段: { value: '本次单价：原 ¥3,200 → 建议 ¥3,000 / 吨（协议价上限内）', status: 'updated' } }, agentLog: { received: '驳回补充', analysis: 'AI 解析驳回意见（单价偏高），展开与驳回原因直接相关的建议修改字段，其余字段折叠', updates: ['单价→¥3,000'], stageChange: '待补充 → 重新审批', recommendedAction: '重新提交进入同一审价节点' } },
+          { flows: ['订单评论 → 销售确认（订单变更载体）'], fields: { 收货地址: { value: '广西南宁 → 湖南岳阳 · 云溪区', status: 'updated' } }, agentLog: { received: '订单评论提醒', analysis: '评论为订单变更常用载体，确认后生效（小红点 + 提醒）', updates: ['地址→湖南岳阳'], recommendedAction: '确认修改' } },
+          { flows: ['preorder-confirm → ORD-2026-0118'], progress: { currentStage: '订单履约', completed: ['智能下单确认'], pending: ['销售主管审价审批', '商务审核/备货', '仓库发货', '财务开票'] }, agentLog: { received: '确认完成', analysis: '正式订单生成，卡片刷新', updates: ['DRAFT-2026-0036→ORD-2026-0118'], stageChange: '已确认 → 已开单', recommendedAction: '跟踪后续节点' } },
+          { fields: { 待办: { value: '驳回已重提 / 评论已确认 / 智能下单已确认 / 回单异常待跟进', status: 'updated' } }, agentLog: { received: '待办刷新', analysis: '三项已处理，回单异常继续跟进', updates: ['待办→1 条需关注'], recommendedAction: '跟进回单异常' } }
+        ]
+      },
+      {
+        id: 'XS5',
+        name: '查物流（图片发群）',
+        stage: '企微群聊 · 销售触发',
+        painPoint: '客户想看物流进度，但没必要自己进系统查——客户在群里问一句，销售在手机端一键触发，系统自动把物流信息生成图片发到群里，客户直接看图即可。',
+        highlights: ['销售一键触发物流查询', '系统自动生成物流信息图片发到群聊', '图片含物流单号 / 运输进度 / 预计送达', '客户在群里直接看图，无需操作'],
+        demoGoal: '展示销售点击「查物流」后，系统自动生成物流图片发到企微群。',
+        initialSide: {
+          tab: '订单', ctx: { name: '广西天华', sub: '供应协同群 · 采购 王志明 · 归属销售 张销售', grade: 'C 级', gradeCls: 'c' },
+          blocks: [{ kind: 'order-list', items: [
+            { no: 'ORD-2026-0118', state: '运输中', stateCls: 'ship', prod: '膨润土 AB-3', qty: '5 吨', amount: '¥16,000', progress: '—', tl4c: 2 }
+          ] }]
+        },
+        messages: [
+          { type: 'customer', sender: '王志明（采购）', content: '张经理，昨天那单 5 吨的到哪了？' },
+          { type: 'sales', sender: '张销售', content: '我帮您查一下，稍等' },
+          { type: 'sys', content: '销售点群内「订单助手」→ 打开该客户订单明细：订单进展（已发货）与物流信息直接展示在明细中，点「生成物流图片发群」', side: { tab: '订单', ctx: { name: '广西天华', sub: '供应协同群 · 采购 王志明 · 归属销售 张销售', grade: 'C 级', gradeCls: 'c' }, blocks: [{ kind: 'detail', no: 'ORD-2026-0118', state: '已发货', stateCls: 'ship', kv: [{ k: '产品', v: '膨润土 AB-3 · 5 吨' }, { k: '物流公司', v: '德邦快递' }, { k: '物流单号', v: 'DBL2026073000387' }, { k: '当前进度', v: '运输中 · 已离开始发站' }, { k: '预计送达', v: '07-31 前' }], tl4: { nodes: ['已开单', '已备货', '已发货', '已开票'], current: 2 }, actions: [{ t: '生成物流图片发群', c: 'btn-confirm' }] }] } },
+          { type: 'image', side: 'right', sender: '张销售', imageTitle: '📋 物流信息', imageRows: [
+            { k: '订单号', v: 'ORD-2026-0118' },
+            { k: '产品', v: '膨润土 AB-3 · 5 吨' },
+            { k: '物流公司', v: '德邦快递' },
+            { k: '物流单号', v: 'DBL2026073000387' },
+            { k: '当前状态', v: '运输中 · 已离开始发站' },
+            { k: '预计送达', v: '07-31 前' }
+          ] },
+          { type: 'sales', sender: '张销售', content: '王总，物流信息发您了，德邦预计后天到，到了群里说一声' }
+        ],
+        annotations: [
+          null,
+          { flows: ['销售触发物流查询（logistics#generate_image）'], fields: { 客户诉求: { value: '查询 ORD-2026-0118 物流进度', status: 'updated' } }, agentLog: { received: '客户询问物流进度', analysis: '识别客户诉求，订单明细中已展示物流信息', updates: ['客户诉求→查询物流'], recommendedAction: '生成物流图片发群' } },
+          { flows: ['订单明细 → 物流信息展示 → 生成图片'], fields: { 物流信息: { value: '已展示在订单明细（公司/单号/进度/预计送达）', status: 'updated' } }, agentLog: { received: '打开订单明细', analysis: '订单已发货，物流信息在明细中展示；点生成图片发群', updates: ['物流→已获取'], recommendedAction: '生成物流图片' } },
+          { flows: ['物流图片生成 → 销售发送群聊'], fields: { 物流图片: { value: '已发送群聊（普通图片，无 AI 标识）', status: 'updated' } }, progress: { currentStage: '运输中', completed: ['已开单', '已备货', '已发货'], pending: ['开票', '签收'] }, agentLog: { received: '物流图片生成', analysis: '图片为普通消息图，客户直接看图', updates: ['物流图片→已发送'], recommendedAction: '客户直接看图' } },
+          null
+        ]
+      }
+    ]
+  },
+
+  /* ============ 角色 2 · 销售主管（企微个体 · 手机端：价格审批走待办，与群无关；无订单职能） ============ */
+  {
+    role: 'SALES_MGR',
+    roleName: '销售主管',
+    avatarChar: '王',
+    formFactor: 'mobile',
+    appName: '订单助手',
+    chatName: '订单助手 · 销售主管工作台',
+    tabs: ['待办', '历史'],
+    scenarios: [
+      {
+        id: 'XSZG1',
+        name: '审价审批',
+        stage: '手机工作台 ·「待办 / 历史」Tab',
+        painPoint: '主管不在群里时也要审批全部销售提交的订单（审批即审价）；工作台入口需要聚合全部销售订单的审价审批任务。',
+        highlights: ['工作台入口（无群上下文）', '审价卡解释触发规则与价格差异', '通过 / 要求修改 / 拒绝三种结果', 'C 级客户通过后自动进入董事长终审'],
+        demoGoal: '展示销售主管从手机工作台审批全部销售订单（审价审批合一）。',
+        initialSide: {
+          tab: '待办',
+          secTitle: '审价审批', secCount: '1',
+          blocks: [{ kind: 'appr-list', items: [
+            { icon: '¥', title: '审价审批 · ORD-2026-0118', sub: '广西天华 · C 级 · 张销售 · ¥16,000', warn: true, tag: '需处理' }
+          ] }]
+        },
+        messages: [
+          { type: 'sys', content: '从手机工作台打开订单助手：无群上下文，全部销售订单的审价审批任务聚合（审批即审价）' },
+          { type: 'ai-hint', content: 'ORD-2026-0118 触发审价：广西天华为 C 级客户；本次单价 ¥3,200/吨，与框架上限一致、较最近成交价高 3.2%，预计毛利率 18.4%，信用额度校验通过。' },
+          { type: 'sys', content: '点击 ORD-2026-0118 → 先看“为什么需要我审批”和关键差异，再决定通过、要求修改或拒绝', side: { tab: '待办', blocks: [{ kind: 'detail', no: 'ORD-2026-0118', state: '待审价审批', stateCls: 'approving', kv: [{ k: '客户公司', v: '广西天华有限公司' }, { k: '客户等级', v: 'C 级 · 归属销售 张销售' }, { k: '产品 / 数量', v: '膨润土 AB-3（吨袋）· 5 吨' }, { k: '本次单价', v: '¥3,200 / 吨' }, { k: '最近成交价', v: '¥3,100 / 吨（+3.2%）' }, { k: '框架价上限', v: '¥3,200 / 吨（未突破）' }, { k: '预计毛利率', v: '18.4%' }, { k: '账期 / 额度', v: '30 天 · 额度内' }, { k: '收货地址', v: '湖南岳阳 · 云溪区' }], tl4: { nodes: ['已开单', '已备货', '已发货', '已开票'], current: 0 }, risk: { title: '审批依据', items: ['C 级客户按策略 AP-C-2026-03：主管审价通过后仍需董事长终审', '若价格或账期需调整，选择“要求修改”返回销售并保留原因'] }, actions: [{ t: '要求修改', c: 'btn-ignore' }, { t: '拒绝', c: 'btn-ignore' }, { t: '通过', c: 'btn-confirm' }] }] } },
+          { type: 'sys', content: '销售主管点击「通过」→ 审价完成；状态进入「待董事长终审」，尚未完成最终放行。若要求修改，则返回张销售补改后重新提交同一审价节点。' },
+          { type: 'sys', content: '切到「历史」Tab：审批历史记录（已通过 / 已驳回），可追溯每次审批的订单与结论', side: { tab: '历史', secTitle: '审批历史', secCount: '2', blocks: [{ kind: 'appr-list', items: [
+            { icon: '✓', title: 'ORD-2026-0115 · 已通过', sub: '广西天华 · 张销售 · ¥9,600 · 08-10 10:12' },
+            { icon: '✕', title: 'ORD-2026-0103 · 已驳回', sub: '宏远铸造 · 王销售 · ¥12,800 · 08-08 16:40' }
+          ] }] } }
+        ],
+        annotations: [
+          { flows: ['工作台入口 → 审价审批全量'], agentLog: { received: '打开工作台', analysis: '无群上下文，聚合全部销售订单审价审批', updates: ['审价审批→2 条'], recommendedAction: '核对后审批' } },
+          { fields: { 审批范围: { value: '全部销售订单（跨客户）', status: 'updated' } }, agentLog: { received: '列表渲染', analysis: 'ORD-0105 为 D 级大单特批价，需重点核对', updates: [], recommendedAction: '优先处理超时项' } },
+          { todo: '审价审批 ORD-2026-0105（¥28,000 · D 级）', agentLog: { received: '打开 ORD-0105 详情', analysis: '核对公司/产品/数量/单价/账期/到货地址；特批价 ¥2,800/吨，D 级客户 45 天账期', updates: [], recommendedAction: '通过（后续董事长终审）' } },
+          { flows: ['销售主管审价审批 → 董事长终审（C/D）→ 商务审核/备货 → 仓库发货 → 财务开票'], progress: { currentStage: '审价审批通过 → 董事长终审', completed: ['销售主管审价审批'], pending: ['董事长终审（C/D）', '商务审核/备货', '仓库发货', '财务开票'] }, agentLog: { received: '通过', analysis: '审价与价格审批完成，D 级大单自动进入董事长终审闸门', updates: ['ORD-2026-0105→已放行'], stageChange: '待审价审批 → 董事长终审', recommendedAction: '跟踪 C/D 级终审闸门' } },
+          { flows: ['审批历史（可追溯）'], fields: { 历史: { value: '已通过 ORD-0115 / 已驳回 ORD-0103', status: 'updated' } }, agentLog: { received: '切到历史 Tab', analysis: '展示审批历史记录，支持追溯', updates: ['历史→2 条'], recommendedAction: '查阅历史结论' } }
+        ]
+      }
+    ]
+  },
+
+  /* ============ 角色 3 · 商务（工作台履约确认 / 全量查询 / 异常协调） ============ */
+  {
+    role: 'COMMERCE',
+    roleName: '商务',
+    avatarChar: '商',
+    formFactor: 'mobile',
+    appName: '订单助手',
+    chatName: '广西天华 · 供应协同群',
+    pcNote: 'PC 必需',
+    tabs: ['待办', '订单'],
+    scenarios: [
+      {
+        id: 'SW1',
+        name: '商务工作台 / 履约确认',
+        stage: '工作台 ·「待办」Tab',
+        chatName: '订单助手 · 商务工作台',
+        painPoint: '终审通过后，商务需要从自己的工作台确认库存、发货仓和可承诺交期；实际发货归仓管，对客沟通归销售。',
+        highlights: ['工作台承接终审后的商务任务', '账面 / 已预留 / 可分配库存口径清晰', '确认时重新校验并原子预留库存', '生成仓管任务并同步销售'],
+        demoGoal: '展示商务从工作台确认正常履约方案，并把任务明确交接给仓管和销售。',
+        initialSide: {
+          tab: '待办', secTitle: '今天 · 待处理', secCount: '1',
+          blocks: [{ kind: 'appr-list', items: [
+            { icon: '▤', title: '确认库存 / 交期 · ORD-2026-0118', sub: '广西天华 · 5 吨 · SLA 剩余 2 小时', warn: true, tag: '需处理' }
+          ] }]
+        },
+        messages: [
+          { type: 'sys', content: '董事长终审通过 → 系统生成商务“库存 / 交期确认”待办；商务从自己的工作台接收，不进入客户群处理。' },
+          { type: 'sys', content: '订单助手已聚合华南仓库存与物流时效：账面库存 8 吨、已有预留 3 吨、可分配 5 吨，本单需要 5 吨；预计可在 08-18 前送达。' },
+          { type: 'sys', content: '打开工作台待办 → 查看任务来源、SLA、库存口径和计划交期。', side: { tab: '待办', secTitle: '今天 · 待处理', secCount: '1', blocks: [{ kind: 'appr-list', items: [
+            { icon: '▤', title: '库存 / 交期 · ORD-2026-0118', sub: '华南仓可分配 5 吨 · SLA 剩余 2 小时', warn: true, tag: '需确认' }
+          ] }] } },
+          { type: 'sys', content: '进入任务详情 → 商务核对仓库、地址和承诺交期；提交时系统会再次校验库存，避免并发超卖。', side: { tab: '待办', blocks: [{ kind: 'detail', no: 'ORD-2026-0118', state: '待确认库存 / 交期', stateCls: 'approving', kv: [{ k: '任务来源', v: '董事长终审通过 · 09:18' }, { k: '客户', v: '广西天华 · C 级' }, { k: '产品 / 数量', v: '膨润土 AB-3 · 5 吨' }, { k: '发货仓', v: '华南仓' }, { k: '账面 / 已预留', v: '8 吨 / 3 吨' }, { k: '当前可分配', v: '5 吨' }, { k: '本单需预留', v: '5 吨（确认后剩余 0 吨）' }, { k: '收货地址', v: '湖南岳阳 · 云溪区' }, { k: '可承诺到货', v: '2026-08-18 前' }, { k: '前序审批', v: '主管审价 + 董事长终审均通过' }], tl4: { nodes: ['已开单', '已备货', '已发货', '已开票'], current: 0 }, risk: { title: '提交后', items: ['重新校验并原子预留华南仓 5 吨库存', '生成华南仓仓管接单任务', '通知归属销售已确认承诺交期', '商务不执行实际发货或开票'] }, actions: [{ t: '调整履约方案', c: 'btn-ignore' }, { t: '确认并预留库存', c: 'btn-confirm' }] }] } },
+          { type: 'sys', content: '商务确认 → 库存复核通过并原子预留 5 吨；系统生成华南仓仓管任务，同时通知张销售“08-18 前到货”已确认。', side: { tab: '待办', blocks: [{ kind: 'success', title: '履约方案已确认', sub: '华南仓已预留 5 吨 · 承诺 08-18 前到货', no: 'ORD-2026-0118', foot: '你的任务已完成 · 下一责任人：华南仓仓管 · 张销售已收到交期通知' }] } }
+        ],
+        annotations: [
+          { todo: '处理三类审批入口：备货 / 发货 / 开票（审价为销售主管职责）', flows: ['工作流活动 → 待办按类型分组'], agentLog: { received: '三类闸门任务推送', analysis: '待办 Tab 下按功能分三类二级入口；审价不在商务职责内', updates: ['待办→3 类'], recommendedAction: '优先备货' } },
+          { fields: { 二级入口: { value: '备货 / 发货 / 开票（分类聚合）', status: 'updated' } }, agentLog: { received: '分类渲染', analysis: '备货超时置顶，其余按类型分列', updates: [], recommendedAction: '点入备货类' } },
+          { todo: '备货类：ORD-2026-0117（膨润土 AB-3 · 5 吨）', progress: { currentStage: '备货闸门', completed: ['已开单', '主管审价'], pending: ['备货', '发货', '开票'] }, agentLog: { received: '进入备货类', analysis: '该客户 1 条待备货任务（主管已审价通过）', updates: ['备货→1 条'], recommendedAction: '打开备货详情' } },
+          { fields: { 核对要素: { value: '产品 / 数量 / 交期 / 审价结论', status: 'updated' } }, agentLog: { received: '打开备货详情', analysis: '审价结论已通过（销售主管），核对备货要素；可写备注', updates: [], recommendedAction: '通过放行' } },
+          null,
+          null,
+          { flows: ['approve → 备货闸门推进'], progress: { currentStage: '备货 → 发货', completed: ['备货通过'], pending: ['发货', '开票'] }, agentLog: { received: '备货放行', analysis: '备货类清空，两类继续流转；备货单将生成发货单给仓管', updates: ['备货→0 条'], stageChange: '备货通过 → 生成发货单', recommendedAction: '继续处理发货 / 开票' } }
+        ]
+      },
+      {
+        id: 'SW2',
+        name: '查询全量订单',
+        stage: '订单助手 ·「订单」Tab（独立入口）',
+        chatName: '订单助手 · 商务工作台',
+        painPoint: '商务需要跨客户查看租户订单的履约状态，但只能读取职责相关字段，不能代替主管审价、仓管发货或财务开票。',
+        highlights: ['租户订单履约视图', '按客户 / 状态 / 仓库 / 交期筛选', '价格和内部备注按最小权限展示', '查询不修改订单，处理动作跳转本人待办'],
+        demoGoal: '展示商务从独立入口查询全量订单，并将需要处理的订单定位到本人待办。',
+        initialSide: {
+          tab: '订单',
+          blocks: [{ kind: 'order-list', items: [
+            { no: 'ORD-2026-0118', state: '待库存/交期确认', stateCls: 'approving', prod: '广西天华 · 膨润土 AB-3', qty: '5 吨', noAmount: true, progress: '华南仓 · 08-18', tl4c: 0 },
+            { no: 'ORD-2026-0110', state: '待到账', stateCls: 'wait', prod: '广西天华 · 膨润土 AB-3（袋装）', qty: '2 吨', noAmount: true, progress: '华南仓 · 已发货', tl4c: 2 },
+            { no: 'ORD-2026-0114', state: '待仓管接单', stateCls: 'ship', prod: '宏远铸造 · 膨润土 AB-3', qty: '3 吨', noAmount: true, progress: '华南仓 · 08-19', tl4c: 1 }
+          ] }]
+        },
+        messages: [
+          { type: 'sys', content: '商务单独打开订单助手（不在群内）：进入租户订单履约视图，只展示客户、产品、数量、仓库、交期与履约状态。' },
+          { type: 'sys', content: '订单助手可按客户、状态、仓库和交期定位订单；查询过程只读，不修改订单，也不替代任何审批角色。' },
+          { type: 'sys', content: '按状态筛选「待库存/交期确认」→ 仅 ORD-2026-0118（主管审价与董事长终审均已通过），点击进入订单详情。', side: { tab: '订单', blocks: [{ kind: 'order-list', items: [{ no: 'ORD-2026-0118', state: '待库存/交期确认', stateCls: 'approving', prod: '广西天华 · 膨润土 AB-3', qty: '5 吨', noAmount: true, progress: '华南仓 · 08-18', tl4c: 0 }] }] } },
+          { type: 'sys', content: '订单详情仅展示商务决策相关信息；需要处理时点击“去待办处理”，不会在查询页直接修改订单。', side: { tab: '订单', blocks: [{ kind: 'detail', no: 'ORD-2026-0118', state: '待库存/交期确认', stateCls: 'approving', kv: [{ k: '客户', v: '广西天华 · C 级' }, { k: '产品 / 数量', v: '膨润土 AB-3 · 5 吨' }, { k: '建议仓库', v: '华南仓' }, { k: '计划交期', v: '2026-08-18 前' }, { k: '审批结论', v: '主管审价、董事长终审均已通过' }], tl4: { nodes: ['已开单', '已备货', '已发货', '已开票'], current: 0 }, risk: { title: '只读查询', items: ['本页面不修改库存、交期或订单状态', '商务不可代替销售主管、董事长、仓管或财务操作'] }, actions: [{ t: '去待办处理', c: 'btn-confirm' }] }] } },
+          { type: 'sys', content: '跳转到本人待办并定位 ORD-2026-0118；查询场景完成，后续确认在“商务工作台 / 履约确认”中进行。', side: { tab: '待办', secTitle: '已定位任务', secCount: '1', blocks: [{ kind: 'appr-list', items: [{ icon: '▤', title: '库存 / 交期 · ORD-2026-0118', sub: '广西天华 · 可分配 5 吨 · SLA 剩余 2 小时', warn: true, tag: '去处理' }] }] } }
+        ],
+        annotations: [
+          { flows: ['查全量订单（ops 聚合视图，独立入口）'], agentLog: { received: '商务打开订单助手', analysis: '独立入口（不在群内），按 ops 角色投影全量订单，倒序排列；商务职责从备货起', updates: ['订单列表→3 笔（跨客户）'], recommendedAction: '按状态筛选定位待办' } },
+          { fields: { 可见范围: { value: '租户全量（含价格/账期/内部备注）', status: 'updated' }, 状态组件: { value: '四节点：已开单→已备货→已发货→已开票', status: 'updated' } }, agentLog: { received: '全量视图渲染', analysis: '商务全字段投影；订单状态统一四节点表述', updates: [], recommendedAction: '定位待备货订单' } },
+          { todo: '备货 ORD-2026-0117（¥16,000 · B 级 · 账期 30 天 · 已审价）', progress: { currentStage: '备货闸门', completed: ['已开单', '主管审价'], pending: ['备货', '发货', '开票'] }, agentLog: { received: '筛选待备货', analysis: 'ORD-2026-0117 已通过主管审价，进入商务备货闸门', updates: ['ORD-2026-0117→待备货'], recommendedAction: '进入备货卡片处理' } },
+          { fields: { 订单详情: { value: '四节点状态 + 全字段 + 审价结论', status: 'updated' } }, agentLog: { received: '打开订单详情', analysis: '全字段 + 审价结论（销售主管已通过）', updates: [], recommendedAction: '去备货' } },
+          null
+        ]
+      },
+      {
+        id: 'SW3',
+        name: '仓管拒绝 / 换仓协调',
+        stage: '手机工作台 ·「待办」Tab',
+        chatName: '订单助手 · 商务工作台',
+        painPoint: '仓管拒绝接单后，任务必须回到商务重新选择仓库、拆单或调整交期，不能直接消失或继续停留在原仓。',
+        highlights: ['仓管拒绝原因完整回传', 'AI 比较换仓 / 拆单 / 调期方案', '商务人工选择新履约方案', '重新派发仓管并通知销售'],
+        demoGoal: '展示仓管拒绝后的异常任务回到商务，并通过换仓形成闭环。',
+        initialSide: {
+          tab: '待办',
+          secTitle: '异常协调', secCount: '2',
+          blocks: [{ kind: 'appr-list', items: [
+            { icon: '↗', title: '换仓协调 · ORD-2026-0114', sub: '宏远铸造 · 华南仓拒绝 · SLA 剩余 45 分钟', warn: true, tag: '需处理' },
+            { icon: '⚠', title: '改派协调 · ORD-2026-0112', sub: '广西天华 · 已发货改址申请 · 待承运商评估' }
+          ] }]
+        },
+        messages: [
+          { type: 'sys', content: '华南仓仓管拒绝 ORD-2026-0114：库位检修，今日无法装车。任务自动退回商务工作台，并保留原拒绝人、时间和原因。' },
+          { type: 'sys', content: '订单助手比较了 3 个方案：改派华东仓可按原交期送达；拆单需要两车且成本更高；保留华南仓需将交期延后 2 天。AI 只推荐，不自动改派。' },
+          { type: 'sys', content: '打开换仓协调任务 → 查看原方案、拒绝原因和备选方案。', side: { tab: '待办', blocks: [{ kind: 'detail', no: 'ORD-2026-0114', state: '仓管拒绝 · 待商务协调', stateCls: 'approving', kv: [{ k: '客户', v: '宏远铸造 · A 级' }, { k: '产品 / 数量', v: '膨润土 AB-3 · 3 吨' }, { k: '原发货仓', v: '华南仓' }, { k: '拒绝人 / 时间', v: '华南仓仓管 · 10:06' }, { k: '拒绝原因', v: '库位检修，今日无法装车' }, { k: '原承诺交期', v: '2026-08-19 前' }, { k: '推荐方案', v: '改派华东仓 · 可按原交期到货' }, { k: '华东仓可分配', v: '6 吨（本单需 3 吨）' }], tl4: { nodes: ['已开单', '已备货', '已发货', '已开票'], current: 1 }, risk: { title: '方案影响', items: ['改派华东仓：交期不变，运输成本预计增加 ¥420', '拆单发货：成本更高，不建议', '延后交期：需由销售重新与客户确认'] }, actions: [{ t: '调整其他方案', c: 'btn-ignore' }, { t: '确认改派华东仓', c: 'btn-confirm' }] }] } },
+          { type: 'sys', content: '商务确认改派 → 系统释放华南仓原预留、锁定华东仓 3 吨并生成新的仓管接单任务；张销售收到“仓库变更、交期不变”通知。', side: { tab: '待办', blocks: [{ kind: 'success', title: '换仓方案已生效', sub: '华东仓已预留 3 吨 · 原承诺交期不变', no: 'ORD-2026-0114', foot: '你的异常协调任务已完成 · 下一责任人：华东仓仓管 · 张销售已收到变更通知' }] } }
+        ],
+        annotations: [
+          { flows: ['工作台入口 → 全租户待办聚合'], agentLog: { received: '打开工作台', analysis: '无群上下文，聚合全租户待办（备货/发货/开票）', updates: ['待办→3 条'], recommendedAction: '按闸门类型分流处理' } },
+          { fields: { 待办范围: { value: '全租户（含他人订单）', status: 'updated' } }, agentLog: { received: '待办分组渲染', analysis: '闸门类型标签 + 订单摘要，超时置顶', updates: [], recommendedAction: '点击直达卡片' } },
+          { todo: '备货 ORD-2026-0117（已审价通过）', agentLog: { received: '点击备货待办', analysis: '跳转到备货卡片，与群内入口一致；审价结论已通过', updates: [], recommendedAction: '通过放行' } },
+          { flows: ['approve → 闸门推进'], progress: { currentStage: '备货 → 发货', completed: ['备货通过'], pending: ['发货', '开票'] }, agentLog: { received: '备货通过', analysis: '任务移除，待办刷新为 2 条', updates: ['待办→2 条'], stageChange: '备货通过 → 生成发货单', recommendedAction: '继续处理其余待办' } }
+        ]
+      },
+    ]
+  },
+
+  /* ============ 角色 3b · 销售助理（企微个体 · PC/手机端：独立角色，代下单双入口 XSZL1/XSZL2） ============ */
+  {
+    role: 'SALES_ASSISTANT',
+    roleName: '销售助理',
+    avatarChar: '助',
+    formFactor: 'mobile',
+    appName: '订单助手',
+    chatName: '订单助手 · 销售助理工作台',
+    tabs: ['下单'],
+    scenarios: [
+      {
+        id: 'XSZL1',
+        name: '代销售下单',
+        stage: '工作台 ·「下单」Tab',
+        painPoint: '销售助理代下单时必须先选归属销售，再从其客户范围中人工选客；系统可以推荐和预填，但不能把“可能是这个客户”直接当成确定事实。',
+        highlights: ['先选归属销售，再人工选客户', '客户候选范围受权限约束', '履约字段提交前必核对', '系统预填均展示来源'],
+        demoGoal: '展示销售助理在权限范围内人工选客、核对履约信息后代销售提交订单。',
+        initialSide: { tab: '下单', blocks: [{ kind: 'long-form', title: '人工下单（代下单）', ctx: '工作台下单 · 先选下单归属销售，其余与销售下单一致', groups: [
+          { title: '代下单归属（先选）', fields: [{ label: '下单归属销售', value: '请选择 ▾', hint: '先选择代下单的销售，决定可选客户范围' }] },
+          { title: '客户与归属', fields: [{ label: '主体', value: '长安仁恒（上海）· 模板自动匹配', ro: true }, { label: '客户', value: '待选择', ro: true }, { label: '销售员', value: '待定（由归属销售带入）', ro: true }, { label: '代办人', value: '', hint: '可选' }, { label: '客户类型', value: 'C 级（自动带出）', ro: true }] },
+          { title: '履约信息（选客后必核对）', fields: [{ label: '发货仓', value: '待推荐' }, { label: '收货地址', value: '待选择客户后加载' }, { label: '收货联系人', value: '待选择客户后加载' }, { label: '交付方式', value: '送货上门' }] },
+          { title: '结算信息', fields: [{ label: '是否自提', value: '否' }, { label: '结算方式', value: '月结' }, { label: '汇款方式', value: '银行转账' }, { label: '账期', value: '30 天' }] },
+          { title: '合同与附件', fields: [{ label: '客户合同', value: 'HT-2025-0038（框架 · 自动匹配）', ro: true }, { label: '合同编号', value: 'HT-2025-0038', ro: true }, { label: '其他附件', value: '', hint: '送货单 / 标签，可添加' }] },
+          { title: '商品明细', fields: [{ label: '产品名称', value: '膨润土 AB-3' }, { label: '数量（公斤）', value: '3000' }, { label: '单价（元/吨）', value: '¥3,200', hint: '自动带出最近订单单价 · 协议价上限内可改' }, { label: '合计', value: '¥9,600（自动计算）', ro: true }, { label: '包装类型', value: '吨袋' }, { label: '规格', value: '1 吨 / 袋' }, { label: '到货时间', value: '2026-08-20' }, { label: '明细备注', value: '', hint: '可选' }] },
+          { title: '补充说明', fields: [{ label: '特殊规格要求', type: 'check', value: '随货附质检报告（仓库随货带纸质版）' }, { label: '订单备注', value: '', hint: '可选' }] }
+        ], quota: '风控校验：额度使用 76%，在额度内 · 合计 ¥9,600', quotaWarn: true, actions: [{ t: '提交订单', c: 'btn-confirm' }] }] },
+        messages: [
+          { type: 'sys', content: '销售助理从工作台打开「下单」：先选择「下单归属销售」（决定可选客户范围），随后进入与销售下单完全一致的单页长表单', side: { tab: '下单', blocks: [{ kind: 'long-form', title: '人工下单（代下单）', ctx: '工作台下单 · 先选下单归属销售，其余与销售下单一致', groups: [
+            { title: '代下单归属（先选）', fields: [{ label: '下单归属销售', value: '请选择 ▾', hint: '先选择代下单的销售，决定可选客户范围' }] },
+            { title: '客户与归属', fields: [{ label: '主体', value: '长安仁恒（上海）· 模板自动匹配', ro: true }, { label: '客户', value: '待选择', ro: true }, { label: '销售员', value: '待定（由归属销售带入）', ro: true }, { label: '代办人', value: '', hint: '可选' }, { label: '客户类型', value: 'C 级（自动带出）', ro: true }] },
+            { title: '履约信息（选客后必核对）', fields: [{ label: '发货仓', value: '待推荐' }, { label: '收货地址', value: '待选择客户后加载' }, { label: '收货联系人', value: '待选择客户后加载' }, { label: '交付方式', value: '送货上门' }] },
+            { title: '结算信息', fields: [{ label: '是否自提', value: '否' }, { label: '结算方式', value: '月结' }, { label: '汇款方式', value: '银行转账' }, { label: '账期', value: '30 天' }] },
+            { title: '合同与附件', fields: [{ label: '客户合同', value: 'HT-2025-0038（框架 · 自动匹配）', ro: true }, { label: '合同编号', value: 'HT-2025-0038', ro: true }, { label: '其他附件', value: '', hint: '送货单 / 标签，可添加' }] },
+            { title: '商品明细', fields: [{ label: '产品名称', value: '膨润土 AB-3' }, { label: '数量（公斤）', value: '3000' }, { label: '单价（元/吨）', value: '¥3,200', hint: '自动带出最近订单单价 · 协议价上限内可改' }, { label: '合计', value: '¥9,600（自动计算）', ro: true }, { label: '包装类型', value: '吨袋' }, { label: '规格', value: '1 吨 / 袋' }, { label: '到货时间', value: '2026-08-20' }, { label: '明细备注', value: '', hint: '可选' }] },
+            { title: '补充说明', fields: [{ label: '特殊规格要求', type: 'check', value: '随货附质检报告（仓库随货带纸质版）' }, { label: '订单备注', value: '', hint: '可选' }] }
+          ], quota: '风控校验：额度使用 76%，在额度内 · 合计 ¥9,600', quotaWarn: true, actions: [{ t: '提交订单', c: 'btn-confirm' }] }] } },
+          { type: 'sys', content: '选定归属销售张销售后，系统将客户范围收窄；销售助理搜索并人工选择“广西天华”，再加载客户档案、最近订单和框架合同预填值。', side: { tab: '下单', blocks: [{ kind: 'long-form', title: '人工下单（代下单）', ctx: '工作台下单 · 归属销售 张销售 · 客户已人工选择', groups: [
+            { title: '代下单归属（先选）', fields: [{ label: '下单归属销售', value: '张销售 ▾', hint: '已选定，决定可选客户范围' }] },
+            { title: '客户与归属', fields: [{ label: '主体', value: '长安仁恒（上海）· 模板自动匹配', ro: true }, { label: '客户', value: '广西天华（人工选择）' }, { label: '销售员', value: '张销售（由归属销售带入）', ro: true }, { label: '代办人', value: '李助理（当前操作人）', ro: true }, { label: '客户类型', value: 'C 级（档案带出）', ro: true }] },
+            { title: '履约信息（提交前必核对）', fields: [{ label: '发货仓', value: '华南仓（库存建议）' }, { label: '收货地址', value: '湖南岳阳 · 云溪区（客户档案）' }, { label: '收货联系人', value: '王志明 · 138****2816（客户档案）' }, { label: '交付方式', value: '送货上门' }] },
+            { title: '结算信息', fields: [{ label: '是否自提', value: '否' }, { label: '结算方式', value: '月结' }, { label: '汇款方式', value: '银行转账' }, { label: '账期', value: '30 天' }] },
+            { title: '合同与附件', fields: [{ label: '客户合同', value: 'HT-2025-0038（框架 · 自动匹配）', ro: true }, { label: '合同编号', value: 'HT-2025-0038', ro: true }, { label: '其他附件', value: '', hint: '送货单 / 标签，可添加' }] },
+            { title: '商品明细', fields: [{ label: '产品名称', value: '膨润土 AB-3' }, { label: '数量（公斤）', value: '3000' }, { label: '单价（元/吨）', value: '¥3,200', hint: '自动带出最近订单单价 · 协议价上限内可改' }, { label: '合计', value: '¥9,600（自动计算）', ro: true }, { label: '包装类型', value: '吨袋' }, { label: '规格', value: '1 吨 / 袋' }, { label: '到货时间', value: '2026-08-20' }, { label: '明细备注', value: '', hint: '可选' }] },
+            { title: '补充说明', fields: [{ label: '特殊规格要求', type: 'check', value: '随货附质检报告（仓库随货带纸质版）' }, { label: '订单备注', value: '', hint: '可选' }] }
+          ], quota: '风控校验：额度使用 76%，在额度内 · 合计 ¥9,600', quotaWarn: true, actions: [{ t: '提交订单', c: 'btn-confirm' }] }] } },
+          { type: 'ai-hint', content: '预填来源：产品、数量和到货时间由销售助理本次录入；地址与联系人来自客户档案，必须人工核对；单价来自最近历史订单；合同按主体匹配。关键履约字段未确认时禁止提交。' },
+          { type: 'sys', content: '销售助理核对无误，点「提交订单」→ 已代张销售提交正式订单，展示后续完整流程', side: { tab: '下单', blocks: [
+            { kind: 'success', title: '代下单成功', sub: '订单已归属销售 张销售，进入主管审价 → C 级董事长终审 → 商务库存/交期确认 → 仓管发货 → 回单 → 财务开票', no: 'ORD-20260811-0111', foot: '提交时间 10:12 · 当前节点：待价格审批' },
+            { kind: 'detail', no: 'ORD-20260811-0111', state: '待价格审批', stateCls: 'approving', kv: [{ k: '归属销售', v: '张销售' }, { k: '代办人', v: '李助理' }, { k: '客户', v: '广西天华 · C 级' }, { k: '产品', v: '膨润土 AB-3 · 3000 公斤' }, { k: '合计', v: '¥9,600' }, { k: '收货地址', v: '湖南岳阳 · 云溪区' }, { k: '到货时间', v: '2026-08-20' }], tl4: { nodes: ['已开单', '已备货', '已发货', '已开票'], current: 0 }, risk: { title: '后续流程', items: ['主管审价 → 董事长终审 → 商务库存/交期确认 → 仓管发货 → 回单 → 财务开票'] }, actions: [{ t: '去待办跟踪', c: 'btn-confirm' }] }
+          ] } }
+        ],
+        annotations: [
+          { todo: '先选择下单归属销售（决定可选客户范围）', fields: { 下单归属销售: { value: '请选择 ▾', status: 'current' }, 客户: { value: '待选择', status: 'empty' }, 销售员: { value: '待定（由归属销售带入）', status: 'empty' } }, agentLog: { received: '销售助理打开下单', analysis: '先选归属销售，其余表单与销售下单一致', updates: [], recommendedAction: '选择归属销售 张销售' } },
+          { flows: ['选定归属销售 → 客户自动补全 + 字段预填'], fields: { 归属销售: { value: '张销售', status: 'updated' }, 客户: { value: '广西天华（自动补全）', status: 'updated' }, 销售员: { value: '张销售（由归属销售带入）', status: 'updated' } }, agentLog: { received: '选定归属销售', analysis: '客户范围锁定并自动补全，字段按档案/最近订单/框架合同最大化预填，与销售下单一致', updates: ['归属销售→张销售', '客户→广西天华'], recommendedAction: '核对预填字段' } },
+          { cards: ['最近订单单价卡（协议价上限内）', '主体模板自动匹配卡'], fields: { 单价: { value: '¥3,200 / 吨（自动带出 · 可改）', status: 'updated' }, 合计: { value: '¥9,600（自动计算）', status: 'updated' }, 合同: { value: 'HT-2025-0038（框架 · 自动匹配）', status: 'updated' } }, agentLog: { received: '预填来源分析', analysis: '单价取最近历史订单（协议价内）；合同按主体自动匹配模板；合计自动计算', updates: ['单价→自动带出', '合同→已匹配'], recommendedAction: '核对后提交' } },
+          { flows: ['order.submit（幂等键防重复）'], progress: { currentStage: '已开单', completed: ['代下单提交'], pending: ['销售主管价格审批', '商务审核/备货', '仓库发货', '财务开票'] }, agentLog: { received: '提交订单', analysis: '订单归属张销售，进入审批流', updates: ['订单→ORD-20260811-0111'], stageChange: '已提交 → 已开单', recommendedAction: '跟踪审批状态' } }
+        ]
+      },
+      {
+        id: 'XSZL2',
+        name: '客户群入口代下单',
+        stage: '群侧边栏 ·「下单」Tab',
+        chatName: '广西天华 · 供应协同群',
+        painPoint: '销售助理从客户群进入时，客户由群上下文直接确定，归属销售自动带出并锁定；系统不能把“可能是这个客户”当成可改项，也不能让销售助理重新选择归属销售。',
+        highlights: ['群上下文直接确定客户（不可更换）', '归属销售自动带出并锁定（readonly 不可改）', '表单最大化预填并标注来源', '提交后进入正常审批链'],
+        demoGoal: '展示销售助理在客户群入口代下单：客户与归属销售由群上下文锁定，核对预填后提交。',
+        initialSide: { tab: '下单', ctx: { name: '广西天华', sub: '供应协同群 · 采购 王志明 · 归属销售 张销售', grade: 'C 级', gradeCls: 'c' }, blocks: [{ kind: 'long-form', title: '人工下单（代下单）', ctx: '当前群客户：广西天华（C 级）· 归属销售 张销售（锁定）', groups: [
+          { title: '客户与归属（群上下文锁定）', fields: [{ label: '主体', value: '长安仁恒（上海）· 模板自动匹配', ro: true }, { label: '客户', value: '广西天华（群上下文）', ro: true }, { label: '销售员', value: '张销售（群上下文锁定）', ro: true }, { label: '代办人', value: '李助理（当前操作人）', ro: true }, { label: '客户类型', value: 'C 级（档案带出）', ro: true }] },
+          { title: '履约信息（提交前必核对）', fields: [{ label: '发货仓', value: '华南仓（库存建议）' }, { label: '收货地址', value: '湖南岳阳 · 云溪区（客户档案）' }, { label: '收货联系人', value: '王志明 · 138****2816（客户档案）' }, { label: '交付方式', value: '送货上门' }] },
+          { title: '结算信息', fields: [{ label: '是否自提', value: '否' }, { label: '结算方式', value: '月结' }, { label: '汇款方式', value: '银行转账' }, { label: '账期', value: '30 天' }] },
+          { title: '合同与附件', fields: [{ label: '客户合同', value: 'HT-2025-0038（框架 · 自动匹配）', ro: true }, { label: '合同编号', value: 'HT-2025-0038', ro: true }, { label: '其他附件', value: '', hint: '送货单 / 标签，可添加' }] },
+          { title: '商品明细', fields: [{ label: '产品名称', value: '膨润土 AB-3' }, { label: '数量（公斤）', value: '3000' }, { label: '单价（元/吨）', value: '¥3,200', hint: '自动带出最近订单单价 · 协议价上限内可改' }, { label: '合计', value: '¥9,600（自动计算）', ro: true }, { label: '包装类型', value: '吨袋' }, { label: '规格', value: '1 吨 / 袋' }, { label: '到货时间', value: '2026-08-20' }, { label: '明细备注', value: '', hint: '可选' }] },
+          { title: '补充说明', fields: [{ label: '特殊规格要求', type: 'check', value: '随货附质检报告（仓库随货带纸质版）' }, { label: '订单备注', value: '', hint: '可选' }] }
+        ], quota: '风控校验：额度使用 76%，在额度内 · 合计 ¥9,600', quotaWarn: true, actions: [{ t: '提交订单', c: 'btn-confirm' }] }] },
+        messages: [
+          { type: 'sys', content: '销售助理在客户群内点「订单助手」→ 打开「下单」Tab：群上下文直接确定客户（广西天华），归属销售自动带出并锁定（readonly 不可改）；其余字段与销售下单一致最大化预填', side: { tab: '下单', ctx: { name: '广西天华', sub: '供应协同群 · 采购 王志明 · 归属销售 张销售', grade: 'C 级', gradeCls: 'c' }, blocks: [{ kind: 'long-form', title: '人工下单（代下单）', ctx: '当前群客户：广西天华（C 级）· 归属销售 张销售（锁定）', groups: [
+            { title: '客户与归属（群上下文锁定）', fields: [{ label: '主体', value: '长安仁恒（上海）· 模板自动匹配', ro: true }, { label: '客户', value: '广西天华（群上下文）', ro: true }, { label: '销售员', value: '张销售（群上下文锁定）', ro: true }, { label: '代办人', value: '李助理（当前操作人）', ro: true }, { label: '客户类型', value: 'C 级（档案带出）', ro: true }] },
+            { title: '履约信息（提交前必核对）', fields: [{ label: '发货仓', value: '华南仓（库存建议）' }, { label: '收货地址', value: '湖南岳阳 · 云溪区（客户档案）' }, { label: '收货联系人', value: '王志明 · 138****2816（客户档案）' }, { label: '交付方式', value: '送货上门' }] },
+            { title: '结算信息', fields: [{ label: '是否自提', value: '否' }, { label: '结算方式', value: '月结' }, { label: '汇款方式', value: '银行转账' }, { label: '账期', value: '30 天' }] },
+            { title: '合同与附件', fields: [{ label: '客户合同', value: 'HT-2025-0038（框架 · 自动匹配）', ro: true }, { label: '合同编号', value: 'HT-2025-0038', ro: true }, { label: '其他附件', value: '', hint: '送货单 / 标签，可添加' }] },
+            { title: '商品明细', fields: [{ label: '产品名称', value: '膨润土 AB-3' }, { label: '数量（公斤）', value: '3000' }, { label: '单价（元/吨）', value: '¥3,200', hint: '自动带出最近订单单价 · 协议价上限内可改' }, { label: '合计', value: '¥9,600（自动计算）', ro: true }, { label: '包装类型', value: '吨袋' }, { label: '规格', value: '1 吨 / 袋' }, { label: '到货时间', value: '2026-08-20' }, { label: '明细备注', value: '', hint: '可选' }] },
+            { title: '补充说明', fields: [{ label: '特殊规格要求', type: 'check', value: '随货附质检报告（仓库随货带纸质版）' }, { label: '订单备注', value: '', hint: '可选' }] }
+          ], quota: '风控校验：额度使用 76%，在额度内 · 合计 ¥9,600', quotaWarn: true, actions: [{ t: '提交订单', c: 'btn-confirm' }] }] } },
+          { type: 'ai-hint', content: '预填来源：客户与归属销售由群上下文锁定；地址与联系人来自客户档案，必须人工核对；单价来自最近历史订单；合同按主体匹配。关键履约字段未确认时禁止提交。' },
+          { type: 'sys', content: '销售助理核对无误，点「提交订单」→ 已代张销售提交正式订单，展示后续完整流程', side: { tab: '下单', blocks: [
+            { kind: 'success', title: '代下单成功', sub: '订单已归属销售 张销售，进入主管审价 → C 级董事长终审 → 商务库存/交期确认 → 仓管发货 → 回单 → 财务开票', no: 'ORD-20260811-0112', foot: '提交时间 10:20 · 当前节点：待价格审批' },
+            { kind: 'detail', no: 'ORD-20260811-0112', state: '待价格审批', stateCls: 'approving', kv: [{ k: '归属销售', v: '张销售（群上下文锁定）' }, { k: '代办人', v: '李助理' }, { k: '客户', v: '广西天华 · C 级' }, { k: '产品', v: '膨润土 AB-3 · 3000 公斤' }, { k: '合计', v: '¥9,600' }, { k: '收货地址', v: '湖南岳阳 · 云溪区' }, { k: '到货时间', v: '2026-08-20' }], tl4: { nodes: ['已开单', '已备货', '已发货', '已开票'], current: 0 }, risk: { title: '后续流程', items: ['主管审价 → 董事长终审 → 商务库存/交期确认 → 仓管发货 → 回单 → 财务开票'] }, actions: [{ t: '去待办跟踪', c: 'btn-confirm' }] }
+          ] } }
+        ],
+        annotations: [
+          { todo: '群上下文锁定客户与归属销售', fields: { 客户: { value: '广西天华（群上下文锁定）', status: 'updated' }, 销售员: { value: '张销售（群上下文锁定 readonly）', status: 'updated' } }, agentLog: { received: '销售助理从客户群打开下单', analysis: '群上下文确定客户；每个客户归属销售明确，自动带出并锁定，不可改', updates: ['客户→广西天华', '销售员→张销售'], recommendedAction: '核对预填字段' } },
+          { cards: ['最近订单单价卡（协议价上限内）', '主体模板自动匹配卡'], fields: { 单价: { value: '¥3,200 / 吨（自动带出 · 可改）', status: 'updated' }, 合计: { value: '¥9,600（自动计算）', status: 'updated' }, 合同: { value: 'HT-2025-0038（框架 · 自动匹配）', status: 'updated' } }, agentLog: { received: '预填来源分析', analysis: '单价取最近历史订单（协议价内）；合同按主体自动匹配模板；合计自动计算', updates: ['单价→自动带出', '合同→已匹配'], recommendedAction: '核对后提交' } },
+          { flows: ['order.submit（幂等键防重复）'], progress: { currentStage: '已开单', completed: ['代下单提交'], pending: ['销售主管价格审批', '商务审核/备货', '仓库发货', '财务开票'] }, agentLog: { received: '提交订单', analysis: '订单归属张销售，进入审批流', updates: ['订单→ORD-20260811-0112'], stageChange: '已提交 → 已开单', recommendedAction: '跟踪审批状态' } }
+        ]
+      }
+    ]
+  },
+
+  /* ============ 角色 4 · 财务（企微个体 · 手机端 + PC 必需：工作台直接上传/审批，与群无关） ============ */
+  {
+    role: 'FINANCE',
+    roleName: '财务',
+    avatarChar: '财',
+    formFactor: 'mobile',
+    appName: '订单助手',
+    chatName: '订单助手 · 财务工作台',
+    pcNote: 'PC 必需',
+    tabs: ['待办', '订单', '上传凭证'],
+    scenarios: [
+      {
+        id: 'CW1',
+        name: '正常开票 / 凭证登记',
+        stage: '财务待办 → 凭证机器人',
+        chatName: '凭证机器人 · 私聊',
+        painPoint: '订单完成发货与回单后，财务需要核对抬头、税号、金额和税率再开票；开票后还要把电子凭证准确登记到订单。',
+        highlights: ['正常开票任务归财务，不由商务执行', '开票前核对抬头 / 税号 / 金额 / 税率', 'OCR 负责提取和校验，不替代财务确认', '凭证只追加登记（可回放）'],
+        demoGoal: '展示财务完成正常开票，并在规则校验后确认登记电子凭证。',
+        initialSide: {
+          tab: '待办',
+          blocks: [{ kind: 'detail', no: 'ORD-2026-0118', state: '待开票', stateCls: 'approving', kv: [{ k: '购方名称', v: '广西天华有限公司' }, { k: '税号', v: '9145**********281' }, { k: '可开票金额', v: '¥16,000' }, { k: '税率', v: '13%' }, { k: '回单状态', v: '已回单 · v3' }], risk: { title: '开票校验', items: ['金额不得超过已发货金额', '抬头、税号、重复发票冲突时必须阻断'] }, actions: [{ t: '确认开票', c: 'btn-confirm' }] }]
+        },
+        messages: [
+          { type: 'sys', content: 'ORD-2026-0118 已回单，正常开票任务进入财务待办。财务核对购方名称、税号、可开票金额和税率后点击“确认开票”。' },
+          { type: 'image', side: 'right', sender: '陈会计', imageTitle: '📄 电子发票（转发）', imageDesc: '（电子发票文件，转发给凭证机器人）', imageFooter: '转发给凭证机器人 · 等待识别' },
+          { type: 'ai-hint', content: 'OCR 提取发票号、购方税号、金额和税额，并完成四项硬校验：订单唯一、非重复发票、抬头/税号一致、开票金额不超过已发货金额。结果待财务确认登记。' },
+          { type: 'sys', content: '财务确认识别结果 → 发票凭证作为 v2 追加登记到 ORD-2026-0118；原文件、识别结果和确认人均可追溯', side: { tab: '上传凭证', blocks: [{ kind: 'success', title: '开票与凭证登记完成', sub: '发票 NO 04511230 · ¥16,000 · v2', no: 'ORD-2026-0118', foot: '确认人：陈会计 · 下一状态：已开票 / 履约完成' }] } },
+          { type: 'sys', content: '「上传凭证」入口保留可用：财务也可打开该 Tab 直接选择电子凭证上传（两路等价）', side: { tab: '上传凭证', blocks: [{ kind: 'detail', no: '上传开票凭证', state: '待上传', stateCls: 'wait', kv: [{ k: '说明', v: '备选入口：选择电子发票文件上传（PDF / 图片），AI 自动识别并匹配订单' }], actions: [{ t: '选择电子凭证上传', c: 'btn-confirm' }] }] } }
+        ],
+        annotations: [
+          { todo: '将电子凭证转发给凭证机器人', agentLog: { received: '开票完成', analysis: '优先走转发凭证机器人流程；上传凭证 Tab / 订单详情为备选入口', updates: ['凭证→待转发'], recommendedAction: '转发给凭证机器人' } },
+          { flows: ['转发凭证机器人（evidence#auto_recognize）'], fields: { 凭证文件: { value: '电子发票已转发', status: 'updated' } }, agentLog: { received: '财务转发电子发票', analysis: '凭证机器人收到电子凭证，开始 OCR 识别', updates: ['凭证→识别中'], recommendedAction: '等待识别' } },
+          { flows: ['凭证 OCR（invoice#auto_recognize）'], fields: { 发票号: { value: 'NO 04511230', status: 'updated' }, 金额: { value: '¥9,600（与发货一致）', status: 'updated' } }, agentLog: { received: '凭证机器人识别', analysis: 'OCR 提取发票要素，金额与发货一致（CQ-09）', updates: ['发票号→NO 04511230'], recommendedAction: '登记凭证' } },
+          { flows: ['append_evidence（凭证只追加 CQ-15）'], progress: { currentStage: '凭证登记', completed: ['转发识别'], pending: ['结算'] }, agentLog: { received: '凭证登记', analysis: '发票凭证追加 v2，只追加不覆盖', updates: ['凭证→v2 已登记'], stageChange: '待登记 → 已登记', recommendedAction: '登记完成' } },
+          { fields: { 备选入口: { value: '上传凭证 Tab / 订单详情（保留可用）', status: 'current' } }, agentLog: { received: '展示备选入口', analysis: '上传凭证入口保留，与转发机器人两路等价', updates: [], recommendedAction: '按需选择入口' } }
+        ]
+      },
+      {
+        id: 'CW2',
+        name: '审批无回单开票',
+        stage: '工作台 ·「待办」Tab',
+        painPoint: '非款到单没有签收回单也要开票，财务需要审批放行；例外审核缺少依据，容易误放或卡单。',
+        highlights: ['无签收回单的开票申请进入审批', '例外审核依据随卡展示', '从工作台待办进入（与群无关）', '通过放行 / 驳回回退'],
+        demoGoal: '展示财务从工作台待办审批无回单开票的例外审核。',
+        initialSide: {
+          tab: '待办',
+          secTitle: '需要我处理', secCount: '1',
+          blocks: [{ kind: 'appr-list', items: [
+            { icon: '⚠', title: '无回单开票审批 · ORD-2026-0102', sub: '广西天华 · ¥9,600 · 回单超期', warn: true, tag: '需处理' }
+          ] }]
+        },
+        messages: [
+          { type: 'sys', content: 'ORD-2026-0102 发货后 5 天仍无签收回单，命中政策 INV-EX-05，销售提交“无回单开票”例外申请并流转至财务待办。' },
+          { type: 'ai-hint', content: 'AI 仅汇总例外依据：客户已确认收货、销售正在补签、信用额度正常、无质量与退货争议；是否放行必须由财务审批。' },
+          { type: 'sys', content: '点击审批条 → 先看政策、申请人、证据和后续责任，再决定限时放行、要求补充或驳回', side: { tab: '待办', blocks: [{ kind: 'detail', no: 'ORD-2026-0102', state: '无回单开票例外', stateCls: 'approving', kv: [{ k: '客户', v: '广西天华 · C 级' }, { k: '开票金额', v: '¥9,600' }, { k: '发货日期', v: '2026-07-28' }, { k: '回单状态', v: '发货后 5 天无回单' }, { k: '申请人 / 原因', v: '张销售 · 客户入账时点临近' }, { k: '客户确认', v: '已确认收货 · 待补签' }, { k: '信用 / 争议', v: '额度正常 · 无质量/退货争议' }, { k: '政策依据', v: 'INV-EX-05' }], tl4: { nodes: ['已开单', '已备货', '已发货', '已开票'], current: 2 }, risk: { title: '例外责任', items: ['限时放行后，销售须在 3 个工作日内补齐回单', '未按期补齐自动升级财务负责人并冻结后续例外申请', '驳回则保持待回单，不进入正常开票'] }, actions: [{ t: '要求补充', c: 'btn-ignore' }, { t: '驳回', c: 'btn-ignore' }, { t: '限时放行', c: 'btn-confirm' }] }] } },
+          { type: 'sys', content: '销售补充说明：客户已邮件确认签收，预计 2 个工作日内返回盖章回单；申请材料已附在审批记录。' },
+          { type: 'sys', content: '财务点击「限时放行」→ 开票流程继续，同时生成“3 个工作日内补齐回单”的销售待办；该待办完成前例外链不闭合。' }
+        ],
+        annotations: [
+          { todo: '无回单开票审批 ORD-2026-0102（¥9,600）', flows: ['回单异常 → 无回单开票申请'], agentLog: { received: '无回单开票申请', analysis: '非款到单 5 天无回单，开票需例外审核（与群无关）', updates: ['申请→1 条'], recommendedAction: '核对例外依据' } },
+          { fields: { 例外依据: { value: '客户补签中 · 开票放行', status: 'updated' } }, agentLog: { received: '例外依据分析', analysis: '销售协调补签回单，风险可控', updates: [], recommendedAction: '进入审批详情' } },
+          null,
+          null,
+          { flows: ['exception-approve → 开票放行'], progress: { currentStage: '开票（例外）', completed: ['例外审核'], pending: ['开票', '回单补齐', '凭证登记'] }, agentLog: { received: '财务放行', analysis: '例外审核通过，开票继续；回单补齐自动闭合', updates: ['ORD-2026-0102→已放行'], stageChange: '无回单开票 → 已放行', recommendedAction: '跟踪回单补齐' } }
+        ]
+      }
+    ]
+  },
+
+  /* ============ 角色 5 · 仓管（企微个体 · 手机端：接受发货 / 确认已发货 / 回单凭证上传） ============ */
+  {
+    role: 'WAREHOUSE',
+    roleName: '仓管',
+    avatarChar: '仓',
+    formFactor: 'mobile',
+    appName: '订单助手',
+    chatName: '订单助手 · 本仓工作台',
+    tabs: ['待办', '已办', '上传凭证'],
+    scenarios: [
+      {
+        id: 'CG1',
+        name: '确认接受发货任务',
+        stage: '本仓待办 · Tab',
+        painPoint: '发货要求来了仓管要第一时间确认可执行；任务里不该让仓管看到价格，只给本仓可执行要素。',
+        highlights: ['发货要求推送本仓待办', '金额对仓管不可见', '本仓可执行要素核对（产品/数量/发货仓/交期）', '接受后进入待发货；拒绝则回商务改派'],
+        demoGoal: '展示仓管在手机端确认接受发货任务（金额不展示）。',
+        initialSide: {
+          tab: '待办',
+          secTitle: '发货任务', secCount: '1',
+          blocks: [{ kind: 'appr-list', items: [
+            { icon: '🚚', title: '接受发货任务 · ORD-2026-0118', sub: '膨润土 AB-3 · 5 吨 · 华南仓', warn: true, tag: '需处理' }
+          ] }]
+        },
+        messages: [
+          { type: 'sys', content: '发货要求推送至本仓待办：ORD-2026-0118 · 5 吨 · 华南仓（金额不展示）' },
+          { type: 'ai-hint', content: '任务要素：产品 膨润土 AB-3（吨袋）/ 数量 5 吨 / 发货仓 华南仓 / 收货地址 湖南岳阳 · 云溪区 / 交期 08-18。金额对仓管角色不可见。' },
+          { type: 'sys', content: '点击任务 → 核对本仓是否可执行；接受后进入“已接受 / 待发货”，不是已办；拒绝必须填写原因并回到商务改派', side: { tab: '待办', blocks: [{ kind: 'detail', no: 'ORD-2026-0118', state: '待接受', stateCls: 'approving', kv: [{ k: '产品', v: '膨润土 AB-3（吨袋）' }, { k: '数量', v: '5 吨' }, { k: '发货仓', v: '华南仓' }, { k: '收货地址', v: '湖南岳阳 · 云溪区' }, { k: '交期', v: '2026-08-18' }], tl4: { nodes: ['已开单', '已备货', '已发货', '已开票'], current: 1 }, risk: { title: '确认接受', items: ['金额不展示：仓管仅确认本仓执行要素', '拒绝后任务回商务，可换仓或调整交期'] }, actions: [{ t: '拒绝并说明', c: 'btn-ignore' }, { t: '确认接受', c: 'btn-confirm' }] }] } },
+          { type: 'sys', content: '确认接受 → 状态更新为“已接受 / 待发货”；责任人锁定为华南仓仓管，实际发货后再完成任务' }
+        ],
+        annotations: [
+          { todo: '接受发货任务 ORD-2026-0117', flows: ['发货要求 → 本仓待办'], agentLog: { received: '发货任务派发', analysis: '按本仓维度派发，金额字段对仓管隐藏', updates: ['发货任务→1 条'], recommendedAction: '核对可执行要素' } },
+          { fields: { 金额: { value: '不可见（角色权限）', status: 'current' } }, agentLog: { received: '任务要素分析', analysis: '产品/数量/目标仓/交期齐备，本仓可执行', updates: [], recommendedAction: '确认接受' } },
+          { flows: ['warehouse-accept → 已办'], progress: { currentStage: '待发货', completed: ['接受任务'], pending: ['实际发货', '确认发货', '回单'] }, agentLog: { received: '仓管确认接受', analysis: '任务进入已办，等待实际发货', updates: ['ORD-2026-0117→已接受'], stageChange: '待接受 → 已接受', recommendedAction: '按交期安排发货' } },
+          null
+        ]
+      },
+      {
+        id: 'CG2',
+        name: '确认已经发货',
+        stage: '本仓待办 · Tab',
+        painPoint: '实际发货后要把数量与已发货量确认掉，防止超发、错发；手工记账容易出错。',
+        highlights: ['实际发货后确认数量', '守恒校验：不超应发量（超发禁止）', '支持部分发货并保留剩余任务', '校验拦截即时反馈'],
+        demoGoal: '展示仓管确认实际发货数量，超发被拦截。',
+        initialSide: {
+          tab: '待办',
+          secTitle: '发货任务', secCount: '1',
+          blocks: [{ kind: 'appr-list', items: [
+            { icon: '🚚', title: '确认已经发货 · ORD-2026-0118', sub: '应发 5 吨 · 已发 0 吨', warn: true, tag: '需处理' }
+          ] }]
+        },
+        messages: [
+          { type: 'sys', content: '物流已取走货 → 仓管填写本次发货数量（应发 5 吨 · 已发 0 吨）' },
+          { type: 'sys', content: '输入「6」→ 点确认发货 → 守恒校验拦截：超出应发量，超发禁止', side: { tab: '待办', blocks: [{ kind: 'detail', no: 'ORD-2026-0118', state: '确认发货', stateCls: 'approving', kv: [{ k: '产品', v: '膨润土 AB-3（吨袋）' }, { k: '应发数量', v: '5 吨' }, { k: '已发数量', v: '0 吨' }], tl4: { nodes: ['已开单', '已备货', '已发货', '已开票'], current: 1 }, form: { fields: [{ label: '本次发货（吨）', value: '6', err: true }] }, tip: '超出应发量 5 吨，超发禁止（守恒校验）', actions: [{ t: '确认发货', c: 'btn-confirm' }] }] } },
+          { type: 'sys', content: '修正为「5」→ 点确认发货 → 校验通过，确认成功；若只发 3 吨，则状态会进入“部分发货”，剩余 2 吨任务继续保留', side: { tab: '待办', blocks: [{ kind: 'detail', no: 'ORD-2026-0118', state: '确认发货', stateCls: 'approving', kv: [{ k: '产品', v: '膨润土 AB-3（吨袋）' }, { k: '应发数量', v: '5 吨' }, { k: '已发数量', v: '0 吨' }, { k: '承运商', v: '德邦快递' }, { k: '物流单号', v: 'DBL2026081200188' }], tl4: { nodes: ['已开单', '已备货', '已发货', '已开票'], current: 1 }, form: { fields: [{ label: '本次发货（吨）', value: '5' }] }, risk: { title: '守恒校验通过', items: ['本次发货 5 吨 ≤ 剩余应发 5 吨', '本次数量小于剩余量时自动进入部分发货，不提前关闭任务'] }, actions: [{ t: '确认发货', c: 'btn-confirm' }] }] } },
+          { type: 'sys', content: '确认成功：已发货量 5/5 吨，发货任务完成，订单进入运输中并等待签收回单', side: { tab: '待办', blocks: [{ kind: 'success', title: '发货已确认', sub: '本次发货 5 吨 · 已发 5/5 吨', no: 'ORD-2026-0118', foot: '下一状态：运输中 · 下一责任：仓管跟进回单' }] } }
+        ],
+        annotations: [
+          { todo: '填写本次发货数量（应发 5 吨）', agentLog: { received: '物流取走货', analysis: '进入确认发货任务，需填写本次发货数量', updates: ['发货任务→待确认'], recommendedAction: '输入数量并确认' } },
+          { flows: ['ship-confirm（守恒拦截 CQ）'], fields: { 输入: { value: '6 吨 → 超出应发量 5 吨', status: 'updated' } }, agentLog: { received: '输入 6 吨并确认', analysis: '本次发货 + 已发 > 应发，守恒校验拦截', updates: ['超发→已拦截'], recommendedAction: '修正发货数量' } },
+          { flows: ['ship-confirm（校验通过）'], fields: { 输入: { value: '5 吨 → 通过', status: 'updated' } }, agentLog: { received: '修正 5 吨并确认', analysis: '本次 + 已发 ≤ 应发，校验通过', updates: ['已发→5/5 吨'], recommendedAction: '进入回单环节' } },
+          { progress: { currentStage: '已发货', completed: ['接受任务', '确认发货'], pending: ['回单', '开票'] }, agentLog: { received: '发货确认完成', analysis: '已发货量 5/5 吨，任务闭环', updates: ['ORD-2026-0117→已发货'], stageChange: '待发货 → 已发货', recommendedAction: '等待回单' } }
+        ]
+      },
+      {
+        id: 'CG3',
+        name: '回单凭证上传',
+        stage: '司机私聊 · 转发凭证机器人',
+        chatName: '司机 · 私聊',
+        painPoint: '司机把回单/签收照片给仓管：用运满满时司机直接上传到系统、仓管人工下载；其他司机或外部仓库仓管直接发图片。仓管优先把照片转发给「凭证机器人」自动识别登记；「上传凭证」Tab 保留为手动备选。客户通常不提供签收凭证，只在货物有问题时在群里反馈异常（另一类场景）。',
+        highlights: ['司机 / 外部仓库仓管发送回单照片（无群）', 'OCR 提取订单号、签收数量和时间', '低置信或多候选必须人工确认', '凭证只追加不覆盖，可回放'],
+        demoGoal: '展示回单 OCR 先识别、再由仓管确认匹配，避免 AI 错绑订单。',
+        initialSide: {
+          tab: '上传凭证',
+          blocks: [{ kind: 'detail', no: '回单凭证上传', state: '待上传', stateCls: 'wait', kv: [{ k: '说明', v: '备选入口：选择相册中的回单照片上传（可一次多张）' }], actions: [{ t: '从相册选择照片', c: 'btn-confirm' }] }]
+        },
+        messages: [
+          { type: 'sys', content: '司机私聊发来回单照片（无群，直接单聊）' },
+          { type: 'image', sender: '司机', imageTitle: '📄 签收回单照片', imageDesc: '（司机拍摄的签收单）', imageFooter: '司机私聊发送' },
+          { type: 'sys', content: '仓管将回单照片转发给「凭证机器人」（私聊转发），机器人自动识别；也可用「上传凭证」Tab 手动上传（备选）' },
+          { type: 'ai-hint', content: 'OCR 提取到“ORD-2026-0118 / 签收 5 吨 / 10:05”，但图片局部模糊，匹配置信度 82%。系统只预填，不自动登记，等待仓管核对。', side: { tab: '上传凭证', blocks: [{ kind: 'detail', no: '回单匹配待确认', state: 'WARNING · 置信度 82%', stateCls: 'approving', kv: [{ k: '候选订单', v: 'ORD-2026-0118' }, { k: '识别数量', v: '5 吨（与发货量一致）' }, { k: '签收时间', v: '10:05' }, { k: '图片质量', v: '局部模糊' }], risk: { title: '需人工确认', items: ['低于 90% 自动登记阈值', '请核对订单号、签收数量和收货方；错绑或重复凭证必须阻断'] }, actions: [{ t: '匹配其他订单', c: 'btn-ignore' }, { t: '确认并登记', c: 'btn-confirm' }] }] } },
+          { type: 'sys', content: '仓管核对订单号、数量和收货方后点击“确认并登记”→ 回单凭证 v3 追加到 ORD-2026-0118，原始图片与识别结果均保留', side: { tab: '已办', secTitle: '已上传凭证', secCount: '1', blocks: [{ kind: 'appr-list', items: [
+            { icon: '📄', title: '回单凭证 · ORD-2026-0118', sub: '签收 5 吨 · 10:05 · v3 · 人工确认后登记' }
+          ] }] } }
+        ],
+        annotations: [
+          { flows: ['司机私聊 → 回单照片'], agentLog: { received: '司机私聊发送回单照片', analysis: '无群，直接单聊收到照片', updates: ['照片→已收到'], recommendedAction: '转发给凭证机器人' } },
+          null,
+          { flows: ['转发凭证机器人（evidence#auto_recognize）'], fields: { 转发: { value: '回单照片已转发凭证机器人', status: 'updated' }, 备选入口: { value: '上传凭证 Tab（手动）', status: 'current' } }, agentLog: { received: '仓管转发照片', analysis: '凭证机器人收到回单照片，自动识别（上传凭证 Tab 为备选）', updates: ['凭证→识别中'], recommendedAction: '等待识别' } },
+          { flows: ['凭证 OCR（evidence#auto_recognize）'], fields: { 匹配订单: { value: 'ORD-2026-0112', status: 'updated' }, 识别结果: { value: '签收 10:05 · 2 吨', status: 'updated' } }, agentLog: { received: '凭证机器人识别', analysis: 'OCR 提取签收信息，匹配订单 ORD-2026-0112', updates: ['匹配订单→ORD-2026-0112'], recommendedAction: '登记凭证' } },
+          { flows: ['append_evidence（凭证只追加 CQ-15）'], progress: { currentStage: '回单闭环', completed: ['凭证登记'], pending: ['结算'] }, fields: { 已办: { value: '已上传凭证记录可查', status: 'updated' } }, agentLog: { received: '登记完成', analysis: '凭证追加 v3，回单环节闭合；已办记录已上传凭证', updates: ['凭证→v3 已登记'], stageChange: '待登记 → 已登记', recommendedAction: '凭证链完成' } }
+        ]
+      }
+    ]
+  },
+
+  /* ============ 角色 6 · 董事长（企微个体 · 手机端：仅 C/D 订单终审，只有待办） ============ */
+  {
+    role: 'CHAIRMAN',
+    roleName: '董事长',
+    avatarChar: '董',
+    formFactor: 'mobile',
+    appName: '订单助手',
+    chatName: '订单助手 · 待办',
+    tabs: ['待办'],
+    scenarios: [
+      {
+        id: 'DSZ1',
+        name: 'C/D 订单终审',
+        stage: '待办 Tab · 手机端',
+        painPoint: 'C/D 级客户订单进入终审时，董事长只需要理解触发原因、关键风险和前序意见，不应在大量订单字段中自行寻找决策依据。',
+        highlights: ['明确展示“为什么到我”与审批策略版本', '价格差异 / 毛利 / 信用暴露 / 前序意见同卡核对', '通过 / 要求修改 / 拒绝三种结果', '拒绝和补改均有明确回流责任人'],
+        demoGoal: '展示董事长基于风险摘要完成 C 级订单终审，并明确下一责任人。',
+        initialSide: {
+          tab: '待办',
+          secTitle: '终审任务', secCount: '1',
+          blocks: [{ kind: 'appr-list', items: [
+            { icon: '⭐', title: '董事长审批 · C 级大单', sub: 'ORD-2026-0118 · ¥16,000', warn: true, tag: '需处理' }
+          ] }]
+        },
+        messages: [
+          { type: 'sys', content: '审价通过后，C 级大单 ORD-2026-0118 进入董事长终审（仅 C/D 级客户订单进入此闸门）' },
+          { type: 'sys', content: '点击审批条 → 先看触发规则和风险差异，再决定通过、要求修改或拒绝', side: { tab: '待办', blocks: [{ kind: 'detail', no: 'ORD-2026-0118', state: '待董事长终审', stateCls: 'approving', stateEmphasis: true, kv: [{ k: '触发原因', v: 'C 级客户 · 策略 AP-C-2026-03' }, { k: '金额 / 账期', v: '¥16,000 · 30 天' }, { k: '本次 / 最近成交价', v: '¥3,200 / ¥3,100（+3.2%）' }, { k: '预计毛利率', v: '18.4%' }, { k: '信用额度', v: '校验通过 · 无逾期应收' }, { k: '主管审价', v: '王主管已通过 · 未突破框架价上限' }, { k: '履约地址', v: '湖南岳阳 · 云溪区' }], tl4: { nodes: ['已开单', '已备货', '已发货', '已开票'], current: 0 }, risk: { title: '终审决策', items: ['通过后进入商务库存 / 交期确认', '要求修改返回张销售，并保留王主管前序意见', '拒绝关闭当前申请，但允许复制为新草稿重建，不直接抹除业务记录'] }, actions: [{ t: '要求修改', c: 'btn-ignore' }, { t: '拒绝', c: 'btn-ignore' }, { t: '通过', c: 'btn-confirm' }] }] } },
+          { type: 'sys', content: '销售补充业务说明：客户希望 08-18 前到货；该说明作为审批附件，不通过客户直接催促董事长。' },
+          { type: 'sys', content: '董事长点击「通过」→ 终审完成并进入商务库存 / 交期确认；若要求修改则回张销售补改，拒绝则关闭本次申请并保留复制重建入口。' }
+        ],
+        annotations: [
+          { todo: '终审 C 级大单 ORD-2026-0117（¥16,000）', flows: ['审价通过 → 董事长终审（order.approve）'], agentLog: { received: 'C 级大单进入终审', analysis: '仅 C/D 级客户订单进入董事长终审闸门', updates: ['终审→1 条'], recommendedAction: '核对全字段后审批' } },
+          { fields: { 金额: { value: '¥16,000', status: 'current' }, 客户等级: { value: 'C（大单终审）', status: 'current' }, 审价结论: { value: '已通过（商务）', status: 'updated' }, 账期: { value: '30 天', status: 'current' } }, agentLog: { received: '终审详情打开', analysis: '全字段核对：金额 / 等级 / 审价结论 / 账期', updates: [], recommendedAction: '通过放行或驳回终态' } },
+          null,
+          { flows: ['chairman-review → 大单终审闸门推进'], progress: { currentStage: '终审 → 备货', completed: ['董事长终审'], pending: ['备货', '发货', '到账', '开票', '回单'] }, agentLog: { received: '董事长通过终审', analysis: '大单放行进入备货链；驳回则终态', updates: ['ORD-2026-0117→已放行'], stageChange: '终审通过 → 备货', recommendedAction: '订单进入备货链' } }
+        ]
+      }
+    ]
+  }
+];
+</script>
+<script src="_shared/demo-engine.js?v=merge-annos-001"></script>
+<script>DemoEngine.init(window.DEMO_ROLES);</script>
+<script src="/__demo_annotate/demo-comments.js"></script>
+</body>
+</html>

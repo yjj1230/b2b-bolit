@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>staff_scene_v0.1 · 现场验证与处理单（企微备案已就绪）</title>
+<style>
+  :root{
+    --bg:#f6f5f2; --paper:#fff; --ink:#1a1d24; --muted:#5d6371;
+    --line:#e6e4de; --blue:#1B365D; --green:#1a7f37; --warn:#b58522; --red:#b13b3b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font:14px/1.65 -apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;padding:22px}
+  .page{max-width:1080px;margin:0 auto;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:40px 48px 56px}
+  header{border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:22px}
+  .crumb{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--muted);letter-spacing:.06em}
+  h1{font-size:28px;margin:8px 0 8px;color:var(--blue)}
+  h2{font-size:20px;margin:30px 0 10px;color:var(--blue);border-top:1px solid var(--line);padding-top:18px}
+  h3{font-size:15px;margin:16px 0 6px}
+  p,li{color:#2c303a}
+  .sub{color:var(--muted);font-size:13px}
+  .pill{display:inline-block;padding:2px 10px;border-radius:10px;font-size:11px;font-weight:600;margin-left:6px}
+  .pill.done{background:rgba(26,127,55,.12);color:var(--green)}
+  .pill.field{background:rgba(181,133,34,.14);color:var(--warn)}
+  .pill.block{background:rgba(177,59,59,.10);color:var(--red)}
+  table{width:100%;border-collapse:collapse;margin:10px 0 16px;font-size:13px}
+  th,td{border-bottom:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:#f0eee4;color:var(--blue);font-size:12px}
+  code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  code{background:#f0eee4;padding:1px 5px;border-radius:4px;font-size:12px}
+  pre{background:#1f2329;color:#e8e8e8;padding:12px 14px;border-radius:8px;overflow:auto;font-size:12px;margin:8px 0}
+  .check{display:flex;gap:8px;align-items:flex-start;margin:6px 0}
+  .check input{margin-top:4px}
+  .box{border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin:8px 0;background:#fafaf7}
+  .box.ok{border-color:#cfe8d4;background:#f4faf5}
+  .box.warn{border-color:#ecd8a8;background:#fdfaf2}
+  .box.danger{border-color:#eac7c7;background:#fdf5f5}
+  .tag{font-weight:700}
+  .tag.ok{color:var(--green)} .tag.warn{color:var(--warn)} .tag.danger{color:var(--red)}
+  footer{margin-top:28px;padding-top:14px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);display:flex;justify-content:space-between}
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="crumb">b2b_pilot_v3 · v0.1 第 1 次发布 · 销售助理接入</div>
+    <h1>现场验证与处理单 <span style="font-size:16px;color:var(--muted)">staff_scene_v0.1</span><span class="pill done">企微备案已就绪</span></h1>
+    <p class="sub">适用：现场程序员（Agent 辅助）。目标：把「销售助理工作流」在<b>企微（测试/生产）</b>与<b>PC</b>两端跑通并留证。所有配置均通过环境注入，测试环境与生产环境使用不同配置，禁止硬编码。</p>
+  </header>
+
+  <section>
+    <h2>0 · 先读：已实现 / 待现场验证的边界</h2>
+    <table>
+      <tr><th>项</th><th>代码状态</th><th>现场验证责任</th></tr>
+      <tr><td>销售助理 H5/PC 页面</td><td>✅ 已实现：<code>GET /assistant</code>（工作台入口 + 客户群入口；PC/手机自适应）</td><td>企微客户端打开、JS-SDK 可用性、群上下文注入</td></tr>
+      <tr><td>PC 兜底后台</td><td>✅ 已实现：<code>GET /bridge</code>（OAuth/下单/我的订单/详情）</td><td>真实飞书 OAuth 回跳与旧系统下单</td></tr>
+      <tr><td>official JS-SDK 双签名</td><td>✅ 已实现：真实 <code>jsapi_ticket</code> + <code>agent_config ticket</code>，域名白名单取租户配置 <code>domain</code></td><td>V-D：真实企微内打开 H5，两个签名均成功</td></tr>
+      <tr><td>official OAuth 身份/群上下文</td><td>✅ 已实现：code→userid；<code>wecom_context_bindings</code> → customer/owner</td><td>V-D：群入口自动带出客户与归属销售并锁定</td></tr>
+      <tr><td>template_card 出站卡片</td><td>✅ 已实现（<code>OfficialGateway.SendCard</code>）</td><td>V-C：真实成员收到卡片，点击回调转 Signal</td></tr>
+      <tr><td>守门员客户群发送</td><td>✅ 已实现代码路径（<code>OfficialGateway.SendGroupCard</code>，<code>appchat/send</code>）</td><td>V-E：确认外部客户群是否可收；不可达则按 6.3 回退并记录裁决</td></tr>
+      <tr><td>仓库群回单机器人</td><td>✅ 代码已有（<code>cmd/wecom</code> 群图片回调→OCR 登记）</td><td>V-F：真实仓库群发回单照片，识别/登记闭环</td></tr>
+      <tr><td>旧系统唯一小改（T-01）</td><td>⛔ 在 <code>tripartite-approval</code> 仓库，本仓库外</td><td>现场程序员在旧系统仓库执行并独立测试</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>1 · 配置注入（测试/生产不同）</h2>
+    <div class="box warn">
+      <p><span class="tag warn">原则</span>：域名备案已完成，但测试环境与生产环境的 <code>corp_id / agent_id / secret / token / AESKey / domain</code> 不同，必须通过以下配置注入，代码中不再写死。</p>
+    </div>
+    <h3>1.1 租户配置模板</h3>
+    <pre>config/wecom-tenant.test.example.json   # 测试环境模板
+config/wecom-tenant.prod.example.json   # 生产环境模板
+config/wecom-tenant.example.json        # 通用示例</pre>
+    <p>现场创建真实文件（不入库密文）：<code>config/wecom-tenant.test.json</code>、<code>config/wecom-tenant.prod.json</code>，字段必须包含：</p>
+    <pre>{
+  "tenant_id": "chang-an",
+  "corp_id": "真实企业 ID",
+  "domain": "已备案可信域名（测试/生产不同）",
+  "app": {
+    "agent_id": 1000002,
+    "secret": "应用 secret",
+    "token": "回调 token",
+    "encoding_aes_key": "43 位 base64 AESKey"
+  },
+  "archive": { "enabled": false, "publickey_ver": 1, "private_keys": [], "secret": "" }
+}</pre>
+
+    <h3>1.2 环境变量注入</h3>
+    <pre># 测试环境
+B2B_WECOM_PROVIDER=official
+B2B_WECOM_TENANT_CFG_FILE=./config/wecom-tenant.test.json
+B2B_WECOM_CONTEXT_SECRET=test-context-secret-xxx
+
+# 生产环境
+B2B_WECOM_PROVIDER=official
+B2B_WECOM_TENANT_CFG_FILE=./config/wecom-tenant.prod.json
+B2B_WECOM_CONTEXT_SECRET=prod-context-secret-yyy</pre>
+    <p><code>docker-compose.yml</code> 已支持：<code>api / worker / wecom</code> 三个服务统一挂载租户 JSON 到 <code>/etc/b2b/wecom-tenant.json</code>，并由 <code>B2B_WECOM_TENANT_CFG</code> 注入。</p>
+
+    <h3>1.3 群上下文绑定注入（数据库）</h3>
+    <pre>INSERT INTO wecom_context_bindings (tenant_id, external_user_id, group_id, binding)
+VALUES ('chang-an', '', '真实客户群 chat_id',
+        '{"kind":"customer_group","customer_id":"真实客户 record_id","owner_user_id":"归属销售企微 userid","owner_name":"张销售"}');</pre>
+    <p>仓库群：<code>{"kind":"warehouse_group","warehouse_id":"wh-xxx"}</code>。绑定缺失时 H5 会明确提示「未识别客户群，功能受限」。</p>
+  </section>
+
+  <section>
+    <h2>2 · 部署与冒烟</h2>
+    <pre>go build ./...
+go test ./internal/wecom ./internal/api ./internal/config
+docker compose build api wecom worker
+docker compose up -d postgres spicedb temporal api wecom worker</pre>
+    <div class="check"><input type="checkbox" /><span><b>A-0</b> <code>GET /healthz</code> 返回 <code>{"status":"ok"}</code>；<code>GET /wecom/healthz</code> 返回 <code>provider=official</code></span></div>
+    <div class="check"><input type="checkbox" /><span><b>A-1</b> <code>GET /assistant</code> 打开销售助理 H5（PC 浏览器 + 企微手机端各一次）</span></div>
+    <div class="check"><input type="checkbox" /><span><b>A-2</b> <code>GET /bridge</code> 打开 PC 兜底后台</span></div>
+  </section>
+
+  <section>
+    <h2>3 · PC 端销售助理闭环</h2>
+    <div class="check"><input type="checkbox" /><span><b>PC-1</b> 飞书 OAuth：点击授权 → 旧系统回调 → 身份回填（token 缓存 2h）</span></div>
+    <div class="check"><input type="checkbox" /><span><b>PC-2</b> 工作台代下单 XSZL1：先选归属销售 → 客户 → 预填 → 提交成功，提示 <code>flow_id/instance_id</code></span></div>
+    <div class="check"><input type="checkbox" /><span><b>PC-3</b> 客户群入口代下单 XSZL2：<code>/assistant/?chat_id=…</code> 打开 → 客户/归属销售锁定（readonly）→ 提交</span></div>
+    <div class="check"><input type="checkbox" /><span><b>PC-4</b> 我的订单列表显示状态/当前节点；点击「查看详情」展示订单详情</span></div>
+    <div class="check"><input type="checkbox" /><span><b>PC-5</b> 详情跳转旧系统 <code>/flows/:flow_id</code> 可打开（四环节快照 + 事件时间线）</span></div>
+    <div class="check"><input type="checkbox" /><span><b>PC-6</b> 旧系统飞书审批中心出现待办；主管/董事长按 V01 profile 收到待办</span></div>
+    <div class="check"><input type="checkbox" /><span><b>PC-7</b> 同键重复提交幂等；token 失效后重授权可继续</span></div>
+  </section>
+
+  <section>
+    <h2>4 · 企微端销售助理闭环（V-C/V-D/V-E）</h2>
+    <div class="check"><input type="checkbox" /><span><b>V-C</b> 出站模板卡：测试成员收到 <code>template_card</code>；点击「通过/驳回」→ <code>cmd/wecom</code> 验签 → HTTP Signal 成功；已决任务幂等 409 回执</span></div>
+    <div class="check"><input type="checkbox" /><span><b>V-D</b> 聊天工具栏/工作台打开 H5：<code>ww.register</code> + <code>wx.agentConfig</code> 双签名成功；OAuth 静默授权完成；顶部显示身份</span></div>
+    <div class="check"><input type="checkbox" /><span><b>V-D-2</b> 客户群入口：H5 自动解析群上下文，客户与归属销售带出并锁定；未绑定群显示黄色提示</span></div>
+    <div class="check"><input type="checkbox" /><span><b>V-D-3</b> 工作台入口：先选归属销售，再人工选客户；客户范围正确</span></div>
+    <div class="check"><input type="checkbox" /><span><b>V-E</b> 守门员：点「发给客户」→ 守门员确认 → 客户群收到消息（未发货订单卡片不含金额）</span></div>
+    <div class="check"><input type="checkbox" /><span><b>V-E-2</b> 若 <code>appchat/send</code> 对外部客户群不可达：回退为「销售人工转发」或切换 <code>externalcontact</code> 群发接口；回退决策与证据写入验收单</span></div>
+    <div class="check"><input type="checkbox" /><span><b>V-F</b> 仓库群回单：发回单照片 → 机器人抓取/识别 → 匹配订单 → 追加凭证版本（只追加不覆盖）</span></div>
+  </section>
+
+  <section>
+    <h2>5 · 数据库/接口核查</h2>
+    <pre># 桥接台账
+SELECT id, legacy_flow_id, state, payload->>'bridge_submission'
+FROM orders WHERE payload->>'bridge_submission'='true' ORDER BY created_at DESC;
+
+# 群绑定
+SELECT tenant_id, group_id, binding FROM wecom_context_bindings;
+
+# 订单事件链
+GET /api/v1/orders/{orderID}/events
+GET /api/v1/orders/{orderID}            # 详情（仓管剥价需单独验证）</pre>
+    <div class="check"><input type="checkbox" /><span><b>DB-1</b> 新单写入后 <code>flow_id/instance_id/stage_id</code> 回写正确</span></div>
+    <div class="check"><input type="checkbox" /><span><b>DB-2</b> <code>view_token</code> / open_id 敏感字段未落库（复核敏感边界）</span></div>
+  </section>
+
+  <section>
+    <h2>6 · 已知风险与现场处理</h2>
+    <div class="box danger"><p><span class="tag danger">R-1</span> <b>旧系统 T-01 未改</b>：v0.1 幂等键前缀识别 + 自动确认 + V01 profile 注入。必须先在 <code>tripartite-approval</code> 仓库完成并独立测试，否则订单会卡「信息确认」。</p></div>
+    <div class="box warn"><p><span class="tag warn">R-2</span> <b>official 群发</b>：代码走 <code>appchat/send</code>；外部客户群若不可达，按 V-E-2 回退并记录。</p></div>
+    <div class="box warn"><p><span class="tag warn">R-3</span> <b>会话存档</b>：官方 <code>decryptMessage</code> 基线是占位实现；v0.1 自动下单不做，不影响销售助理人工下单。若 V-F 依赖真实消息回调图片 URL，需现场确认回调字段。</p></div>
+    <div class="box warn"><p><span class="tag warn">R-4</span> <b>角色映射</b>：官方 userid 当前默认 <code>OP</code>（销售助理语义）；非助理角色接入需扩展 <code>demoRoleOf</code> 或角色映射配置。</p></div>
+    <div class="box warn"><p><span class="tag warn">R-5</span> <b>备案域名</b>：已就绪；仍需确认 JS-SDK 域名白名单与 <code>B2B_WECOM_TENANT_CFG.domain</code> 完全一致（含端口/子域）。</p></div>
+  </section>
+
+  <section>
+    <h2>7 · 验收证据归档</h2>
+    <table>
+      <tr><th>证据</th><th>文件名建议</th><th>内容</th></tr>
+      <tr><td>部署截图</td><td><code>evidence/v01-staff/deploy.png</code></td><td>compose up、healthz</td></tr>
+      <tr><td>PC 闭环</td><td><code>evidence/v01-staff/pc-order.mp4</code></td><td>授权→下单→列表→详情→flows</td></tr>
+      <tr><td>企微 H5</td><td><code>evidence/v01-staff/wecom-h5.png</code></td><td>双签名成功、群上下文锁定、提交成功</td></tr>
+      <tr><td>模板卡</td><td><code>evidence/v01-staff/template-card.png</code></td><td>收到卡 + 点击回调</td></tr>
+      <tr><td>守门员</td><td><code>evidence/v01-staff/gatekeeper.mp4</code></td><td>确认前后群消息</td></tr>
+      <tr><td>仓库群回单</td><td><code>evidence/v01-staff/receipt-v3.png</code></td><td>识别结果 + 凭证版本</td></tr>
+      <tr><td>验收结论</td><td><code>evidence/v01-staff/acceptance.md</code></td><td>逐项 PASS/FAIL + 回退裁决</td></tr>
+    </table>
+  </section>
+
+  <footer>
+    <span>staff_scene_v0.1 · 现场验证与处理单</span>
+    <span>由 v0.1发布过程跟踪.html 引用 · 完成后回填跟踪页</span>
+  </footer>
+</div>
+</body>
+</html>

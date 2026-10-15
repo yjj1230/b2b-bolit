@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>企微订单助手 · 财务相关会议信息（供业财对接）</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+  :root {
+    --bg: #f5f6f8;
+    --paper: #ffffff;
+    --ink: #1a1d24;
+    --muted: #5d6371;
+    --line: #e8e9ed;
+    --accent: #2c5fae;
+    --accent-soft: #e8efff;
+    --positive: #2c8a4f;
+    --warn: #b58522;
+    --danger: #b13b3b;
+    --gold: #b58522;
+    --display: 'Georgia', 'Songti SC', 'STSong', 'SimSun', serif;
+    --body: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, 'JetBrains Mono', monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.7; }
+  .page { max-width: 1000px; margin: 28px auto 48px; padding: 48px 56px 56px; background: var(--paper); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 2px 12px rgba(26,29,36,0.05); }
+
+  /* ---------- Header ---------- */
+  header.head { border-bottom: 1px solid var(--line); padding-bottom: 22px; margin-bottom: 28px; }
+  .crumb { font-family: var(--mono); font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  h1 { font-family: var(--display); font-size: 32px; margin: 8px 0 14px; letter-spacing: 0; font-weight: 700; line-height: 1.3; }
+  .meta-row { display: flex; gap: 30px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+  .meta-row strong { color: var(--ink); display: block; font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; font-weight: 500; }
+  .callout { padding: 16px 20px; background: var(--accent-soft); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; font-size: 13.5px; margin: 12px 0 18px; }
+  .callout.blue { background: #ecf3fb; border-left-color: #2c5fae; }
+  .callout.green { background: #eef7ef; border-left-color: var(--positive); }
+  .callout.red { background: #fbeeed; border-left-color: var(--danger); }
+  .callout.gold { background: #fdf6e7; border-left-color: var(--gold); }
+  .callout strong { font-weight: 600; }
+
+  section { margin-top: 42px; }
+  h2 { font-family: var(--display); font-size: 22px; margin: 0 0 16px; letter-spacing: 0; }
+  h3 { font-family: var(--display); font-size: 16px; margin: 0 0 10px; }
+  .chapter-head { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin: 0 0 6px; }
+  .chapter-head h2 { margin: 0; }
+  .rank-pill { font-family: var(--mono); font-size: 12px; font-weight: 700; letter-spacing: 0.04em; padding: 3px 12px; border-radius: 999px; color: #fff; white-space: nowrap; }
+  .rank-1 { background: var(--accent); }
+  .rank-2 { background: var(--gold); }
+  .rank-3 { background: var(--danger); }
+  .chapter-sub { color: var(--muted); font-size: 14px; margin: 0 0 18px; max-width: 760px; }
+
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+  .stat { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+  .stat .k { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); display: block; margin-bottom: 3px; }
+  .stat .v { font-size: 16.5px; font-weight: 700; letter-spacing: -0.01em; }
+  .stat .v small { font-size: 12px; font-weight: 500; color: var(--muted); display: block; margin-top: 1px; }
+
+  table { width: 100%; border-collapse: collapse; margin: 6px 0 10px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); font-size: 13.5px; vertical-align: top; }
+  th { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600; white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+  tbody tr:nth-child(even) { background: #fafbfc; }
+  tbody tr:hover { background: var(--accent-soft); }
+  td strong { font-weight: 600; }
+  td .sub { display: block; color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+
+  .pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font-family: var(--mono); font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
+  .pill-todo { background: var(--bg); color: var(--muted); border: 1px solid var(--line); }
+  .pill-progress { background: rgba(44,95,174,0.12); color: var(--accent); }
+  .pill-done { background: rgba(44,138,79,0.12); color: var(--positive); }
+  .pill-blocked { background: rgba(177,59,59,0.12); color: var(--danger); }
+
+  .mermaid-box { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; overflow-x: auto; margin: 8px 0 18px; }
+  .mermaid-box svg { max-width: 100%; height: auto; }
+  .fig-caption { font-size: 12px; color: var(--muted); text-align: center; margin: -10px 0 20px; }
+
+  .decisions { padding: 22px 24px; background: var(--accent-soft); border-left: 3px solid var(--accent); border-radius: 6px; }
+  .decisions h3 { font-family: var(--display); font-size: 15px; margin: 0 0 12px; color: var(--accent); }
+  .decisions ul { padding-left: 18px; margin: 0; display: flex; flex-direction: column; gap: 8px; font-size: 14px; }
+  .decisions li::marker { color: var(--accent); }
+  .decisions li strong { font-weight: 600; }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .panel { padding: 18px 20px; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; }
+  .panel h3 { font-family: var(--display); font-size: 16px; margin: 0 0 8px; }
+  .panel p { color: var(--muted); margin: 0; font-size: 13.5px; line-height: 1.6; }
+  .panel ul { margin: 8px 0 0; padding-left: 18px; font-size: 13.5px; color: var(--muted); }
+
+  footer { margin-top: 44px; padding-top: 18px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-family: var(--mono); font-size: 11.5px; color: var(--muted); }
+
+  @media (max-width: 760px) {
+    .page { padding: 26px 20px; margin: 0; border-radius: 0; }
+    .grid, .stats { grid-template-columns: 1fr 1fr; }
+    h1 { font-size: 26px; }
+  }
+  @media print {
+    body { background: #fff; }
+    .page { box-shadow: none; border: none; max-width: 100%; }
+    .mermaid-box { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ================= Header ================= -->
+  <header class="head">
+    <div class="crumb">长安仁恒 / 订单助手 / 财务专题 · 供业财对接</div>
+    <h1>财务相关会议信息 · 供业财对接</h1>
+    <div class="meta-row">
+      <span><strong>Source</strong>2026-08-13 需求评审会议逐字稿</span>
+      <span><strong>Audience</strong>业财 / 财务系统技术同事</span>
+      <span><strong>Scope</strong>仅财务相关议题</span>
+      <span><strong>Version</strong>v1.0</span>
+    </div>
+  </header>
+
+  <div class="callout">
+    本文档从 2026-08-13《企微订单助手 · 需求评审会议纪要》中<strong>摘出全部与财务相关的会议信息</strong>，供业财侧技术同事单独审阅、确认与对接。涉及：<strong>开票凭证上传方式、发票发客户群守门员、多单合并开票与剩余额度、无回单开票规则、收款确认环节、飞书 × 企微后台打通</strong>。
+  </div>
+
+  <!-- ================= 总览 ================= -->
+  <section id="overview">
+    <h2>财务相关议题 · 一表总览</h2>
+    <table>
+      <thead><tr><th>议题</th><th>会议结论</th><th>状态</th><th>需要业财侧做什么</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>① 开票凭证上传方式</strong></td>
+          <td>财务在<strong>订单后台页面</strong>上传，凭证机器人仅兜底无电脑场景</td>
+          <td><span class="pill pill-done">已拍板</span></td>
+          <td>确认财务端操作路径与订单后台对接</td>
+        </tr>
+        <tr>
+          <td><strong>② 发票发客户群</strong></td>
+          <td>第一轮强制<strong>销售守门员</strong>点确认后自动发群，逐步释放</td>
+          <td><span class="pill pill-done">已拍板</span></td>
+          <td>确认发票触达链路与审核节点</td>
+        </tr>
+        <tr>
+          <td><strong>③ 多单合并开票 / 剩余额度</strong></td>
+          <td>发票与订单分离、关联可追加；收款/发货/开票三金额分别展示；剩余未开票额度留订单上、财务确认关联</td>
+          <td><span class="pill pill-progress">需惊蜇确认</span></td>
+          <td><strong>确认是否已有业财实现</strong>（业财逻辑归属）</td>
+        </tr>
+        <tr>
+          <td><strong>④ 无回单开票</strong></td>
+          <td>规则未定：是否允许销售无回单开票，需先确认规则再谈实现</td>
+          <td><span class="pill pill-blocked">规则待确认</span></td>
+          <td>等规则确认后对齐审批放行逻辑</td>
+        </tr>
+        <tr>
+          <td><strong>⑤ 收款确认（款到发货）</strong></td>
+          <td>财务查银行、主动反馈款是否到账，节点卡住才继续走</td>
+          <td><span class="pill pill-done">已拍板</span></td>
+          <td>确认收款确认数据来源与触发方式</td>
+        </tr>
+        <tr>
+          <td><strong>⑥ 飞书 × 企微后台打通</strong></td>
+          <td>财务继续用飞书，后台与企微打通，现有数据不动</td>
+          <td><span class="pill pill-progress">今晚定共识</span></td>
+          <td>确认飞书侧数据结构与迁移边界</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ================= 第一章 凭证上传 ================= -->
+  <section id="ch1">
+    <div class="chapter-head">
+      <h2>一 · 开票凭证上传方式（CW1）</h2>
+      <span class="rank-pill rank-1">已拍板</span>
+    </div>
+    <p class="chapter-sub">会上明确：财务的操作路径要落在「订单后台页面」，而不是转发凭证机器人——财务每天对电脑，凭证上传属于高危操作，要放在最稳、最直接的路径上。</p>
+
+    <h3>① 结论</h3>
+    <table>
+      <thead><tr><th>角色</th><th>凭证上传方式</th><th>理由</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>财务</strong></td>
+          <td>进<strong>订单管理后台 → 订单详情页 → 上传凭证</strong></td>
+          <td>财务本身每天坐在电脑前，最简做法就是点后台、进订单上传；不经过机器人中转</td>
+        </tr>
+        <tr>
+          <td><strong>凭证机器人</strong></td>
+          <td>降级为<strong>兜底通道</strong>：仅用于没有电脑操作场景的人（如餐馆类客户）</td>
+          <td>若财务有高频、后台难以支持的操作场景，再考虑用凭证中转</td>
+        </tr>
+        <tr>
+          <td><strong>销售（合同回传）</strong></td>
+          <td>可以<strong>直接转给凭证机器人</strong>处理</td>
+          <td>销售常在外面跑、没机会对电脑，走机器人更顺</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="callout red">
+      <strong>背景强调（菜花原意）：</strong>财务操作属于<strong>高危行为</strong>，凭证上传要落在最稳的操作路径上；机器人转发是给「没有电脑场景」的人准备的，不能本末倒置。
+    </div>
+  </section>
+
+  <!-- ================= 第二章 发票流转 ================= -->
+  <section id="ch2">
+    <div class="chapter-head">
+      <h2>二 · 发票流转与「守门员」机制</h2>
+      <span class="rank-pill rank-1">已拍板</span>
+    </div>
+    <p class="chapter-sub">财务上传发票到订单后，是否自动发到客户群？第一轮不放开全自动，强制销售确认后再发，逐步释放。</p>
+
+    <h3>① 目标流转</h3>
+    <div class="mermaid-box">
+<pre class="mermaid">
+graph LR
+  F["财务开票"] --> U["订单后台页面上传凭证<br/>（订单详情 · 上传）"]
+  U --> A["关联订单<br/>（多单合并 / 分批发货开票）"]
+  A --> G["销售 · 守门员确认<br/>（第一轮强制）"]
+  G -->|"确认后自动发"| C["客户群 · 客户可见"]
+  style F fill:#fbf9f4,stroke:#e8e9ed,color:#1a1d24
+  style U fill:#eef7ef,stroke:#2c8a4f,color:#1a1d24
+  style A fill:#fbf9f4,stroke:#e8e9ed,color:#1a1d24
+  style G fill:#fdf6e7,stroke:#b58522,color:#1a1d24
+  style C fill:#eef7ef,stroke:#2c8a4f,color:#1a1d24
+</pre>
+    </div>
+    <p class="fig-caption">第一轮上线时，任何内容发到客户群前必须有销售点一下确认（守门员），之后再逐步释放自动化。</p>
+
+    <div class="callout blue">
+      <strong>确立的原则：</strong>「哪些内容可以不经审核直接发到群里、哪些内容必须要有审核动作」要明确成规则。第一轮宁可多一次点击，避免一上来就全自动化带来体验与风险问题。
+    </div>
+  </section>
+
+  <!-- ================= 第三章 多单合并开票 ================= -->
+  <section id="ch3">
+    <div class="chapter-head">
+      <h2>三 · 多单合并开票 / 剩余开票额度</h2>
+      <span class="rank-pill rank-2">需惊蜇确认 · 业财逻辑</span>
+    </div>
+    <p class="chapter-sub">这是财务侧最关键的需求点：多笔订单合并开票、分批发货开票、一笔款跨多张订单的场景，会议明确了「发票是发票、订单是订单」的关联逻辑，并点名要确认该功能是否已有业财系统实现。</p>
+
+    <h3>① 核心规则</h3>
+    <table>
+      <thead><tr><th>规则</th><th>说明</th><th>会议原话要点</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>发票与订单分离</strong></td>
+          <td>发票和订单通过「关联」连接，不是一一对应；一笔款可跨多笔订单</td>
+          <td>"发票是发票，订单是订单"</td>
+        </tr>
+        <tr>
+          <td><strong>关联可追加</strong></td>
+          <td>先关联 1、2 两笔订单后，发现漏了可再补关联第 3 笔</td>
+          <td>"本来要关联 123，可以先关联 12，再把关联关系增加一个 3"</td>
+        </tr>
+        <tr>
+          <td><strong>三金额分别展示</strong></td>
+          <td>收款金额 / 发货金额 / 开票金额是三个独立数字</td>
+          <td>"总发货 12000 · 总开票 10000 · 剩余 2000 未开票"</td>
+        </tr>
+        <tr>
+          <td><strong>剩余额度留在订单上</strong></td>
+          <td>未开票额度保留在对应订单上，表示该订单还可以继续开票</td>
+          <td>"有一张订单上面要留出 2000 的额度，还可以继续开"</td>
+        </tr>
+        <tr>
+          <td><strong>关联规则由财务确认</strong></td>
+          <td>剩余额度关联到哪张订单继续开，由<strong>财务选择</strong>，不自动匹配</td>
+          <td>"财务选这个，不可能我们来选"</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>② 关联与额度示意</h3>
+    <div class="mermaid-box">
+<pre class="mermaid">
+graph TB
+  INV["发票 INV-001<br/>开票金额 ¥10,000"] -->|"关联（可追加）"| O1["订单 1 · ¥8,000<br/>已开票 8,000 · 余 0"]
+  INV -->|"关联（可追加）"| O2["订单 2 · ¥6,000<br/>已开票 2,000 · 余 4,000"]
+  PAY["收款 ¥12,000<br/>（一笔款跨多单）"] -. "收款金额" .-> O1
+  PAY -. "收款金额" .-> O2
+  style INV fill:#e8efff,stroke:#2c5fae,color:#1a1d24
+  style O1 fill:#fbf9f4,stroke:#e8e9ed,color:#1a1d24
+  style O2 fill:#fdf6e7,stroke:#b58522,color:#1a1d24
+  style PAY fill:#eef7ef,stroke:#2c8a4f,color:#1a1d24
+</pre>
+    </div>
+    <p class="fig-caption">三金额口径：收款金额（实际到账）、发货金额（订单金额）、开票金额（已开票），未开票额度留在订单上由财务确认继续开。</p>
+
+    <div class="callout gold">
+      <strong>归属待确认：</strong>菜花点名「这个功能找一下<strong>惊蜇</strong>，看看是不是他们做的，因为这是<strong>业财里面的逻辑</strong>」——请业财侧确认：<strong>多单合并开票、剩余未开票额度关联，是否已有业财系统实现；若有，订单助手如何对接；若没有，由哪边承担。</strong>
+    </div>
+  </section>
+
+  <!-- ================= 第四章 无回单开票 ================= -->
+  <section id="ch4">
+    <div class="chapter-head">
+      <h2>四 · 无回单开票（CW2）</h2>
+      <span class="rank-pill rank-3">规则待确认</span>
+    </div>
+    <p class="chapter-sub">demo 里画的场景是：非款到单没有签收回单，超过 5 天自动出现在财务工作台待办，财务点「放行」即可开票。会议确认：<strong>「是否允许销售无回单开票」这个规则本身还没有定</strong>，先定规则再谈实现。</p>
+
+    <h3>① demo 设想 vs 会议结论</h3>
+    <table>
+      <thead><tr><th>维度</th><th>demo 设想（CW2）</th><th>会议结论</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>触发</strong></td>
+          <td>无回单且超过 5 天，自动出待办</td>
+          <td>触发逻辑成立，但前提规则未定</td>
+        </tr>
+        <tr>
+          <td><strong>审批</strong></td>
+          <td>财务工作台点「放行」即可开票</td>
+          <td>需先确认：公司是否允许销售无回单开票（找宋主任 / 财务负责人 / 张总）</td>
+        </tr>
+        <tr>
+          <td><strong>例外审核依据</strong></td>
+          <td>缺少判断依据，容易误放或卡单</td>
+          <td>规则确认前不实现；规则确认后对齐例外审批流程</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>② 需要同步算的一笔账</h3>
+    <div class="callout gold">
+      <strong>资金账（菜花给出的沟通口径）：</strong>坚持要回单，整个资金回笼可能<strong>延后约 30 天到账</strong>。按当前利息折算，损失金额要算出来、写成文档——用数据说服老板重新评估「必须回单」的规则，而不是只停在「老板说要回单所以没法改」。
+    </div>
+
+    <div class="callout red">
+      <strong>协作要求：</strong>把<strong>现状、问题、现象、建议</strong>整理成文档主动提出，而不是默认规则不可变。"张总走错了路，你们就觉得那是他的问题——你们有责任把问题、把建议说出来。"
+    </div>
+  </section>
+
+  <!-- ================= 第五章 收款确认 ================= -->
+  <section id="ch5">
+    <div class="chapter-head">
+      <h2>五 · 收款确认环节（款到发货）</h2>
+      <span class="rank-pill rank-1">已拍板</span>
+    </div>
+    <p class="chapter-sub">在款到发货订单中，财务承担「款是否到账」的确认职责，是发货前的一道闸门。</p>
+    <div class="mermaid-box">
+<pre class="mermaid">
+graph TB
+  A["商务确认备货可执行"] --> B["财务确认款到<br/>（财务查银行）"]
+  B -->|"款到 · 主动反馈"| C["发货"]
+  B -->|"款未到 · 节点卡住"| B
+  style A fill:#fbf9f4,stroke:#e8e9ed,color:#1a1d24
+  style B fill:#e8efff,stroke:#2c5fae,color:#1a1d24
+  style C fill:#eef7ef,stroke:#2c8a4f,color:#1a1d24
+</pre>
+    </div>
+    <p class="fig-caption">财务确认款到的方式：财务去查银行；流程上需要有节点让财务办理并主动反馈，流程才会往下走（不是系统自动查账）。</p>
+  </section>
+
+  <!-- ================= 第六章 飞书×企微 ================= -->
+  <section id="ch6">
+    <div class="chapter-head">
+      <h2>六 · 飞书 × 企微后台打通（财务端）</h2>
+      <span class="rank-pill rank-2">今晚定共识</span>
+    </div>
+    <p class="chapter-sub">会议明确：飞书与企微两端后台是打通的——<strong>财务继续用飞书</strong>（仓管也继续用飞书），订单助手在企微侧，两端数据一致。</p>
+    <table>
+      <thead><tr><th>决策项</th><th>结论</th></tr></thead>
+      <tbody>
+        <tr><td><strong>财务端入口</strong></td><td>继续使用飞书（不迁移到企微）</td></tr>
+        <tr><td><strong>打通方式</strong></td><td>飞书与企微<strong>后台打通</strong>，两端看到同一份订单数据</td></tr>
+        <tr><td><strong>数据约束</strong></td><td><strong>现有数据不能动</strong>：数据结构要放回飞书已经在跑的那套上面，需迅速调整</td></tr>
+        <tr><td><strong>时间点</strong></td><td>今晚（08-13）老轮子 × 菜花 × 怀滨达成共识，不再来回拉扯</td></tr>
+      </tbody>
+    </table>
+    <div class="callout">
+      <strong>为什么重要：</strong>该决定是架构先决条件——若飞书、企微同时在用，意味着现有飞书侧数据结构与数据都不能动，直接影响订单助手的对接方案与上线排期。
+    </div>
+  </section>
+
+  <!-- ================= 待办 ================= -->
+  <section id="actions">
+    <h2>给业财侧 / 财务相关行动项</h2>
+    <table>
+      <thead><tr><th>行动</th><th>Owner</th><th>Due</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>确认「多单合并开票 / 剩余未开票额度关联」是否已有业财系统实现；若无，明确由哪边承担（惊蜇）</td>
+          <td>业财侧</td><td>方案期</td><td><span class="pill pill-todo">To do</span></td>
+        </tr>
+        <tr>
+          <td>确认「是否允许销售无回单开票」规则（宋主任 / 财务负责人 / 张总），并整理现状-问题-建议文档（含资金延后 30 天利息账）</td>
+          <td>陈虹励</td><td>产品到岗前</td><td><span class="pill pill-todo">To do</span></td>
+        </tr>
+        <tr>
+          <td>确认财务端上传凭证的订单后台路径与凭证机器人兜底边界</td>
+          <td>技术侧</td><td>方案期</td><td><span class="pill pill-todo">To do</span></td>
+        </tr>
+        <tr>
+          <td>确认收款确认环节的数据来源（财务查银行）与节点触发方式</td>
+          <td>技术侧</td><td>方案期</td><td><span class="pill pill-todo">To do</span></td>
+        </tr>
+        <tr>
+          <td>飞书 × 企微后台打通方案（现有数据不动、结构放回飞书在跑的那套）</td>
+          <td>曹文炯</td><td>今晚</td><td><span class="pill pill-todo">To do</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>
+    <span>摘录自 2026-08-13《企微订单助手 · 需求评审会议纪要》· 仅财务相关议题</span>
+    <span>长安仁恒 · 订单助手 · 财务专题 v1.0</span>
+  </footer>
+
+</div>
+
+<script>
+mermaid.initialize({ startOnLoad: true, theme: 'base', securityLevel: 'loose',
+  themeVariables: { fontFamily: "-apple-system,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif", fontSize: '13px',
+    primaryColor: '#fbf9f4', primaryBorderColor: '#e8e9ed', primaryTextColor: '#1a1d24',
+    lineColor: '#9aa3b2', background: '#ffffff' } });
+</script>
+</body>
+</html>

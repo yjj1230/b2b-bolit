@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>渐进式发布计划 v2 · 三次发布</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({ startOnLoad: true, theme: 'base', themeVariables: {
+    primaryColor: '#eef3ff', primaryBorderColor: '#4f6ef7', primaryTextColor: '#172554',
+    lineColor: '#64748b', fontSize: '13px', fontFamily: 'ui-sans-serif, system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif'
+  }});
+</script>
+<style>
+  :root{
+    --ink:#0f172a; --ink2:#334155; --ink3:#64748b;
+    --line:#e2e8f0; --line2:#cbd5e1;
+    --bg:#f6f8fb; --card:#ffffff;
+    --blue:#2563eb; --blue-bg:#eff6ff; --blue-line:#bfdbfe;
+    --green:#059669; --green-bg:#ecfdf5; --green-line:#a7f3d0;
+    --amber:#b45309; --amber-bg:#fffbeb; --amber-line:#fde68a;
+    --red:#dc2626; --red-bg:#fef2f2; --red-line:#fecaca;
+    --violet:#7c3aed; --violet-bg:#f5f3ff; --violet-line:#ddd6fe;
+    --shadow:0 1px 2px rgba(15,23,42,.05), 0 8px 24px rgba(15,23,42,.06);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:ui-sans-serif,system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.75;font-size:15px}
+  .wrap{max-width:1100px;margin:0 auto;padding:32px 22px 80px}
+  header.hero{background:linear-gradient(135deg,#172554 0%,#1e3a8a 55%,#4c1d95 100%);color:#fff;border-radius:18px;padding:34px 34px 28px;margin-bottom:26px;box-shadow:var(--shadow)}
+  header.hero h1{margin:0 0 10px;font-size:27px;letter-spacing:.5px}
+  header.hero p{margin:4px 0;color:#dbeafe;font-size:14px}
+  .hero-badges{margin-top:16px;display:flex;flex-wrap:wrap;gap:10px}
+  .badge{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 13px;font-size:12.5px;font-weight:600;border:1px solid transparent}
+  .badge.blue{background:#dbeafe;color:#1e3a8a}
+  .badge.green{background:#d1fae5;color:#065f46}
+  .badge.amber{background:#fef3c7;color:#92400e}
+  .badge.red{background:#fee2e2;color:#991b1b}
+  .badge.violet{background:#ede9fe;color:#5b21b6}
+  h2{font-size:21px;margin:44px 0 14px;padding-left:12px;border-left:5px solid var(--blue);line-height:1.4}
+  h3{font-size:17px;margin:28px 0 10px;color:var(--ink)}
+  h4{font-size:15px;margin:20px 0 8px;color:var(--ink2)}
+  p{margin:8px 0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 24px;margin:14px 0;box-shadow:var(--shadow)}
+  .card.blue{border-color:var(--blue-line);background:linear-gradient(180deg,#f8fbff,var(--card))}
+  .card.green{border-color:var(--green-line);background:linear-gradient(180deg,#f8fff9,var(--card))}
+  .card.amber{border-color:var(--amber-line);background:linear-gradient(180deg,#fffef7,var(--card))}
+  .card.red{border-color:var(--red-line);background:linear-gradient(180deg,#fff9f9,var(--card))}
+  .tldr{font-size:16px;line-height:1.9}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr}}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13.5px;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.04)}
+  th{background:#f1f5f9;color:#0f172a;text-align:left;font-weight:700;padding:10px 11px;border-bottom:2px solid var(--line);white-space:nowrap}
+  td{padding:10px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:#fafcff}
+  .tag{display:inline-block;border-radius:6px;padding:1px 8px;font-size:12px;font-weight:600;white-space:nowrap;border:1px solid transparent}
+  .tag.green{background:var(--green-bg);color:var(--green);border-color:var(--green-line)}
+  .tag.blue{background:var(--blue-bg);color:var(--blue);border-color:var(--blue-line)}
+  .tag.amber{background:var(--amber-bg);color:var(--amber);border-color:var(--amber-line)}
+  .tag.red{background:var(--red-bg);color:var(--red);border-color:var(--red-line)}
+  .tag.violet{background:var(--violet-bg);color:var(--violet);border-color:var(--violet-line)}
+  .tag.gray{background:#f1f5f9;color:#475569;border-color:var(--line2)}
+  .mermaid{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;margin:16px 0;overflow-x:auto;box-shadow:var(--shadow)}
+  .small{font-size:12.5px;color:var(--ink3)}
+  code, .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;font-size:.92em;background:#f1f5f9;border-radius:5px;padding:1px 6px;color:#0f172a}
+  pre{background:#0f172a;color:#e2e8f0;border-radius:12px;padding:16px 18px;overflow-x:auto;font-size:13px;line-height:1.6}
+  pre code{background:none;color:inherit;padding:0}
+  .toc{column-count:2;column-gap:30px;font-size:14px}
+  .toc a{color:var(--blue);text-decoration:none}
+  .toc a:hover{text-decoration:underline}
+  @media(max-width:760px){.toc{column-count:1}}
+  .release{border-top:4px solid var(--blue);margin-top:26px}
+  .release.r1{border-top-color:#2563eb}
+  .release.r2{border-top-color:#7c3aed}
+  .release.r3{border-top-color:#dc2626}
+  .conclusion-box{border-left:4px solid var(--green);background:var(--green-bg);padding:14px 18px;border-radius:10px}
+  ul{margin:8px 0 8px 1.2em;padding:0}
+  li{margin:4px 0}
+  .legend{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+  .kbd{background:#fff;border:1px solid var(--line2);border-bottom-width:2px;border-radius:6px;padding:0 7px;font-size:12px;font-family:ui-monospace,monospace}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <h1>渐进式发布计划 v2 · 三次发布</h1>
+  <p>设计对象：b2b_pilot_v3（企微版订单履约系统） · 参考：飞书三方审批（tripartite-approval）与 pgAPI</p>
+  <p>发布策略：把原来的 v0.1 → v0.2 → v0.3 → v0.4 → 0.5 压缩为 <strong>三次发布</strong></p>
+  <p>设计日期：2026-08-18 · 最高验证视角：<strong>数据不可丢失 · 不可有不能解决的死路</strong></p>
+  <div class="hero-badges">
+    <span class="badge blue">第 1 次：销售助理接入</span>
+    <span class="badge violet">第 2 次：商务 + 财务 + 仓管接入</span>
+    <span class="badge red">第 3 次：销售接入 + 全部数据切换</span>
+  </div>
+</header>
+
+<div class="card">
+  <h3 style="margin-top:0">目录</h3>
+  <div class="toc">
+    <a href="#s0">0. 结论摘要（TL;DR）</a><br>
+    <a href="#s1">1. 三次发布总览</a><br>
+    <a href="#s2">2. 第 1 次发布：销售助理接入</a><br>
+    <a href="#s3">3. 第 2 次发布：商务 + 财务 + 仓管接入</a><br>
+    <a href="#s4">4. 第 3 次发布：销售接入 + 全部数据切换</a><br>
+    <a href="#s5">5. 数据与真相源演进</a><br>
+    <a href="#s6">6. 受信办理通道（第 2、3 次共用命门）</a><br>
+    <a href="#s7">7. 角色与权限接入节奏</a><br>
+    <a href="#s8">8. P0 清单重映射（按三次发布）</a><br>
+    <a href="#s9">9. 风险 Gap 与补齐方式</a><br>
+    <a href="#s10">10. 验收标准</a><br>
+    <a href="#s11">11. 明确不做（防范围蔓延）</a><br>
+    <a href="#s12">附录 A · 证据索引</a>
+  </div>
+</div>
+
+<!-- ============ 0 ============ -->
+<h2 id="s0">0 · 结论摘要（TL;DR）</h2>
+<div class="card green tldr">
+<p><strong>三次发布成立，但每刀都更重。</strong>压缩的关键不是把五周的事硬塞进三周，而是改变「双执行」策略：第 2 次发布把商务、财务、仓管一次迁入，但他们办理的每一笔都通过<strong>受信办理通道</strong>写回旧飞书系统，旧系统继续当真相源；第 3 次发布把销售、主管、董事长一次迁入，同时执行<strong>一次性数据切换</strong>，新系统才成为真相源。</p>
+<p><strong>三句话记住三刀：</strong></p>
+<ul>
+  <li><b>第 1 刀（销售助理）</b>：新系统只做「下单入口 + 状态视图」，订单写进旧飞书流，后续环节旧系统照跑。这一刀与原 v0.1 完全一致。</li>
+  <li><b>第 2 刀（商务 + 财务 + 仓管）</b>：把原 v0.2 + v0.3 合并。商务办备货、财务确认到款、仓管办发货和回单，全部在新系统操作，但结果经受信通道落回旧系统。旧系统仍是真相源，飞书审批中心仍可见可办（存量单）。</li>
+  <li><b>第 3 刀（销售 + 切换）</b>：把原 v0.4 + 0.5 合并。销售办开票信息与盖章回传，主管/董事长迁入新系统审批台；随后执行「冻结旧系统 → 全量迁移 → 对账 → 切换」，新系统成为唯一真相源，飞书三方审批流整体下线。</li>
+</ul>
+<p><strong>最重要的约束</strong>：第 3 次发布不是普通版本，是一次<strong>系统切换项目</strong>，必须单独演练；第 2 次发布前必须把「受信办理通道」补齐（真实操作人 + 幂等锁）；三次发布全程沿用同一原则——<strong>数据不丢、无死路、旧系统尽量少改</strong>。</p>
+</div>
+
+<!-- ============ 1 ============ -->
+<h2 id="s1">1 · 三次发布总览</h2>
+
+<div class="mermaid">
+flowchart LR
+  subgraph R1["第 1 次发布 · 销售助理接入"]
+    U1["用户：虹励（销售助理）"]
+    F1["下单入口 + 我的订单 + 状态回显"]
+    O1["订单写进旧飞书流，后续照旧"]
+  end
+  subgraph R2["第 2 次发布 · 商务 + 财务 + 仓管"]
+    U2["用户新增：商务 + 财务 + 仓管"]
+    F2["商务备货选仓 / 财务确认到款 / 仓管发货与回单"]
+    O2["新系统办理 → 受信通道 → 旧系统 decision 推进"]
+  end
+  subgraph R3["第 3 次发布 · 销售接入 + 全部数据切换"]
+    U3["用户新增：销售全员 + 销售主管 + 董事长"]
+    F3["销售开票信息与盖章回传 + 主管审价 + 董事长终审"]
+    O3["冻结旧系统 → 全量迁移 → 对账 → 切换，新系统成为真相源"]
+  end
+  R1 --> R2 --> R3
+  O1 -.->|旧系统唯一真相| R2
+  O2 -.->|旧系统仍唯一真相| R3
+</div>
+
+<div class="card">
+<h3>1.1 与原五段计划的对应关系</h3>
+<table>
+  <tr><th style="width:130px">v2 发布</th><th style="width:240px">吸收原计划的哪些版本</th><th>核心变化</th></tr>
+  <tr><td><b>第 1 次</b></td><td>原 v0.1（销售助手下单 + 视图）</td><td>不变，保持原设计</td></tr>
+  <tr><td><b>第 2 次</b></td><td>原 v0.2（商务备货）+ 原 v0.3（仓管 + 财务）</td><td>三角色一次发布，但各自环节独立开关，可分批灰度；开票「盖章回传」留在第 3 次</td></tr>
+  <tr><td><b>第 3 次</b></td><td>原 v0.4（销售环节）+ 原 0.5（两级终审 + 真相源切换）</td><td>销售、主管、董事长一次迁入，迁入完成即切换，飞书下线</td></tr>
+</table>
+</div>
+
+<div class="card amber">
+<h3>1.2 三次发布的节奏建议（相对工期，不是承诺日期）</h3>
+<table>
+  <tr><th>发布</th><th style="width:160px">建议工期</th><th>理由</th></tr>
+  <tr><td>第 1 次</td><td>1 周内</td><td>桥接模块方案已定、旧系统接口已核验；主要工作量是极简前端 + 联调</td></tr>
+  <tr><td>第 2 次</td><td>1–2 周</td><td>受信办理通道一次建成，三角色只是同一通道上的三组信号；工作量大在权限/待办视图</td></tr>
+  <tr><td>第 3 次</td><td>2–3 周（含 2 次演练）</td><td>这是一次系统切换：全量迁移 + 对账 + 切换仪式 + 回滚演练，必须单独排期</td></tr>
+</table>
+</div>
+
+<!-- ============ 2 ============ -->
+<h2 id="s2">2 · 第 1 次发布：销售助理接入</h2>
+
+<div class="card release r1">
+<h3 style="margin-top:0">2.1 本次发布做什么</h3>
+<table>
+  <tr><th style="width:150px">维度</th><th>内容</th></tr>
+  <tr><td>唯一用户</td><td>销售助理虹励；其他用户零影响，继续用飞书</td></tr>
+  <tr><td>入口</td><td>企微（群聊确认卡 / 侧边栏 / 工作台）；企微备案域名未就绪则先 PC 订单后台</td></tr>
+  <tr><td>核心功能</td><td>① 飞书 OAuth 授权；② 下单并写进旧飞书审批流；③ 我的订单列表；④ 状态回显；⑤ 详情跳转旧系统 /flows/:flow_id；⑥ 驳回原因可见（P1）</td></tr>
+  <tr><td>明确不做</td><td>不在新系统办理备货/发货/开票；不迁移 JSONL；不修旧系统 bug</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>2.2 数据怎么流</h3>
+<div class="mermaid">
+flowchart TB
+  S["销售助理在企微/PC 填写订单"] --> B["新系统 internal/bridge<br/>OAuth 代理 + 下单调用器"]
+  B -->|"POST /external-orders/create"| OLD["旧飞书三方审批系统"]
+  OLD -->|"创建飞书审批实例"| FS["飞书审批中心"]
+  OLD -->|"回写 flow_id / instance_id"| PG["新系统 PG"]
+  FS -.->|"审批进度（飞书原生）"| S
+  MIRROR["pgAPI 三方审批流程表镜像"] -.->|"周期同步（可后置）"| SYNC["cmd/sync"]
+  SYNC --> PG
+  PG -->|"我的订单列表"| S
+  PG -->|"详情跳转"| FLOW["旧系统 /flows/:flow_id 只读页"]
+</div>
+<p class="small">读方向优先对接 <code>pgAPI /api/db/approval-flows</code>（稳定英文字段 + 分页），不直接调飞书开放平台；存量订单同步是 P1，可后置——自建单列表直查新系统 PG 就已够开工。</p>
+</div>
+
+<div class="card">
+<h3>2.3 关键开发量（全部计入新系统，旧系统只一处小改）</h3>
+<table>
+  <tr><th style="width:250px">工作项</th><th style="width:110px">归属</th><th>说明</th></tr>
+  <tr><td>internal/bridge：OAuth 代理 + token 缓存 + 下单调用器 + 字段映射 + 幂等 + 回写 PG</td><td><span class="tag blue">新系统施工</span></td><td>方案 A1 已定；旧系统既有接口 <code>/api/approval/feishu-user-by-code</code> 与 <code>POST /external-orders/create</code> 已核验</td></tr>
+  <tr><td>极简前端：下单页 + 我的订单 + 详情跳转</td><td><span class="tag blue">新系统施工</span></td><td>本仓库无 web/ 目录；先做 PC 极简版跑闭环，企微入口后置</td></tr>
+  <tr><td>旧系统针对性小改：v0.1 幂等键前缀识别 → 自动确认信息确认 + 注入 V01 profile</td><td><span class="tag violet">旧系统小改</span></td><td>收敛在 submitExternalOrder.ts 创建处；只影响 v0.1 订单；独立测试服务验证后上生产</td></tr>
+  <tr><td>旧系统配置：飞书重定向白名单、agent/sales 白名单加虹励、V01 profile 显式配 TEST_SUPERVISOR</td><td><span class="tag amber">配置</span></td><td>不写代码；不配 TEST_SUPERVISOR 会 fallback 到王杰 → 卡单</td></tr>
+  <tr><td>cmd/sync 增加 pgAPI HTTP 源（可选 P1）</td><td><span class="tag blue">新系统施工</span></td><td>HTTPFetcher 现为占位报错；接 <code>GET /api/db/approval-flows</code> 分页拉取</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>2.4 验收标准（销售助手体验闭环）</h3>
+<table>
+  <tr><th style="width:60px">#</th><th>体验项</th><th>验收标准</th></tr>
+  <tr><td>1</td><td>下单</td><td>提交成功提示「已进入审批」；新系统 PG 记录 flow_id/instance_id</td></tr>
+  <tr><td>2</td><td>审批可见</td><td>下单后飞书审批中心出现待办（信息确认自动通过 → 主管/董事长按 V01 profile 推送）</td></tr>
+  <tr><td>3</td><td>进度回显</td><td>我的订单列表显示状态/当前节点；点详情跳 /flows/:flow_id 看到四环节快照 + 事件时间线</td></tr>
+  <tr><td>4</td><td>驳回感知</td><td>列表状态回显驳回；flows 页可见驳回意见</td></tr>
+  <tr><td>5</td><td>复制重提（P1）</td><td>驳回单/已完成单可一键复制再下</td></tr>
+  <tr><td>6</td><td>授权续期</td><td>token 过期前提醒，跳转一次完成重新授权</td></tr>
+</table>
+</div>
+
+<div class="card amber">
+<h3>2.5 回滚与兜底</h3>
+<ul>
+  <li><b>回滚</b>：新系统关闭桥接开关即停用下单；旧系统零改动零回滚。</li>
+  <li><b>数据兜底</b>：v0.1 订单与旧系统既有数据共存同一 JSONL（approval_profile 区分）；排查按 flow_id 定位，不按 profile 隔离。</li>
+  <li><b>敏感边界</b>：view_token 不进新系统 PG；open_id 映射表加密保存。</li>
+</ul>
+</div>
+
+<!-- ============ 3 ============ -->
+<h2 id="s3">3 · 第 2 次发布：商务 + 财务 + 仓管接入</h2>
+
+<div class="card release r2">
+<h3 style="margin-top:0">3.1 本次发布做什么（原 v0.2 + v0.3 合并）</h3>
+<p>三个角色一次发布，但<strong>每个角色有独立灰度开关</strong>；底层共用同一条「受信办理通道」。旧系统仍然是真相源，新系统是执行入口；每笔办理都以「受信通道成功」为准落库。</p>
+<table>
+  <tr><th style="width:100px">角色</th><th style="width:240px">迁入环节（新系统操作）</th><th>经旧系统哪个 decision 接口落地</th></tr>
+  <tr><td><b>商务</b></td><td>备货「填写发货仓」：选仓/自提、收件人、电话、收货地址 → 通过/驳回</td><td><code>POST /stock-prepares/:id/decision</code>（business task，字段型 extraData，无文件）</td></tr>
+  <tr><td><b>财务</b></td><td>款到类订单「确认到款」→ 通过/驳回；到款状态回显</td><td><code>POST /stock-prepares/:id/decision</code>（finance task）</td></tr>
+  <tr><td><b>仓管</b></td><td>① 发货「确认已经发货」（数量守恒）；② 上传回单（receipt_files 必传，最多 10 个）</td><td><code>POST /shipments/:id/decision</code>（warehouse task / receipt task，multipart 已就绪）</td></tr>
+</table>
+<p class="small">本次<strong>不做</strong>：开票「盖章回传」留到第 3 次（办理人是销售/代办，不是本次角色）；财务深链（上传发票/接收/回款跟进）当前旧系统不可达，本次不做，切换后再由新系统全权承接。</p>
+</div>
+
+<div class="card">
+<h3>3.2 数据怎么流（旧系统仍真相源）</h3>
+<div class="mermaid">
+flowchart TB
+  U["商务 / 财务 / 仓管在新系统办理"] --> API["新系统 API（信号）"]
+  API --> WF["新系统工作流（本地/ Temporal）"]
+  WF --> TRUST["受信办理客户端 internal/bridge"]
+  TRUST -->|"POST decision + multipart"| OLD["旧系统 decision 接口"]
+  OLD -->|"推进 JSONL 状态机 + 飞书实例"| FS["飞书审批中心 / JSONL"]
+  TRUST -->|"以旧系统成功回执为准落库"| PG["新系统 PG"]
+  PG -->|"待办 / 状态视图"| U
+  MIRROR["pgAPI 审批流程镜像"] -.->|"周期同步"| SYNC["cmd/sync"]
+  SYNC --> PG
+</div>
+</div>
+
+<div class="card">
+<h3>3.3 受信办理通道本次必须补齐（P0）</h3>
+<table>
+  <tr><th style="width:260px">补齐项</th><th>原因</th><th>证据</th></tr>
+  <tr><td>真实 operator（新系统用户身份）</td><td>旧系统备货/开票 decision 写死占位符 "(stock-prepare-web-approver)"，审计「谁办的」不精确</td><td>tripartite-approval/src/routes/stockPrepares.ts:1062</td></tr>
+  <tr><td>受信端点幂等锁</td><td>备货/发货/开票 decision 无并发锁；新系统 + 飞书残留待办双通道可能并发办理同一任务</td><td>stockPrepares.ts / shipments.ts decision 无 activeOrderDecisionKeys 机制</td></tr>
+  <tr><td>文件转发（multipart 直传）</td><td>发货回单 receipt_files、开票盖章回传 invoice_files 必经旧系统 multer</td><td>shipments.ts:1853、invoices.ts:772</td></tr>
+  <tr><td>旧系统 task 已办检测兜底</td><td>受信通道重试时，旧系统任务已办应幂等返回，不能重复推进</td><td>旧系统 decision 接口对终态/旧 task 重定向 ALREADY</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>3.4 三角色一次发布的「合」与「分」</h3>
+<div class="grid3">
+<div class="card blue" style="margin:0">
+<h4 style="margin-top:0">合</h4>
+<ul>
+  <li>同一条受信通道，同一套鉴权（approver_token + task_id）</li>
+  <li>同一套幂等/重试/对账机制</li>
+  <li>同一次发布窗口，减少发布次数</li>
+</ul>
+</div>
+<div class="card violet" style="margin:0">
+<h4 style="margin-top:0">分</h4>
+<ul>
+  <li>按角色灰度开关：商务先开，财务/仓管跟进</li>
+  <li>按 flow_id 批次生效：新单新办法，存量单飞书走完</li>
+  <li>三角色各自验收，不互相阻塞</li>
+</ul>
+</div>
+<div class="card amber" style="margin:0">
+<h4 style="margin-top:0">风险控制</h4>
+<ul>
+  <li>开票范围先说清：本次只做确认到款，不做盖章回传/上传发票</li>
+  <li>仓管金额不可见（剥价）</li>
+  <li>商务待办按 approver_open_ids 过滤，不能串角色</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div class="card">
+<h3>3.5 存量待办规则（本次发布前必须定稿）</h3>
+<p><b>规则：新单新办法、存量单飞书走完。</b>第 2 次发布上线的时刻，旧系统里已有的 PENDING 待办（商务填写发货仓/财务确认到款/仓库发货）继续在飞书办完；只有发布后新建的订单才走新系统执行。迁移开关按 flow_id 批次生效，不做存量待办搬运。</p>
+</div>
+
+<div class="card">
+<h3>3.6 验收标准</h3>
+<table>
+  <tr><th style="width:100px">角色</th><th>验收项</th><th>通过标准</th></tr>
+  <tr><td>商务</td><td>备货办理</td><td>新系统选仓 + 收货地址 → 通过 → 受信通道成功 → 旧系统生成发货单给仓管；驳回通知销售</td></tr>
+  <tr><td>财务</td><td>确认到款</td><td>款到类订单在新系统确认到款 → 旧系统状态推进 → 新系统回显到款</td></tr>
+  <tr><td>仓管</td><td>确认发货</td><td>新系统填本次发货数量 → 超发拦截（输入 6 应发 5 → 拒绝）→ 通过后旧系统发货状态更新</td></tr>
+  <tr><td>仓管</td><td>上传回单</td><td>新系统传回单文件 → 受信通道 multipart 直传旧系统 → 旧系统 receipt_files 可查</td></tr>
+  <tr><td>全局</td><td>幂等/重试</td><td>同一任务重复提交 → 幂等回执；受信通道失败 → 新系统不落「已办」、可重试</td></tr>
+  <tr><td>全局</td><td>双通道并发</td><td>新系统与飞书残留待办同时办同一任务 → 一方成功、另一方 ALREADY，不产生双状态</td></tr>
+</table>
+</div>
+
+<div class="card amber">
+<h3>3.7 本次发布的回滚与兜底</h3>
+<ul>
+  <li><b>回滚</b>：按角色开关关闭新系统办理入口，该角色回飞书办；旧系统不暂停、不回滚。</li>
+  <li><b>数据兜底</b>：真相仍在旧系统 JSONL；新系统 PG 只是执行视图，可随时从 pgAPI/多维表重建。</li>
+  <li><b>附件兜底</b>：回单文件真相在旧系统，新系统只存链接；旧系统不可用时走手动补登。</li>
+</ul>
+</div>
+
+<!-- ============ 4 ============ -->
+<h2 id="s4">4 · 第 3 次发布：销售接入 + 全部数据切换</h2>
+
+<div class="card release r3">
+<h3 style="margin-top:0">4.1 本次发布做什么（原 v0.4 + 0.5 合并）</h3>
+<p>这是整个计划里<strong>最重的一刀</strong>：既是最后一批角色迁入，又是真相源切换。必须先完成角色迁入，等销售/主管/董事长在新系统跑通验收，再执行切换仪式。</p>
+<table>
+  <tr><th style="width:150px">子阶段</th><th>内容</th></tr>
+  <tr><td><b>A. 销售环节迁入</b></td><td>销售：填写开票信息（shipment invoice-info task）、盖章回传（invoice stamp-return task）；驳回/重提体验闭环</td></tr>
+  <tr><td><b>B. 两级终审迁入</b></td><td>销售主管：审价；董事长：C/D 级终审；新系统审批台 + 通知 + 超时提醒</td></tr>
+  <tr><td><b>C. 全量数据迁移</b></td><td>旧系统 JSONL（orders/order_events/stock/shipment/invoice 全家族）→ 新系统 PG；含事件链，不做摘要式快照</td></tr>
+  <tr><td><b>D. 切换仪式</b></td><td>冻结旧系统写 → 终审对账 → 切换开关 → 旧系统只读归档，飞书审批流下线</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>4.2 切换时序（不能乱）</h3>
+<div class="mermaid">
+flowchart TB
+  STEP1["① 全量迁移：JSONL → PG<br/>orders + order_events + stock/shipment/invoice 事件链"] --> STEP2["② 预对账：订单数 / 状态 / 事件链 / 附件 四层对账"]
+  STEP2 --> STEP3["③ 冻结旧系统：停新单、停办理入口；存量单收口"]
+  STEP3 --> STEP4["④ 终审对账：业务方抽单确认，差异清零"]
+  STEP4 --> STEP5["⑤ 切换开关：新系统 PG 为唯一真相源，停受信通道"]
+  STEP5 --> STEP6["⑥ 旧系统只读归档：flows/附件可查，飞书审批流下线"]
+  STEP6 --> STEP7["⑦ 观察期：每日对账，保留回滚通道"]
+</div>
+<p class="small">顺序不能反：<b>严禁先停旧系统再迁移</b>。先迁移、先对账、后冻结、再切换。每次演练都要走完整七步。</p>
+</div>
+
+<div class="card">
+<h3>4.3 本次发布的五张表</h3>
+<table>
+  <tr><th style="width:180px">维度</th><th>要点</th></tr>
+  <tr><td>用户范围</td><td>销售全员 + 销售主管 + 董事长 + 已接入的商务/财务/仓管/销售助理；飞书 H5 下单入口关闭，全部走新系统</td></tr>
+  <tr><td>真相源</td><td>切换前旧系统 JSONL；切换后新系统 PG。受信通道在切换前继续用，切换后停用</td></tr>
+  <tr><td>状态机</td><td>新系统必须接住所有中间状态；T1.3 五项状态语义必须在本阶段前拍板</td></tr>
+  <tr><td>附件</td><td>合同/出库单/回单/发票：优先迁到新系统对象存储/证据目录；迁不动或来不及的，旧系统保留只读访问 6 个月</td></tr>
+  <tr><td>历史身份</td><td>飞书 open_id → 企微 user_id 映射表永久保留，审计可追溯</td></tr>
+  <tr><td>pgAPI 定位</td><td>切换后 pgAPI 的三方审批镜像表改为只读历史/台账查询；若多维表台账还要继续用，必须先停飞书→PG 上游同步，改由新系统写 pgAPI，且列为独立决策</td></tr>
+</table>
+</div>
+
+<div class="card red">
+<h3>4.4 为什么第 3 次风险最大，以及怎么控</h3>
+<table>
+  <tr><th style="width:260px">风险</th><th>控制措施</th></tr>
+  <tr><td>全量迁移漏事件链 → 审计史丢失</td><td>迁移脚本按「快照末条 + 事件链全量」双轨；迁移批次 checksum 幂等；迁移后对账事件数</td></tr>
+  <tr><td>进行中订单切换时无处可去</td><td>冻结旧系统新单；存量单在旧系统走完或明确承接；新系统状态机接住所有中间状态</td></tr>
+  <tr><td>终审迁入与切换同时做，问题难定位</td><td>先迁角色（A/B）→ 灰度跑通 → 再执行切换（C/D）；两个子阶段之间有明确验收门</td></tr>
+  <tr><td>旧系统停机后详情/附件死路</td><td>切换前新系统详情页 + 附件查看就绪；旧系统保留只读运行</td></tr>
+  <tr><td>切换当天失败</td><td>回滚演练：关闭新系统写入，重开旧系统入口；回滚通道保留到观察期结束</td></tr>
+  <tr><td>pgAPI 上游同步覆盖新数据</td><td>切换后停飞书多维表→pgAPI 同步；pgAPI 的 approval-flows/details 写接口由新系统接管或冻结</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>4.5 验收标准</h3>
+<table>
+  <tr><th style="width:90px">阶段</th><th>验收项</th><th>通过标准</th></tr>
+  <tr><td>A</td><td>销售开票信息</td><td>销售在新系统填写开票信息 → 受信通道推进旧系统；合并开票同客户多订单校验通过</td></tr>
+  <tr><td>A</td><td>盖章回传</td><td>销售/代办在新系统上传盖章回传文件 → 受信通道 multipart 直达旧系统 invoice_files</td></tr>
+  <tr><td>B</td><td>主管审价 / 董事长终审</td><td>新系统审批台通过/驳回；C/D 级自动进终审；驳回通知销售；超时提醒可用</td></tr>
+  <tr><td>C</td><td>全量迁移</td><td>订单数一致、事件链一致、附件清单一致；同一批次重跑不重复</td></tr>
+  <tr><td>D</td><td>切换</td><td>旧系统停写后，新系统单量/状态/事件/附件四层对账 100% 一致；飞书入口只读</td></tr>
+  <tr><td>D</td><td>回滚演练</td><td>至少一次完整回滚演练：切回旧系统后，增量数据不丢、状态不乱</td></tr>
+</table>
+</div>
+
+<!-- ============ 5 ============ -->
+<h2 id="s5">5 · 数据与真相源演进</h2>
+
+<div class="mermaid">
+flowchart TB
+  subgraph PHASE1["第 1 次发布：旧系统唯一真相"]
+    T1["旧系统 JSONL + 飞书实例"] -->|"唯一真相"| X1["全流程"]
+    N1["新系统 PG"] -->|"自建单 + 同步视图"| N1
+    N1 -.->|"下单写旧系统"| T1
+  end
+  subgraph PHASE2["第 2 次发布：旧系统唯一真相，新系统执行"]
+    T2["旧系统 JSONL + 飞书实例"] -->|"唯一真相"| X2["全流程"]
+    N2["新系统 PG"] -->|"办理指令"| TRUST["受信通道"]
+    TRUST -->|"写回"| T2
+    N2 -.->|"同步视图"| T2
+  end
+  subgraph PHASE3["第 3 次发布切换后：新系统唯一真相"]
+    T3["旧系统 JSONL + 飞书实例"] -->|"只读归档"| H3["历史查询"]
+    N3["新系统 PG"] -->|"唯一真相"| X3["全流程"]
+    N3 -.->|"台账/镜像（决策）"| P3["pgAPI"]
+  end
+  PHASE1 --> PHASE2 --> PHASE3
+</div>
+
+<div class="card">
+<h3>5.1 每个阶段「谁说了算」一句话</h3>
+<table>
+  <tr><th style="width:130px">阶段</th><th style="width:200px">真相源</th><th>新系统 PG 的定位</th></tr>
+  <tr><td>第 1 次</td><td>旧系统 JSONL + 飞书实例</td><td>自建单台账 + 状态回显视图（可重建）</td></tr>
+  <tr><td>第 2 次</td><td>旧系统 JSONL + 飞书实例</td><td>执行工作台 + 受信回执台账（可重建）</td></tr>
+  <tr><td>第 3 次切换后</td><td>新系统 PG</td><td>唯一真相源，事件链 append-only</td></tr>
+</table>
+</div>
+
+<!-- ============ 6 ============ -->
+<h2 id="s6">6 · 受信办理通道（第 2、3 次共用命门）</h2>
+
+<div class="card green">
+<p>受信办理通道是新系统办理、旧系统推进的唯一命门。原《发布计划可行性验证》已逐行核验，结论是<strong>成立</strong>：三个 decision 接口只校验 <code>approver_token</code>，无飞书身份依赖、无 entry 限制，文件上传 multer 已就绪。</p>
+</div>
+
+<table>
+  <tr><th style="width:110px">环节</th><th style="width:230px">鉴权（已核验）</th><th>文件上传</th><th>证据</th></tr>
+  <tr><td>备货</td><td>仅 approver_token 匹配（无身份/entry 限制）</td><td>无（字段型 extraData）</td><td>tripartite-approval/src/routes/stockPrepares.ts:963-977</td></tr>
+  <tr><td>发货</td><td>仅 approver_token 匹配</td><td><b>receipt_files 必传</b>（回单节点，最多 10 个）</td><td>tripartite-approval/src/routes/shipments.ts:1853-1871</td></tr>
+  <tr><td>开票</td><td>仅 approver_token 匹配</td><td><b>invoice_files</b>（发票/盖章回传，最多 10 个）</td><td>tripartite-approval/src/routes/invoices.ts:772-789</td></tr>
+</table>
+
+<div class="card amber">
+<h3>6.1 通道必须带上的两个补丁（P0-3）</h3>
+<ul>
+  <li><b>真实 operator</b>：受信端点把新系统用户身份透传给旧系统，替换占位符 "(stock-prepare-web-approver)" / "(shipment-web-approver)"，审计才精确。</li>
+  <li><b>幂等锁</b>：受信端点在旧系统侧或新系统侧加一道幂等锁，避免「新系统 + 飞书审批中心残留待办」双通道并发办理同一 task_id。</li>
+</ul>
+</div>
+
+<!-- ============ 7 ============ -->
+<h2 id="s7">7 · 角色与权限接入节奏</h2>
+
+<div class="mermaid">
+flowchart LR
+  subgraph R1U["第 1 次"]
+    R1A["销售助理（虹励）"]
+  end
+  subgraph R2U["第 2 次"]
+    R2A["商务"]
+    R2B["财务"]
+    R2C["仓管"]
+  end
+  subgraph R3U["第 3 次"]
+    R3A["销售全员"]
+    R3B["销售主管"]
+    R3C["董事长"]
+  end
+</div>
+
+<table>
+  <tr><th style="width:120px">角色</th><th style="width:130px">接入发布</th><th>新系统权限要点</th><th>旧系统对应 role map</th></tr>
+  <tr><td>销售助理</td><td>第 1 次</td><td>仅虹励；可代下单，归属销售锁定</td><td>V01_SALES_ASSISTANT profile（显式配 TEST_SUPERVISOR）</td></tr>
+  <tr><td>商务</td><td>第 2 次</td><td>待办按 approver_open_ids 过滤；备货选仓 + 收货地址；金额可见</td><td>TEST_STOCK_BUSINESS（已含虹励 or-sign 组）</td></tr>
+  <tr><td>财务</td><td>第 2 次</td><td>确认到款；开票深链本次不做；金额可见</td><td>TEST_STOCK_FINANCE（or-sign 组）</td></tr>
+  <tr><td>仓管</td><td>第 2 次</td><td>金额不可见（剥价）；超发拦截；回单上传</td><td>TEST_SHIPMENT_WAREHOUSE / TEST_SHIPMENT_RECEIPT</td></tr>
+  <tr><td>销售</td><td>第 3 次</td><td>开票信息填写 + 盖章回传；本人订单数据可见</td><td>旧系统 sales/agent 白名单沿用</td></tr>
+  <tr><td>销售主管</td><td>第 3 次</td><td>审价审批台；通过/驳回</td><td>TEST_SUPERVISOR（V01 profile 必配）</td></tr>
+  <tr><td>董事长</td><td>第 3 次</td><td>C/D 级终审；通过/驳回</td><td>TEST_CHAIRMAN（C/D 级触发）</td></tr>
+</table>
+
+<!-- ============ 8 ============ -->
+<h2 id="s8">8 · P0 清单重映射（按三次发布）</h2>
+
+<div class="card">
+<p>原计划有 P0-1..P0-8。压缩成三次发布后，时点重新对齐如下。原则不变：<b>P0 不堵上，对应的那一刀不发。</b></p>
+</div>
+
+<table>
+  <tr><th style="width:70px">编号</th><th style="width:150px">必须堵上时点</th><th style="width:250px">P0 事项</th><th>归属 / 说明</th></tr>
+  <tr><td><b>P0-1</b></td><td>第 1 次前</td><td>V01 profile 显式配 TEST_SUPERVISOR</td><td>旧系统数据配置；不配 fallback 王杰 → 卡单</td></tr>
+  <tr><td><b>P0-2</b></td><td>第 2 次前</td><td>存量待办规则定稿（新单新办法）</td><td>业务方 + 设计</td></tr>
+  <tr><td><b>P0-3</b></td><td>第 2 次前</td><td>受信端点（真实 operator + 幂等锁）</td><td>旧系统临时修补</td></tr>
+  <tr><td><b>P0-4</b></td><td>第 2 次前</td><td>开票范围按真实任务修正：第 2 次只做「确认到款」；「盖章回传」放第 3 次；财务深链明确不做或切换后承接</td><td>业务方 + 设计（压缩后边界必须更早说清）</td></tr>
+  <tr><td><b>P0-5</b></td><td>第 2 次前</td><td>受信通道文件转发（multipart 直传）+ 附件归属（回单真相在旧系统，新系统存链接）</td><td>设计 + 开发</td></tr>
+  <tr><td><b>P0-6</b></td><td>第 3 次切换前</td><td>新系统详情页 + 附件查看自立（不再依赖 flows 页）</td><td>新系统开发</td></tr>
+  <tr><td><b>P0-7</b></td><td>第 3 次前</td><td>T1.3 五项状态语义拍板（新系统状态机接住所有中间状态）</td><td>业务方</td></tr>
+  <tr><td><b>P0-8</b></td><td>第 3 次切换前</td><td>JSONL 级全量迁移（含事件链）+ 切换仪式 + 切换/回滚演练</td><td>设计 + 开发 + 业务方</td></tr>
+  <tr><td><b>P0-9</b><span class="tag red">v2 新增</span></td><td>第 3 次切换前</td><td>销售环节迁入（开票信息 + 盖章回传）与两级终审迁入，必须先于切换跑通灰度</td><td>新系统开发 + 业务方</td></tr>
+  <tr><td><b>P0-10</b><span class="tag red">v2 新增</span></td><td>第 3 次切换前</td><td>pgAPI 上游同步策略拍板：切换后停飞书→PG 同步，pgAPI 只读历史或由新系统接管写入</td><td>业务方 + 数据方（防镜像覆盖真相）</td></tr>
+</table>
+
+<!-- ============ 9 ============ -->
+<h2 id="s9">9 · 风险 Gap 与补齐方式</h2>
+
+<div class="card amber">
+<p><strong>读表说明</strong>：类型「施工」= 新系统写代码可控；「决策」= 业务方/外部给信息；「配置」= 旧系统侧数据操作；「旧改」= 动旧系统代码（有边界）。大小 S=1 人日内，M=2–4 人日，L=5–10 人日，XL=项目级。</p>
+</div>
+
+<table>
+  <tr>
+    <th style="width:40px">#</th>
+    <th style="width:165px">Gap</th>
+    <th style="width:85px">现状</th>
+    <th style="width:80px">类型</th>
+    <th style="width:60px">大小</th>
+    <th>怎么补（说人话）</th>
+  </tr>
+  <tr>
+    <td><b>G1</b></td>
+    <td><b>下单桥接模块</b>（第 1 次命门）</td>
+    <td><span class="tag red">没有</span></td>
+    <td><span class="tag blue">施工</span></td>
+    <td><b>L</b></td>
+    <td>新建 internal/bridge：OAuth 代理 + token 缓存 + 调旧系统 <code>/external-orders/create</code> + 字段映射 + 回写 PG；方案 A1 已定</td>
+  </tr>
+  <tr>
+    <td><b>G2</b></td>
+    <td><b>旧系统一处小改</b>（自动确认 + V01 profile）</td>
+    <td><span class="tag red">未开工</span></td>
+    <td><span class="tag violet">旧改</span></td>
+    <td><b>S</b></td>
+    <td>改 submitExternalOrder.ts 创建处；只影响 v0.1 幂等键前缀订单；独立测试服务验证后上生产</td>
+  </tr>
+  <tr>
+    <td><b>G3</b></td>
+    <td><b>销售助手前端</b></td>
+    <td><span class="tag red">没有</span></td>
+    <td><span class="tag blue">施工</span></td>
+    <td><b>L</b></td>
+    <td>先做极简 PC 后台（下单 + 我的订单 + 跳 flows）跑闭环；企微入口和精装修后置</td>
+  </tr>
+  <tr>
+    <td><b>G4</b></td>
+    <td><b>同步 HTTP 源接 pgAPI</b></td>
+    <td><span class="tag amber">半成品</span></td>
+    <td><span class="tag blue">施工</span></td>
+    <td><b>M</b></td>
+    <td>实现 HTTPFetcher 调 <code>GET /api/db/approval-flows</code> 分页拉取 + 字段映射；比直连飞书 bitable 更稳</td>
+  </tr>
+  <tr>
+    <td><b>G5</b></td>
+    <td><b>受信办理通道</b>（第 2、3 次命门）</td>
+    <td><span class="tag red">未开工</span></td>
+    <td><span class="tag blue">施工</span> + <span class="tag violet">旧改</span></td>
+    <td><b>M</b></td>
+    <td>新系统受信客户端 + 旧系统决策端点真实 operator + 幂等锁；一次改造三次复用（备货/发货/开票）</td>
+  </tr>
+  <tr>
+    <td><b>G6</b></td>
+    <td><b>商务/财务/仓管工作台视图</b></td>
+    <td><span class="tag amber">部分</span></td>
+    <td><span class="tag blue">施工</span></td>
+    <td><b>M</b></td>
+    <td>按 approver_open_ids / 仓库 / 款到维度过滤待办；仓管剥价已有机制，补财务/商务视图</td>
+  </tr>
+  <tr>
+    <td><b>G7</b></td>
+    <td><b>T1.3 五项状态语义拍板</b></td>
+    <td><span class="tag amber">未决</span></td>
+    <td><span class="tag amber">决策</span></td>
+    <td><b>无</b></td>
+    <td>第 3 次前必须拍板；第 1/2 次可先用旧系统原始状态文字过渡</td>
+  </tr>
+  <tr>
+    <td><b>G8</b></td>
+    <td><b>旧系统配置/白名单/审批人 open_id</b></td>
+    <td><span class="tag amber">未做</span></td>
+    <td><span class="tag violet">配置</span></td>
+    <td><b>S</b></td>
+    <td>飞书重定向白名单、agent/sales 白名单、V01 profile 审批人；第 1 次前完成</td>
+  </tr>
+  <tr>
+    <td><b>G9</b></td>
+    <td><b>企微备案域名</b></td>
+    <td><span class="tag amber">未就绪</span></td>
+    <td><span class="tag amber">决策</span></td>
+    <td><b>不定</b></td>
+    <td>未就绪先 PC 后台；第 2 次前若企微入口仍不可用，需确认三角色用 PC 还是等</td>
+  </tr>
+  <tr>
+    <td><b>G10</b></td>
+    <td><b>企微官方通道补全</b>（template_card / 群发）</td>
+    <td><span class="tag amber">简化</span></td>
+    <td><span class="tag blue">施工</span></td>
+    <td><b>M</b></td>
+    <td>OfficialGateway.SendCard 现为 text；GroupSender 无 official 实现；第 2 次前补 template_card，群发按需</td>
+  </tr>
+  <tr>
+    <td><b>G11</b></td>
+    <td><b>第 3 次全量迁移 + 切换仪式</b></td>
+    <td><span class="tag red">未开工</span></td>
+    <td><span class="tag blue">施工</span> + <span class="tag amber">决策</span></td>
+    <td><b>XL</b></td>
+    <td>JSONL 全量（含事件链）迁移、对账、切换、演练；作为切换项目单独排期</td>
+  </tr>
+  <tr>
+    <td><b>G12</b></td>
+    <td><b>pgAPI 切换后定位</b></td>
+    <td><span class="tag amber">未决</span></td>
+    <td><span class="tag amber">决策</span></td>
+    <td><b>S–M</b></td>
+    <td>切换后停上游同步；pgAPI 只读历史，或新系统接管写 approval-flows/details 作为台账镜像</td>
+  </tr>
+</table>
+
+<div class="grid2">
+<div class="card blue">
+<h3 style="margin-top:0">施工侧（新系统内部可控）</h3>
+<ul>
+  <li><b>G1/G3/G4/G5/G6/G10/G11</b> 都是写代码能解决的，风险在于排期是否给够。</li>
+  <li>最大施工量在 G1（桥接）、G3（前端）、G11（迁移切换）。</li>
+  <li>G5 受信通道一次建成，第 2/3 次复用，是压缩计划的支点。</li>
+</ul>
+</div>
+<div class="card amber">
+<h3 style="margin-top:0">决策/配置侧（必须外部给答案）</h3>
+<ul>
+  <li><b>G7/G8/G9/G12</b> 不写代码，但不拍板会卡发布或卡单。</li>
+  <li>最硬的是 G8 的 V01 profile 审批人 open_id 和 G9 企微备案域名。</li>
+  <li>G12 pgAPI 定位必须在第 3 次前拍板，否则镜像可能覆盖新真相。</li>
+</ul>
+</div>
+</div>
+
+<!-- ============ 10 ============ -->
+<h2 id="s10">10 · 验收标准</h2>
+
+<div class="card">
+<h3>10.1 第 1 次发布验收（销售助理体验闭环）</h3>
+<p>见 <a href="#s2">§2.4</a> 六项体验清单；硬指标：测试账号授权 → 下单成功 → 飞书实例出现 → 新系统 PG 有 flow_id/instance_id；虹励真实下单 1–2 笔全流程通过。</p>
+<h3>10.2 第 2 次发布验收（三角色执行闭环）</h3>
+<p>见 <a href="#s3">§3.6</a>；硬指标：商务备货、财务到款、仓管发货/回单各至少 1 笔真实订单经受信通道成功；同一 task 重复提交幂等；双通道并发一方 ALREADY。</p>
+<h3>10.3 第 3 次发布验收（切换闭环）</h3>
+<p>见 <a href="#s4">§4.5</a>；硬指标：订单数 / 状态 / 事件链 / 附件四层对账 100% 一致；切换与回滚各演练一次；观察期 3 天每日对账无差异。</p>
+</div>
+
+<!-- ============ 11 ============ -->
+<h2 id="s11">11 · 明确不做（防范围蔓延）</h2>
+<div class="card">
+<ul>
+  <li><b>不修旧系统任何 bug / 深链</b>：开票财务深链、auto_approve、修改校验、回款判断、48h 升级链等，旧系统程序员职责；新系统只规避不触碰。</li>
+  <li><b>旧系统唯一改动</b>：仍只有两处——① 第 1 次的幂等键前缀自动确认 + V01 profile 注入；② 第 2 次的受信端点补丁（真实 operator + 幂等锁）。除此之外旧系统零代码改动。</li>
+  <li><b>第 1 次不做</b>：不迁移 JSONL；不做备货/发货/开票执行；自动下单继续移出；锁库存不做。</li>
+  <li><b>第 2 次不做</b>：不做开票盖章回传（留第 3 次）；不做财务深链；不做库存锁定。</li>
+  <li><b>第 3 次不做</b>：不删旧系统历史数据（只读归档）；不在切换当天改流程（流程在切换前冻结）。</li>
+  <li><b>全期不做</b>：不新增旧系统导出端点 / webhook / 桥接泛化；不直接写旧系统 JSONL 文件。</li>
+</ul>
+</div>
+
+<!-- ============ 附录 ============ -->
+<h2 id="s12">附录 A · 证据索引</h2>
+<div class="card">
+<table>
+  <tr><th style="width:300px">结论</th><th>证据</th></tr>
+  <tr><td>新系统 16 个 API 端点已实现</td><td>b2b_pilot_v3/internal/api/server.go:58-71</td></tr>
+  <tr><td>下单桥接模块尚未存在</td><td>grep 全仓无 internal/bridge / feishu-user-by-code / external-orders/create</td></tr>
+  <tr><td>同步骨架存在、HTTP 源为占位</td><td>b2b_pilot_v3/internal/sync/sync.go HTTPFetcher.Fetch 显式报错</td></tr>
+  <tr><td>旧系统备货 decision 仅认 approver_token</td><td>tripartite-approval/src/routes/stockPrepares.ts:963-977</td></tr>
+  <tr><td>旧系统发货 decision 仅认 approver_token + multipart</td><td>tripartite-approval/src/routes/shipments.ts:1853-1871</td></tr>
+  <tr><td>旧系统开票 decision 仅认 approver_token + multipart</td><td>tripartite-approval/src/routes/invoices.ts:772-789</td></tr>
+  <tr><td>operatorOpenId 为占位符</td><td>tripartite-approval/src/routes/stockPrepares.ts:1062；shipments.ts decision 内 "(shipment-web-approver)"</td></tr>
+  <tr><td>pgAPI 提供 approval-flows/approval-details 稳定英文字段与分页读取</td><td>pgAPI/external/pgapi/docs/API.md；app/db_api_config.py</td></tr>
+  <tr><td>pgAPI 上游同步执行器未接入，append 返回 501</td><td>pgAPI/external/pgapi/README.md「同步服务入口」</td></tr>
+  <tr><td>pgAPI 写接口会直接写 PG 镜像表，存在与上游同步冲突边界</td><td>pgAPI/external/pgapi/README.md「当前边界」</td></tr>
+  <tr><td>V01 profile 必须显式配 TEST_SUPERVISOR（merge 语义）</td><td>《B2B_V01_对比与同步设计_20260818》附录 D-4</td></tr>
+  <tr><td>T1.3 五项状态语义未拍板</td><td>《B2B_V01_对比与同步设计_20260818》§4.2</td></tr>
+</table>
+<p class="small">本计划基于 b2b_pilot_v3、tripartite-approval、pgAPI 三个仓库的文档与代码审计生成；所有「已核验」结论均有代码行号支撑；工期为工程判断，落地以实际开发速度为准。</p>
+</div>
+
+</div>
+</body>
+</html>

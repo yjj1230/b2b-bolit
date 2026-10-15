@@ -1,0 +1,14 @@
+# D-005 bootstrap handoff 协议适用
+decision_id: D-005
+choice: >
+  本次生成 OFFERED handoff 包 HOF-20260813-001，acceptance.decision=NOT_APPLICABLE，
+  由后续独立接手方填写
+rationale: >
+  §10 bootstrap 例外：首次接手声明 bootstrap 模式；A.10 第 6 条禁止同一 Agent 自证独立接手
+premises:
+  - handoff 协议对本次请求按 bootstrap 例外处理
+objections: []
+decider: project-governance（bootstrap 执行者 reasonix-executor）
+effective_interval: {from: "2026-08-13T00:00:00+00:00", to: null}
+supersedes: []
+review_condition: 机制激活评估时复核

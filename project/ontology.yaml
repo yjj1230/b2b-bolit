@@ -1,0 +1,62 @@
+# project/ontology.yaml — 项目级受控词表（ECM §03）
+# 机制级对象/关系/状态模型以 ECM-1.0.0.yaml 的 ontology 组件为基准（ECM-AUTH-003）；
+# 本文件落定本项目可用的受控词表实例，供 claims/、events/、views/ 引用。
+# 变更本词表属于机制相关变更，须走版本边界（§07），不得静默扩词。
+
+schema_version: ECM@1.0.0
+owner: project-governance
+updated_at: 2026-08-13T08:37:00+00:00
+
+artifact_kinds:      # M0 manifest 使用的 kind 词表（project/views/artifact-manifest.yaml）
+  - source          # spec/ 一手业务资料（biz/raw/review/ui 等子域见 manifest 明细）
+  - review_source   # 评审记录
+  - ui_source       # 界面/交互原始资料
+  - methodology     # 方法/机制类说明
+  - doc             # 产品/技术/测试文档（docs/ 顶层）
+  - demo            # 可交互演示（docs/demo/）
+  - history         # 历史冻结报告（docs/history/）
+  - testcase_doc    # 用例表
+  - ui_doc          # UI 文档
+  - code            # 后端/前端代码（cmd/ internal/）
+  - migration       # 数据库迁移（migrations/）
+  - test            # 测试程序与测试数据（tests/）
+  - script          # 工具脚本（scripts/）
+  - schema          # 数据模型 schema
+  - infra_config    # 部署/容器配置
+  - build_config    # 构建配置
+  - dependency_manifest  # 依赖清单
+  - binary_artifact # 未跟踪大二进制（如 wecom）
+  - mechanism       # 机制制品（policies/mechanism/ 下）
+  - handoff         # 交接包（handoffs/）
+  - event_log       # 事件流（events/）
+  - view            # 自动生成视图（views/）
+
+claim_statuses:      # semantic_status 词表（与 ECM-1.0.0.yaml ontology 一致）
+  semantic: [PROPOSED, ACCEPTED, DEFERRED, REJECTED, SUPERSEDED, CHALLENGED]
+  implementation: [UNPLANNED, PLANNED, PARTIAL, IMPLEMENTED, DRIFTED]
+  verification: [UNVERIFIED, PASS, FAIL, STALE, INVALID, EXPIRED]
+
+edge_types: [DERIVED_FROM, REFINES, IMPLEMENTS, VERIFIES, DECIDES, SUPERSEDES, DEPENDS_ON, CONFLICTS_WITH, VALID_DURING]
+
+risk_levels: [R0, R1, R2, R3, UNKNOWN]   # 语义见 ECM-1.0.0.yaml authority_matrix.risk_levels
+
+event_kinds:         # 事件流 kind 词表（§11 每次变化必须产出 ArtifactChanged）
+  - ArtifactChanged
+  - MECHANISM_PROPOSED
+  - MECHANISM_ACTIVATED
+  - HANDOFF_OFFERED
+  - HANDOFF_ACCEPTED
+  - HANDOFF_REJECTED
+  - BASELINE_PUBLISHED
+  - CONFLICT_OPENED
+  - CONFLICT_RESOLVED
+
+handoff_status: [OFFERED, ACCEPTED, CONDITIONAL, REJECTED]
+
+baseline_status: [PUBLISHED, SUPERSEDED]
+
+domain_owners:       # §09 M2 需要 owner 的领域（当前为推定，M2 由 owner 确认）
+  - business-owner   # spec/ 一手业务资料
+  - product-owner    # docs/demo、docs/ui、docs/testcase
+  - tech-owner       # cmd/ internal/ migrations/ docs 顶层/机制
+  - qa-owner         # tests/ scripts/

@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>验证项目设计 · 订单系统：SpiceDB 授权 + Temporal 流程 + 企微接入</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --navy:#17365d; --blue:#2e74b5; --blue-soft:#eef5fb; --ink:#253447; --muted:#667487;
+  --line:#d9e2ec; --bg:#edf2f7; --paper:#fff; --green:#147d73; --green-soft:#e7f6f4;
+  --amber:#b45309; --amber-soft:#fff4dd; --red:#c43b3b; --red-soft:#fff0f0;
+  --violet:#7056d8; --violet-soft:#f0edff; --radius:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:18px}
+body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",sans-serif;font-size:15px;line-height:1.78}
+.page{max-width:1380px;margin:26px auto;background:var(--paper);border-radius:16px;box-shadow:0 14px 44px rgba(31,55,80,.11);overflow:hidden}
+.hero{padding:44px 58px 32px;background:linear-gradient(135deg,#f8fbff,#edf5fc);border-bottom:1px solid var(--line)}
+.kicker{color:var(--blue);font-weight:750;letter-spacing:.1em;font-size:13px;margin-bottom:10px}
+.hero h1{margin:0 0 10px;color:var(--navy);font-size:31px;line-height:1.25}
+.hero .sub{margin:0;color:var(--muted);font-size:16px;max-width:980px}
+.hero .tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.tag{display:inline-block;padding:3px 10px;border:1px solid var(--line);border-radius:20px;background:#fff;color:#4a5a6e;font-size:12px;font-weight:700}
+.tag.hot{background:var(--amber-soft);border-color:#f0d7a6;color:var(--amber)}
+.layout{display:grid;grid-template-columns:250px minmax(0,1fr);gap:0}
+.toc{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;padding:28px 16px 40px;border-right:1px solid var(--line);font-size:13px;line-height:1.5;background:#fafcff}
+.toc-title{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:0 8px 12px}
+.toc a{display:block;padding:5px 10px;border-radius:6px;color:#526273;text-decoration:none;border-left:2px solid transparent}
+.toc a:hover{color:var(--blue);background:var(--blue-soft)}
+.toc a.sub{padding-left:24px;color:#7b8797}
+.toc a.current{color:var(--blue);border-left-color:var(--blue);background:var(--blue-soft);font-weight:700}
+main{min-width:0;padding:38px 54px 80px}
+h2{margin:50px 0 14px;padding-bottom:8px;border-bottom:2px solid #e6edf5;color:var(--navy);font-size:23px}
+h2:first-of-type{margin-top:0}
+h3{margin:28px 0 10px;color:var(--blue);font-size:18px}
+h4{margin:20px 0 8px;color:var(--navy);font-size:15px}
+p{margin:9px 0 14px}
+strong{color:#152d4d}
+ul,ol{margin:8px 0 18px;padding-left:1.5em}li{margin:5px 0}
+code{padding:1px 5px;border-radius:4px;background:#eef1f4;color:#b45309;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.88em}
+pre{margin:14px 0 18px;padding:16px 18px;overflow:auto;border:1px solid var(--line);border-radius:8px;background:#0f1b2d;color:#d7e3f4;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.65}
+pre code{background:none;color:inherit;padding:0}
+.callout{margin:16px 0 20px;padding:14px 18px;border:1px solid var(--line);border-left:4px solid var(--blue);border-radius:var(--radius);background:#f7fafd}
+.callout.warn{border-left-color:var(--amber);background:var(--amber-soft)}
+.callout.danger{border-left-color:var(--red);background:var(--red-soft)}
+.callout.good{border-left-color:var(--green);background:var(--green-soft)}
+.callout .ct{font-weight:800;margin-bottom:4px}
+.callout p{margin:0}
+.table-wrap{margin:14px 0 22px;overflow:auto;border:1px solid var(--line);border-radius:var(--radius)}
+table{width:100%;border-collapse:collapse;min-width:680px;font-size:13.5px}
+th,td{padding:10px 13px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{background:#f1f5f9;color:var(--navy);white-space:nowrap}
+tr:last-child td{border-bottom:0}th:last-child,td:last-child{border-right:0}
+tbody tr:nth-child(even){background:#fbfcfe}
+.yes{color:var(--green);font-weight:800}.no{color:var(--red);font-weight:800}.note{color:var(--amber);font-weight:800}
+.mermaid-wrap{margin:16px 0 22px;padding:16px;overflow:auto;border:1px solid var(--line);border-radius:var(--radius);background:#fff}
+.mermaid{display:flex;justify-content:center}
+.phase{margin:14px 0;padding:14px 16px;border:1px solid var(--line);border-left:5px solid var(--blue);border-radius:8px;background:#fbfdff}
+.phase b{color:var(--navy)}
+.phase .gate{margin-top:8px;font-size:12.5px;color:var(--muted)}
+.phase .gate b{color:var(--green)}
+.footer{padding:18px 58px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px;text-align:center;background:#fafcff}
+@media(max-width:980px){.layout{grid-template-columns:1fr}.toc{position:static;height:auto;max-height:300px;border-right:0;border-bottom:1px solid var(--line)}main{padding:26px 22px 60px}.hero{padding:32px 24px}}
+@media(max-width:620px){.hero h1{font-size:24px}table{font-size:12.5px}}
+</style>
+</head>
+<body>
+<div class="page">
+<header class="hero">
+  <div class="kicker">VERIFICATION POC DESIGN · V1.2</div>
+  <h1>验证项目设计：长安仁恒订单履约主轴（演示样板，直接展示给智厨）· 授权 / 流程 / 企微</h1>
+  <p class="sub">以<strong>长安仁恒的订单履约为主轴</strong>（依据《三方审批流程图_v2》：订单创建 → 备货审批 → 发货分配及出库 → 开票回单审批 四分支）。<strong>长安仁恒的验证项目即演示样板，直接展示给智厨</strong>——不为智厨定制可用的验证项目，而是以长安仁恒各订单处理环节为落脚点，向智厨展示同一套系统在其业务场景下的差异映射。验证项目同时回答三个问题：<strong>SpiceDB 能否承载复杂 B2B 的 RBAC+ReBAC 混合授权；Temporal 能否承载四分支主流程；企微接入的各类场景是否可行、交互是否顺畅</strong>——其中「客户在群里发言直接变成下单需求」是技术可行性的重点验证项。</p>
+  <div class="tags">
+    <span class="tag hot">★ 主轴：长安仁恒订单履约</span>
+    <span class="tag hot">★ 展示对象：智厨（长安仁恒样板直接展示）</span>
+    <span class="tag">SpiceDB · RBAC + ReBAC</span>
+    <span class="tag">Temporal · 主流程 + 子流程</span>
+    <span class="tag">会话内容存档</span>
+    <span class="tag">基于 b2b_pilot_v2 演进</span>
+  </div>
+</header>
+
+<div class="layout">
+<nav class="toc" aria-label="目录">
+  <p class="toc-title">目录</p>
+  <a href="#s0">0. 结论摘要（TL;DR）</a>
+  <a href="#s1">1. 需求扫描摘要</a>
+  <a href="#s1-5">1.5 双客户定位与演示主轴</a>
+  <a href="#s1-5-a" class="sub">1.5.1 双客户业务定位对照</a>
+  <a href="#s1-5-b" class="sub">1.5.2 演示主流程对照</a>
+  <a href="#s1-5-c" class="sub">1.5.3 各环节要点对照</a>
+  <a href="#s2">2. 验证目标与范围</a>
+  <a href="#s3">3. 总体架构</a>
+  <a href="#s4">4. 授权支柱：SpiceDB</a>
+  <a href="#s4-1" class="sub">4.1 RBAC + ReBAC 混合模型</a>
+  <a href="#s4-2" class="sub">4.2 复杂 B2B 场景覆盖</a>
+  <a href="#s5">5. 流程支柱：Temporal</a>
+  <a href="#s5-1" class="sub">5.1 主流程与子流程</a>
+  <a href="#s5-2" class="sub">5.2 双门禁与状态一致性</a>
+  <a href="#s6">6. 企微接入（重点）</a>
+  <a href="#s6-1" class="sub">6.1 场景矩阵</a>
+  <a href="#s6-2" class="sub">6.2 通道能力对照</a>
+  <a href="#s6-3" class="sub">6.3 「群发言→预订单」可行性</a>
+  <a href="#s6-4" class="sub">6.4 捕捉处理流水线</a>
+  <a href="#s6-5" class="sub">6.5 交互设计</a>
+  <a href="#s6-6" class="sub">6.6 工程注意事项与降级</a>
+  <a href="#s7">7. 数据模型与集成</a>
+  <a href="#s8">8. 验证计划（五阶段）</a>
+  <a href="#s9">9. 验收标准与决策门</a>
+  <a href="#s10">10. 风险登记册</a>
+  <a href="#s11">11. 开放问题</a>
+</nav>
+
+<main>
+
+<!-- ============ 0 ============ -->
+<h2 id="s0">0. 结论摘要（TL;DR）</h2>
+<div class="callout good">
+  <div class="ct">三大支柱的验证结论预期</div>
+  <p><strong>① 授权</strong>：SpiceDB 用「全局角色关系 + 资源级关系 + 条件关系」即可同时表达 RBAC 与 ReBAC，且与现有 pilot 的 7 定义 15 权限可直接演进；字段级裁剪（仓管看不到价格金额）由 BFF 在资源级授权通过后做投影，边界清晰。<strong>② 流程</strong>：Temporal 以 1 个 OrderWorkflow 主流程 + 3 类子流程（发货 / 转交 / 例外开票）承载四环节，用 Timer 做超时催办、用 Signal 接企微回调，与现有 PrestockWorkflow/ShipmentWorkflow 映射后即可复用大部分骨架。<strong>③ 企微（重点）</strong>：<em>「客户在群里发言→自动变成下单需求」在技术上完全可行，但只有一条官方通道——「会话内容存档」API</em>；它要求企业认证 + 付费开通 + 员工知情同意，属于合规敏感能力，需在 Phase 0 设决策门。侧边栏 H5、应用消息卡片、回调均为主流成熟能力，风险低。</p>
+</div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>支柱</th><th>验证问题</th><th>预期结论</th><th>最大前置条件</th></tr></thead>
+<tbody>
+<tr><td><strong>授权</strong></td><td>SpiceDB 能否支撑「岗位角色 + 关系授权 + 多租户 + 交接/代办/转交」的复杂 B2B 需求</td><td class="yes">可以，混合模型 + 双门禁</td><td>无（纯软件验证）</td></tr>
+<tr><td><strong>流程</strong></td><td>Temporal 能否承载四环节主流程、分批发货、转交、例外开票、超时催办</td><td class="yes">可以，主流程 + 子流程 + Signal/Timer</td><td>无（纯软件验证）</td></tr>
+<tr><td><strong>企微</strong></td><td>侧边栏、群消息捕捉、卡片确认、回调四类场景能否跑通</td><td class="note">可行但「群消息捕捉」依赖会话存档，需合规决策</td><td>测试企业认证 + 会话存档开通 + 员工知情同意</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ============ 1 ============ -->
+<h2 id="s1">1. 需求扫描摘要</h2>
+<p>以下为对本次输入需求文档的要点提炼，是验证项目范围与验收标准的来源依据。</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>来源</th><th>关键要求（影响验证设计）</th></tr></thead>
+<tbody>
+<tr><td>订单系统业务需求说明 V2.0+</td><td>统一订单总表承接多来源订单；ORD/STK/SHP/INV 四环节以主流程编号串联；多仓与产品明细分配、分批发货、办理人/仓库转交；回单按发货批次关联、无回单例外开票；权限原则（仓管不查看价格金额、商务全公司、销售本人）；订单状态由实际结果汇总、不得被节点点击直接改完成；库存按「仓库+型号+批号+包装」；历史未完成订单可继续办理</td></tr>
+<tr><td>B2B 订单管理产品方案</td><td>四个创建入口：小程序 / 客户群侧边栏 / 订单智能体对话 / <strong>AI 自动捕捉群消息生成预订单</strong>；预订单生命周期（确认/修改/忽略/超时提醒）；客户风控评级（回款/退货/纠纷/额度/对话舆情）三档处置（放行/标记/阻断+特批）；审批串并行可配、超时催办升级、驳回带原因；订单智能体七角色（下单助手/对话监听/风控守门/审批催办/履约追踪/合同管家/信息中转）</td></tr>
+<tr><td>企微侧边栏 H5 全生命周期指南</td><td>自建应用 + 聊天工具栏 H5 为主路径（非小程序）；OAuth 网页授权 + JS-SDK（<code>ww.register</code>）；企业签名 + 应用签名（agent_config）双票据；entry 分流（<code>single_chat_tools</code>/<code>group_chat_tools</code>/<code>normal</code>）；可信域名 + 回调域 + 客户联系权限；<strong>群消息监听只有会话存档一条官方通道</strong>；ticket 限流（每企业每小时 400 次）；本地联调用测试域名 + HTTPS 代理；身份与上下文都必须服务端重新授权</td></tr>
+<tr><td>07-20 订单系统闭门会</td><td>合同场景 A–F 覆盖评估（框架/单次/到期/超量/无合同）；流程必须可审计、可回溯（版本固化，非运行时随机变化）；业务规则（如回单才开票）由业务方拍板、技术保持规则弹性；有限研发资源 → 验证项目必须边界清晰、可复用资产</td></tr>
+<tr><td>0718 ToB 企业 AI 化改造路径</td><td>先做「频率高、责任清、数据可得、价值可量化」的模块；交付闭环：诊断→同日原型→定版→上线→资产化；权限越权是 P0 红线；最小项目组角色分工（业务/技术 Owner 唯一责任人）</td></tr>
+<tr><td>AI 组织文化 / Agent 主体信仰</td><td>Agent 是主体、人是异常处置层；评测集跑分才可信；安全失败边界（AI 不得独立签约/承诺/报价）；能力沉淀为可复用资产；数据争论不争论直觉</td></tr>
+<tr><td>现有 pilot（b2b_pilot_v2）</td><td>Go 全栈 + Temporal + SpiceDB + PostgreSQL + Outbox 投影；已有备货父流程 + 发货子流程、7 定义 15 权限、153 测试 92.7% 覆盖率；本验证项目在其上演进，不另起炉灶</td></tr>
+<tr><td><strong>三方审批流程图 v2（2026-08-06 补充）</strong></td><td><strong>长安仁恒真实流程的权威依据</strong>：四分支（订单创建→备货审批→发货分配及出库→开票回单审批）Mermaid 等价修正版；客户商誉评估（客户等级 C/D 触发董事长审批）、合同生成校验（模板/要素/编号）；备货按供方分流（总部/化工/阳原/分公司财务）；发货单一次性完成、剩余回备货层；<strong>回单不卡开票</strong>（款到直接进/有回单/超 5 天自动/5 天内提前申请 四种分流）；修改订单 A/B/C/D/E 分类规则；24 条评审批注（开票独立于发货、合同单独管理等设计意图）</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout">
+  <div class="ct">需求扫描结论</div>
+  <p>验证项目不需要覆盖全部需求（如真实开票系统对接、生产排期、客户系统对接均属后续阶段），而应验证<b>决定整体方案是否成立的三件事</b>：授权模型能否承接复杂角色关系、流程引擎能否承接长生命周期业务、企微通道能否把「业务动作」与「客户沟通现场」连接起来。</p>
+</div>
+
+<!-- ============ 1.5 ============ -->
+<h2 id="s1-5">1.5 双客户定位与演示主轴（长安仁恒 × 智厨）</h2>
+<p>验证项目的<b>演示主轴 = 长安仁恒的订单履约四分支</b>（依据《三方审批流程图_v2》，2026-08-06 修正版）。<b>智厨的定位 = 演示展示对象</b>：长安仁恒的验证项目本身就是给智厨看的样板，<strong>不为智厨定制可用的验证项目</strong>；所有展示以长安仁恒的订单处理环节为落脚点——先按长安仁恒的环节走完整条链路，在每个环节以对照表说明「智厨若使用该系统，该环节如何映射到其业务」（角色/仓库/凭证/SLA/开票等），用于向智厨沟通系统能力与适配路径，而非交付承诺。</p>
+
+<h3 id="s1-5-a">1.5.1 双客户业务定位对照</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>维度</th><th>长安仁恒（演示主轴 / 落脚点）</th><th>智厨（展示对照对象）</th></tr></thead>
+<tbody>
+<tr><td>业务形态</td><td><strong>订单履约型</strong>：原料/工业品（四仓：阳原 / 长兴 / 东莞 / 成都）</td><td><strong>服务交付型</strong>：商用厨具设备 + 售后服务（备件 / 安装 / 培训 / 接待）</td></tr>
+<tr><td>核心链路</td><td>下单 → 审价 → 备货 → 发货 → 回单 → 开票（ORD→STK→SHP→INV）</td><td>服务群响应 → 工单 → 备件/服务交付 → 回访（服务驱动，订单为弱主轴）</td></tr>
+<tr><td>协同角色</td><td>销售/代办、销售主管、董事长（C/D 级）、商务、财务（按供方分流）、仓管、物流</td><td>售后工程师、服务经理、销售（个微触达）、流程信息部（对接 CM/工单/审批）</td></tr>
+<tr><td>企微触点</td><td>销售用工作机登录个人微信（可会话存档）→ 群消息捕捉可行</td><td>销售用个人微信、售后在企微 → 会话存档仅覆盖售后群；销售侧需降级为半自动</td></tr>
+<tr><td>流程复杂度</td><td>四分支 + 修改分类（A/B/C/D/E）+ 供方分流 + 回单例外开票</td><td>服务工单状态机 + 备件库存 + 多服务群并发（与订单流程解耦）</td></tr>
+<tr><td>在验证项目中的角色</td><td class="yes">主流程本体（所有环节以其为落脚点）</td><td class="note">展示对照对象（长安仁恒样板直接展示，不单独建验证项目）</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="s1-5-b">1.5.2 演示主流程对照（以长安仁恒订单履约为主轴）</h3>
+<p>以下为主流程表，按长安仁恒四分支逐环节对照「智厨若使用该系统时的映射」。演示叙事：长安仁恒完整走一遍（样板本体）→ 每个环节用对照列说明智厨场景如何映射到该环节。</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>长安仁恒环节（落脚点）</th><th>长安仁恒主流程关键节点（依据流程图 v2）</th><th>智厨映射（展示对照，非定制）</th><th>展示要点</th></tr></thead>
+<tbody>
+<tr>
+<td rowspan="2"><strong>① 订单创建</strong><br/>（ORD）</td>
+<td>订单草稿 → 系统校验 → 客户等级存在且有效? → 缺失则<strong>客户商誉评估</strong> → 待价格审批（销售主管）→ C/D 级再走<strong>董事长审批</strong> → 合同生成校验（模板/要素/编号）→ 合同已生成 → 自动创建备货任务</td>
+<td>客户台账以服务工单/设备档案为主，商誉评估依赖售后回访与备件复购数据；价格审批简单（多走服务合同而非逐单审价）</td>
+<td>ORD 状态机不变；「商誉评估」节点抽象为可配置评估来源（财务账期 / 服务复购）；「董事长审批」为 C/D 级条件分支，智厨可配置为关闭或替换为服务经理审批</td>
+</tr>
+<tr>
+<td>修改订单：A 类（客户/型号/单价/等级→回审价）、B 类（供方/账期/收货/数量→仅重生成合同）、C 类（其他→静默修改）</td>
+<td>修改多发生在服务工单字段（地址/联系人/设备型号），无价格与合同敏感性</td>
+<td>A/B/C 修改规则表为配置数据；智厨将 A 类降级为 C 类（静默修改），仅「设备型号」变更触发重生成服务单</td>
+</tr>
+<tr>
+<td rowspan="2"><strong>② 备货审批</strong><br/>（STK）</td>
+<td>合同已生成（款到发货）→ 待商务备货（选仓+发货量）→ 待仓管确认备货（评估库存/执行能力）→ 退回 / <strong>申请转仓</strong> / 可执行 → 待财务确认到账（按<strong>供方分流</strong>：总部/化工/阳原/分公司财务）→ 商务发出发货命令</td>
+<td>备货对象是备件/整机而非原料批次；库存粒度到设备型号+序列号；「财务确认到账」弱（多为服务合同分期），「仓管」= 售后库管</td>
+<td>STK 状态机不变；「仓库」抽象为库存域（区域仓 ↔ 备件库），「财务确认」节点按配置可跳过或改为「服务合同校验」；转仓规则复用（库房间调拨）</td>
+</tr>
+<tr>
+<td>非款到发货：直接进入发货分配（跳过备货财务确认）</td>
+<td>智厨大部分为非款到发货（服务合同）→ 走简化路径</td>
+<td>「账期类型」为订单级配置字段；智厨默认非款到，天然复用简化分支</td>
+</tr>
+<tr>
+<td rowspan="2"><strong>③ 发货分配及出库</strong><br/>（SHP）</td>
+<td>出库单已生成 → 商务选仓+发货量 → 仓管填实际发货量 → 累计发货=订单总量? → 全部完成 / 部分发货（<strong>剩余三种处理</strong>：按原分批继续 / 仓管申请退回或转仓 / 已发货部分可申请开票）；<strong>一张发货单只发一次</strong>，少发回退备货层</td>
+<td>发货=设备安装/物流送货上门（含安装调试动作）；凭证含安装单、验收单而非回单；批次粒度=单台设备</td>
+<td>SHP 状态机不变；「凭证类型」配置（回单 ↔ 安装/验收单）；「分批规则」配置（按吨 ↔ 按台）；少发回退备货层逻辑复用</td>
+</tr>
+<tr>
+<td>转交：仓管申请转交及原因 → 商务确认 → 转交其他仓管</td>
+<td>安装任务可转交其他售后工程师/区域</td>
+<td>TransferWorkflow 复用；「转交审批人」配置为商务 ↔ 服务经理</td>
+</tr>
+<tr>
+<td rowspan="2"><strong>④ 开票回单审批</strong><br/>（INV）</td>
+<td>已发货 → 款到直接进 / 有回单 / 无回单超 5 天自动进入 / 5 天内提前申请（回单异常审核）→ 待开票申请（提交人）→ 推送财务 → 有回单→订单结束；无回单→待补回单→结束。<strong>回单不卡开票</strong></td>
+<td>开票主体多为服务合同（维护费/备件），发票类型与税率不同；回单弱化为电子服务确认</td>
+<td>INV 状态机不变；「回单阈值」与「开票依据」配置（回单 ↔ 服务验收）；四种开票分流规则为配置数据</td>
+</tr>
+<tr>
+<td>开票独立于发货（评审批注 #17/#24）：订单存在即可开票，按有效发货勾选合并开票</td>
+<td>服务费可按周期开票，天然符合「开票独立」设计</td>
+<td>「有效发货」抽象为「有效服务交付」；合并开票入口复用</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="s1-5-c">1.5.3 各环节要点对照（长安仁恒为落脚点，智厨差异标注）</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>要点维度</th><th>长安仁恒实现方式（落脚点）</th><th>智厨差异点</th><th>技术承载</th></tr></thead>
+<tbody>
+<tr><td>授权模型</td><td>RBAC（岗位：销售/主管/董事长/商务/财务/仓管）+ ReBAC（客户归属/代办/转交/供方分流）+ 字段裁剪（仓管不见价格）</td><td>角色集不同（售后工程师/服务经理）；「供方分流财务」换为「区域服务经理」</td><td>SpiceDB 混合 schema，角色与资源关系均为可配置数据</td></tr>
+<tr><td>流程引擎</td><td>OrderWorkflow 四分支主流程 + Shipment/Transfer/ExceptionInvoice 子流程；修改分类 A/B/C/D/E 为状态机分支</td><td>主流程相同，子流程类型与修改分类映射不同</td><td>Temporal；修改分类规则表与子流程注册表可插拔</td></tr>
+<tr><td>双门禁</td><td>SpiceDB 判断关系授权 + 状态机判断状态/额度；C/D 级客户走董事长审批</td><td>门禁逻辑相同；「额度」换为「服务合同有效性」</td><td>复用现有 pilot 双门禁模式</td></tr>
+<tr><td>企微接入</td><td>S1 侧边栏 H5 + S2 群消息捕捉（销售工作机会话存档）+ S3 应用消息 + S4 工作台</td><td>S2 仅覆盖售后企微群；销售个微侧降级为半自动（S1 侧边栏 + 人工确认）</td><td>企微适配器 Real/Fake 双实现；S2 按群类型路由</td></tr>
+<tr><td>超时催办</td><td>每个人工节点配 SLA，Timer 催办 + N 次升级上级（董事长）</td><td>SLA 阈值不同；升级链到服务经理/总监</td><td>Temporal Timer + 配置</td></tr>
+<tr><td>转交</td><td>handler 关系迁移 + 原因 + 通知 + 审计（仓管↔仓管）</td><td>转交对象为售后工程师/区域</td><td>TransferWorkflow 复用</td></tr>
+<tr><td>审计回溯</td><td>History 即审计，版本固化，状态由实际结果汇总（回单/发票/到账）；评审批注 #17/#20/#23 明确「开票独立于发货」「一张发货单只发一次」「合同单独管理」</td><td>相同要求（服务记录可回溯）</td><td>双重表述（PG 事实 + Temporal 轨迹）</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout warn">
+  <div class="ct">智厨定位说明（2026-08-06 确认）</div>
+  <p><strong>长安仁恒的验证项目即演示样板，直接展示给智厨；不为智厨定制可用的验证项目。</strong>上表「智厨映射」列基于 07-19/07-20 会议纪要与售后中枢 POC 方案提取（服务群/工单/备件/安装培训接待、销售用个微、售后在企微），用于向智厨展示「同一套系统在您的场景下如何落地」，<strong>属于沟通对照而非需求承诺或交付范围</strong>。智厨侧是否后续单独建设，待样板演示与业务沟通后另行决策。</p>
+</div>
+
+<!-- ============ 2 ============ -->
+<h2 id="s2">2. 验证目标与范围</h2>
+<h3>2.1 目标</h3>
+<ul>
+  <li><strong>主轴目标</strong>：以长安仁恒订单履约四分支（订单创建→备货审批→发货分配及出库→开票回单审批，依据《三方审批流程图_v2》）为演示主轴完整走通，<strong>该验证项目同时作为展示给智厨的演示样板</strong>；在对应环节以「智厨映射」对照列说明智厨场景如何适配，验证系统对两类业务的可展示性与复用边界。</li>
+  <li><strong>授权目标</strong>：验证 SpiceDB 的 RBAC + ReBAC 混合模型能覆盖长安仁恒订单系统的复杂权限（多角色、客户归属、代办、交接、转交、C/D 级董事长审批、供方分流财务、多租户隔离、字段裁剪），并形成可复用 schema 与自动化测试。</li>
+  <li><strong>流程目标</strong>：验证 Temporal 能承载长安仁恒四分支主流程（含修改订单 A/B/C/D/E 分类分支）+ 发货/转交/例外开票子流程，包括人工等待、超时催办升级、外部回调接入、失败重试与审计轨迹。</li>
+  <li><strong>企微目标</strong>：验证四类场景（侧边栏 H5、<strong>群消息捕捉→预订单</strong>、应用消息卡片确认、回调事件）在长安仁恒（销售工作机会话存档可行）与智厨（仅售后群可存档、销售侧降级）两种情况下的技术可行性与真实交互体验，并给出「可行 / 有条件可行 / 不可行」的证据化结论。</li>
+</ul>
+
+<h3>2.2 范围（做 / 不做）</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>维度</th><th>✅ 验证范围内</th><th>⛔ 明确不做（后续阶段）</th></tr></thead>
+<tbody>
+<tr><td>授权</td><td>RBAC+ReBAC 混合 schema；客户归属/代办/交接/转交/多租户/字段裁剪；授权自动化测试；Temporal Activity 内授权</td><td>与既有身份系统（AD/LDAP）对接；组织架构自动同步</td></tr>
+<tr><td>流程</td><td><strong>长安仁恒四分支主流程</strong>：① 订单创建（客户商誉评估/C-D 级董事长审批/合同生成校验/修改 A-B-C 类）→ ② 备货审批（商务选仓/仓管确认/转仓/供方分流财务确认到账）→ ③ 发货分配及出库（一张发货单一次完成/剩余三种处理/转交）→ ④ 开票回单审批（回单不卡开票四况分流/例外审核）；超时催办与升级；企微 Signal 接入；各环节附「智厨映射」展示对照</td><td>真实开票/税控对接；ERP/财务核销；生产排期联动；库存自动扣减对接仓库系统</td></tr>
+<tr><td>企微</td><td>聊天工具栏 H5（单聊/群聊/工作台三 entry）；会话存档捕捉群消息→预订单→卡片确认；应用消息推送（审批/催办/通知）；回调验签解密</td><td>微信小程序形态；工作手机/非官方接口；智能机器人知识库问答；群发助手</td></tr>
+<tr><td>数据</td><td>订单/明细/批次/回单/开票申请/预订单/上下文绑定/会话消息（仅意图特征）</td><td>BI 报表、费用报销、客户线索（化百道）、历史数据迁移</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>2.3 与现有 pilot 的关系</h3>
+<p>在 <code>b2b_pilot_v2</code> 基础上演进：复用 Go workspace、<code>packages/domain|contracts|authz|adapters</code> 包结构、SpiceDB schema 文件、docker-compose 编排与测试分层；将现有 <code>PrestockWorkflow/ShipmentWorkflow</code> 映射为 STK/SHP 环节；新增 <code>OrderWorkflow</code>（ORD 总入口）与 <code>TransferWorkflow</code>、<code>ExceptionInvoiceWorkflow</code>；新增企微「会话存档捕捉服务」与「消息卡片确认」端点。</p>
+
+<!-- ============ 3 ============ -->
+<h2 id="s3">3. 总体架构</h2>
+<div class="mermaid-wrap"><pre class="mermaid">
+flowchart TB
+  subgraph 企微["企业微信（测试企业）"]
+    A1["客户单聊/客户群<br/>聊天工具栏 H5"] --> A2["JS-SDK: getContext<br/>getCurExternalContact/Chat"]
+    B1["客户在客户群发言<br/>（会话内容存档通道）"] --> B2["会话存档 API 拉取+解密"]
+    C1["销售/审批人<br/>应用消息卡片"] --> C2["应用消息 API + 卡片回调"]
+    D1["企微事件回调<br/>（审批/客户联系事件）"] --> D2["回调验签+解密"]
+  end
+
+  subgraph BFF["Go BFF（apps/bff-api）"]
+    E["OAuth / Session / 双签名"]
+    F["上下文解析<br/>chatId→customer 映射"]
+    G["意图识别编排<br/>LLM + 规则"]
+    H["预订单 / 卡片确认端点"]
+  end
+
+  subgraph ENG["流程与授权引擎"]
+    I["Temporal Worker<br/>OrderWorkflow + 子流程<br/>(STK/SHP/INV/Transfer/Exception)"]
+    J["SpiceDB<br/>RBAC+ReBAC 混合授权"]
+    K["Outbox → Relation Projector"]
+  end
+
+  subgraph DATA["数据"]
+    L[("PostgreSQL<br/>业务事实 + 事件")] 
+    M[("MinIO<br/>凭证/回单附件")]
+  end
+
+  A2 --> E
+  B2 --> G
+  C2 --> H
+  D2 --> E
+  E --> F --> G
+  G --> H
+  H --> I
+  I --> K
+  I --> L
+  I --> M
+  E --> J
+  F --> J
+  H --> J
+  K --> J
+</pre></div>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>层</th><th>组件</th><th>职责</th><th>验证要点</th></tr></thead>
+<tbody>
+<tr><td>接入层</td><td>企微适配器（Real/Fake 双实现）</td><td>OAuth、双票据签名、会话存档拉取与 RSA/AES 解密、应用消息、回调验签解密</td><td>Fake 适配器保证无企微环境可开发；Real 适配器在测试企业验证</td></tr>
+<tr><td>应用层</td><td>BFF</td><td>会话管理、上下文解析、意图识别编排、预订单生命周期、卡片回调</td><td>「群发言→预订单→确认」全链路延迟与准确率</td></tr>
+<tr><td>引擎层</td><td>Temporal + SpiceDB</td><td>流程编排与关系授权（双门禁）</td><td>四环节流转、催办升级、授权矩阵自动化测试</td></tr>
+<tr><td>数据层</td><td>PostgreSQL + MinIO</td><td>业务事实（双重表述）、附件凭证</td><td>Outbox 投影一致性</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ============ 4 ============ -->
+<h2 id="s4">4. 授权支柱：SpiceDB（RBAC + ReBAC 混合）</h2>
+
+<h3 id="s4-1">4.1 混合模型设计</h3>
+<p>在 SpiceDB 中，RBAC 与 ReBAC 都是「关系」——差别只在于被授权对象是<b>角色组</b>还是<b>具体资源</b>。混合体现在授权表达式上：<strong>权限 = 全局角色关系（岗位）∩ 资源级关系（归属/关系）∩ 条件关系（例外/时效）</strong>，三者全部满足才放行。这与需求中「仓管是角色、但只能看本仓任务（关系）」的语义完全对应。</p>
+<pre><code>// 概念级 schema（验证项目将落地为 config/schema.zed）
+definition organization {
+    relation member: user
+    relation role: user | member   // RBAC：member 是成员，role 是岗位
+    permission has_role = role
+}
+
+definition customer {
+    relation tenant: organization
+    relation owner: user            // ReBAC：客户归属销售
+    relation proxy: user            // 代办：可替 owner 操作（交接/休假）
+    relation managed_by: user       // 商务统筹
+    permission view = owner + proxy + managed_by
+    permission create_order = owner + proxy
+}
+
+definition order {
+    relation tenant: organization
+    relation customer: customer
+    relation creator: user
+    permission view = customer.view + creator
+    permission approve_price = tenant.has_role("sales_manager")
+}
+
+definition warehouse {
+    relation tenant: organization
+    relation operator: user
+    permission manage = operator
+}
+
+definition shipment {
+    relation tenant: organization
+    relation warehouse: warehouse
+    relation requester: user
+    relation handler: user | warehouse.operator   // 仓管 + 转交后的新办理人
+    permission confirm = handler
+    permission append_evidence = requester + handler + customer_contact
+    permission view_price = false                 // 字段级裁剪：仓管永远无价格权限
+}
+
+definition invoice {
+    relation tenant: organization
+    relation order: order
+    relation approver: user
+    permission approve = approver + tenant.has_role("finance")
+}</code></pre>
+<p><strong>关键设计点</strong>：</p>
+<ul>
+  <li><strong>RBAC 部分</strong>：<code>tenant.has_role("sales"|"sales_manager"|"operations"|"warehouse"|"finance"|"admin")</code> 表达岗位；角色关系由管理员写入。</li>
+  <li><strong>ReBAC 部分</strong>：<code>customer.owner / proxy / managed_by</code>、<code>shipment.handler</code>、<code>order.creator</code> 表达资源级关系；交接 = 迁移 owner 关系；转交 = 迁移 handler 关系；代办 = 增加 proxy 关系（带有效期则用条件关系 caveat）。</li>
+  <li><strong>字段级裁剪</strong>：SpiceDB 是资源级授权，字段投影由 BFF 在 <code>view</code> 通过后执行（仓管视图不含 price/amount 字段）。验证项目将其固化为「授权结果 → 响应投影」的强制管线 + 契约测试。</li>
+  <li><strong>双门禁</strong>：SpiceDB 回答「能不能做」（关系），Temporal/状态机回答「该不该现在做」（状态与额度）——<code>approve_price</code> 即使有权限，订单不在待审批状态也不能推进。</li>
+</ul>
+
+<h3 id="s4-2">4.2 复杂 B2B 场景覆盖（验证用例）</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>场景</th><th>授权表达</th><th>验证断言</th></tr></thead>
+<tbody>
+<tr><td>销售只看本人客户订单</td><td><code>order.view = customer.view + creator</code></td><td>销售 A 不可见销售 B 的订单（列表过滤 + 详情 403）</td></tr>
+<tr><td>商务看全公司订单</td><td><code>tenant.has_role("operations")</code> → 全量视图</td><td>商务可见全量但字段完整（价格可见）</td></tr>
+<tr><td>仓管只办本仓任务</td><td><code>shipment.handler = warehouse.operator</code></td><td>仓管 A 不可见仓 B 任务；任务详情无价格/金额字段</td></tr>
+<tr><td>代办（授权下单）</td><td><code>customer.proxy</code>（caveat 限有效期）</td><td>代办可替 owner 下单，记录实际提交人（creator=代办）</td></tr>
+<tr><td>销售离职交接</td><td>owner 关系迁移 + 历史审计</td><td>交接后新 owner 可见、旧 owner 不可见；操作日志保留</td></tr>
+<tr><td>发货任务转交</td><td>handler 关系迁移（需原因与通知）</td><td>原办理人待办关闭、新办理人可 confirm、转交不可重复</td></tr>
+<tr><td>多租户隔离</td><td>所有定义挂 <code>tenant</code></td><td>跨企业（corp）数据零可见</td></tr>
+<tr><td>例外开票审批</td><td><code>invoice.approve = approver + finance</code></td><td>非财务角色不能批准例外开票</td></tr>
+<tr><td>审批权限与状态双门禁</td><td>SpiceDB 通过 + 状态机校验</td><td>已办结订单旧链接不可重复推进</td></tr>
+</tbody>
+</table>
+</div>
+<div class="callout warn">
+  <div class="ct">授权验证的方式</div>
+  <p>延续现有 pilot 的 Auth-Pillar 测试（A0 schema 编译 / A1 黄金矩阵 / A2 一致性 / A3 竞态），新增「字段投影契约测试」与「Temporal Activity 内授权测试」。授权验证纯软件、无外部依赖，是三大支柱中<b>风险最低、最先完成</b>的一项。</p>
+</div>
+
+<!-- ============ 5 ============ -->
+<h2 id="s5">5. 流程支柱：Temporal</h2>
+
+<h3 id="s5-1">5.1 主流程与子流程（对齐《三方审批流程图_v2》四分支）</h3>
+<div class="mermaid-wrap"><pre class="mermaid">
+stateDiagram-v2
+    [*] --> 订单草稿: 创建/预订单确认
+    订单草稿 --> 待客户商誉评估: 校验通过且等级缺失/过期
+    待客户商誉评估 --> 待价格审批: 评估完成
+    订单草稿 --> 待价格审批: 校验通过且等级有效
+    待价格审批 --> 待董事长审批: 主管通过且 C/D 级
+    待价格审批 --> 待合同生成校验: 主管通过且非 C/D 级
+    待价格审批 --> 订单已终止: 拒绝
+    待价格审批 --> 订单草稿: 退回/撤回
+    待董事长审批 --> 待合同生成校验: 通过
+    待董事长审批 --> 订单已终止: 拒绝
+    待合同生成校验 --> 待补全合同要素: 模板/要素/编号未通过
+    待补全合同要素 --> 待合同生成校验: 补全后重新校验
+    待合同生成校验 --> 合同已生成: 校验通过
+    合同已生成 --> 待商务备货: 款到发货(备货分支)
+    合同已生成 --> 待商务选择仓库: 非款到发货(发货分配分支)
+    待商务备货 --> 待仓管确认备货: 商务选仓+发货量
+    待仓管确认备货 --> 待商务备货: 退回/申请转仓
+    待仓管确认备货 --> 待财务确认到账: 可执行(供方分流财务)
+    待财务确认到账 --> 待商务发出发货命令: 到账
+    待商务选择仓库 --> 待发货: 选择发货仓
+    待商务发出发货命令 --> 待发货: 发货命令下达
+    待发货 --> 订单已全部发货: 累计发货=订单总量
+    待发货 --> 订单部分发货: 累计发货&lt;订单总量
+    订单部分发货 --> 待发货: 按原分批继续
+    订单部分发货 --> 待商务选择仓库: 退回/转仓
+    订单已全部发货 --> 待开票申请: 提交人申请开票
+    订单部分发货 --> 待开票申请: 已发货部分申请开票
+    待开票申请 --> 待回单异常审核: 无回单且超5天/提前申请
+    待回单异常审核 --> 待开票申请: 审核通过
+    待回单异常审核 --> 待补回单: 审核不通过
+    待开票申请 --> 已推送财务: 提交人确认
+    已推送财务 --> 订单结束: 有回单
+    已推送财务 --> 待回单上传: 无回单
+    待回单上传 --> 订单结束: 回单上传完成
+</pre></div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>工作流</th><th>承载</th><th>关键机制</th><th>与现有 pilot 映射</th></tr></thead>
+<tbody>
+<tr><td><code>OrderWorkflow</code></td><td>长安仁恒四分支主流程（订单创建→备货审批→发货分配及出库→开票回单审批，状态机 + 人工等待 + 修改分类 A/B/C/D/E 分支）</td><td><code>workflow.Signal</code> 接收审批/回调结果；<code>Timer</code> 超时催办并升级上级；<code>workflow.NewChildWorkflow</code> 编排子流程；SearchAttributes 支持「待办/超时」检索；修改分类规则表驱动状态回退（A 回审价 / B-D 重生成合同 / E 静默）</td><td>新增（现有 PrestockWorkflow 演进为 STK 环节）</td></tr>
+<tr><td><code>ShipmentWorkflow</code></td><td>每次实际发货（批次、库存锁定、凭证、物流）</td><td>现有骨架直接复用；批次与主订单「累计已发/剩余未发」由事件投影计算</td><td>复用（现有 ShipmentWorkflow）</td></tr>
+<tr><td><code>TransferWorkflow</code></td><td>仓管/办理人转交（原因、通知、原待办关闭）</td><td>Signal 确认 + 关系迁移（SpiceDB handler 更新）+ 审计</td><td>新增</td></tr>
+<tr><td><code>ExceptionInvoiceWorkflow</code></td><td>无回单例外开票申请（材料、审批、后补回单跟踪）</td><td>人工审批等待 + 定时器跟踪后补回单</td><td>新增</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="s5-2">5.2 双门禁与状态一致性</h3>
+<ul>
+  <li><strong>双重表述</strong>：PostgreSQL 保存业务事实（订单、批次、回单、发票状态），Temporal 保存「下一步做什么」与完整历史轨迹（History 即审计）。订单状态由实际业务结果事件汇总（回单齐、发票关联、回款登记），任何节点被点击都不能直接改完成——这正是需求 V2.0+ 的硬性要求。</li>
+  <li><strong>事务性 Outbox</strong>：业务写 + 事件在同一 DB 事务；Outbox 投影到 SpiceDB 关系与读模型（现有 Relation Projector 复用）。</li>
+  <li><strong>超时催办</strong>：每个人工节点配置 SLA，<code>Timer</code> 到期触发催办 Activity（企微应用消息），N 次后升级上级——对应需求「超时自动催办 + 升级」与「驳回带原因」。超时/逾期订单进入商务工作台「疑似漏发/超时清单」。</li>
+  <li><strong>防重复</strong>：旧待办只读、task_id 校验、撤回重提生成新任务——由 OrderWorkflow 状态机 + SpiceDB 双门禁保证，沿用现有 pilot 的 L3 补偿测试模式。</li>
+</ul>
+
+<!-- ============ 6 ============ -->
+<h2 id="s6">6. 企微接入（重点验证项）</h2>
+
+<h3 id="s6-1">6.1 场景矩阵</h3>
+<p>需求中的企微触点可归纳为四类场景。验证项目逐一落地并给出「可行性 + 交互」证据。</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>场景</th><th>使用者</th><th>交互形式</th><th>技术路径</th><th>可行性</th></tr></thead>
+<tbody>
+<tr><td><strong>S1 聊天工具栏 H5</strong><br/>（单聊 / 客户群 / 工作台）</td><td>销售、商务</td><td>在聊天窗口右侧侧边栏打开 H5：当前客户上下文自动带入 → 下单 / 查进度 / 处理待办</td><td>自建应用「聊天工具栏」配置 URL；OAuth 网页授权；JS-SDK <code>ww.register</code> + <code>getContext</code> + <code>getCurExternalContact/Chat</code>；企业+应用双签名</td><td class="yes">官方成熟（主路径）</td></tr>
+<tr><td><strong>S2 群消息捕捉→预订单</strong><br/>（客户在群里发言直接变成下单需求）</td><td>系统（Agent）→ 销售确认</td><td>客户群发言 → 系统捕捉 → 生成预订单 → 应用消息卡片推给销售 → 确认/修改/忽略</td><td><strong>会话内容存档 API</strong>（唯一官方消息通道）+ 意图识别 + 应用消息卡片</td><td class="note">技术可行，需认证+付费+员工同意（详见 6.3）</td></tr>
+<tr><td><strong>S3 应用消息推送</strong><br/>（审批 / 催办 / 状态通知 / 待办卡片）</td><td>全部角色</td><td>审批卡片（通过/驳回带原因）、催办、发货/开票状态变更通知、预订单确认卡片</td><td>应用消息 API（text/template_card）+ 点击卡片回调（点击事件回调 URL）</td><td class="yes">官方成熟</td></tr>
+<tr><td><strong>S4 工作台 H5</strong><br/>（无会话上下文入口）</td><td>销售、仓管</td><td>我的订单 / 我的待办 / 我的发货任务（安全降级视图，不猜客户）</td><td>应用主页 URL + 既有 OAuth/Session</td><td class="yes">官方成熟</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="s6-2">6.2 通道能力对照（为什么只有一条路）</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>企微通道</th><th>能否读客户群消息</th><th>说明</th><th>验证项目是否采用</th></tr></thead>
+<tbody>
+<tr><td>聊天工具栏 H5（JS-SDK）</td><td class="no">否（只能取当前会话 ID/客户 ID，且需用户主动打开）</td><td>提供「上下文」而非「消息流」；可拿到 chatId/external_userid 用于关联客户</td><td class="yes">采用（S1）</td></tr>
+<tr><td><strong>会话内容存档 API</strong></td><td class="yes">是（官方唯一消息流通道）</td><td>按 seq 游标增量拉取指定成员/客户群消息，RSA+AES 解密；需企业认证、付费开通（按存档账号数）、员工知情同意</td><td class="yes">采用（S2，设决策门）</td></tr>
+<tr><td>应用「接收消息」回调</td><td class="no">否（只能收成员发给应用会话的消息）</td><td>客户群消息不会推送给应用</td><td class="no">不用于消息捕捉（可用于应用内对话）</td></tr>
+<tr><td>群机器人 webhook</td><td class="no">否（只能发、不能收）</td><td>适合通知推送，不适合监听</td><td class="no">通知统一走应用消息</td></tr>
+<tr><td>客户联系事件回调</td><td class="no">仅结构事件（加好友/建群/群成员变更），不含聊天内容</td><td>可用于维护 chatId→customer 映射</td><td class="yes">辅助采用（映射维护）</td></tr>
+<tr><td>智能机器人（企微 AI）</td><td class="note">部分（知识库问答，业务回调能力有限）</td><td>配置化能力，不满足「捕捉→预订单→回写业务」的深度定制</td><td class="no">观察，不作为主通道</td></tr>
+<tr><td>工作手机 / 非官方 SDK</td><td class="no">灰色，封号与合规风险</td><td>会议纪要中「仁恒工作机同步聊天记录」的替代路线，不属官方能力</td><td class="no">验证项目不采用</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="s6-3">6.3 「群发言→预订单」可行性分析（核心）</h3>
+<div class="callout danger">
+  <div class="ct">结论先行</div>
+  <p><strong>技术上完全可行，且只有「会话内容存档」一条官方通道</strong>。验证项目将其作为 S2 场景的技术底座，但必须满足三项前置：① 测试企业完成认证并付费开通会话存档（按需存档的账号数计费）；② 获得存档范围内员工（销售/商务）的知情同意（企微官方要求，含告知义务）；③ 存档数据仅用于「下单意图识别与业务协同」，原始消息最小化留存、日志脱敏、按留存策略清理。若公司合规不认可第②条，S2 降级为「半自动」：销售在群内看到消息后一键打开侧边栏（S1），系统预填客户与历史订单，人工确认后进入下单流程——产品价值打折，但整体架构不变。</p>
+</div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>环节</th><th>官方能力 / 事实</th><th>验证项目做法</th></tr></thead>
+<tbody>
+<tr><td>开通</td><td>管理后台「安全与管理 → 会话内容存档」；企业认证 + 按账号付费；生成 RSA 公钥（2048 位）与加密算法配置</td><td>Phase 0 决策门：确认测试企业认证状态、费用预算、合规审批；仅对测试销售/商务账号开通（最小集）</td></tr>
+<tr><td>拉取</td><td><code>getchatdata</code>（seq 游标增量，单次上限与频率限制以官方文档为准）；需企业级 access_token；只能拉取已授权存档账号的会话</td><td>独立「存档拉取服务」：定时轮询 + seq 断点持久化 + 限速退避；失败告警</td></tr>
+<tr><td>解密</td><td>企业私钥 RSA 解出 AES key → AES-256-CBC 解密消息体（JSON：msgtype/roomid/from/tolist/msgtime/content）</td><td>私钥入 KMS/密钥系统，不在日志出现；解密失败计指标</td></tr>
+<tr><td>过滤</td><td>文本消息为主；<code>roomid</code> 判定群、<code>from/tolist</code> 判定发送者</td><td>只处理已绑定客户群的 roomid；非文本消息（图片/语音）本阶段不解析，仅留意图线索（如「看下这个单」无文本时发提醒）</td></tr>
+<tr><td>意图识别</td><td>LLM 结构化抽取 + 规则兜底（匹配产品库/历史订单/客户映射）</td><td>输出置信度分级：高 → 生成预订单；中 → 只发「疑似下单意图」提醒；低 → 忽略（全部计入评测集）</td></tr>
+<tr><td>归属</td><td>chatId → customer → owner（SpiceDB 关系查询）</td><td>「卡片推给谁」本身即 ReBAC 查询，天然串联授权支柱</td></tr>
+<tr><td>确认</td><td>应用消息 template_card + 点击回调</td><td>卡片含「确认 / 修改 / 忽略」；回调验签后更新预订单；24h 未处理提醒升级</td></tr>
+<tr><td>防重复</td><td>—</td><td>消息 ID 幂等表 + 意图 hash + 时间窗合并（客户连说三条只生成一个预订单）</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout warn">
+  <div class="ct">双客户 S2 适用性差异（长安仁恒 × 智厨）</div>
+  <p>会话存档按「存档成员账号」开通，只覆盖企微内会话：<strong>长安仁恒</strong>销售使用公司工作机登录个人微信（07-19 会议纪要）→ 需以「成员企微账号」纳入存档范围，客户群消息可捕捉，S2 全能力可用；<strong>智厨</strong>销售使用个人微信（不在企微）、仅售后团队在企微 → 会话存档只覆盖售后服务群，S2 仅能捕捉「备件补货 / 服务诉求」类意图并推给售后，销售侧下单意图走<strong>半自动降级</strong>（S1 侧边栏 + 人工确认）。验证项目将 S2 设计为「按群类型路由」：<code>supplier_order_group</code>（仁恒销售群）→ 预订单全流程；<code>service_group</code>（智厨售后群）→ 意图分类为服务/备件，命中才建预订单。</p>
+</div>
+
+<h3 id="s6-4">6.4 捕捉处理流水线（S2 时序）</h3>
+<div class="mermaid-wrap"><pre class="mermaid">
+sequenceDiagram
+    actor C as 客户（群里）
+    participant G as 客户群
+    participant A as 存档拉取服务
+    participant P as 意图识别(PG+LLM)
+    participant B as BFF
+    participant S as SpiceDB
+    participant W as Temporal(OrderWorkflow)
+    actor M as 销售
+
+    C->>G: 「上次那个 N320 再发 5 吨，带质检报告，分两批发」
+    A->>A: 轮询 getchatdata(seq) → 解密 → 过滤 roomid
+    A->>P: 文本消息 + 群上下文
+    P->>P: 结构化抽取（产品/数量/交期/分批/资质）→ 置信度 0.92
+    P->>S: chatId → customer.owner 查询（这是谁的客户）
+    P->>B: 生成预订单（幂等去重）
+    B->>W: Signal(PreOrderCreated, 预订单号)
+    B->>M: 应用消息卡片「确认 / 修改 / 忽略」
+    M->>B: 点击「确认」（回调验签）
+    B->>W: Signal(OrderSubmitted)
+    W->>W: 进入待价格审批（状态机）
+    B->>M: 通知：预订单已确认，进入审批
+</pre></div>
+
+<h3 id="s6-5">6.5 交互设计要点</h3>
+<ul>
+  <li><strong>预订单卡片</strong>：展示客户、产品（匹配产品库后的标准名+原始说法）、数量、单价（合同价/历史价，标注来源）、交期解析（「下周五」→具体日期）、分批与特殊要求；<strong>任何生成结果都需人工确认才能成为正式订单</strong>（对应 AI 安全边界：Agent 不得独立签约/承诺）。</li>
+  <li><strong>识别失败/低置信</strong>：只推送「王总在群里提到补货，请确认是否需要下单」轻提醒，不自动建单——误报成本≈一条提醒，漏报由人工兜底。</li>
+  <li><strong>S1 侧边栏交互</strong>：entry 分流（single_chat_tools 用 getCurExternalContact，group_chat_tools 用 getCurExternalChat，normal 显示我的待办/我的订单）；无映射客户时给出选择器并走服务端授权，不信任前端身份字段。</li>
+  <li><strong>S3 通知交互</strong>：审批卡片点击直达对应订单详情；驳回必须带原因；催办升级链（超时 → 催 → 上级）。</li>
+  <li><strong>状态机驱动 UI</strong>：前端按「booting→authenticating→registering→resolving→loading→ready」状态机初始化，不做定时器轮询客户 ID（避免旧客户串话）。</li>
+</ul>
+
+<h3 id="s6-6">6.6 工程注意事项与降级</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>事项</th><th>要求</th></tr></thead>
+<tbody>
+<tr><td>可信域名 / 回调域</td><td>测试域名（如 wecom-test.example.com）HTTPS + ICP 备案；OAuth 回调域与 JS-SDK 域名一致；不填 localhost</td></tr>
+<tr><td>双签名</td><td>企业 jsapi_ticket（config）+ 应用 ticket（agent_config）分离缓存；ticket 限流（每企业每小时 400 次）→ singleflight + 指标；签名 URL 取页面完整 URL 去 # 且不 encode</td></tr>
+<tr><td>OAuth 安全</td><td>snsapi_base 静默授权；state 校验；code 一次性；return_to 白名单；HttpOnly/Secure/SameSite Session</td></tr>
+<tr><td>本地联调</td><td>Fake 适配器（无企微可跑）+ 测试域名 HTTPS 反向代理；移动端不走 hosts</td></tr>
+<tr><td>限流与失败</td><td>存档拉取限速退避；企微 5xx/45009 熔断；凭证失效只允许一次受控刷新</td></tr>
+<tr><td>版本兼容</td><td>getCurExternalChat 最低 2.8.17、getContext 3.0.24；UAT 覆盖桌面/移动</td></tr>
+<tr><td><strong>S2 降级路径</strong></td><td>会话存档不可用 → 半自动模式（S1 侧边栏 + 人工转发/快速下单），架构不变、交互降级</td></tr>
+<tr><td>合规</td><td>存档员工知情同意书面化；原始消息不落业务库（仅意图特征与必要引用）；日志脱敏 external_userid/手机号；留存期限配置</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ============ 7 ============ -->
+<h2 id="s7">7. 数据模型与集成</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>表</th><th>关键字段 / 说明</th><th>与现有 pilot 关系</th></tr></thead>
+<tbody>
+<tr><td><code>orders</code></td><td>主流程编号、来源（人工/预订单/侧边栏）、ORD/STK/SHP/INV 聚合状态、归属销售、商务、价格审批结果</td><td>扩展（现有 prestock 演进为 STK 单据）</td></tr>
+<tr><td><code>order_items</code></td><td>产品明细（原始品名 + 标准型号）、数量、单价、指定仓库与分配量</td><td>扩展</td></tr>
+<tr><td><code>shipments</code></td><td>发货批次：计划量/实际量/累计已发/剩余、仓库、批号、物流、回单状态</td><td>复用现有 shipment 表</td></tr>
+<tr><td><code>transfers</code></td><td>转交记录：原因、原办理人、新办理人、时间、通知状态</td><td>新增</td></tr>
+<tr><td><code>invoices</code></td><td>开票申请：正常/例外（例外含材料+审批人）、发票关联、推送状态</td><td>新增</td></tr>
+<tr><td><code>pre_orders</code></td><td>预订单：消息 ID 幂等、意图 JSON、置信度、确认/修改/忽略/超时</td><td>新增（S2 核心）</td></tr>
+<tr><td><code>wecom_context_bindings</code></td><td>chatId/external_userid → customer 映射</td><td>复用现有表 + 客户联系事件回调自动维护</td></tr>
+<tr><td><code>wecom_archive_cursor</code></td><td>会话存档 seq 断点、限速状态</td><td>新增</td></tr>
+<tr><td><code>quota_ledger / outbox / 事件表</code></td><td>额度账本、Outbox、InboundEvent 幂等</td><td>复用现有</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ============ 8 ============ -->
+<h2 id="s8">8. 验证计划（五阶段）</h2>
+
+<div class="phase">
+  <b>Phase 0 · 环境与决策门（第 1 周）</b>
+  <p>测试企业认证确认；创建自建应用；配置可信域名、回调域、客户联系权限；<strong>开通会话内容存档（最小账号集）并完成员工知情同意流程</strong>；准备测试成员、客户、客户群。</p>
+  <div class="gate"><b>退出条件：</b>会话存档可拉取测试群消息（决策门通过）或明确降级为半自动模式；其余配置截图留档。</div>
+</div>
+
+<div class="phase">
+  <b>Phase 1 · 授权支柱（第 1–2 周，与 P0 并行）</b>
+  <p>落地 RBAC+ReBAC 混合 schema（含 caveat 条件关系）；完成 9 类 B2B 场景授权用例（4.2 表）；字段投影管线；Auth-Pillar 自动化测试；Temporal Activity 内授权。</p>
+  <div class="gate"><b>退出条件：</b>全部授权用例测试通过，无越权缺陷（P0 红线）。</div>
+</div>
+
+<div class="phase">
+  <b>Phase 2 · 流程支柱（第 2–3 周）</b>
+  <p>OrderWorkflow 主流程 + ShipmentWorkflow/TransferWorkflow/ExceptionInvoiceWorkflow 子流程；SLA 超时催办与升级；企微 Signal 接入；双门禁与防重复；L0–L3 测试。</p>
+  <div class="gate"><b>退出条件：</b>四环节演示链路在 Mock 环境全通；催办升级与例外开票用例通过。</div>
+</div>
+
+<div class="phase">
+  <b>Phase 3 · 企微接入（第 3–4 周）</b>
+  <p>S1 侧边栏 H5（三 entry）+ OAuth + 双签名；S2 存档捕捉→预订单→卡片确认全链路；S3 审批/催办/通知卡片；S4 工作台视图；客户联系事件回调维护映射。</p>
+  <div class="gate"><b>退出条件：</b>真实测试企业跑通「群里发言→销售确认→进入审批」端到端；采集延迟与识别准确率指标。</div>
+</div>
+
+<div class="phase">
+  <b>Phase 4 · UAT 与验收（第 5 周）</b>
+  <p>四端（桌面/移动）、四角色（销售/总监/商务/仓管/财务）、单聊/群聊/工作台入口 UAT；失败路径（无权限/无映射/限流/旧链接）；证据归档（截图/录屏/日志 trace/指标）；输出决策报告。</p>
+  <div class="gate"><b>退出条件：</b>三大支柱验证结论 + 上线路线图（含会话存档合规结论）签字。</div>
+</div>
+
+<!-- ============ 9 ============ -->
+<h2 id="s9">9. 验收标准与决策门</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>验证问题</th><th>通过标准（证据）</th></tr></thead>
+<tbody>
+<tr><td>SpiceDB 混合授权成立</td><td>9 类场景授权用例全绿；跨租户/越权测试零缺陷；字段投影契约测试通过；Temporal Activity 授权生效</td></tr>
+<tr><td>Temporal 承载主流程</td><td>ORD→STK→SHP→INV 全链路可运行；分批发货剩余量准确；转交不重复；例外开票可审批；超时催办升级可见；L0–L3 全通过</td></tr>
+<tr><td>企微 S1 侧边栏</td><td>测试企业桌面/移动真实打开，entry 分流正确，OAuth 一次登录，上下文自动关联客户</td></tr>
+<tr><td>企微 S2 群消息捕捉</td><td>端到端延迟（发言→卡片）≤ 2 分钟；预订单直接被销售确认的比例 ≥ 80%（评测集 ≥ 50 条）；无误建正式订单（未确认不进入审批）</td></tr>
+<tr><td>企微 S3/S4</td><td>审批/催办/通知卡片点击可达详情；工作台无上下文降级正确</td></tr>
+<tr><td>合规</td><td>存档开通最小集、员工同意记录、消息最小化留存、日志脱敏检查通过</td></tr>
+</tbody>
+</table>
+</div>
+<div class="callout good">
+  <div class="ct">决策门（Phase 4 输出）</div>
+  <p><strong>可行</strong>：三项全过 → 进入完整项目（按需求 V2.0+ 五阶段建设顺序推进）。<strong>有条件可行</strong>：S2 合规受限 → 以半自动模式进入完整项目，会话存档作为后续增强项。<strong>不可行</strong>：出现架构级否决项（预期不发生）→ 输出替代路线与成本对比。</p>
+</div>
+
+<!-- ============ 10 ============ -->
+<h2 id="s10">10. 风险登记册</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>风险</th><th>概率</th><th>影响</th><th>缓解</th></tr></thead>
+<tbody>
+<tr><td>会话存档合规不通过（员工同意/法务）</td><td class="note">中</td><td class="no">高（S2 不可用）</td><td>Phase 0 决策门前置；最小账号集；半自动降级预案；法务书面意见</td></tr>
+<tr><td>意图识别准确率不足（误报/漏报）</td><td class="note">中</td><td class="note">中</td><td>置信度分级 + 人工确认兜底；评测集持续沉淀（AI 文化：跑分说话）</td></tr>
+<tr><td>企微限流/凭证提前失效（ticket 400/h）</td><td class="note">中</td><td class="note">中</td><td>双票据分离缓存、singleflight、受控重试、指标告警</td></tr>
+<tr><td>存档消息含敏感信息外泄</td><td class="no">低</td><td class="no">高</td><td>私钥入 KMS；原始消息不落业务库；日志脱敏；留存期限</td></tr>
+<tr><td>测试企业/客户群资源不足</td><td class="note">中</td><td class="note">中</td><td>固定测试成员与客户群；群消息可用脚本回放驱动（Fake 通道）</td></tr>
+<tr><td>客户端版本/移动端差异</td><td class="note">低</td><td class="note">低</td><td>最低版本策略（3.0.24/2.8.17）；四端 UAT 覆盖</td></tr>
+<tr><td>范围蔓延（把完整项目塞进验证）</td><td class="note">中</td><td class="note">中</td><td>验收标准固定（第 9 节）；超出项进入路线图不开工</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ============ 11 ============ -->
+<h2 id="s11">11. 开放问题</h2>
+<ol>
+  <li>会话存档开通的账号数预算与计费方式（按需存档人数）——由商务/老板与企微侧确认。</li>
+  <li>员工知情同意的落地形式（劳动合同补充条款 vs 操作前弹窗确认）——法务确认。</li>
+  <li>测试企业认证状态与「客户联系」权限是否已具备——若不具备，验证项目需先完成企业认证（周期 1–2 周，纳入 Phase 0 关键路径）。</li>
+  <li>「仓管看不到价格」是否需要对仓管角色彻底隐藏金额类字段（含明细导出、报表权限）——授权投影范围需业务确认。</li>
+  <li>多租户验证深度：验证项目用单企业即可，是否额外做「第二企业」隔离冒烟——建议做，成本低。</li>
+  <li>意图识别模型选型（LLM 服务 vs 本地模型）与评测集规模（≥50 条真实群消息回放）——Phase 3 前确定。</li>
+  <li><strong>智厨展示定位确认</strong>：已确认长安仁恒验证项目作为演示样板直接展示给智厨、不为智厨定制验证项目；「智厨映射」列基于会议纪要提取，演示时作为沟通对照使用，是否后续单独建设由样板演示与业务沟通后再决策。</li>
+  <li><strong>《三方审批流程图_v2》实现口径确认</strong>：客户商誉评估办法与客户等级表、合同模板与要素来源（评审批注 #5/#7）、供方分流财务（总部/化工/阳原/分公司）、回单超 5 天自动进入阈值——这些规则需业务方书面确认后固化为配置与测试用例。</li>
+</ol>
+
+</main>
+</div>
+
+<footer class="footer">
+  验证项目设计 V1.2（演示样板版）· 主轴：长安仁恒订单履约四分支（依据《三方审批流程图_v2》）· 展示：智厨（长安仁恒样板直接展示，不单独定制） · 依据：订单系统业务需求 V2.0+ / B2B 订单管理产品方案 / 企微侧边栏 H5 全生命周期指南 / ToB AI 化改造路径 / 业务会议纪要 · 基于 b2b_pilot_v2 演进
+</footer>
+</div>
+
+<script>
+mermaid.initialize({ startOnLoad:true, theme:'base', securityLevel:'loose',
+  flowchart:{ useMaxWidth:true, htmlLabels:true, curve:'basis' },
+  sequence:{ useMaxWidth:true, actorFontSize:13, messageFontSize:12 },
+  themeVariables:{ primaryColor:'#eef5fb', primaryTextColor:'#17365d', primaryBorderColor:'#2e74b5',
+    lineColor:'#6b7f93', secondaryColor:'#e7f6f4', tertiaryColor:'#fff4dd', fontFamily:'PingFang SC, Microsoft YaHei, sans-serif' }
+});
+</script>
+</body>
+</html>

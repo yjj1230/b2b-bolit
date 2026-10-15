@@ -1,0 +1,25 @@
+?   	b2b_pilot_v3/cmd/api	[no test files]
+?   	b2b_pilot_v3/cmd/sync	[no test files]
+?   	b2b_pilot_v3/cmd/wecom	[no test files]
+?   	b2b_pilot_v3/cmd/worker	[no test files]
+ok  	b2b_pilot_v3/internal/api	0.472s
+ok  	b2b_pilot_v3/internal/authz	0.095s
+ok  	b2b_pilot_v3/internal/config	0.003s
+ok  	b2b_pilot_v3/internal/domain	0.004s
+ok  	b2b_pilot_v3/internal/integration	0.003s
+ok  	b2b_pilot_v3/internal/orderdata	0.004s
+ok  	b2b_pilot_v3/internal/pgapi	0.007s
+ok  	b2b_pilot_v3/internal/repo	0.019s
+ok  	b2b_pilot_v3/internal/sync	0.006s
+ok  	b2b_pilot_v3/internal/wecom	0.087s
+ok  	b2b_pilot_v3/internal/workflows	162.890s
+?   	b2b_pilot_v3/scripts/audit	[no test files]
+?   	b2b_pilot_v3/scripts/concurrency	[no test files]
+?   	b2b_pilot_v3/scripts/fullchain	[no test files]
+?   	b2b_pilot_v3/scripts/pgapi_backfill	[no test files]
+?   	b2b_pilot_v3/scripts/pgapi_smoke_tmp	[no test files]
+?   	b2b_pilot_v3/scripts/reconcile	[no test files]
+?   	b2b_pilot_v3/scripts/seeddata	[no test files]
+?   	b2b_pilot_v3/scripts/seedrel	[no test files]
+ok  	b2b_pilot_v3/tests/l0_unit	0.008s
+?   	b2b_pilot_v3/tests/testkit	[no test files]

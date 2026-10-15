@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>企微订单助手 Demo 评审 · 修改意见</title>
+<style>
+  :root {
+    --bg: #fafaf8; --paper: #ffffff; --ink: #1a1d24; --muted: #5d6371;
+    --line: #e8e9ed; --accent: #2c5fae; --accent-soft: #e8efff;
+    --positive: #2c8a4f; --positive-soft: rgba(44,138,79,.1);
+    --warn: #b58522; --warn-soft: rgba(181,133,34,.1);
+    --danger: #b13b3b; --danger-soft: rgba(177,59,59,.1);
+    --display: 'Charter', Georgia, serif;
+    --body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 14.5px; line-height: 1.6; }
+  .page { max-width: 1060px; margin: 24px auto; padding: 48px 56px 64px; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; }
+
+  header.head { border-bottom: 1px solid var(--line); padding-bottom: 22px; margin-bottom: 28px; }
+  .crumb { font-family: var(--mono); font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  h1 { font-family: var(--display); font-size: 32px; margin: 6px 0 14px; letter-spacing: -0.005em; font-weight: 700; }
+  .meta-row { display: flex; gap: 28px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+  .meta-row strong { color: var(--ink); display: block; font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; font-weight: 500; }
+  .attendees { display: flex; align-items: center; gap: 14px; margin-top: 18px; padding: 14px 16px; background: var(--bg); border-radius: 8px; }
+  .attendees-label { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+  .av-row { display: flex; }
+  .av { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--paper); margin-left: -8px; font-size: 11px; font-weight: 700; color: white; display: inline-flex; align-items: center; justify-content: center; }
+  .av:first-child { margin-left: 0; }
+  .a-dp { background: linear-gradient(135deg, #2c5fae, #6e9bf0); }
+  .a-mr { background: linear-gradient(135deg, #d6336c, #ff7a9b); }
+  .a-pb { background: linear-gradient(135deg, #b58522, #f1b13a); }
+  .a-ca { background: linear-gradient(135deg, #1a8e8e, #56c1c1); }
+  .a-sl { background: linear-gradient(135deg, #5b3df0, #a991ff); }
+  .a-jn { background: linear-gradient(135deg, #2c8a4f, #6fce97); }
+
+  section { margin-top: 36px; }
+  h2 { font-family: var(--display); font-size: 22px; margin: 0 0 14px; letter-spacing: -0.005em; }
+  h2 .num { color: var(--accent); font-family: var(--mono); font-size: 15px; margin-right: 8px; }
+  h3 { font-family: var(--display); font-size: 16px; margin: 26px 0 10px; }
+  .lead { color: var(--muted); font-size: 13.5px; margin: 0 0 14px; }
+
+  /* 摘要卡 */
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 8px; }
+  .kpi { padding: 16px 18px; background: var(--bg); border-radius: 10px; }
+  .kpi .v { font-family: var(--display); font-size: 26px; font-weight: 700; line-height: 1.2; }
+  .kpi .k { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-top: 4px; }
+  .kpi.a .v { color: var(--accent); } .kpi.b .v { color: var(--positive); }
+  .kpi.c .v { color: var(--warn); } .kpi.d .v { color: var(--danger); }
+
+  /* 表格 */
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); font-size: 13px; vertical-align: top; }
+  th { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 500; background: var(--bg); }
+  tr:last-child td { border-bottom: none; }
+  td.id { font-family: var(--mono); font-size: 12px; color: var(--accent); font-weight: 600; white-space: nowrap; }
+  td.ts { font-family: var(--mono); font-size: 11px; color: var(--muted); white-space: nowrap; }
+  td.who { white-space: nowrap; }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; font-family: var(--mono); font-size: 10.5px; font-weight: 600; letter-spacing: 0.04em; white-space: nowrap; }
+  .pill-done { background: var(--positive-soft); color: var(--positive); }
+  .pill-todo { background: var(--warn-soft); color: var(--warn); }
+  .pill-open { background: var(--danger-soft); color: var(--danger); }
+  .pill-info { background: rgba(44,95,174,.1); color: var(--accent); }
+
+  /* 分场景块 */
+  .scene-block { border: 1px solid var(--line); border-radius: 10px; margin-top: 16px; overflow: hidden; }
+  .scene-head { display: flex; align-items: baseline; gap: 12px; padding: 12px 18px; background: var(--bg); border-bottom: 1px solid var(--line); }
+  .scene-head .scene-id { font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--accent); }
+  .scene-head .scene-name { font-weight: 600; font-size: 14.5px; }
+  .scene-head .scene-stage { font-size: 12px; color: var(--muted); }
+  .scene-block table { margin-top: 0; }
+  .scene-block th { background: var(--paper); }
+
+  /* 结论与共识 */
+  .consensus { padding: 22px 24px; background: var(--accent-soft); border-left: 3px solid var(--accent); border-radius: 6px; margin-top: 16px; }
+  .consensus h3 { font-family: var(--display); font-size: 15px; margin: 0 0 12px; color: var(--accent); }
+  .consensus ul { padding-left: 18px; margin: 0; display: flex; flex-direction: column; gap: 8px; font-size: 14px; }
+  .consensus li::marker { color: var(--accent); }
+  .consensus.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .consensus.warn h3 { color: var(--warn); }
+  .consensus.warn li::marker { color: var(--warn); }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .panel { padding: 20px 22px; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; }
+  .panel h3 { font-family: var(--display); font-size: 16px; margin: 0 0 8px; }
+  .panel p { color: var(--muted); margin: 0; font-size: 13.5px; line-height: 1.55; }
+
+  footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11.5px; color: var(--muted); }
+
+  @media (max-width: 700px) {
+    .page { padding: 28px 24px; margin: 0; border-radius: 0; }
+    .kpis { grid-template-columns: 1fr 1fr; }
+    .grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="head">
+    <div class="crumb">B2B Pilot v3 / 产品评审 / 修改意见</div>
+    <h1>企微订单助手 Demo 评审 · 修改意见</h1>
+    <div class="meta-row">
+      <span><strong>评审对象</strong>docs/demo/index.html · 长安仁恒订单助手产品演示</span>
+      <span><strong>评审日期</strong>2026-08-12</span>
+      <span><strong>评审方式</strong>Demo 对稿会（线上逐场景过稿）</span>
+      <span><strong>配套文档</strong>202608121845_逐字稿.html</span>
+    </div>
+    <div class="attendees">
+      <span class="attendees-label">评审参与</span>
+      <div class="av-row">
+        <span class="av a-dp" title="曹文炯 · 老轮子（研发 / Demo 制作）">轮</span>
+        <span class="av a-mr" title="菜花（产品负责人）">菜</span>
+        <span class="av a-pb" title="陈虹励（商务）">陈</span>
+        <span class="av a-ca" title="IRON_ICE-John 怀斌">华</span>
+        <span class="av a-sl" title="宇航（PO）">航</span>
+        <span class="av a-jn" title="苏天 · 思静">思</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ 一、评审概览 ============ -->
+  <section>
+    <h2><span class="num">01</span>评审概览</h2>
+    <div class="kpis">
+      <div class="kpi a"><div class="v">6</div><div class="k">销售侧场景（评审主线）</div></div>
+      <div class="kpi b"><div class="v">40</div><div class="k">修改意见（分场景归纳）</div></div>
+      <div class="kpi c"><div class="v">29</div><div class="k">已达成共识</div></div>
+      <div class="kpi d"><div class="v">11</div><div class="k">待定 / 行动项</div></div>
+    </div>
+    <p class="lead">本次评审以销售角色 6 个场景（XS1–XS6）为主线逐场景过稿，交叉讨论了商务/财务/仓管/董事长链路中的数据权限与通知机制。全部意见按「场景」归类，每条标注逐字稿时间戳出处与提出人；标注「共识」的为会上明确结论，标注「待定」的为提出但未最终拍板的事项。</p>
+  </section>
+
+  <!-- ============ 二、分场景修改意见 ============ -->
+
+  <!-- 场景 XS1 -->
+  <section>
+    <h2><span class="num">02</span>分场景修改意见</h2>
+
+    <div class="scene-block">
+      <div class="scene-head">
+        <span class="scene-id">XS1</span><span class="scene-name">查订单 / 订单详情</span>
+        <span class="scene-stage">群侧边栏 ·「订单」Tab</span>
+      </div>
+      <table>
+        <thead><tr><th>编号</th><th>问题 / 建议</th><th>结论</th><th>提出人</th><th>出处</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="id">XS1-01</td>
+            <td><strong>订单列表缺日期字段</strong>：每条订单仅展示编号/产品/数量/价格，需补充「下单日期」与「发货日期」。</td>
+            <td><span class="pill pill-done">共识 · 必改</span></td>
+            <td class="who">陈虹励</td><td class="ts">00:11:17</td>
+          </tr>
+          <tr>
+            <td class="id">XS1-02</td>
+            <td><strong>订单列表需展示收货信息</strong>：同一客户可能多地址收货、同一订单多次发货；列表需能看到收货地址（发货到广西还是湖南），不能仅点进详情才可见。</td>
+            <td><span class="pill pill-done">共识 · 必改</span></td>
+            <td class="who">陈虹励</td><td class="ts">00:11:49</td>
+          </tr>
+          <tr>
+            <td class="id">XS1-03</td>
+            <td><strong>订单卡信息清单确认</strong>：下单日期、发货日期、产品型号、数量、收货信息、价格（可小字号），以及订单当前所处环节（四节点：已开单→已备货→已发货→已开票）。</td>
+            <td><span class="pill pill-done">共识 · 必改</span></td>
+            <td class="who">陈虹励</td><td class="ts">00:12:26</td>
+          </tr>
+          <tr>
+            <td class="id">XS1-04</td>
+            <td><strong>已发货需标注具体仓库</strong>：显示「已发货」时应补充从哪个仓库发出，便于客户估算到货时间。</td>
+            <td><span class="pill pill-done">共识 · 必改</span></td>
+            <td class="who">陈虹励</td><td class="ts">00:13:34</td>
+          </tr>
+          <tr>
+            <td class="id">XS1-05</td>
+            <td><strong>列表信息变多后的承载方式</strong>：若一屏放不下全部字段，允许点入二级页面查看完整信息（当前订单卡承载信息过满时启用）。</td>
+            <td><span class="pill pill-todo">设计取舍</span></td>
+            <td class="who">陈虹励</td><td class="ts">00:14:12</td>
+          </tr>
+          <tr>
+            <td class="id">XS1-06</td>
+            <td><strong>订单截图 → 小程序推送</strong>：客户问单后不应只发截图，长期目标是推订单小程序卡片，客户点入查看；第一期可保留截图，后续升级（可采集客户授权、点击、停留时长）。</td>
+            <td><span class="pill pill-done">共识 · 分期</span></td>
+            <td class="who">菜花</td><td class="ts">00:07:17</td>
+          </tr>
+          <tr>
+            <td class="id">XS1-07</td>
+            <td><strong>查单更智能的方式</strong>：客户说「帮我看看这两单进度」后，智能体直接与客户交互、自动推送小程序卡片，无需销售手动确认后转发。</td>
+            <td><span class="pill pill-todo">待定 · 依赖 AI 交互</span></td>
+            <td class="who">菜花</td><td class="ts">00:09:42</td>
+          </tr>
+          <tr>
+            <td class="id">XS1-08</td>
+            <td><strong>客户评级可见性</strong>：客户等级（A/B/C/D）展示给销售即可，客户侧不可见；后续评级规则将调整（不再由销售自评）。</td>
+            <td><span class="pill pill-done">共识</span></td>
+            <td class="who">陈虹励 / 菜花</td><td class="ts">00:20:16</td>
+          </tr>
+          <tr>
+            <td class="id">XS1-09</td>
+            <td><strong>「上传凭证」入口存疑</strong>：回单并非客户提供；会上唯一想到的凭证场景是客户盖章合同。菜花结论：入口暂保留（无风险），后续按实际场景收敛。</td>
+            <td><span class="pill pill-done">共识 · 暂保留</span></td>
+            <td class="who">陈虹励 / 菜花</td><td class="ts">00:17:49</td>
+          </tr>
+          <tr>
+            <td class="id">XS1-10</td>
+            <td><strong>UI 需专业评审</strong>：当前界面美观度不足，需懂 UI 的人员介入调整（已安排丹妮跟进）。</td>
+            <td><span class="pill pill-todo">行动项</span></td>
+            <td class="who">曹文炯</td><td class="ts">00:08:56</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 场景 XS2 -->
+    <div class="scene-block">
+      <div class="scene-head">
+        <span class="scene-id">XS2</span><span class="scene-name">人工下单</span>
+        <span class="scene-stage">群侧边栏 ·「下单」Tab</span>
+      </div>
+      <table>
+        <thead><tr><th>编号</th><th>问题 / 建议</th><th>结论</th><th>提出人</th><th>出处</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="id">XS2-01</td>
+            <td><strong>合并步骤 1–2</strong>：群内进入下单时客户已确定且不可改，无需先展示「选定客户」页，应直接进入下一页面（顶部展示客户名，不可编辑）。</td>
+            <td><span class="pill pill-done">共识 · 必改</span></td>
+            <td class="who">菜花</td><td class="ts">00:23:20</td>
+          </tr>
+          <tr>
+            <td class="id">XS2-02</td>
+            <td><strong>单页长表单</strong>：四步（客户→合同→明细→预览）合并为一个长页面，向下滑动填写，底部直接提交，不设分步预览。</td>
+            <td><span class="pill pill-done">共识 · 必改</span></td>
+            <td class="who">陈虹励</td><td class="ts">00:27:16</td>
+          </tr>
+          <tr>
+            <td class="id">XS2-03</td>
+            <td><strong>合同不选模板</strong>：合同由系统按「主体」自动匹配对应模板生成（上海分公司/总部/杨园各有固定模板），无需人工选择；字段文案由「合同检验」改为「主体」。</td>
+            <td><span class="pill pill-done">共识 · 必改</span></td>
+            <td class="who">陈虹励</td><td class="ts">00:24:42</td>
+          </tr>
+          <tr>
+            <td class="id">XS2-04</td>
+            <td><strong>补充字段</strong>：账期、付款方式（非「打款」）；产品明细含产品型号、数量（单位：公斤）、单价、包装类型。</td>
+            <td><span class="pill pill-done">共识 · 必改</span></td>
+            <td class="who">陈虹励</td><td class="ts">00:25:19</td>
+          </tr>
+          <tr>
+            <td class="id">XS2-05</td>
+            <td><strong>单价自动带出</strong>：默认带出该客户最近一次历史订单单价（协议价上限内），允许销售按本次变价修改。</td>
+            <td><span class="pill pill-done">共识</span></td>
+            <td class="who">陈虹励</td><td class="ts">00:28:16</td>
+          </tr>
+          <tr>
+            <td class="id">XS2-06</td>
+            <td><strong>群内默认值最大化</strong>：客户在群里通常只明确产品+数量（+日期），其余字段应尽可能用群上下文/档案默认带出，减少填写。</td>
+            <td><span class="pill pill-done">共识</span></td>
+            <td class="who">IRON_ICE-John</td><td class="ts">00:29:14</td>
+          </tr>
+          <tr>
+            <td class="id">XS2-07</td>
+            <td><strong>「订单已提交」页改造</strong>：当前页面信息无价值，应展示后续完整流程（价格审批→商务审核→备货→发货→开票等）并尽量可交互。</td>
+            <td><span class="pill pill-done">共识 · 必改</span></td>
+            <td class="who">菜花</td><td class="ts">00:31:49</td>
+          </tr>
+          <tr>
+            <td class="id">XS2-08</td>
+            <td><strong>下单后回群通知</strong>：提交后群内多一条消息，由销售主动点击通知客户；自动化遵循「降级做、不整体替换」，避免让销售 surprise。</td>
+            <td><span class="pill pill-done">共识</span></td>
+            <td class="who">菜花</td><td class="ts">00:30:40</td>
+          </tr>
+          <tr>
+            <td class="id">XS2-09</td>
+            <td><strong>销售与客户通知点分离</strong>：销售关注「合同是否生成」，客户关注「何时发货/何时到」；通知内容与时机按角色区分。</td>
+            <td><span class="pill pill-done">共识</span></td>
+            <td class="who">IRON_ICE-John</td><td class="ts">00:31:18</td>
+          </tr>
+          <tr>
+            <td class="id">XS2-10</td>
+            <td><strong>下单主体可切换</strong>：客户可能在同一群内更换下单主体名称（如广西天华→广西顺华）；客户档案需维护多个主体实体，下单时允许在有限范围内选择/修改。</td>
+            <td><span class="pill pill-todo">待定 · 需档案支持</span></td>
+            <td class="who">陈虹励 / 菜花</td><td class="ts">00:40:29</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 场景 XS3 -->
+    <div class="scene-block">
+      <div class="scene-head">
+        <span class="scene-id">XS3</span><span class="scene-name">智能下单确认卡</span>
+        <span class="scene-stage">待办 Tab · 智能下单确认</span>
+      </div>
+      <table>
+        <thead><tr><th>编号</th><th>问题 / 建议</th><th>结论</th><th>提出人</th><th>出处</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="id">XS3-01</td>
+            <td><strong>确认通知需主动推送</strong>：销售不能仅靠进群/进工作台查看，智能下单确认生成时应由订单机器人推私信提醒（待办 + 私信双通道）。</td>
+            <td><span class="pill pill-done">共识 · 必改</span></td>
+            <td class="who">菜花</td><td class="ts">00:43:24</td>
+          </tr>
+          <tr>
+            <td class="id">XS3-02</td>
+            <td><strong>工作台全量入口</strong>：订单并行 40–50 笔时不可能逐个进群，必须有「工作台」全量待办入口（当前 demo 未演示，需补）。</td>
+            <td><span class="pill pill-done">共识 · 必改</span></td>
+            <td class="who">IRON_ICE-John</td><td class="ts">00:44:03</td>
+          </tr>
+          <tr>
+            <td class="id">XS3-03</td>
+            <td><strong>默认关注机制</strong>：默认让所有销售关注订单机器人，凡与订单相关的消息均可触达。</td>
+            <td><span class="pill pill-todo">待定 · 需产品确认</span></td>
+            <td class="who">曹文炯</td><td class="ts">00:44:47</td>
+          </tr>
+          <tr>
+            <td class="id">XS3-04</td>
+            <td><strong>驳回/退回需销售补充</strong>：主管审价驳回或写备注后，销售需在待办看到并补充/修改；当前 demo 未展现「退回→销售处理」链路，需补上。</td>
+            <td><span class="pill pill-done">共识 · 必改</span></td>
+            <td class="who">菜花 / 曹文炯</td><td class="ts">00:45:19</td>
+          </tr>
+          <tr>
+            <td class="id">XS3-05</td>
+            <td><strong>质检报告双场景</strong>：① 客户要电子版 → 销售转发；② 下单勾选「带质检报告」→ 发给仓库随货附纸质版。建议后续在订单/小程序中直接附带质检报告，客户自助下载。</td>
+            <td><span class="pill pill-done">共识 · 分期</span></td>
+            <td class="who">陈虹励 / 菜花</td><td class="ts">00:47:35</td>
+          </tr>
+          <tr>
+            <td class="id">XS3-06</td>
+            <td><strong>多句连续对话识别</strong>：客户「再发 5 吨」「带质检」「某日期」分多句发送时，智能体需跨句合并上下文后一次生成确认卡（不能拆成多单/漏信息）。</td>
+            <td><span class="pill pill-todo">待定 · AI 能力校验</span></td>
+            <td class="who">IRON_ICE-John</td><td class="ts">00:50:04</td>
+          </tr>
+          <tr>
+            <td class="id">XS3-07</td>
+            <td><strong>纪要识别扩展</strong>：除「发货」外，高频需求「寄样」也应能识别（不急，后续迭代）。</td>
+            <td><span class="pill pill-todo">待定 · 后续迭代</span></td>
+            <td class="who">IRON_ICE-John</td><td class="ts">00:51:05</td>
+          </tr>
+          <tr>
+            <td class="id">XS3-08</td>
+            <td><strong>订单评论查看与提醒</strong>：评论是订单变更（改地址/改日期/改数量）的常用载体，销售需能便捷查看并有提醒（小红点/私信），避免被消息淹没。</td>
+            <td><span class="pill pill-done">共识 · 必改</span></td>
+            <td class="who">陈虹励</td><td class="ts">00:51:25</td>
+          </tr>
+          <tr>
+            <td class="id">XS3-09</td>
+            <td><strong>修改信息不走评论</strong>：地址/日期/数量等修改应通过正式修改动作完成；需区分「无需阻断流程直接可改」与「必须驳回/退回后才能改」两类。</td>
+            <td><span class="pill pill-done">共识 · 流程规则</span></td>
+            <td class="who">菜花</td><td class="ts">00:54:29</td>
+          </tr>
+          <tr>
+            <td class="id">XS3-10</td>
+            <td><strong>备注保留 + 快捷模板</strong>：备注不可取消但越少越好；为常见备注（如仓库延迟发货说明）提供快捷短语模板。</td>
+            <td><span class="pill pill-done">共识</span></td>
+            <td class="who">菜花 / IRON_ICE-John</td><td class="ts">00:59:11</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 场景 XS5 / XS6 -->
+    <div class="scene-block">
+      <div class="scene-head">
+        <span class="scene-id">XS5 / XS6</span><span class="scene-name">查物流 / 签收凭证自动识别</span>
+        <span class="scene-stage">群内物流查询 · 凭证识别</span>
+      </div>
+      <table>
+        <thead><tr><th>编号</th><th>问题 / 建议</th><th>结论</th><th>提出人</th><th>出处</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="id">XS5-01</td>
+            <td><strong>物流查询走小程序</strong>：查物流不应以截图形式发群，客户点小程序查看物流轨迹；凭证类信息同样建议以小程序链接承载（权限可控）。</td>
+            <td><span class="pill pill-done">共识 · 分期</span></td>
+            <td class="who">菜花</td><td class="ts">00:07:26</td>
+          </tr>
+          <tr>
+            <td class="id">XS6-01</td>
+            <td><strong>签收回单链路不成立</strong>：业务实际中客户签收完全无感——司机带出库单给客户签字后带回仓库，仓库再交商务，全链路在线下，当前「凭证自动识别」前提不成立。</td>
+            <td><span class="pill pill-todo">待定 · 需业务流改造</span></td>
+            <td class="who">宇航</td><td class="ts">01:03:33</td>
+          </tr>
+          <tr>
+            <td class="id">XS6-02</td>
+            <td><strong>司机无回传驱动力</strong>：司机运费月结、凭纸质票，对电子照片回传无动力，直接拉长应收账款账期；需先解决「谁催、怎么催」。</td>
+            <td><span class="pill pill-todo">待定 · 业务侧问题</span></td>
+            <td class="who">宇航</td><td class="ts">01:05:32</td>
+          </tr>
+          <tr>
+            <td class="id">XS6-03</td>
+            <td><strong>建议落地节点</strong>：从业务流输出一个可执行节点（如仓库回传、机器人协助催司机）；该问题属于仁恒内部工作流调整，记录为建议反馈给内部（弘毅/华斌/张栋）。</td>
+            <td><span class="pill pill-todo">行动项 · 业务侧</span></td>
+            <td class="who">宇航 / 菜花</td><td class="ts">01:06:45</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 跨场景 -->
+    <div class="scene-block">
+      <div class="scene-head">
+        <span class="scene-id">ALL</span><span class="scene-name">跨场景 · 群数据权限与安全</span>
+        <span class="scene-stage">所有群内消息与卡片</span>
+      </div>
+      <table>
+        <thead><tr><th>编号</th><th>问题 / 建议</th><th>结论</th><th>提出人</th><th>出处</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="id">ALL-01</td>
+            <td><strong>群内无「客户」概念</strong>：应定义为客户下的具体角色（采购、库管、收货人等），每个群成员需映射到组织关系。</td>
+            <td><span class="pill pill-done">共识 · 必改</span></td>
+            <td class="who">菜花</td><td class="ts">00:35:50</td>
+          </tr>
+          <tr>
+            <td class="id">ALL-02</td>
+            <td><strong>信息按权限最小交集裁剪</strong>：群内角色多样时，发出的信息以所有人可见权限的交集为准；拉群时由销售+商务共同定义群成员角色。</td>
+            <td><span class="pill pill-done">共识 · 必改</span></td>
+            <td class="who">曹文炯 / 菜花</td><td class="ts">00:36:25</td>
+          </tr>
+          <tr>
+            <td class="id">ALL-03</td>
+            <td><strong>资金信息是高压线</strong>：单价、金额、账期等资金类信息不以明文出现在服务群（哪怕客户在群里问也不发），仅在小程序内按授权展示。</td>
+            <td><span class="pill pill-done">共识 · 强制规则</span></td>
+            <td class="who">菜花</td><td class="ts">00:38:23</td>
+          </tr>
+          <tr>
+            <td class="id">ALL-04</td>
+            <td><strong>技术参数/配方类信息</strong>：不允许明文出现，仅可通过小程序授权查看。</td>
+            <td><span class="pill pill-done">共识 · 强制规则</span></td>
+            <td class="who">菜花</td><td class="ts">00:39:53</td>
+          </tr>
+          <tr>
+            <td class="id">ALL-05</td>
+            <td><strong>CRM 定义群成员</strong>：每个进群的人（我方/客户方、企微/个微）都需在 CRM 中定义身份、角色与可见范围，作为后续数据权限基础。</td>
+            <td><span class="pill pill-done">共识 · 必改</span></td>
+            <td class="who">菜花</td><td class="ts">00:40:05</td>
+          </tr>
+          <tr>
+            <td class="id">ALL-06</td>
+            <td><strong>备注/评论信息承载</strong>：大量备注说明审批流无法承载过程信息；需把这类信息抽象为独立的信息传递模块（远期），近期先保证备注可查询、可提醒。</td>
+            <td><span class="pill pill-todo">待定 · 架构演进</span></td>
+            <td class="who">IRON_ICE-John</td><td class="ts">00:57:48</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ 三、共识与待定 ============ -->
+  <section>
+    <h2><span class="num">03</span>会上共识与待定事项</h2>
+
+    <div class="consensus">
+      <h3>✓ 已达成共识（将直接进入下一版修改）</h3>
+      <ul>
+        <li>订单列表/详情补全日期、收货信息、仓库节点等字段（XS1-01 ~ XS1-04）。</li>
+        <li>人工下单合并为单页长表单，合同按主体自动匹配，补账期/付款方式/公斤单位等字段（XS2-01 ~ XS2-05）。</li>
+        <li>「订单已提交」页改为展示后续流程（XS2-07）。</li>
+        <li>智能下单确认：机器人私信 + 工作台全量入口双通道（XS3-01 ~ XS3-02）。</li>
+        <li>补「驳回/退回 → 销售待办补充」链路（XS3-04）。</li>
+        <li>群内资金、技术参数类信息禁止明文出现，全部走小程序授权（ALL-03 ~ ALL-04）。</li>
+        <li>群成员组织关系在 CRM 定义，信息按权限交集裁剪（ALL-01 ~ ALL-02、ALL-05）。</li>
+      </ul>
+    </div>
+
+    <div class="consensus warn">
+      <h3>△ 待定 / 需进一步确认</h3>
+      <ul>
+        <li>查单全智能交互（智能体直接回客户）是否本期上线（XS1-07）。</li>
+        <li>多句连续对话合并识别（XS3-06）、寄样识别（XS3-07）依赖 AI 能力校验结果。</li>
+        <li>下单主体切换需客户档案多实体支持，涉及数据模型（XS2-10）。</li>
+        <li>签收回单链路（XS6-01 ~ XS6-03）属于仁恒内部工作流改造，先记录建议，待与董事长会议对齐。</li>
+        <li>小程序是否本期启动：菜花确认「接受分段，先把需求全部对焦」，小程序优先级待产品排期（00:48:57）。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ 四、跟进行动项 ============ -->
+  <section>
+    <h2><span class="num">04</span>跟进行动项</h2>
+    <table>
+      <thead><tr><th>Action</th><th>Owner</th><th>状态</th><th>出处</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>按本意见 XS1/XS2/XS3 修改销售侧 6 个场景页面，产出下一版 demo 供复评</td>
+          <td>曹文炯 · 老轮子</td>
+          <td><span class="pill pill-todo">进行中</span></td>
+          <td class="ts">01:02:26</td>
+        </tr>
+        <tr>
+          <td>UI 视觉评审与调整</td>
+          <td>丹妮</td>
+          <td><span class="pill pill-todo">待启动</span></td>
+          <td class="ts">00:09:25</td>
+        </tr>
+        <tr>
+          <td>业务流梳理（含签收凭证节点、司机回传卡点）输出文档</td>
+          <td>宇航 + 红利</td>
+          <td><span class="pill pill-todo">明日输出</span></td>
+          <td class="ts">01:02:13</td>
+        </tr>
+        <tr>
+          <td>客户档案多主体（多实体）支持评估</td>
+          <td>产品经理（待位）</td>
+          <td><span class="pill pill-open">待定</span></td>
+          <td class="ts">00:42:33</td>
+        </tr>
+        <tr>
+          <td>与董事长正式会议：业务流汇报 + 问题识别 + 三期落地计划 + 群控数据分析诉求</td>
+          <td>菜花</td>
+          <td><span class="pill pill-open">待排期</span></td>
+          <td class="ts">01:15:03</td>
+        </tr>
+        <tr>
+          <td>需求文档与协作机制建设（产品经理 owner，宇航/红利参与结构化整理）</td>
+          <td>菜花 / 产品经理</td>
+          <td><span class="pill pill-todo">进行中</span></td>
+          <td class="ts">01:19:03</td>
+        </tr>
+        <tr>
+          <td>签收凭证建议（仓库回传/机器人催司机）反馈仁恒内部（弘毅/华斌/张栋）</td>
+          <td>宇航</td>
+          <td><span class="pill pill-open">待反馈</span></td>
+          <td class="ts">01:08:03</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>本文档基于 202608121845_逐字稿.html 整理 · 意见均标注逐字稿时间戳出处 · 生成时间 2026-08-12</footer>
+</div>
+</body>
+</html>

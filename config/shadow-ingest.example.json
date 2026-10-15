@@ -1,0 +1,93 @@
+{
+  "tenant_id": "chang-an-shadow",
+  "sources": [
+    {
+      "name": "feishu_orders",
+      "kind": "file",
+      "path": "/data/shadow/orders.jsonl",
+      "cursor_field": "occurred_at",
+      "column_map": {
+        "legacy_flow_id": "flow_id",
+        "legacy_event_id": "event_id",
+        "event_action": "status",
+        "operator_id": "operator",
+        "occurred_at": "occurred_at",
+        "stage_code": "stage_code",
+        "order_id": "order_id",
+        "customer_id": "customer_id",
+        "payment_term": "payment_terms"
+      }
+    },
+    {
+      "name": "feishu_order_events",
+      "kind": "file",
+      "path": "/data/shadow/order_events.jsonl",
+      "cursor_field": "occurred_at",
+      "join_source": "feishu_orders",
+      "join_key_field": "instance_id",
+      "join_fields": {
+        "flow_id": "flow_id",
+        "stage_code": "stage_code",
+        "order_id": "order_id",
+        "customer_record_id": "customer_record_id",
+        "customer_name": "customer_name",
+        "payment_terms": "payment_terms",
+        "supplier": "supplier",
+        "unit_price": "unit_price",
+        "product_name": "product_name",
+        "quantity": "quantity"
+      },
+      "column_map": {
+        "legacy_flow_id": "flow_id",
+        "legacy_event_id": "event_id",
+        "event_action": "status",
+        "operator_id": "operator",
+        "occurred_at": "occurred_at",
+        "stage_code": "stage_code",
+        "order_id": "order_id"
+      }
+    },
+    {
+      "name": "feishu_stock_prepare_events",
+      "kind": "file",
+      "path": "/data/shadow/stock_prepare_events.jsonl",
+      "cursor_field": "occurred_at",
+      "column_map": {
+        "legacy_flow_id": "flow_id",
+        "legacy_event_id": "event_id",
+        "event_action": "status",
+        "operator_id": "operator",
+        "occurred_at": "occurred_at",
+        "stage_code": "stage_code"
+      }
+    },
+    {
+      "name": "feishu_shipment_events",
+      "kind": "file",
+      "path": "/data/shadow/shipment_events.jsonl",
+      "cursor_field": "occurred_at",
+      "column_map": {
+        "legacy_flow_id": "flow_id",
+        "legacy_event_id": "event_id",
+        "event_action": "status",
+        "operator_id": "operator",
+        "occurred_at": "occurred_at",
+        "stage_code": "stage_code"
+      }
+    },
+    {
+      "name": "feishu_invoice_events",
+      "kind": "file",
+      "path": "/data/shadow/invoice_events.jsonl",
+      "cursor_field": "occurred_at",
+      "column_map": {
+        "legacy_flow_id": "flow_id",
+        "legacy_event_id": "event_id",
+        "event_action": "status",
+        "operator_id": "operator",
+        "occurred_at": "occurred_at",
+        "stage_code": "stage_code"
+      }
+    }
+  ]
+}

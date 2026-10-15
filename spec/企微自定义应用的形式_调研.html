@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>企微自定义应用的形式_调研｜纷享销客企微整合实证参考</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+SC:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  /* ===== 页面基座（沿用 spec 页纸感风格 + 企微绿 token） ===== */
+  :root{
+    --paper:#f5f4ed; --paper2:#efeee5; --ink:#1f1d18; --ink2:#6b665b;
+    --ink3:#3a382f; --blue:#1B365D; --rule:#d4d1c5; --red:#c0392b; --green:#1a7f37;
+    --wc-green:#07C160;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif; line-height:1.6; overflow-x:hidden;}
+  .wrap{max-width:1180px; margin:0 auto; padding:48px 40px 80px;}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;}
+  .folio{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--rule); padding-bottom:10px;
+    font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink2); flex-wrap:wrap; gap:4px;}
+  .folio a{color:var(--ink2); border:none;}
+  .folio a:hover{color:var(--blue);}
+  .tag{display:inline-block; padding:3px 10px; font-size:11px; letter-spacing:.16em; background:var(--paper2); color:var(--blue);}
+  .tag.green{background:rgba(7,193,96,.1); color:var(--wc-green);}
+  .kicker{display:flex; align-items:baseline; gap:12px; margin-top:48px; flex-wrap:wrap;}
+  h1{font-size:clamp(30px,4.6vw,46px); line-height:1.12; font-weight:500; margin-top:14px; letter-spacing:-.01em;}
+  .lede{margin-top:18px; font-size:16.5px; line-height:1.7; color:var(--ink3); max-width:960px;}
+  h2{font-size:22px; font-weight:600; margin:48px 0 14px; color:var(--blue); display:flex; align-items:baseline; gap:10px; border-top:1px solid var(--rule); padding-top:26px;}
+  h2 .no{font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.12em;}
+  h3{font-size:17px; font-weight:600; margin:26px 0 10px; color:var(--ink);}
+  h4{font-size:14.5px; font-weight:600; margin:18px 0 6px; color:var(--ink);}
+  p{margin:9px 0; color:var(--ink3);}
+  a{color:var(--blue); text-decoration:none; border-bottom:1px solid var(--rule);}
+  a:hover{border-bottom-color:var(--blue);}
+  code{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace; font-size:12.5px; background:var(--paper2); padding:1px 5px; border-radius:3px;}
+  ul,ol{margin:8px 0 8px 26px; color:var(--ink3);}
+  li{margin:4px 0;}
+  .mermaid{background:#fff; border:1px solid var(--rule); padding:16px; overflow-x:auto; text-align:center; margin:18px 0;}
+  .mermaid svg{max-width:100%; height:auto;}
+  figcaption{text-align:center; font-size:12px; color:var(--ink2); margin:-8px 0 22px; font-style:italic;}
+  /* ===== 元信息卡 ===== */
+  .meta-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; margin:22px 0 6px;}
+  .meta-card{border:1px solid var(--rule); background:var(--paper2); padding:14px 16px;}
+  .meta-card .k{font-size:10.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--blue); margin-bottom:6px;}
+  .meta-card .v{font-size:13px; color:var(--ink3); line-height:1.55;}
+  .meta-card .v .ok{color:var(--green); font-weight:600;}
+  /* ===== 目录 ===== */
+  .toc{border:1px solid var(--rule); background:var(--paper2); padding:16px 24px; margin:22px 0;}
+  .toc .tt{font-size:11px; letter-spacing:.2em; color:var(--blue); margin-bottom:8px;}
+  .toc a{display:inline-block; padding:3px 14px 3px 0; color:var(--ink3); border:none; font-size:13.5px;}
+  .toc a:hover{color:var(--blue);}
+  /* ===== 表格 ===== */
+  .table-wrap{overflow-x:auto; margin:14px 0 8px; border:1px solid var(--rule); background:#fff;}
+  table{width:100%; border-collapse:collapse; font-size:12.8px;}
+  th{background:var(--blue); color:#fff; text-align:left; font-weight:600; padding:6px 8px; border-bottom:1.5px solid var(--blue); font-size:11.5px; overflow-wrap:anywhere;}
+  td{padding:6px 8px; border-bottom:1px solid var(--rule); vertical-align:top; color:var(--ink3); overflow-wrap:anywhere;}
+  tr:nth-child(even) td{background:#faf9f3;}
+  tr:hover td{background:#f2efe3;}
+  td .n{color:var(--blue); font-weight:600; white-space:nowrap;}
+  td .tech{color:var(--green); font-weight:600;}
+  td .cls{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace; font-size:11px; color:#7a5a1e; background:var(--paper2); padding:0 4px; border-radius:3px;}
+  td .flag{font-size:11px; padding:1px 6px; border-radius:3px; white-space:nowrap;}
+  .flag.y{background:rgba(255,125,0,.14); color:#b45309;}
+  .flag.g{background:rgba(26,127,55,.12); color:var(--green);}
+  .flag.b{background:rgba(27,54,93,.1); color:var(--blue);}
+  .flag.r{background:rgba(192,57,43,.1); color:var(--red);}
+  /* ===== 证据块 ===== */
+  .evi{border:1px solid var(--rule); background:#fff; margin:12px 0; padding:12px 16px;}
+  .evi .ehead{font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--green); margin-bottom:6px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px;}
+  .evi .ehead a{color:var(--green); border-bottom-color:rgba(26,127,55,.3); font-size:11px; letter-spacing:0; text-transform:none;}
+  .evi .esrc{font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--ink2); word-break:break-all;}
+  .evi img{max-width:100%; border:1px solid var(--rule); margin:8px 0 4px; display:block; background:#fff;}
+  .evi .ecap{font-size:11.5px; color:var(--ink2); font-style:italic;}
+  .evi .ep{font-size:13px; color:var(--ink3); margin:4px 0;}
+  /* ===== 步骤条 ===== */
+  .step-flow{counter-reset:sf; border:1px solid var(--rule); background:#fff; padding:18px 22px; margin:14px 0;}
+  .step-flow .sf-item{counter-increment:sf; padding:8px 0 8px 46px; position:relative; border-bottom:1px dashed var(--rule);}
+  .step-flow .sf-item:last-child{border-bottom:none;}
+  .step-flow .sf-item::before{content:counter(sf); position:absolute; left:0; top:8px; width:30px; height:30px; border-radius:50%;
+    background:var(--wc-green); color:#fff; font-family:'IBM Plex Mono',monospace; font-size:13px; display:flex; align-items:center; justify-content:center;}
+  .step-flow .sf-item .t{font-size:14px; font-weight:600; color:var(--ink);}
+  .step-flow .sf-item .d{font-size:12.8px; color:var(--ink3); margin-top:2px;}
+  /* 细节分析小节 */
+  .sec-box{border:1px solid var(--rule); background:#fff; padding:18px 22px; margin:14px 0;}
+  .sec-box .sno{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.14em; color:var(--blue);}
+  .sec-box h3{display:flex; align-items:baseline; gap:10px; margin-top:2px;}
+  .sec-box .flow{font-family:'IBM Plex Mono',monospace; font-size:12px; background:var(--paper2); padding:8px 12px; border-left:2px solid var(--blue); margin:8px 0; overflow-x:auto; white-space:pre-wrap;}
+  .warn{border-left:2px solid var(--warn,#FF7D00); background:rgba(255,125,0,.06); padding:10px 14px; margin:10px 0; font-size:13px; color:var(--ink3);}
+  .oknote{border-left:2px solid var(--green); background:rgba(26,127,55,.06); padding:10px 14px; margin:10px 0; font-size:13px; color:var(--ink3);}
+  .map-card{border:1px solid var(--rule); background:#fff; margin:12px 0; padding:14px 18px;}
+  .map-card .mc-k{font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--wc-green); margin-bottom:4px;}
+  .map-card .mc-t{font-size:15px; font-weight:600; color:var(--ink);}
+  .map-card .mc-d{font-size:13px; color:var(--ink3); margin-top:4px;}
+  footer.colophon{margin-top:56px; padding-top:14px; border-top:1px solid var(--rule); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;
+    font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink2);}
+  footer.colophon a{color:var(--ink2); border:none;}
+  @media(max-width:720px){
+    .wrap{padding:28px 18px 60px;}
+    th{font-size:10.5px; padding:5px 6px;}
+    td{font-size:11.5px; padding:5px 6px;}
+    .sec-box{padding:14px 14px;}
+    .meta-grid{grid-template-columns:1fr;}
+    .step-flow .sf-item{padding-left:40px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="folio">
+    <span><a href="../docs/ui/index.html">← Docs Index</a></span>
+    <span>WeCom Custom App · Research</span>
+    <span>长安仁恒 · 企微订单助手</span>
+  </header>
+
+  <div class="kicker">
+    <span class="tag">Research · 调研报告</span>
+    <span class="tag green">证据导向 · 实证参考</span>
+    <span class="mono" style="font-size:11px; letter-spacing:.18em; color:var(--ink2);">纷享销客帮助中心 → 企微自定义应用形态 → 配置路径 → 场景映射</span>
+  </div>
+
+  <h1>企微自定义应用的形式_调研<br/><span style="font-style:italic; color:var(--blue);">以纷享销客企微整合为实证参考 · 指导订单履约系统的企微集成设计</span></h1>
+
+  <p class="lede">本调研以<strong>纷享销客（fxiaoke.com）企业微信版帮助中心</strong>为唯一事实源，系统阅读其全部企微相关文档（含用户指定的「企业微信版本侧边栏配置手册」b664 页与「企微SCRM」专区 /86b2 全部 19+ 子页），回答三个问题：<strong>① 企微上能开发/挂载什么样的自定义应用；② 怎么配置上去（分步操作）；③ 什么业务场景下怎么用</strong>。纷享销客是成熟商用 CRM，其企微集成方案已大规模落地验证，故其「自建应用 + 聊天工具栏自定义 URL」模式可作为本项目订单履约系统企微整合的<strong>直接技术原型</strong>。全文每条结论均标注来源 URL；原站截图以链接形式呈现作为证据指针。</p>
+
+  <!-- ============ 元信息 ============ -->
+  <div class="meta-grid">
+    <div class="meta-card"><div class="k">来源站点</div><div class="v">
+      help.fxiaoke.com 帮助中心 — 企业微信版本侧边栏配置手册（<span class="mono">/9bfb/ddc1/b664</span>）<br/>
+      企微SCRM 专区（<span class="mono">/86b2</span>）：概述 1 页 + 管理员手册 9 子节 + 用户手册 10 子节
+    </div></div>
+    <div class="meta-card"><div class="k">证据原则</div><div class="v">
+      每条结论附来源 URL（<span class="ok">可点击回验</span>）；配置步骤附原站截图链接（saas.bk-cdn01.com 图片）作为证据指针；流程图用 mermaid 复现
+    </div></div>
+    <div class="meta-card"><div class="k">与本项目关系</div><div class="v">
+      为 <span class="mono">docs/ui/wecom_tech_survey.html</span> 的落地形态提供<strong>已商用实证</strong>：纷享的「聊天工具栏自定义 URL 挂 H5」正是本项目 <span class="mono">spec/ui/wecom-sidebar</span> 侧边栏应用的技术原型
+    </div></div>
+    <div class="meta-card"><div class="k">结论先行</div><div class="v">
+      企微自定义应用 = <span class="ok">自建应用（应用主页 / 自定义页面 URL）</span> + <span class="ok">代开发自建应用（扫码安装、服务商代开发）</span> 两种形态；挂载点 = <span class="ok">聊天工具栏（会话侧边栏）</span> + <span class="ok">工作台应用</span> + <span class="ok">应用消息推送</span>
+    </div></div>
+  </div>
+
+  <nav class="toc">
+    <div class="tt">CONTENTS</div>
+    <a href="#p1">P1 · 企微应用形态总览（能开发什么）</a>
+    <a href="#p2">P2 · 应用挂载点与入口矩阵（挂在哪里）</a>
+    <a href="#p3">P3 · 配置上线全流程（怎么配上去）</a>
+    <a href="#p4">P4 · 聊天工具栏 5 项能力配置细则</a>
+    <a href="#p5">P5 · 企微侧扩展能力（数据/存档/推送）</a>
+    <a href="#p6">P6 · 订单履约系统 × 企微整合映射</a>
+    <a href="#p7">P7 · 风险、边界与结论</a>
+    <a href="#src">附录 · 全部证据来源清单</a>
+  </nav>
+
+  <!-- ================================================================ -->
+  <!-- ========================== PART 1 ============================= -->
+  <!-- ================================================================ -->
+  <h2 id="p1"><span class="no">P1 ·</span> 企微应用形态总览 —— 能开发什么样的企微应用</h2>
+
+  <p>纷享销客的企微整合文档揭示了企微自定义应用的完整形态谱系。核心结论：<strong>企微应用分「自建应用」与「代开发自建应用」两种形态</strong>，前者由企业自己创建、页面用 URL 或应用主页承载；后者由服务商（纷享销客）代开发，企业扫码安装、授权后使用，可解锁更深的平台能力（如会话存档的数据与智能专区）。</p>
+
+  <div class="mermaid">
+flowchart TB
+    subgraph APP["企业微信应用形态（纷享实证）"]
+        A["自建应用<br/>(企业微信后台创建)"]
+        B["代开发自建应用<br/>(服务商代开发·扫码安装)"]
+    end
+    A --> A1["第三方应用市场添加<br/>（如：纷享销客CRM）"]
+    A --> A2["应用主页<br/>（页面内容=应用主页）"]
+    A --> A3["自定义页面<br/>（页面内容=自定义 URL）"]
+    B --> B1["纷享销客代开发应用<br/>（CRM 主体）"]
+    B --> B2["纷享营销助手代开发应用<br/>（营销主体）"]
+    B --> B3["企业专属小程序<br/>（营销通绑定）"]
+    A1 --> C["挂载点"]
+    A2 --> C
+    A3 --> C
+    B1 --> C
+    B2 --> C
+    B3 --> C
+    C --> D1["聊天工具栏·侧边栏<br/>(外部客户会话)"]
+    C --> D2["工作台应用<br/>(PC/APP 入口)"]
+    C --> D3["应用消息推送<br/>(template_card 到消息列)"]
+  </div>
+  <figcaption>图 1：企微应用形态谱系（依据纷享销客「企业微信关联配置流程」/86b2/9bdb/ef01/7044/4b2a 与「侧边栏菜单配置」/86b2/9bdb/9803/fdf4 复现）</figcaption>
+
+  <h3>1.1 两种应用形态对照</h3>
+  <div class="table-wrap"><table>
+    <tr><th>维度</th><th>自建应用</th><th>代开发自建应用</th></tr>
+    <tr><td class="n">创建方式</td><td>企业微信管理后台 → 应用管理 → 自建，企业自己维护</td><td>服务商（纷享）提供二维码，企微管理员扫码安装；安装后显示「开发中」，由服务商代为上线</td></tr>
+    <tr><td class="n">典型实例</td><td>纷享销客CRM 第三方应用（应用市场添加）；本项目的订单助手自建应用</td><td>纷享销客代开发应用（CRM 主体）、纷享营销助手代开发应用（营销主体）</td></tr>
+    <tr><td class="n">页面承载</td><td>应用主页（应用配置的默认页）或 自定义页面 URL（聊天工具栏挂任意 H5）</td><td>应用主页 + 专属功能（如会话存档需启用数据与智能专区）</td></tr>
+    <tr><td class="n">可见范围</td><td>按部门/人员设置；人数按购买计费，超出需增购</td><td>按部门/人员/成员标签设置；官方建议用成员标签（如「CRM使用人」）统一管理</td></tr>
+    <tr><td class="n">适用场景</td><td>企业自有业务系统对接（如订单履约系统）；页面即 H5 URL，零平台开发成本</td><td>需要深度平台能力（会话存档、小程序身份互通、公众号打通）或需服务商持续代维护</td></tr>
+    <tr><td class="n">证据来源</td><td><a href="https://help.fxiaoke.com/86b2/9bdb/ef01/7044/4b2a">/86b2/9bdb/ef01/7044/4b2a</a> 步骤2</td><td><a href="https://help.fxiaoke.com/86b2/9bdb/ef01/7044/4b2a">/86b2/9bdb/ef01/7044/4b2a</a> 步骤3-4</td></tr>
+  </table></div>
+
+  <h3>1.2 关键证据：关联配置总览图（原站图）</h3>
+  <div class="evi">
+    <div class="ehead"><span>证据 E1 · 企业微信关联配置总览</span><a href="https://help.fxiaoke.com/86b2/9bdb/ef01/7044/4b2a" target="_blank">来源页面 ↗</a></div>
+    <img src="https://saas.bk-cdn01.com/t/e77d24d5-3d21-4bbc-8ec5-886214579a51/u/85358ee7-02d3-4bbd-b1b9-44f4143af0a1/1703231469505/%E5%AE%B9%E5%99%A8%2024.png" alt="企业微信关联配置流程图（原站图）" loading="lazy" />
+    <p class="ecap">纷享销客官方「企业微信关联配置流程」总览图：营销渠道接入 → 添加 CRM 应用 → 授权代开发应用 → 授权营销助手 → 配置侧边栏 → 返回后台关联。注意官方提示「每个企业的二维码是唯一的，扫码添加代开发应用时请返回您的 CRM 系统页面进行扫描」。</p>
+  </div>
+
+  <!-- ================================================================ -->
+  <!-- ========================== PART 2 ============================= -->
+  <!-- ================================================================ -->
+  <h2 id="p2"><span class="no">P2 ·</span> 应用挂载点与入口矩阵 —— 应用挂在哪里</h2>
+
+  <p>纷享SCRM 用户操作手册「SCRM 访问入口」页明确了企微整合的 <strong>4 类入口</strong>，构成应用挂载点矩阵。这直接回答了"订单助手这类应用在企微里以什么形态出现"：</p>
+
+  <div class="table-wrap"><table>
+    <tr><th>入口</th><th>呈现位置</th><th>适用角色</th><th>与订单履约系统的对应</th><th>证据</th></tr>
+    <tr><td class="n">入口 1</td><td>纷享销客 CRM PC 端（浏览器）</td><td>市场/运营/SCRM 管理员</td><td>订单管理后台（管理端）</td><td><a href="https://help.fxiaoke.com/86b2/ed79/3d10/af11">/86b2/ed79/3d10/af11</a></td></tr>
+    <tr><td class="n">入口 2</td><td>企业微信 PC 端 → 工作台</td><td>销售/客服等需 PC 沟通人员</td><td>PC 端订单助手工作台入口</td><td><a href="https://help.fxiaoke.com/86b2/ed79/3d10/af11">/86b2/ed79/3d10/af11</a></td></tr>
+    <tr><td class="n">入口 3</td><td>企业微信 APP 端 → 工作台</td><td>销售/客服等移动沟通人员</td><td>移动端订单助手工作台入口</td><td><a href="https://help.fxiaoke.com/86b2/ed79/3d10/af11">/86b2/ed79/3d10/af11</a></td></tr>
+    <tr><td class="n">入口 4</td><td>企业微信 → 外部对话侧边栏</td><td>与客户会话的销售/客服</td><td><strong>侧边栏订单助手（本项目主形态）</strong></td><td><a href="https://help.fxiaoke.com/86b2/ed79/3d10/af11">/86b2/ed79/3d10/af11</a></td></tr>
+  </table></div>
+
+  <div class="evi">
+    <div class="ehead"><span>证据 E2 · 企微侧边栏入口示意</span><a href="https://help.fxiaoke.com/86b2/ed79/3d10/af11" target="_blank">来源页面 ↗</a></div>
+    <img src="https://saas.bk-cdn01.com/t/e77d24d5-3d21-4bbc-8ec5-886214579a51/u/5223574d-96d6-46df-97fc-8193b714c3bd/1688885763503/image.png" alt="企微外部对话侧边栏入口（原站图）" loading="lazy" />
+    <p class="ecap">官方截图：企微外部对话的侧边栏（右侧栏）即 CRM 主页入口——与本项目 spec/ui/wecom-sidebar 的 PC 侧边栏形态完全一致。</p>
+  </div>
+
+  <div class="oknote"><strong>对本项目的意义：</strong>订单履约系统的企微应用应同时提供「侧边栏」（会话上下文内操作，主形态）+「工作台」（无会话场景，如全量待办）+「应用消息推送」（审批/状态触达）三个挂载点——与 <span class="mono">docs/ui/wecom_tech_survey.html</span> 的 S1/S2/S3/S4 入口划分吻合，且已被纷享商用实证。</div>
+
+  <!-- ================================================================ -->
+  <!-- ========================== PART 3 ============================= -->
+  <!-- ================================================================ -->
+  <h2 id="p3"><span class="no">P3 ·</span> 配置上线全流程 —— 怎么把应用配上去</h2>
+
+  <p>以下为纷享销客「企业微信关联配置流程」的完整 6 步操作（<a href="https://help.fxiaoke.com/86b2/9bdb/ef01/7044/4b2a">来源</a>），是本项目配置企微集成的直接操作蓝本。其中<strong>步骤 2、3、5</strong> 是订单履约系统整合必需的最小路径（自建/添加应用 → 授权 → 配置侧边栏 URL）。</p>
+
+  <div class="step-flow">
+    <div class="sf-item"><div class="t">步骤 1 · 接入营销渠道（可选）</div><div class="d">仅需营销功能（活动营销/微页面/公众号/小程序）时执行；绑定微信公众号/小程序到纷享（营销通）。订单履约场景可跳过。<span class="mono">证据：/86b2/9bdb/ef01/7044/4b2a 步骤1</span></div></div>
+    <div class="sf-item"><div class="t">步骤 2 · 添加纷享销客 CRM 应用（自建应用形态）</div><div class="d">企微后台 → 应用管理 → 第三方栏 → 添加第三方应用 → 搜索「纷享销客」→ 添加 → 设置可见范围（部门/人员）。<span class="mono">证据：/86b2/9bdb/ef01/7044/4b2a 步骤2</span></div></div>
+    <div class="sf-item"><div class="t">步骤 3 · 授权代开发应用（服务商代开发形态）</div><div class="d">企微管理员扫码安装 → 显示「开发中」→ 通知服务商上线 → 管理员确认授权（<strong>必须授权，否则部分数据无法同步</strong>）→ 设置可见范围（建议成员标签）。<span class="mono">证据：/86b2/9bdb/ef01/7044/4b2a 步骤3</span></div></div>
+    <div class="sf-item"><div class="t">步骤 4 · 授权营销助手代开发应用（可选）</div><div class="d">营销场景专用：扫码安装「纷享营销助手」+「纷享营销助手-小程序」两个应用，同样需商务上线 + 管理员授权。<span class="mono">证据：/86b2/9bdb/ef01/7044/4b2a 步骤4</span></div></div>
+    <div class="sf-item"><div class="t">步骤 5 · 配置企业微信侧边栏（本项目核心）</div><div class="d">① 从纷享后台「SCRM 配置向导」获取各侧边栏 URL（或联系工作人员）→ ② 企微后台「客户与上下游-聊天工具-聊天工具栏管理」→ 配置应用页面 → 选应用 → 填页面名称 + 页面内容（应用主页 或 自定义 URL）→ ③ 拖动调整侧边栏顺序。<span class="mono">证据：/86b2/9bdb/ef01/7044/4b2a 步骤5</span></div></div>
+    <div class="sf-item"><div class="t">步骤 6 · 返回 CRM 后台关联企业微信</div><div class="d">后台设置-集成平台管理-连接器-企业微信 → 去授权（企微管理员扫码）→ 账号绑定（CRM 员工账号 ↔ 企微员工账号一对一）。企微版 CRM 自动同步组织架构。<span class="mono">证据：/86b2/9bdb/ef01/7044/4b2a 步骤6</span></div></div>
+  </div>
+
+  <h3>3.1 配置流程总览图（mermaid 复现）</h3>
+  <div class="mermaid">
+flowchart LR
+    S0["企微后台<br/>开启客户联系权限"] --> S1["添加/创建应用<br/>(自建 or 第三方)"]
+    S1 --> S2["设置可见范围<br/>(部门/人员/标签)"]
+    S2 --> S3["配置聊天工具栏<br/>应用页面"]
+    S3 --> S4["页面内容=<br/>应用主页 | 自定义URL"]
+    S4 --> S5["调整侧边栏顺序"]
+    S5 --> S6["后台关联企微<br/>(连接器+账号绑定)"]
+    S6 --> S7["✅ 侧边栏生效<br/>(外部客户会话)"]
+  </div>
+  <figcaption>图 2：企微应用配置上线全流程（依据 /86b2/9bdb/ef01/7044/4b2a 六步 + /86b2/9bdb/9803/fdf4 权限前置复现）</figcaption>
+
+  <div class="warn"><strong>关键前置：</strong>使用聊天工具栏/客户联系功能前，必须先在企微后台「客户与上下游 → 客户联系 → 权限配置」将员工加入「客户联系和客户群」使用范围（<span class="mono">使用范围推荐与应用的可见范围一致</span>）。无此权限则侧边栏不显示。证据：<a href="https://help.fxiaoke.com/86b2/9bdb/9803/fdf4">/86b2/9bdb/9803/fdf4</a>。</div>
+
+  <!-- ================================================================ -->
+  <!-- ========================== PART 4 ============================= -->
+  <!-- ================================================================ -->
+  <h2 id="p4"><span class="no">P4 ·</span> 聊天工具栏 5 项能力配置细则 —— 一个侧边栏能挂什么</h2>
+
+  <p>纷享SCRM 的聊天工具栏提供 <strong>5 项能力</strong>（<a href="https://help.fxiaoke.com/86b2/9bdb/9803/fdf4">/86b2/9bdb/9803/fdf4</a>），展示了"一个应用可挂多个侧边栏页面、每页不同内容类型"的完整模式。这是本项目订单助手侧边栏页面划分的直接参照。</p>
+
+  <div class="table-wrap"><table>
+    <tr><th>侧边栏能力</th><th>承载应用</th><th>页面内容类型</th><th>URL 来源</th><th>典型用途</th></tr>
+    <tr><td class="n">CRM 主页</td><td>纷享销客CRM</td><td><span class="flag g">应用主页</span></td><td>无需（应用默认主页）</td><td>客户总览/工作台，进入即看</td></tr>
+    <tr><td class="n">CRM 详情</td><td>纷享销客CRM</td><td><span class="flag b">自定义</span></td><td>纷享后台 SCRM 配置向导复制链接</td><td>当前会话客户的详情（订单/线索/客户关联）</td></tr>
+    <tr><td class="n">营销助手</td><td>纷享营销助手（代开发）</td><td><span class="flag g">应用主页</span></td><td>无需（代开发应用主页）</td><td>打标签/推物料/营销任务/客户动态</td></tr>
+    <tr><td class="n">话术库</td><td>纷享销客CRM</td><td><span class="flag b">自定义</span></td><td>纷享后台复制链接</td><td>销售话术检索/快捷发送</td></tr>
+    <tr><td class="n">服务工单</td><td>纷享销客CRM</td><td><span class="flag b">自定义</span></td><td>纷享后台复制链接</td><td>售后工单处理</td></tr>
+  </table></div>
+
+  <div class="oknote"><strong>模式提炼（对本项目至关重要）：</strong>「应用主页」适合无需会话上下文的入口（工作台）；「自定义 URL」适合会话上下文页面（详情类）——<span class="mono">自定义 URL 页面可携带会话上下文参数，正是本项目「群上下文 → 客户订单列表/订单详情」的实现方式</span>，与 <span class="mono">docs/ui/wecom_tech_survey.html</span> 的 ww.getCurExternalChat 群上下文方案一致。</div>
+
+  <h3>4.1 配置操作截图证据</h3>
+  <div class="evi">
+    <div class="ehead"><span>证据 E3 · 聊天工具栏管理入口</span><a href="https://help.fxiaoke.com/86b2/9bdb/9803/fdf4" target="_blank">来源页面 ↗</a></div>
+    <img src="https://saas.bk-cdn01.com/t/e77d24d5-3d21-4bbc-8ec5-886214579a51/u/5223574d-96d6-46df-97fc-8193b714c3bd/1688290994989/image.png" alt="企微后台聊天工具栏管理入口（原站图）" loading="lazy" />
+    <p class="ecap">企微管理后台：客户与上下游 → 客户联系 → 聊天工具 → 聊天工具栏管理 → 配置应用页面。</p>
+  </div>
+  <div class="evi">
+    <div class="ehead"><span>证据 E4 · 配置 CRM 详情（自定义 URL 示例）</span><a href="https://help.fxiaoke.com/86b2/9bdb/9803/fdf4" target="_blank">来源页面 ↗</a></div>
+    <img src="https://saas.bk-cdn01.com/t/e77d24d5-3d21-4bbc-8ec5-886214579a51/u/85358ee7-02d3-4bbd-b1b9-44f4143af0a1/1724926356203/%E5%AE%B9%E5%99%A8%203%401x.png" alt="CRM详情自定义链接获取（原站图）" loading="lazy" />
+    <p class="ecap">从纷享后台「SCRM 配置向导」悬浮「查看链接」弹出 URL 并复制——本项目后端需提供等价的「侧边栏 URL 生成器」供管理员配置。</p>
+  </div>
+
+  <h3>4.2 侧边栏 5 项能力 → 订单履约系统映射</h3>
+  <div class="mermaid">
+flowchart LR
+    subgraph W["企微聊天工具栏（外部客户会话侧边栏）"]
+        W1["订单工作台<br/>(应用主页)"]
+        W2["订单详情·客户视图<br/>(自定义URL·会话上下文)"]
+        W3["下单助手<br/>(自定义URL)"]
+        W4["发货/回单<br/>(自定义URL·角色裁剪)"]
+    end
+    W1 --> B["订单履约系统 BFF"]
+    W2 --> B
+    W3 --> B
+    W4 --> B
+    B --> C1["订单/客户/合同数据"]
+    B --> C2["审批流/闸门"]
+    B --> C3["凭证/回单"]
+  </div>
+  <figcaption>图 3：将纷享 5 项侧边栏能力模式移植到订单履约系统（应用主页 + 自定义 URL 双类型）</figcaption>
+
+  <!-- ================================================================ -->
+  <!-- ========================== PART 5 ============================= -->
+  <!-- ================================================================ -->
+  <h2 id="p5"><span class="no">P5 ·</span> 企微侧扩展能力 —— 数据打通 / 会话存档 / 消息推送</h2>
+
+  <h3>5.1 企微好友数据同步（客户数据打通）</h3>
+  <p>纷享「企微好友数据同步设置」（<a href="https://help.fxiaoke.com/86b2/9bdb/5015/cac7">/86b2/9bdb/5015/cac7</a>）揭示企微好友 → CRM 业务对象的自动同步机制，与订单系统的客户主数据打通直接相关：</p>
+  <ul>
+    <li><strong>同步对象</strong>：企微好友 → 销售线索 / 客户 / 联系人（三页签分别开启）</li>
+    <li><strong>同步时机</strong>：直接同步（添加好友即同步）或 满足条件同步（条件配置器/APL 函数）</li>
+    <li><strong>查重处理</strong>：继续创建 / 阻断 / 绑定已有（默认客户、联系人按电话查重并绑定已有）</li>
+    <li><strong>关联关系</strong>：同步后企微好友与业务对象建立关联；侧边栏「CRM 详情」可人工关联/新建/导入</li>
+    <li><strong>范围</strong>：仅同步「开启开关后新增」的好友（存量不回补）</li>
+  </ul>
+  <div class="oknote"><strong>映射：</strong>订单系统客户主数据 = 企微好友 + 公司信息；可在客户「添加好友」事件上触发客户建档/查重绑定（对应本项目 Customer 实体的 OWNS 关系建立）。</div>
+
+  <h3>5.2 企业微信会话存档（履约审计/纠纷取证）</h3>
+  <p>纷享会话存档基于企微「数据与智能专区」能力（<a href="https://help.fxiaoke.com/86b2/9bdb/6e0a/5dc6">/86b2/9bdb/6e0a/5dc6</a>），三段式配置：</p>
+  <div class="step-flow">
+    <div class="sf-item"><div class="t">① 代开发应用启用「数据与智能专区」</div><div class="d">企微后台 → 应用管理 → 纷享销客代开发应用 → 授权信息 → 数据与智能专区 → 去授权 → 前往启用。前置：购买 SCRM 会话存档与质检。</div></div>
+    <div class="sf-item"><div class="t">② 上传《企业微信会话内容使用授权函》</div><div class="d">企微后台 → 安全与管理 → 管理工具 → 数据与智能专区 → 企业会话内容 → 前往配置 → 启用 → 上传授权函。</div></div>
+    <div class="sf-item"><div class="t">③ CRM 后台布局配置</div><div class="d">新企业直接可用；老企业需在预设对象管理中将「企微会话存档」组件拖出布局。会话内容同步至 CRM「企业微信会话存档」对象（列表/分屏/三栏三视图）。</div></div>
+  </div>
+  <div class="warn"><strong>注意：</strong>会话存档需「代开发应用」形态（企业自建应用无法直接启用数据与智能专区）；且需购买付费能力 + 上传授权函。订单履约场景中，若需对"群内口头下单"做审计留痕，这是唯一合规路径。</div>
+
+  <h3>5.3 企微端消息提醒（审批/待办触达）</h3>
+  <p>纷享「企微客户端消息提醒」（<a href="https://help.fxiaoke.com/86b2/ed79/bcd4/699a/86f8">/86b2/ed79/bcd4/699a/86f8</a>）确认：企微互通后，CRM 的<strong>待办/审批/业务流程消息直达企微消息列</strong>：</p>
+  <div class="table-wrap"><table>
+    <tr><th>接收入口</th><th>消息类型</th><th>订单履约对应</th></tr>
+    <tr><td>企微-消息列-应用通知</td><td>待处理审批/业务流程/阶段进程/线索/工单/审批消息/工作流消息</td><td><strong>订单审批待办、闸门通知（审价/到账/备货/发货/开票）</strong></td></tr>
+    <tr><td>企微-对话框侧边栏-营销助手</td><td>推广任务/定向邀约/标签建群</td><td>（营销可选）</td></tr>
+    <tr><td>企微-消息列-群发助手</td><td>客户群发任务</td><td>（营销可选，如发货通知群发）</td></tr>
+  </table></div>
+
+  <h3>5.4 其他能力速览</h3>
+  <div class="table-wrap"><table>
+    <tr><th>能力</th><th>要点</th><th>证据</th></tr>
+    <tr><td class="n">1+N 多组织</td><td>一个企微 ↔ 多个 CRM 租户（集团-分公司）；需开通「多组织」（不可关闭）；部门ID+企业ID 关联 + 账号一对一绑定</td><td><a href="https://help.fxiaoke.com/86b2/9bdb/ef01/cb2f/e65a">/86b2/9bdb/ef01/cb2f/e65a</a></td></tr>
+    <tr><td class="n">在/离职继承</td><td>好友继承/群主继承（离职无需客户确认）；继承结果 24h 返回（好友）或实时（群主）；可同步继承关联业务数据</td><td><a href="https://help.fxiaoke.com/86b2/ed79/a99a/fe99">/86b2/ed79/a99a/fe99</a></td></tr>
+    <tr><td class="n">质检</td><td>会话存档衍生；质检结果留存 CRM 对象，支持 BI 分析；权限默认系统管理员+SCRM 管理员</td><td><a href="https://help.fxiaoke.com/86b2/ed79/4838/3be6">/86b2/ed79/4838/3be6</a></td></tr>
+    <tr><td class="n">消息群发</td><td>客户群发/客户群群发；每天每客户 1 条上限；任务下发后不可编辑撤回</td><td><a href="https://help.fxiaoke.com/86b2/ed79/9d9b/68cc">/86b2/ed79/9d9b/68cc</a></td></tr>
+    <tr><td class="n">营销助手</td><td>侧边栏打标签/推物料/营销任务/客户行为动态（行为轨迹时间轴）</td><td><a href="https://help.fxiaoke.com/86b2/ed79/9386/8513/43c5">/86b2/ed79/9386/8513/43c5</a></td></tr>
+    <tr><td class="n">话术库</td><td>个人/企业话术库；PC 维护 + 企微侧边栏搜索发送；可见范围控制</td><td><a href="https://help.fxiaoke.com/86b2/9bdb/2e4d/412f">/86b2/9bdb/2e4d/412f</a></td></tr>
+  </table></div>
+
+  <!-- ================================================================ -->
+  <!-- ========================== PART 6 ============================= -->
+  <!-- ================================================================ -->
+  <h2 id="p6"><span class="no">P6 ·</span> 订单履约系统 × 企微整合映射 —— 我们怎么做</h2>
+
+  <p>综合纷享实证，本项目（长安仁恒 B2B 订单履约系统）的企微整合应落地为以下方案：</p>
+
+  <h3>6.1 整合架构总图</h3>
+  <div class="mermaid">
+flowchart TB
+    subgraph WECOM["企业微信"]
+        A1["聊天工具栏·侧边栏 H5<br/>(外部客户会话)"]
+        A2["工作台应用<br/>(PC/APP)"]
+        A3["应用消息推送<br/>(审批/状态 template_card)"]
+    end
+    subgraph OMS["订单履约系统（自建应用·自定义URL）"]
+        B1["侧边栏 URL 生成器<br/>(管理员配置用)"]
+        B2["订单助手 H5<br/>待办·订单·下单（3 Tab 角色裁剪）"]
+        B3["订单详情·剥价视图<br/>(仓管/客户联系人)"]
+        B4["审批/确认卡片<br/>(预订单·审价·到账·备货·发货·开票)"]
+    end
+    subgraph SVC["服务端"]
+        C1["OAuth 双票据 + X-WeCom-Context 重认证"]
+        C2["BFF 字段投影（剥价/剥备注）"]
+        C3["SpiceDB ReBAC + 工作流闸门"]
+        C4["Notifier → 应用消息推送"]
+    end
+    A1 --> B1
+    A1 --> B2
+    A2 --> B2
+    A3 -.-> A1
+    B2 --> C1 --> C2 --> C3
+    B3 --> C2
+    C3 --> C4 -.-> A3
+  </div>
+  <figcaption>图 4：订单履约系统企微整合建议架构（纷享模式移植：自建应用 + 聊天工具栏自定义 URL + 应用消息推送）</figcaption>
+
+  <h3>6.2 纷享实证 → 本项目映射表</h3>
+  <div class="table-wrap"><table>
+    <tr><th>纷享能力</th><th>企微形态</th><th>本项目映射</th><th>优先度</th></tr>
+    <tr><td>CRM 主页（应用主页）</td><td>侧边栏/工作台入口</td><td>订单工作台（待办 Tab 聚合本人任务）</td><td><span class="flag g">P0 必做</span></td></tr>
+    <tr><td>CRM 详情（自定义 URL）</td><td>侧边栏会话上下文页</td><td>订单详情 + 客户视图（群上下文 → 该客户订单列表）</td><td><span class="flag g">P0 必做</span></td></tr>
+    <tr><td>应用消息推送</td><td>消息列应用通知</td><td>审批待办/闸门通知/状态卡（预订单确认、审价、到账、备货、发货、开票、回单异常）</td><td><span class="flag g">P0 必做</span></td></tr>
+    <tr><td>话术库（自定义 URL）</td><td>侧边栏</td><td>销售话术库（可选，复用产品话术/标准应答）</td><td><span class="flag b">P1 可选</span></td></tr>
+    <tr><td>服务工单（自定义 URL）</td><td>侧边栏</td><td>发货/回单处理页（仓管剥价视图）</td><td><span class="flag b">P1 可选</span></td></tr>
+    <tr><td>好友数据同步</td><td>后台自动同步</td><td>客户主数据建档：企微好友 ↔ 客户/联系人绑定（OWNS 关系）</td><td><span class="flag b">P1 可选</span></td></tr>
+    <tr><td>会话存档（代开发+数据与智能专区）</td><td>合规存档</td><td>群内口头下单审计/纠纷取证（需代开发应用+付费授权函）</td><td><span class="flag y">P2 按需</span></td></tr>
+    <tr><td>1+N 多组织</td><td>集团多租户</td><td>多分公司订单隔离（本项目暂为单租户，预留）</td><td><span class="flag y">P3 预留</span></td></tr>
+    <tr><td>在/离职继承</td><td>客户资产继承</td><td>销售离职订单/客户自动转接（对接企微客户继承 API）</td><td><span class="flag y">P3 预留</span></td></tr>
+    <tr><td>营销助手/群发/SOP</td><td>营销运营</td><td>本场景无营销需求，不做</td><td><span class="flag r">不做</span></td></tr>
+  </table></div>
+
+  <h3>6.3 落地步骤建议（对照纷享 6 步）</h3>
+  <div class="sec-box">
+    <div class="sno">ROLLOUT</div>
+    <h3>订单履约系统企微集成上线路线</h3>
+    <div class="flow">阶段一（P0）：① 企微后台创建「订单助手」自建应用 → ② 设置可见范围（销售/商务/仓管/财务等标签）→ ③ 开启客户联系权限（范围一致）→ ④ 后端实现「侧边栏 URL 生成器」产出各页面 URL → ⑤ 聊天工具栏管理配置应用页面（订单工作台=应用主页；订单详情/下单/发货=自定义 URL）→ ⑥ 后端实现 OAuth 双票据 + 重认证 + 上下文路由 → ⑦ 应用消息推送接入审批流
+阶段二（P1）：话术库/发货页/客户数据同步
+阶段三（P2/P3）：会话存档（若需审计）→ 多组织/继承（预留）</div>
+    <p class="ep">关键差异提示：纷享作为服务商走「代开发应用」；本项目作为企业自研，走<strong>「自建应用」形态即可获得聊天工具栏/工作台/消息推送全部挂载点</strong>——只有会话存档需额外申请数据与智能专区。</p>
+  </div>
+
+  <!-- ================================================================ -->
+  <!-- ========================== PART 7 ============================= -->
+  <!-- ================================================================ -->
+  <h2 id="p7"><span class="no">P7 ·</span> 风险、边界与结论</h2>
+
+  <h3>7.1 边界与注意</h3>
+  <ul>
+    <li><strong>侧边栏仅外部会话可见</strong>：聊天工具栏只出现在与客户私聊/客户群会话，企业内部聊天不显示（<a href="https://help.fxiaoke.com/86b2/ed79/9386/8513/43c5">证据</a>）；内部协作需走工作台入口。</li>
+    <li><strong>可见范围与权限范围一致</strong>：聊天工具栏使用范围推荐与应用可见范围一致，否则出现"应用可见但工具栏不显示"。</li>
+    <li><strong>代开发应用授权不可省</strong>：未确认授权会导致部分数据无法同步。</li>
+    <li><strong>会话存档门槛高</strong>：需付费购买 + 代开发形态 + 授权函上传，非必需不要上。</li>
+    <li><strong>好友同步仅增量</strong>：开启后的新增好友才同步，存量需人工/其他路径。</li>
+    <li><strong>1+N 不可逆</strong>：多组织业务一旦开启无法关闭，单租户阶段勿开。</li>
+  </ul>
+
+  <h3>7.2 结论</h3>
+  <div class="oknote">
+    纷享销客的企微整合实证表明：<strong>「企微自建应用 + 聊天工具栏自定义 URL + 应用消息推送」三件套即可完整支撑订单履约场景</strong>——侧边栏承载会话上下文操作（查订单/下单/审批），工作台承载无会话操作（全量待办），消息推送承载触达（审批/状态通知）。本项目 <span class="mono">docs/ui/wecom_tech_survey.html</span> 与 <span class="mono">spec/ui/wecom-sidebar</span> 的设计与此完全同构，可直接按本调研的配置路径落地。
+  </div>
+
+  <!-- ================================================================ -->
+  <!-- ======================== 附录：证据来源 ======================== -->
+  <!-- ================================================================ -->
+  <h2 id="src"><span class="no">APPENDIX ·</span> 全部证据来源清单</h2>
+  <div class="table-wrap"><table>
+    <tr><th>#</th><th>页面</th><th>URL</th><th>本调研引用内容</th></tr>
+    <tr><td class="n">S1</td><td>企业微信版本侧边栏配置手册</td><td><a href="https://help.fxiaoke.com/9bfb/ddc1/b664">help.fxiaoke.com/9bfb/ddc1/b664</a></td><td>侧边栏配置前置（客户联系权限）+ 配置路径 + URL 模板 + PDF 手册</td></tr>
+    <tr><td class="n">S2</td><td>企微SCRM概述</td><td><a href="https://help.fxiaoke.com/86b2/32c8/d994">/86b2/32c8/d994</a></td><td>平台定位与能力全景（营销服一体化、1+N）</td></tr>
+    <tr><td class="n">S3</td><td>企业微信关联配置流程</td><td><a href="https://help.fxiaoke.com/86b2/9bdb/ef01/7044/4b2a">/86b2/9bdb/ef01/7044/4b2a</a></td><td>应用形态、6 步配置、可见范围、账号绑定（文档主干）</td></tr>
+    <tr><td class="n">S4</td><td>侧边栏菜单配置</td><td><a href="https://help.fxiaoke.com/86b2/9bdb/9803/fdf4">/86b2/9bdb/9803/fdf4</a></td><td>聊天工具栏 5 项能力、应用主页 vs 自定义 URL</td></tr>
+    <tr><td class="n">S5</td><td>企业微信会话存档配置</td><td><a href="https://help.fxiaoke.com/86b2/9bdb/6e0a/5dc6">/86b2/9bdb/6e0a/5dc6</a></td><td>数据与智能专区、授权函、三段式配置</td></tr>
+    <tr><td class="n">S6</td><td>企微好友数据同步设置</td><td><a href="https://help.fxiaoke.com/86b2/9bdb/5015/cac7">/86b2/9bdb/5015/cac7</a></td><td>自动同步规则、查重、对象关联</td></tr>
+    <tr><td class="n">S7</td><td>一个企业微信和多个CRM租户对应</td><td><a href="https://help.fxiaoke.com/86b2/9bdb/ef01/cb2f/e65a">/86b2/9bdb/ef01/cb2f/e65a</a></td><td>1+N 多组织、部门ID/企业ID、账号绑定</td></tr>
+    <tr><td class="n">S8</td><td>话术库设置</td><td><a href="https://help.fxiaoke.com/86b2/9bdb/2e4d/412f">/86b2/9bdb/2e4d/412f</a></td><td>话术库初始化/维护/侧边栏应用</td></tr>
+    <tr><td class="n">S9</td><td>企微端接收SCRM系统消息说明</td><td><a href="https://help.fxiaoke.com/86b2/ed79/bcd4/699a/86f8">/86b2/ed79/bcd4/699a/86f8</a></td><td>消息列应用通知、消息类型表</td></tr>
+    <tr><td class="n">S10</td><td>SCRM访问入口</td><td><a href="https://help.fxiaoke.com/86b2/ed79/3d10/af11">/86b2/ed79/3d10/af11</a></td><td>4 类入口矩阵（PC/工作台PC/工作台APP/侧边栏）</td></tr>
+    <tr><td class="n">S11</td><td>营销助手</td><td><a href="https://help.fxiaoke.com/86b2/ed79/9386/8513/43c5">/86b2/ed79/9386/8513/43c5</a></td><td>侧边栏打标签/物料/任务/动态</td></tr>
+    <tr><td class="n">S12</td><td>销售线索、客户、联系人数据关联</td><td><a href="https://help.fxiaoke.com/86b2/ed79/9386/e4a0/4de5/c511">/86b2/ed79/9386/e4a0/4de5/c511</a></td><td>CRM 详情侧边栏关联/新建/导入</td></tr>
+    <tr><td class="n">S13</td><td>企微消息群发</td><td><a href="https://help.fxiaoke.com/86b2/ed79/9d9b/68cc">/86b2/ed79/9d9b/68cc</a></td><td>群发任务、每天 1 条上限</td></tr>
+    <tr><td class="n">S14</td><td>在/离职继承</td><td><a href="https://help.fxiaoke.com/86b2/ed79/a99a/fe99">/86b2/ed79/a99a/fe99</a></td><td>好友/群主继承、继承记录</td></tr>
+    <tr><td class="n">S15</td><td>企业微信会话存档对象</td><td><a href="https://help.fxiaoke.com/86b2/ed79/d7a2/aa09">/86b2/ed79/d7a2/aa09</a></td><td>存档对象三视图</td></tr>
+    <tr><td class="n">S16</td><td>质检结果</td><td><a href="https://help.fxiaoke.com/86b2/ed79/4838/3be6">/86b2/ed79/4838/3be6</a></td><td>质检结果留存/权限/BI</td></tr>
+    <tr><td class="n">S17</td><td>聊天工具栏（用户侧）</td><td><a href="https://help.fxiaoke.com/86b2/ed79/9386">/86b2/ed79/9386</a></td><td>用户侧工具栏子页索引（CRM主页/CRM详情/营销助手）</td></tr>
+    <tr><td class="n">S18</td><td>SCRM用户操作手册索引</td><td><a href="https://help.fxiaoke.com/86b2/ed79">/86b2/ed79</a></td><td>用户手册 10 子节目录树</td></tr>
+    <tr><td class="n">S19</td><td>SCRM管理员手册索引</td><td><a href="https://help.fxiaoke.com/86b2/9bdb">/86b2/9bdb</a></td><td>管理员手册 9 子节目录树</td></tr>
+  </table></div>
+
+  <footer class="colophon">
+    <span><a href="../docs/ui/index.html">← Docs Index</a></span>
+    <span>WeCom Custom App Research · 全部结论以 help.fxiaoke.com 为证据源</span>
+    <span>长安仁恒 · B2B 订单履约</span>
+  </footer>
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad:true, theme:'base',
+    themeVariables:{
+      fontFamily:"'Source Serif Pro','Noto Serif SC',serif",
+      primaryColor:'#f5f4ed', primaryTextColor:'#1f1d18', primaryBorderColor:'#d4d1c5',
+      lineColor:'#1B365D', secondaryColor:'#efeee5', tertiaryColor:'#fff',
+      fontSize:'13px'
+    }
+  });
+</script>
+</body>
+</html>

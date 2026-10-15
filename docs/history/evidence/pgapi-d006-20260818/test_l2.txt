@@ -1,0 +1,4 @@
+go test -count=1 ./internal/workflows/... ./internal/api/... ./internal/wecom/...
+ok  	b2b_pilot_v3/internal/workflows	165.051s
+ok  	b2b_pilot_v3/internal/api	0.458s
+ok  	b2b_pilot_v3/internal/wecom	0.095s

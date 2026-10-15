@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>从不看代码，到看见项目：一套证据收敛式交付方法的形成</title>
+<style>
+  :root {
+    --page: #f4f6f5;
+    --paper: #ffffff;
+    --paper-alt: #edf2ef;
+    --ink: #18201e;
+    --body: #35413d;
+    --muted: #64716c;
+    --line: #d5ddd9;
+    --green: #17634e;
+    --green-soft: #e2f0e9;
+    --blue: #225f83;
+    --blue-soft: #e6f0f6;
+    --amber: #8a5b14;
+    --amber-soft: #f7edd9;
+    --red: #963d38;
+    --red-soft: #f6e7e5;
+    --violet: #5c4686;
+    --violet-soft: #eee9f6;
+    --code: #182220;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    --serif: "Songti SC", "STSong", "Noto Serif CJK SC", serif;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--body);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.82;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--blue); text-underline-offset: 3px; }
+  code, pre, .mono {
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+  code {
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: var(--blue);
+    background: var(--blue-soft);
+    font-size: .88em;
+  }
+  pre {
+    margin: 20px 0;
+    padding: 18px 20px;
+    overflow-x: auto;
+    border-radius: 6px;
+    background: var(--code);
+    color: #e7efec;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  pre code { padding: 0; color: inherit; background: transparent; }
+
+  .shell { width: min(1120px, calc(100% - 40px)); margin: 0 auto; }
+  .reading { max-width: 820px; }
+
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    border-bottom: 1px solid var(--line);
+    background: rgba(244, 246, 245, .96);
+    backdrop-filter: blur(12px);
+  }
+  .topbar-inner {
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .brand {
+    flex: 0 0 auto;
+    color: var(--green);
+    font-size: 13px;
+    font-weight: 800;
+  }
+  .toc {
+    display: flex;
+    gap: 2px;
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
+  }
+  .toc::-webkit-scrollbar { display: none; }
+  .toc a {
+    padding: 6px 9px;
+    color: var(--muted);
+    border-radius: 4px;
+    font-size: 12px;
+    text-decoration: none;
+  }
+  .toc a:hover, .toc a.active { color: var(--ink); background: var(--paper-alt); }
+
+  .hero {
+    min-height: 72vh;
+    display: flex;
+    align-items: center;
+    padding: 72px 0 56px;
+    border-bottom: 1px solid var(--line);
+    background: var(--paper);
+  }
+  .eyebrow {
+    margin: 0 0 16px;
+    color: var(--green);
+    font-size: 12px;
+    font-weight: 800;
+  }
+  h1, h2, h3 { color: var(--ink); font-family: var(--serif); font-weight: 700; }
+  h1 {
+    max-width: 940px;
+    margin: 0;
+    font-size: 48px;
+    line-height: 1.24;
+    letter-spacing: 0;
+  }
+  .hero .lede {
+    max-width: 820px;
+    margin: 24px 0 0;
+    color: #3d4a46;
+    font-family: var(--serif);
+    font-size: 20px;
+  }
+  .hero-facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px 24px;
+    margin-top: 32px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .hero-thesis {
+    max-width: 900px;
+    margin-top: 42px;
+    padding: 18px 0 18px 22px;
+    border-left: 4px solid var(--green);
+    color: var(--ink);
+    font-family: var(--serif);
+    font-size: 18px;
+  }
+
+  main { background: var(--paper); }
+  section {
+    padding: 82px 0;
+    border-bottom: 1px solid var(--line);
+    scroll-margin-top: 52px;
+  }
+  section.alt { background: var(--page); }
+  .section-head { max-width: 850px; margin-bottom: 34px; }
+  .section-no {
+    color: var(--green);
+    font-size: 12px;
+    font-weight: 800;
+  }
+  h2 {
+    margin: 8px 0 10px;
+    font-size: 32px;
+    line-height: 1.35;
+    letter-spacing: 0;
+  }
+  h3 {
+    margin: 38px 0 10px;
+    font-size: 21px;
+    line-height: 1.5;
+    letter-spacing: 0;
+  }
+  p { max-width: 820px; margin: 12px 0; }
+  .subtitle { margin: 0; color: var(--muted); font-size: 16px; }
+  .lead { color: var(--ink); font-family: var(--serif); font-size: 19px; }
+
+  .dialogue {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 30px 0;
+  }
+  .voice {
+    min-height: 180px;
+    padding: 20px 22px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--paper);
+  }
+  .voice.user { border-top: 3px solid var(--green); }
+  .voice.agent { border-top: 3px solid var(--blue); }
+  .voice .who {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 800;
+  }
+  .voice p { margin: 10px 0 0; color: var(--ink); font-family: var(--serif); font-size: 17px; }
+
+  .callout {
+    max-width: 920px;
+    margin: 26px 0;
+    padding: 18px 20px;
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--amber);
+    border-radius: 0 6px 6px 0;
+    background: var(--paper);
+  }
+  .callout.good { border-left-color: var(--green); background: var(--green-soft); }
+  .callout.danger { border-left-color: var(--red); background: var(--red-soft); }
+  .callout.violet { border-left-color: var(--violet); background: var(--violet-soft); }
+  .callout strong { color: var(--ink); }
+  .callout p { margin: 0; max-width: none; }
+
+  .table-wrap {
+    width: 100%;
+    margin: 24px 0;
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--paper);
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  caption { padding: 12px 14px; color: var(--muted); text-align: left; font-size: 12px; }
+  th {
+    padding: 11px 13px;
+    background: var(--paper-alt);
+    color: var(--ink);
+    text-align: left;
+    white-space: nowrap;
+    font-size: 12px;
+  }
+  td { padding: 12px 13px; border-top: 1px solid var(--line); vertical-align: top; }
+  tbody tr:hover td { background: #f8faf9; }
+  td:first-child { color: var(--ink); font-weight: 700; }
+
+  .mermaid-wrap {
+    margin: 30px 0;
+    padding: 20px;
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--paper);
+  }
+  .mermaid { display: flex; justify-content: center; min-width: 660px; }
+  .mermaid svg { max-width: 100%; height: auto; }
+  figcaption { margin-top: 10px; color: var(--muted); text-align: center; font-size: 12px; }
+
+  .equation {
+    max-width: 900px;
+    margin: 28px 0;
+    padding: 24px;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    color: var(--ink);
+    text-align: center;
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 16px;
+    line-height: 1.9;
+  }
+  .equation .accent { color: var(--green); font-weight: 800; }
+
+  .principles {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin: 26px 0;
+  }
+  .principle {
+    padding: 18px;
+    border-top: 3px solid var(--blue);
+    background: var(--blue-soft);
+  }
+  .principle:nth-child(2) { border-color: var(--green); background: var(--green-soft); }
+  .principle:nth-child(3) { border-color: var(--amber); background: var(--amber-soft); }
+  .principle b { display: block; margin-bottom: 5px; color: var(--ink); }
+  .principle p { margin: 0; font-size: 14px; }
+
+  .steps { margin: 34px 0 0; border-left: 2px solid var(--line); }
+  .step {
+    position: relative;
+    display: grid;
+    grid-template-columns: 130px minmax(0, 1fr);
+    gap: 24px;
+    padding: 0 0 34px 30px;
+  }
+  .step::before {
+    content: "";
+    position: absolute;
+    left: -7px;
+    top: 7px;
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--green);
+    border-radius: 50%;
+    background: var(--paper);
+  }
+  .step:last-child { padding-bottom: 0; }
+  .step .phase { color: var(--green); font-size: 12px; font-weight: 800; }
+  .step h3 { margin: 0 0 6px; font-family: var(--sans); font-size: 17px; }
+  .step p { margin: 0; font-size: 14.5px; }
+  .step .output { margin-top: 8px; color: var(--muted); font-size: 13px; }
+
+  .evidence-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin: 28px 0;
+  }
+  .evidence-item {
+    padding: 17px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--paper);
+  }
+  .evidence-item .value { color: var(--green); font-family: var(--serif); font-size: 28px; font-weight: 700; }
+  .evidence-item .label { color: var(--ink); font-weight: 700; }
+  .evidence-item p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+
+  .human-view {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin: 28px 0;
+  }
+  .human-view > div { padding: 16px 0; border-top: 3px solid var(--green); }
+  .human-view b { display: block; color: var(--ink); }
+  .human-view span { color: var(--muted); font-size: 13px; }
+
+  .appendix {
+    background: #eef1f0;
+    color: #2a3532;
+  }
+  .appendix .section-head { max-width: 960px; }
+  .appendix h2, .appendix h3 { font-family: var(--sans); }
+  .spec-label {
+    display: inline-block;
+    margin-bottom: 10px;
+    padding: 2px 7px;
+    border-radius: 3px;
+    color: #fff;
+    background: var(--violet);
+    font-size: 11px;
+    font-weight: 800;
+  }
+  .normative { max-width: 940px; font-size: 14px; }
+  .contract-table td:first-child { white-space: nowrap; font-family: ui-monospace, "SFMono-Regular", Menlo, monospace; }
+  .appendix .mermaid-wrap { background: #f8faf9; }
+
+  footer {
+    padding: 34px 0 50px;
+    background: var(--code);
+    color: #b9c7c2;
+    font-size: 13px;
+  }
+  footer strong { color: #fff; }
+
+  @media (max-width: 840px) {
+    h1 { font-size: 38px; }
+    .hero { min-height: auto; }
+    .dialogue, .principles, .evidence-grid { grid-template-columns: 1fr; }
+    .human-view { grid-template-columns: 1fr 1fr; }
+    .step { grid-template-columns: 1fr; gap: 4px; }
+  }
+  @media (max-width: 560px) {
+    .shell { width: min(100% - 28px, 1120px); }
+    .brand { display: none; }
+    .topbar-inner { min-height: 48px; }
+    h1 { font-size: 32px; }
+    h2 { font-size: 27px; }
+    .hero { padding: 54px 0 44px; }
+    section { padding: 62px 0; }
+    .hero .lede { font-size: 18px; }
+    .human-view { grid-template-columns: 1fr; }
+    .mermaid-wrap { margin-left: -6px; margin-right: -6px; padding: 14px 10px; }
+    .table-wrap { width: calc(100% + 12px); margin-left: -6px; }
+  }
+  @media print {
+    .topbar { display: none; }
+    .hero { min-height: auto; }
+    section { break-inside: avoid; }
+    body { background: #fff; }
+  }
+</style>
+</head>
+<body>
+<nav class="topbar" aria-label="文章目录">
+  <div class="shell topbar-inner">
+    <div class="brand">PROJECT AS EVIDENCE</div>
+    <div class="toc">
+      <a href="#origin">起点</a>
+      <a href="#shift">转折</a>
+      <a href="#collapse">收敛</a>
+      <a href="#methods">方法拼图</a>
+      <a href="#sampling">采样</a>
+      <a href="#project">项目证据</a>
+      <a href="#delivery">交付流程</a>
+      <a href="#human">人看什么</a>
+      <a href="#agent-contract">Agent 附录</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="shell">
+    <p class="eyebrow">一段讨论，逐步形成一套可执行的方法</p>
+    <h1>从不看代码，<br>到真正看见项目</h1>
+    <p class="lede">我们最初讨论的是一个近乎偏执的问题：能不能几乎不读代码，只确认极少数设计，就把握一个项目的质量？讨论走到最后，答案不再是“少看一点”，而是重新设计项目如何被描述、被测量、被挑战，以及在交付前如何把不确定性一层层压缩。</p>
+    <div class="hero-facts">
+      <span>b2b_pilot_v3 的实践背景</span>
+      <span>Graph Engineering × 测试 × 可复现证据</span>
+      <span>面向人类的故事 + 面向 Agent 的执行契约</span>
+    </div>
+    <div class="hero-thesis">最终得到的不是一种神奇的“免审代码术”，而是一种更朴素也更严格的交付方式：人负责定义什么算正确，机器负责持续排除不正确，直到只剩少量真正需要人判断的问题。</div>
+  </div>
+</header>
+
+<main>
+<section id="origin">
+  <div class="shell">
+    <div class="section-head">
+      <div class="section-no">01 · 起点</div>
+      <h2>问题一开始，听起来有些冒险</h2>
+      <p class="subtitle">“几乎不看代码，能不能完成项目质量 review？”</p>
+    </div>
+    <div class="reading">
+      <p class="lead">这个问题并不是偷懒。它背后其实是一种对规模的直觉：代码越多，人逐行阅读越不可能成为稳定的质量手段。全面阅读看似认真，注意力却会被平均摊薄。</p>
+    </div>
+
+    <div class="dialogue">
+      <article class="voice user">
+        <div class="who">最初的问题</div>
+        <p>如果我只确认非常少的设计，而不去看大量实现，能不能仍然把握项目整体质量？能不能像一次“量子坍缩”，由少数关键信息迫使其他信息保持一致？</p>
+      </article>
+      <article class="voice agent">
+        <div class="who">最初的回应</div>
+        <p>可以减少源码阅读，但不能跳过正确性的定义。少量设计之所以有用，不是因为它们少，而是因为它们能约束大量后续选择，并且能被独立证据反复检查。</p>
+      </article>
+      <article class="voice user">
+        <div class="who">进一步反思</div>
+        <p>真正想要的是一套严谨、稳定、可复现的量化方法。从 Meta 到设计文档都模板化，把项目放进一个尺度有限的空间，再用测试、双 Graph、采样和学习不断缩小不确定性。</p>
+      </article>
+      <article class="voice agent">
+        <div class="who">问题被重新定义</div>
+        <p>那就不该把 review 理解为“读过多少”，而应理解为“还有多少重要状态没有被区分”。项目交付也不再是 Agent 的一句完成，而是证据满足一组明确条件后的状态。</p>
+      </article>
+    </div>
+
+    <figure class="mermaid-wrap">
+      <div class="mermaid">
+flowchart LR
+  A["几乎不看代码<br/>能否把握质量？"] --> B["把代码投影成图、测试与证据"]
+  B --> C["发现：全绿仍可能同源自证"]
+  C --> D["加入独立挑战、证据绑定与运行反馈"]
+  D --> E["进一步：让采样主动选择最有价值的问题"]
+  E --> F["最终：交付是一场持续压缩不确定性的过程"]
+      </div>
+      <figcaption>讨论的演进：从“少看”转向“让项目变得可观测、可挑战、可收敛”</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="shift" class="alt">
+  <div class="shell">
+    <div class="section-head">
+      <div class="section-no">02 · 转折</div>
+      <h2>真正要改变的，是 review 的对象</h2>
+      <p class="subtitle">不再把源码文本当成唯一事实，而是审查项目的约束、响应和剩余风险。</p>
+    </div>
+    <div class="reading">
+      <p>一份实现可以有无数种写法。只要它们满足同样的业务规则、接口契约、状态变化、数据边界和运行要求，从产品所有者的视角看，它们就属于同一类可接受实现。于是，人不必知道每一处具体写法，只需要确认划分这类实现的规则是否正确。</p>
+      <p>这和类型系统、数据库约束、会计守恒有些相似。我们不会逐笔猜测库存是否可能变成负数，而是要求所有改变库存的路径都服从同一个约束，并用并发、回滚和真实数据库测试去挑战它。</p>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>过去关注什么</th><th>新的关注对象</th><th>为什么信息量更高</th></tr></thead>
+        <tbody>
+          <tr><td>代码是否写得像预期</td><td>业务不变量是否在所有相关路径成立</td><td>一个不变量可以约束许多模块和调用路径</td></tr>
+          <tr><td>测试是否很多</td><td>测试能否拒绝错误、杀死变异、复现反例</td><td>测到过不等于测得有效</td></tr>
+          <tr><td>文档是否齐全</td><td>每条设计是否有稳定编号并能追到实现与证据</td><td>齐全的散文仍可能彼此矛盾</td></tr>
+          <tr><td>CI 是否全绿</td><td>证据是否绑定同一源码、制品、环境和验证器</td><td>避免用旧报告证明新项目</td></tr>
+          <tr><td>整体分数是否漂亮</td><td>高风险问题是否仍有未知、反例或过期证据</td><td>关键风险不能被大量低价值绿灯平均掉</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout good"><p><strong>关键转折：</strong>我们不再问“Agent 看完了吗”，而是问“项目中还有哪些重要状态无法由现有证据区分”。</p></div>
+  </div>
+</section>
+
+<section id="collapse">
+  <div class="shell">
+    <div class="section-head">
+      <div class="section-no">03 · 收敛</div>
+      <h2>所谓“坍缩”，实际是约束传播</h2>
+      <p class="subtitle">量子是一个形象的比喻；数独、约束求解和主动提问更接近工程事实。</p>
+    </div>
+    <div class="reading">
+      <p>假设项目最开始有许多可能状态：需求可能有几种理解，架构可能有几种拆法，实现又有大量选择。每确认一条高价值信息，就能排除一批不符合它的状态。</p>
+    </div>
+
+    <div class="equation">
+      Ω<sub>0</sub> = 所有可能的项目状态<br>
+      Ω<sub>t+1</sub> = Ω<sub>t</sub> ∩ 与新证据一致的状态<br>
+      <span class="accent">交付目标：剩余状态中的风险已经低于当前项目允许的范围</span>
+    </div>
+
+    <figure class="mermaid-wrap">
+      <div class="mermaid">
+flowchart TB
+  O["所有可能状态 Ω₀"] --> M["Meta：目标、边界、反目标"]
+  M --> D["设计：状态、关系、不变量"]
+  D --> T["测试：正确路径与反例"]
+  T --> G["图比较：设计与实现是否对齐"]
+  G --> R["运行观察：真实环境是否仍成立"]
+  R --> S["剩余的少量不可区分状态 Ω*"]
+  H["专家补充新的事实或判断"] --> S
+  S -. "仍有高风险未知" .-> H
+      </div>
+      <figcaption>每条证据都在缩小可能空间；专家处理的是机器无法继续区分的部分</figcaption>
+    </figure>
+
+    <div class="principles">
+      <div class="principle"><b>约束必须连得起来</b><p>如果设计、实现、测试和运行彼此没有稳定映射，局部确认不会传播到全局。</p></div>
+      <div class="principle"><b>约束必须能被推翻</b><p>“系统应该可靠”无法验证；“并发发货后库存永不为负”可以被反例挑战。</p></div>
+      <div class="principle"><b>观测器必须先校准</b><p>图工具、测试框架和规则引擎若理解错了项目，越精密的数字越会制造假象。</p></div>
+    </div>
+
+    <div class="callout danger"><p><strong>必须保留的边界：</strong>内部一致不等于外部正确。一个项目可以从需求到测试都严丝合缝，却从一开始就解决了错误的问题。外部业务事实与专家判断不能被自动化系统自我生成。</p></div>
+  </div>
+</section>
+
+<section id="methods" class="alt">
+  <div class="shell">
+    <div class="section-head">
+      <div class="section-no">04 · 方法拼图</div>
+      <h2>每一种技术，只负责它擅长的那一段</h2>
+      <p class="subtitle">方法的强度来自分工，而不是把所有东西都叫作“证明”。</p>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>方法</th><th>在这里负责什么</th><th>留下什么结果</th><th>不要误认为</th></tr></thead>
+        <tbody>
+          <tr><td>模板化 Meta 与设计</td><td>把目标、风险、状态、不变量放进有限且可检查的坐标系</td><td>稳定编号的声明、假设和开放问题</td><td>模板覆盖了现实中的一切</td></tr>
+          <tr><td>世界图与任务图</td><td>分别说明系统记住什么、系统如何推进，再把两者对齐</td><td>实体关系、状态迁移、能力问题坐标</td><td>图上存在一条路径就代表业务正确</td></tr>
+          <tr><td>实现图与运行图</td><td>把代码和真实运行投影成可比较的结构</td><td>调用、依赖、数据流、动态边和影响范围</td><td>静态抽取能看见反射、配置和所有外部行为</td></tr>
+          <tr><td>测试与覆盖</td><td>观察环节联动，验证正确路径，主动拒绝错误路径</td><td>反例、状态覆盖、组合覆盖、变异结果</td><td>行覆盖率高就是业务质量高</td></tr>
+          <tr><td>承诺与挑战</td><td>先固定规格和挑战摘要，再让独立执行者验证同一制品</td><td>不可错配、可重放的证据</td><td>测试报告变成了密码学正确性证明</td></tr>
+          <tr><td>规范化比较</td><td>用稳定 ID、统一格式和约束查询消除名字与表达差异</td><td>预期与实际的明确差异</td><td>普通映射都需要混淆电路</td></tr>
+          <tr><td>隐私计算</td><td>双方不能暴露输入时，仍可计算约定判断</td><td>只披露判断结果的比较证明</td><td>它能替代正确的比较规则</td></tr>
+          <tr><td>经验学习</td><td>从事故与误报中提出下一批候选规则</td><td>带来源、解释和历史回放的规则候选</td><td>统计相关性可以直接成为硬规则</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>测试覆盖不是一个百分比</h3>
+    <p>如果只看行覆盖率，我们只知道某行曾被执行。真正的质量密度来自多个维度同时成立：</p>
+    <figure class="mermaid-wrap">
+      <div class="mermaid">
+flowchart LR
+  C1["需求声明<br/>是否都有测试"] --> C2["状态与交互<br/>是否覆盖关键组合"]
+  C2 --> C3["错误路径<br/>是否真的被拒绝"]
+  C3 --> C4["变异与故障<br/>测试能否发现改变"]
+  C4 --> C5["真实运行<br/>环境差异是否可见"]
+  C5 --> Q["质量密度"]
+      </div>
+      <figcaption>覆盖是一组互补的观察，而不是单一数字</figcaption>
+    </figure>
+
+    <h3>双 Graph 也不是最终答案</h3>
+    <p>世界图和任务图提供了最重要的起点，但真正交付时还要补上实现、运行和证据。五者通过稳定 ID 相连，才能回答“这条业务声明由哪里实现、在哪里运行、由什么证据支持”。</p>
+    <figure class="mermaid-wrap">
+      <div class="mermaid">
+flowchart LR
+  I["意图<br/>为什么做、什么不能错"] --> A["架构<br/>边界、契约、数据归属"]
+  A --> X["实现<br/>符号、调用、配置、制品"]
+  X --> R["运行<br/>真实调用、事件、指标、异常"]
+  E["证据<br/>声明、挑战、结果、例外"]
+  I -. "被验证" .-> E
+  A -. "被实现" .-> X
+  X -. "被观察" .-> R
+  R -. "产生新事实" .-> I
+  E -. "绑定同一对象" .-> X
+  E -. "绑定同一环境" .-> R
+      </div>
+      <figcaption>双 Graph 是问题与工作的骨架；实现、运行和证据让它成为交付系统</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="sampling">
+  <div class="shell">
+    <div class="section-head">
+      <div class="section-no">05 · 采样</div>
+      <h2>不穷举所有可能，而是每次问最值钱的问题</h2>
+      <p class="subtitle">排列组合不是为了制造更多测试，而是为了更快地区分故障来源。</p>
+    </div>
+    <div class="reading">
+      <p>现实项目的组合空间太大：角色、状态、数据、网络、重试、并发、时间和外部服务相互作用，无法全部穷举。采样的价值在于用少量实验覆盖高概率交互，并在失败后迅速缩小范围。</p>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>遇到的问题</th><th>适合的办法</th><th>它如何减少排查成本</th></tr></thead>
+        <tbody>
+          <tr><td>参数组合太多</td><td>二元/三元组合覆盖</td><td>不遍历全部排列，也能覆盖常见交互缺陷</td></tr>
+          <tr><td>不知道哪一组变化导致失败</td><td>分组测试</td><td>一次试一组，再根据结果继续二分</td></tr>
+          <tr><td>失败输入或改动太大</td><td>最小化失败样本</td><td>自动删减，直到留下最小失败条件</td></tr>
+          <tr><td>测试预算有限</td><td>按风险和信息增益排序</td><td>优先检查高影响、高不确定、高耦合区域</td></tr>
+          <tr><td>历史缺陷不断增加</td><td>经验模型与候选规则</td><td>让过去的事故改变下一次采样顺序</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <figure class="mermaid-wrap">
+      <div class="mermaid">
+flowchart LR
+  U["当前未知与风险清单"] --> P["计算：哪次检查最可能减少未知"]
+  P --> C["生成组合、故障或隐藏挑战"]
+  C --> O["观察结果与最小反例"]
+  O --> D{"是否仍有高风险未知？"}
+  D -- "有" --> U
+  D -- "没有" --> H["整理剩余风险，交给人确认"]
+  O --> L["事故与误报进入历史样本"]
+  L --> P
+      </div>
+      <figcaption>采样是一个自适应循环；学习只决定先查哪里，不直接决定项目是否通过</figcaption>
+    </figure>
+
+    <div class="callout violet"><p><strong>人类 review 的位置也因此改变：</strong>专家不再接收一大堆源码，而是接收“当前仍有三种解释无法区分，确认其中哪一种符合业务”的精确问题。专家的回答随后被写回为新声明、新反例或新规则。</p></div>
+  </div>
+</section>
+
+<section id="project" class="alt">
+  <div class="shell">
+    <div class="section-head">
+      <div class="section-no">06 · 项目给出的证据</div>
+      <h2>b2b_pilot_v3 已经展示了这条路为什么值得继续</h2>
+      <p class="subtitle">这里不是抽象畅想；项目中已经存在一批可复盘的闭环样本。</p>
+    </div>
+
+    <div class="evidence-grid">
+      <div class="evidence-item"><div class="value">15 / 15</div><div class="label">能力问题由代码图回答</div><p>从业务问题出发，回到代码图寻找实现与测试依据。</p></div>
+      <div class="evidence-item"><div class="value">49 / 49</div><div class="label">分层测试清单落地</div><p>单元、集成、端到端和系统验证均有对应场景。</p></div>
+      <div class="evidence-item"><div class="value">300 / 300</div><div class="label">双 Graph 用例五维核对</div><p>150 正例与 150 负例逐项检查设计、实现、测试和追踪。</p></div>
+      <div class="evidence-item"><div class="value">8</div><div class="label">测试逼出的真实编排缺陷</div><p>事务、租户幂等、分批发货、Timer 与开票语义均出现过真实偏差。</p></div>
+      <div class="evidence-item"><div class="value">87.8%</div><div class="label">全仓行覆盖率</div><p>没有粉饰成 95% 或 98%；domain 核心为 100%，缺口被解释和登记。</p></div>
+      <div class="evidence-item"><div class="value">6</div><div class="label">用例坐标与文档漂移</div><p>验证没有只找代码问题，也反向修正了设计和用例本身。</p></div>
+    </div>
+
+    <div class="reading">
+      <p>最有价值的不是这些数字本身，而是它们之间能相互追溯：能力问题产生测试清单，测试暴露实现和设计偏差，偏差回写文档，再由代码图重新回答能力问题。项目不是一条从文档走到代码的直线，而是一条能往返的路。</p>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>项目中的一次发现</th><th>如果只看绿灯会怎样</th><th>闭环如何处理</th></tr></thead>
+        <tbody>
+          <tr><td>事务中错误地查询连接池</td><td>常规 happy path 可能长期不暴露</td><td>故障注入发现 → 修复 → 形成“事务内只用同一连接”的规则</td></tr>
+          <tr><td>幂等键没有租户维度</td><td>单租户测试全部正常</td><td>跨租户负例发现 → 修改派生规则 → 增加固定回归样本</td></tr>
+          <tr><td>部分发货后开票按整单计算</td><td>整单发货场景看不出问题</td><td>分批组合暴露守恒失败 → 业务基准改为有效发货量</td></tr>
+          <tr><td>图工具给出互相矛盾的测试信号</td><td>可能把工具盲区误当成项目缺口</td><td>先把测量工具列为被验证对象，再决定哪些指标可用于结论</td></tr>
+          <tr><td>真实企微环境尚未端到端验证</td><td>mock 全绿容易被描述成全面完成</td><td>明确保留为外部环境风险，不用内部证据替代真实运行</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout"><p><strong>这段实践带来的最重要教训：</strong>覆盖率是结果，不是目标；图是测量工具，不是现实本身；真正可靠的是能暴露反例、承认盲区并使旧结论失效的过程。</p></div>
+  </div>
+</section>
+
+<section id="delivery">
+  <div class="shell">
+    <div class="section-head">
+      <div class="section-no">07 · 交付前，Agent 应该怎样工作</div>
+      <h2>从接到项目，到有资格说“可以交付”</h2>
+      <p class="subtitle">下面是给人阅读的版本：每一步都说明要解决什么，以及应该留下什么。</p>
+    </div>
+
+    <div class="steps">
+      <div class="step"><div class="phase">第 0 步</div><div><h3>先验证尺子是否可信</h3><p>用已知缺陷、故意注入的错误和小型标准样例检查图工具、测试框架、规则和运行环境。看不见的动态调用、错误的测试映射和工具自身失败都要列出来。</p><div class="output">留下：工具版本、校准结果、已知盲区、谁负责维护。</div></div></div>
+      <div class="step"><div class="phase">第 1 步</div><div><h3>把项目为什么存在说清楚</h3><p>整理目标、反目标、用户、数据、外部系统、不可逆操作、可靠性要求和仍未确认的问题。没有答案就写“未知”，不允许自动补成听起来合理的答案。</p><div class="output">留下：Meta、风险清单、术语表和开放问题。</div></div></div>
+      <div class="step"><div class="phase">第 2 步</div><div><h3>把自然语言变成可推翻的声明</h3><p>每个重要要求都有稳定编号、适用范围、反例和最低证据要求。比如“库存可靠”要改写为并发、回滚和任何合法操作后库存均不为负。</p><div class="output">留下：声明、不变量、反例、风险等级和验证方法。</div></div></div>
+      <div class="step"><div class="phase">第 3 步</div><div><h3>画出问题与工作的坐标</h3><p>世界图描述实体、关系和业务事实；任务图描述状态与推进；架构说明边界、数据归属、失败与恢复。每个设计元素必须服务某条声明。</p><div class="output">留下：图、状态机、接口契约、数据与信任边界、追踪关系。</div></div></div>
+      <div class="step"><div class="phase">第 4 步</div><div><h3>先固定问题，再开始实现</h3><p>对规格、设计、验证计划和工具版本计算摘要。实现可以变化，但任何改变问题定义或验证标准的动作都会使已有证据失效并重新确认。</p><div class="output">留下：冻结版本及其摘要。</div></div></div>
+      <div class="step"><div class="phase">第 5 步</div><div><h3>实现与挑战分开进行</h3><p>一个上下文负责实现，只看到公开契约；另一个上下文负责从风险、历史事故和业务规则中设计隐藏样例、属性、组合和故障。两边在候选制品完成后汇合。</p><div class="output">留下：候选制品、公开测试、隐藏挑战摘要和来源。</div></div></div>
+      <div class="step"><div class="phase">第 6 步</div><div><h3>让同一个候选物接受多种观察</h3><p>编译、静态检查、单元、契约、集成、端到端、属性、变异、安全、供应链和回滚都指向同一个制品。报告摘要不能代替原始结果。</p><div class="output">留下：结构化证据、原始日志摘要、环境与验证器身份。</div></div></div>
+      <div class="step"><div class="phase">第 7 步</div><div><h3>比较承诺与现实</h3><p>抽取实现图和运行图，与意图和架构逐项比较。检查禁止依赖、越界数据流、状态缺口、未声明动态边和变更影响范围。</p><div class="output">留下：明确差异、动态盲区和受影响声明。</div></div></div>
+      <div class="step"><div class="phase">第 8 步</div><div><h3>把测试预算花在最不确定的地方</h3><p>根据风险、耦合、历史缺陷和当前证据空白选择下一轮组合与故障。失败后自动缩小到最小反例；没有信息增益的重复测试停止运行。</p><div class="output">留下：采样记录、最小反例、未覆盖组合和停止理由。</div></div></div>
+      <div class="step"><div class="phase">第 9 步</div><div><h3>把机器无法回答的问题交给人</h3><p>只提交那些会明显改变结论的问题：业务语义冲突、不可逆风险接受、外部事实缺失。人的回答立即转成新声明、反例或规则，再跑一次相关验证。</p><div class="output">留下：决策、责任人、适用范围和被它影响的旧证据。</div></div></div>
+      <div class="step"><div class="phase">第 10 步</div><div><h3>只有证据收敛后才能交付</h3><p>所有必要声明达到对应风险要求；没有未处理反例、未知高风险和过期例外；供应链与回滚可验证；仍然存在的限制被清楚地写进交付说明。</p><div class="output">留下：可重放的交付包，而不是一句“已完成”。</div></div></div>
+    </div>
+
+    <figure class="mermaid-wrap">
+      <div class="mermaid">
+flowchart TB
+  M["确认目标、风险和设计"] --> F["冻结规格与验证计划"]
+  F --> B["实现者：构建候选制品"]
+  F --> C["挑战者：设计独立样例与故障"]
+  B --> V["对同一制品执行验证"]
+  C --> V
+  V --> D{"证据是否足够？"}
+  D -- "发现反例" --> B
+  D -- "仍有重要未知" --> H["请求专家提供一个明确判断"]
+  H --> M
+  D -- "达到风险要求" --> P["生成交付包"]
+  P --> R["真实运行继续反馈"]
+  R --> M
+      </div>
+      <figcaption>实现与挑战并行，证据不足就回到相应位置；生产反馈使项目保持闭环</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="human" class="alt">
+  <div class="shell">
+    <div class="section-head">
+      <div class="section-no">08 · 最后，人只需要看什么</div>
+      <h2>把复杂性留给系统，把责任留给人</h2>
+      <p class="subtitle">人不需要吞下全部实现细节，但必须看见不能被机器替代的事实。</p>
+    </div>
+    <div class="human-view">
+      <div><b>设计内核</b><span>项目目标、关键不变量、风险边界是否正确。</span></div>
+      <div><b>反例与未知</b><span>哪里失败、哪里看不见、哪些外部事实尚未验证。</span></div>
+      <div><b>声明与证据</b><span>每项要求由什么独立结果支持，证据是否仍有效。</span></div>
+      <div><b>剩余风险</b><span>例外、回滚、真实环境限制以及需要谁承担。</span></div>
+    </div>
+    <div class="reading">
+      <p class="lead">因此，“不读代码”不是把判断交给 Agent，而是把人的判断放在更高杠杆的位置。机器负责穷尽纪律，人负责定义意义；机器负责不断压缩，人负责在最后的分叉处给出真实世界的答案。</p>
+    </div>
+    <div class="callout good"><p><strong>这场讨论最终形成的一句话：</strong>用有限模板建立坐标，用图连接承诺与现实，用测试和采样持续排除错误，用可重放证据约束 Agent，再把仍不可区分的少量问题交给专家。项目不是因为“全绿”而完成，而是因为重要的不确定性已经被解释、消除或明确承担。</p></div>
+  </div>
+</section>
+
+<section id="agent-contract" class="appendix">
+  <div class="shell">
+    <div class="section-head">
+      <span class="spec-label">APPENDIX A · NORMATIVE</span>
+      <h2>Agent 执行契约</h2>
+      <p class="subtitle">本附录是机器执行规范。除非项目配置显式覆盖，Agent 必须按以下标识、状态、产物、转移条件和停止条件执行；不得依赖上文叙事自行补充语义。</p>
+    </div>
+
+    <div class="normative">
+      <h3>A1. 规范词</h3>
+      <div class="table-wrap">
+        <table class="contract-table">
+          <thead><tr><th>词</th><th>唯一含义</th></tr></thead>
+          <tbody>
+            <tr><td>MUST</td><td>不满足即不得进入下一状态。</td></tr>
+            <tr><td>MUST_NOT</td><td>出现即将受影响证据标记为 <code>INVALID</code>。</td></tr>
+            <tr><td>SHOULD</td><td>默认执行；跳过时必须生成带 owner 和 reason 的例外记录。</td></tr>
+            <tr><td>MAY</td><td>可选，不影响状态转移。</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>A2. 唯一标识与枚举</h3>
+      <pre><code>project_id        := PROJECT.&lt;ASCII_SLUG&gt;
+claim_id          := CLAIM.&lt;DOMAIN&gt;.&lt;NNN&gt;
+challenge_id      := CHALLENGE.&lt;CLAIM_ID&gt;.&lt;NNN&gt;
+run_id            := RUN.&lt;UTC_YYYYMMDDTHHMMSSZ&gt;.&lt;8_HEX&gt;
+evidence_id       := EVIDENCE.&lt;CLAIM_ID&gt;.&lt;RUN_ID&gt;.&lt;NNN&gt;
+exception_id      := EXCEPTION.&lt;CLAIM_ID&gt;.&lt;NNN&gt;
+rule_id           := RULE.&lt;DOMAIN&gt;.&lt;NNN&gt;
+
+risk_level        := R0 | R1 | R2 | R3
+assurance_level   := A0 | A1 | A2 | A3 | A4
+claim_status      := UNKNOWN | PASS | FAIL | INVALID | EXCEPTED
+decision          := PASS | CONDITIONAL | FAIL | INVALID
+
+A0 := 无可用证据
+A1 := 可构建且静态/结构约束通过
+A2 := 行为、反例、属性与变异验证达到计划阈值
+A3 := 真实或等价运行环境、故障、SLO 与回滚已验证
+A4 := 指定有限内核具有机器检查的形式化证明</code></pre>
+
+      <h3>A3. 角色与隔离</h3>
+      <div class="table-wrap">
+        <table class="contract-table">
+          <thead><tr><th>role_id</th><th>允许输入</th><th>允许输出</th><th>MUST_NOT</th></tr></thead>
+          <tbody>
+            <tr><td>ORCHESTRATOR</td><td>全部摘要、状态和公开结果</td><td>调度、状态转移、问题包</td><td>修改验证原始结果</td></tr>
+            <tr><td>SPECIFIER</td><td>用户输入、外部事实、现有设计</td><td>Meta、claim、架构与验证计划</td><td>把未知项推断为已确认事实</td></tr>
+            <tr><td>BUILDER</td><td>已冻结公开规格与公开测试</td><td>源码、锁文件、SBOM、候选制品</td><td>读取隐藏挑战；修改策略或阈值</td></tr>
+            <tr><td>CHALLENGER</td><td>Meta、claim、风险、历史缺陷</td><td>隐藏挑战、生成器、故障计划</td><td>读取 Builder 推理记录</td></tr>
+            <tr><td>VERIFIER</td><td>候选制品、挑战、固定工具链</td><td>原始结果与结构化 evidence</td><td>修改制品或重跑到绿</td></tr>
+            <tr><td>SKEPTIC</td><td>图、git、历史结果与证据缺口</td><td>排序、异常、候选规则</td><td>直接改变 claim_status</td></tr>
+            <tr><td>ATTESTOR</td><td>摘要、原始结果、身份信息</td><td>签名 manifest 与只读视图</td><td>生成缺失的原始证据</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>同一 Agent 实例或同一上下文 MUST_NOT 同时承担 <code>BUILDER</code> 与 <code>CHALLENGER</code>。R2/R3 项目 SHOULD 使用不同模型、不同工具实现或独立专家减少共同偏差。</p>
+
+      <h3>A4. 文件布局</h3>
+      <pre><code>.zkge/
+  project.yaml
+  risks.yaml
+  claims/&lt;claim_id&gt;.yaml
+  architecture/
+    intent.yaml
+    architecture.yaml
+    traceability.yaml
+    verification-plan.yaml
+  commitments/&lt;commitment_id&gt;.json
+  challenges/
+    public/
+    hidden.digest.json
+  graphs/
+    implementation.snapshot.json
+    runtime.snapshot.json
+    evidence.snapshot.json
+    coverage-debt.yaml
+  evidence/&lt;run_id&gt;/
+    manifest.json
+    results/*.json
+    raw-digests.json
+  cases/
+    counterexamples/*.yaml
+    incidents/*.yaml
+  rules/
+    candidates/*.yaml
+    active/*.yaml
+    retired/*.yaml
+  exceptions/&lt;exception_id&gt;.yaml
+  decisions/&lt;decision_id&gt;.yaml
+  handoff/manifest.json</code></pre>
+
+      <h3>A5. Claim 最小记录</h3>
+      <pre><code>schema: zkge.claim/v1
+id: CLAIM.INV.009
+statement: "任一订单的累计开票数量不得超过累计有效发货数量"
+owner: business.finance
+risk_level: R2
+required_assurance_level: A3
+scope:
+  included: [currency=CNY, shipment_status=effective]
+  excluded: [legacy_import_unreconciled]
+assumptions:
+  - id: ASSUMPTION.INV.001
+    text: "有效发货事件为开票数量的唯一基准"
+oracle:
+  type: invariant
+  expression: sum(invoice.qty) &lt;= sum(effective_shipment.qty)
+counterexample:
+  expression: sum(invoice.qty) &gt; sum(effective_shipment.qty)
+required_verifiers:
+  - property_test
+  - database_integration
+  - runtime_reconciliation
+invalidation_inputs:
+  - specification_digest
+  - source_digest
+  - migration_digest
+  - verifier_digest
+status: UNKNOWN</code></pre>
+
+      <h3>A6. 生命周期状态</h3>
+      <figure class="mermaid-wrap">
+        <div class="mermaid">
+stateDiagram-v2
+  [*] --> S0_UNDEFINED
+  S0_UNDEFINED --> S1_CALIBRATED: verifier calibration passes
+  S1_CALIBRATED --> S2_COMMITTED: G1 decision recorded
+  S2_COMMITTED --> S3_BUILT: artifact digest exists
+  S3_BUILT --> S4_CHALLENGED: challenge runs complete
+  S4_CHALLENGED --> S5_VERIFIED: evidence manifests valid
+  S5_VERIFIED --> S6_CONVERGED: residual uncertainty within budget
+  S6_CONVERGED --> S7_APPROVED: required human decisions recorded
+  S7_APPROVED --> S8_HANDOFF_READY: handoff predicate true
+  S3_BUILT --> S2_COMMITTED: specification changed
+  S4_CHALLENGED --> S3_BUILT: counterexample requires implementation change
+  S5_VERIFIED --> S1_CALIBRATED: verifier calibration invalid
+  S6_CONVERGED --> S2_COMMITTED: high-risk unknown discovered
+  S8_HANDOFF_READY --> S2_COMMITTED: any bound digest changed
+        </div>
+        <figcaption>状态只由可验证条件推动；任一绑定对象变化都会回退</figcaption>
+      </figure>
+
+      <h3>A7. 状态转移条件</h3>
+      <div class="table-wrap">
+        <table class="contract-table">
+          <thead><tr><th>target_state</th><th>全部必须成立</th><th>失败动作</th></tr></thead>
+          <tbody>
+            <tr><td>S1_CALIBRATED</td><td>每个 verifier 有 id/version/digest/owner/self_test；已知缺陷回放达到项目阈值；盲区已登记</td><td>状态保持 S0；相关结果不得进入 evidence</td></tr>
+            <tr><td>S2_COMMITTED</td><td>Meta、风险、claim、架构、验证计划 schema 通过；R2/R3 无未确认 oracle；摘要已生成</td><td>生成按信息增益排序的问题包</td></tr>
+            <tr><td>S3_BUILT</td><td>source/artifact/SBOM/build-environment digest 齐全；构建可复现策略通过</td><td>状态保持 S2；输出 build counterexample</td></tr>
+            <tr><td>S4_CHALLENGED</td><td>公开与隐藏挑战均针对 S3 的 artifact digest；随机运行记录 seed/generator/sample-space</td><td>结果标记 INVALID 并重新运行</td></tr>
+            <tr><td>S5_VERIFIED</td><td>每条 evidence 绑定 claim/source/artifact/spec/environment/verifier/raw-output；无摘要错配</td><td>decision=INVALID</td></tr>
+            <tr><td>S6_CONVERGED</td><td>无开放反例；无 R2/R3 UNKNOWN；所有 required claim 达到 required_assurance_level；采样停止条件成立</td><td>回到 Builder、Specifier 或 Challenger</td></tr>
+            <tr><td>S7_APPROVED</td><td>所有必要的人类判断有 owner/scope/reason/time；受影响证据已重算</td><td>保持 S6</td></tr>
+            <tr><td>S8_HANDOFF_READY</td><td>A10 的 handoff predicate 为 true；handoff manifest 可重放</td><td>不得声明完成</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>A8. 执行动作流</h3>
+      <pre><code>procedure EXECUTE_PROJECT_DELIVERY(project_root):
+  01. load .zkge/project.yaml; validate schema; else STOP(INVALID_CONFIG)
+  02. inventory external facts; unresolved fact =&gt; UNKNOWN; MUST_NOT infer confirmation
+  03. register TCB; run verifier self-tests and historical-bug replay
+  04. if calibration fails: STOP(UNCALIBRATED_VERIFIER)
+  05. compile Meta -&gt; claims -&gt; architecture -&gt; verification plan
+  06. validate: stable IDs, owners, risk, oracle, counterexample, trace edges
+  07. if high-risk UNKNOWN exists: emit QUESTION_PACKET; STOP(WAITING_FOR_OWNER)
+  08. hash and freeze specification, policy, public challenge, toolchain
+  09. dispatch BUILDER and CHALLENGER in isolated contexts
+  10. receive artifact; bind source/artifact/SBOM/build-environment digests
+  11. run public + hidden challenges against the same artifact digest
+  12. emit raw result digests; normalize results into evidence schema
+  13. extract implementation/runtime graphs; compare with intent/architecture
+  14. compute claim_status, assurance_level, coverage debt, residual uncertainty
+  15. while convergence predicate is false:
+        a. if open counterexample: minimize; route to BUILDER or SPECIFIER
+        b. if evidence INVALID: rerun from earliest changed digest
+        c. if high-risk UNKNOWN: emit one highest-information QUESTION_PACKET
+        d. else select next challenge by A9; run; update evidence
+        e. if no legal next challenge can reduce uncertainty: STOP(BLOCKED)
+  16. convert accepted incidents into rule candidates
+  17. replay each candidate against positive + negative history
+  18. activate rule only after deterministic translation and owner approval
+  19. evaluate A10 handoff predicate
+  20. if false: decision := FAIL | INVALID | CONDITIONAL; MUST_NOT claim complete
+  21. if true: write .zkge/handoff/manifest.json; state := S8_HANDOFF_READY
+end</code></pre>
+
+      <h3>A9. 采样与停止</h3>
+      <pre><code>risk_weight(R0,R1,R2,R3) := (1, 3, 10, 30)
+level_gap(i) := max(required_assurance_level(i) - actual_assurance_level(i), 0)
+unknown(i) := 1 when claim_status(i) = UNKNOWN else 0
+invalid(i) := 1 when claim_status(i) = INVALID else 0
+counterexample(i) := 1 when an open counterexample exists else 0
+
+residual_uncertainty U := Σ risk_weight(i) *
+  (level_gap(i) + unknown(i) + invalid(i) + 2 * counterexample(i))
+
+challenge_priority(c) :=
+  expected_closed_risk_weight(c)
+  * affected_claim_count(c)
+  * observability_gap(c)
+  / max(execution_cost(c), 1)
+
+select next challenge := argmax(challenge_priority(c))
+
+sampling_stop :=
+  no_open_counterexample
+  and no_R2_R3_unknown
+  and all_required_levels_met
+  and no_available_challenge_with_positive_expected_closed_risk_weight</code></pre>
+      <p><code>residual_uncertainty</code> 仅用于排序与预算，不得替代逐条 claim 判定。任何 R3 FAIL/INVALID/UNKNOWN 均不可被其他 claim 抵消。</p>
+
+      <h3>A10. 证据失效与交付判定</h3>
+      <pre><code>invalidate(evidence) when any bound digest changes:
+  specification_digest
+  source_digest
+  artifact_digest
+  dependency_or_sbom_digest
+  environment_digest
+  verifier_digest
+  challenge_digest
+  policy_digest
+
+handoff_ready :=
+  all(required_claim.status = PASS or approved_unexpired_exception)
+  and all(required_claim.actual_assurance_level &gt;= required_assurance_level)
+  and evidence_bindings_valid
+  and no_open_counterexample
+  and no_R2_R3_UNKNOWN
+  and no_unowned_or_expired_exception
+  and verifier_calibration_valid
+  and supply_chain_policy_pass
+  and rollback_verified
+  and required_human_decisions_recorded
+  and handoff_manifest_replay_pass</code></pre>
+
+      <h3>A11. 交付清单最小结构</h3>
+      <pre><code>{
+  "schema": "zkge.handoff/v1",
+  "project_id": "PROJECT.B2B_PILOT_V3",
+  "state": "S8_HANDOFF_READY",
+  "decision": "PASS",
+  "subject": {
+    "source_digest": "sha256:...",
+    "artifact_digest": "sha256:...",
+    "sbom_digest": "sha256:..."
+  },
+  "commitment_digest": "sha256:...",
+  "required_claims": {
+    "count": 0,
+    "pass": 0,
+    "excepted": 0,
+    "unknown": 0,
+    "fail": 0,
+    "invalid": 0
+  },
+  "evidence_index_digest": "sha256:...",
+  "open_counterexamples": [],
+  "residual_risks": [],
+  "exceptions": [],
+  "runtime_limitations": [],
+  "rollback_evidence_id": "EVIDENCE....",
+  "replay": {
+    "command": "make zkge-replay",
+    "environment_digest": "sha256:...",
+    "expected_result_digest": "sha256:..."
+  },
+  "approved_by": [],
+  "generated_at": "UTC_RFC3339"
+}</code></pre>
+
+      <h3>A12. 绝对停止条件</h3>
+      <div class="table-wrap">
+        <table class="contract-table">
+          <thead><tr><th>condition</th><th>required_action</th></tr></thead>
+          <tbody>
+            <tr><td>SPEC_CONFLICT</td><td>停止实现；提交冲突事实、受影响 claim 和最高信息增益问题。</td></tr>
+            <tr><td>ORACLE_MISSING_R2_R3</td><td>停止验证；不得由 Builder 或同源 Agent 补写 oracle。</td></tr>
+            <tr><td>EVIDENCE_DIGEST_MISMATCH</td><td>decision=INVALID；从最早变化输入重新执行。</td></tr>
+            <tr><td>VERIFIER_UNCALIBRATED</td><td>禁用该 verifier 的所有门禁用途；已有证据全部 INVALID。</td></tr>
+            <tr><td>OPEN_COUNTEREXAMPLE</td><td>decision=FAIL；最小化并路由，不得用重跑掩盖。</td></tr>
+            <tr><td>FLAKY_RESULT</td><td>记录失败分布；不得重跑到绿；按风险策略处理。</td></tr>
+            <tr><td>NO_INFORMATION_GAIN</td><td>停止机械加测；提交剩余不可区分状态给责任人。</td></tr>
+            <tr><td>HANDOFF_PREDICATE_FALSE</td><td>MUST_NOT 使用“完成、通过、可交付”描述项目。</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="shell"><strong>从不看代码，到看见项目</strong><br>基于 b2b_pilot_v3 的 Graph Engineering、测试与闭环验证实践，以及一次关于“如何压缩项目不确定性”的持续讨论。叙事部分供人理解，附录作为 Agent 实施契约的起点。</div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    securityLevel: 'loose',
+    theme: 'base',
+    fontFamily: '-apple-system, BlinkMacSystemFont, Segoe UI, PingFang SC, Microsoft YaHei, sans-serif',
+    themeVariables: {
+      primaryColor: '#e2f0e9',
+      primaryTextColor: '#18201e',
+      primaryBorderColor: '#17634e',
+      secondaryColor: '#e6f0f6',
+      secondaryTextColor: '#18201e',
+      secondaryBorderColor: '#225f83',
+      tertiaryColor: '#f7edd9',
+      tertiaryTextColor: '#18201e',
+      tertiaryBorderColor: '#8a5b14',
+      lineColor: '#64716c',
+      fontSize: '14px',
+      clusterBkg: '#f8faf9',
+      clusterBorder: '#d5ddd9'
+    },
+    flowchart: { curve: 'basis', htmlLabels: true, useMaxWidth: true }
+  });
+
+  const links = Array.from(document.querySelectorAll('.toc a'));
+  const sections = links
+    .map((link) => document.querySelector(link.getAttribute('href')))
+    .filter(Boolean);
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      links.forEach((link) => {
+        link.classList.toggle('active', link.getAttribute('href') === '#' + entry.target.id);
+      });
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  sections.forEach((section) => observer.observe(section));
+</script>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Review 2026-08-07 13:46 · B2B 订单履约验证项目</title>
+<style>
+  :root{
+    --paper:#f5f4ed; --paper2:#efeee5; --ink:#1f1d18; --ink2:#6b665b;
+    --ink3:#3a382f; --blue:#1B365D; --rule:#d4d1c5;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif; line-height:1.6;}
+  .wrap{max-width:960px; margin:0 auto; padding:48px 40px 80px;}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;}
+  .folio{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--rule); padding-bottom:10px;
+    font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink2);}
+  .folio a{color:var(--ink2); border:none;}
+  .folio a:hover{color:var(--blue);}
+  .kicker{display:flex; align-items:baseline; gap:12px; margin-top:48px;}
+  h1{font-size:clamp(30px,4.5vw,44px); line-height:1.12; font-weight:500; margin-top:14px; letter-spacing:-.01em;}
+  .lede{margin-top:18px; font-size:16.5px; line-height:1.7; color:var(--ink3); max-width:760px;}
+  h2{font-size:22px; font-weight:600; margin:48px 0 14px; color:var(--blue); display:flex; align-items:baseline; gap:12px; border-top:1px solid var(--rule); padding-top:24px;}
+  h2 .no{font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.12em;}
+  h3{font-size:17px; font-weight:600; margin:28px 0 10px; color:var(--ink);}
+  h3 .no{color:var(--blue); font-family:'IBM Plex Mono',monospace; font-size:12px; margin-right:8px;}
+  p{margin:10px 0; color:var(--ink3);}
+  ul,ol{margin:10px 0 10px 26px; color:var(--ink3);}
+  li{margin:5px 0;}
+  a{color:var(--blue); text-decoration:none; border-bottom:1px solid var(--rule);}
+  a:hover{border-bottom-color:var(--blue);}
+  blockquote{border-left:2px solid var(--blue); padding:10px 18px; margin:16px 0; background:var(--paper2); font-style:italic;}
+  table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  .table-wrap{overflow-x:auto; margin:16px 0 24px; border:1px solid var(--rule);}
+  .table-wrap table{margin:0;}
+  th{background:var(--paper2); color:var(--blue); text-align:left; font-weight:600; padding:9px 12px; border-bottom:1.5px solid var(--blue); font-size:12.5px; white-space:nowrap;}
+  td{padding:9px 12px; border-bottom:1px solid var(--rule); vertical-align:top; color:var(--ink3);}
+  .ok{color:#1a7a3a; font-weight:600;}
+  .warn{color:#a15c00; font-weight:600;}
+  .bad{color:#b3261e; font-weight:600;}
+  .foot{margin-top:56px; border-top:1px solid var(--rule); padding-top:14px; font-size:12px; color:var(--ink2);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="folio"><span>B2B Pilot · Review Record</span><span>2026-08-07 13:46 UTC</span></div>
+
+  <div class="kicker"><span class="mono">REVIEW</span></div>
+  <h1>复盘 Review · HTTP API 贯通 · 覆盖率 · 双 graph 回溯</h1>
+  <p class="lede">本轮复盘回答三个问题：<strong>(1) HTTP API 全流程是否完全贯通；(2) 测试覆盖率是否达到 ≥95%；(3) 从设计-代码-测试回溯到双 graph 是否完全无误。</strong>
+  验证基线：本机真实 PostgreSQL（55432）+ LocalRunner + StaticChecker + wecom mock；代码图谱（code-review-graph）增量重建至 HEAD（7d9e8fc）。</p>
+
+  <h2><span class="no">1 ·</span> 测试情况（最近一轮全量顺序回归）</h2>
+
+  <h3><span class="no">1.1</span> L 分层套件实测</h3>
+  <div class="table-wrap"><table>
+    <tr><th>套件</th><th>范围</th><th>结果</th><th>耗时</th><th>说明</th></tr>
+    <tr><td class="mono">tests/l0_unit</td><td>黑盒契约：FSM / 守恒 / 幂等键 / 回单分流 / 接入层 / StaticChecker / API 模型 snake_case</td><td class="ok">ok · 6 用例</td><td>0.013s</td><td>零外部依赖</td></tr>
+    <tr><td class="mono">tests/l1_integration</td><td>HTTP × 真实 PG：幂等唯一 / 跨租户 / 事件链 / 凭证只追加 / 校验</td><td class="ok">ok · 5 用例</td><td>19.2s</td><td>-tags integration；每用例重置 schema</td></tr>
+    <tr><td class="mono">tests/l2_e2e</td><td><strong>20 用例</strong>：款到全链 / 非款到例外 / 董事长 C-D / 部分发货 / 修改 A-E / 拒绝 / 预订单 3 路径 / 凭证链 / 投影 / 幂等重放 / <strong>W5 企微回调转接</strong></td><td class="ok">ok · 20 用例</td><td>105.7s</td><td>LocalRunner 真实工作流执行</td></tr>
+    <tr><td class="mono">tests/l3_system</td><td>seeddata → HTTP 全链 → reconcile / audit / concurrency</td><td class="ok">ok · 2 用例</td><td>17.5s</td><td>独立 DB（b2b_pilot）</td></tr>
+    <tr><td class="mono">internal/…</td><td>182 个 func Test（domain / api / authz / wecom / integration / config / repo / workflows）</td><td class="ok">ok</td><td>—</td><td>含于 make cover 全量执行</td></tr>
+    <tr><td class="mono">internal/workflows</td><td>Temporal TestSuite：L2-01..14 + 故障注入</td><td class="ok">ok</td><td>146.6s</td><td>preorder.go 修复后无回归</td></tr>
+    <tr><td class="mono">internal/wecom</td><td>默认 + <span class="mono">-tags deferred</span>（暂缓段回归路径）</td><td class="ok">ok · ok</td><td>1.2s / 0.2s</td><td>回调转接层单测全绿</td></tr>
+  </table></div>
+
+  <h3><span class="no">1.2</span> 覆盖率门禁（make cover，2026-08-07 13:46 实测）</h3>
+  <div class="table-wrap"><table>
+    <tr><th>包</th><th>目标</th><th>实测</th><th>差距性质</th></tr>
+    <tr><td class="mono">domain</td><td>100%</td><td class="ok">100.0%（硬门禁 PASS）</td><td>—</td></tr>
+    <tr><td class="mono">config</td><td>—</td><td class="ok">100.0%</td><td>—</td></tr>
+    <tr><td class="mono">integration</td><td>≥98%</td><td class="ok">100.0%</td><td>—</td></tr>
+    <tr><td class="mono">authz</td><td>≥98%</td><td class="warn">95.7%</td><td>mustStruct panic 分支、懒连接构造</td></tr>
+    <tr><td class="mono">wecom</td><td>≥98%</td><td class="warn">94.5%</td><td>官方通道网络/限流分支、回调防御分支</td></tr>
+    <tr><td class="mono">api</td><td>≥98%</td><td class="warn">91.5%</td><td>userOf 兜底、LocalRunner 日志注入等</td></tr>
+    <tr><td class="mono">workflows</td><td>≥98%</td><td class="warn">86.3%</td><td>各闸门决策分支的防御性错误返回</td></tr>
+    <tr><td class="mono">repo</td><td>≥98%</td><td class="bad">80.9%</td><td>pgx scan error、每句 SQL 的失败返回（最大缺口）</td></tr>
+    <tr><td><strong>全仓</strong></td><td><strong>≥95%（用户）/ ≥98%（文档）</strong></td><td class="bad"><strong>87.8%</strong>（门禁 85% + domain 100% 硬门禁）</td><td>防御性错误分支；部分物理不可达（CHECK 约束拦截）</td></tr>
+  </table></div>
+  <p>测试函数总数：<strong>212</strong>（internal 182 + tests 30）。门禁输出：<span class="mono">PASS: total coverage 87.8%</span> + <span class="mono">PASS: domain coverage 100.0% (hard gate)</span>，8 包齐全性检查通过（缺包即 FAIL，防假绿）。</p>
+
+  <h2><span class="no">2 ·</span> 设计修复情况（自 review_202608071154 以来的落地清单）</h2>
+  <div class="table-wrap"><table>
+    <tr><th>#</th><th>变更</th><th>类型</th><th>验证</th></tr>
+    <tr><td>1</td><td>DemoPolicy 契约测试 + LocalRunner 策略注入/WaitAll 单测 + API 模型 snake_case（ApprovalTask/PreOrder）</td><td>测试补齐（review 盘点）</td><td>integration 57.9%→100%、api 89.5%→91.5%（fb43375）</td></tr>
+    <tr><td>2</td><td><span class="mono">scripts/fullchain</span>：HTTP API 全流程可运行 demo（22 步：订单全链/凭证/预订单/待办/出站卡片）</td><td>独立验证载体</td><td>2× 连续全绿 exit=0（e3d82b2）</td></tr>
+    <tr><td>3</td><td>「基于意图识别的企微自动下单」暂缓实现/暂缓测试（intent.go + 测试 + cmd/wecom 自动下单段 → <span class="mono">-tags deferred</span>）</td><td>范围决策</td><td>默认构建不含；deferred 构建可回归（4fd4872）</td></tr>
+    <tr><td>4</td><td>docs/07 新 §4「企微 × 流程执行结合」产品设计（交互点×API 映射表、EventKey 协议、mermaid 时序/流程图）+ 章节重编号与外部引用同步</td><td>文档</td><td>HTML 校验通过（39d108c）</td></tr>
+    <tr><td>5</td><td>企微回调转接层：<span class="mono">CallbackHandler + HTTPActionClient</span>（EventKey → HTTP API，verdict 按信号语义翻译）+ cmd/wecom 接线（B2B_API_ADDR）+ W5 E2E</td><td>功能落地</td><td>W5 回调驱动订单全链/驳回/预订单确认+修改/幂等回执（7d9e8fc）</td></tr>
+    <tr><td>6</td><td><strong>真 bug 修复</strong>：预订单 modified 分支派生订单状态硬编码 from=PRE_CONFIRMED（修改后确认链必然失败，此前无测试暴露）</td><td>缺陷修复</td><td>deriveOrder fromState 动态化；W5 modify 用例覆盖（7d9e8fc）</td></tr>
+    <tr><td>7</td><td>Score Card 47→48 例（W5 入表）、wecom 覆盖率数字、测试总数同步</td><td>文档</td><td>grep 残留检查零命中</td></tr>
+  </table></div>
+
+  <h2><span class="no">3 ·</span> 三问判定</h2>
+
+  <h3><span class="no">3.1</span> 问题一：HTTP API 全流程是否完全贯通 — <span class="ok">✅ 贯通</span></h3>
+  <ol>
+    <li><strong>端到端用例</strong>：tests/l2_e2e 20 用例全绿——款到全链（6 信号 → INV_CLOSED + 26 事件链）、非款到（分流③例外审核）、董事长 C/D、部分发货（2 批）、修改 A-E（revision/resubmit）、拒绝终态、预订单 3 路径（确认/忽略/升级→降级）、凭证链（v1/v2/403/回放）、BFF 投影（仓管剥价）、幂等重放、W5 企微回调转接（回调驱动与直接 HTTP 等价）。</li>
+    <li><strong>可运行 demo</strong>：<span class="mono">go run ./scripts/fullchain</span> 22 步走完全程（订单链 + 凭证链 + 预订单链 + 待办/事件 + 出站卡片留痕），退出码 0 = PASS，2× 稳定。</li>
+    <li><strong>调用链图证</strong>：代码图谱中 <span class="mono">handleCreateOrder</span> →（userOf/Decode/writeErr）→ <span class="mono">Starter.StartOrderWorkflow</span> 接口 5 个实现齐备（LocalRunner / TemporalStarter / fakeStarter / errStarter / NoopStarter）；handleOrderSignal → SignalWorkflow 同构。HTTP 端点 → Starter → OrderWorkflow / PreOrderWorkflow 链路完整。</li>
+  </ol>
+
+  <h3><span class="no">3.2</span> 问题二：测试覆盖率是否 ≥95% — <span class="bad">❌ 未达成（实测 87.8%）</span></h3>
+  <ol>
+    <li><strong>实测</strong>：全仓 87.8%（门禁 85% + domain 100% 硬门禁 PASS）；距离 95% 目标差 <strong>7.2pp</strong>；距离文档目标 98% 差 10.2pp。</li>
+    <li><strong>缺口分解</strong>：repo 80.9%（-14.1pp，最大缺口：pgx scan error、每句 SQL 失败返回）、workflows 86.3%、api 91.5%、wecom 94.5%、authz 95.7%。全部为<strong>防御性错误分支</strong>，部分物理不可达（如负库存分支被 CHECK(qty&gt;=0) 阻断——是「防线生效」而非「测试缺失」）；正确性核心 domain 100%。</li>
+    <li><strong>诚实声明</strong>：不以上轮「96.0% 假绿」为基线——门禁已修复为完整 8 包 profile + 数值比较 + 缺包即 FAIL；87.8% 为真值。</li>
+    <li><strong>追平路径（建议）</strong>：SQL 层错误注入框架（mock pgx 连接，逐句失败注入）可追平 repo 缺口约 +10pp；其余为网络/限流分支，故障注入成本高、收益低。按 03 §3 既有声明，门禁取实测值并留余量（85% + domain 100% 硬门禁）。</li>
+  </ol>
+
+  <h3><span class="no">3.3</span> 问题三：回溯到双 graph 是否完全无误 — <span class="ok">✅ 一致（锚点验证 + 决策闭环）</span></h3>
+  <p>「双 graph」= Graph Engineering 两半（spec/evolve.md）：<strong>知识图谱</strong>（业务实体/关系/约束，本项目载体 docs/01-core-graph.html 世界知识图谱 + FSM 图）与<strong>任务图</strong>（流程执行拓扑：workflows 编排、07 §4 时序）。方法论闭环：双 graph → 设计 → 开发 → 测试 → 验证 → 倒推回双 graph。</p>
+  <ol>
+    <li><strong>知识图谱 ← 代码图回答</strong>：docs/05-roundtrip-report.html 15 个 CQ ← 代码图锚点（设计图锚点 vs 实施后实际锚点 vs 测试背书）。本轮抽查 5 个关键锚点（<span class="mono">ProjectOrder / CreatePreOrder / ClassifyReceipt / ApplyShipment / AssertPrepareWithinOrder</span>）在当前 HEAD 全部存活（函数级，行号 ±3 漂移）。</li>
+    <li><strong>授权图谱</strong>：schema.zed v2（prestock/shipment/evidence 一等 definition、8 细粒度 permission、expiry_ok caveat）经 CHANGELOG §4-§8 的倒推-决策闭环（D1-D4 人类架构师全部批准 → 落地 → 变更闭环验证：全量回归 + roundtrip 倒推）——图谱裂缝（实体 vs 授权对象不对齐）已闭合。</li>
+    <li><strong>代码图谱（code-review-graph）</strong>：已增量重建至 HEAD（built_at_sha = head_sha = 7d9e8fc，<span class="mono">head_matches_build=true</span>；109 文件 / 1076 节点 / 212 测试节点 / 4212 TESTED_BY 边）。</li>
+    <li><strong>测试 ↔ 代码图</strong>：TESTED_BY 边 4212 条，Score Card 48/48 有对应测试（零静默 Skip / 零空测试）。</li>
+  </ol>
+  <blockquote>保留项（非错误）：① docs/05 报告引用的图谱规模数字（75 文件 / 780 节点 / commit 20d8962）已过期，CQ 映射结论有效但数字需回填；② Outbox 投影器未接线属阶段二（docs/05 §3、CHANGELOG D4 明示），本地模式用 StaticChecker 判定，与文档一致；③ TestSuite 信号递送竞态为环境层限制（tests/README.md 记录 + 300ms 间隔规避）。</blockquote>
+
+  <h2><span class="no">4 ·</span> 结论</h2>
+  <div class="table-wrap"><table>
+    <tr><th>问题</th><th>判定</th><th>关键证据</th></tr>
+    <tr><td>HTTP API 全流程贯通</td><td class="ok">✅ 完全贯通</td><td>l2_e2e 20 用例 + scripts/fullchain 22 步 demo + 调用链图证（Starter 5 实现）</td></tr>
+    <tr><td>测试覆盖率 ≥95%</td><td class="bad">❌ 未达成（87.8%）</td><td>门禁 PASS（85% + domain 100% 硬门禁）；差距全为防御性错误分支，repo 缺口最大</td></tr>
+    <tr><td>回溯双 graph 无误</td><td class="ok">✅ 一致</td><td>15 CQ 锚点抽查存活 + D1-D4 决策闭环 + 代码图谱 head_matches_build=true</td></tr>
+  </table></div>
+  <p><strong>总体判定</strong>：设计-代码-测试全链路贯通，HTTP API 全流程与双 graph 回溯均验证一致；唯一未达标项是<strong>总覆盖率 87.8% &lt; 95%</strong>（差距性质为防御性错误分支，已如实声明并留痕）。若用户坚持 95% 门禁，追平路径为 SQL 层错误注入框架（可覆盖 repo 约 +10pp）——需投入约 0.5-1 人日，建议作为独立任务排期。</p>
+
+  <div class="foot">B2B Pilot · Review Record 2026-08-07 13:46 UTC · 验证基线：真实 PG 55432 + LocalRunner + StaticChecker + wecom mock · code-review-graph @ 7d9e8fc</div>
+</div>
+</body>
+</html>

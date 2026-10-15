@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>企微侧边栏 · 销售订单助手｜双端演示</title>
+<link rel="icon" href="data:,">
+<style>
+  /* ===== 双端模式切换壳：切换 Tab 在容器外，不进入企微界面 ===== */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    background: #141414;
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  /* 顶部切换栏（演示层，永远在容器外） */
+  .mode-switcher {
+    flex-shrink: 0;
+    margin: 14px 0 0;
+    display: flex;
+    align-items: center;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.15);
+    border-radius: 20px;
+    padding: 3px;
+    z-index: 9999;
+  }
+  .mode-btn {
+    border: none; background: transparent; color: rgba(255,255,255,.6);
+    font-size: 12px; padding: 6px 18px; border-radius: 17px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: all .15s;
+  }
+  .mode-btn svg { width: 14px; height: 14px; }
+  .mode-btn.is-active {
+    background: #07C160; color: #fff; font-weight: 600;
+  }
+
+  /* 视图舞台：纯定位容器（PC 居中 / 移动贴顶），Tab 在外面 */
+  .stage {
+    flex: 1;
+    width: 100%;
+    position: relative;
+  }
+  .view { display: none; }
+  .view.visible { display: block; }
+
+  /* 移动端手机壳容器：固定 390×844，垂直居中于 stage（自然高度，不撑满） */
+  #viewMobile { width: 390px; height: 844px; flex-shrink: 0; }
+  #viewMobile.visible {
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  #viewMobile.visible #frameMobile {
+    width: 390px;
+    height: 844px;
+    border: none;
+    display: block;
+    border-radius: 40px;
+    overflow: hidden;
+  }
+
+  /* PC 窗口容器（模拟应用窗口，无独立标题栏；红绿灯浮在左上角头像上方） */
+  .pc-window {
+    width: min(1280px, calc(100vw - 48px));
+    height: calc(100vh - 96px);
+    min-height: 560px;
+    background: #202124;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    box-shadow: 0 24px 70px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.08);
+  }
+  #viewPc.visible {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .pc-window iframe {
+    flex: 1;
+    width: 100%;
+    border: none;
+    background: #202124;
+  }
+
+  /* 红绿灯（macOS 窗口控制）浮层：贴在窗口左上角，悬于应用栏头像上方留白区 */
+  .pc-traffic-lights {
+    position: absolute;
+    top: 8px;
+    left: 10px;
+    z-index: 999;
+    display: flex;
+    gap: 5px;
+    pointer-events: none;
+  }
+  .pc-traffic-lights span {
+    width: 10px; height: 10px; border-radius: 50%;
+  }
+  .pc-traffic-lights .d-red { background: #FF5F57; }
+  .pc-traffic-lights .d-yellow { background: #FEBC2E; }
+  .pc-traffic-lights .d-green { background: #28C840; }
+
+  /* ===== 移动端手机壳容器 ===== */
+  #frameMobile {
+    box-shadow: 0 24px 70px rgba(0,0,0,.7);
+  }
+</style>
+</head>
+<body>
+
+  <!-- 顶部切换栏（演示层，不在任何企微界面内） -->
+  <div class="mode-switcher">
+    <button class="mode-btn" data-mode="pc" id="modePc">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+      企微端
+    </button>
+    <button class="mode-btn is-active" data-mode="mobile" id="modeMobile">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/></svg>
+      移动端
+    </button>
+  </div>
+
+  <!-- 视图舞台 -->
+  <div class="stage">
+
+    <!-- PC 企微端：窗口容器（红绿灯浮在左上角，无独立标题栏），Tab 在容器外 -->
+    <div class="view" id="viewPc">
+      <div class="pc-window">
+        <div class="pc-traffic-lights">
+          <span class="d-red"></span>
+          <span class="d-yellow"></span>
+          <span class="d-green"></span>
+        </div>
+        <iframe id="framePc" src="pc.html"></iframe>
+      </div>
+    </div>
+
+    <!-- 移动端：手机壳 -->
+    <div class="view visible" id="viewMobile">
+      <iframe id="frameMobile" src="mobile.html"></iframe>
+    </div>
+
+  </div>
+
+  <script>
+  // 双端切换（Tab 在容器外，不影响企微界面内部）
+  const viewPc = document.getElementById('viewPc');
+  const viewMobile = document.getElementById('viewMobile');
+  const btnPc = document.getElementById('modePc');
+  const btnMobile = document.getElementById('modeMobile');
+
+  function switchMode(mode) {
+    const isPc = mode === 'pc';
+    viewPc.classList.toggle('visible', isPc);
+    viewMobile.classList.toggle('visible', !isPc);
+    btnPc.classList.toggle('is-active', isPc);
+    btnMobile.classList.toggle('is-active', !isPc);
+  }
+  btnPc.addEventListener('click', () => switchMode('pc'));
+  btnMobile.addEventListener('click', () => switchMode('mobile'));
+  </script>
+</body>
+</html>

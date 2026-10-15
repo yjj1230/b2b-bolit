@@ -1,0 +1,113 @@
+# project/policies/mechanism/calibration-cases.yaml
+# ECM 1.0.0 校准用例（§07 policy manifest calibration.corpus 指向本文件）
+# 首批用例 = 文档 §08 桌面推演 SIM-01..06（用当前项目已经发生或很可能发生的变化反向攻击机制）。
+# 规则变更必须先在历史正例/反例/边界例上回放；不能只验证促成该规则的单一事故（§07 “规则从事故到生效”）。
+# 状态：bootstrap 首批；后续事故/漏检先记录为不可改写案例，再提规则变更。
+
+mechanism_id: ECM
+version: 1.0.0
+corpus_status: PROPOSED
+cases:
+  - id: SIM-01
+    domain: SPEC
+    name: 业务一手资料更新——签收凭证前提被否定
+    must_detect: invalidated_business_premise
+    input: 评审说明客户签收完全无感，司机带纸质出库单回仓库，旧用例却让客户在群内发签收照片
+    expected:
+      - 创建新的事实 Source；命中 CLM-RECEIPT-CHAIN 前提冲突
+      - 业务 owner 当前事实对“真实流程”有权威，旧 claim 转 CHALLENGED 而非悄悄删除
+      - 只让 XS6 demo、凭证流程、相关权限、CQ-09 测试进入 stale；订单查询、审价等无关区域继续
+    false_positive_guard: 不得因为 demo 存在就反向证明业务流程成立
+  - id: SIM-02
+    domain: DOCS
+    name: 产品文档落后——用例总表仍是 4 步向导
+    must_detect: stale_usecase_after_demo_review
+    input: 同日会议决策和更晚 demo 都已采用单页长表单，docs/用例总表.html 尚未更新
+    expected:
+      - 三者关联同一 claim；Decision 明确 supersede 旧交互
+      - demo 是 accepted claim 的实现投影；用例总表标记 STALE_VIEW，生成文档同步任务
+      - 无需人工裁决，不重跑后端测试
+    false_positive_guard: “更晚”只用于确认因果顺序；真正的权威来自已批准 Decision
+  - id: SIM-03
+    domain: DEMO
+    name: demo 先探索——设计师把物流图片改成小程序
+    must_detect: deferred_future_vs_current_not_conflict
+    input: 小程序在评审里是分期方向，但 demo 分支提前实现
+    expected:
+      - 若绑定 vNext deferred claim：记录 DEFERRED + IMPLEMENTED(demo)，不影响 v0 baseline
+      - 若覆盖 v0 场景且未声明 phase：检测为 scope 冲突，要求补清阶段
+    false_positive_guard: 允许探索，不让探索无声升级为当前承诺
+  - id: SIM-04
+    domain: CODE
+    name: 代码先修复——群内接口不再返回金额
+    input: 代码实现字段投影收紧，产品文档和 demo 已有“群内资金信息不发”规则
+    expected:
+      - 图谱找到 API projection、ReBAC、群截图与测试的共同 claim
+      - 代码 implementation 状态更新；相关契约与安全测试重跑；通过后 DRIFTED/PARTIAL -> IMPLEMENTED
+      - 不会因为代码先落地就生成新的业务决定
+    false_positive_guard: 代码可以领先文档同步，但必须能追溯到已有承诺
+  - id: SIM-05
+    domain: TEST
+    name: 测试更新——把“金额必须为空”改成“不检查金额”
+    input: 测试仍然全绿，但 oracle 被弱化
+    expected:
+      - 测试程序是 verifier；digest 与断言语义变化导致旧 PASS 证据 stale
+      - 校准用例检测断言强度下降；R2 权限声明无有效 oracle 时回到 UNVERIFIED
+      - 禁止仅凭绿灯交付
+    false_positive_guard: 测试变化不能被当成普通实现维护；防止“删断言换全绿”
+  - id: SIM-06
+    domain: METHOD
+    name: 机制更新——规定所有 demo 改动必须先有 accepted claim
+    input: 新规则看似更一致，却会扼杀用 demo 探索交互的现实工作方式
+    expected:
+      - 历史回放会在早期 demo 探索案例产生大量误报；影子运行显示问题包数量上升、迭代变慢
+      - 规则被修正为：demo 可实现 proposed claim，但不得进入交付 baseline；改变高风险业务规则时必须先决策
+    false_positive_guard: 慢循环能拒绝过度严格但不合用的治理规则
+
+expected:
+  must_detect:
+    - stale_usecase_after_demo_review
+    - deferred_future_vs_current_not_conflict
+    - invalidated_business_premise
+
+# ---- M1 退出条件验证（§09：M1 交付物"能够表达 SIM-01..06"）----
+# 每条 SIM 映射到机制元素：入口（entry_routes）/对象（ontology）/裁决（authority_matrix）/
+# 状态机（state_machine）/证据（evidence_policy）。此映射由 scripts/ecm_selfcheck.py 的
+# SIM 表达性检查逐条校验（sim_expressible 检查项）。
+m1_exit_validation:
+  SIM-01:
+    entry: spec 更新
+    objects: [source(评审记录), claim(CLM-RECEIPT-CHAIN), conflict(CONFLICTS_WITH)]
+    semantic_transition: CHALLENGED（前提被否定）
+    implementation_transition: 旧凭证识别相关制品 -> STALE 局部失效
+    authority: authority_matrix.rows[0]（业务真实流程 -> 业务 owner 一手事实）
+    evidence: 旧 PASS 证据转 STALE（P5 局部失效，不默认全仓重跑）
+  SIM-02:
+    entry: docs 更新
+    objects: [decision(单页长表单), claim(交互形态), view(用例总表 STALE_VIEW)]
+    semantic_transition: 新 claim ACCEPTED、旧 claim SUPERSEDED
+    authority: authority_matrix.rows[2]（交互当前设计 -> 已批准交互 claim + demo）
+    evidence: 生成文档同步任务，无需重跑后端测试
+  SIM-03:
+    entry: demo 更新
+    objects: [claim(物流小程序 vNext), scope(phase), baseline(v0)]
+    semantic_transition: DEFERRED + IMPLEMENTED(demo)，不影响 v0 baseline
+    conflict_detection: scope 冲突（未声明 phase 覆盖 v0 场景）-> 要求补清阶段
+    authority: authority_matrix.rows[2]（demo 是已接受交互的实现投影）
+  SIM-04:
+    entry: 代码更新
+    objects: [claim(群内资金信息不发), artifact(API projection/ReBAC/测试), edge(IMPLEMENTS/VERIFIES)]
+    implementation_transition: PARTIAL/DRIFTED -> IMPLEMENTED
+    evidence: 契约与安全测试重跑；代码先落地不生成新业务决定
+    authority: authority_matrix.rows[3]（系统当前实际做什么 -> 目标 commit 代码）
+  SIM-05:
+    entry: 测试更新
+    objects: [evidence(旧 PASS), verifier(测试程序 digest), oracle(R2 权限声明)]
+    verification_transition: 旧 PASS -> STALE（verifier digest 变化）；无有效 oracle -> UNVERIFIED
+    authority: authority_matrix.rows[4]（实现是否满足声明 -> 有效 oracle 下的证据组合）
+    anti_weakening: 检测断言强度下降，禁止仅凭绿灯交付
+  SIM-06:
+    entry: 机制更新（慢循环）
+    objects: [policy(机制规则), case(不可改写历史案例), shadow_run(新旧并行)]
+    authority: slow_loop（OBSERVE -> PROPOSE -> REPLAY -> SHADOW -> APPROVE -> ACTIVATE）
+    evidence: 历史回放误报率与问题包数量变化作为规则取舍依据

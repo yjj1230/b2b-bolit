@@ -1,0 +1,481 @@
+mechanism_id: ECM
+version: 1.0.0
+status: PROPOSED
+title: 证据收敛式项目迭代机制
+effective_from: 2026-08-13
+owner: project-governance
+canonicalizer:
+  id: ECM-1.0.0-canonicalizer
+  version: 1.0.0
+  algorithm: sha256 over canonical-json (UTF-8, keys byte-sorted, compact, no trailing whitespace)
+  scope:
+  - manifest
+  - handoff
+  - baseline
+  - evidence
+  - event
+digest_format: sha256:<64 lowercase hex>
+time_format: RFC3339 with explicit offset, second precision
+compatibility:
+  reads_claim_schema: ^1.0
+calibration:
+  corpus: project/policies/mechanism/calibration-cases.yaml
+  expected:
+    must_detect:
+    - stale_usecase_after_demo_review
+    - deferred_future_vs_current_not_conflict
+    - invalidated_business_premise
+rollback_to: 0.9.3
+approved_by:
+- product-owner
+- tech-owner
+- qa-owner
+components:
+  ontology: sha256:d22312aa0cc32b80fb3a89fd0dfe32bd837198eeec6a376725e8e6ded6c29da3
+  authority_matrix: sha256:8b7362f967366363504aebd7418be689f024aa037c14bcf4835400124a02e395
+  state_machine: sha256:9ad44634996a8c3a12f7b826c81dd230ee968c7d58fee98bc1e70cd8b9982b72
+  evidence_policy: sha256:9a6ef66c6497e03aadc1240c64ad837655b875aae60ae0a7277fc3aad7e68475
+  handoff_policy: sha256:e5ecfc8c8314ce4a4376d68eacfac72572fc26e2ba043eac3b420e449dfe0be4
+ontology:
+  objects:
+    source:
+      purpose: 保存原始表达与外部事实
+      required:
+      - source_id
+      - source_person_or_system
+      - occurred_at
+      - observed_at
+      - digest
+      - trust_scope
+      - valid_until
+    claim:
+      purpose: 项目可判断、可实现、可验证的最小声明
+      required:
+      - claim_id
+      - statement(subject/predicate/object)
+      - scope
+      - risk
+      - owner
+      - semantic_status
+      - implementation_status
+      - verification_status
+      - acceptance_oracle
+    decision:
+      purpose: 在候选之间形成当前承诺
+      required:
+      - decision_id
+      - choice
+      - rationale
+      - premises
+      - objections
+      - decider
+      - effective_interval
+      - supersedes
+      - review_condition
+    artifact:
+      purpose: 承载说明、交互、代码、配置、测试程序或报告
+      required:
+      - kind
+      - path_or_uri
+      - version
+      - digest
+      - covers_claims
+      - generation
+      - baseline
+    evidence:
+      purpose: 对声明或制品的一次可重放观察
+      required:
+      - input_digest
+      - artifact
+      - environment
+      - verifier
+      - mechanism_version
+      - command
+      - raw_output
+      - verdict
+      - ttl
+    baseline:
+      purpose: 冻结某一交付时刻相互一致的一组对象
+      required:
+      - includes(claim/decision/artifact/evidence digests)
+      - mechanism_version
+      - open_risks
+      - approver
+  relations:
+  - DERIVED_FROM
+  - REFINES
+  - IMPLEMENTS
+  - VERIFIES
+  - DECIDES
+  - SUPERSEDES
+  - DEPENDS_ON
+  - CONFLICTS_WITH
+  - VALID_DURING
+  relation_rule: 关系必须可定位到声明或文件片段；只有文件路径而没有 claim 边，无法做可靠影响分析；多对多是正常状态。
+  semantic_status:
+  - PROPOSED
+  - ACCEPTED
+  - DEFERRED
+  - REJECTED
+  - SUPERSEDED
+  - CHALLENGED
+  implementation_status:
+  - UNPLANNED
+  - PLANNED
+  - PARTIAL
+  - IMPLEMENTED
+  - DRIFTED
+  verification_status:
+  - UNVERIFIED
+  - PASS
+  - FAIL
+  - STALE
+  - INVALID
+  - EXPIRED
+  orthogonality: 语义/实现/验证三组状态必须分开维护（P3），禁止合并成单一“状态=完成”。
+  claim_granularity: 满足任一条件即拆分为独立 claim：可单独接受或拒绝；不同 owner；映射不同实现；需要不同 oracle；风险或生效阶段不同。
+  completeness_vector:
+  - scope
+  - decomposition
+  - trace
+  - evidence
+  - conflict_closure
+  - freshness
+  completeness_rule: handoff 逐维设门槛；禁止用平均分掩盖任一 R3 缺口。
+authority_matrix:
+  rows:
+  - question: 业务真实流程是什么
+    primary: 被识别的业务 owner 的一手事实 + 已批准 BDR
+    secondary:
+    - 逐字稿
+    - 现场观察
+    - 业务系统数据
+    cannot_replace:
+    - demo
+    - code
+    - tests_pass
+  - question: 当前版本承诺做什么
+    primary: 生效中的 Decision + Claim baseline
+    secondary:
+    - 规范化 PRD
+    - 范围表
+    cannot_replace:
+    - 原始材料中尚未裁决的建议
+  - question: 交互当前设计成什么样
+    primary: 已批准交互 claim；其当前 demo 是最强可视投影
+    secondary:
+    - UI spec
+    - UAT 记录
+    cannot_replace:
+    - 后端代码
+    - 较旧产品说明
+  - question: 系统当前实际做什么
+    primary: 目标 commit 的代码 + 真实运行观察
+    secondary:
+    - API 快照
+    - 图谱
+    - 日志
+    cannot_replace:
+    - 架构图
+    - demo
+  - question: 实现是否满足某声明
+    primary: 有效 oracle 下的证据组合
+    secondary:
+    - 静态分析
+    - 测试
+    - 人工验收
+    cannot_replace:
+    - 单一覆盖率数字
+  - question: 某次交付包含什么
+    primary: 签名 Baseline manifest
+    secondary:
+    - 构建产物
+    - SBOM
+    - evidence manifest
+    cannot_replace:
+    - 工作区最新状态
+  adjudication_steps:
+  - normalize
+  - admissibility
+  - domain_authority
+  - decision_state
+  - causal_timeline
+  - specificity
+  - evidence_rebuttal
+  - human_adjudication
+  - local_invalidation
+  authority_formula: authority(candidate, question) = admissibility × domain_authority × decision_state × scope_fit × causal_freshness；mtime 只影响 causal_freshness 的一部分；任一前置项为 0，文件再新也不能成为答案
+  consistency_levels:
+  - semantic
+  - temporal
+  - structural
+  - behavioral
+  - evidence
+  risk_levels:
+    R0: 局部、可逆、无外部影响
+    R1: 单模块或低影响业务偏差
+    R2: 跨模块、权限/资金/一致性/真实流程风险
+    R3: 安全、合规、不可逆数据、重大外部影响或交付真实性风险
+  risk_rule: 多个等级适用取最高；无法分类为 UNKNOWN，在 handoff 决策中按 R3 处理。
+state_machine:
+  states:
+  - UNINITIALIZED
+  - BOOTSTRAP_DIAGNOSTIC
+  - MECHANISM_VALIDATING
+  - HANDOFF_VALIDATING
+  - READY
+  - READY_CONDITIONAL
+  - EXECUTING
+  - REVALIDATE
+  - BLOCKED
+  transitions:
+  - from: UNINITIALIZED
+    to: BOOTSTRAP_DIAGNOSTIC
+    when: project/project.yaml 缺失 或 ACTIVE mechanism 缺失
+  - from: UNINITIALIZED
+    to: MECHANISM_VALIDATING
+    when: 其他
+  - from: MECHANISM_VALIDATING
+    to: HANDOFF_VALIDATING
+    when: mechanism pointer/schema/digests 全部通过
+  - from: MECHANISM_VALIDATING
+    to: BLOCKED
+    when: MECHANISM_UNRESOLVED 或指令冲突
+  - from: HANDOFF_VALIDATING
+    to: READY
+    when: acceptance = ACCEPTED
+  - from: HANDOFF_VALIDATING
+    to: READY_CONDITIONAL
+    when: acceptance = CONDITIONAL 且动作在 blocked_scope 之外
+  - from: HANDOFF_VALIDATING
+    to: BLOCKED
+    when: acceptance = REJECTED
+  - from:
+    - READY
+    - READY_CONDITIONAL
+    to: EXECUTING
+    when: 仅限用户当前请求授权的动作
+  - from:
+    - READY
+    - READY_CONDITIONAL
+    to: REVALIDATE
+    when: 任一 snapshot 组件变化
+  - from: REVALIDATE
+    to: HANDOFF_VALIDATING
+    when: 项目状态变化
+  - from: REVALIDATE
+    to: MECHANISM_VALIDATING
+    when: 机制/政策变化
+  - from: REVALIDATE
+    to: BLOCKED
+    when: 变化无法界定
+  invalid_transition_rule: 任何未列出的状态转移 := INVALID_TRANSITION
+  bootstrap_boundary: BOOTSTRAP_DIAGNOSTIC 允许只读盘点并提出/执行用户已授权的控制面迁移；不得用 ECM 门禁宣布 PASS、不得生成伪造的 ACTIVE 指针、不得把自身生成的 handoff 自行视为已被独立接手方接受。
+  resolve_mechanism: "procedure RESOLVE_MECHANISM(repo_root):\n  01. require repo_root known; else return BLOCKED(REPO_ROOT_UNKNOWN)\n  02. read exactly repo_root/project/project.yaml; missing => BOOTSTRAP_DIAGNOSTIC(PROJECT_CONTROL_PLANE_MISSING)\n  03. schema-validate project.yaml; invalid => BLOCKED(PROJECT_MANIFEST_INVALID)\n  04. require mechanism.pointer 是 repo_root 内单一规范化相对路径；否则 BLOCKED(MECHANISM_POINTER_INVALID)\n  05. read exactly pointer target; 禁止搜索替代\n  06. require pointer.status == ACTIVE\n  07. require pointer.id/version == project.yaml mechanism.id/version\n  08. read exactly pointer.spec and pointer.guide; 两者均须在 repo_root 内\n  09. verify bytes with declared digest algorithm and digest values\n  10. schema-validate YAML spec; verify HTML declares same id/version/status\n  11. require all referenced policy components exist and match digests\n  12. freeze mechanism snapshot; return MECHANISM_VALID\n任何 05..11 失败 => BLOCKED(MECHANISM_UNRESOLVED)；禁止回退搜索、就近版本、mtime 或隐式默认。\n"
+evidence_policy:
+  convergence_loop:
+  - INGEST
+  - NORMALIZE
+  - DIFF
+  - IMPACT
+  - ROUTE
+  - VERIFY
+  - BASELINE
+  entry_routes:
+  - entry: spec 更新
+    treat_as: 新的来源事实或需求候选，不直接等于 accepted
+    automatic:
+    - 抽取候选 claim
+    - 与当前 baseline 比较
+    - 标记依赖前提变化
+    - 生成决策候选
+    needs_human: 语义变化/范围变化/R2-R3 冲突/owner 不明确
+  - entry: docs 更新
+    treat_as: 视图变化；可能只是表达修正，也可能偷带新规则
+    automatic:
+    - 比对所引用 claim
+    - 纯表达更新只重建视图摘要
+    - 新增规范性语句转成 proposal
+    needs_human: 文档试图越过 decision 直接修改当前承诺
+  - entry: demo 更新
+    treat_as: 可执行交互提案或已接受交互的实现
+    automatic:
+    - 运行场景 smoke 与截图 diff
+    - 检查 claim 覆盖
+    - 更新 demo implementation 状态
+    needs_human: 出现未绑定交互/改变业务规则/权限/字段或流程节点
+  - entry: 代码更新
+    treat_as: 实现事实变化
+    automatic:
+    - 图谱影响分析
+    - 重跑相关测试
+    - 对照 accepted claim 与接口契约
+    - 使旧运行证据 stale
+    needs_human: 代码行为与承诺冲突但无法判断是需求变了还是实现错了
+  - entry: 测试更新
+    treat_as: 验证器或 oracle 变化，风险高于普通代码变更
+    automatic:
+    - 校准测试自身
+    - 旧结果按 verifier digest 局部失效
+    - 检查是否降低断言强度
+    needs_human: oracle 改变业务含义/删除高风险断言/引入临时豁免
+  fast_loop:
+  - step: 1
+    action: register(event.path, kind, digest, author_role, observed_at)
+  - step: 2
+    action: candidate_changes = semantic_diff(event, referenced_claims)
+  - step: 3
+    action: editorial 变化 -> rebuild_view 并跳过；否则 resolve_or_propose_claim
+  - step: 4
+    action: 发现 active conflict 且需人裁决 -> emit_question_packet(max_items=3, ranked_by=closed_risk_per_cost)，claim 标 WAITING_DECISION
+  - step: 5
+    action: 无需人裁决 -> apply_authority_policy，受影响制品标 STALE，dispatch_minimal_tasks(impact)
+  - step: 6
+    action: run_affected_verifiers()
+  - step: 7
+    action: publish_baseline_only_if(handoff_predicate == true)
+  slow_loop:
+  - OBSERVE
+  - PROPOSE
+  - REPLAY
+  - SHADOW
+  - APPROVE
+  - ACTIVATE
+  slow_loop_rule: 事故或漏检先记录为不可改写的案例（当时输入/旧机制输出/人工正确答案）；规则变更须在历史正反例回放（REPLAY）后影子并行（SHADOW）不改变当前门禁，人工审查差异与回滚（APPROVE）后发布新版本（ACTIVATE）。
+  question_packet:
+    max_items: 3
+    required_fields:
+    - 冲突的精确 claim
+    - 各候选及来源
+    - 受影响范围
+    - 不回答的风险
+    - 推荐项与可逆性
+    - 最晚决策点
+    answer_semantics: 人的回答生成 Decision，不直接覆盖文件；后续自动派生修改任务。
+  change_must_produce:
+  - item: ArtifactChanged 事件
+    fields:
+    - digest
+    - actor
+    - time
+    - kind
+  - 声明级差异：新增/修改/替代/仅表达变化/无法解析
+  - 受影响对象集合与理由，至少覆盖 docs/demo/code/tests/evidence 五类
+  - 自动任务或人工问题包；每项有 owner/风险/截止门禁/完成条件
+  - 验证结果及其绑定摘要；失败、过期和冲突不能被绿灯覆盖
+  verify_binding: 证据必须绑定 input_digest/artifact/environment/verifier/mechanism_version/command/raw_output/verdict/ttl
+  invalidation: 声明/代码/环境/验证器/机制变化时沿依赖边计算影响半径；旧证据转 STALE 保留审计，不全量删除、不默认全仓重跑（P5）。
+  oracle_rule: R2/R3 声明必须有有效 oracle；无 oracle 回到 UNVERIFIED，禁止仅凭绿灯交付（SIM-05）。
+  test_weakening_detect: 测试程序是 verifier；其 digest 与断言语义变化导致旧 PASS 证据 stale；校准用例须检测断言强度下降（SIM-05）。
+  baseline_ready: "baseline_ready(scope) :=\n  all required claims in scope are ACCEPTED or explicitly DEFERRED outside scope\n  and no active semantic conflict overlaps scope\n  and every R2/R3 claim has an owner and an independent acceptance oracle\n  and required artifacts implement the accepted claim versions\n  and required evidence is PASS, fresh, replayable, and digest-matched\n  and demo-only behavior is not represented as production capability\n"
+  stop_conditions:
+  - 基线内 R3 缺口不得被平均分掩盖
+  - 开放反例未闭合不得发布 baseline
+  - demo-only 行为不得表述为生产能力
+  - 失败/过期/冲突证据不得被绿灯覆盖
+handoff_policy:
+  directory: project/handoffs/{HOF-YYYYMMDD-NNN}/
+  files:
+  - manifest.yaml
+  - summary.md
+  - open-items.yaml
+  - decisions-since-baseline.yaml
+  - evidence-index.yaml
+  - acceptance.yaml
+  pointer: project/handoffs/current.yaml
+  manifest_required_fields:
+  - handoff_id
+  - status
+  - from
+  - created_at
+  - project(repo/branch/commit/working_tree_digest)
+  - mechanism(id/version/spec_digest)
+  - baseline(id/manifest_digest)
+  - scope_in_progress
+  - open_items_digest
+  - evidence_index_digest
+  - change_cursor
+  - next_recommended_action(action/target/reason)
+  - expires_at
+  receiving_agent_steps:
+  - n: 1
+    action: 解析机制
+    detail: 执行 §07 Agent 启动协议；确认 ACTIVE ECM 版本和摘要。机制不明时只允许 bootstrap/diagnostic 模式
+  - n: 2
+    action: 定位交接
+    detail: 读取 project/handoffs/current.yaml 和固定 ID 的 manifest；禁止按目录时间挑包
+  - n: 3
+    action: 校验基点
+    detail: 核对 repo/branch/commit/working-tree digest/baseline ID/机制版本/claim/evidence 索引摘要
+  - n: 4
+    action: 检查变化窗口
+    detail: 比较 handoff.created_at 到当前之间的提交、未提交修改、外部资料和过期证据
+  - n: 5
+    action: 恢复开放状态
+    detail: 读取开放 claim/冲突/反例/豁免/等待问题/未完成验证；按风险重建下一步
+  - n: 6
+    action: 写接受回执
+    detail: 记录 ACCEPTED/CONDITIONAL/REJECTED、接手 Agent 身份、观察时间、差异及首个动作
+  acceptance_states:
+  - ACCEPTED
+  - CONDITIONAL
+  - REJECTED
+  acceptance_contract:
+    ECM-REC-001: 回执含 decision/agent/observed_at/change_window_digest/first_action；字段缺失或解析失败 => UNKNOWN
+    ECM-REC-002: 接受回执必须写入 acceptance.yaml；手写、口头或聊天摘要不构成有效回执
+    ECM-REC-003: 独立校验后 decision 只能是 ACCEPTED | CONDITIONAL | REJECTED，不得猜测
+    ECM-REC-004: bootstrap 模式不得写 ACCEPTED；本次 HOF-20260813-001 的 acceptance.decision = NOT_APPLICABLE，须由后续独立接手方填写
+  bootstrap_exception: 首次接手 Agent 应声明 bootstrap 模式，核对根 HTML 身份与 Git 工作区，随后执行 §09 M0/M1；不得伪造一个 ACTIVE 指针或假装已有正式 handoff 包。
+conformance:
+  rules:
+  - id: ECM-AUTH-001
+    must: 本协议只约束项目内信息解释/handoff/证据/baseline 操作，不授予任何读取/写入/执行/网络/提交/发布或外部通信权限
+  - id: ECM-AUTH-002
+    must: 与更高优先级约束冲突时停止冲突动作并输出 INSTRUCTION_CONFLICT；不得用 ECM 覆盖更高优先级约束
+  - id: ECM-AUTH-003
+    must: 固定版本 ECM-x.y.z.yaml 是机器判定规范源；同版本 HTML 是解释性发布视图；冲突时输出 MECHANISM_CONTENT_CONFLICT，不得自行择一
+  - id: ECM-AUTH-004
+    must: 根目录 HTML 当前是 ECM 1.0.0 PROPOSED；除 bootstrap 外读取本文不构成机制激活/handoff 接受/baseline 接受/任务授权
+  - id: ECM-INFER-001
+    must_not: 推断“文件更新更晚，所以语义权威更高”
+  - id: ECM-INFER-002
+    must_not: 推断“位于 spec=内容已批准；位于 docs=内容已过期”
+  - id: ECM-INFER-003
+    must_not: 推断“demo 可操作=生产代码已实现；测试通过=业务声明正确”
+  - id: ECM-INFER-004
+    must_not: 推断“前任写了完成=开放反例/未知/脏工作区/失败证据可关闭”
+  - id: ECM-INFER-005
+    must_not: 多 mechanism/baseline/handoff 候选时按文件名/目录顺序/mtime/语义相似度选择
+  - id: ECM-INFER-006
+    must_not: 推断“用户要求继续工作=隐含批准 destructive action/外部发布/扩大范围/改变机制版本”
+  - id: ECM-CANON-001
+    must: 所有文本路径 UTF-8 解码→仓库相对 POSIX 路径，拒绝根外解析，比较区分大小写；不能无损解码 => CANONICALIZATION_FAILED
+  - id: ECM-CANON-002
+    must: 所有时间 RFC3339 显式时区秒级精度；缺时区或解析失败 => UNKNOWN；不得用文件 mtime 代替业务/决策/handoff 时间
+  - id: ECM-CANON-003
+    must: digest 固定为 sha256:<64 小写 hex>，对文件原始字节计算；不得预先换行转换/格式化/转码
+  - id: ECM-CANON-004
+    must: 集合比较与摘要前按 UTF-8 字节升序排序并去重；重复 ID 内容不同 => DUPLICATE_ID_CONFLICT
+  - id: ECM-CANON-005
+    must: 结构化 manifest 规范摘要由版本化 canonicalizer 生成；机制未声明 canonicalizer ID/version 则 digest=UNKNOWN、ACTIVE 校验失败
+  - id: ECM-CANON-006
+    must: Git 工作区观察至少含 HEAD/branch 或 detached/已跟踪修改/暂存修改/未跟踪路径/子模块状态；任一未观察到 => working tree 标 PARTIAL
+  failure_codes:
+  - REPO_ROOT_UNKNOWN
+  - PROJECT_CONTROL_PLANE_MISSING
+  - PROJECT_MANIFEST_INVALID
+  - MECHANISM_POINTER_INVALID
+  - MECHANISM_UNRESOLVED
+  - MECHANISM_CONTENT_CONFLICT
+  - INSTRUCTION_CONFLICT
+  - HANDOFF_POINTER_MISSING
+  - HANDOFF_EXPIRED
+  - BASELINE_MISSING
+  - CANONICALIZATION_FAILED
+  - DUPLICATE_ID_CONFLICT
+  - INVALID_TRANSITION
+  activation_gates:
+    ECM-ACT-001: ACTIVE 必须同时发布：YAML Schema、canonicalizer、状态机/决策表测试向量、可重放 validator；本次交付未达，机制保持 PROPOSED
+    ECM-ACT-002: 激活测试须覆盖 10 类场景（状态转移/裁决/失效/交接/摘要/回放/回滚/并发/未知/冲突）；未通过不得 ACTIVE
+    ECM-ACT-003: ACTIVE 校验失败时状态机与输出必须确定（同一输入同一状态/失败码/允许动作）
+    ECM-ACT-004: 激活必须有人工批准记录（activation_decision）与审计事件；current.yaml 只能由激活或回滚操作改变

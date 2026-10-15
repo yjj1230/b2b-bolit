@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>发票自动化推送｜需求文档</title>
+  <style>
+    :root {
+      --ink: #1f2937;
+      --muted: #64748b;
+      --line: #dbe4ee;
+      --brand: #2563eb;
+      --brand-soft: #eff6ff;
+      --green: #047857;
+      --green-soft: #ecfdf5;
+      --amber: #b45309;
+      --amber-soft: #fffbeb;
+      --red: #b91c1c;
+      --red-soft: #fef2f2;
+      --paper: #ffffff;
+      --bg: #f4f7fb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--bg);
+      font: 15px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    .page { max-width: 1180px; margin: 0 auto; padding: 28px 22px 64px; }
+    .hero {
+      background: linear-gradient(135deg, #173b8f 0%, #2563eb 58%, #38bdf8 100%);
+      color: #fff; border-radius: 18px; padding: 34px 38px; box-shadow: 0 14px 34px rgba(37, 99, 235, .18);
+    }
+    h1 { margin: 0 0 8px; font-size: clamp(28px, 4vw, 42px); line-height: 1.2; letter-spacing: -.02em; }
+    h2 { margin: 40px 0 14px; font-size: 25px; line-height: 1.3; }
+    h3 { margin: 24px 0 8px; font-size: 18px; }
+    p { margin: 8px 0; }
+    .subtitle { margin: 0; opacity: .92; font-size: 17px; }
+    .meta { display: flex; flex-wrap: wrap; gap: 10px 20px; margin-top: 20px; font-size: 13px; opacity: .9; }
+    .toc, .card, .callout, table { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; }
+    .toc { padding: 18px 22px; margin-top: 20px; }
+    .toc a { color: var(--brand); text-decoration: none; }
+    .toc ol { margin: 8px 0 0; padding-left: 22px; columns: 2; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .card { padding: 20px 22px; }
+    .card h3 { margin-top: 0; }
+    .tag { display: inline-block; padding: 2px 9px; border-radius: 999px; background: var(--brand-soft); color: var(--brand); font-size: 12px; margin: 2px 4px 2px 0; }
+    .callout { padding: 16px 18px; margin: 14px 0; border-left: 5px solid var(--brand); }
+    .callout.green { background: var(--green-soft); border-left-color: var(--green); }
+    .callout.amber { background: var(--amber-soft); border-left-color: var(--amber); }
+    .callout.red { background: var(--red-soft); border-left-color: var(--red); }
+    ul, ol { padding-left: 22px; }
+    li { margin: 5px 0; }
+    table { border-collapse: separate; border-spacing: 0; width: 100%; overflow: hidden; }
+    th, td { padding: 11px 13px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { background: #f8fafc; font-weight: 650; }
+    tr:last-child td { border-bottom: 0; }
+    .table-wrap { overflow-x: auto; }
+    .diagram { background: #fbfdff; border: 1px solid var(--line); border-radius: 14px; padding: 12px; overflow-x: auto; }
+    .diagram svg { display: block; min-width: 920px; width: 100%; height: auto; }
+    .legend { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 10px 2px 0; color: var(--muted); font-size: 13px; }
+    .legend span::before { content: ""; display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; background: #dbeafe; border: 1px solid #93c5fd; }
+    .legend .human::before { background: #fef3c7; border-color: #f59e0b; }
+    .legend .system::before { background: #dcfce7; border-color: #34d399; }
+    .legend .exception::before { background: #fee2e2; border-color: #f87171; }
+    .small { color: var(--muted); font-size: 13px; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .footer { margin-top: 42px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+    @media (max-width: 760px) {
+      .page { padding: 14px 12px 42px; }
+      .hero { padding: 25px 22px; }
+      .grid { grid-template-columns: 1fr; }
+      .toc ol { columns: 1; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <h1>发票自动化推送</h1>
+      <p class="subtitle">企微直推客户模式｜产研需求文档（初稿）</p>
+      <div class="meta">
+        <span>需求提出人：陈虹励</span>
+        <span>目标使用时间：财务每日 16:00 统一推送</span>
+        <span>来源：飞书知识库《发票自动化推送》</span>
+        <span>文档日期：2026-08-15</span>
+      </div>
+    </header>
+
+    <nav class="toc" aria-label="目录">
+      <strong>目录</strong>
+      <ol>
+        <li><a href="#summary">需求摘要</a></li>
+        <li><a href="#problem">业务背景与要解决的问题</a></li>
+        <li><a href="#roles">角色与职责</a></li>
+        <li><a href="#current">Before：现状执行流程</a></li>
+        <li><a href="#target">After：目标业务流程</a></li>
+        <li><a href="#exceptions">异常与补偿流程</a></li>
+        <li><a href="#rules">业务规则与状态</a></li>
+        <li><a href="#data">数据与页面建议</a></li>
+        <li><a href="#acceptance">产研验收标准</a></li>
+        <li><a href="#questions">待确认事项</a></li>
+      </ol>
+    </nav>
+
+    <section id="summary">
+      <h2>1. 需求摘要</h2>
+      <div class="callout green">
+        <strong>一句话定义：</strong>出纳批量上传发票后，系统自动识别并匹配客户，财务/业务人员人工核对通过后，在每日 16:00 将发票 PDF 和“发票请查收”自动发送到对应客户企微群；没有客户群时，通知销售建群，并完整记录每张发票的推送状态。
+      </div>
+      <div class="grid">
+        <div class="card">
+          <h3>本次要做</h3>
+          <ul>
+            <li>保留现有“批量上传 + 自动识别/匹配 + 人工核对”能力。</li>
+            <li>增加客户企微群的匹配与直推能力。</li>
+            <li>统一每日 16:00 处理已审核的待推送发票。</li>
+            <li>展示已推送、未推送、推送失败和待建群记录。</li>
+            <li>支持失败重试、补推和操作留痕，避免重复发送。</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>本次不改变</h3>
+          <ul>
+            <li>不改变税务系统的开票和下载方式。</li>
+            <li>不要求出纳逐张录入发票信息，仍以批量上传为主。</li>
+            <li>人工核对仍是推送前的必要环节，不做未经确认的全自动外发。</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="problem">
+      <h2>2. 业务背景与要解决的问题</h2>
+      <p>目前总部和上海分公司出纳从税务系统下载发票文件包，再把发票 PDF 批量上传到飞书多维表。插件会自动识别发票信息并匹配销售员，之后由人工核对，销售员逐个点击推送，飞书机器人按日期汇总后发给销售员，由销售员自行下载并转发。</p>
+      <p>业务现在希望新增“企微直推客户”模式：发票经过人工核对后，直接发到对应客户企微群，减少人工下载、转发和逐群发送的工作量，同时让财务可以清楚知道哪些发票已推送、哪些仍未推送。</p>
+      <div class="grid">
+        <div class="card"><h3>现有痛点</h3><ul><li>人工下载、转发动作重复，处理量随发票数量线性增加。</li><li>销售员作为中间环节，容易出现忘记转发、转发延迟或发错群。</li><li>推送结果缺少统一状态，未推送记录需要人工排查。</li><li>暂无客户群时，缺少明确的责任人和后续补推机制。</li></ul></div>
+        <div class="card"><h3>期望结果</h3><ul><li>把“发票 → 客户 → 客户企微群”关系沉淀为可追踪数据。</li><li>把人工精力集中在核对和异常处理，自动化完成外发动作。</li><li>每天固定时间统一处理，业务节奏可预期。</li><li>每张发票都有明确状态、失败原因和下一步动作。</li></ul></div>
+      </div>
+    </section>
+
+    <section id="roles">
+      <h2>3. 角色与职责</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>角色</th><th>主要动作</th><th>关注结果</th></tr></thead>
+          <tbody>
+            <tr><td>出纳</td><td>从税务系统下载文件包，批量上传发票 PDF。</td><td>上传成功，文件未遗漏，来源公司正确。</td></tr>
+            <tr><td>系统/插件</td><td>识别发票字段，匹配客户、销售员和客户企微群，生成待核对记录。</td><td>识别准确、匹配关系可追溯，异常有原因。</td></tr>
+            <tr><td>财务/业务核对人</td><td>核对发票信息和归属关系；通过后进入推送批次。</td><td>只把确认无误的发票发给客户。</td></tr>
+            <tr><td>销售</td><td>无客户群时建群或补充群信息；处理异常匹配。</td><td>客户群可用，待建群记录最终闭环。</td></tr>
+            <tr><td>客户企微群</td><td>接收发票 PDF 与固定文案。</td><td>客户能收到并下载正确发票。</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="current">
+      <h2>4. Before：现在实际执行的流程</h2>
+      <p>下面这张图还原的是目前真实发生的业务动作：开票申请先由系统自动生成初稿，宋主任修改后交给出纳；出纳按开票申请内容到税务系统开票并人工下载文件包，文件包包含每张发票和对应开票申请。之后出纳再批量上传到飞书多维表，系统识别和匹配，销售员收到后还要自行下载，再人工转发到客户。</p>
+      <div class="diagram">
+        <svg viewBox="0 0 1140 470" role="img" aria-labelledby="current-title">
+          <title id="current-title">Before：当前实际执行的发票推送流程</title>
+          <defs><marker id="arrow-current" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#64748b"/></marker></defs>
+          <g font-family="Microsoft YaHei, sans-serif" font-size="13" text-anchor="middle">
+            <text x="570" y="20" font-size="16" fill="#334155">当前流程的关键特征：多次人工搬运，销售员是客户与系统之间的中转人</text>
+            <rect x="10" y="35" width="175" height="410" rx="10" fill="#f8fafc" stroke="#dbe4ee"/><rect x="195" y="35" width="175" height="410" rx="10" fill="#f8fafc" stroke="#dbe4ee"/><rect x="380" y="35" width="175" height="410" rx="10" fill="#f8fafc" stroke="#dbe4ee"/><rect x="565" y="35" width="175" height="410" rx="10" fill="#f8fafc" stroke="#dbe4ee"/><rect x="750" y="35" width="175" height="410" rx="10" fill="#f8fafc" stroke="#dbe4ee"/><rect x="935" y="35" width="195" height="410" rx="10" fill="#f8fafc" stroke="#dbe4ee"/>
+            <text x="97" y="62" font-size="14" font-weight="600">开票申请 / 税务系统</text><text x="282" y="62" font-size="14" font-weight="600">出纳</text><text x="467" y="62" font-size="14" font-weight="600">飞书多维表 / 插件</text><text x="652" y="62" font-size="14" font-weight="600">人工核对人</text><text x="837" y="62" font-size="14" font-weight="600">销售员</text><text x="1032" y="62" font-size="14" font-weight="600">客户</text>
+            <rect x="30" y="92" width="135" height="64" rx="10" fill="#dcfce7" stroke="#34d399"/><text x="97" y="119">开票申请自动生成</text><text x="97" y="142">系统生成初稿</text>
+            <rect x="30" y="182" width="135" height="64" rx="10" fill="#fef3c7" stroke="#f59e0b"/><text x="97" y="209">宋主任修改申请</text><text x="97" y="232">修改后交给出纳</text>
+            <rect x="215" y="112" width="135" height="92" rx="10" fill="#fef3c7" stroke="#f59e0b"/><text x="282" y="139">按申请内容开票</text><text x="282" y="162">人工下载文件包</text><text x="282" y="185">发票 + 开票申请</text>
+            <rect x="400" y="104" width="135" height="76" rx="10" fill="#dcfce7" stroke="#34d399"/><text x="467" y="131">自动识别字段</text><text x="467" y="154">匹配销售员</text>
+            <rect x="585" y="183" width="135" height="76" rx="10" fill="#fef3c7" stroke="#f59e0b"/><text x="652" y="210">人工核对</text><text x="652" y="233">确认匹配无误</text>
+            <rect x="770" y="265" width="135" height="76" rx="10" fill="#fef3c7" stroke="#f59e0b"/><text x="837" y="292">逐个点击推送</text><text x="837" y="315">每个销售一次</text>
+            <rect x="400" y="300" width="135" height="76" rx="10" fill="#dcfce7" stroke="#34d399"/><text x="467" y="327">按日期汇总</text><text x="467" y="350">飞书机器人发销售</text>
+            <rect x="770" y="382" width="135" height="48" rx="10" fill="#fef3c7" stroke="#f59e0b"/><text x="837" y="411">下载发票</text>
+            <rect x="950" y="382" width="165" height="48" rx="10" fill="#dbeafe" stroke="#93c5fd"/><text x="1032" y="411">客户收到（人工转发）</text>
+            <line x1="97" y1="156" x2="97" y2="180" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-current)"/><line x1="165" y1="214" x2="213" y2="164" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-current)"/><line x1="350" y1="158" x2="398" y2="142" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-current)"/><line x1="535" y1="165" x2="583" y2="205" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-current)"/><line x1="720" y1="240" x2="768" y2="280" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-current)"/><line x1="770" y1="303" x2="537" y2="337" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-current)"/><line x1="535" y1="355" x2="768" y2="402" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-current)"/><line x1="905" y1="406" x2="948" y2="406" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-current)"/>
+            <text x="725" y="275" fill="#b45309">人工动作</text><text x="627" y="390" fill="#64748b">销售下载后再转发</text>
+          </g>
+        </svg>
+        <div class="legend"><span class="human">人工动作</span><span class="system">系统动作</span><span>蓝色框：外部系统/客户</span><span>虚线之外的动作不在现有系统自动完成范围内</span></div>
+      </div>
+      <div class="callout red"><strong>Before 的核心问题：</strong>发票在系统内完成识别和汇总后，仍要经过“销售员逐个点击 → 销售员下载 → 销售员人工转发”这段链路；客户是否收到、何时收到、是否漏发，都依赖人工执行，系统也难以形成准确的已推送/未推送状态。</div>
+    </section>
+
+    <section id="target">
+      <h2>5. After：目标业务流程（企微直推客户）</h2>
+      <p>建议将“每日 16:00 统一推送”产品化为一个批次任务：只有完成人工核对、且已找到客户企微群的记录进入推送批次。系统自动发送后写回结果，未满足条件的记录保留在异常列表中。</p>
+      <div class="diagram">
+        <svg viewBox="0 0 1120 420" role="img" aria-labelledby="target-title">
+          <title id="target-title">目标发票自动推送流程</title>
+          <defs><marker id="arrow-target" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#64748b"/></marker></defs>
+          <g font-family="Microsoft YaHei, sans-serif" font-size="14" text-anchor="middle">
+            <rect x="20" y="165" width="145" height="70" rx="12" fill="#fef3c7" stroke="#f59e0b"/><text x="92" y="195">出纳</text><text x="92" y="219">批量上传发票 PDF</text>
+            <rect x="200" y="165" width="145" height="70" rx="12" fill="#dcfce7" stroke="#34d399"/><text x="272" y="195">系统</text><text x="272" y="219">识别字段并匹配客户</text>
+            <rect x="380" y="165" width="145" height="70" rx="12" fill="#fef3c7" stroke="#f59e0b"/><text x="452" y="195">人工核对</text><text x="452" y="219">确认客户与发票无误</text>
+            <rect x="560" y="165" width="145" height="70" rx="12" fill="#dcfce7" stroke="#34d399"/><text x="632" y="195">系统</text><text x="632" y="219">匹配客户企微群</text>
+            <rect x="740" y="165" width="145" height="70" rx="12" fill="#dcfce7" stroke="#34d399"/><text x="812" y="195">16:00 推送批次</text><text x="812" y="219">发送 PDF + 固定文案</text>
+            <rect x="920" y="165" width="170" height="70" rx="12" fill="#dbeafe" stroke="#93c5fd"/><text x="1005" y="195">客户企微群</text><text x="1005" y="219">客户查收并下载</text>
+            <line x1="165" y1="200" x2="198" y2="200" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-target)"/><line x1="345" y1="200" x2="378" y2="200" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-target)"/><line x1="525" y1="200" x2="558" y2="200" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-target)"/><line x1="705" y1="200" x2="738" y2="200" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-target)"/><line x1="885" y1="200" x2="918" y2="200" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-target)"/>
+            <polygon points="632,285 714,330 632,375 550,330" fill="#fff7ed" stroke="#fb923c" stroke-width="2"/><text x="632" y="326">是否有客户群？</text><text x="632" y="348" font-size="12">群 ID 有效且可发送</text>
+            <line x1="632" y1="235" x2="632" y2="283" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-target)"/>
+            <rect x="770" y="302" width="150" height="55" rx="12" fill="#dcfce7" stroke="#34d399"/><text x="845" y="335">是：进入推送批次</text><line x1="714" y1="330" x2="768" y2="330" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-target)"/><text x="742" y="316" fill="#047857">是</text>
+            <rect x="280" y="302" width="190" height="55" rx="12" fill="#fee2e2" stroke="#f87171"/><text x="375" y="326">否：状态=待建群</text><text x="375" y="346">通知销售建群后补推</text><line x1="550" y1="330" x2="472" y2="330" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-target)"/><text x="518" y="316" fill="#b91c1c">否</text>
+          </g>
+        </svg>
+        <div class="legend"><span class="human">人工动作</span><span class="system">系统动作</span><span class="exception">异常分支</span></div>
+      </div>
+      <div class="callout"><strong>推荐的操作入口：</strong>在发票列表增加“批量推送”按钮和“定时任务”两种入口。每日 16:00 自动执行一次；人工核对完成后也可以对单张或选中记录进行“立即推送/补推”，但仍需满足审核通过和客户群有效两个前置条件。</div>
+    </section>
+
+    <section id="exceptions">
+      <h2>6. 异常与补偿流程</h2>
+      <div class="diagram">
+        <svg viewBox="0 0 1120 360" role="img" aria-labelledby="exception-title">
+          <title id="exception-title">异常与补偿流程</title>
+          <defs><marker id="arrow-exception" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#64748b"/></marker></defs>
+          <g font-family="Microsoft YaHei, sans-serif" font-size="14" text-anchor="middle">
+            <rect x="28" y="145" width="145" height="65" rx="12" fill="#dbeafe" stroke="#93c5fd"/><text x="100" y="173">待处理发票</text><text x="100" y="195">进入校验</text>
+            <polygon points="290,125 370,177 290,229 210,177" fill="#fff7ed" stroke="#fb923c" stroke-width="2"/><text x="290" y="173">识别/匹配是否成功？</text>
+            <rect x="440" y="45" width="170" height="62" rx="12" fill="#fee2e2" stroke="#f87171"/><text x="525" y="72">失败：待人工修正</text><text x="525" y="94">修正后重新校验</text>
+            <polygon points="720,125 800,177 720,229 640,177" fill="#fff7ed" stroke="#fb923c" stroke-width="2"/><text x="720" y="173">人工核对是否通过？</text>
+            <rect x="864" y="45" width="180" height="62" rx="12" fill="#fee2e2" stroke="#f87171"/><text x="954" y="72">不通过：退回修改</text><text x="954" y="94">保留原因与操作人</text>
+            <rect x="864" y="260" width="180" height="62" rx="12" fill="#fee2e2" stroke="#f87171"/><text x="954" y="287">推送失败：记录原因</text><text x="954" y="309">支持重试/人工补推</text>
+            <rect x="440" y="260" width="170" height="62" rx="12" fill="#dcfce7" stroke="#34d399"/><text x="525" y="287">推送成功</text><text x="525" y="309">状态=已推送，写入时间</text>
+            <line x1="173" y1="177" x2="208" y2="177" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-exception)"/><line x1="370" y1="145" x2="438" y2="78" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-exception)"/><text x="408" y="105" fill="#b91c1c">否</text><line x1="370" y1="177" x2="638" y2="177" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-exception)"/><text x="505" y="164" fill="#047857">是</text><line x1="800" y1="145" x2="862" y2="78" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-exception)"/><text x="835" y="105" fill="#b91c1c">否</text><line x1="720" y1="229" x2="525" y2="258" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-exception)"/><text x="626" y="254" fill="#047857">是：进入 16:00 批次</text><line x1="610" y1="291" x2="862" y2="291" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-exception)"/><text x="736" y="279" fill="#b91c1c">发送接口失败</text>
+          </g>
+        </svg>
+        <div class="legend"><span class="exception">异常状态</span><span class="system">可闭环状态</span><span>所有异常都不能静默丢弃，必须保留原因、时间和处理人</span></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>异常场景</th><th>系统处理</th><th>人工下一步</th></tr></thead>
+          <tbody>
+            <tr><td>发票字段识别失败</td><td>状态=识别异常，展示原始文件和失败原因。</td><td>人工补充/修正字段后重新校验。</td></tr>
+            <tr><td>客户匹配失败或匹配多个客户</td><td>状态=待确认归属，不进入推送批次。</td><td>选择正确客户，必要时通知销售确认。</td></tr>
+            <tr><td>人工核对不通过</td><td>状态=核对退回，记录退回原因。</td><td>修正数据后再次提交核对。</td></tr>
+            <tr><td>没有客户企微群</td><td>状态=待建群，通知对应销售。</td><td>销售建群并回填群 ID，记录进入下一次推送。</td></tr>
+            <tr><td>企微发送失败</td><td>状态=推送失败，保存错误码/错误消息。</td><td>系统按策略重试；仍失败时人工补推。</td></tr>
+            <tr><td>重复触发推送</td><td>按“发票号码 + 推送批次/渠道”做幂等校验，避免重复发送。</td><td>仅在明确需要时执行“强制补推”，并保留操作记录。</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="rules">
+      <h2>7. 业务规则与状态</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>核心业务规则</h3>
+          <ol>
+            <li>总部和上海分公司出纳可以在任意时间批量上传，系统按文件逐张建立发票记录。</li>
+            <li>只有“人工核对通过”的记录才允许进入推送批次。</li>
+            <li>每日 16:00 统一执行推送；当日 16:00 后新上传且已审核的记录进入下一批次，具体截止时间由产研确认。</li>
+            <li>发送内容至少包含发票 PDF 附件和固定文案：“发票请查收”。</li>
+            <li>发送成功后写入推送时间、推送渠道、目标群和操作/任务标识。</li>
+            <li>没有客户群、群 ID 无效或发送失败的记录，必须可筛选、可重试、可补推。</li>
+          </ol>
+        </div>
+        <div class="card">
+          <h3>建议状态机</h3>
+          <p><span class="tag">待识别</span> → <span class="tag">待核对</span> → <span class="tag">核对通过</span> → <span class="tag">待推送</span> → <span class="tag">已推送</span></p>
+          <p><span class="tag">识别异常</span>、<span class="tag">待确认归属</span>、<span class="tag">核对退回</span>、<span class="tag">待建群</span>、<span class="tag">推送失败</span>均为可回到主链路的异常状态。</p>
+          <p class="small">状态名称可按现有多维表字段兼容调整，但必须能区分“未推送”和“推送失败”，不能只用一个空值表示。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="data">
+      <h2>8. 数据与页面建议</h2>
+      <h3>8.1 发票记录字段</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>字段</th><th>用途</th><th>建议必填/来源</th></tr></thead>
+          <tbody>
+            <tr><td>发票 PDF</td><td>发送给客户的附件。</td><td>必填，出纳上传。</td></tr>
+            <tr><td>发票号码、开票日期、金额、税额、价税合计</td><td>核对和追踪。</td><td>系统识别，可人工修正。</td></tr>
+            <tr><td>客户名称</td><td>确定发票归属和推送目标。</td><td>系统匹配，人工确认。</td></tr>
+            <tr><td>销售员</td><td>异常通知和客户群维护责任人。</td><td>系统匹配，人工确认。</td></tr>
+            <tr><td>客户企微群 ID / 群名称</td><td>确定发送目标。</td><td>系统匹配或销售补录。</td></tr>
+            <tr><td>核对状态、核对人、核对时间</td><td>控制推送前置条件，形成审计记录。</td><td>人工操作产生。</td></tr>
+            <tr><td>推送状态、推送时间、推送渠道</td><td>查询已推送/未推送。</td><td>系统写回。</td></tr>
+            <tr><td>失败原因、重试次数、最后重试时间</td><td>异常处理和运营排查。</td><td>系统写回。</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>8.2 页面/视图建议</h3>
+      <ul>
+        <li><strong>全部发票：</strong>支持按开票日期、公司、客户、销售员、推送状态筛选。</li>
+        <li><strong>待核对：</strong>展示识别结果、客户匹配结果和 PDF 预览/下载入口。</li>
+        <li><strong>待推送：</strong>只展示核对通过且客户群有效的记录，支持批量推送和查看预计发送数量。</li>
+        <li><strong>异常处理：</strong>集中展示识别异常、待建群、推送失败和核对退回，提供对应处理按钮。</li>
+        <li><strong>推送记录：</strong>展示发送时间、目标群、发送结果和失败原因，支持按批次查询。</li>
+      </ul>
+    </section>
+
+    <section id="acceptance">
+      <h2>9. 产研验收标准</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>编号</th><th>验收项</th><th>验收口径</th></tr></thead>
+          <tbody>
+            <tr><td>AC-01</td><td>批量上传</td><td>出纳一次上传多张 PDF 后，每张文件均建立独立记录，且可追溯到原文件。</td></tr>
+            <tr><td>AC-02</td><td>自动匹配</td><td>系统完成发票字段识别，并给出客户、销售员、客户群匹配结果；失败时明确展示原因。</td></tr>
+            <tr><td>AC-03</td><td>人工核对门禁</td><td>未核对通过的记录无法进入推送批次；退回原因可查看。</td></tr>
+            <tr><td>AC-04</td><td>定时推送</td><td>每日 16:00 自动处理符合条件的记录，并生成推送批次。</td></tr>
+            <tr><td>AC-05</td><td>消息内容</td><td>客户企微群收到正确的发票 PDF，并包含“发票请查收”文案。</td></tr>
+            <tr><td>AC-06</td><td>无群分支</td><td>没有有效客户群时不发送，状态变为“待建群”，对应销售收到通知。</td></tr>
+            <tr><td>AC-07</td><td>状态追踪</td><td>可按条件查出已推送、待推送、待建群、推送失败记录，并显示最新处理时间。</td></tr>
+            <tr><td>AC-08</td><td>失败补偿</td><td>发送失败记录保留失败原因，支持重试或人工补推，不产生不可解释的丢单。</td></tr>
+            <tr><td>AC-09</td><td>幂等</td><td>重复点击或任务重跑不会默认重复发送同一张发票；强制补推必须有明确操作记录。</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="questions">
+      <h2>10. 待确认事项</h2>
+      <div class="callout amber"><strong>以下事项不影响流程理解，但会影响产品和技术落地，需要在评审时定稿：</strong></div>
+      <ol>
+        <li>同一客户同一天有多张发票时，是合并为一条群消息发送多个附件，还是每张发票单独发送？</li>
+        <li>16:00 是系统自动发送，还是由人工在 16:00 点击“批量推送”确认后发送？建议采用“自动批次 + 可人工暂停/补推”。</li>
+        <li>企微客户群的识别方式是什么：通过客户名称匹配、群 ID 维护表，还是由销售在系统内绑定？</li>
+        <li>“暂无群”通知发送给销售的渠道是什么：飞书消息、企微消息、邮件，还是系统待办？</li>
+        <li>推送失败的自动重试次数、间隔和最终告警对象是什么？</li>
+        <li>发票是否允许在推送成功后再次修改附件或关键信息？如允许，是否需要重新核对并补推？</li>
+        <li>客户企微群是否存在合规或权限限制，例如群机器人、外部联系人群、附件大小和消息频率限制？</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>附：给产研同学的场景描述</h2>
+      <div class="callout">
+        财务完成开票后，出纳从税务系统下载本次开票文件包并批量上传发票 PDF。系统自动识别发票信息，并根据客户名称等信息匹配客户、销售员和客户企微群。财务/业务人员在推送前进行人工核对，确认无误后，记录进入当天 16:00 的推送批次。批次执行时，系统将发票 PDF 和“发票请查收”发送到对应客户企微群，并把结果写回发票记录。如果没有客户群、匹配不明确或发送失败，系统不应静默跳过，而应进入对应异常状态，通知责任人并支持后续补推。最终，业务人员可以按日期、客户、销售员和状态查看每张发票当前处于什么环节。
+      </div>
+    </section>
+
+    <footer class="footer">
+      本文档根据飞书知识库页面《发票自动化推送》整理，页面原始需求包含“自动匹配客户名称、人工核对后推送到客户群、每日 16:00 统一推送、查看已推送/未推送发票、无群时通知销售建群”等信息。流程中的“建议”与“待确认事项”用于帮助产研评审，不代表已经确定的产品决策。
+    </footer>
+  </main>
+</body>
+</html>

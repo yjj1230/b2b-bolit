@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>ZK × Graph Engineering 怀疑者层设计 — 把怀疑机器化，把注意力聚焦</title>
+<style>
+  :root {
+    --paper: #f7f6f2;
+    --surface: #ffffff;
+    --surface-2: #eef2ef;
+    --ink: #1e2527;
+    --muted: #5f696b;
+    --line: #d8ddda;
+    --green: #176b54;
+    --green-soft: #e4f1eb;
+    --blue: #255f85;
+    --blue-soft: #e8f0f6;
+    --amber: #8a5a12;
+    --amber-soft: #f7edd8;
+    --red: #9a3b36;
+    --red-soft: #f6e8e5;
+    --violet: #5b3f8a;
+    --violet-soft: #efeaf6;
+    --code: #192123;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    --serif: "Songti SC", "STSong", "Noto Serif CJK SC", serif;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.8;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--blue); text-underline-offset: 3px; }
+  .shell { width: min(1180px, calc(100% - 40px)); margin: 0 auto; }
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    border-bottom: 1px solid var(--line);
+    background: rgba(247, 246, 242, .96);
+    backdrop-filter: blur(10px);
+  }
+  .topbar-inner {
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .brand { flex: 0 0 auto; font-size: 13px; font-weight: 800; color: var(--violet); }
+  .toc {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    white-space: nowrap;
+  }
+  .toc::-webkit-scrollbar { display: none; }
+  .toc a {
+    color: var(--muted);
+    text-decoration: none;
+    padding: 6px 9px;
+    border-radius: 5px;
+    font-size: 12px;
+  }
+  .toc a:hover, .toc a.active { color: var(--ink); background: var(--surface-2); }
+  .hero {
+    padding: 62px 0 38px;
+    border-bottom: 1px solid var(--line);
+  }
+  .eyebrow { color: var(--violet); font-size: 12px; font-weight: 800; text-transform: uppercase; }
+  h1, h2, h3 { font-family: var(--serif); }
+  h1 {
+    max-width: 920px;
+    margin: 14px 0 18px;
+    font-size: 42px;
+    line-height: 1.25;
+    letter-spacing: 0;
+  }
+  .hero .lede { max-width: 850px; margin: 0; font-size: 19px; color: #3d484a; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 24px; font-size: 13px; color: var(--muted); }
+  .thesis {
+    margin-top: 34px;
+    padding: 20px 22px;
+    border-left: 4px solid var(--violet);
+    background: var(--surface);
+    max-width: 950px;
+  }
+  .thesis strong { color: var(--violet); }
+  main { padding: 18px 0 80px; }
+  section { padding-top: 62px; scroll-margin-top: 54px; }
+  h2 { margin: 0; font-size: 28px; line-height: 1.35; }
+  h2 .num { color: var(--violet); font-family: var(--sans); font-size: 13px; margin-right: 10px; }
+  .subtitle { max-width: 780px; margin: 8px 0 22px; color: var(--muted); }
+  h3 { margin: 34px 0 10px; font-size: 20px; line-height: 1.5; }
+  p { max-width: 800px; }
+  .verdict {
+    display: grid;
+    grid-template-columns: 180px minmax(0, 1fr);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .verdict + .verdict { margin-top: 10px; }
+  .verdict .label { padding: 16px; font-weight: 800; background: var(--surface-2); }
+  .verdict .body { padding: 16px 18px; }
+  .verdict p { margin: 0; max-width: none; }
+  .tag {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 800;
+    vertical-align: 1px;
+  }
+  .tag.must { color: var(--red); background: var(--red-soft); }
+  .tag.keep { color: var(--green); background: var(--green-soft); }
+  .tag.new { color: var(--blue); background: var(--blue-soft); }
+  .tag.skeptic { color: var(--violet); background: var(--violet-soft); }
+  .callout {
+    margin: 22px 0;
+    padding: 16px 18px;
+    max-width: 920px;
+    border: 1px solid var(--line);
+    border-left-width: 4px;
+    border-left-color: var(--amber);
+    background: var(--surface);
+    border-radius: 0 6px 6px 0;
+  }
+  .callout.violet { border-left-color: var(--violet); }
+  .callout.green { border-left-color: var(--green); }
+  .callout.red { border-left-color: var(--red); }
+  .callout p { margin: 0; }
+  .table-wrap {
+    margin: 18px 0;
+    max-width: 100%;
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--surface);
+  }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  thead th {
+    background: var(--surface-2);
+    text-align: left;
+    padding: 10px 12px;
+    font-size: 12px;
+    letter-spacing: .02em;
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+  }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: #fbfaf7; }
+  code {
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 12.5px;
+  }
+  pre {
+    background: var(--code);
+    color: #d8e1e3;
+    padding: 16px 18px;
+    border-radius: 6px;
+    overflow-x: auto;
+    font-size: 12.5px;
+    line-height: 1.7;
+    max-width: 920px;
+  }
+  pre code { background: none; border: none; color: inherit; padding: 0; font-size: 12.5px; }
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px; margin: 18px 0; }
+  .card {
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--surface);
+    padding: 16px 18px;
+  }
+  .card h4 { margin: 0 0 6px; font-size: 15px; }
+  .card p { margin: 0; font-size: 13.5px; color: #3d484a; }
+  .card .model-id {
+    display: inline-block;
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--violet);
+    background: var(--violet-soft);
+    padding: 2px 7px;
+    border-radius: 4px;
+    margin-right: 8px;
+    vertical-align: 1px;
+  }
+  .kpi-row { display: flex; flex-wrap: wrap; gap: 12px; margin: 20px 0; }
+  .kpi {
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--surface);
+    padding: 14px 20px;
+    min-width: 150px;
+  }
+  .kpi .v { font-family: var(--serif); font-size: 26px; font-weight: 700; color: var(--violet); }
+  .kpi .k { font-size: 12px; color: var(--muted); }
+  .mermaid { margin: 22px 0; text-align: center; }
+  .mermaid svg { max-width: 100%; height: auto; }
+  .footer {
+    border-top: 1px solid var(--line);
+    margin-top: 60px;
+    padding: 24px 0 48px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .note { font-size: 13px; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="topbar"><div class="shell topbar-inner">
+  <div class="brand">ZK × GE · Skeptic Layer</div>
+  <nav class="toc">
+    <a href="#s00">00 审计</a>
+    <a href="#s01">01 概念校准</a>
+    <a href="#s02">02 注意力经济</a>
+    <a href="#s03">03 小专家模型</a>
+    <a href="#s04">04 超规则系统</a>
+    <a href="#s05">05 证据扩展</a>
+    <a href="#s06">06 威胁与TCB</a>
+    <a href="#s07">07 决策门禁</a>
+    <a href="#s08">08 落地路线</a>
+    <a href="#s09">09 边界与结论</a>
+  </nav>
+</div></div>
+
+<header class="hero"><div class="shell">
+  <div class="eyebrow">Verification methodology · Skeptic Layer · v1.0</div>
+  <h1>怀疑者层设计<br>把怀疑机器化，把注意力聚焦</h1>
+  <p class="lede">在「确定性验证」与「人类判断」之间，补上第三根支柱：<b>从数据中学到的怀疑</b>——专为项目而存在的小专家模型与超规则系统，不替代 review，而是让每一次人类注意力都花在最可能出错的地方。</p>
+  <div class="hero-meta">
+    <span>承《ZK-GE 闭环验证方案 v2》</span>
+    <span>项目：b2b_pilot_v3</span>
+    <span>2026-08-08</span>
+    <span>单文件、自包含 HTML</span>
+  </div>
+  <div class="thesis">
+    <p><strong>核心论点（三句话）：</strong><br>
+    ① 小专家模型与超规则系统不是外挂，而是补完 v2 体系唯一还靠人的环节——<b>怀疑的来源</b>；<br>
+    ② 怀疑者只<b>分配注意力</b>与<b>生成挑战</b>，永不进入 pass/fail 的布尔逻辑；<br>
+    ③ 真正有效的不是「消灭 review」，而是「机器聚焦 + 人类仲裁」——这比全面 review 更强，因为全面扫 = 每个点都浅。</p>
+  </div>
+</div></header>
+
+<main class="shell">
+
+<section id="s00">
+  <h2><span class="num">00</span>对现有体系的审计：三个空白</h2>
+  <p class="subtitle">v2 已经把「验证已知」做成体系；本节定位它没覆盖的地方，正是怀疑者层要补的洞。</p>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th>你的哲学概念</th><th>v2 中的机制</th><th>状态</th></tr></thead>
+    <tbody>
+      <tr><td><b>设计一致性</b></td><td>五图证据体系 + REALIZES / IMPLEMENTS 映射边 + 阶段⑦ 约束差分</td><td><span class="tag keep">已成体系</span></td></tr>
+      <tr><td><b>实现偏差</b></td><td>预期图 vs 实际图指纹比对 + 爆炸半径 + 12 条偏差记录（05 §3）</td><td><span class="tag keep">已成体系</span></td></tr>
+      <tr><td><b>测试闭环</b></td><td>Score Card 47 例 + CQ→测试映射 + 变异/故障注入 + 300 用例五维验证</td><td><span class="tag keep">已成体系</span></td></tr>
+      <tr><td><b>设计反刍</b></td><td>阶段⑨ incident → 新 claim / 新挑战 → 新一轮</td><td><span class="tag must">半自动</span> 反刍产物（教训→规则）靠人脑搬运</td></tr>
+      <tr><td><b>未知未知</b></td><td>规格投机、未建模风险、语义偏差的发现</td><td><span class="tag must">仅人类一个来源</span></td></tr>
+      <tr><td><b>注意力分配</b></td><td>G1/G2 人类闸门的输入组织</td><td><span class="tag must">无排序机制</span> 人类看全量证据，无可疑度优先序</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="grid2">
+    <div class="card"><h4>空白一 · 反刍的最后一公里</h4><p>R1-R8 教训（「事务内禁止查 pool」「幂等键要带租户维度」）目前由人总结、人手写成图约束。若能把「缺陷 → 候选规则」机器化，设计反刍就真正闭环了。</p></div>
+    <div class="card"><h4>空白二 · 未知未知无机器来源</h4><p>确定性验证只能查「已知问题」；「没想过的问题」（规格投机、未建模风险、语义偏差）目前只靠人脑。统计信号是唯一能在未知侧给出线索的机器手段。</p></div>
+    <div class="card"><h4>空白三 · 注意力没有预算</h4><p>G1/G2 面对全部证据与全量变更，没有「哪里最可疑」的优先序。人类的验证注意力是稀缺资源，没有分配机制 = 全面扫 = 每个点都浅。</p></div>
+  </div>
+
+  <div class="callout violet">
+    <p><b>审计结论：</b>v2 已把「验证已知」做成体系；怀疑者层负责把「发现未知」与「分配注意力」机器化。它不是 v3 的推倒重来，而是 v2 的自然补完——补的是「怀疑」这一环。</p>
+  </div>
+</section>
+
+<section id="s01">
+  <h2><span class="num">01</span>概念校准：怀疑者（Skeptic）不是验证者（Verifier）</h2>
+  <p class="subtitle">整个设计的第一条铁律：模型和规则系统的输出永远不是结论，而是「往哪看」的提示。</p>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th>支柱</th><th>性质</th><th>回答的问题</th><th>输出</th><th>状态</th></tr></thead>
+    <tbody>
+      <tr><td><b>验证者</b> Verifier</td><td>确定性</td><td>已知问题有没有？</td><td>pass / fail / invalid</td><td>已有：编译器、图约束、守恒、变异、模型检查</td></tr>
+      <tr><td><b>怀疑者</b> Skeptic</td><td>统计性</td><td>未知问题最可能在哪？</td><td>suspicion score + 候选规则</td><td><span class="tag skeptic">本设计新增</span></td></tr>
+      <tr><td><b>仲裁者</b> Human Gate</td><td>决策性</td><td>接受还是拒绝？</td><td>accept / reject / conditional</td><td>已有：G1 / G2</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>为什么怀疑者不能成为验证者（五条理由）</h3>
+  <div class="verdict"><div class="label">概率性</div><div class="body"><p>模型输出是分数与分布，有假阴/假阳；把它写进 <code>release_allowed</code> 的布尔合取，等于把发布决策押在统计侥幸上。</p></div></div>
+  <div class="verdict"><div class="label">可对抗</div><div class="body"><p>实现域一旦知道模型特征，就可定向构造「特征上正常、语义上错误」的变更——统计信号会被博弈，确定性检查不会。</p></div></div>
+  <div class="verdict"><div class="label">分布漂移</div><div class="body"><p>项目形态（新模块、新语言、新需求域）变化时，训练分布失效，模型静默失真——需要元层的漂移检测。</p></div></div>
+  <div class="verdict"><div class="label">无 oracle 语义</div><div class="body"><p>模型学到的是相关性（correlation），不是业务语义（causation）。「统计上可疑」不等于「业务上错误」。</p></div></div>
+  <div class="verdict"><div class="label">解释性</div><div class="body"><p>仲裁者必须能理解「为什么可疑」才能决策；黑箱分数无法支撑 G2 的职责——这是设计对可解释性的硬要求。</p></div></div>
+
+  <div class="callout">
+    <p><b>铁律：</b>怀疑者的输出只能影响两件事——① 人类注意力的分配（G1/G2 的聚焦点与顺序）；② 挑战域的生成（对可疑处定向构造隐藏测试、故障注入、变异）。它永远不能直接授予绿灯。</p>
+  </div>
+</section>
+
+<section id="s02">
+  <h2><span class="num">02</span>方法论基础：注意力经济</h2>
+  <p class="subtitle">为什么「聚焦 review + 机器兜底」强于「全面 review」——这是本设计的元洞察。</p>
+
+  <p>全面 review 的有效性可以写成一个朴素等式：</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>策略</th><th>有效性</th><th>成本</th><th>短板</th></tr></thead>
+    <tbody>
+      <tr><td><b>全面 review</b>（人扫全部代码/设计）</td><td>注意力 ÷ 代码量，随规模衰减</td><td>O(代码量)，昂贵</td><td>人类注意力有限，全面扫 = 每个点都浅；规模一大有效性趋零</td></tr>
+      <tr><td><b>纯机器验证</b>（只有确定性检查）</td><td>只覆盖已知问题</td><td>O(验证运行)，便宜</td><td>未知未知漏光；同源自证无解</td></tr>
+      <tr><td><b>聚焦 review + 机器兜底</b>（本设计）</td><td>注意力 ÷ 可疑点集，可疑点集被机器压缩</td><td>O(验证) + O(可疑点)</td><td>依赖怀疑者的查全率；需要双门纪律防幻觉</td></tr>
+    </tbody>
+  </table></div>
+
+  <p>机制上，怀疑者层 = <b>挑战生成器的进化</b>。在 ZKP 协议结构里，Challenge 组件从「静态挑战集」（人写的测试用例）升级为「自适应挑战」：</p>
+  <div class="mermaid">
+flowchart LR
+  CQ["CQ / 规约"] -->|静态挑战| T1["测试集&lt;br/&gt;(人写, 已有)"]
+  GR["实现图 + 运行图"] -->|特征| SK["怀疑者层&lt;br/&gt;小模型 × 超规则"]
+  SK -->|suspicion 排序| T2["定向挑战&lt;br/&gt;隐藏测试 · 故障注入 · 变异"]
+  SK -->|可疑点 top-K| G2["G2 人类仲裁&lt;br/&gt;只审最可疑处"]
+  T1 --> V["确定性验证器"]
+  T2 --> V
+  V --> E["证据图"]
+</div>
+
+  <div class="callout green">
+    <p><b>与 ZKP 的关系：</b>v2 说「ZKP 真正有效的是把交付改造成先承诺、后挑战、证据绑定、独立验证、风险决策的协议」。怀疑者层把「挑战」这一步从静态推向自适应——挑战的质量不再只取决于人写测试时的想象力，还取决于机器从历史经验中学到的怀疑。</p>
+  </div>
+</section>
+
+<section id="s03">
+  <h2><span class="num">03</span>小专家模型：四个候选，按优先级排</h2>
+  <p class="subtitle">「专为项目而存在」= 特征来自本项目图与 git，训练数据来自本项目历史缺陷。诚实前提：现有标注量决定了第一代必须是轻模型 + 特征工程。</p>
+
+  <h3>3.1 数据现实（冷启动约束）</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>标注来源</th><th>数量</th><th>粒度</th><th>可用性</th></tr></thead>
+    <tbody>
+      <tr><td>真实编排缺陷（R1-R8）</td><td>8</td><td>缺陷级</td><td>✅ 高质量，含根因与修复 diff</td></tr>
+      <tr><td>roundtrip 发现（F1-F6）</td><td>6</td><td>偏差级</td><td>✅ 高质量，含文档坐标</td></tr>
+      <tr><td>设计偏差记录（05 §3）</td><td>12</td><td>变更级</td><td>✅ 可作「非缺陷但需注意」负样本</td></tr>
+      <tr><td>300 用例负例</td><td>150</td><td>FSM 级</td><td>✅ 结构化，适合规则归纳语料</td></tr>
+      <tr><td>故障注入位点</td><td>≈50</td><td>分支级</td><td>✅ 可作「边界分支」特征标签</td></tr>
+      <tr><td>代码/测试实体</td><td>780 节点 / 7832 边</td><td>图级</td><td>✅ 特征来源，无需标注</td></tr>
+    </tbody>
+  </table></div>
+  <p><b>推论：</b>几百样本规模下，深度学习不成立；<b>特征工程 + 逻辑回归 / GBDT</b> 才是正确起点（这恰是「传统 ML」而非「传统 DL」的用武之地）。演进路径：v0 线性/树模型（可解释）→ 数据飞轮转起来 → v1 小 MLP（几百特征、几千样本时）。</p>
+
+  <h3>3.2 四个模型（特征全部来自图 + git 元数据，不读代码）</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>模型</th><th>任务</th><th>关键特征（例）</th><th>输出</th><th>服务的哲学概念</th></tr></thead>
+    <tbody>
+      <tr><td><b>M1</b> 变更风险排序器 <span class="tag skeptic">核心</span></td><td>该变更集携带缺陷的概率</td><td>impact radius、触碰 bridge/hub 节点数、跨越社区数、测试盲区比例、文档同步标志、变更规模/类型/作者</td><td>风险分 ∈[0,1] + 分位数</td><td>实现偏差</td></tr>
+      <tr><td><b>M2</b> 假绿检测器</td><td>每个测试杀死变异体的预测率</td><td>测试的断言密度、分支覆盖、调用深度、mock 使用、被测代码的图热度</td><td>每个测试的可信度</td><td>测试闭环</td></tr>
+      <tr><td><b>M3</b> 漂移预筛器</td><td>15+N 个 CQ 中哪个最可能已漂移</td><td>CQ 文本嵌入 × 代码符号名/注释嵌入 + 图结构特征</td><td>漂移可疑度排序</td><td>设计一致性</td></tr>
+      <tr><td><b>M4</b> 异常边检测 <span class="tag new">可选</span></td><td>与历史分布显著不同的图边</td><td>边类型分布、社区间边密度、运行时未声明边的统计</td><td>异常边清单</td><td>抽图盲区补偿</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>3.3 模型细节与评估纪律</h3>
+  <div class="grid2">
+    <div class="card"><h4><span class="model-id">M1</span>变更风险排序器</h4><p>训练标签：R1-R8 + 注入缺陷 = 1；普通提交（可抽样 = 0）。评估：时间序列划分（前 80% 训练，后 20% 验证，防泄漏）。用途：G2 面板排序、挑战生成优先级、R0/R1 自动发布的弱信号。验收基线：对历史缺陷的 top-20% 召回率 ≥ 80%。</p></div>
+    <div class="card"><h4><span class="model-id">M2</span>假绿检测器</h4><p>训练标签：现有 168 测试的变异分数（运行变异测试获得，一次成本换长期收益）。用途：把「最可能假绿的测试」排到补测队列顶部——让测试闭环从「覆盖没覆盖」进化到「测了是否真的有用」。</p></div>
+    <div class="card"><h4><span class="model-id">M3</span>漂移预筛器</h4><p>用途：roundtrip 的预筛。现在 15 个 CQ 全查可行；未来 CQ 增长到 50+ 时，用嵌入相似度把「最可能漂移的 CQ」排前面，人工只复核 top-K。注意：这不是 NLI 门禁，是排序器。</p></div>
+    <div class="card"><h4><span class="model-id">M4</span>异常边检测</h4><p>用途：v2「抽图盲区」威胁的统计侧补偿——动态调用、运行时注入、消息路由逃出静态图，但会在运行图里留下与历史分布不同的统计痕迹。输出异常边清单进入 coverage debt 评估。</p></div>
+  </div>
+
+  <div class="callout red">
+    <p><b>评估纪律（防自我欺骗）：</b>① 模型评估集与训练集必须时间隔离，禁止随机划分；② 每个模型版本绑定评估报告（精度/召回/分位数校准）入证据；③ 模型上线前过 <b>G1-Skeptic 门</b>（见 §07）：评估集、误报预算、失效条件三者齐备才允许进面板。</p>
+  </div>
+</section>
+
+<section id="s04">
+  <h2><span class="num">04</span>超规则系统：三层结构 + 双门纪律</h2>
+  <p class="subtitle">「heuristic learning 范式」落成三层：执行层已有，归纳层与治理层新增。这是设计反刍的机器化——v2 的反刍是「事件→claim」，这里补上「事件→规则」。</p>
+
+  <div class="mermaid">
+flowchart TB
+  R0["R0 执行层（已有）&lt;br/&gt;policy engine (OPA) + 图约束查询&lt;br/&gt;确定性执行 · pass/fail"]
+  R1["R1 归纳层（新增）&lt;br/&gt;从历史缺陷归纳候选规则&lt;br/&gt;决策树 / RIPPER / 关联挖掘"]
+  R2["R2 治理层（新增 · 元规则）&lt;br/&gt;规则生命周期 · 冲突消解 · 失效条件&lt;br/&gt;每条生效规则的 抓到数/误报数 计数器"]
+  DEF["结构化缺陷记录&lt;br/&gt;R1-R8 · F1-F6 · 300 用例负例 · 注入缺陷"] --> R1
+  R1 -->|候选规则 + 置信度 + 解释| GATE["双门：历史回放门 → 人类确认门"]
+  GATE -->|批准后生效| R0
+  R0 -->|生效规则效果反馈| R2
+  R2 -->|低效规则降级/废弃| R1
+</div>
+
+  <h3>4.1 三层职责</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>层</th><th>职责</th><th>形态</th><th>状态</th></tr></thead>
+    <tbody>
+      <tr><td><b>R0 执行层</b></td><td>规则确定性执行，输出 pass/fail</td><td>OPA/Rego 或等价规则引擎 + 图约束查询</td><td>已有（v2 §09 policy engine）</td></tr>
+      <tr><td><b>R1 归纳层</b></td><td>从结构化缺陷记录归纳候选规则（带支持度、置信度、自然语言解释）</td><td>决策树归纳 / RIPPER 式规则学习 / 关联规则挖掘</td><td><span class="tag skeptic">新增</span></td></tr>
+      <tr><td><b>R2 治理层</b></td><td>元规则：生命周期（候选→评审→生效→评估→降级/废弃）；冲突消解（业务优先级/置信度高者胜）；覆盖范围；失效条件</td><td>规则注册表 + 计数器 + 评审工作流</td><td><span class="tag skeptic">新增</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>4.2 双门纪律（防幻觉规则）</h3>
+  <div class="verdict"><div class="label">门一 · 历史回放</div><div class="body"><p>候选规则必须在历史缺陷语料上回放：召回率 ≥ 阈值（如对 R1-R8 召回 ≥ 60%），且<b>不误伤既有绿灯证据</b>（对 300 正例误报率 ≤ 1%）。回放报告随规则入库。</p></div></div>
+  <div class="verdict"><div class="label">门二 · 人类确认</div><div class="body"><p>规则必须带自然语言解释，且解释能映射回业务概念（守恒 / 幂等 / 授权 / 事件链之一）——<b>归纳 ≠ 理解</b>，统计巧合的规则必须有语义锚点，由架构师签字生效。</p></div></div>
+
+  <div class="callout">
+    <p><b>与「规格投机」的对称性：</b>v2 防的是「AI 为了通过而改规格」；超规则系统要防的是「AI 为了抓错而发明规则」。两个方向的防御机制相同——规则/规格变更都要人类闸门、都要使旧证据失效、都要可回滚。</p>
+  </div>
+
+  <h3>4.3 与设计反刍的合流（示例）</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>历史缺陷</th><th>人总结的教训（已有）</th><th>可归纳的规则形态（新增）</th><th>落点</th></tr></thead>
+    <tbody>
+      <tr><td>R1 事务内查 pool</td><td>事务内禁止查 pool（单连接纪律）</td><td>「事务上下文内出现 pool 查询」→ 静态/图规则</td><td>R0 图约束 + 静态检查</td></tr>
+      <tr><td>R3 幂等键跨租户冲突</td><td>多租户确定性派生必须带 tenant</td><td>「确定性派生键缺租户维度」→ 模式规则</td><td>R0 命名/派生规则</td></tr>
+      <tr><td>R8 开票量=整单</td><td>守恒校验要与业务语义一致</td><td>「守恒断言基量与业务语义源不一致」→ 语义模式</td><td>R1 语料特征 → R2 治理</td></tr>
+      <tr><td>R6 Timer 分支返回 nil</td><td>Timer 分支与决策分支互斥返回</td><td>「闸门分支存在双返回路径」→ 控制流模式</td><td>R0 代码图查询</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">反刍闭环：incident → 结构化特征化 → 双路进（小模型训练集 + 规则归纳语料）→ 双门 → 进入执行层。v2 的反刍回路（事件→claim）与这里的回路（事件→规则）互为补充。</p>
+</section>
+
+<section id="s05">
+  <h2><span class="num">05</span>证据图与协议扩展</h2>
+  <p class="subtitle">五处修改，全部小而精确，不破坏 v2 的证据契约根基。</p>
+
+  <h3>5.1 证据图新增边类型</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>新增边</th><th>含义</th><th>属性</th><th>不破坏的既有不变量</th></tr></thead>
+    <tbody>
+      <tr><td><code>SUSPECTED_BY</code></td><td>Claim / 变更被某怀疑者标记</td><td><code>skeptic_id</code>（模型或规则）、<code>score</code>、<code>version</code>、<code>evidence_ref</code>、<code>expires_at</code></td><td>不参与 pass/fail；仅进入「可疑度排序」视图</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>5.2 suspicion 证据类型（evidence manifest 扩展）</h3>
+  <pre><code>{
+  "schema": "zkge.evidence/v2.suspicion",
+  "claim_id": "CHANGE.SET.0042",
+  "skeptic": {
+    "kind": "model",                 // model | learned_rule | anomaly
+    "id": "risk-ranker@gbdt.v0.3",
+    "digest": "sha256:...",
+    "eval_report": "sha256:..."      // 精度/召回/分位数校准，必须可重放
+  },
+  "input_summary": { "features": "sha256:...", "graph_snapshot": "sha256:..." },
+  "score": 0.87,
+  "percentile": 0.97,
+  "explanation": "触碰 bridge 节点 3 个 + 测试盲区 41% + 跨社区 2 个",
+  "disposition": "review_only"       // 只影响注意力与挑战，不授予绿灯
+}</code></pre>
+
+  <h3>5.3 挑战域扩展</h3>
+  <div class="grid2">
+    <div class="card"><h4>定向挑战生成</h4><p>M1 高风险的变更集 → 挑战域定向生成：隐藏测试、故障注入、变异体，围绕其风险特征构造，而不是均匀撒网。</p></div>
+    <div class="card"><h4>假绿复核队列</h4><p>M2 低可信度的测试 → 进入「复核队列」：补断言、补负例、或替换为属性测试；复核结果回填 M2 训练集。</p></div>
+    <div class="card"><h4>漂移复核清单</h4><p>M3 高可疑的 CQ → roundtrip 时人工只复核 top-K；复核结论（漂移/未漂移）成为 M3 的新标签。</p></div>
+    <div class="card"><h4>异常边处置</h4><p>M4 异常边 → 进入 coverage debt 评估：归属已知盲区（记录）或触发新约束规则（走 R1 归纳）。</p></div>
+  </div>
+</section>
+
+<section id="s06">
+  <h2><span class="num">06</span>威胁模型与 TCB 扩展</h2>
+  <p class="subtitle">怀疑者层自身是新的风险面——按 v2 的原则：保证强度不会超过最弱组件。</p>
+
+  <h3>6.1 威胁模型新增四行</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>新增威胁</th><th>典型失效</th><th>控制</th></tr></thead>
+    <tbody>
+      <tr><td><b>分布漂移</b></td><td>项目形态变化（新模块/新语言/新需求域），模型静默失真，可疑度排序失去意义</td><td>漂移检测器（特征分布监控）+ 模型失效条件 + 定期重训触发</td></tr>
+      <tr><td><b>对抗样本</b></td><td>实现域构造「特征上正常、语义上错误」的变更骗过模型</td><td>模型输出不进门禁；特征透明化；定期用对抗样例评估模型鲁棒性</td></tr>
+      <tr><td><b>规则过拟合</b></td><td>归纳规则只匹配历史缺陷形态，对新缺陷无召回</td><td>历史回放门 + 保留的对抗语料定期评估 + R2 计数器驱动降级</td></tr>
+      <tr><td><b>训练集泄漏</b></td><td>评估集混入训练集，精度虚高</td><td>时间序列划分硬规则；评估报告绑定数据版本摘要</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>6.2 TCB 新增四个组件</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>组件</th><th>职责</th><th>必须登记</th></tr></thead>
+    <tbody>
+      <tr><td>特征提取器</td><td>图/git → 特征向量</td><td>id + version + digest + owner + self_test</td></tr>
+      <tr><td>模型推理器</td><td>特征 → suspicion score</td><td>同上 + 评估报告摘要</td></tr>
+      <tr><td>规则归纳器</td><td>缺陷语料 → 候选规则</td><td>同上 + 语料版本摘要</td></tr>
+      <tr><td>规则库</td><td>生效规则 + 元规则 + 计数器</td><td>同上 + 变更需走双门并作废旧证据</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>6.3 保证等级的影响</h3>
+  <div class="callout violet">
+    <p><b>L0-L4 定义不变。</b>怀疑者输出属于 L1/L2 层级的「信号增强」：它让结构验证与行为验证更有针对性，但不把任何 claim 从 L2 升到 L3/L4。升等级仍然只能靠确定性手段（运行验证、形式化内核）。</p>
+  </div>
+</section>
+
+<section id="s07">
+  <h2><span class="num">07</span>决策门禁修正</h2>
+  <p class="subtitle">release_allowed 的布尔逻辑保持不变；怀疑者只改变「人类看什么」与「挑战生成什么」。</p>
+
+  <pre><code># v2 的 release_allowed 不变，怀疑者不进入布尔合取：
+release_allowed =
+  all(required_claims.meet_minimum_level)
+  and evidence_bindings.valid
+  and no(open_counterexample)
+  and no(unowned_or_expired_exception)
+  and supply_chain_policy.pass
+  and rollback_verified
+  and human_gate_G2.approved_when_required
+
+# 新增（决策面板与挑战域，非门禁）：
+suspicion_report = rank_by(            # 供 G2 人类仲裁聚焦
+  changes, key = M1.score, take = topK(risk_level)
+)
+challenge_plan = generate_targeted(    # 供挑战域定向
+  suspicion_report ∩ verifier_gaps
+)</code></pre>
+
+  <h3>7.1 G1 扩展：怀疑者上线门（G1-Skeptic）</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>项</th><th>要求</th></tr></thead>
+    <tbody>
+      <tr><td>评估集</td><td>时间隔离的验证集 + 评估报告（精度/召回/分位数校准）</td></tr>
+      <tr><td>误报预算</td><td>每模型每周期允许的最大误报数，超预算自动降级为「仅提示」</td></tr>
+      <tr><td>失效条件</td><td>分布漂移阈值、特征缺失阈值、评估分数下限</td></tr>
+      <tr><td>职责分离</td><td>模型训练者与门禁批准者不得为同一人/同一 AI 上下文（对齐 v2 独立性原则）</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>7.2 G2 扩展：剩余怀疑度</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>面板新增</th><th>内容</th><th>禁止的替代指标</th></tr></thead>
+    <tbody>
+      <tr><td>可疑点 top-K</td><td>本次变更按怀疑度排序的前 K 项，每项带解释与证据引用</td><td>模型自评「低风险」的绿色徽章</td></tr>
+      <tr><td>模型健康度</td><td>每个模型的评估分数新鲜度、漂移指标、误报计数器</td><td>「模型已运行」状态灯</td></tr>
+      <tr><td>规则效果</td><td>每条生效规则近期的抓到数 / 误报数</td><td>规则总数、规则库「全绿」</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">K 的选择 = f(风险等级, 可疑度分布, 规则置信度)——R0/R1 可以 K=0（全自动），R2 至少 K≥1 且必须有人类仲裁，R3 保持全部人工。</p>
+</section>
+
+<section id="s08">
+  <h2><span class="num">08</span>落地路线：先证明怀疑者抓得到错</h2>
+  <p class="subtitle">延续 v2 第 10 节的原则——每轮验收都用已知缺陷、变异或故障注入来验证验证者本身；怀疑者层同样适用。</p>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th>Round</th><th>范围</th><th>交付</th><th>硬验收</th></tr></thead>
+    <tbody>
+      <tr><td><b>6 · 怀疑者骨架</b></td><td>缺陷语料 + 特征 + M1 v0</td><td>结构化缺陷语料库（R1-R8/F1-F6/300 用例负例/注入缺陷）；特征抽取流水线（图+git，不读代码）；M1 v0（GBDT/逻辑回归）；G2 面板接入可疑度排序</td><td>对历史缺陷 top-20% 召回 ≥ 80%；时间隔离评估成立；面板只展示可疑度、不展示模型绿灯</td></tr>
+      <tr><td><b>7 · 超规则原型</b></td><td>归纳器 + 双门</td><td>R1 归纳器 v0（决策树/RIPPER 式）；候选规则评审工作流；历史回放门自动化；R2 计数器骨架</td><td>注入 3 个历史缺陷形态的变体，归纳器产出至少 1 条命中候选规则且通过双门；回放门能拒绝 1 条统计巧合规则</td></tr>
+      <tr><td><b>8 · 闭环验证</b></td><td>怀疑者自身被验证</td><td>构造「确定性验证全绿、语义错误」的注入缺陷集，验证怀疑者能否抓出</td><td>注入 ≥ 10 例，M1+M2+M3 联合检出 ≥ 60%，且每例都有可解释特征；失败案例进入语料库</td></tr>
+      <tr><td><b>9 · 数据飞轮</b></td><td>持续化</td><td>每次 incident/偏差自动结构化入语料；模型周期重训；规则计数器驱动治理</td><td>两个连续里程碑的语料增长率、模型评估分数不倒退、误报计数器在预算内</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout green">
+    <p><b>建议节奏（对齐 v2 的 90 天框架尾部）：</b>Round 6 约 2 周（数据与特征是大头），Round 7 约 1.5 周，Round 8 约 1 周，Round 9 进入常态化。总增量控制在 4-5 周内，不抢占业务里程碑的关键路径。</p>
+  </div>
+</section>
+
+<section id="s09">
+  <h2><span class="num">09</span>边界与结论</h2>
+  <p class="subtitle">怀疑者层能给你什么、不能给你什么——必须同样诚实。</p>
+
+  <div class="verdict"><div class="label">它能给你的</div><div class="body"><p>① 把稀缺的人类验证注意力聚焦到最可疑处，让「不读代码」从「碰运气」变成「有先验」；② 把设计反刍的最后一公里（教训→规则）机器化；③ 给「未知未知」一个统计侧的探测源；④ 让挑战域从静态走向自适应。</p></div></div>
+  <div class="verdict"><div class="label">它不能给你的</div><div class="body"><p>① 正确性声明——概率输出永远不是证明；② 免于需求责任/oracle 责任/风险责任（v2 结论不变）；③ 让 R2/R3 系统完全无人把关——它只改变人类把关注哪里，不改变人类必须存在；④ 对「模型自身正确」的保证——怀疑者也要被怀疑（Round 8 的意义）。</p></div></div>
+
+  <h3>五条诚实边界（写进哲学）</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>#</th><th>边界</th><th>含义</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>概率输出 ≠ 正确性声明</td><td>模型分数永远不能成为独立硬门禁（R0 除外），只能改变注意力分配与挑战生成</td></tr>
+      <tr><td>2</td><td>数据稀缺是硬约束</td><td>第一代必须是轻模型 + 特征工程；先建特征流水线与评估框架，数据飞轮转起来再加深</td></tr>
+      <tr><td>3</td><td>项目专用 = 项目过拟合</td><td>单仓库训练的模型会过拟合本项目形态；需要元层的漂移检测，形态变化时模型降级而非静默失真</td></tr>
+      <tr><td>4</td><td>归纳 ≠ 理解</td><td>规则必须有解释、有回放验证、有人类确认，否则就是带统计伪装的幻觉</td></tr>
+      <tr><td>5</td><td>不替代的东西不变</td><td>需求责任、oracle 责任、风险责任——模型和规则同样承担不了</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>结论</h3>
+  <div class="callout violet">
+    <p><b>一句话：</b>你的两个新想法方向正确，且是你哲学体系的自然延伸——它们应当被设计为「怀疑者层」，补上「验证已知」与「人类判断」之间的空白。真正有效的不是消灭 review，而是让每一次人类注意力都花在最可能出错的地方——这是「不读代码」执念的唯一正确实现方式。</p>
+    <p style="margin-top:10px"><b>对 v2 的定位：</b>本设计不推翻 v2 的任何结论；它在 v2 的 Challenge 组件与 Human Gate 组件之间插入一层统计怀疑，并把「设计反刍」从人工闭环升级为「人工 + 机器」双闭环。</p>
+  </div>
+
+  <h3>参考与关系</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>文档</th><th>关系</th></tr></thead>
+    <tbody>
+      <tr><td>spec/philosophy/ZK-GE-闭环验证方案.html（v1）</td><td>本设计的上游：ZKP 协议隐喻 + 九阶段闭环</td></tr>
+      <tr><td>spec/philosophy/ZK-GE-闭环验证方案_v2.html</td><td>本设计直接承接：五图体系、威胁模型、TCB、保证等级、落地路线</td></tr>
+      <tr><td>spec/code-graph-engineering-philosophy.html</td><td>特征来源的方法论基础：代码即图、确定性抽取</td></tr>
+      <tr><td>docs/05-roundtrip-report.html、docs/06-testing-retrospective.html</td><td>本设计的标注语料来源：12 条偏差、R1-R8、F1-F6</td></tr>
+      <tr><td>spec/testcase_gen.md / testcase_verify.md</td><td>300 用例方法论，规则归纳语料的结构化入口</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<div class="footer">
+  ZK × Graph Engineering 怀疑者层设计 · v1.0 · 2026-08-08 · 单文件、自包含 HTML · 本文中的「证明」默认指工程证据；「模型」默认指传统特征工程 ML（GBDT/逻辑回归起步），非 LLM。与 v2 一致：所有验证证据基于确定性可重放组件，怀疑者输出仅作注意力与挑战信号。
+</div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({ startOnLoad: true, theme: 'neutral', fontFamily: 'inherit' });</script>
+</body>
+</html>

@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>财务 · 角色规约页｜长安仁恒</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+SC:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="wecom-tokens.css" />
+<link rel="stylesheet" href="wecom-pc-frame.css" />
+<style>
+  :root{ --paper:#f5f4ed; --paper2:#efeee5; --ink:#1f1d18; --ink2:#6b665b; --ink3:#3a382f; --blue:#1B365D; --rule:#d4d1c5; }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif; line-height:1.6;}
+  .wrap{max-width:960px; margin:0 auto; padding:48px 40px 80px;}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;}
+  .folio{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--rule); padding-bottom:10px; font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink2);}
+  .folio a{color:var(--ink2); border:none;} .folio a:hover{color:var(--blue);}
+  .tag{display:inline-block; padding:3px 10px; font-size:11px; letter-spacing:.16em; background:var(--paper2); color:var(--blue);}
+  .kicker{display:flex; align-items:baseline; gap:12px; margin-top:48px;}
+  h1{font-size:clamp(32px,5vw,50px); line-height:1.12; font-weight:500; margin-top:14px; letter-spacing:-.01em;}
+  .lede{margin-top:18px; font-size:17px; line-height:1.7; color:var(--ink3); max-width:720px;}
+  h2{font-size:23px; font-weight:600; margin:52px 0 14px; color:var(--blue); display:flex; align-items:baseline; gap:12px; border-top:1px solid var(--rule); padding-top:26px;}
+  h2 .no{font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.12em;}
+  h3{font-size:17.5px; font-weight:600; margin:30px 0 10px; color:var(--ink);} h3 .no{color:var(--blue); font-family:'IBM Plex Mono',monospace; font-size:12px; margin-right:8px;}
+  h4{font-size:15.5px; font-weight:600; margin:24px 0 8px; color:var(--ink);}
+  p{margin:10px 0; color:var(--ink3);}
+  a{color:var(--blue); text-decoration:none; border-bottom:1px solid var(--rule);} a:hover{border-bottom-color:var(--blue);}
+  .mermaid{background:var(--paper); border:1px solid var(--rule); padding:18px; overflow-x:auto; text-align:center; margin:20px 0;}
+  .mermaid svg{max-width:100%; height:auto;}
+  figcaption{text-align:center; font-size:12px; color:var(--ink2); margin:-10px 0 26px; font-style:italic;}
+  code{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace; font-size:13px; background:var(--paper2); padding:1px 5px;}
+  footer.colophon{margin-top:56px; padding-top:14px; border-top:1px solid var(--rule); display:flex; justify-content:space-between; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink2); flex-wrap:wrap; gap:8px;}
+  footer.colophon a{color:var(--ink2); border:none;} footer.colophon a:hover{color:var(--blue);}
+  .toc{border:1px solid var(--rule); background:var(--paper2); padding:18px 24px; margin:26px 0;}
+  .toc .tt{font-size:11px; letter-spacing:.2em; color:var(--blue); margin-bottom:8px;}
+  .toc a{display:block; padding:3px 0; color:var(--ink3); border:none;} .toc a:hover{color:var(--blue);}
+  .toc .mono{font-size:12px; color:var(--blue); margin-right:8px;}
+  .ui-step{margin:18px 0 34px;}
+  .ui-step .desc{flex:1 1 300px; min-width:280px;}
+  .ui-step .desc .stepno{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.14em; color:var(--blue);}
+  .ui-step .desc h4{font-size:15px; margin:4px 0 6px;}
+  .ui-step .desc p{font-size:13.5px; margin:6px 0;}
+  .ui-step .desc .hint{font-size:12px; color:var(--ink2); background:var(--paper2); border-left:2px solid var(--rule); padding:6px 10px; margin-top:8px;}
+  .ui-shot{margin-top:12px; display:flex; justify-content:center; flex-wrap:wrap; gap:22px; align-items:flex-start;}
+  .shot-label{flex-basis:100%; text-align:center; font-size:11px; color:var(--ink2); margin-bottom:-14px; letter-spacing:.12em;}
+  @media(max-width:720px){.wrap{padding:28px 18px 60px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="folio">
+    <span><a href="index.html">← Role Specs</a></span>
+    <span>FINANCE · Role Spec</span>
+    <span>财务 · 3 Block</span>
+  </header>
+
+  <div class="kicker">
+    <span class="tag">Role Spec · 财务</span>
+    <span class="mono" style="font-size:11px; letter-spacing:.18em; color:var(--ink2);">到账确认为主 · 款到才发货</span>
+  </div>
+
+  <h1>财务<span style="font-style:italic; color:var(--blue);">· 角色规约页</span></h1>
+
+  <p class="lede"><span class="mono">confirm_payment = reviewer + tenant->accounting + tenant->admin</span> 是财务<strong>专属</strong>授权——到账确认面向租户全量订单（需价格/账期核算）。<strong>UI 操作图采用产品稿设计语言</strong>，Tab 裁剪为「待办 / 订单」。本页 3 个 Block。</p>
+
+  <nav class="toc">
+    <div class="tt">CONTENTS · 3 BLOCKS</div>
+    <a href="#b1"><span class="mono">B1</span>到账确认（待办 Tab）</a>
+    <a href="#b2"><span class="mono">B2</span>开票（待办 Tab）</a>
+    <a href="#b3"><span class="mono">B3</span>回单异常（待办 Tab）</a>
+  </nav>
+
+  <!-- ============ BLOCK 1 ============ -->
+  <h2 id="b1"><span class="no">B1 ·</span> 到账确认（待办 Tab）</h2>
+
+  <h3><span class="no">①</span> 用例图</h3>
+  <pre class="mermaid">
+flowchart LR
+    subgraph ACT1["参与者"]
+        FIN1["财务<br/>(tenant->accounting)"]
+        NOTI1["系统/Notifier（非人）"]
+    end
+    subgraph SYS1["企微订单助手（系统边界）"]
+        UC11["(确认到账 confirm_payment)"]
+        UC12["(查看银行流水匹配)"]
+    end
+    NOTI1 --> UC11
+    FIN1 --> UC11
+    FIN1 --> UC12
+  </pre>
+  <figcaption>用例图 B1：到账确认为财务硬闸门（款到单才放行发货）</figcaption>
+
+  <h3><span class="no">②</span> 流程图</h3>
+  <pre class="mermaid">
+flowchart TD
+    A1["待办 Tab「确认到账」审批条"] --> B1["核对应到金额/账期/流水匹配"]
+    B1 --> C1{"确认 / 驳回"}
+    C1 -->|"确认到账"| D1["payment-confirm Signal"]
+    C1 -->|"驳回"| E1["驳回链"]
+    D1 --> F1["款到闸门放行"]
+  </pre>
+  <figcaption>流程图 B1：核对 → 确认 → 款到闸门放行（款到才发货）</figcaption>
+
+  <h3><span class="no">③</span> UI 操作图（产品稿企微手机屏幕）</h3>
+
+  <div class="ui-step">
+    <div class="desc">
+      <span class="stepno">操作 1.1</span>
+      <h4>待办 Tab 到账确认审批条</h4>
+      <p>财务待办 Tab 审批条：应到金额、账期、流水匹配状态；点击进入确认详情。</p>
+      <div class="hint">到账确认为财务专属授权（confirm_payment），非财务不可操作。</div>
+    </div>
+        <div class="ui-shot">
+      <div class="shot-label">PC 端 · 企微客户端四栏（侧边栏应用在最右栏）</div>
+      <div class="wc-pc">
+        <div class="tl"><i class="r"></i><i class="y"></i><i class="g"></i></div>
+                <div class="rail">
+          <div class="av">财</div>
+          <div class="nav on"><span class="ico">💬</span>消息<span class="bdg">2</span></div>
+          <div class="nav"><span class="ico">✉</span>邮件</div>
+          <div class="nav"><span class="ico">📄</span>文档</div>
+          <div class="nav"><span class="ico">📅</span>日程</div>
+          <div class="nav"><span class="ico">✓</span>待办</div>
+          <div class="nav"><span class="ico">🎥</span>会议</div>
+          <div class="nav"><span class="ico">🧩</span>工作台</div>
+          <div class="nav"><span class="ico">👥</span>通讯录</div>
+          <div class="nav"><span class="ico">☁</span>微盘</div>
+        </div>
+        <div class="conv">
+          <div class="search"><span class="box">⌕ 搜索</span><span class="plus">＋</span></div>
+          <div class="conv-item on">
+            <div class="cav">天</div>
+            <div class="meta"><div class="nm">待确认到账 · ORD-2026-0110<span class="tm">09:24</span></div><div class="pv">王总：再发5吨膨润土 AB-3…</div></div>
+          </div>
+        </div>
+        <div class="chat">
+          <div class="ch-head"><div><div class="nm">待确认到账 · ORD-2026-0110</div><div class="sub">外部客户群 · 已开启订单助手（演示）</div></div></div>
+          <div class="ch-body">
+            <div class="msg o"><span class="mav">王</span><div class="mb"><div class="who">王志明｜广西天华采购部</div><div class="bub">订单 ORD-2026-0110 已进入到账确认闸门（款到才发货）。</div></div></div>
+          </div>
+          <div class="input-area"><span class="tools">☺ ▧ 📁</span><span class="field">输入消息…</span><span class="send">发送</span></div>
+        </div>
+        <div class="aside">
+          <div class="marker">◈ 订单助手 · 我们的应用（侧边栏）</div>
+          <div class="tabs">
+                        <span class="tab on">待办<span class="cnt">3</span></span><span class="tab">订单</span>
+          </div>
+          <div class="content">
+            <div class="pc-appr"><span class="ai">⚠</span><div class="am"><div class="at">确认到账 · ORD-2026-0110</div><div class="as">广西天华 · 应到 ¥6,800 · 流水已匹配</div></div><span class="pc-tag o">需处理</span><span class="arrow">›</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="wc-phone">
+        <div class="st-bar"><span>9:30</span><span>📶 🔋</span></div>
+        <div class="nav"><span class="back">‹</span><span class="title">订单助手</span><span class="more">⋯</span></div>
+        <div class="wc-full">
+          <div class="aside-tabs">
+            <span class="aside-tab on">待办<span class="cnt">3</span></span><span class="aside-tab">订单</span>
+          </div>
+          <div class="aside-scroll">
+            <div class="wc-sec-title"><span class="dot"></span>需要我处理 <span class="count">3</span></div>
+            <div class="wc-approval"><span class="ap-icon">¥</span><div class="ap-main"><div class="ap-title">确认到账 · ORD-2026-0110</div><div class="ap-sub">广西天华 · 应到 ¥6,800 · 流水已匹配</div></div><span class="ap-tag">需处理</span><span class="ap-arrow">›</span></div>
+            <div class="wc-approval"><span class="ap-icon">📄</span><div class="ap-main"><div class="ap-title">开票 · ORD-2026-0108</div><div class="ap-sub">¥9,600 · 已发货</div></div><span class="ap-arrow">›</span></div>
+            <div class="wc-approval"><span class="ap-icon">⚠</span><div class="ap-main"><div class="ap-title">回单异常 · 已超期 3 天</div><div class="ap-sub">ORD-2026-0102 · 非款到单</div></div><span class="ap-tag">需关注</span><span class="ap-arrow">›</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ BLOCK 2 ============ -->
+  <h2 id="b2"><span class="no">B2 ·</span> 开票（待办 Tab）</h2>
+
+  <h3><span class="no">①</span> 用例图</h3>
+  <pre class="mermaid">
+flowchart LR
+    subgraph ACT2["参与者"]
+        FIN2["财务（工作流 assignee）"]
+        NOTI2["系统/Notifier（非人）"]
+    end
+    subgraph SYS2["企微订单助手（系统边界）"]
+        UC21["(开票 invoice-issued)"]
+        UC22["(核对开票金额)"]
+    end
+    NOTI2 --> UC21
+    FIN2 --> UC21
+    FIN2 --> UC22
+  </pre>
+  <figcaption>用例图 B2：开票为工作流 assignee 委派（可含财务，非财务专属 permission）</figcaption>
+
+  <h3><span class="no">②</span> 流程图</h3>
+  <pre class="mermaid">
+flowchart TD
+    A2["待办 Tab「开票」审批条"] --> B2["核对开票金额（不超发货 CQ-09）"]
+    B2 --> C2["确认开票 invoice-issued"]
+    C2 --> D2["开票闸门推进"]
+  </pre>
+  <figcaption>流程图 B2：核对（双维度不超发货）→ 开票 → 闸门推进</figcaption>
+
+  <h3><span class="no">③</span> UI 操作图（产品稿企微手机屏幕）</h3>
+
+  <div class="ui-step">
+    <div class="desc">
+      <span class="stepno">操作 2.1</span>
+      <h4>开票详情（订单详情卡）</h4>
+      <p>点击开票审批条进入订单详情卡：开票金额、已发货数量、开票规则「不超发货」（CQ-09）；底部确认操作。</p>
+      <div class="hint">产品稿组件：order-detail-card（od-kv 字段行 + od-state 状态）。</div>
+    </div>
+        <div class="ui-shot">
+      <div class="shot-label">PC 端 · 企微客户端四栏（侧边栏应用在最右栏）</div>
+      <div class="wc-pc">
+        <div class="tl"><i class="r"></i><i class="y"></i><i class="g"></i></div>
+                <div class="rail">
+          <div class="av">财</div>
+          <div class="nav on"><span class="ico">💬</span>消息<span class="bdg">2</span></div>
+          <div class="nav"><span class="ico">✉</span>邮件</div>
+          <div class="nav"><span class="ico">📄</span>文档</div>
+          <div class="nav"><span class="ico">📅</span>日程</div>
+          <div class="nav"><span class="ico">✓</span>待办</div>
+          <div class="nav"><span class="ico">🎥</span>会议</div>
+          <div class="nav"><span class="ico">🧩</span>工作台</div>
+          <div class="nav"><span class="ico">👥</span>通讯录</div>
+          <div class="nav"><span class="ico">☁</span>微盘</div>
+        </div>
+        <div class="conv">
+          <div class="search"><span class="box">⌕ 搜索</span><span class="plus">＋</span></div>
+          <div class="conv-item on">
+            <div class="cav">天</div>
+            <div class="meta"><div class="nm">待确认到账 · ORD-2026-0110<span class="tm">09:24</span></div><div class="pv">王总：再发5吨膨润土 AB-3…</div></div>
+          </div>
+        </div>
+        <div class="chat">
+          <div class="ch-head"><div><div class="nm">待确认到账 · ORD-2026-0110</div><div class="sub">外部客户群 · 已开启订单助手（演示）</div></div></div>
+          <div class="ch-body">
+            <div class="msg o"><span class="mav">王</span><div class="mb"><div class="who">王志明｜广西天华采购部</div><div class="bub">订单 ORD-2026-0110 已进入到账确认闸门（款到才发货）。</div></div></div>
+          </div>
+          <div class="input-area"><span class="tools">☺ ▧ 📁</span><span class="field">输入消息…</span><span class="send">发送</span></div>
+        </div>
+        <div class="aside">
+          <div class="marker">◈ 订单助手 · 我们的应用（侧边栏）</div>
+          <div class="tabs">
+                        <span class="tab on">待办<span class="cnt">3</span></span><span class="tab">订单</span>
+          </div>
+          <div class="content">
+            <div class="pc-appr"><span class="ai">⚠</span><div class="am"><div class="at">确认到账 · ORD-2026-0110</div><div class="as">广西天华 · 应到 ¥6,800 · 流水已匹配</div></div><span class="pc-tag o">需处理</span><span class="arrow">›</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="wc-phone">
+        <div class="st-bar"><span>9:30</span><span>📶 🔋</span></div>
+        <div class="nav"><span class="back">‹</span><span class="title">开票详情</span><span class="more">⋯</span></div>
+        <div class="wc-full">
+          <div class="aside-scroll">
+            <div class="wc-detail">
+              <div class="od-head"><span class="od-no">ORD-2026-0108</span><span class="od-state"><span class="state st-wait" style="font-size:10px;padding:2px 6px;border-radius:3px;font-weight:500;">待开票</span></span></div>
+              <div class="od-kv">
+                <div class="row"><span class="k">客户</span><span class="v">宏远铸造</span></div>
+                <div class="row"><span class="k">开票金额</span><span class="v">¥9,600</span></div>
+                <div class="row"><span class="k">已发货</span><span class="v">3 吨（整批）</span></div>
+                <div class="row"><span class="k">开票规则</span><span class="v">不超发货（CQ-09）</span></div>
+              </div>
+            </div>
+            <div class="wc-po-actions"><span class="btn btn-confirm">确认开票</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ BLOCK 3 ============ -->
+  <h2 id="b3"><span class="no">B3 ·</span> 回单异常（待办 Tab）</h2>
+
+  <h3><span class="no">①</span> 用例图</h3>
+  <pre class="mermaid">
+flowchart LR
+    subgraph ACT3["参与者"]
+        FIN3["财务 / 销售（assignee）"]
+        NOTI3["系统/Notifier（Timer 触发）"]
+    end
+    subgraph SYS3["企微订单助手（系统边界）"]
+        UC31["(接收回单异常)"]
+        UC32["(处理例外审核)"]
+    end
+    NOTI3 --> UC31
+    FIN3 --> UC31
+    FIN3 --> UC32
+  </pre>
+  <figcaption>用例图 B3：非款到 5 天无回单 → Timer 触发回单异常（CQ-10）</figcaption>
+
+  <h3><span class="no">②</span> 流程图</h3>
+  <pre class="mermaid">
+flowchart TD
+    A3["Timer：非款到 5 天无回单"] --> B3["待办 Tab 回单异常审批条"]
+    B3 --> C3["点击「处理异常」"]
+    C3 --> D3["receipt-exception 审核 Signal"]
+    D3 --> E3["例外审核推进（CQ-10）"]
+  </pre>
+  <figcaption>流程图 B3：Timer 触发 → 审批条 → 例外审核推进</figcaption>
+
+  <h3><span class="no">③</span> UI 操作图（产品稿企微手机屏幕）</h3>
+
+  <div class="ui-step">
+    <div class="desc">
+      <span class="stepno">操作 3.1</span>
+      <h4>回单异常详情（风险提示）</h4>
+      <p>点击回单异常审批条进入详情：发货日期、回单状态、超期天数（橙色 tag「已超期 3 天」）；「处理异常」进入例外审核。</p>
+      <div class="hint">回单异常为工作流 assignee 判定，非财务专属 permission（07 §4.5.4）。</div>
+    </div>
+        <div class="ui-shot">
+      <div class="shot-label">PC 端 · 企微客户端四栏（侧边栏应用在最右栏）</div>
+      <div class="wc-pc">
+        <div class="tl"><i class="r"></i><i class="y"></i><i class="g"></i></div>
+                <div class="rail">
+          <div class="av">财</div>
+          <div class="nav on"><span class="ico">💬</span>消息<span class="bdg">2</span></div>
+          <div class="nav"><span class="ico">✉</span>邮件</div>
+          <div class="nav"><span class="ico">📄</span>文档</div>
+          <div class="nav"><span class="ico">📅</span>日程</div>
+          <div class="nav"><span class="ico">✓</span>待办</div>
+          <div class="nav"><span class="ico">🎥</span>会议</div>
+          <div class="nav"><span class="ico">🧩</span>工作台</div>
+          <div class="nav"><span class="ico">👥</span>通讯录</div>
+          <div class="nav"><span class="ico">☁</span>微盘</div>
+        </div>
+        <div class="conv">
+          <div class="search"><span class="box">⌕ 搜索</span><span class="plus">＋</span></div>
+          <div class="conv-item on">
+            <div class="cav">天</div>
+            <div class="meta"><div class="nm">待确认到账 · ORD-2026-0110<span class="tm">09:24</span></div><div class="pv">王总：再发5吨膨润土 AB-3…</div></div>
+          </div>
+        </div>
+        <div class="chat">
+          <div class="ch-head"><div><div class="nm">待确认到账 · ORD-2026-0110</div><div class="sub">外部客户群 · 已开启订单助手（演示）</div></div></div>
+          <div class="ch-body">
+            <div class="msg o"><span class="mav">王</span><div class="mb"><div class="who">王志明｜广西天华采购部</div><div class="bub">订单 ORD-2026-0110 已进入到账确认闸门（款到才发货）。</div></div></div>
+          </div>
+          <div class="input-area"><span class="tools">☺ ▧ 📁</span><span class="field">输入消息…</span><span class="send">发送</span></div>
+        </div>
+        <div class="aside">
+          <div class="marker">◈ 订单助手 · 我们的应用（侧边栏）</div>
+          <div class="tabs">
+                        <span class="tab on">待办<span class="cnt">3</span></span><span class="tab">订单</span>
+          </div>
+          <div class="content">
+            <div class="pc-appr"><span class="ai">⚠</span><div class="am"><div class="at">确认到账 · ORD-2026-0110</div><div class="as">广西天华 · 应到 ¥6,800 · 流水已匹配</div></div><span class="pc-tag o">需处理</span><span class="arrow">›</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="wc-phone">
+        <div class="st-bar"><span>9:30</span><span>📶 🔋</span></div>
+        <div class="nav"><span class="back">‹</span><span class="title">回单异常</span><span class="more">⋯</span></div>
+        <div class="wc-full">
+          <div class="aside-scroll">
+            <div class="wc-detail">
+              <div class="od-head"><span class="od-no">ORD-2026-0102</span><span class="od-state"><span class="state st-approving" style="font-size:10px;padding:2px 6px;border-radius:3px;font-weight:500;">已超期 3 天</span></span></div>
+              <div class="od-kv">
+                <div class="row"><span class="k">客户</span><span class="v">广西天华</span></div>
+                <div class="row"><span class="k">发货日期</span><span class="v">2026-07-28</span></div>
+                <div class="row"><span class="k">回单状态</span><span class="v">非款到单 · 5 天无回单</span></div>
+              </div>
+            </div>
+            <div class="wc-risk warn">
+              <div class="rk-head"><span class="rk-badge">⚠</span><span class="rk-title">例外审核</span></div>
+              <div class="rk-items">
+                <div class="rk-item"><span class="mk warn">!</span><span class="text">非款到单发货后 5 天无签收回单，进入例外审核（CQ-10）</span></div>
+              </div>
+            </div>
+            <div class="wc-po-actions"><span class="btn btn-confirm">处理异常</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="colophon">
+    <span><a href="index.html">← Role Specs</a></span>
+    <span>FINANCE · Role Spec · B2B Order Fulfillment</span>
+  </footer>
+</div>
+
+<script>
+  mermaid.initialize({ startOnLoad:true, theme:'base',
+    themeVariables:{ fontFamily:"'Noto Serif SC','Source Serif Pro',serif",
+      primaryColor:'#efeee5', primaryBorderColor:'#1B365D', primaryTextColor:'#1f1d18',
+      lineColor:'#1B365D', secondaryColor:'#f5f4ed', tertiaryColor:'#f5f4ed',
+      edgeLabelBackground:'#f5f4ed', clusterBkg:'#f5f4ed', clusterBorder:'#d4d1c5' },
+    flowchart:{curve:'basis'} });
+</script>
+</body>
+</html>

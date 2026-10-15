@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>角色规约页 · 用例/流程/UI 操作｜长安仁恒</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+SC:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:#f5f4ed; --paper2:#efeee5; --ink:#1f1d18; --ink2:#6b665b;
+    --ink3:#3a382f; --blue:#1B365D; --rule:#d4d1c5;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif; line-height:1.6;}
+  .wrap{max-width:960px; margin:0 auto; padding:48px 40px 80px;}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;}
+  .folio{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--rule); padding-bottom:10px;
+    font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink2);}
+  .folio a{color:var(--ink2); border:none;}
+  .folio a:hover{color:var(--blue);}
+  .tag{display:inline-block; padding:3px 10px; font-size:11px; letter-spacing:.16em; background:var(--paper2); color:var(--blue);}
+  .kicker{display:flex; align-items:baseline; gap:12px; margin-top:48px;}
+  h1{font-size:clamp(32px,5vw,50px); line-height:1.12; font-weight:500; margin-top:14px; letter-spacing:-.01em;}
+  .lede{margin-top:18px; font-size:17px; line-height:1.7; color:var(--ink3); max-width:720px;}
+  h2{font-size:22px; font-weight:600; margin:44px 0 14px; color:var(--blue); display:flex; align-items:baseline; gap:10px;}
+  h2 .no{font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.12em;}
+  p{margin:10px 0; color:var(--ink3);}
+  a{color:var(--blue); text-decoration:none; border-bottom:1px solid var(--rule);}
+  a:hover{border-bottom-color:var(--blue);}
+  .doc-card{display:block; border:1px solid var(--rule); padding:22px 24px; margin:18px 0; color:var(--ink); transition:border-color .15s;}
+  .doc-card:hover{border-color:var(--blue);}
+  .doc-card .dno{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.14em; color:var(--blue);}
+  .doc-card .dt{font-size:20px; font-weight:600; margin:6px 0 6px;}
+  .doc-card .dd{font-size:14px; color:var(--ink2);}
+  .doc-card .role{display:inline-block; margin-top:10px; font-size:11px; letter-spacing:.12em; background:var(--paper2); color:var(--blue); padding:2px 8px;}
+  .doc-card .role.hot{background:#fdf3f3; color:#c0392b;}
+  table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  .table-wrap{overflow-x:auto; margin:16px 0 24px; border:1px solid var(--rule);}
+  .table-wrap table{margin:0;}
+  th{background:var(--paper2); color:var(--blue); text-align:left; font-weight:600; padding:9px 12px; border-bottom:1.5px solid var(--blue); font-size:12.5px; white-space:nowrap;}
+  td{padding:9px 12px; border-bottom:1px solid var(--rule); vertical-align:top; color:var(--ink3);}
+  tr:nth-child(even) td{background:#faf9f3;}
+  footer.colophon{margin-top:56px; padding-top:14px; border-top:1px solid var(--rule); display:flex; justify-content:space-between;
+    font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink2);}
+  footer.colophon a{color:var(--ink2); border:none;}
+  footer.colophon a:hover{color:var(--blue);}
+  @media(max-width:720px){.wrap{padding:28px 20px 60px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="folio">
+    <span><a href="../index.html">Docs</a></span>
+    <span>UI Spec · Role Views</span>
+    <span>长安仁恒 · 企微订单助手</span>
+  </header>
+
+  <div class="kicker">
+    <span class="tag">Role Spec · 文档式规约</span>
+    <span class="mono" style="font-size:11px; letter-spacing:.18em; color:var(--ink2);">每角色一页 · 每页 N Block</span>
+  </div>
+
+  <h1>角色规约页<br/><span style="font-style:italic; color:var(--blue);">用例图 · 流程图 · UI 操作图</span></h1>
+
+  <p class="lede">每个角色一个独立页面，每页分为 N 个 Block；每个 Block 由三要素组成：<strong>① 用例图</strong>（参与者与系统边界）→ <strong>② 流程图</strong>（操作步骤流转）→ <strong>③ UI 操作图</strong>（每个操作给一段说明 + 一个页面）。<strong>UI 操作图同时呈现两种企微真实形态</strong>：<strong>PC 端四栏</strong>（① 标准按钮列 → ② 联系人 → ③ 对话框 → ④ 侧边栏应用，最右栏绿色标注"我们的应用"）+ <strong>移动端手机屏幕</strong>（聊天窗口 + 工具栏「订单助手」入口 + 全屏 H5）。设计语言强参考产品稿 <span class="mono">spec/ui/wecom-sidebar</span>（PC 暗色 <span class="mono">#202124</span> / 移动端浅色 <span class="mono">#F4F5F7</span> + <span class="mono">#07C160</span> 企微绿，3 Tab「待办·订单·下单」按角色裁剪）。数据为虚拟演示：企业=长安仁恒，客户=广西天华，商品=膨润土 AB-3。业务语义以 <a href="../07-wecom-integration.html">07</a> 与 <a href="../07a-wecom-interaction-prd.html">07a</a> 为事实源。</p>
+
+  <h2><span class="no">01</span> 角色规约页</h2>
+
+  <a class="doc-card" href="sales-spec.html">
+    <span class="dno">SALES · 归属销售</span>
+    <div class="dt">归属销售 —— 5 个 Block</div>
+    <div class="dd">① 查本人订单（S1）② 人工下单（S1）③ 自动下单确认卡（S2）④ 审批/催办/状态卡（S3）⑤ 工作台待办（S4）</div>
+    <span class="role hot">5 Block · 全流程主控</span>
+  </a>
+
+  <a class="doc-card" href="assistant-spec.html">
+    <span class="dno">SALES_ASSISTANT · 销售助理</span>
+    <div class="dt">销售助理 —— 2 个 Block</div>
+    <div class="dd">① 工作台代下单（XSZL1 · 先选归属销售）② 客户群入口代下单（XSZL2 · 归属销售自动带出锁定）</div>
+    <span class="role hot">2 Block · 代下单双入口</span>
+  </a>
+
+  <a class="doc-card" href="commerce-spec.html">
+    <span class="dno">COMMERCE · 商务</span>
+    <div class="dt">商务 —— 3 个 Block</div>
+    <div class="dd">① 查全量订单（S1）② 审价/备货/发货/开票卡片（S3）③ 工作台全量待办（S4）</div>
+    <span class="role">3 Block · 租户 ops</span>
+  </a>
+
+  <a class="doc-card" href="warehouse-spec.html">
+    <span class="dno">WAREHOUSE · 仓管</span>
+    <div class="dt">仓管 —— 3 个 Block</div>
+    <div class="dd">① 本仓发货单剥价视图 + 发货数量录入（S1）② 仓库确认/发货卡（S3）③ 回单凭证上传（S1）</div>
+    <span class="role">3 Block · 剥价视图</span>
+  </a>
+
+  <a class="doc-card" href="finance-spec.html">
+    <span class="dno">FINANCE · 财务</span>
+    <div class="dt">财务 —— 3 个 Block</div>
+    <div class="dd">① 到账确认卡（S3）② 开票卡（S3）③ 回单异常卡（S3）</div>
+    <span class="role">3 Block · 款到才发货</span>
+  </a>
+
+  <a class="doc-card" href="chairman-spec.html">
+    <span class="dno">CHAIRMAN · 董事长</span>
+    <div class="dt">董事长 —— 2 个 Block</div>
+    <div class="dd">① C/D 大单终审卡（S3）② 决策视图查全量（S1）</div>
+    <span class="role">2 Block · 大单终审</span>
+  </a>
+
+  <a class="doc-card" href="contact-spec.html">
+    <span class="dno">CONTACT · 客户联系人</span>
+    <div class="dt">客户联系人 —— 2 个 Block</div>
+    <div class="dd">① 我的物流视图（S1，剥金额/内部备注）② 签收凭证上传（S1）</div>
+    <span class="role">2 Block · 物流视图</span>
+  </a>
+
+  <a class="doc-card" href="admin-spec.html">
+    <span class="dno">ADMIN · 管理员</span>
+    <div class="dt">管理员 —— 3 个 Block</div>
+    <div class="dd">① 全量查询（S1/S4）② 审批委派（S3）③ 代办授权（S3）</div>
+    <span class="role">3 Block · 全量/委派</span>
+  </a>
+
+  <a class="doc-card" href="order-detail-spec.html">
+    <span class="dno">ORDER DETAIL · 订单详情</span>
+    <div class="dt">订单详情 —— 通用页面（2 个 Block）</div>
+    <div class="dd">① 全字段订单详情（四节点时间线 · 物流/预计送达 · 审批链）② 剥价订单详情（仓管/客户联系人 · 金额不可见）</div>
+    <span class="role">2 Block · 全字段 / 剥价</span>
+  </a>
+
+  <h2><span class="no">02</span> Block 结构说明</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>要素</th><th>内容</th><th>呈现</th></tr>
+    <tr><td><strong>① 用例图</strong></td><td>该用例的参与者与系统边界</td><td>mermaid flowchart（角色 → 系统边界 → 用例椭圆节点）</td></tr>
+    <tr><td><strong>② 流程图</strong></td><td>该用例的操作流程</td><td>mermaid flowchart TD/LR（步骤流转 + 分支）</td></tr>
+    <tr><td><strong>③ UI 操作图</strong></td><td>每个操作 = 一段说明 + 一个页面</td><td>静态 UI 卡片（从交互 demo 页提取，非交互）</td></tr>
+  </table>
+  </div>
+
+  <footer class="colophon">
+    <span><a href="../index.html">Docs Index</a></span>
+    <span>UI Spec · B2B Order Fulfillment</span>
+  </footer>
+</div>
+</body>
+</html>

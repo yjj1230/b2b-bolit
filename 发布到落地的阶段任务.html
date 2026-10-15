@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>发布到落地的阶段任务 · AI Native 作战地图</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      primaryColor: '#eef3ff', primaryBorderColor: '#4f6ef7', primaryTextColor: '#172554',
+      lineColor: '#64748b', fontSize: '13px',
+      fontFamily: 'ui-sans-serif, system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif',
+      sequenceMessageMargin: 30, actorBkg: '#eef3ff', actorBorder: '#4f6ef7',
+      signalColor: '#334155', actorTextColor: '#172554'
+    },
+    flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'basis' },
+    sequence: { useMaxWidth: true, showSequenceNumbers: false, wrap: true }
+  });
+</script>
+<style>
+  :root{
+    --ink:#0f172a; --ink2:#334155; --ink3:#64748b;
+    --line:#e2e8f0; --line2:#cbd5e1;
+    --bg:#f6f8fb; --card:#ffffff;
+    --blue:#2563eb; --blue-bg:#eff6ff; --blue-line:#bfdbfe;
+    --green:#059669; --green-bg:#ecfdf5; --green-line:#a7f3d0;
+    --amber:#b45309; --amber-bg:#fffbeb; --amber-line:#fde68a;
+    --red:#dc2626; --red-bg:#fef2f2; --red-line:#fecaca;
+    --violet:#7c3aed; --violet-bg:#f5f3ff; --violet-line:#ddd6fe;
+    --cyan:#0e7490; --cyan-bg:#ecfeff; --cyan-line:#a5f3fc;
+    --shadow:0 1px 2px rgba(15,23,42,.05), 0 8px 24px rgba(15,23,42,.06);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:ui-sans-serif,system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.75;font-size:15px}
+  .wrap{max-width:1180px;margin:0 auto;padding:32px 22px 80px}
+  header.hero{background:linear-gradient(135deg,#172554 0%,#1e3a8a 50%,#7c3aed 100%);color:#fff;border-radius:18px;padding:34px 34px 28px;margin-bottom:26px;box-shadow:var(--shadow)}
+  header.hero h1{margin:0 0 10px;font-size:27px;letter-spacing:.5px}
+  header.hero p{margin:4px 0;color:#dbeafe;font-size:14px}
+  .hero-badges{margin-top:16px;display:flex;flex-wrap:wrap;gap:10px}
+  .badge{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 13px;font-size:12.5px;font-weight:600;border:1px solid transparent}
+  .badge.blue{background:#dbeafe;color:#1e3a8a}
+  .badge.green{background:#d1fae5;color:#065f46}
+  .badge.amber{background:#fef3c7;color:#92400e}
+  .badge.red{background:#fee2e2;color:#991b1b}
+  .badge.violet{background:#ede9fe;color:#5b21b6}
+  .badge.cyan{background:#cffafe;color:#155e75}
+  h2{font-size:21px;margin:44px 0 14px;padding-left:12px;border-left:5px solid var(--blue);line-height:1.4}
+  h2.r1{border-left-color:#2563eb}
+  h2.r2{border-left-color:#7c3aed}
+  h2.r3{border-left-color:#dc2626}
+  h2.db{border-left-color:#0e7490}
+  h2.risk{border-left-color:#b45309}
+  h3{font-size:17px;margin:28px 0 10px;color:var(--ink)}
+  h4{font-size:15px;margin:20px 0 8px;color:var(--ink2)}
+  p{margin:8px 0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 24px;margin:14px 0;box-shadow:var(--shadow)}
+  .card.blue{border-color:var(--blue-line);background:linear-gradient(180deg,#f8fbff,var(--card))}
+  .card.green{border-color:var(--green-line);background:linear-gradient(180deg,#f8fff9,var(--card))}
+  .card.amber{border-color:var(--amber-line);background:linear-gradient(180deg,#fffef7,var(--card))}
+  .card.red{border-color:var(--red-line);background:linear-gradient(180deg,#fff9f9,var(--card))}
+  .card.violet{border-color:var(--violet-line);background:linear-gradient(180deg,#fdfbff,var(--card))}
+  .card.cyan{border-color:var(--cyan-line);background:linear-gradient(180deg,#f8feff,var(--card))}
+  .tldr{font-size:16px;line-height:1.9}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr}}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13px;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.04)}
+  th{background:#f1f5f9;color:#0f172a;text-align:left;font-weight:700;padding:10px 11px;border-bottom:2px solid var(--line);white-space:nowrap}
+  td{padding:10px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  tbody tr:hover td{background:#fafcff}
+  .tag{display:inline-block;border-radius:6px;padding:1px 8px;font-size:12px;font-weight:600;white-space:nowrap;border:1px solid transparent}
+  .tag.green{background:var(--green-bg);color:var(--green);border-color:var(--green-line)}
+  .tag.blue{background:var(--blue-bg);color:var(--blue);border-color:var(--blue-line)}
+  .tag.amber{background:var(--amber-bg);color:var(--amber);border-color:var(--amber-line)}
+  .tag.red{background:var(--red-bg);color:var(--red);border-color:var(--red-line)}
+  .tag.violet{background:var(--violet-bg);color:var(--violet);border-color:var(--violet-line)}
+  .tag.cyan{background:var(--cyan-bg);color:var(--cyan);border-color:var(--cyan-line)}
+  .tag.gray{background:#f1f5f9;color:#475569;border-color:var(--line2)}
+  .mermaid{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;margin:16px 0;overflow-x:auto;box-shadow:var(--shadow)}
+  .small{font-size:12.5px;color:var(--ink3)}
+  code, .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;font-size:.92em;background:#f1f5f9;border-radius:5px;padding:1px 6px;color:#0f172a}
+  pre{background:#0f172a;color:#e2e8f0;border-radius:12px;padding:16px 18px;overflow-x:auto;font-size:13px;line-height:1.6}
+  pre code{background:none;color:inherit;padding:0}
+  .toc{column-count:2;column-gap:30px;font-size:14px}
+  .toc a{color:var(--blue);text-decoration:none}
+  .toc a:hover{text-decoration:underline}
+  @media(max-width:760px){.toc{column-count:1}}
+  ul{margin:8px 0 8px 1.2em;padding:0}
+  li{margin:4px 0}
+  .legend{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+  .kbd{background:#fff;border:1px solid var(--line2);border-bottom-width:2px;border-radius:6px;padding:0 7px;font-size:12px;font-family:ui-monospace,monospace}
+  .loss{background:#0f172a;color:#e2e8f0;border-radius:10px;padding:14px 18px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;overflow-x:auto}
+  footer{margin-top:56px;text-align:center;color:var(--ink3);font-size:12.5px;border-top:1px solid var(--line);padding-top:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <h1>发布到落地的阶段任务 · AI Native 作战地图</h1>
+  <p>阶段边界：从「发布计划已批准 / 基线冻结」开始，到「生产部署成功 + 观察期收口」结束。</p>
+  <p>机制来源：AI-Native 项目迭代闭环的故事哲学 · 证据收敛式项目迭代机制 · 渐进式发布计划 v2（当前项目实例）</p>
+  <div class="hero-badges">
+    <span class="badge blue">线上线下交错步进</span>
+    <span class="badge green">AI 反向传播倒推计划</span>
+    <span class="badge amber">有限不确定性容错</span>
+    <span class="badge violet">物料为核心交接</span>
+    <span class="badge cyan">控制结点风险管理</span>
+  </div>
+</header>
+
+<div class="card">
+  <h3 style="margin-top:0">目录</h3>
+  <div class="toc">
+    <a href="#s0">0 · 阶段边界与读法</a><br>
+    <a href="#s1">1 · 主流程：从发布计划到落地</a><br>
+    <a href="#s2">2 · 线上线下交错步进的迭代引擎</a><br>
+    <a href="#s3">3 · 反向传播：预期、效果、偏差与计划倒推</a><br>
+    <a href="#s4">4 · 物料为核心的交接清单</a><br>
+    <a href="#s5">5 · 人类角色：责任、动作、效果、度量</a><br>
+    <a href="#s6">6 · 有限不确定性容错与出口预测</a><br>
+    <a href="#s7">7 · 预埋控制结点：收集、更新、预测、调整、控制</a><br>
+    <a href="#s8">8 · 收口定义与交付</a>
+  </div>
+</div>
+
+<!-- ============ 0 ============ -->
+<h2 id="s0">0 · 阶段边界与读法</h2>
+
+<div class="card blue">
+  <h3 style="margin-top:0">0.1 本阶段只回答一个问题</h3>
+  <p><strong>发布计划已经制定并批准之后，如何把计划变成生产事实？</strong>这一阶段不是再做计划，也不是重新论证业务；它是项目从「信息上的承诺」走向「物理世界的事实」的一段高密度、高风险、线上线下反复交错的执行期。</p>
+  <p>它在大闭环中的位置：业务分析 → 产品设计 → 技术实施 → 测试 → <strong>部署</strong> → 业务运营。本文件就是「部署」这个站点的展开，但它的内部仍是一个完整的、小号的信息闭环。</p>
+</div>
+
+<div class="card green">
+  <h3 style="margin-top:0">0.2 当前项目实例（渐进式发布计划 v2）</h3>
+  <p>本机制是通用化的，但为了落地，我们用当前项目的三次发布作为实例：</p>
+  <table>
+    <tr><th style="width:160px">发布</th><th>阶段任务重点</th></tr>
+    <tr><td><span class="tag blue">第 1 次</span>销售助理接入</td><td>桥接模块、OAuth 通路、白名单/V01 profile、pgAPI 只读、PC/企微入口；旧系统仍是真相源</td></tr>
+    <tr><td><span class="tag violet">第 2 次</span>商务+财务+仓管接入</td><td>受信办理通道、真实 operator、幂等锁、文件直传、存量待办规则、三角色工作台</td></tr>
+    <tr><td><span class="tag red">第 3 次</span>销售接入+全量切换</td><td>角色迁入、JSONL 全量迁移、四层对账、冻结、切换、观察期、回滚演练</td></tr>
+  </table>
+</div>
+
+<div class="card amber">
+  <h3 style="margin-top:0">0.3 本文件的五条公理（来自两个参考机制）</h3>
+  <ul>
+    <li><strong>线上只有信息；线下动作的价值等于它带回的信息块。</strong>所以一切线下动作都必须设计成「带着 Gap 去，带着裸材料回」。</li>
+    <li><strong>先线上，后线下。</strong>AI 先把已有信息块用满，剩余 Gap 才派发线下任务。</li>
+    <li><strong>带着不确定性前行。</strong>线上维护有限、可回放、可测量的平行分支；昂贵不可逆的物理动作前必须退相干。</li>
+    <li><strong>一切产出都是声明，一切证据必须可回放。</strong>部署不是一个动作，而是一条新 claim 进入生产证据链。</li>
+    <li><strong>收敛才是完成。</strong>不是「全部绿灯」，而是重要不确定性已被解释、消除或显式承担。</li>
+  </ul>
+</div>
+
+<!-- ============ 1 ============ -->
+<h2 id="s1">1 · 主流程：从发布计划到落地</h2>
+
+<div class="card">
+  <h3>1.1 一张图看懂全阶段</h3>
+  <div class="mermaid">
+flowchart TB
+    START["发布计划已批准<br/>Baseline 冻结"]:::start
+    P1["① 发布准备<br/>物料集结 / 控制结点埋点 / 角色定岗"]:::online
+    P2{"② P0 门禁<br/>证据是否齐备？"}:::gate
+    P3["③ 发布执行<br/>线上部署 / 灰度 / 线下核验"]:::offline
+    P4["④ 生产观察<br/>指标采集 / 对账 / 缺陷捕获"]:::online
+    P5{"⑤ 偏差判定<br/>是否在容差内？"}:::gate
+    P6["⑥ 收口与交付<br/>证据打包 / 复盘 / 基线升版"]:::online
+    LOOP["小循环：反向传播调整<br/>偏差归因 → 更新物料 → 重排任务"]:::loop
+    START --> P1 --> P2
+    P2 -->|"通过"| P3
+    P2 -->|"不通过"| LOOP
+    LOOP --> P1
+    P3 --> P4 --> P5
+    P5 -->|"是"| P6
+    P5 -->|"否"| LOOP
+    P6 --> DONE["生产部署成功<br/>观察期收口"]:::done
+    classDef online fill:#eff6ff,stroke:#2563eb,color:#1d4ed8
+    classDef offline fill:#fff7ed,stroke:#b45309,color:#92400e
+    classDef gate fill:#fdf4ff,stroke:#a21caf,color:#86198f
+    classDef loop fill:#f1f5f9,stroke:#64748b,color:#475569
+    classDef start fill:#ecfdf5,stroke:#059669,color:#065f46
+    classDef done fill:#d1fae5,stroke:#059669,color:#065f46
+  </div>
+  <p class="small">这不是一条直线，而是一条<strong>带反向传播小循环</strong>的收敛曲线：第 2/5 两个门禁是显式闸门，任何偏差都会沿虚线回到准备区重新推演，而不是带着错误继续走。</p>
+</div>
+
+<div class="card">
+  <h3>1.2 六个阶段各自的任务、退出条件与当前项目映射</h3>
+  <table>
+    <tr><th style="width:130px">阶段</th><th>核心任务</th><th>退出条件</th><th>当前项目映射</th></tr>
+    <tr><td>① 发布准备</td><td>把计划拆成物料包；埋控制结点；确定角色与度量</td><td>物料清单 100% 可追踪；控制结点有 owner</td><td>三次发布的 P0 清单、取证清单、角色权限表</td></tr>
+    <tr><td>② P0 门禁</td><td>逐项验证阻塞项证据</td><td>P0 全部关闭，未关闭项有批准豁免</td><td>P0-1..P0-10 证据门（见发布计划 §8）</td></tr>
+    <tr><td>③ 发布执行</td><td>线上部署 + 线下核验交错；小步推进</td><td>部署动作可回放；线下核验材料回流</td><td>第 1 次桥接上线；第 2 次受信通道；第 3 次切换</td></tr>
+    <tr><td>④ 生产观察</td><td>采集真实运行指标；对账；捕获缺陷</td><td>观察期达到预设时长；数据偏差可解释</td><td>第 3 次观察期每日对账；灰度数据</td></tr>
+    <tr><td>⑤ 偏差判定</td><td>预期 vs 实际；偏差归因；决定放行/回退/重排</td><td>每项偏差有归因与处置</td><td>四层对账 100% 一致；回滚演练通过</td></tr>
+    <tr><td>⑥ 收口交付</td><td>证据打包；基线升版；把新事实写回地图</td><td>交付基线可重建；复盘问题进入下一循环</td><td>《分期部署数据流分析》更新；生产基线建立</td></tr>
+  </table>
+</div>
+
+<!-- ============ 2 ============ -->
+<h2 id="s2">2 · 线上线下交错步进的迭代引擎</h2>
+
+<div class="card">
+  <h3>2.1 一次最小的交错步进</h3>
+  <p>每向前走一步，都是同一个节奏：<strong>AI 在线上推演 → 给人类一个最小任务包 → 人类在线下执行 → 裸材料回流线上 → 地图更新 → AI 重新推演。</strong></p>
+  <div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant AI as AI 指挥官（线上）
+    participant MAP as 项目地图 / 事件日志（线上）
+    participant HUMAN as 人类角色（线下）
+    participant WORLD as 生产 / 物理世界（线下）
+
+    AI->>MAP: 读当前 Plan / Material / Gap
+    MAP-->>AI: 预期值、风险权重、可回放历史
+    AI->>AI: 推演 expected；选择最小线下动作
+    AI->>HUMAN: 下发任务包（≤3 问，附 Gap 与关闭判据）
+    HUMAN->>WORLD: 执行物理动作（部署/核验/签字/切换）
+    WORLD-->>HUMAN: 产生裸材料（截图/日志/签核单/观测）
+    HUMAN->>MAP: 裸材料回流成信息块（脱敏、编号、digest）
+    MAP->>AI: 更新 actual；计算 deviation
+    AI->>MAP: 反向传播：归因 → 更新 Plan / 分支退相干
+    Note over AI,WORLD: 小循环可多次，直到通过控制结点或显式升级
+  </div>
+</div>
+
+<div class="card">
+  <h3>2.2 交错步进的三种小循环</h3>
+  <table>
+    <tr><th style="width:130px">小循环</th><th>触发条件</th><th>循环动作</th><th>当前项目实例</th></tr>
+    <tr><td><span class="tag blue">准备循环</span></td><td>P0 门禁不通过</td><td>回准备区补齐物料/证据，重排任务</td><td>第 1 次前发现 V01 profile 未配 → 现场取证 → 配置 → 复核</td></tr>
+    <tr><td><span class="tag violet">验证循环</span></td><td>灰度/测试发现偏差</td><td>小范围修正，补证据，重新灰度</td><td>第 2 次受信通道 multipart 失败 → 修正 → 单角色灰度重试</td></tr>
+    <tr><td><span class="tag red">对账循环</span></td><td>生产观察发现偏差</td><td>对账 → 归因 → 调整或回滚</td><td>第 3 次四层对账差异 → 补迁/重对账，差异清零前不切换</td></tr>
+  </table>
+</div>
+
+<div class="card green">
+  <h3>2.3 线下任务包的格式（从故事哲学第五章继承）</h3>
+  <table>
+    <tr><th style="width:150px">要素</th><th>必须写清的问题</th></tr>
+    <tr><td>来源 Gap</td><td>这趟出去是为了填地图上哪个洞？（例如：V01 profile 审批人是否已配真实主管）</td></tr>
+    <tr><td>最小物理动作</td><td>能用一个截图回答，就不开一场会；能一次核验，就不做全量回归。</td></tr>
+    <tr><td>裸材料形态</td><td>截图、命令输出、签核单、日志片段、观测数据；必须带时间戳与来源。</td></tr>
+    <tr><td>回流方式</td><td>谁在何时把材料编号、脱敏、计算 digest，写回事件日志。</td></tr>
+    <tr><td>关闭证据</td><td>Gap 关闭时引用哪一条新信息块；由谁复核。</td></tr>
+  </table>
+</div>
+
+<!-- ============ 3 ============ -->
+<h2 id="s3">3 · 反向传播：预期、效果、偏差与计划倒推</h2>
+
+<div class="card">
+  <h3>3.1 AI 作为指挥官，如何倒推计划</h3>
+  <p>机器学习的反向传播，本质是：<strong>用损失函数比较预测与真实，把误差沿计算图回传，逐层更新权重。</strong>发布到落地阶段完全同构：</p>
+  <div class="loss">Loss = Σ (风险权重 × 偏差等级) + Σ (控制结点未通过数 × 阻塞权重)<br>
+Gradient → 归因到「物料 / 角色 / 步骤 / 前提假设」 → 更新对应计划与任务</div>
+  <div class="mermaid">
+flowchart LR
+    E["预期 Expected<br/>计划值 / 验收阈值 / 时间窗"]:::e
+    A["实际 Actual<br/>生产观测 / 现场材料 / 对账结果"]:::a
+    C{"比较器<br/>偏差分级"}:::gate
+    G["归因 Attribution<br/>物料缺失 / 角色动作 / 步骤顺序 / 前提假设"]:::g
+    U["更新 Plan<br/>补物料 / 重排任务 / 调整容差 / 分支退相干"]:::u
+    E --> C
+    A --> C
+    C -->|"deviation"| G
+    G --> U
+    U -.->|"新预期"| E
+    classDef e fill:#eff6ff,stroke:#2563eb,color:#1d4ed8
+    classDef a fill:#fff7ed,stroke:#b45309,color:#92400e
+    classDef gate fill:#fdf4ff,stroke:#a21caf,color:#86198f
+    classDef g fill:#f1f5f9,stroke:#64748b,color:#475569
+    classDef u fill:#ecfdf5,stroke:#059669,color:#065f46
+  </div>
+</div>
+
+<div class="card">
+  <h3>3.2 预期/实际/偏差的度量表（定量）</h3>
+  <table>
+    <tr><th style="width:190px">度量对象</th><th>预期（Expected）</th><th>实际（Actual）</th><th>偏差分级与处置</th></tr>
+    <tr><td>P0 关闭率</td><td>发布前 100%</td><td>现场取证后的 P0 状态</td><td>未关 → 回准备循环；有豁免 → 记录风险与 owner</td></tr>
+    <tr><td>数据对账差异</td><td>四层计数 100% 一致</td><td>订单数/状态/事件链/附件差异</td><td>0 差异放行；非 0 停止切换并归因</td></tr>
+    <tr><td>灰度缺陷率</td><td>预设阈值（如严重 0 / 一般 ≤ n）</td><td>灰度期观测</td><td>超阈值回滚；未超阈值继续放量</td></tr>
+    <tr><td>同步时延</td><td>业务可接受时延</td><td>pgAPI / 多维表实际时延</td><td>超容差 → 调整同步频率或改链路</td></tr>
+    <tr><td>回滚演练</td><td>切回旧系统后增量不丢</td><td>演练实际结果</td><td>失败 → 修回滚路径，再演练</td></tr>
+    <tr><td>用户验收</td><td>角色体验清单全过</td><td>UAT 签核与问题数</td><td>关键项不过 → 回验证循环</td></tr>
+  </table>
+</div>
+
+<div class="card amber">
+  <h3>3.3 偏差归因的四个默认方向</h3>
+  <table>
+    <tr><th style="width:150px">归因方向</th><th>要问的问题</th><th>典型计划更新</th></tr>
+    <tr><td>物料缺失</td><td>是计划缺了某份信息，还是信息没回流？</td><td>补取证/补文档/补配置，重排任务依赖</td></tr>
+    <tr><td>角色动作</td><td>是谁的哪个动作没有达到预期效果？</td><td>换人、培训、增加签核、增加验证</td></tr>
+    <tr><td>步骤顺序</td><td>是否顺序错了导致不可逆动作提前发生？</td><td>冻结步骤，先迁移后切换；更新 runbook</td></tr>
+    <tr><td>前提假设</td><td>计划依赖的前提是否已经变化？</td><td>重开决策、更新 claim、分支退相干</td></tr>
+  </table>
+</div>
+
+<!-- ============ 4 ============ -->
+<h2 id="s4">4 · 物料为核心的交接清单</h2>
+
+<div class="card">
+  <h3>4.1 为什么是物料，而不是会议</h3>
+  <p>线下交接最贵的是失忆。物料是<strong>可版本、可引用、可回放的信息块</strong>；会议和口述只是生成物料的现场。发布到落地的每一步，都应该用物料完成状态转移：<strong>上线 = 新物料声明；验收 = 物料与现场一致；回滚 = 旧物料重新生效。</strong></p>
+</div>
+
+<div class="card">
+  <h3>4.2 物料清单：线上物料 ↔ 线下物料</h3>
+  <table>
+    <tr><th style="width:160px">物料</th><th style="width:110px">形态</th><th>从哪来</th><th>到哪去</th><th style="width:160px">交接判据</th></tr>
+    <tr><td>发布计划 / Baseline</td><td>线上</td><td>规划阶段批准产物</td><td>所有执行与验证引用</td><td>版本号 + digest 冻结</td></tr>
+    <tr><td>P0 证据清单</td><td>线上/线下混合</td><td>现场取证 / 测试 / 代码核验</td><td>P0 门禁</td><td>每项有证据编号与等级</td></tr>
+    <tr><td>部署 runbook / 操作手册</td><td>线上</td><td>计划拆解产出</td><td>现场操作台</td><td>步骤可执行、可回滚</td></tr>
+    <tr><td>生产基线数据表</td><td>线上</td><td>现场只读采集</td><td>对账与控制结点</td><td>同口径、带时间戳</td></tr>
+    <tr><td>签核单 / 截图 / 日志</td><td>线下</td><td>物理动作产生</td><td>回流为信息块</td><td>脱敏、编号、可回放</td></tr>
+    <tr><td>对账报告</td><td>线上</td><td>实际 vs 预期比较</td><td>偏差判定</td><td>差异逐项归因</td></tr>
+    <tr><td>切换 / 回滚记录</td><td>线上</td><td>控制结点执行</td><td>证据链</td><td>时间、操作人、结果</td></tr>
+    <tr><td>观察期日报</td><td>线上</td><td>生产观测</td><td>复盘与基线升版</td><td>每项指标有预期与实际</td></tr>
+  </table>
+</div>
+
+<div class="card violet">
+  <h3>4.3 每次交接的固定动作</h3>
+  <div class="mermaid">
+flowchart LR
+    M1["交接物打包<br/>id@version + digest"] --> M2["接收方校验<br/>打开即验证"] --> M3["回执签收<br/>接受/拒绝"] --> M4["写入事件日志<br/>append-only"] --> M5["后续工作才允许开始"]
+    style M1 fill:#eff6ff,stroke:#2563eb
+    style M5 fill:#ecfdf5,stroke:#059669
+  </div>
+</div>
+
+<!-- ============ 5 ============ -->
+<h2 id="s5">5 · 人类角色：责任、动作、效果、度量</h2>
+
+<div class="card">
+  <h3>5.1 角色一览表</h3>
+  <table>
+    <tr><th style="width:130px">角色</th><th style="width:200px">责任</th><th style="width:260px">关键动作</th><th>期望效果</th><th>度量指标</th></tr>
+    <tr><td><span class="tag violet">AI 指挥官</span></td><td>把已有信息用满；推演预期；倒推计划；维护分支</td><td>读地图、算 Gap、排任务、做 simulation、更新 Plan</td><td>每个线下任务都最小、可关闭 Gap；偏差有归因</td><td>Gap 关闭率、推演命中率、循环收敛速度</td></tr>
+    <tr><td><span class="tag blue">业务负责人</span></td><td>对真实业务事实与验收负责</td><td>裁决业务语义、确认验收口径、签核业务结果</td><td>业务真相被准确记录；验收无歧义</td><td>决策及时率、验收一次通过率</td></tr>
+    <tr><td><span class="tag green">产品负责人</span></td><td>把业务承诺转成可执行、可验收的产物</td><td>维护 claim、确认范围、确认体验清单</td><td>范围清晰、体验清单可验收</td><td>需求变更率、验收项覆盖度</td></tr>
+    <tr><td><span class="tag cyan">技术负责人</span></td><td>让实现与计划一致，且可回放</td><td>技术方案、代码/配置变更、部署回滚设计</td><td>实现可重建；变更可回滚</td><td>部署成功率、回滚成功率</td></tr>
+    <tr><td><span class="tag amber">测试 / 验证负责人</span></td><td>独立挑战；为每条 claim 制造反例</td><td>测试用例、灰度方案、对账程序、回滚演练</td><td>关键风险有独立证据；无自证通过</td><td>反例命中率、证据覆盖率</td></tr>
+    <tr><td><span class="tag red">现场 Agent / 运维</span></td><td>线下物理动作的执行与取证</td><td>只读采集、执行 runbook、截图签核、回流材料</td><td>线下动作安全、材料完整、脱敏合规</td><td>取证完成率、物料回流及时率</td></tr>
+    <tr><td><span class="tag gray">业务操作者</span></td><td>在真实场景中操作并产生反馈</td><td>按体验清单完成业务动作（下单/审批/发货等）</td><td>流程可走通、问题可复现</td><td>UAT 通过率、问题报告质量</td></tr>
+  </table>
+</div>
+
+<div class="card green">
+  <h3>5.2 当前项目角色映射</h3>
+  <table>
+    <tr><th style="width:150px">通用角色</th><th>当前项目中的具体对象</th></tr>
+    <tr><td>业务负责人</td><td>业务方（销售、财务、仓管、商务、董事长等角色的业务决策者）</td></tr>
+    <tr><td>产品负责人</td><td>产品 / 设计 owner；发布计划与验收口径维护者</td></tr>
+    <tr><td>技术负责人</td><td>新系统 Go 开发、旧系统 TS 开发、pgAPI 数据侧负责人</td></tr>
+    <tr><td>测试 / 验证负责人</td><td>测试负责人、回滚演练指挥、对账脚本负责人</td></tr>
+    <tr><td>现场 Agent / 运维</td><td>现场取证 Agent、旧系统运维、新系统运维、飞书/企微管理后台操作者</td></tr>
+    <tr><td>业务操作者</td><td>销售助理虹励、商务、财务、仓管、销售、主管、董事长</td></tr>
+  </table>
+</div>
+
+<!-- ============ 6 ============ -->
+<h2 id="s6">6 · 有限不确定性容错与出口预测</h2>
+
+<div class="card">
+  <h3>6.1 不提前坍缩，但也不无限叠加</h3>
+  <p>发布阶段有大量不确定性：入口是否就绪、通道是否可用、对账是否有差异。我们的姿态是：<strong>在线上为每个不确定点维护一个可回放的平行分支；每个分支必须配一个测量计划和一个最晚坍缩点；昂贵、不可逆的物理动作前必须退相干。</strong></p>
+  <div class="mermaid">
+flowchart TB
+    subgraph TODAY["当前不确定点（有限叠加）"]
+      B1["分支 A：企微域名未就绪 → PC 兜底"]:::b
+      B2["分支 B：企微域名就绪 → 企微入口"]:::b
+      B3["分支 C：pgAPI 只读历史"]:::b
+      B4["分支 D：新系统接管写 pgAPI"]:::b
+    end
+    M["测量 / Simulation / Sampling<br/>现场取证 / 影子运行 / 抽样对账"]:::m
+    F["退相干：一条成为事实<br/>其余 STALE 归档"]:::f
+    TODAY --> M --> F
+    classDef b fill:#eff6ff,stroke:#2563eb,color:#1d4ed8
+    classDef m fill:#fdf4ff,stroke:#a21caf,color:#86198f
+    classDef f fill:#ecfdf5,stroke:#059669,color:#065f46
+  </div>
+</div>
+
+<div class="card">
+  <h3>6.2 Simulation / Sampling / 泛性支持：如何预测出口</h3>
+  <table>
+    <tr><th style="width:160px">方法</th><th>做什么</th><th>输出</th><th>当前项目实例</th></tr>
+    <tr><td>历史回放</td><td>把过去事件/事故/旧版本放在新机制下重跑</td><td>召回与误伤率</td><td>回放旧 system 的 decision 接口并发场景，验证幂等锁是否必要</td></tr>
+    <tr><td>影子运行</td><td>新旧机制/新旧数据链并行计算，不改变生产</td><td>新旧差异清单</td><td>第 3 次切换前，新系统状态机影子跑旧 JSONL 样本</td></tr>
+    <tr><td>抽样对账</td><td>对大数据面做统计抽样，按风险分层抽检</td><td>差异率与置信度</td><td>四层对账：订单数全量、事件链按 flow_id 抽样</td></tr>
+    <tr><td>蒙特卡洛 / 压力推演</td><td>对任务时长、缺陷率做分布推演</td><td>完成概率、瓶颈</td><td>第 3 次迁移时长与切换窗口的可行性</td></tr>
+    <tr><td>故障注入</td><td>在测试环境故意制造失败，验证兜底</td><td>回滚路径有效性</td><td>回滚演练：关新系统写入，重开旧系统入口</td></tr>
+      <tr><td>泛化 / 鲁棒性支持</td><td>把同一套机制复用到不同角色、租户、场景，验证泛化边界</td><td>可复用的步骤 / 需特化的点</td><td>三角色灰度的可复制性；新旧系统的桥接通道一次建成、三处复用</td></tr>
+  </table>
+</div>
+
+<div class="card amber">
+  <h3>6.3 分支管理纪律</h3>
+  <ul>
+    <li><strong>每条分支都是可回放的信息块</strong>：带 id、权重、前提、测量计划、最晚坍缩点。</li>
+    <li><strong>活分支有预算上限</strong>：默认不超过 3 个；权重按「风险 × 信息增益」分配。</li>
+    <li><strong>昂贵动作前必须坍缩</strong>：切换、冻结、回滚、批量迁移之前，只允许一个事实分支。</li>
+    <li><strong>被淘汰分支不销毁</strong>：标 STALE 归档，未来证据反转还能重新水合。</li>
+  </ul>
+</div>
+
+<!-- ============ 7 ============ -->
+<h2 id="s7">7 · 预埋控制结点：收集、更新、预测、调整、控制</h2>
+
+<div class="card">
+  <h3>7.1 控制结点的完整循环</h3>
+  <p>控制结点不是审批章，而是<strong>信息采集器 + 偏差比较器 + 计划调整器</strong>。每个结点都要完成五件事：<strong>收集 → 更新 → 预测 → 调整 → 控制</strong>。</p>
+  <div class="mermaid">
+flowchart LR
+    C["收集 Collect<br/>现场材料 / 生产指标"] --> U["更新 Update<br/>写入事件日志 / 地图"]
+    U --> P["预测 Predict<br/>simulation / 推演出口"]
+    P --> A["调整 Adjust<br/>重排计划 / 分支坍缩"]
+    A --> K["控制 Control<br/>放行 / 冻结 / 回滚"]
+    K -.->|"下一结点"| C
+    style K fill:#ecfdf5,stroke:#059669
+  </div>
+</div>
+
+<div class="card">
+  <h3>7.2 控制结点清单（通用 + 当前项目实例）</h3>
+  <table>
+    <tr><th style="width:150px">控制结点</th><th style="width:110px">触发时机</th><th>收集什么</th><th>预测/调整什么</th><th>控制动作</th></tr>
+    <tr><td>CN-0 基线冻结</td><td>发布准备开始</td><td>计划版本、物料清单、角色定岗</td><td>后续所有证据必须引用此基线</td><td>冻结；变更走重开</td></tr>
+    <tr><td>CN-1 P0 门禁</td><td>发布执行前</td><td>P0 证据包</td><td>未关 P0 的阻塞后果</td><td>放行 / 回准备循环</td></tr>
+    <tr><td>CN-2 测试/预发验证</td><td>进入生产前</td><td>测试证据、部署 runbook</td><td>缺陷逃逸概率</td><td>放行 / 回验证循环</td></tr>
+    <tr><td>CN-3 灰度/金丝雀</td><td>生产放量中</td><td>真实用户行为、缺陷、时延</td><td>继续放量 / 回滚概率</td><td>放量 / 暂停 / 回滚</td></tr>
+    <tr><td>CN-4 对账结点</td><td>数据切换前</td><td>订单数/状态/事件链/附件</td><td>切换后差异风险</td><td>通过 / 补迁重对账</td></tr>
+    <tr><td>CN-5 冻结结点</td><td>真相源切换前</td><td>旧系统写入状态、存量单</td><td>进行中订单死路风险</td><td>冻结旧系统写</td></tr>
+    <tr><td>CN-6 切换结点</td><td>终审对账通过后</td><td>最终对账结论</td><td>切换成功概率</td><td>切换 / 回滚</td></tr>
+    <tr><td>CN-7 观察期</td><td>切换后</td><td>每日对账、缺陷、时延</td><td>是否需要回滚</td><td>保持 / 回滚 / 收口</td></tr>
+  </table>
+</div>
+
+<div class="card green">
+  <h3>7.3 风险控制矩阵：每个风险都对应到控制结点</h3>
+  <table>
+    <tr><th style="width:190px">风险</th><th style="width:120px">主控结点</th><th>收集动作</th><th>控制动作</th></tr>
+    <tr><td>双通道并发写</td><td>CN-2 / CN-3</td><td>幂等锁证据；并发复现测试</td><td>不补齐不放行；灰度期监测 ALREADY</td></tr>
+    <tr><td>受信通道失败导致新旧不一致</td><td>CN-3 / CN-4</td><td>回执成功记录；对账差异</td><td>以旧系统回执为准；失败重试</td></tr>
+    <tr><td>事件链丢失</td><td>CN-4</td><td>事件链完整性抽样</td><td>不全量迁移不冻结</td></tr>
+    <tr><td>附件死路</td><td>CN-4 / CN-5</td><td>附件清单与缺失检测</td><td>缺失未清不切换</td></tr>
+    <tr><td>pgAPI 镜像覆盖新真相</td><td>CN-5 / CN-6</td><td>上游同步状态</td><td>切换后停上游同步</td></tr>
+    <tr><td>切换顺序错误</td><td>CN-5 / CN-6</td><td>runbook 顺序；演练记录</td><td>先迁移→对账→冻结→切换</td></tr>
+    <tr><td>回滚失败</td><td>CN-6 / CN-7</td><td>回滚演练证据</td><td>演练不过不切换；观察期保留回滚</td></tr>
+  </table>
+</div>
+
+<!-- ============ 8 ============ -->
+<h2 id="s8">8 · 收口定义与交付</h2>
+
+<div class="card green tldr">
+  <h3 style="margin-top:0">8.1 本阶段完成的标准</h3>
+  <p><strong>不是「部署动作做完了」，而是下面七条同时成立：</strong></p>
+  <ul>
+    <li>所有控制结点（CN-0..CN-7）已执行并有证据。</li>
+    <li>关键偏差已被解释、消除或显式承担；剩余分支全部 STALE 归档可重放。</li>
+    <li>四层对账与观察期数据达到预设容差。</li>
+    <li>回滚路径在观察期内仍然可用。</li>
+    <li>所有线下裸材料已回流为可引用信息块，无脱敏违规。</li>
+    <li>交付基线已升版，并绑定计划、代码、证据、机制版本。</li>
+    <li>复盘产生的新 Gap 已进入下一个闭环。</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h3>8.2 交付物清单</h3>
+  <table>
+    <tr><th style="width:160px">交付物</th><th>说明</th><th>去向</th></tr>
+    <tr><td>发布基线（升版）</td><td>计划 + 代码 + 配置 + 证据的一致切片</td><td>项目地图 / baseline</td></tr>
+    <tr><td>控制结点证据包</td><td>每个 CN 的输入、结论、操作人、时间</td><td>事件日志 / evidence</td></tr>
+    <tr><td>生产基线数据表</td><td>发布前后同一口径的定量指标</td><td>《分期部署数据流分析》更新</td></tr>
+    <tr><td>复盘报告</td><td>预期 vs 实际、偏差归因、新 Gap 清单</td><td>下一轮迭代输入</td></tr>
+    <tr><td>回滚 runbook</td><td>观察期结束前保持热状态</td><td>运维 / 值班</td></tr>
+  </table>
+</div>
+
+<footer>
+  发布到落地的阶段任务 · AI Native 作战地图 · 参考：AI-Native 项目迭代闭环的故事哲学 · 证据收敛式项目迭代机制 · 渐进式发布计划 v2
+</footer>
+
+</div>
+</body>
+</html>

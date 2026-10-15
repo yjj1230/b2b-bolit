@@ -1,0 +1,2107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:,">
+<title>场景2 · 企微实时话术参谋｜陈香贵连锁 王建国</title>
+<link rel="stylesheet" href="../../shared/css/styles.css">
+<style>
+/* ==========================================================================
+   WeCom PC 暗色模式 · 四栏工作台
+   ========================================================================== */
+:root {
+  --bg-primary: #202124;
+  --bg-rail: #2A2B2E;
+  --bg-side: #202124;
+  --bg-chat: #1F2022;
+  --bg-search: #3A3B3D;
+  --bg-detail: #1F2022;
+  --divider: rgba(255,255,255,0.08);
+  --divider-solid: #303236;
+  --text-primary: #E6E6E6;
+  --text-secondary: #9A9A9A;
+  --text-tertiary: #6F7378;
+  --brand-blue: #2F7EDB;
+  --brand-blue-bubble: #1677D2;
+  --badge-red: #F04B4B;
+  --bubble-other: #333538;
+
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+}
+
+/* ---------- Scene nav (keep from shared) ---------- */
+main.scene-content { padding: 0; max-width: none; width: 100%; }
+.scene-page .scene-nav { position: relative; z-index: 100; }
+
+/* ============================
+   FOUR-COLUMN LAYOUT
+   ============================ */
+.app-window {
+  display: grid;
+  grid-template-columns: 60px 300px 1fr;
+  height: calc(100vh - 48px); /* 48px = scene-nav height */
+  min-height: 0;
+  overflow: hidden;
+  background: var(--bg-primary);
+}
+
+/* ============================
+   COLUMN 1: Sidebar Apps (92px)
+   ============================ */
+.sidebar-apps {
+  width: 60px;
+  background: #1B1B1C;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 0 10px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  position: relative;
+  z-index: 5;
+}
+.sidebar-apps::-webkit-scrollbar { display: none; }
+
+.sb-profile {
+  width: 40px; height: 40px;
+  border-radius: 6px;
+  background: #3A3B3D;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 600; color: var(--text-primary);
+  margin-bottom: 16px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.sb-nav-item {
+  width: 48px;
+  display: flex; flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 2px;
+  border-radius: 5px;
+  cursor: pointer;
+  color: var(--text-tertiary);
+  font-size: 11px;
+  transition: background 0.1s;
+  position: relative;
+  margin-bottom: 8px;
+  flex-shrink: 0;
+}
+.sb-nav-item:hover { background: rgba(255,255,255,0.06); }
+.sb-nav-item.is-active {
+  background: var(--brand-blue);
+  color: #fff;
+}
+.sb-nav-item svg { width: 22px; height: 22px; stroke: currentColor; stroke-width: 1.5; fill: none; }
+.sb-nav-item .sb-label { line-height: 1.2; text-align: center; white-space: nowrap; font-size: 10px; }
+
+.sb-badge {
+  position: absolute; top: 2px; right: 0;
+  background: var(--badge-red);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  min-width: 16px; height: 16px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 8px;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+
+/* ============================
+   COLUMN 2: Conversation List (510px)
+   ============================ */
+.conversation-list {
+  background: #202021;
+  display: flex; flex-direction: column;
+  border-right: 1px solid var(--divider-solid);
+  min-height: 0;
+}
+
+.search-bar {
+  height: 65px;
+  display: flex; align-items: center;
+  padding: 0 16px;
+  gap: 8px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--divider);
+}
+.search-bar .search-input-wrap {
+  flex: 1;
+  position: relative;
+}
+.search-bar .search-input-wrap svg {
+  position: absolute; left: 12px; top: 50%;
+  transform: translateY(-50%);
+  width: 14px; height: 14px;
+  stroke: var(--text-tertiary);
+  fill: none; stroke-width: 1.8;
+  pointer-events: none;
+}
+.search-bar input {
+  width: 100%; height: 34px;
+  background: var(--bg-search);
+  border: none;
+  border-radius: 18px;
+  padding: 0 14px 0 34px;
+  color: var(--text-primary);
+  font-size: 14px;
+  outline: none;
+}
+.search-bar input::placeholder { color: var(--text-tertiary); }
+.search-bar .sb-add-btn {
+  width: 32px; height: 32px;
+  border: none; background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.1s;
+}
+.search-bar .sb-add-btn:hover { background: rgba(255,255,255,0.08); }
+.search-bar .sb-add-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+
+.conv-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 8px;
+  min-height: 0;
+}
+.conv-list::-webkit-scrollbar { width: 4px; }
+.conv-list::-webkit-scrollbar-track { background: transparent; }
+.conv-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+.conv-item {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 8px;
+  padding: 11px 10px 12px;
+  cursor: pointer;
+  transition: background 0.1s;
+  position: relative;
+}
+.conv-item:hover { background: rgba(255,255,255,0.04); }
+.conv-item + .conv-item { border-top: 1px solid var(--divider); }
+.conv-item.is-active {
+  background: var(--brand-blue);
+  border-radius: 6px;
+}
+.conv-item.is-active + .conv-item { border-top-color: transparent; }
+
+.conv-avatar {
+  width: 40px; height: 40px;
+  border-radius: 5px;
+  background: #3A3B3D;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 600;
+  color: var(--text-primary);
+  flex-shrink: 0;
+  position: relative;
+}
+.conv-avatar .conv-unread {
+  position: absolute; top: -5px; right: -5px;
+  min-width: 16px; height: 16px;
+  background: var(--badge-red);
+  color: #fff;
+  font-size: 10px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 8px;
+  padding: 0 4px;
+  line-height: 1;
+}
+.conv-item.is-active .conv-avatar { background: #4A5B8C; }
+
+.conv-meta {
+  display: flex; flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  line-height: 1.3;
+}
+.conv-top {
+  display: flex; align-items: center;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+.conv-name {
+  font-size: 16px; font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  line-height: 1.3;
+}
+.conv-item.is-active .conv-name { color: #fff; }
+.conv-time {
+  font-size: 12px; color: var(--text-tertiary);
+  margin-left: auto; white-space: nowrap;
+  flex-shrink: 0;
+}
+.conv-item.is-active .conv-time { color: rgba(255,255,255,0.7); }
+.conv-preview {
+  font-size: 13px;
+  color: var(--text-secondary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin-bottom: 1px;
+}
+.conv-item.is-active .conv-preview { color: rgba(255,255,255,0.75); }
+
+
+
+/* ============================
+   COLUMN 3: Chat Panel
+   ============================ */
+.chat-panel {
+  background: var(--bg-chat);
+  display: flex; flex-direction: column;
+  min-height: 0;
+}
+
+/* -- Chat Header -- */
+.chat-header {
+  height: 80px;
+  display: flex; align-items: center;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--divider);
+  flex-shrink: 0;
+  position: relative;
+}
+.chat-header-left { flex: 1; min-width: 0; }
+.chat-contact-name {
+  font-size: 18px; font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+.chat-archive-tip {
+  font-size: 13px;
+  color: var(--text-tertiary);
+}
+.chat-header-right {
+  flex-shrink: 0;
+}
+.chat-header-btn {
+  width: 32px; height: 32px;
+  border: none; background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  display: flex; align-items: center; justify-content: center;
+}
+.chat-header-btn:hover { background: rgba(255,255,255,0.06); }
+.chat-header-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.5; }
+
+/* -- Chat Body (messages) -- */
+.chat-main {
+  display: flex; flex-direction: row;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.chat-left {
+  display: flex; flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+.chat-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 24px;
+  position: relative;
+  min-height: 0;
+  background: var(--bg-chat);
+}
+.chat-body > * { position: relative; z-index: 1; }
+
+.chat-body::-webkit-scrollbar { width: 4px; }
+.chat-body::-webkit-scrollbar-track { background: transparent; }
+.chat-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+
+
+/* Time divider */
+.time-divider {
+  text-align: center;
+  margin: 24px 0 16px;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  position: relative;
+}
+.time-divider span {
+  background: var(--bg-chat);
+  padding: 0 12px;
+  display: inline-block;
+}
+
+/* System tip */
+.system-tip {
+  text-align: center;
+  margin: 12px 0 16px;
+  font-size: 13px;
+  color: var(--text-tertiary);
+  line-height: 1.6;
+}
+
+/* Messages container */
+.msg {
+  display: flex;
+  margin-bottom: 20px;
+  max-width: 100%;
+}
+.msg-other { justify-content: flex-start; }
+.msg-self { justify-content: flex-end; }
+
+.msg-avatar {
+  width: 36px; height: 36px;
+  border-radius: 4px;
+  background: #3A3B3D;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 600;
+  color: var(--text-primary);
+  flex-shrink: 0;
+}
+.msg-self .msg-avatar { display: none; }
+
+.msg-body {
+  max-width: 520px;
+  margin-left: 10px;
+}
+.msg-self .msg-body { margin-left: 0; margin-right: 8px; }
+
+.msg-sender {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin-bottom: 4px;
+  padding-left: 2px;
+}
+
+.bubble {
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 15px;
+  line-height: 1.55;
+  word-wrap: break-word;
+  position: relative;
+}
+.bubble b { font-weight: 600; }
+.bubble u { text-decoration: underline; text-decoration-color: rgba(255,255,255,0.3); }
+.bubble em { font-style: normal; }
+
+.msg-other .bubble {
+  background: var(--bubble-other);
+  color: var(--text-primary);
+  border-top-left-radius: 2px;
+}
+.msg-self .bubble {
+  background: var(--brand-blue-bubble);
+  color: #fff;
+  border-top-right-radius: 2px;
+}
+
+/* File card in bubble */
+
+
+.msg-time {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-top: 3px;
+  padding-left: 2px;
+}
+.msg-self .msg-time { text-align: right; }
+
+
+
+/* ============================
+   Sidebar (inside chat-main)
+   ============================ */
+.customer-detail {
+  width: 360px;
+  flex-shrink: 0;
+  background: var(--bg-detail);
+  display: flex; flex-direction: column;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  border-left: 1px solid var(--divider-solid);
+}
+.chat-panel.sidebar-closed .customer-detail { display: none; }
+
+.detail-tabs {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--divider);
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+.detail-tabs-inner {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  height: 100%;
+}
+.detail-tabs.is-expanded .detail-tabs-inner {
+  flex-wrap: wrap;
+  overflow: visible;
+  height: auto;
+}
+.detail-tabs.is-expanded {
+  height: auto;
+  overflow: visible;
+  flex-wrap: wrap;
+  padding-bottom: 4px;
+  transition: height 0.2s ease;
+}
+.detail-tab {
+  height: 40px;
+  padding: 0 8px;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  display: flex; align-items: center;
+  gap: 2px;
+  position: relative;
+  transition: color 0.1s;
+  flex-shrink: 0;
+}
+.detail-tab:hover { color: var(--text-secondary); }
+.detail-tab.is-active {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+.detail-tab.is-active::after {
+  content: "";
+  position: absolute; bottom: -1px; left: 0; right: 0;
+  height: 2px;
+  background: var(--brand-blue);
+}
+.detail-tab-expand {
+  margin-left: auto;
+  color: var(--brand-blue);
+  font-size: 13px;
+}
+.detail-tab-expand svg {
+  width: 14px; height: 14px;
+  stroke: currentColor; fill: none; stroke-width: 2;
+}
+
+.detail-content {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  height: 100%;
+  padding: 0 0 16px;
+}
+.detail-content::-webkit-scrollbar { width: 4px; }
+.detail-content::-webkit-scrollbar-track { background: transparent; }
+.detail-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+/* Scene-12 style insight cards */
+.insight-cards { display: flex; flex-direction: column; gap: 8px; padding: 12px; }
+.insight-card {
+  background: #28282B;
+  border: 1px solid #3A3B3D;
+  border-radius: 8px;
+  padding: 12px;
+}
+.insight-card-title {
+  font-size: 11px; font-weight: 600;
+  color: #9A9A9A;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+  display: flex; align-items: center; gap: 6px;
+}
+.insight-card-title .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.dot-blue { background: #3B82F6; }
+.dot-green { background: #10B981; }
+.dot-purple { background: #8B5CF6; }
+.dot-orange { background: #F59E0B; }
+.dot-rose { background: #F43F5E; }
+.insight-card-body { font-size: 12px; color: #CCC; line-height: 1.5; }
+.insight-card-body strong { color: #E6E6E6; }
+.insight-card-body .sf-row { display: flex; align-items: center; gap: 4px; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 12px; }
+.insight-card-body .sf-row:last-child { border-bottom: none; }
+.insight-card-body .sf-key { color: #9A9A9A; min-width: 60px; flex-shrink: 0; font-size: 11px; }
+.insight-card-body .sf-val { color: #E6E6E6; font-weight: 500; flex: 1; font-size: 12px; }
+.insight-card-body .sf-badge { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; font-size: 9px; font-weight: 700; flex-shrink: 0; }
+.insight-card-body .sf-badge-new { background: rgba(59,130,246,0.2); color: #60A5FA; }
+.insight-card-body .sf-badge-upd { background: rgba(245,158,11,0.2); color: #FBBF24; }
+.insight-card-body .sf-badge-conf { background: rgba(16,185,129,0.2); color: #34D399; }
+.insight-card-body .sf-new { background: rgba(59,130,246,0.05); }
+.insight-card-body .sf-updated { background: rgba(245,158,11,0.05); }
+.insight-card-body .sf-confirmed { background: rgba(16,185,129,0.05); }
+.insight-card-body ul { list-style: none; padding: 0; margin: 4px 0; }
+.sp-dot { display: inline-flex; flex-direction: column; align-items: center; gap: 1px; flex-shrink: 0; }
+.sp-dot .sp-label { font-size: 8px; font-weight: 600; color: #6F7378; letter-spacing: 0.02em; width: 20px; text-align: center; }
+.sp-dot::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #3A3B3D; }
+.sp-done::before { background: #10B981; }
+.sp-current::before { background: var(--brand-blue); box-shadow: 0 0 0 2px rgba(47,126,219,0.2); }
+.sp-line { display: inline-block; width: 12px; height: 2px; background: #3A3B3D; margin: 0 1px; vertical-align: middle; align-self: center; margin-bottom: 14px; }
+.sp-line-done { background: #10B981; }
+
+/* Scene-12 mobile-style tabs & refined sections */
+.sb-tabs { display: flex; border-bottom: 0.5px solid rgba(255,255,255,.06); margin-bottom: 12px; }
+.sb-tab { flex:1; padding: 8px 0; font-size: 12px; color: rgba(255,255,255,.4); text-align: center; cursor: pointer; border: none; background: none; font-family: inherit; border-bottom: 2px solid transparent; transition: all .15s; }
+.sb-tab.active { color: #60A5FA; border-bottom-color: #60A5FA; }
+.sb-tab.disabled { color: rgba(255,255,255,.15); cursor: default; }
+.sb-tab:hover:not(.disabled) { color: rgba(255,255,255,.6); }
+
+/* Scene-12 mobile-style refined sections */
+.sb-section { margin-bottom: 16px; }
+.sb-section-title { font-size: 10px; font-weight: 600; color: rgba(255,255,255,.3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+.sb-row { display: flex; align-items: center; padding: 5px 0; border-bottom: 0.5px solid rgba(255,255,255,.06); font-size: 12px; }
+.sb-row:last-child { border-bottom: none; }
+.sb-key { color: #8B8FA3; min-width: 72px; flex-shrink: 0; font-size: 11px; }
+.sb-val { color: rgba(255,255,255,.85); flex: 1; font-size: 12px; }
+.sb-val-empty { color: rgba(255,255,255,.2); }
+.sb-next-sug { font-size: 13px; font-weight: 600; color: rgba(255,255,255,.9); margin-bottom: 4px; }
+.sb-next-reason { font-size: 11px; color: rgba(255,255,255,.4); margin-bottom: 8px; }
+.sb-next-script { background: rgba(255,255,255,.04); border: 0.5px solid rgba(255,255,255,.1); border-radius: 6px; padding: 8px 10px; font-size: 12px; color: rgba(255,255,255,.8); line-height: 1.5; margin-bottom: 6px; }
+.sb-progress-dots { display: flex; align-items: center; gap: 0; margin-bottom: 8px; padding: 4px 0; }
+.sb-pdot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.12); flex-shrink: 0; }
+.sb-pdot.done { background: #10B981; }
+.sb-pdot.cur { background: #60A5FA; box-shadow: 0 0 0 2px rgba(96,165,250,.2); }
+.sb-pbar { width: 20px; height: 2px; background: rgba(255,255,255,.08); flex-shrink: 0; }
+.sb-pbar.filled { background: #10B981; }
+.sb-stage-info { font-size: 11px; color: rgba(255,255,255,.5); margin-bottom: 6px; }
+.sb-stage-info strong { color: rgba(255,255,255,.85); }
+.sb-check { font-size: 11px; color: rgba(255,255,255,.6); padding: 2px 0 2px 14px; position: relative; }
+.sb-check::before { content: '✓'; position: absolute; left: 0; color: #10B981; font-weight: 700; }
+.sb-pending { font-size: 11px; color: rgba(255,255,255,.3); padding: 2px 0 2px 14px; position: relative; }
+.sb-pending::before { content: '○'; position: absolute; left: 0; color: rgba(255,255,255,.2); }
+.sb-flow-btn { display: inline-flex; align-items: center; gap: 4px; padding: 5px 10px; border: 0.5px solid rgba(255,255,255,.1); background: rgba(255,255,255,.03); border-radius: 6px; font-size: 11px; color: rgba(255,255,255,.7); cursor: pointer; font-family: inherit; margin: 2px; transition: all .15s; }
+.sb-flow-btn:hover { border-color: rgba(255,255,255,.2); color: rgba(255,255,255,.9); background: rgba(255,255,255,.06); }
+
+/* History timeline entries */
+.ht-entry { display: flex; align-items: flex-start; gap: 8px; position: relative; padding-left: 4px; }
+.ht-time { font-size: 10px; color: rgba(255,255,255,.35); white-space: nowrap; flex-shrink: 0; padding-top: 1px; min-width: 36px; text-align: right; }
+.ht-dot { width: 6px; height: 6px; border-radius: 50%; background: #60A5FA; flex-shrink: 0; margin-top: 4px; position: relative; z-index: 1; }
+.ht-entry + .ht-entry::before { content: ''; position: absolute; left: 42px; top: 0; width: 1px; height: 100%; background: rgba(255,255,255,.06); }
+.ht-body { flex: 1; min-width: 0; padding-bottom: 8px; }
+.ht-label { font-size: 12px; color: rgba(255,255,255,.8); display: block; }
+.ht-detail { font-size: 11px; color: rgba(255,255,255,.4); margin-top: 1px; display: block; }
+.ht-badge { display: inline-block; padding: 1px 5px; border-radius: 3px; font-size: 9px; font-weight: 600; margin-right: 4px; vertical-align: middle; }
+.ht-badge-stage { background: rgba(16,185,129,.15); color: #34D399; }
+.ht-badge-field { background: rgba(96,165,250,.15); color: #60A5FA; }
+.ht-badge-done { background: rgba(16,185,129,.15); color: #34D399; }
+.ht-item { font-size: 12px; color: rgba(255,255,255,.7); padding: 3px 0; }
+.ht-text { font-size: 12px; color: rgba(255,255,255,.6); }
+.ht-empty { font-size: 12px; color: rgba(255,255,255,.25); text-align: center; padding: 20px 0; }
+.insight-card-body ul li { padding: 2px 0 2px 12px; position: relative; font-size: 12px; color: #BBB; }
+.insight-card-body ul li::before { content: '-'; position: absolute; left: 0; color: #6F7378; }
+.flow-btn {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 5px 8px;
+  border: 1px solid #3A3B3D; background: #2A2B2E;
+  border-radius: 4px;
+  font-size: 11px; cursor: pointer;
+  color: #CCC;
+  margin: 3px;
+  font-family: inherit;
+  transition: all 0.1s;
+}
+.flow-btn:hover { border-color: var(--brand-blue); color: var(--brand-blue); background: rgba(47,126,219,0.1); }
+.knowledge-tag {
+  display: inline-block;
+  padding: 3px 8px;
+  background: #2A2B2E;
+  border: 1px solid #3A3B3D;
+  border-radius: 4px;
+  font-size: 11px;
+  color: #BBB;
+  margin: 3px;
+}
+.next-title { font-size: 13px; font-weight: 600; color: #E6E6E6; margin-bottom: 4px; }
+.next-desc { font-size: 11px; color: #9A9A9A; margin-bottom: 8px; }
+.next-quote { background: #2A2B2E; border: 1px solid #3A3B3D; border-radius: 4px; padding: 8px; }
+.next-quote-label { font-size: 10px; font-weight: 600; color: #9A9A9A; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+.next-quote-text { font-size: 12px; color: #CCC; line-height: 1.5; }
+.check-item { font-size: 12px; color: #BBB; padding: 2px 0 2px 16px; position: relative; }
+.check-item::before { content: '✓'; position: absolute; left: 0; color: #10B981; font-weight: 700; }
+.pending-item { font-size: 12px; color: #6F7378; padding: 2px 0 2px 16px; position: relative; }
+.pending-item::before { content: '□'; position: absolute; left: 0; color: #6F7378; }
+
+/* Customer Profile */
+.customer-profile {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--divider);
+}
+.cust-avatar {
+  width: 56px; height: 56px;
+  border-radius: 6px;
+  background: #3A3B3D;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; font-weight: 600;
+  color: var(--text-primary);
+  flex-shrink: 0;
+}
+.cust-name-area { min-width: 0; }
+.cust-name {
+  font-size: 18px; font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+.cust-meta {
+  font-size: 13px;
+  color: var(--text-tertiary);
+}
+
+/* Info List */
+.cust-info-list { padding: 0; }
+.cust-info-row {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--divider);
+}
+.cust-info-row:last-child { border-bottom: none; }
+.cust-info-label {
+  width: 100px;
+  font-size: 14px;
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+.cust-info-value {
+  flex: 1;
+  font-size: 14px;
+  color: var(--text-primary);
+  min-width: 0;
+  display: flex; align-items: center;
+  gap: 6px;
+}
+.cust-info-value .clickable {
+  color: var(--brand-blue);
+  cursor: pointer;
+}
+.cust-info-value .clickable:hover { text-decoration: underline; }
+.cust-info-arrow {
+  color: var(--text-tertiary);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.cust-info-arrow svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+/* ============================
+   CHAT INPUT PANEL (350px)
+   ============================ */
+.chat-input-panel {
+  height: 350px;
+  display: flex; flex-direction: column;
+  border-top: 1px solid var(--divider);
+  flex-shrink: 0;
+}
+
+.composer-toolbar {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  gap: 2px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--divider);
+}
+.toolbar-left { display: flex; align-items: center; gap: 2px; }
+.toolbar-right { margin-left: auto; display: flex; align-items: center; gap: 2px; }
+
+.toolbar-btn {
+  width: 30px; height: 30px;
+  border: none; background: transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text-tertiary);
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.1s;
+}
+.toolbar-btn:hover { background: rgba(255,255,255,0.06); color: var(--text-secondary); }
+.toolbar-btn svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+.toolbar-btn .arrow-drop {
+  width: 16px; height: 16px;
+  stroke-width: 1.2;
+  margin-left: -3px;
+}
+.toolbar-btn-has-drop { padding-right: 0; }
+
+.toolbar-btn-quick {
+  height: 28px;
+  border: 1px solid var(--divider-solid);
+  background: transparent;
+  border-radius: 4px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  display: flex; align-items: center;
+  gap: 4px;
+  padding: 0 8px;
+  transition: background 0.1s;
+}
+.toolbar-btn-quick:hover { background: rgba(255,255,255,0.06); }
+.toolbar-btn-quick svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+
+.composer-input-area {
+  flex: 1;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+}
+.composer-textarea {
+  flex: 1;
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: inherit;
+  resize: none;
+  outline: none;
+  line-height: 1.6;
+}
+.composer-textarea::placeholder { color: var(--text-tertiary); }
+
+.composer-bottom {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding: 4px 0 0;
+  flex-shrink: 0;
+}
+.composer-mode {
+  font-size: 12px; color: var(--text-tertiary);
+}
+.composer-send {
+  width: 30px; height: 30px;
+  border: none; background: transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--brand-blue);
+  display: flex; align-items: center; justify-content: center;
+}
+.composer-send svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+.composer-send:hover { background: rgba(47,126,219,0.12); }
+
+/* ============================
+   RIGHT PANEL — 话术推荐 / 洞察 / 下一步
+   ============================ */
+.detail-tab-panel {
+  display: flex; flex-direction: column;
+  padding: 12px 16px;
+  gap: 10px;
+}
+
+.detail-section {
+  margin-bottom: 8px;
+}
+.detail-section-title {
+  font-size: 13px; font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  display: flex; align-items: center;
+  gap: 6px;
+}
+
+/* Script cards */
+.script-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--divider);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+}
+.script-card-top {
+  display: flex; align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.script-score {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--brand-blue);
+  color: #fff;
+  font-size: 14px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.script-card.is-top .script-score { background: #34C759; }
+.script-level {
+  font-size: 11px; color: var(--text-tertiary);
+  margin-bottom: 2px;
+}
+.script-level.top { color: #34C759; }
+.script-level.mid { color: var(--brand-blue); }
+.script-text {
+  font-size: 13px; line-height: 1.55;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+.script-tags {
+  display: flex; gap: 4px; flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+.script-tag {
+  font-size: 10px; padding: 1px 6px;
+  border-radius: 3px;
+  background: rgba(255,255,255,0.06);
+  color: var(--text-tertiary);
+}
+.script-why {
+  font-size: 11px; color: var(--text-tertiary);
+  padding: 6px 8px;
+  background: rgba(255,255,255,0.02);
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+.script-acts {
+  display: flex; gap: 6px;
+}
+.script-act-btn {
+  flex: 1; height: 28px;
+  border: 1px solid var(--divider-solid);
+  background: transparent;
+  border-radius: 4px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  gap: 4px;
+  transition: all 0.1s;
+}
+.script-act-btn:hover { border-color: var(--brand-blue); color: var(--brand-blue); }
+.script-act-btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+.script-act-btn.is-send:hover { background: var(--brand-blue); border-color: var(--brand-blue); color: #fff; }
+
+/* Stage bar */
+.stage-bar {
+  display: flex; align-items: center;
+  gap: 2px;
+  padding: 8px 0;
+  overflow: hidden;
+}
+.stage-node {
+  flex: 1; text-align: center;
+  position: relative; cursor: default;
+}
+.stage-dot {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  margin: 0 auto 3px;
+  background: rgba(255,255,255,0.1);
+  border: 2px solid rgba(255,255,255,0.15);
+  transition: all 0.2s;
+}
+.stage-node.done .stage-dot { background: #34C759; border-color: #34C759; }
+.stage-node.active .stage-dot {
+  background: var(--brand-blue);
+  border-color: var(--brand-blue);
+  box-shadow: 0 0 0 3px rgba(47,126,219,0.3);
+}
+.stage-node.risk-warn .stage-dot { background: #F59E0B; border-color: #F59E0B; box-shadow: 0 0 0 3px rgba(245,158,11,0.25); }
+.stage-node.risk-danger .stage-dot { background: #EF4444; border-color: #EF4444; box-shadow: 0 0 0 3px rgba(239,68,68,0.25); }
+.stage-label { font-size: 9px; color: var(--text-tertiary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.stage-node.active .stage-label { color: var(--brand-blue); font-weight: 600; }
+.stage-connector {
+  flex: 0 0 4px; height: 2px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 1px;
+  margin-bottom: 14px;
+}
+.stage-connector.done { background: #34C759; }
+
+.stage-dwell { font-size: 8px; color: var(--text-tertiary); }
+.risk-banner {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 10px; margin-bottom: 6px;
+  border-radius: 4px; font-size: 11px; line-height: 1.4;
+}
+.risk-banner.warn { background: rgba(245,158,11,0.12); color: #FBBF24; }
+.risk-banner.danger { background: rgba(239,68,68,0.12); color: #FCA5A5; }
+.risk-banner svg { width: 14px; height: 14px; flex-shrink: 0; stroke: currentColor; fill: none; stroke-width: 1.6; }
+
+/* Insight items */
+.insight-list { display: flex; flex-direction: column; gap: 6px; }
+.insight-item {
+  display: flex; gap: 8px;
+  padding: 8px 10px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 4px;
+  border-left: 3px solid var(--brand-blue);
+}
+.insight-item.kind-pain { border-left-color: #F59E0B; }
+.insight-item.kind-risk { border-left-color: #EF4444; }
+.insight-item.kind-signal { border-left-color: #34C759; }
+.insight-item.kind-next { border-left-color: var(--brand-blue); }
+.insight-label { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+.insight-detail { font-size: 12px; color: var(--text-tertiary); margin-top: 2px; }
+
+/* Next actions */
+.next-list { display: flex; flex-direction: column; gap: 6px; }
+.next-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 4px;
+}
+.next-icon { width: 20px; height: 20px; flex-shrink: 0; color: var(--brand-blue); }
+.next-icon svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+.next-main { flex: 1; min-width: 0; }
+.next-title { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+.next-detail { font-size: 11px; color: var(--text-tertiary); margin-top: 1px; }
+.next-btn {
+  padding: 3px 10px;
+  border: 1px solid var(--divider-solid);
+  background: transparent;
+  border-radius: 4px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.next-btn:hover { border-color: var(--brand-blue); color: var(--brand-blue); }
+
+/* SOP Timeline */
+.sop-list {
+  list-style: none;
+  padding: 0;
+}
+.sop-list li {
+  display: flex; gap: 6px;
+  padding: 6px 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--divider);
+}
+.sop-list li:last-child { border-bottom: none; }
+.sop-list li b { color: var(--text-primary); font-weight: 500; }
+
+/* Takeover bar */
+.takeover-bar {
+  flex-shrink: 0;
+  border-top: 1px solid var(--divider);
+  padding: 8px 16px;
+}
+.takeover-btn {
+  width: 100%; height: 30px;
+  border: 1px dashed var(--divider-solid);
+  background: transparent;
+  border-radius: 4px;
+  color: var(--text-tertiary);
+  font-size: 12px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  gap: 6px;
+  transition: all 0.1s;
+}
+.takeover-btn:hover { border-color: var(--brand-blue); color: var(--brand-blue); }
+.takeover-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+.takeover-btn.is-active { border-style: solid; border-color: var(--brand-blue); color: var(--brand-blue); }
+
+/* Toast */
+.toast {
+  position: fixed; right: 22px; bottom: 22px;
+  background: #28282B;
+  border: 1px solid #3A3B3D;
+  color: #CCC;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 12px; line-height: 1.5;
+  max-width: 260px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  transform: translateY(120%); opacity: 0;
+  transition: all 0.25s ease;
+  z-index: 200;
+  pointer-events: none;
+}
+.toast.is-show { transform: translateY(0); opacity: 1; }
+.toast .toast-title { color: #E6E6E6; font-weight: 600; }
+.toast .toast-time { color: var(--brand-blue); }
+
+/* Customer profile mini info */
+.cust-kv {
+  display: grid; grid-template-columns: 80px 1fr;
+  gap: 4px 8px;
+  font-size: 12px;
+}
+.cust-kv dt { color: var(--text-tertiary); }
+.cust-kv dd { color: var(--text-primary); }
+
+/* ---- Scene hint (keep minimal) ---- */
+.scene-hint-bar { display: none; }
+
+/* ---- Scrollbar global ---- */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+</style>
+</head>
+<body class="scene-page">
+<nav class="scene-nav" id="scene-nav"></nav>
+
+<main class="scene-content">
+  <div class="app-window" id="appWindow">
+
+    <!-- ============ COL 1: Sidebar Apps ============ -->
+    <div class="sidebar-apps">
+      <div class="sb-profile">李</div>
+
+      <div class="sb-nav-item is-active">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span class="sb-label">消息</span>
+        <span class="sb-badge">2</span>
+      </div>
+      <div class="sb-nav-item">
+        <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <span class="sb-label">邮件</span>
+      </div>
+      <div class="sb-nav-item">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span class="sb-label">文档</span>
+      </div>
+      <div class="sb-nav-item">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span class="sb-label">日程</span>
+      </div>
+      <div class="sb-nav-item">
+        <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <span class="sb-label">待办</span>
+      </div>
+      <div class="sb-nav-item">
+        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        <span class="sb-label">会议</span>
+      </div>
+
+
+      <div class="sb-nav-item">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        <span class="sb-label">工作台</span>
+      </div>
+      <div class="sb-nav-item">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span class="sb-label">通讯录</span>
+      </div>
+      <div class="sb-nav-item">
+        <svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+        <span class="sb-label">微盘</span>
+      </div>
+
+
+    </div>
+
+    <!-- ============ COL 2: Conversation List ============ -->
+    <div class="conversation-list">
+      <div class="search-bar">
+        <div class="search-input-wrap">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input placeholder="搜索" id="searchInput" />
+        </div>
+      </div>
+      <div class="conv-list" id="convList"></div>
+    </div>
+
+    <!-- ============ COL 3: Chat Panel ============ -->
+    <div class="chat-panel" id="chatPanel">
+      <div class="chat-header">
+        <div class="chat-header-left">
+          <div class="chat-contact-name" id="chatContactName">朱江浩（豆爸 / TT） @微信</div>
+          <div class="chat-archive-tip">对方默认同意存档会话内容</div>
+        </div>
+        <div class="chat-header-right">
+          <button class="chat-header-btn" title="更多">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="chat-main">
+        <div class="chat-left">
+          <div class="chat-body" id="chatBody">
+            <!-- Messages rendered here -->
+          </div>
+          <div class="chat-input-panel">
+        <div class="composer-toolbar">
+          <div class="toolbar-left">
+            <button class="toolbar-btn" title="表情">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><circle cx="9" cy="9" r="0.8"/><circle cx="15" cy="9" r="0.8"/></svg>
+            </button>
+            <button class="toolbar-btn toolbar-btn-has-drop" title="截图">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>
+              <svg class="arrow-drop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <button class="toolbar-btn" title="图片">
+              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            </button>
+            <button class="toolbar-btn" title="文档">
+              <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </button>
+            <button class="toolbar-btn" title="待办">
+              <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            </button>
+            <button class="toolbar-btn" title="文件夹">
+              <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            </button>
+            <button class="toolbar-btn" title="电话">
+              <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            </button>
+            <button class="toolbar-btn" title="聊天气泡">
+              <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </button>
+          </div>
+          <div class="toolbar-right">
+            <button class="toolbar-btn-quick">
+              <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              <span>快速会议</span>
+            </button>
+            <button class="toolbar-btn" id="sidebarToggle" title="切换面板">
+              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="composer-input-area">
+          <textarea class="composer-textarea" id="chatInput" placeholder="输入消息..."></textarea>
+          <div class="composer-bottom">
+            <span class="composer-mode">键盘输入</span>
+            <button class="composer-send" id="sendBtn" title="发送">
+              <svg viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="customer-detail" id="customerDetail">
+      <div class="detail-tabs" id="detailTabs">
+        <div class="detail-tabs-inner" id="detailTabsInner">
+          <button class="detail-tab" data-tab="script">销售助手</button>
+          <button class="detail-tab" data-tab="insight">客户画像</button>
+          <button class="detail-tab is-active" data-tab="detail">客户详情</button>
+        </div>
+        <button class="detail-tab detail-tab-expand" id="tabExpandBtn">
+          展开
+          <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+      </div>
+      <div class="detail-content" id="detailContent">
+        <!-- Rendered by JS -->
+      </div>
+      <div class="takeover-bar">
+        <button class="takeover-btn" id="takeoverBtn">
+          <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>
+          <span>AI 辅助</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="toast" id="takeoverToast">
+  <div class="toast-title">已切换至人工接管</div>
+  <div style="margin-top:2px;">AI 话术推荐已暂停，由销售人工处理。<span class="toast-time" id="takeoverTime">14:38</span></div>
+</div>
+
+<script src="app.js"></script>
+<script>
+/* =========================================================
+ * scene-2-chat · 企业微信暗色模式
+ * ========================================================= */
+initNav('企微实时话术参谋', '销售赋能', 'tag-blue');
+
+// ============ DOM Refs ============
+const convListEl = document.getElementById('convList');
+const chatBody = document.getElementById('chatBody');
+const chatInput = document.getElementById('chatInput');
+const sendBtn = document.getElementById('sendBtn');
+const detailContent = document.getElementById('detailContent');
+const detailTabs = document.getElementById('detailTabs');
+const takeoverBtn = document.getElementById('takeoverBtn');
+const toastEl = document.getElementById('takeoverToast');
+const chatContactName = document.getElementById('chatContactName');
+const chatPanel = document.getElementById('chatPanel');
+const sidebarToggle = document.getElementById('sidebarToggle');
+const searchInput = document.getElementById('searchInput');
+
+// ============ CRM STAGES ============
+const CRM_STAGES = [
+  { id:'P1', name:'了解信息', convRate:36.63, dwellAvg:13, dwellRisk:7,  weight:'需求挖掘',   desc:'信息收集与初步接触' },
+  { id:'P2', name:'收集需求', convRate:52.01, dwellAvg:9,  dwellRisk:7,  weight:'方案引导',   desc:'深挖场景与痛点' },
+  { id:'P3', name:'确认合作', convRate:73.66, dwellAvg:4,  dwellRisk:7,  weight:'试菜邀约',   desc:'方案评估与确认' },
+  { id:'P4', name:'合同签署', convRate:97.75, dwellAvg:2,  dwellRisk:7,  weight:'合同推进',   desc:'商务条款与签约' },
+  { id:'P5', name:'发货',     convRate:72.61, dwellAvg:5,  dwellRisk:7,  weight:'发货确认',   desc:'订单生产与物流' },
+  { id:'P6', name:'已回款',   convRate:76.78, dwellAvg:3,  dwellRisk:7,  weight:'催款跟进',   desc:'回款管理' },
+  { id:'P7', name:'已交付',   convRate:100,   dwellAvg:0,  dwellRisk:0,  weight:'转介绍',     desc:'交付验收与售后' }
+];
+
+function calcScriptWeight(baseScore, stageIdx, scriptTags) {
+  const stage = CRM_STAGES[stageIdx] || CRM_STAGES[0];
+  const convFactor = stage.convRate / 100;
+  let adj = 1.0;
+  if (stageIdx === 0) {
+    // 五步法①：建立专业人设
+    if (scriptTags.includes('行业知识') || scriptTags.includes('避坑指南') || scriptTags.includes('场景识别')) adj = 1.15;
+    if (scriptTags.includes('资料投递')) adj = 0.75;
+  } else if (stageIdx === 1) {
+    // 五步法②：报价
+    if (scriptTags.includes('报价') || scriptTags.includes('以退为进') || scriptTags.includes('封闭选择')) adj = 1.15;
+    if (scriptTags.includes('场景识别') || scriptTags.includes('案例借力')) adj = 1.10;
+  } else if (stageIdx === 2) {
+    // 五步法③：提供购买建议及原因
+    if (scriptTags.includes('价值重塑') || scriptTags.includes('数据破价') || scriptTags.includes('案例借力')) adj = 1.15;
+    if (scriptTags.includes('竞品对比')) adj = 1.10;
+  } else if (stageIdx === 3) {
+    // 五步法④：打造靠谱人设
+    if (scriptTags.includes('说出担忧') || scriptTags.includes('秀肌肉') || scriptTags.includes('售后回应')) adj = 1.15;
+  } else if (stageIdx === 4) {
+    // 五步法⑤：引导成交
+    if (scriptTags.includes('损失规避') || scriptTags.includes('现场体验') || scriptTags.includes('服务保障')) adj = 1.15;
+  } else if (stageIdx >= 5) {
+    if (scriptTags.includes('转介绍') || scriptTags.includes('服务保障')) adj = 1.10;
+  }
+  const confidenceBase = Math.min(convFactor / 0.7, 1.3);
+  return Math.min(Math.round(baseScore * adj * confidenceBase), 99);
+}
+
+function getDwellDays(stageIdx) {
+  const base = [14, 9, 5, 3, 5, 3, 1];
+  return base[stageIdx] || 3;
+}
+function getStageRisk(stageIdx) {
+  const dwell = getDwellDays(stageIdx);
+  const stage = CRM_STAGES[stageIdx];
+  if (!stage || stage.dwellRisk === 0) return 'none';
+  if (dwell >= 14) return 'danger';
+  if (dwell >= 7) return 'warn';
+  return 'none';
+}
+
+// ============ Conversation Data ============
+const CONV_LIST = [
+  { id:'CUS-2026-0002', name:'王建国 P1', last:'主要是浇头标准化需求',                  time:'14:32', unread:2, active:true },
+  { id:'CUS-2026-0001', name:'小江溪 P7', last:'张经理介绍的，你们炒菜机G2和G3区别？',   time:'昨天',   unread:0 },
+  { id:'CUS-2026-0004', name:'中品一禾 P2', last:'听说你们的炒菜机适合食堂，了解一下',   time:'昨天', unread:1 },
+  { id:'CUS-2026-0005', name:'君濠书院 P6', last:'G5 2联组运行稳定',                   time:'周一',   unread:0 },
+  { id:'CUS-2026-0006', name:'乡村基 P1',   last:'想咨询炒菜机方案',                    time:'5/15',   unread:0 },
+  { id:'CUS-2026-0014', name:'比格 P3',     last:'G3还在测试中',                        time:'5/14',   unread:0 },
+  { id:'CUS-2026-0015', name:'张记烧烤 P4', last:'试菜效果不错，准备签合同',              time:'5/12', unread:3 },
+  { id:'CUS-2026-0016', name:'刘一手火锅 P2', last:'先发份资料看看',                     time:'5/10', unread:0 },
+  { id:'CUS-2026-0017', name:'半天妖 P5',   last:'设备已到店，安装中',                   time:'5/8',  unread:1 },
+  { id:'CUS-2026-0018', name:'杨国福 P1',   last:'朋友介绍的，想了解炒菜机',              time:'5/6',  unread:0 },
+  { id:'CUS-2026-0019', name:'喜家德 P3',   last:'价格能再低点吗？',                     time:'5/4',  unread:0 },
+  { id:'CUS-2026-0020', name:'五爷拌面 P2', last:'你们和美膳狮比有什么优势？',            time:'5/2',  unread:1 },
+  { id:'CUS-2026-0021', name:'麻辣诱惑 P7', last:'设备用了一年，质量稳定',               time:'4/30', unread:0 },
+  { id:'CUS-2026-0022', name:'很久以前 P4', last:'下周签合同，先把条款发我',             time:'4/28', unread:0 },
+  { id:'CUS-2026-0023', name:'木屋烧烤 P1', last:'串烤类能用你们的设备吗？',             time:'4/25', unread:0 },
+  { id:'CUS-2026-0024', name:'丰茂烤串 P2', last:'你们有适合烤串的机型吗',               time:'4/22', unread:0 },
+  { id:'CUS-2026-0025', name:'新石器烤肉 P3', last:'烤肉出品速度怎么样',                 time:'4/20', unread:1 },
+  { id:'CUS-2026-0026', name:'西贝莜面 P4', last:'莜面标准化方案有吗',                   time:'4/18', unread:0 },
+  { id:'CUS-2026-0027', name:'费大厨 P2',   last:'辣椒炒肉能标准化吗',                   time:'4/16', unread:0 },
+  { id:'CUS-2026-0028', name:'老乡鸡 P1',   last:'想了解一下炒菜机',                     time:'4/14', unread:2 },
+  { id:'CUS-2026-0029', name:'大米先生 P5', last:'设备用了两周，效率提升明显',           time:'4/12', unread:0 },
+  { id:'CUS-2026-0030', name:'和府捞面 P2',  last:'浇头标准化能解决吗',                  time:'4/10', unread:0 },
+  { id:'CUS-2026-0031', name:'遇见小面 P3',  last:'你们的价格比预期高',                  time:'4/8',  unread:1 },
+  { id:'CUS-2026-0032', name:'阿香米线 P1',  last:'米线汤底能自动化吗',                  time:'4/5',  unread:0 },
+  { id:'CUS-2026-0033', name:'鱼你在一起 P4', last:'酸菜鱼方案发我看看',                 time:'4/3',  unread:0 },
+  { id:'CUS-2026-0034', name:'胖哥俩 P6',    last:'设备验收完成，满意',                  time:'4/1',  unread:0 },
+  { id:'CUS-2026-0035', name:'廖记棒棒鸡 P7', last:'老客户推荐朋友来咨询',               time:'3/30', unread:1 },
+  { id:'CUS-2026-0036', name:'绝味鸭脖 P1',  last:'卤味能自动化生产吗',                  time:'3/28', unread:0 },
+  { id:'CUS-2026-0037', name:'周黑鸭 P2',    last:'先发资料看看',                        time:'3/25', unread:0 },
+];
+
+const CONV_ROUNDS = {
+  'CUS-2026-0002': {
+    customerId: 'CUS-2026-0002',
+    name: '王建国', company: '陈香贵连锁', region: '上海总部',
+    stage: 0, stageName: 'P1 了解信息',
+    avatarChar: '王', colorClass: 'c2',
+    profile: {
+      customerType: { code:'CHAIN', label:'连锁品牌', desc:'2家以上门店，统一采购，品牌化运营，预算15~50万' },
+      decisionRole: { label:'老板/创始人', desc:'最终决策人，关注投资回报率' },
+      leadSource: { label:'朋友推荐', desc:'经朋友介绍添加，信任基础好' },
+      cuisine: { label:'面食', desc:'牛肉面/浇头拌面，日均400份浇头' },
+      budget: '15~50万',
+      concerns: ['浇头标准化', '出品一致性', '全国售后覆盖']
+    },
+    bootstrap: [
+      { type:'system', text:'14:08 · 通过「企微外部联系人」添加 王建国（陈香贵连锁）' },
+      { type:'time-div', text:'今天 14:12' },
+      { type:'msg', side:'other', name:'王建国', content:'你好，我是陈香贵的，朋友推荐的，想了解一下你们的炒菜机', time:'14:12', online:true },
+      { type:'msg', side:'other', name:'王建国', content:'我们现在全国几百家门店，<b>主要是浇头标准化需求</b>，想看看自动化能不能帮上忙。', time:'14:12' }
+    ],
+    rounds: [
+      // ════ R1 · 五步法第一步：建立专业人设 ════
+      {
+        stage: 0, stageName: 'P1 了解信息', crmStage:'P1',
+        reply: { text:'听你这么一说我放心不少，之前还真不知道炒菜机行业水这么深。<b>那你们G2和G3具体有什么区别？</b>我们浇头日均400份，你推荐哪个方案？', tags:['信任建立','询问方案','决策人'], markLabel:'信任建立：客户主动进入你的话语体系', mark:'turn' },
+        scripts: [
+          { score:96, level:'top', text:'王总，先说句题外话。<b>炒菜机行业现在比较混乱，很多小厂用不锈钢锅冒充氮化铁锅，成本差30%，但出品稳定性和寿命差一两倍。</b>我们做这个18年，氮化铁锅是标配——受热均匀、不粘锅、不析出有害物质。说回您的需求，G2占地0.52m²、13秒升温、14种调料，适合小炒浇头；G3升级立体加热、15种调料、产能更高。面品类我有把握推荐G2+G3组合——G2炒小炒黄牛肉、爆肚等特色浇头，G3跑量保底。您看我这样说清楚吗？', why:'先讲行业知识建立专家身份，再推荐具体方案——先建立专业人设再谈产品', tags:['行业知识','避坑指南','场景识别'], confidence:0.96 },
+          { score:82, level:'mid', text:'感谢信任！G2和G3的核心区别：G2是小炒型，适合特色菜；G3是大产能型，适合跑量。按您日均400份浇头，建议G2+G3组合，一台出特色、一台出效率。', why:'直接回方案，未先建立专业形象——方法正确但少了行业认知铺垫', tags:['场景识别','案例借力'], confidence:0.80 },
+          { score:63, level:'low', text:'我把G2和G3的产品册发您看看？', why:'直接推资料，错失第一次建立专家身份的机会', tags:['资料投递'], confidence:0.55 }
+        ],
+        insight: [
+          { kind:'signal', label:'五步法① 建立专业人设 ✓', detail:'通过行业知识+避坑建立专家身份，让客户进入你的话语体系' },
+          { kind:'pain',   label:'浇头标准化需求', detail:'日均400份浇头，面品类现炒差异化' },
+          { kind:'next',   label:'下一步：提供专业报价', detail:'客户已进入咨询阶段，准备好报价方案' }
+        ]
+      },
+      // ════ R2 · 五步法第二步：报价 ════
+      {
+        stage: 1, stageName: 'P2 收集需求', crmStage:'P2',
+        reply: { text:'组合方案听着不错。那价格呢？<b>G2和G3分别多少钱？</b>我们全国几百家门店，如果效果好批量上的话，价格能不能优惠？', tags:['询价','批量需求','高意向'], markLabel:'客户主动询价——真实购买信号', mark:'turn' },
+        scripts: [
+          { score:94, level:'top', text:'我先给您报标准价，您心里有个数。G2基础配置<b>¥5.2万</b>，G3升级配置<b>¥7.6万</b>，G2+G3组合方案<b>¥12.8万</b>。给您看专业报价单（<u>点击查看报价表图片</u>）——我详细标了每台配置、适用场景和建议数量。<br><br>另外我多说一句：<b>您先别着急批量上</b>，建议先试1-2套，跑通浇头标准化的完整流程，验证了效果再铺开。这样既控制风险，后面批量上时也好跟内部沟通。您觉得呢？', why:'先报标准价建立锚点，再以退为进建议先试后扩——不急于成交，反而让客户更信任', tags:['报价','以退为进','封闭选择'], confidence:0.93 },
+          { score:78, level:'mid', text:'G2 ¥5.2万，G3 ¥7.6万，组合¥12.8万。批量的话我们可以再谈。关键是先看效果——要不我先安排一台G3到您上海总部实测？', why:'报了价但没给选择空间，也未建立价值锚点', tags:['硬报价','现场体验'], confidence:0.72 },
+          { score:58, level:'low', text:'我发您一份详细报价表，您先看看？', why:'被动等回复，错失引导窗口', tags:['资料投递'], confidence:0.50 }
+        ],
+        insight: [
+          { kind:'signal', label:'五步法② 报价 ✓', detail:'专业报价单+封闭价格空间+以退为进，不急于成交' },
+          { kind:'risk',   label:'批量询价——高意向但也可能是比价', detail:'客户提到"批量上"，需要验证真实预算和决策周期' },
+          { kind:'next',   label:'下一步：提供购买建议及原因', detail:'客户对价格已有认知，需要给出有依据的推荐' }
+        ]
+      },
+      // ════ R3 · 五步法第三步：提供购买建议及原因 ════
+      {
+        stage: 2, stageName: 'P3 确认合作', crmStage:'P3',
+        reply: { text:'你们和美膳狮比优势在哪？<b>他们价格便宜差不多一半</b>。而且我们连锁店比较多，售后你们能覆盖全国吗？', tags:['竞品对比','售后顾虑','决策迟疑'], markLabel:'异议：竞品对比+售后顾虑', mark:'loss' },
+        scripts: [
+          { score:95, level:'top', text:'您问得很准，这两个确实是我们客户最关心的问题。我直接对比说：<br><br><b>关于价格差：</b>差价主要在三个地方——① 我们的氮化铁锅受热均匀、不粘锅、不析出有害物质，美膳狮是不锈钢加铝层，高温下铝离子有迁移风险；② 我们52人售后团队全国覆盖，美膳狮4-6小时响应且仅限省会；③ 我们有六大运营报表体系，他们没有。<br><br><b>关于推荐：</b>我建议您<b>先上G2+G3各一台</b>，总投资12.8万，在总部跑1-2个月。看数据说话——小江溪上设备后人力成本降40%，残食浪费从50斤降到10斤。这两个月我帮您盯落地，效果出来再决定要不要扩。<br><br>不是因为我推荐便宜的，是因为对您来说<b>先验证再铺开是最稳妥的路</b>。您说呢？', why:'逐条对比破价+以退为进建议先试后扩——站在客户角度给建议而非硬推', tags:['价值重塑','数据破价','案例借力'], confidence:0.95 },
+          { score:76, level:'mid', text:'美膳狮我也了解，但差价的3万主要在材料和售后上。我们的氮化铁锅和美膳狮的不锈钢锅不是一个级别。要不我发您一份详细的竞品对比表？', why:'有对比但缺少明确的购买建议和"为什么"', tags:['竞品对比','资料投递'], confidence:0.72 },
+          { score:55, level:'low', text:'一分钱一分货，我们的品质对得起这个价格。您放心，售后我们有52人团队。', why:'空泛回应，没有数据支撑也没有购买建议', tags:['空话'], confidence:0.45 }
+        ],
+        insight: [
+          { kind:'signal', label:'五步法③ 提供购买建议及原因 ✓', detail:'数据破价+以退为进推荐先试后扩——站在客户角度给出有依据的建议' },
+          { kind:'pain',   label:'竞品对比+售后是核心顾虑', detail:'需要通过数据对比化解，而非降价' },
+          { kind:'next',   label:'下一步：打造靠谱人设', detail:'客户已对方案有兴趣，需要进一步建立信任' }
+        ]
+      },
+      // ════ R4 · 五步法第四步：打造靠谱人设 ════
+      {
+        stage: 3, stageName: 'P4 合同签署', crmStage:'P4',
+        reply: { text:'你说得有一定道理。<b>但我心里还是没底——万一上了设备效果不行，或者售后跟不上，我们几百家门店的摊子不好收。</b>', tags:['最后顾虑','决策迟疑','信任测试'], markLabel:'客户说出真实担忧——最后一次信任测试', mark:'turn' },
+        scripts: [
+          { score:96, level:'top', text:'王总，我完全理解您的顾虑。<b>说实话，换成我花十几万上一套新设备，我也会担心。</b>我跟您说几个事实：① 我们母公司优特集团做了30年，自有资金，不是那种烧完融资就跑路的公司；② 我们80%的新客户来自老客户介绍——小江溪就是张经理介绍的，这个比例在行业里算很高的；③ 我们承诺：设备到店后，工程师团队完成安装+8道招牌菜标准菜谱录制，您满意了再签验收单。<br><br>我一直觉得<b>销售不是把产品卖出去，是帮客户做出对的决策。</b>您的方案我备好了，什么时候方便我带到您总部当面给您演示？', why:'说出客户担忧→秀肌肉(老客户推荐率/母公司背景)→承诺落地服务——完整走完信任建立闭环', tags:['说出担忧','秀肌肉','售后回应'], confidence:0.96 },
+          { score:74, level:'mid', text:'我们母公司优特集团做了30年，自有资金。80%客户都是老客户推荐的，您放心。售后方面我们有7×24小时响应。', why:'有秀肌肉但未先说出客户担忧，说服力打折扣', tags:['秀肌肉','售后回应'], confidence:0.70 },
+          { score:50, level:'low', text:'您放一万个心，我们这个行业做了18年了，不会有问题的。', why:'空洞承诺，没有具体证据', tags:['空话'], confidence:0.40 }
+        ],
+        insight: [
+          { kind:'signal', label:'五步法④ 打造靠谱人设 ✓', detail:'说出客户担忧+秀肌肉(老客户率/母公司)+落地承诺——信任闭环完成' },
+          { kind:'signal', label:'客户主动说出担忧——真实信任测试', detail:'客户愿意说出真实担忧而非直接拒绝，是积极的信号' },
+          { kind:'next',   label:'下一步：引导成交', detail:'信任已建立，可以推进成交动作' }
+        ]
+      },
+      // ════ R5 · 五步法第五步：引导成交 ════
+      {
+        stage: 4, stageName: 'P5 发货', crmStage:'P5',
+        reply: { text:'好，那就先上一套G2+G3试试。<b>你看最快什么时候能安排？</b>', tags:['确认购买','主动问时间'], markLabel:'成交：客户主动提出购买', mark:'gold' },
+        scripts: [
+          { score:98, level:'top', text:'太好了王总！那我安排：<b>这周五下午我带G3到您上海总部，用您自己的食材现场做3道浇头</b>——小炒黄牛肉、爆肚拌面和一份招牌拉面底汤。您和主厨一起品鉴，满意了我们现场签试用协议，直接安排发货。<br><br>如果不满意——方案当场作废，绝不耽误您时间。您看周五下午方便吗？', why:'零风险体验邀约——让客户自己说出"想买"，然后锁定具体时间推进', tags:['损失规避','现场体验','服务保障'], confidence:0.98 },
+          { score:80, level:'mid', text:'好的，我马上安排！本周五前G2+G3各一台送到您总部，安装培训同步进行。具体地址发我一下？', why:'确认订单但少了让客户亲自体验的环节', tags:['服务保障'], confidence:0.76 },
+          { score:55, level:'low', text:'好的王总，我这就去安排出库！', why:'过于急切，给客户压迫感', tags:['空话'], confidence:0.50 }
+        ],
+        insight: [
+          { kind:'signal', label:'五步法⑤ 引导成交 ✓', detail:'不急于成交，让成交从客户口中说出来——锁定周五试菜时间' },
+          { kind:'signal', label:'成交转化', detail:'从接触到成交约2周，G2+G3组合方案' },
+          { kind:'next',   label:'后续：到店试菜+签约+安装', detail:'周五试菜→签约→安排发货→8道菜谱录制' }
+        ]
+      }
+    ]
+  },
+  'CUS-2026-0001': {
+    customerId: 'CUS-2026-0001',
+    name: '小江溪', company: '南昌小江溪餐饮', region: '南昌总部',
+    stage: 1, stageName: '兴趣',
+    avatarChar: '李', colorClass: 'c5',
+    bootstrap: [
+      { type:'system', text:'5月19日 09:22 · 通过「企微外部联系人」接收客户主动咨询' },
+      { type:'time-div', text:'昨天 09:25' },
+      { type:'msg', side:'other', name:'小江溪', content:'张经理介绍的，你们的炒菜机我们在南昌的店想试试，G2和G3有什么区别？', time:'09:25', online:true },
+      { type:'msg', side:'self',  name:'我（小李·销售）', content:'江总您好！小江溪的赣菜特色我们很清楚。G2占地0.52m²、13秒升温、14种调料，适合小炒；G3升级版立体加热、15种调料、产能更高。我们建议G2+G3组合，一台炒招牌菜、一台跑量。', time:'09:26', status:'read' }
+    ],
+    rounds: [{
+      stage: 1, stageName: '兴趣',
+      reply: { text:'好的，先上G2和G3各一台，试试效果。', tags:['确认购买','快速决策'], markLabel:'已成交：快速决策', mark:'gold' },
+      scripts: [
+        { score:98, level:'top', text:'太好了！我马上安排出库。G2和G3各一台，含安装培训，工程师本周五前到南昌。到货后我们厨师团队会到店完成8道招牌菜的标准菜谱录制。', why:'确认订单+锁定交付+追加菜谱服务', tags:['服务保障'] }
+      ],
+      insight: [
+        { kind:'signal', label:'快速决策成交', detail:'从接触到成交仅1天，氮化铁锅是核心决策因素' },
+        { kind:'next', label:'安排发货+菜谱录制', detail:'确认发货+安排厨师团队到店' }
+      ]
+    }]
+  },
+  'CUS-2026-0004': {
+    customerId: 'CUS-2026-0004',
+    name: '中品一禾', company: '山东中品一禾餐饮', region: '济南·高校团餐',
+    stage: 2, stageName: '评估',
+    avatarChar: '赵', colorClass: 'c4',
+    bootstrap: [
+      { type:'system', text:'5月17日 16:40 · 通过「企微外部联系人」添加 中品一禾联系人' },
+      { type:'time-div', text:'周一 09:00' },
+      { type:'msg', side:'other', name:'中品一禾', content:'听说你们的炒菜机适合食堂，我们高校食堂每天大概1200人就餐', time:'09:00', online:true },
+      { type:'msg', side:'self', name:'我（小李·销售）', content:'您好！食堂场景我们有真实案例。山东中品一禾就是高校团餐，用了G3之后残食浪费从50斤降到10斤。', time:'09:02', status:'read' }
+    ],
+    rounds: [{
+      stage: 2, stageName: '评估',
+      reply: { text:'还在讨论，能耗和售后是我们比较关心的。', tags:['能耗关注','决策周期'], markLabel:'待决策 · 能耗+售后' },
+      scripts: [
+        { score:90, level:'top', text:'理解！能耗方面，G3 15kW按每天6小时算，日耗电约¥72，折合每份菜不到¥0.06。售后方面52人团队全国覆盖，G3质保2年。', why:'数据化回复', tags:['数据化回复'] }
+      ],
+      insight: [
+        { kind:'pain', label:'能耗+售后双顾虑', detail:'决策层关注能耗和长期服务' },
+        { kind:'next', label:'周五邀约参观', detail:'系统生成展厅参观邀约' }
+      ]
+    }]
+  }
+};
+
+// ============ State ============
+let activeConvId = 'CUS-2026-0002';
+let round = 1;
+let activeTab = 'detail'; // detail | script | insight | card
+let searchQuery = '';
+
+// ============ SVG Icons ============
+const ICONS = {
+  send: '<svg viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>',
+  read: '<svg viewBox="0 0 24 24"><path d="M18 6L9 15l-4-4"/><path d="M22 10v5a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h13"/></svg>',
+  calendar: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+  tag: '<svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>',
+  alertCircle: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+  user: '<svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+  zap: '<svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+  alert: '<svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'
+};
+
+// ============ Render Helpers ============
+function createMsgEl(type, content) {
+  const el = document.createElement('div');
+  el.innerHTML = content;
+  return el.firstChild || el;
+}
+
+function systemTip(text) {
+  const d = document.createElement('div');
+  d.className = 'system-tip';
+  d.textContent = text;
+  return d;
+}
+
+function timeDivider(text) {
+  const d = document.createElement('div');
+  d.className = 'time-divider';
+  d.innerHTML = '<span>' + text + '</span>';
+  return d;
+}
+
+function message(cfg) {
+  const wrap = document.createElement('div');
+  wrap.className = 'msg msg-' + cfg.side;
+
+  let html = '';
+  if (cfg.side === 'other') {
+    html += '<div class="msg-avatar">' + (cfg.avatar || '?') + '</div>';
+  }
+
+  html += '<div class="msg-body">';
+  if (cfg.side === 'other' && cfg.name) {
+    html += '<div class="msg-sender">' + cfg.name + '</div>';
+  }
+  html += '<div class="bubble">' + cfg.content + '</div>';
+  html += '<div class="msg-time">' + (cfg.time || '') + '</div>';
+
+  html += '</div>';
+
+  wrap.innerHTML = html;
+  return wrap;
+}
+
+function scrollBottom(el) {
+  el.scrollTop = el.scrollHeight;
+}
+
+function nowHM() {
+  var d = new Date();
+  return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+}
+function addMin(hm, n) {
+  var parts = hm.split(':');
+  var t = parseInt(parts[0])*60 + parseInt(parts[1]) + n;
+  return String(Math.floor(t/60)%24).padStart(2,'0') + ':' + String(t%60).padStart(2,'0');
+}
+
+// ============ Conversation List ============
+function renderConvList() {
+  convListEl.innerHTML = '';
+  var filtered = searchQuery ? CONV_LIST.filter(function(c) {
+    return c.name.toLowerCase().indexOf(searchQuery.toLowerCase()) !== -1 ||
+           c.last.toLowerCase().indexOf(searchQuery.toLowerCase()) !== -1;
+  }) : CONV_LIST;
+  filtered.forEach(function(c) {
+    var row = document.createElement('div');
+    row.className = 'conv-item' + (c.id === activeConvId ? ' is-active' : '');
+    row.dataset.id = c.id;
+
+    var badgeHtml = c.unread ? '<span class="conv-unread">' + c.unread + '</span>' : '';
+
+    row.innerHTML =
+      '<div class="conv-avatar">' + c.name[0] + badgeHtml + '</div>' +
+      '<div class="conv-meta">' +
+        '<div class="conv-top">' +
+          '<span class="conv-name">' + c.name + '</span>' +
+          '<span class="conv-time">' + c.time + '</span>' +
+        '</div>' +
+        '<div class="conv-preview">' + c.last + '</div>' +
+      '</div>';
+
+    row.addEventListener('click', function() { switchConversation(c.id); });
+    convListEl.appendChild(row);
+  });
+}
+
+function switchConversation(convId) {
+  if (convId === activeConvId) return;
+  activeConvId = convId;
+
+  document.querySelectorAll('.conv-item').forEach(function(i) {
+    i.classList.toggle('is-active', i.dataset.id === convId);
+  });
+
+  chatBody.innerHTML = '';
+  round = 1;
+  var data = CONV_ROUNDS[convId];
+
+  if (!data) {
+    var c = CONV_LIST.find(function(x) { return x.id === convId; });
+    chatBody.appendChild(systemTip('已切换到 ' + (c ? c.name : convId)));
+    chatBody.appendChild(timeDivider('今天'));
+    if (c) {
+      chatBody.appendChild(message({
+        side: 'other', name: c.name, avatar: c.name[0], colorClass: 'c1',
+        content: c.last, time: c.time
+      }));
+    }
+    renderDetail(null);
+    updateChatHeader(convId);
+    scrollBottom(chatBody);
+    return;
+  }
+
+  updateChatHeader(convId, data);
+  bootstrapConv(data);
+}
+
+function updateChatHeader(convId, data) {
+  if (data) {
+    chatContactName.textContent = data.name + ' @微信';
+  } else {
+    var c = CONV_LIST.find(function(x) { return x.id === convId; });
+    chatContactName.textContent = c ? c.name : convId;
+  }
+}
+
+function bootstrapConv(data) {
+  data.bootstrap.forEach(function(item) {
+    if (item.type === 'system') {
+      chatBody.appendChild(systemTip(item.text));
+    } else if (item.type === 'time-div') {
+      chatBody.appendChild(timeDivider(item.text));
+    } else if (item.type === 'msg') {
+      chatBody.appendChild(message({
+        side: item.side,
+        name: item.name,
+        avatar: item.side === 'self' ? '李' : (item.name ? item.name[0] : '?'),
+        colorClass: item.side === 'self' ? 'c4' : data.colorClass,
+        content: item.content,
+        time: item.time,
+        online: item.online || false,
+        status: item.status || null
+      }));
+    }
+  });
+  scrollBottom(chatBody);
+  renderDetail(data.rounds ? data.rounds[round - 1] : null);
+}
+
+// ============ Detail Panel ============
+function renderDetail(roundData) {
+  if (activeTab === 'detail') {
+    renderCustomerDetail(roundData);
+  } else if (activeTab === 'script') {
+    renderScriptTab(roundData);
+  } else if (activeTab === 'insight') {
+    renderInsightCards(roundData);
+  } else {
+    detailContent.innerHTML = '<div class="detail-tab-panel"><div style="color:var(--text-tertiary);font-size:13px;text-align:center;padding:40px 0;">功能开发中</div></div>';
+  }
+}
+
+function renderCustomerDetail(roundData) {
+  var data = CONV_ROUNDS[activeConvId];
+  if (!data) {
+    detailContent.innerHTML = '<div style="color:var(--text-tertiary);font-size:13px;text-align:center;padding:40px 0;">暂无客户信息</div>';
+    return;
+  }
+
+  var stageIdx = (roundData && typeof roundData.stage === 'number') ? roundData.stage : data.stage || 0;
+
+  var html =
+  '<div class="customer-profile">' +
+    '<div class="cust-avatar">' + data.avatarChar + '</div>' +
+    '<div class="cust-name-area">' +
+      '<div class="cust-name">' + data.name + ' <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:var(--text-tertiary);vertical-align:middle;stroke-width:1.5;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg> <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:var(--text-tertiary);vertical-align:middle;stroke-width:1.5;"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>' +
+      '<div class="cust-meta">' + data.company + ' · ' + data.region + '</div>' +
+    '</div>' +
+  '</div>' +
+  '<div class="cust-info-list">' +
+    '<div class="cust-info-row">' +
+      '<span class="cust-info-label">性别</span>' +
+      '<span class="cust-info-value">男</span>' +
+    '</div>' +
+    '<div class="cust-info-row">' +
+      '<span class="cust-info-label">设置备注和描述</span>' +
+      '<span class="cust-info-value">陈香贵 · 王总</span>' +
+    '</div>' +
+    '<div class="cust-info-row">' +
+      '<span class="cust-info-label">设置标签</span>' +
+      '<span class="cust-info-value">高意向 · 连锁餐饮</span>' +
+    '</div>' +
+    '<div class="cust-info-row">' +
+      '<span class="cust-info-label">我的名片</span>' +
+      '<span class="cust-info-value">小李·销售顾问</span>' +
+    '</div>' +
+    '<div class="cust-info-row">' +
+      '<span class="cust-info-label">添加时间</span>' +
+      '<span class="cust-info-value">2026-04-01 10:56</span>' +
+    '</div>' +
+    '<div class="cust-info-row">' +
+      '<span class="cust-info-label">类型</span>' +
+      '<span class="cust-info-value">微信联系人</span>' +
+    '</div>' +
+    '<div class="cust-info-row">' +
+      '<span class="cust-info-label">来源</span>' +
+      '<span class="cust-info-value">对方通过名片分享添加</span>' +
+    '</div>' +
+  '</div>';
+
+  detailContent.innerHTML = html;
+}
+
+function renderInsightCards(roundData) {
+  var data = CONV_ROUNDS[activeConvId];
+  if (!data) {
+    detailContent.innerHTML = '<div class="insight-cards"><div class="insight-card"><div class="insight-card-body" style="text-align:center;padding:20px 0;color:#6F7378;">暂无客户数据</div></div></div>';
+    return;
+  }
+
+  var stageIdx = (roundData && typeof roundData.stage === 'number') ? roundData.stage : data.stage || 0;
+  var stage = CRM_STAGES[stageIdx];
+  var dwell = getDwellDays(stageIdx);
+  var topScript = roundData && roundData.scripts && roundData.scripts.length ? roundData.scripts[0] : null;
+  var insightItems = roundData && roundData.insight ? roundData.insight : [];
+
+  // 跟进节奏计算（基于通用跟进模型，可配置周期参数）
+  function calcFollowUpPhase(dwellDays) {
+    if (dwellDays <= 1) return { phase:'D1', label:'开口跟进', color:'#F59E0B', desc:'当天完成所有基本动作' };
+    if (dwellDays <= 2) return { phase:'D2', label:'唤醒跟进', color:'#3B82F6', desc:'唤醒未开口客户+跟踪有意向客户' };
+    if (dwellDays <= 4) return { phase:'D4', label:'持续跟进', color:'#8B5CF6', desc:'二次唤醒+标准话术跟进' };
+    var n = Math.floor((dwellDays - 5) / 7) + 1;
+    return { phase:'D7+' + (n > 1 ? '#' + n : ''), label:'定期唤醒', color:'#6F7378', desc:'每7天一次标准话术唤醒（当前第'+ n +'轮）' };
+  }
+  var followUp = calcFollowUpPhase(dwell);
+
+  // 客户分类
+  function calcCustomerLabel(stageIdx, dwell) {
+    if (stageIdx >= 4 && dwell <= 3) return { label:'即将成交', color:'#10B981' };
+    if (stageIdx >= 2 && dwell <= 7) return { label:'培育中', color:'#3B82F6' };
+    if (dwell >= 14) return { label:'沉睡客户', color:'#6F7378' };
+    return { label:'新 leads', color:'#F59E0B' };
+  }
+  var custLabel = calcCustomerLabel(stageIdx, dwell);
+
+  // Status helpers (scene-12 style)
+  function badge(status) {
+    if (status === 'new') return '<span class="sf-badge sf-badge-new">+</span>';
+    if (status === 'updated') return '<span class="sf-badge sf-badge-upd">~</span>';
+    if (status === 'confirmed') return '<span class="sf-badge sf-badge-conf">v</span>';
+    return '';
+  }
+  function rowCls(status) {
+    if (!status || status === 'confirmed') return 'sf-row sf-confirmed';
+    if (status === 'new') return 'sf-row sf-new';
+    if (status === 'updated') return 'sf-row sf-updated';
+    return 'sf-row';
+  }
+
+  // History entries (simulated from insight items)
+  var historyEntries = insightItems.length ? insightItems.map(function(item, idx) {
+    var days = idx === 0 ? dwell : dwell - idx;
+    return '<div class="ht-entry"><span class="ht-time">' + (days > 0 ? days + '天前' : '今天') + '</span><span class="ht-dot"></span><div class="ht-body"><span class="ht-label">' + item.label + '</span><span class="ht-detail">' + item.detail + '</span></div></div>';
+  }).join('') : '';
+
+  var html =
+    '<div class="insight-cards">' +
+
+      // Card: 客户画像 (contact header + fields)
+      '<div class="insight-card">' +
+
+        // Contact info bar (like mobile version)
+        '<div style="display:flex;align-items:center;gap:10px;padding:0 0 12px 0;border-bottom:0.5px solid rgba(255,255,255,.06);margin-bottom:12px;">' +
+          '<div style="width:36px;height:36px;border-radius:50%;background:var(--brand-blue);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:600;flex-shrink:0;">' + data.avatarChar + '</div>' +
+          '<div style="flex:1;min-width:0;">' +
+            '<div style="font-size:14px;font-weight:600;color:rgba(255,255,255,.9);">' + data.name + '</div>' +
+            '<div style="font-size:11px;color:rgba(255,255,255,.4);">销售：小李 | ' + data.company + '</div>' +
+          '</div>' +
+        '</div>' +
+
+        // 3-tab navigation
+        '<div class="sb-tabs">' +
+          '<button class="sb-tab active" data-tab="profile">画像</button>' +
+          '<button class="sb-tab" data-tab="history">记录</button>' +
+          '<button class="sb-tab disabled" data-tab="order">订单</button>' +
+        '</div>' +
+
+        // 画像 tab content (profile section)
+        '<div class="sb-section">' +
+          '<div class="sb-section-title">客户画像</div>' +
+          '<div class="sb-row"><span class="sb-key">客户名称</span><span class="sb-val">' + data.name + '</span></div>' +
+          '<div class="sb-row"><span class="sb-key">所属公司</span><span class="sb-val">' + data.company + '</span></div>' +
+          '<div class="sb-row"><span class="sb-key">所在地区</span><span class="sb-val">' + data.region + '</span></div>' +
+          (data.profile ? '<div class="sb-row"><span class="sb-key">客户类型</span><span class="sb-val">' + data.profile.customerType.label + '</span></div>' : '') +
+          (data.profile ? '<div class="sb-row"><span class="sb-key">决策角色</span><span class="sb-val">' + data.profile.decisionRole.label + '</span></div>' : '') +
+          (data.profile ? '<div class="sb-row"><span class="sb-key">线索来源</span><span class="sb-val">' + data.profile.leadSource.label + '</span></div>' : '') +
+          (data.profile ? '<div class="sb-row"><span class="sb-key">菜系</span><span class="sb-val">' + data.profile.cuisine.label + '</span></div>' : '') +
+          (data.profile ? '<div class="sb-row"><span class="sb-key">预算范围</span><span class="sb-val">' + data.profile.budget + '</span></div>' : '') +
+          '<div class="sb-row"><span class="sb-key">当前阶段</span><span class="sb-val">' + (stage ? stage.name + ' · ' + stage.weight : '-') + '</span></div>' +
+          '<div class="sb-row"><span class="sb-key">停留天数</span><span class="sb-val">' + dwell + ' 天</span></div>' +
+        '</div>' +
+
+        // 跟进计划
+        '<div class="sb-section">' +
+          '<div class="sb-section-title">跟进计划</div>' +
+          '<div class="sb-row"><span class="sb-key">跟进节奏</span><span class="sb-val"><span style="color:' + followUp.color + ';font-weight:600;">' + followUp.phase + '</span> ' + followUp.label + '</span></div>' +
+          '<div class="sb-row"><span class="sb-key">客户分类</span><span class="sb-val"><span style="background:' + custLabel.color + '20;color:' + custLabel.color + ';padding:1px 6px;border-radius:3px;font-size:11px;font-weight:600;">' + custLabel.label + '</span></span></div>' +
+          '<div class="sb-row"><span class="sb-key">距离下次跟进</span><span class="sb-val" style="font-size:11px;color:#9A9A9A;">' + followUp.desc + '</span></div>' +
+        '</div>' +
+
+        // 核心关注（从 profile 取）
+        (data.profile && data.profile.concerns && data.profile.concerns.length ? '' +
+        '<div class="sb-section">' +
+          '<div class="sb-section-title">核心关注</div>' +
+          data.profile.concerns.map(function(c){ return '<div class="sb-check">' + c + '</div>'; }).join('') +
+        '</div>' +
+        '' : '') +
+
+
+
+      '</div>' +  // end insight-card
+
+      // Card 2: 跟进记录
+      '<div class="insight-card">' +
+        '<div class="sb-section" style="margin-bottom:0;">' +
+          '<div class="sb-section-title">跟进记录</div>' +
+          (historyEntries ? '<div style="display:flex;flex-direction:column;gap:4px;">' + historyEntries + '</div>' : '<div class="ht-empty">暂无跟进记录</div>') +
+        '</div>' +
+      '</div>' +
+    '</div>';
+
+  detailContent.innerHTML = html;
+}
+
+function renderScriptTab(roundData) {
+  if (!roundData || !roundData.scripts || !roundData.scripts.length) {
+    detailContent.innerHTML = '<div class="insight-cards"><div class="insight-card"><div class="insight-card-body" style="text-align:center;padding:20px 0;color:#6F7378;">暂无推荐话术</div></div></div>';
+    return;
+  }
+
+  var stageIdx = roundData.stage || 0;
+  var riskClass = getStageRisk(stageIdx);
+  var dwell = getDwellDays(stageIdx);
+  var stage = CRM_STAGES[stageIdx];
+
+  // Stage progress dots
+  var stageDots = '';
+  CRM_STAGES.forEach(function(s, i) {
+    if (i > 0) stageDots += '<span class="sp-line' + (i <= stageIdx ? ' sp-line-done' : '') + '"></span>';
+    stageDots += '<span class="sp-dot' + (i < stageIdx ? ' sp-done' : i === stageIdx ? ' sp-current' : '') + '"><span class="sp-label">' + s.id + '</span></span>';
+  });
+
+  // Script cards — 平铺列表，无嵌套卡片
+  var scriptsHtml = roundData.scripts.map(function(s, i) {
+    var adjScore = calcScriptWeight(s.score, stageIdx, s.tags);
+    var scoreColor = adjScore >= 85 ? '#10B981' : adjScore >= 70 ? '#60A5FA' : '#6F7378';
+    var levelLabel = s.level === 'top' ? '首选' : (s.level === 'mid' ? '备选' : '参考');
+
+    var sep = i > 0 ? '<div style="height:1px;background:rgba(255,255,255,0.06);margin:12px 0;"></div>' : '';
+
+    return sep +
+      '<div style="margin-bottom:4px;">' +
+        '<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">' +
+          '<span style="display:inline-flex;align-items:center;gap:4px;background:' + scoreColor + '18;color:' + scoreColor + ';font-weight:700;font-size:13px;padding:1px 7px;border-radius:4px;line-height:1.5;">' + adjScore + '<span style="font-weight:500;font-size:10px;opacity:0.7;">' + levelLabel + '</span></span>' +
+          '<span style="font-size:10px;color:#6F7378;margin-left:auto;">' + s.tags.slice(0,2).join(' · ') + '</span>' +
+        '</div>' +
+        '<div style="font-size:13px;color:#D4D4D8;line-height:1.65;margin-bottom:6px;">' + s.text + '</div>' +
+        '<div style="font-size:11px;color:#6F7378;margin-bottom:8px;padding-left:1px;">' + s.why + '</div>' +
+        '<div style="display:flex;gap:6px;">' +
+          '<button class="flow-btn" data-action="insert" style="flex:1;height:26px;font-size:11px;">插入输入框</button>' +
+          '<button class="flow-btn" data-action="send-direct" style="flex:1;height:26px;font-size:11px;border-color:var(--brand-blue);color:var(--brand-blue);">直接发送</button>' +
+        '</div>' +
+      '</div>';
+  }).join('');
+
+  // 各阶段目标 + 待办（参考场景3 SOP定义）
+  var STAGE_GOALS = ['确认需求','报价推进','方案确认','合同签署','发货完成','回款入账','交付验收','沉睡唤醒'];
+  var stageGoal = STAGE_GOALS[stageIdx] || '';
+  var STAGE_TODOS = [
+    ['发送欢迎消息','发送方案资料','安排试菜体验','确认客户需求'],
+    ['发送详细报价','安排上门时间'],
+    ['确认签约意向','准备合同草案'],
+    ['推进合同签署'],
+    ['确认发货安排'],
+    ['确认回款对账'],
+    ['确认安装交付','发送满意度调查'],
+    ['发送沉睡唤醒消息']
+  ];
+  var stageTodos = STAGE_TODOS[stageIdx] || [];
+  // 模拟已完成——前 n 个已完成，第 n+1 个是下一步
+  var doneCount = Math.min(dwell < 7 ? Math.floor(dwell / 3) : stageTodos.length - 1, stageTodos.length - 1);
+  var nextTodo = stageTodos[doneCount] || stageTodos[0] || '';
+
+  // Risk text
+  var riskText = '';
+  if (riskClass === 'warn') {
+    riskText = '<div style="font-size:11px;color:#F59E0B;margin-bottom:6px;">当前阶段已停留 ' + dwell + ' 天，建议加速推进</div>';
+  } else if (riskClass === 'danger') {
+    riskText = '<div style="font-size:11px;color:#F04B4B;margin-bottom:6px;">风险升级：已停留 ' + dwell + ' 天，需立即干预</div>';
+  }
+
+  var html =
+    '<div class="insight-cards">' +
+      // Card 1: 阶段进度
+      '<div class="insight-card">' +
+        '<div class="insight-card-title"><span class="dot dot-green"></span>阶段进度</div>' +
+        '<div class="insight-card-body">' +
+          '<div style="font-size:12px;color:#9A9A9A;margin-bottom:4px;"><strong style="color:#E6E6E6;">' + roundData.stageName + '</strong> · 目标: <span style="color:#60A5FA;">' + stageGoal + '</span> · 停留 ' + dwell + ' 天</div>' +
+          (nextTodo ? '<div style="font-size:11px;color:#10B981;margin-bottom:4px;">待办: <span style="color:#D4D4D8;">' + nextTodo + '</span></div>' : '') +
+          riskText +
+          '<div style="display:flex;align-items:center;gap:2px;padding:4px 0;">' + stageDots + '</div>' +
+        '</div>' +
+      '</div>' +
+      // Card 2: 推荐话术
+      '<div class="insight-card">' +
+        '<div class="insight-card-title"><span class="dot dot-blue"></span>推荐话术 <span style="font-weight:400;color:#6F7378;text-transform:none;">（动态评分已适配阶段权重）</span></div>' +
+        '<div class="insight-card-body">' + scriptsHtml + '</div>' +
+      '</div>' +
+    '</div>';
+
+  detailContent.innerHTML = html;
+
+  // Bind action buttons
+  detailContent.querySelectorAll('[data-action="insert"]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var scriptEl = btn.closest('[style*="margin-bottom"]');
+      if (!scriptEl) return;
+      var textDiv = scriptEl.querySelector('[style*="color:#D4D4D8"]');
+      if (textDiv) {
+        chatInput.value = textDiv.innerText.trim();
+        chatInput.focus();
+      }
+    });
+  });
+  detailContent.querySelectorAll('[data-action="send-direct"]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var scriptEl = btn.closest('[style*="margin-bottom"]');
+      if (!scriptEl) return;
+      var textDiv = scriptEl.querySelector('[style*="color:#D4D4D8"]');
+      if (textDiv) {
+        chatInput.value = textDiv.innerText.trim();
+        sendUserMessage();
+      }
+    });
+  });
+}
+
+// ============ Customer Detail Tab Switching ============
+detailTabs.addEventListener('click', function(e) {
+  var t = e.target.closest('.detail-tab');
+  if (!t) return;
+  // Expand toggle
+  if (t.id === 'tabExpandBtn') {
+    detailTabs.classList.toggle('is-expanded');
+    var isExpanded = detailTabs.classList.contains('is-expanded');
+    t.innerHTML = (isExpanded ? '收起' : '展开') + '<svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;"><polyline points="' + (isExpanded ? '18 15 12 9 6 15' : '6 9 12 15 18 9') + '"/></svg>';
+    return;
+  }
+  var tab = t.dataset.tab;
+  if (!tab) return;
+  activeTab = tab;
+  detailTabs.querySelectorAll('.detail-tab').forEach(function(x) { x.classList.remove('is-active'); });
+  t.classList.add('is-active');
+  renderDetail(getActiveRound());
+  // Collapse after switching tabs
+  detailTabs.classList.remove('is-expanded');
+});
+
+// Overflow detection for tabs
+function checkTabOverflow() {
+  var inner = document.getElementById('detailTabsInner');
+  var btn = document.getElementById('tabExpandBtn');
+  var tabs = document.getElementById('detailTabs');
+  if (!inner || !btn || !tabs) return;
+  // 如果已展开，不要隐藏按钮（用户需要它来收起）
+  if (tabs.classList.contains('is-expanded')) { btn.style.display = 'flex'; return; }
+  if (inner.scrollWidth > inner.clientWidth) {
+    btn.style.display = 'flex';
+  } else {
+    btn.style.display = 'none';
+  }
+}
+// Check on load and on resize
+window.addEventListener('resize', checkTabOverflow);
+checkTabOverflow();
+
+// ============ Send Message ============
+function sendUserMessage() {
+  var text = (chatInput.value || '').trim();
+  if (!text) return;
+  chatInput.value = '';
+
+  var now = nowHM();
+  var data = CONV_ROUNDS[activeConvId];
+
+  var myMsg = message({
+    side: 'self', name: '我（小李 · 销售）', avatar: '李', colorClass: 'c4',
+    content: text, time: now, status: 'sending'
+  });
+  chatBody.appendChild(myMsg);
+  scrollBottom(chatBody);
+
+  // Simulate "read"
+  setTimeout(function() {
+    var bubble = myMsg.querySelector('.bubble');
+    if (bubble) {
+      var timeEl = myMsg.querySelector('.msg-time');
+      if (timeEl) timeEl.textContent = now + ' 已读';
+    }
+  }, 900);
+
+  // Customer reply
+  var rounds = getActiveRounds();
+  if (rounds && round <= rounds.length) {
+    var rd = rounds[round - 1];
+    var markMap = { 0:'turn', 1:'loss', 2:'turn' };
+
+    // Show typing
+    var typingMsg = message({
+      side: 'other', name: data.name, avatar: data.avatarChar, colorClass: data.colorClass,
+      content: '<span style="color:var(--text-tertiary);font-style:italic;">正在输入…</span>',
+      time: addMin(now, 1)
+    });
+    chatBody.appendChild(typingMsg);
+    scrollBottom(chatBody);
+
+    // Replace with real reply after delay
+    setTimeout(function() {
+      typingMsg.remove();
+      var replyMsg = message({
+        side: 'other', name: data.name, avatar: data.avatarChar, colorClass: data.colorClass,
+        content: rd.reply.text,
+        time: addMin(now, 1)
+      });
+      chatBody.appendChild(replyMsg);
+      scrollBottom(chatBody);
+
+      round = Math.min(round + 1, rounds.length);
+      renderDetail(getActiveRound());
+
+      // Clear unread badge
+      var conv = CONV_LIST.find(function(c) { return c.id === activeConvId; });
+      if (conv && conv.unread > 0) { conv.unread = 0; renderConvList(); }
+    }, 1100 + Math.random()*600);
+  } else {
+    // No more rounds
+    setTimeout(function() {
+      chatBody.appendChild(message({
+        side: 'other', name: data ? data.name : '客户', avatar: data ? data.avatarChar : '?',
+        colorClass: data ? data.colorClass : 'c1',
+        content: '好的，我再看看。', time: nowHM()
+      }));
+      scrollBottom(chatBody);
+    }, 800);
+  }
+}
+
+function getActiveData() { return CONV_ROUNDS[activeConvId] || null; }
+function getActiveRounds() { var d = getActiveData(); return d ? d.rounds : null; }
+function getActiveRound() { var r = getActiveRounds(); if (!r) return null; return r[round - 1] || null; }
+
+// ============ Init ============
+function bootstrap() {
+  var data = getActiveData();
+  if (data) {
+    updateChatHeader(activeConvId, data);
+    bootstrapConv(data);
+  } else {
+    chatBody.appendChild(systemTip('已连接到 ' + activeConvId));
+    chatBody.appendChild(timeDivider('今天'));
+  }
+}
+
+// ============ Event Binding ============
+sendBtn.addEventListener('click', sendUserMessage);
+chatInput.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendUserMessage();
+  }
+});
+
+// Takeover toggle
+takeoverBtn.addEventListener('click', function() {
+  var isActive = this.classList.toggle('is-active');
+  if (isActive) {
+    var t = new Date();
+    var timeStr = String(t.getHours()).padStart(2,'0') + ':' + String(t.getMinutes()).padStart(2,'0');
+    document.getElementById('takeoverTime').textContent = timeStr;
+    toastEl.classList.add('is-show');
+    setTimeout(function() { toastEl.classList.remove('is-show'); }, 2500);
+    this.innerHTML = '<svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.6;"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg><span>人工接管中</span>';
+  } else {
+    this.innerHTML = '<svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.6;"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg><span>AI 辅助</span>';
+  }
+});
+
+// Search
+searchInput.addEventListener('input', function() {
+  searchQuery = this.value.trim();
+  renderConvList();
+});
+
+// Sidebar toggle
+sidebarToggle.addEventListener('click', function() {
+  chatPanel.classList.toggle('sidebar-closed');
+});
+
+renderConvList();
+bootstrap();
+</script>
+</body>
+</html>

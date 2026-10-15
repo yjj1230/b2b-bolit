@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>v0.1 销售助手 · 下单桥接后台</title>
+<style>
+  :root{--blue:#1B365D;--ink:#1f1d18;--paper:#f6f5ef;--panel:#fff;--rule:#d8d5c8;--green:#2f6b3a}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);font:15px/1.7 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;padding:32px}
+  .wrap{max-width:920px;margin:0 auto}
+  h1{font-size:24px;color:var(--blue);margin-bottom:14px}
+  .card{background:var(--panel);border:1px solid var(--rule);border-radius:8px;padding:18px 20px;margin-bottom:18px}
+  .row{display:grid;grid-template-columns:150px 1fr;gap:8px;margin:8px 0}
+  label{color:#555}
+  input,select{width:100%;padding:7px 9px;border:1px solid var(--rule);border-radius:5px;font:inherit}
+  button{background:var(--blue);color:#fff;border:0;padding:9px 16px;border-radius:6px;cursor:pointer;font:inherit}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  table{width:100%;border-collapse:collapse;background:var(--panel);font-size:13px}
+  th,td{border-bottom:1px solid var(--rule);padding:7px 8px;text-align:left}
+  th{background:#f0eee4;color:var(--blue)}
+  .muted{color:#777;font-size:13px}
+  .err{color:#9b3b3b}.ok{color:var(--green)}
+  pre{background:#f0eee4;padding:10px;border-radius:6px;overflow:auto;font-size:12px}
+  .link-btn{background:none;border:none;color:var(--blue);text-decoration:underline;cursor:pointer;font:inherit;padding:0}
+  .modal-mask{position:fixed;inset:0;background:rgba(20,20,20,.45);display:none;align-items:flex-start;justify-content:center;z-index:99;padding:40px 16px;overflow:auto}
+  .modal-mask.show{display:flex}
+  .modal{background:#fff;border-radius:10px;max-width:720px;width:100%;padding:22px 24px;box-shadow:0 18px 40px rgba(0,0,0,.25)}
+  .modal h3{margin-bottom:10px}
+  .modal .close{float:right;background:#f0eee4;border:0;border-radius:5px;padding:5px 12px;cursor:pointer}
+  .kv-grid{display:grid;grid-template-columns:130px 1fr;gap:6px 12px;font-size:13px;margin:10px 0}
+  .kv-grid .k{color:#555}
+  .kv-grid .v{font-weight:500;word-break:break-all}
+  .modal .muted{margin-top:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>v0.1 销售助手 · 下单桥接后台（PC 兜底）</h1>
+
+  <div class="card">
+    <h3>1 · 飞书授权（token 2 小时有效）</h3>
+    <div class="row"><label>当前用户 ID</label><input id="user-id" value="" placeholder="测试手填；生产由企微身份决定" /></div>
+    <button id="btn-auth">打开飞书授权</button>
+    <p id="auth-status" class="muted"></p>
+  </div>
+
+  <div class="card">
+    <h3>2 · 下单（写进旧飞书审批流）</h3>
+    <div class="row"><label>客户（老客户 record_id）</label><input id="customer_record_id" placeholder="rec_xxx，留空则走新客户" /></div>
+    <div class="row"><label>客户名称</label><input id="customer_name" placeholder="北京华信科技" /></div>
+    <div class="row"><label>客户等级</label><input id="customer_level" placeholder="A/B/C/D" value="A" /></div>
+    <div class="row"><label>供方</label><input id="supplier" value="渠道A" /></div>
+    <div class="row"><label>产品名称</label><input id="product_name" value="标准电机 C68" /></div>
+    <div class="row"><label>数量（kg）</label><input id="quantity" type="number" value="100" /></div>
+    <div class="row"><label>单价（元/kg）</label><input id="unit_price" type="number" step="0.01" value="12.5" /></div>
+    <div class="row"><label>结算方式</label><select id="payment_terms"><option>款到发货</option><option>非款到发货</option><option>账期 30 天</option><option>月结 30 天</option></select></div>
+    <div class="row"><label>汇款方式</label><input id="remittance_method" value="转账" /></div>
+    <div class="row"><label>收货地址</label><input id="shipping_address" value="上海仓库" /></div>
+    <div class="row"><label>收件人</label><input id="receiver" value="张三" /></div>
+    <div class="row"><label>电话</label><input id="phone" value="13800000000" /></div>
+    <div class="row"><label>归属销售 role</label><select id="sales_role"><option>sales</option><option>agent</option></select></div>
+    <button id="btn-order">提交下单</button>
+    <p id="order-status" class="muted"></p>
+  </div>
+
+  <div class="card">
+    <h3>3 · 我的订单（本机台账）</h3>
+    <button id="btn-refresh">刷新列表</button>
+    <table><thead><tr><th>订单ID</th><th>flow_id</th><th>instance_id</th><th>操作</th></tr></thead><tbody id="orders"></tbody></table>
+  </div>
+</div>
+
+<div class="modal-mask" id="detail-mask">
+  <div class="modal">
+    <button class="close" id="detail-close">✕ 关闭</button>
+    <h3>📋 订单详情</h3>
+    <div class="kv-grid" id="detail-body"><span class="muted">加载中…</span></div>
+    <p class="muted" id="detail-foot"></p>
+  </div>
+</div>
+
+<script>
+let identity = null;
+try { identity = JSON.parse(localStorage.getItem('bridge_identity') || 'null'); } catch (e) {}
+
+function authHeader() {
+  const uid = document.getElementById('user-id').value;
+  return { 'Content-Type': 'application/json', 'X-User-Id': uid };
+}
+
+document.getElementById('btn-auth').addEventListener('click', async () => {
+  const r = await fetch('/api/v1/bridge/auth-url?state=v01', { headers: { 'X-User-Id': document.getElementById('user-id').value } });
+  const j = await r.json();
+  if (!r.ok) { document.getElementById('auth-status').innerHTML = '<span class="err">' + (j.error||'fail') + '</span>'; return; }
+  window.open(j.auth_url, '_blank');
+  document.getElementById('auth-status').textContent = '请在授权回调页粘贴 code 到此处完成兑换（见下）';
+});
+
+// 回调页 /bridge/?code=...：自动兑换并写 localStorage
+const params = new URLSearchParams(location.search);
+const code = params.get('code');
+if (code) {
+  fetch('/api/v1/bridge/callback', { method: 'POST', headers: authHeader(), body: JSON.stringify({ code }) })
+    .then(r => r.json().then(j => ({ ok: r.ok, j })))
+    .then(({ ok, j }) => {
+      if (!ok) { document.getElementById('auth-status').innerHTML = '<span class="err">授权兑换失败：' + (j.error||'') + '</span>'; return; }
+      identity = j.identity;
+      localStorage.setItem('bridge_identity', JSON.stringify(identity));
+      document.getElementById('auth-status').innerHTML = '<span class="ok">授权成功：' + identity.name + ' / ' + identity.role + '</span>';
+    });
+} else if (identity) {
+  document.getElementById('auth-status').innerHTML = '<span class="ok">已授权：' + identity.name + ' / ' + identity.role + '</span>';
+} else {
+  document.getElementById('auth-status').textContent = '未授权。点击上方按钮打开飞书授权，并把回调页面产生的 code 粘贴处理（开发模式）';
+}
+
+document.getElementById('btn-order').addEventListener('click', async () => {
+  const item = {
+    product_name: document.getElementById('product_name').value,
+    quantity: parseFloat(document.getElementById('quantity').value) || 0,
+    unit_price_cents: Math.round((parseFloat(document.getElementById('unit_price').value)||0) * 100),
+  };
+  const salesRole = document.getElementById('sales_role').value;
+  const body = {
+    customer_record_id: document.getElementById('customer_record_id').value,
+    customer_name: document.getElementById('customer_name').value,
+    customer_level: document.getElementById('customer_level').value,
+    supplier: document.getElementById('supplier').value,
+    items: [item],
+    payment_terms: document.getElementById('payment_terms').value,
+    remittance_method: document.getElementById('remittance_method').value,
+    currency: 'CNY',
+    shipping_address: document.getElementById('shipping_address').value,
+    receiver: document.getElementById('receiver').value,
+    phone: document.getElementById('phone').value,
+    sales_name: identity ? identity.name : document.getElementById('user-id').value,
+    sales_open_id: identity ? identity.open_id : '',
+    sales_user_id: identity ? identity.user_id : document.getElementById('user-id').value,
+    sales_role_key: identity ? identity.role : salesRole,
+  };
+  const r = await fetch('/api/v1/bridge/orders', { method: 'POST', headers: authHeader(), body: JSON.stringify(body) });
+  const j = await r.json();
+  if (!r.ok) { document.getElementById('order-status').innerHTML = '<span class="err">' + (j.error||'下单失败') + '</span>'; return; }
+  document.getElementById('order-status').innerHTML = '<span class="ok">已提交：flow_id=' + j.flow_id + ' instance_id=' + j.instance_id + '</span>';
+  refreshOrders();
+});
+
+async function refreshOrders() {
+  const r = await fetch('/api/v1/bridge/orders', { headers: { 'X-User-Id': document.getElementById('user-id').value } });
+  const j = await r.json();
+  const tbody = document.getElementById('orders');
+  tbody.innerHTML = '';
+  (j.items || []).forEach(it => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td>' + it.order_id + '</td><td>' + it.flow_id + '</td><td>' + it.instance_id + '</td>' +
+      '<td><button class="link-btn" onclick="showOrderDetail(\'' + it.order_id + '\')">查看详情</button>' +
+      ' · <a target="_blank" href="' + (it.detail_url||'#') + '">flows</a></td>';
+    tbody.appendChild(tr);
+  });
+}
+document.getElementById('btn-refresh').addEventListener('click', refreshOrders);
+document.getElementById('detail-close').addEventListener('click', closeOrderDetail);
+document.getElementById('detail-mask').addEventListener('click', function (e) {
+  if (e.target === this) closeOrderDetail();
+});
+
+function fmtCents(cents) {
+  if (cents == null) return '—';
+  return '¥' + (cents / 100).toFixed(2);
+}
+
+function kvRow(k, v) {
+  return '<div class="k">' + k + '</div><div class="v">' + (v == null || v === '' ? '—' : v) + '</div>';
+}
+
+async function showOrderDetail(orderID) {
+  const mask = document.getElementById('detail-mask');
+  const body = document.getElementById('detail-body');
+  const foot = document.getElementById('detail-foot');
+  mask.classList.add('show');
+  body.innerHTML = '<span class="muted">加载中…</span>';
+  foot.textContent = '';
+  try {
+    const r = await fetch('/api/v1/orders/' + encodeURIComponent(orderID), { headers: { 'X-User-Id': document.getElementById('user-id').value } });
+    const j = await r.json();
+    if (!r.ok) { body.innerHTML = '<span class="err">' + (j.error || '加载失败') + '</span>'; return; }
+    const items = (j.items || []).map(function (it, i) {
+      return '<div style="grid-column:1/-1;border-top:1px solid #eee;padding-top:6px;margin-top:4px;"><b>明细 ' + (i+1) + '</b></div>' +
+        kvRow('产品ID', it.product_id) + kvRow('数量', it.quantity) + kvRow('收货地址', it.receive_address);
+    }).join('');
+    body.innerHTML =
+      kvRow('订单ID', j.id) + kvRow('状态', j.state) + kvRow('结算方式', j.payment_term) +
+      kvRow('供方渠道', j.supplier_channel) + kvRow('合同编号', j.contract_no || '—') +
+      (j.unit_price_cents != null ? kvRow('单价', fmtCents(j.unit_price_cents)) : '') +
+      (j.amount_cents != null ? kvRow('合计', fmtCents(j.amount_cents)) : '') +
+      items;
+    foot.innerHTML = '本页为 PC 兜底只读视图；完整履约时间线/物流/审批链以企微 H5 订单详情页为准。';
+  } catch (e) {
+    body.innerHTML = '<span class="err">网络错误：' + e.message + '</span>';
+  }
+}
+
+function closeOrderDetail() {
+  document.getElementById('detail-mask').classList.remove('show');
+}
+
+refreshOrders();
+</script>
+</body>
+</html>

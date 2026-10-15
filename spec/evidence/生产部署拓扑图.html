@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第一次发布前生产部署拓扑</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f4f7fa;color:#17212b;font-family:"Microsoft YaHei",Arial,sans-serif}.page{width:1440px;min-height:960px;margin:0 auto;padding:44px}.title{font-size:32px;font-weight:700;color:#17324d}.sub{margin-top:8px;color:#5c6b7a}.legend{display:flex;gap:20px;margin:22px 0;font-size:14px}.legend span:before{content:"";display:inline-block;width:28px;border-top:3px solid #0f766e;margin-right:8px;vertical-align:middle}.legend .missing:before{border-top-color:#c62828;border-top-style:dashed}.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:22px}.zone{background:#fff;border:1px solid #d7e0e8;border-radius:8px;padding:18px;min-height:230px;box-shadow:0 3px 12px rgba(23,50,77,.06)}.zone h2{font-size:18px;margin:0 0 14px;color:#17324d}.box{border-left:5px solid #2563eb;background:#eef5ff;padding:12px 14px;margin:10px 0;border-radius:4px;line-height:1.55}.box.green{border-left-color:#0f766e;background:#eaf8f5}.box.amber{border-left-color:#b45309;background:#fff7e6}.box.red{border-left-color:#c62828;background:#fdecec}.box b{display:block}.flow{grid-column:1/-1;background:#17324d;color:white;border-radius:8px;padding:20px 24px}.route{display:grid;grid-template-columns:1fr 60px 1fr 60px 1fr;align-items:center;gap:8px;margin:13px 0}.node{background:#fff;color:#17212b;border-radius:5px;padding:12px;text-align:center;min-height:64px;display:flex;align-items:center;justify-content:center}.arrow{text-align:center;font-size:28px;color:#70d7c8}.route.missing .arrow{color:#ff8a80}.route.missing .node:last-child{border:2px dashed #ff8a80;background:#fff2f1}.footer{margin-top:18px;color:#5c6b7a;font-size:13px}
+</style></head><body><main class="page">
+<div class="title">第一次发布前生产部署拓扑</div><div class="sub">现场实际结构，采集时间 2026-08-19；秘密值和业务明细未进入图中</div>
+<div class="legend"><span>已存在且可达</span><span class="missing">目标链路不存在或未就绪</span></div>
+<section class="grid">
+<div class="zone"><h2>飞书侧</h2><div class="box"><b>飞书自建应用</b>web_app · 版本 1.0.15<br>旧系统 3 个重定向地址</div><div class="box"><b>审批中心 / H5 下单</b>通过 approval.renheng.com 进入旧系统</div><div class="box green"><b>飞书多维表</b>流程表、客户档案、产品表<br>流程数据同步至购销合同表</div></div>
+<div class="zone"><h2>旧系统生产主机</h2><div class="box green"><b>101.37.66.110</b>Windows Server 2025 · Node v24.15.0 · :3000</div><div class="box green"><b>C:\feishu-approval-poc</b>main@a42a115 · 正式部署范围 102 个文件哈希一致</div><div class="box amber"><b>运行保障</b>计划任务/看门狗运行；C 盘剩余约 4.62GiB</div></div>
+<div class="zone"><h2>pgAPI / RHCRM</h2><div class="box green"><b>192.168.254.44</b>Ubuntu 22.04.5 · Python 3.10.12 · :8000/:8002</div><div class="box"><b>三张核心表</b>customers · products · purchase-contracts</div><div class="box"><b>公网入口</b>api.renheng.com:443 经网关转发<br>PostgreSQL 与 pgAPI 同机</div></div>
+<div class="zone"><h2>企微侧</h2><div class="box"><b>企微自建应用</b>可信域名 wecom-test.renheng.com</div><div class="box amber"><b>当前主页</b>/miniapp/ 仍为旧“备货与发货”页面</div></div>
+<div class="zone"><h2>新系统生产环境</h2><div class="box green"><b>121.40.226.192</b>CentOS 8 · Podman 3.3.1</div><div class="box"><b>b2b_pilot_v2@bf6a9cb7</b>BFF :8080 · PG16 · Temporal · SpiceDB · MinIO</div><div class="box red"><b>第一次发布缺口</b>无 bridge/auth-url 源码；端点 404；业务库无业务表</div></div>
+<div class="zone"><h2>HTTPS 证书</h2><div class="box">approval.renheng.com<br>到期 2026-10-16</div><div class="box">wecom-test.renheng.com<br>到期 2026-10-15</div><div class="box">api.renheng.com<br>到期 2026-11-13</div></div>
+<div class="flow"><b>当前实际数据与入口链路</b>
+<div class="route"><div class="node">飞书 H5 / 审批中心</div><div class="arrow">→</div><div class="node">旧系统 Node :3000</div><div class="arrow">→</div><div class="node">多维表 → RHCRM / pgAPI 三表</div></div>
+<div class="route"><div class="node">企微应用 /miniapp/</div><div class="arrow">→</div><div class="node">121.40.226.192 网关</div><div class="arrow">→</div><div class="node">旧备货与发货服务</div></div>
+<div class="route missing"><div class="node">新系统 BFF</div><div class="arrow">⇢</div><div class="node">bridge/auth-url</div><div class="arrow">⇢</div><div class="node">不存在 / 404</div></div>
+</div></section><div class="footer">结论：现有飞书旧系统正式部署范围与 main 一致；历史备份源码不纳入部署判断。pgAPI 三表链路可用，第一次发布所需的新系统桥接链路尚未形成。</div>
+</main></body></html>

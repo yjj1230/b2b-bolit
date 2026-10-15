@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>12 · 影子全流程预演 · 0.1 订单助手（内部轨 / 收集数据 / 审计 / 修复）</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+SC:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:#f5f4ed; --paper2:#efeee5; --ink:#1f1d18; --ink2:#6b665b;
+    --ink3:#3a382f; --blue:#1B365D; --rule:#d4d1c5; --amber:#8a6d3b; --red:#9b3b3b; --green:#3b6d3b;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif; line-height:1.6;}
+  .wrap{max-width:980px; margin:0 auto; padding:48px 40px 80px;}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;}
+  .folio{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--rule); padding-bottom:10px;
+    font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink2);}
+  .folio a{color:var(--ink2); border:none;}
+  .folio a:hover{color:var(--blue);}
+  .tag{display:inline-block; padding:3px 10px; font-size:11px; letter-spacing:.16em; background:var(--paper2); color:var(--blue);}
+  .tag.red{background:#f3e3e3; color:var(--red);}
+  .tag.amber{background:#f3ecdc; color:var(--amber);}
+  .tag.green{background:#e3f0e3; color:var(--green);}
+  .kicker{display:flex; align-items:baseline; gap:12px; margin-top:48px; flex-wrap:wrap;}
+  h1{font-size:clamp(30px,4.6vw,46px); line-height:1.14; font-weight:500; margin-top:14px; letter-spacing:-.01em;}
+  .lede{margin-top:18px; font-size:16.5px; line-height:1.7; color:var(--ink3); max-width:760px;}
+  h2{font-size:23px; font-weight:600; margin:52px 0 14px; color:var(--blue); display:flex; align-items:baseline; gap:12px; border-top:1px solid var(--rule); padding-top:26px;}
+  h2 .no{font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.12em;}
+  h3{font-size:17.5px; font-weight:600; margin:30px 0 10px; color:var(--ink);}
+  h3 .no{color:var(--blue); font-family:'IBM Plex Mono',monospace; font-size:12px; margin-right:8px;}
+  p{margin:10px 0; color:var(--ink3);}
+  ul,ol{margin:10px 0 10px 26px; color:var(--ink3);}
+  li{margin:5px 0;}
+  a{color:var(--blue); text-decoration:none; border-bottom:1px solid var(--rule);}
+  a:hover{border-bottom-color:var(--blue);}
+  blockquote{border-left:2px solid var(--blue); padding:10px 18px; margin:16px 0; background:var(--paper2); font-style:italic;}
+  table{width:100%; border-collapse:collapse; font-size:13px;}
+  .table-wrap{overflow-x:auto; margin:16px 0 24px; border:1px solid var(--rule);}
+  .table-wrap table{margin:0;}
+  th{background:var(--paper2); color:var(--blue); text-align:left; font-weight:600; padding:9px 12px; border-bottom:1.5px solid var(--blue); font-size:12px; white-space:nowrap;}
+  td{padding:8px 12px; border-bottom:1px solid var(--rule); vertical-align:top; color:var(--ink3);}
+  tr:nth-child(even) td{background:#faf9f3;}
+  tr:hover td{background:#f0ede0;}
+  td .tag{font-size:10px; padding:1px 6px;}
+  td code{font-size:11.5px;}
+  .mermaid{background:var(--paper); border:1px solid var(--rule); padding:18px; overflow-x:auto; text-align:center; margin:20px 0;}
+  .mermaid svg{max-width:100%; height:auto;}
+  figcaption{text-align:center; font-size:12px; color:var(--ink2); margin:-10px 0 26px; font-style:italic;}
+  code{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace; font-size:13px; background:var(--paper2); padding:1px 5px;}
+  pre{background:var(--paper2); border:1px solid var(--rule); padding:16px 18px; overflow-x:auto; font-size:12.5px; line-height:1.55; margin:14px 0;}
+  pre code{background:none; padding:0;}
+  footer.colophon{margin-top:56px; padding-top:14px; border-top:1px solid var(--rule); display:flex; justify-content:space-between;
+    font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink2); flex-wrap:wrap; gap:8px;}
+  footer.colophon a{color:var(--ink2); border:none;}
+  footer.colophon a:hover{color:var(--blue);}
+  .toc{border:1px solid var(--rule); background:var(--paper2); padding:18px 24px; margin:26px 0;}
+  .toc .tt{font-size:11px; letter-spacing:.2em; color:var(--blue); margin-bottom:8px;}
+  .toc a{display:block; padding:3px 0; color:var(--ink3); border:none;}
+  .toc a:hover{color:var(--blue);}
+  .toc .mono{font-size:12px; color:var(--blue); margin-right:8px;}
+  .note{background:#f3ecdc; border:1px solid #d8c9a3; padding:12px 16px; margin:16px 0; font-size:13.5px; color:var(--ink3);}
+  .note .tt{font-size:10.5px; letter-spacing:.18em; color:var(--amber); font-family:'IBM Plex Mono',monospace;}
+  @media(max-width:720px){.wrap{padding:28px 18px 60px;}}
+</style>
+<script>
+  mermaid.initialize({startOnLoad:true, theme:'neutral', themeVariables:{primaryColor:'#efeee5', primaryBorderColor:'#1B365D', primaryTextColor:'#1f1d18', lineColor:'#6b665b', secondaryColor:'#f3ecdc', tertiaryColor:'#f5f4ed'}});
+</script>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="folio">
+    <span><a href="index.html">← Docs</a> · B2B Order Fulfillment · <a href="index.html">v0.1</a></span>
+    <span>12 · Shadow Full-Flow</span>
+    <span>内部轨 · 预演 · 审计</span>
+  </header>
+
+  <div class="kicker">
+    <span class="tag">影子全流程预演 · v0.1 内部轨</span>
+    <span class="tag red">非客户功能 · 仅内部使用</span>
+    <span class="mono" style="font-size:11px; letter-spacing:.18em; color:var(--ink2);">真实数据驱动 · 零出站 · 零回写 · 可重建重放</span>
+  </div>
+
+  <h1>影子全流程预演设计 · v0.1<br/><span style="font-style:italic; color:var(--blue);">完整状态机内部运行：收集数据 · 审计 · 修复</span></h1>
+
+  <p class="lede">把<strong>已经实现的完整流程状态机</strong>随 v0.1 一起发布到生产：6 台状态机（ORD / STK / SHP / INV / PRE / Gatekeeper，52 状态 · 79 迁移边）+ <code>OrderWorkflow</code> / <code>PreOrderWorkflow</code> 全量工作流，在<strong>影子区</strong>以真实飞书数据驱动运行。<strong>不是给客户用</strong>——影子轨无公网入口、无企微出站、不回写飞书；它对我们自己是一个<strong>收集数据、进行审计、修复问题的预演过程</strong>，为 v0.2「数据正式迁入新系统（唯一真相），除销售 / 主管 / 董事长外全部上企微」的 Go/No-Go，以及 v0.3「企微体系发布完成：销售 / 主管 / 董事长迁入企微 + 全量数据 100% 迁完 + 影子撤销」的演练资产提供证据。</p>
+  <blockquote><strong>D-012（2026-08-20 项目 owner 裁决）· 新单实时增量模式</strong>：影子摄入只吃<strong>新下单订单</strong>，经旧系统埋点 / 飞书事件订阅（hook 主通道，T3 调研定）实时进入 <code>shadow-ingest</code>；JSONL / 列表每日对账兜底；<strong>历史存量不依赖、不前置</strong>。采集管道必须准确（丢单 / 错序 = 采集故障并告警），重放结果允许与飞书不一致——<strong>差异即校验尺子</strong>。影子数据 v0.3 后撤销。</blockquote>
+
+  <nav class="toc">
+    <div class="tt">CONTENTS · 目录</div>
+    <a href="#s1"><span class="mono">1</span>定位与铁律</a>
+    <a href="#s2"><span class="mono">2</span>为什么现在做（v0.1 缺口 → v0.2/v0.3 承接）</a>
+    <a href="#s3"><span class="mono">3</span>目标模型与运行边界</a>
+    <a href="#s4"><span class="mono">4</span>总体架构（双轨三区）</a>
+    <a href="#s5"><span class="mono">5</span>数据流：摄入 → 翻译 → 信号 → 执行 → 审计</a>
+    <a href="#s6"><span class="mono">6</span>事件 → 信号映射规范</a>
+    <a href="#s7"><span class="mono">7</span>影子栈部署（compose · 端口 · 环境变量）</a>
+    <a href="#s8"><span class="mono">8</span>数据收集与审计报告</a>
+    <a href="#s9"><span class="mono">9</span>修复-重放闭环</a>
+    <a href="#s10"><span class="mono">10</span>测试与验收（S-01..S-09）</a>
+    <a href="#s11"><span class="mono">11</span>发布 / 门禁 / 回滚</a>
+    <a href="#s12"><span class="mono">12</span>实施任务与文档关联</a>
+    <a href="#appendix-a"><span class="mono">附录 A</span>隔离审计：影子库不触碰生产业务库</a>
+  </nav>
+
+  <h2 id="s1"><span class="no">1 ·</span> 定位与铁律</h2>
+
+  <p>v0.1 发布从「单轨」改为「双轨」：</p>
+
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>轨</th><th>服务对象</th><th>范围</th><th>本设计中的变化</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag">A · 对外轨</span></td><td>虹励 / 客户可见</td><td>桥接下单 → 飞书流续跑 → 我的订单 / 状态回显</td><td><strong>不变</strong>，发布物与验收口径维持现状</td></tr>
+      <tr><td><span class="tag red">S · 影子轨</span></td><td><strong>仅内部</strong></td><td>完整 FSM + 全量工作流在真实数据上运行，产出覆盖率 / 分歧 / 审计报告</td><td><strong>新增</strong>，随 v0.1 R1/R2 同发，独立开关独立回滚</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="note">
+    <span class="tt">最新裁决 · 2026-08-20（D-009 / D-010 / D-011，已落 project/decisions/）</span>
+    <strong>D-009 无托底</strong>：所有上线系统必须可用，否则就是故障；影子轨一旦上线，没有「影子可降级」口径，可用性/监控/告警/回滚进发布门禁。
+    <strong>D-009 全节点覆盖 + 差异映射可接受</strong>：影子轨覆盖飞书现状全部数据流程节点；飞书与新系统的差异必然存在，只要提前映射、标记（分歧表），差异本身可接受——阻塞的是「未映射、未标记」。
+    <strong>D-010 独立环境与生命周期</strong>：影子栈单独一套环境，compose 自带 <code>shadow-temporal</code>，与 A 轨零共享面；影子库运行到 v0.3 正式上线后撤销（归档 → 停栈 → drop）；容量按 ≤1 万条/天规划。
+    <strong>D-011 持续发布与六同原则</strong>：v0.1 之后影子系统可多次发布以加速验证；影子通过「同代码同镜像 / 同数据 / 同状态机 / 同执行环境 / 同查询面 / 同审计」六同原则保持与真实系统近乎等效，显式例外只有零出站通知器、零回写、无公网入口、PRE/Gatekeeper 种子四类。
+  </div>
+
+  <p>影子轨六条铁律（违反任一条即影子轨 NO-GO）：</p>
+
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>#</th><th>铁律</th><th>落地方式</th></tr></thead>
+    <tbody>
+      <tr><td>S-铁1</td><td><strong>零客户触达</strong></td><td>影子 API 只绑 127.0.0.1 / 内网，身份白名单 <code>B2B_SHADOW_PRINCIPALS</code>；不做企微入口、不发客户群</td></tr>
+      <tr><td>S-铁2</td><td><strong>零出站</strong></td><td><code>B2B_WECOM_PROVIDER=mock</code>（只记录不发送）；<code>B2B_FEISHU_BRIDGE_ENABLED=false</code>；无任何群消息通道</td></tr>
+      <tr><td>S-铁3</td><td><strong>零回写飞书</strong></td><td>同步只读账号 + V5 验收（同步期间飞书侧零写入）；影子栈无旧系统写接口凭据</td></tr>
+      <tr><td>S-铁4</td><td><strong>零污染生产</strong></td><td>D-010 独立环境：影子栈在专用环境运行，自带 <code>shadow-temporal</code>、独立 PG <code>b2b_shadow</code>、独立 SpiceDB、独立 compose 网络，对 A 轨主机名零可达；并以<strong>启动守卫 + 网络隔离 + 迁移目录拆分 + 写哨兵</strong>四层强制落地，不依赖人「记得配对」</td></tr>
+      <tr><td>S-铁5</td><td><strong>可重建重放</strong></td><td>真相永远在飞书；影子区可随时 drop 重建，任一修复后重放「受影响批次 + 上线以来新单全集 + 种子集」证明（D-012；历史存量不参与）</td></tr>
+      <tr><td>S-铁6</td><td><strong>影子故障不动 A 轨</strong></td><td>独立开关 <code>B2B_SHADOW_ENABLED</code>；停影子 = <code>docker compose -p b2b-shadow -f docker-compose.shadow.yml down</code>（独立 compose 项目/网络），A 轨零感知</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2 id="s2"><span class="no">2 ·</span> 为什么现在做（v0.1 缺口 → v0.2/v0.3 承接）</h2>
+
+  <h3><span class="no">2.1</span> 当前 v0.1 的状态机空档</h3>
+  <ul>
+    <li>代码侧：<code>internal/domain</code> 六台 FSM、<code>OrderWorkflow</code> 四段推进 + 13 个审批 Signal、repo 守恒事务、<code>scripts/audit</code> 审计链——<strong>已全部实现</strong>，但 v0.1 生产只用了桥接台账，飞书审批期间这些代码没有在真实业务数据上跑过。</li>
+    <li>同步侧：<code>cmd/sync + ApplySyncBatch</code> 目前是<strong>快照 upsert 写 <code>orders.state</code>，不经过 FSM 校验</strong>——只能做视图，不能证明状态机能接住旧系统的真实路径。</li>
+    <li>计划侧：<code>发布计划v2</code> 第 1 次（桥接）与第 2 次（角色迁入新系统办理）之间，没有任何机制回答「我们的全流程状态机能不能接住飞书真实业务」。影子轨就是这个验证器。</li>
+  </ul>
+
+  <h3><span class="no">2.2</span> 与 v0.2 设计 Preview 的承接</h3>
+  <p>按 <code>v0.2_设计_preview.html</code>（讨论稿）与 <code>docs/发布计划v2/渐进式发布计划v2.html</code> 的最新讨论：<strong>v0.1 + 影子轨提前完成 v0.2 前的流程校验测试，安全系数大幅提高</strong>，因此 <strong>v0.2 = 数据正式迁入新系统（唯一状态机与数据真相）</strong>，除销售 / 主管 / 董事长外全部岗位切换到企微体系，旧系统复杂流程冻结、只保留为三岗位新增的极简飞书审批；<strong>v0.3 = 企微体系发布完成</strong>：销售 / 主管 / 董事长迁入企微 + 全量数据 100% 迁完（四层对账）+ 影子撤销 + 旧系统只读归档 / 下线。影子轨是这两次发布的前置安全装置，并且按 D-010/D-011：<strong>运行到 v0.3 正式上线后撤销</strong>；v0.3 之前影子系统可以按验证需要<strong>多次发布</strong>（映射、种子、审计与重放工具），A 轨不因影子发布而重新发布。</p>
+
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>影子轨产出</th><th>直接服务于</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>真实事件 → Signal 映射表</td><td>v0.2 数据迁入 / v0.3 企微体系完成</td><td>旧系统事件动作字典 → 新系统 Signal，是 v0.2 数据迁入、v0.3 销售/主管/董事长企微切换与全量迁完的共同对照底稿，与影子映射表同源复用</td></tr>
+      <tr><td>FSM 边覆盖率 + 分歧清单</td><td>v0.2 数据迁入 Go/No-Go</td><td>v0.2 让新系统成为唯一真相之前，必须先证明状态机能接住真实业务全部路径</td></tr>
+      <tr><td><code>FSM_GAP</code> 类分歧修复</td><td>v0.2 发布前</td><td>把「真实业务合法但我们的 FSM 拒绝」的缺陷在 v0.1 内部窗口修掉，而不是等数据迁入后暴露</td></tr>
+      <tr><td>影子摄入 / 事件重放 / 对账脚本</td><td>v0.3 全量数据迁完</td><td>JSONL → PG 的「迁移 + 批次幂等 + 事件链核对」已在影子轨演练过，v0.3 全量迁完（企微体系发布完成）只是换目标库再执行一遍</td></tr>
+      <tr><td><code>LEGACY_ANOMALY</code> 清单</td><td>v0.3 全量迁完前清洗</td><td>飞书侧断链 / 非法迁移 / 缺事件，记录在案，成为全量迁移前清洗与裁决清单</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2 id="s3"><span class="no">3 ·</span> 目标模型与运行边界</h2>
+
+  <h3><span class="no">3.1</span> 已经实现、本次要发上去的状态机全量</h3>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>FSM</th><th>文件</th><th>状态数</th><th>迁移边</th><th>影子轨驱动来源</th></tr></thead>
+    <tbody>
+      <tr><td>ORD 订单创建</td><td><code>internal/domain/ord.go</code></td><td>11</td><td>20</td><td rowspan="4">旧飞书真实事件（订单 / 备货 / 发货 / 开票 + 审批决策）</td></tr>
+      <tr><td>STK 备货审批</td><td><code>internal/domain/stk.go</code></td><td>11</td><td>19</td></tr>
+      <tr><td>SHP 发货出库</td><td><code>internal/domain/shp.go</code></td><td>7</td><td>11</td></tr>
+      <tr><td>INV 开票回单</td><td><code>internal/domain/inv.go</code></td><td>11</td><td>14</td></tr>
+      <tr><td>PRE 预订单</td><td><code>internal/domain/preorder.go</code></td><td>9</td><td>13</td><td>内部种子事件集（v0.1 自动捕捉段暂缓，无真实来源）</td></tr>
+      <tr><td>Gatekeeper 守门员</td><td><code>internal/domain/gatekeeper.go</code></td><td>3</td><td>2</td><td>内部测试账号在影子 API 上跑 Pending → Confirmed / Cancelled</td></tr>
+      <tr><td><strong>合计</strong></td><td>—</td><td><strong>52</strong></td><td><strong>79</strong></td><td>四主段用真实数据；PRE / Gatekeeper 用内部种子补齐边覆盖</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3><span class="no">3.2</span> 谁可以用、能做什么、不能做什么</h3>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>维度</th><th>边界</th></tr></thead>
+    <tbody>
+      <tr><td>使用者</td><td>内部白名单（开发 / 实施 / 审计人员）；<strong>虹励与任何客户在影子轨没有入口、没有感知</strong></td></tr>
+      <tr><td>做什么</td><td>摄入真实事件 → 影子建单 → 工作流按真实决策推进 → 事件链 / 守恒 / 待办全部落影子库 → 每日审计报告</td></tr>
+      <tr><td>不做什么</td><td>不发送企微 / 飞书消息、不写回旧系统、不创建真实飞书审批实例、不占用真实审批人、不产生客户可见数据</td></tr>
+      <tr><td>数据边界</td><td>沿用 11-migration §6 敏感边界：SanitizeRow 剥离、open_id 映射后落库、token 丢弃、原始聊天不迁入</td></tr>
+      <tr><td>可见边界</td><td>报告只进 <code>logs/audit/shadow/</code> 与影子库；文档标记「内部预演」，不进入面向客户的 v0.1 说明材料</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2 id="s4"><span class="no">4 ·</span> 总体架构（双轨三区）</h2>
+
+  <div class="mermaid">
+flowchart TB
+  subgraph TRUTH["真相区 · 旧飞书（只读）"]
+    FS["新单事件源（D-012）<br/>旧系统 hook / 飞书事件订阅<br/>JSONL 每日对账兜底 / pgAPI 镜像"]
+  end
+  subgraph LIVE["生产区 · v0.1 对外轨 A（不变）"]
+    BR["桥接 api + 我的订单<br/>状态回显 · 详情跳转"]
+    PG[("b2b_pilot PG<br/>台账 + 同步视图")]
+  end
+  subgraph SHADOW["影子区 · v0.1 内部轨 S（新增 · 无公网入口）"]
+    ING["shadow-ingest<br/>真实事件摄入（只读）"]
+    SDB[("b2b_shadow PG<br/>快照 + 源事件 + 影子事件链")]
+    FEED["shadow-feed<br/>事件 → Signal 翻译投递"]
+    TS["Temporal<br/>ns=b2b-shadow · queue=b2b-shadow-order"]
+    WK["shadow-worker<br/>OrderWorkflow / PreOrderWorkflow 全量"]
+    API["shadow-api<br/>127.0.0.1:18082 内部查询"]
+    AUD["shadow-audit<br/>覆盖率 / 分歧 / 状态对齐日报"]
+  end
+  FS -->|"只读账号 · V5 零写入校验"| ING
+  ING -->|"幂等批次"| SDB
+  SDB -->|"新事件 NEW"| FEED
+  FEED -->|"Start / Signal"| TS
+  TS --> WK
+  WK -->|"FSM 校验后的真实写盘"| SDB
+  API --> SDB
+  SDB --> AUD
+  AUD --> RPT["logs/audit/shadow/<br/>审计报告 + 分歧清单"]
+  FS -.->|"生产轨同步（既有）"| PG
+  </div>
+  <figcaption>图 1 · 双轨三区——真相区只读；生产区 A 轨不变；影子区完整状态机全量运行，与生产物理隔离</figcaption>
+
+  <p>三个区的物理隔离点（D-010 已升级为独立环境）：影子栈运行在专用环境、专用 compose 项目，自带 <code>shadow-temporal</code> 独立实例；影子 PG 独立数据库 <code>b2b_shadow</code>；SpiceDB 独立实例（memory datastore + 影子关系种子，0.7 建议后续升级为 postgres 存储以贴近生产）；影子 API 仅回环地址。<strong>影子容器与 A 轨的共享面为零</strong>——唯一的跨环境关系是只读数据源（pgAPI / 飞书同步源）。</p>
+
+  <h2 id="s5"><span class="no">5 ·</span> 数据流：摄入 → 翻译 → 信号 → 执行 → 审计</h2>
+
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>#</th><th>步骤</th><th>组件</th><th>动作</th><th>落库 / 产物</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>只读摄入</td><td><code>cmd/shadow-ingest</code></td><td>配置驱动拉取 orders + stock_prepare_events + shipment_events + invoice_events + 审批任务结果；SanitizeRow 敏感剥离；批次 checksum 幂等</td><td><code>orders</code> 快照 + <code>shadow_source_events</code></td></tr>
+      <tr><td>2</td><td>影子建单</td><td><code>cmd/shadow-feed</code></td><td>每条 flow 的首个 ORD 事件 → 建影子订单（idempotency 搬源键）→ 幂等 StartWorkflow</td><td><code>orders</code>（state=ORD_REQUESTED）+ Workflow 启动</td></tr>
+      <tr><td>3</td><td>事件翻译</td><td><code>cmd/shadow-feed</code></td><td>按 <code>shadow-feed.json</code> 把 source 事件映射为 Signal 名 + payload；未知动作 → UNMAPPED 分歧，不猜测</td><td><code>shadow_signal_log</code>（NEW → DELIVERED / FAILED）</td></tr>
+      <tr><td>4</td><td>信号投递</td><td><code>cmd/shadow-feed</code></td><td>按 <code>(flow_id, source_event_id)</code> 幂等投递；同一 flow 事件按 occurred_at 串行</td><td>Temporal Signal</td></tr>
+      <tr><td>5</td><td>状态机执行</td><td><code>cmd/shadow-worker</code></td><td>真实 <code>OrderWorkflow</code>：FSM 校验 → repo 单事务写盘 → 守恒断言 → approval_tasks；影子模式抑制 Timer、接受 <code>shadow-inject</code> 分支信号；通知器 = mock</td><td><code>order_events / stock_prepares / shipments / invoices</code> 全量影子事件链</td></tr>
+      <tr><td>6</td><td>分歧捕获</td><td><code>cmd/shadow-feed + scripts/shadow_audit</code></td><td>非法迁移 / 未映射事件 / 链断裂 / 守恒违例 / 状态失配 / 卡住等待 → 写分歧表</td><td><code>shadow_divergences</code></td></tr>
+      <tr><td>7</td><td>覆盖率统计</td><td><code>scripts/shadow_audit</code></td><td>影子 <code>order_events</code> 的每步迁移对 79 边去重计数</td><td><code>shadow_coverage</code></td></tr>
+      <tr><td>8</td><td>每日报告</td><td><code>cmd/shadow-audit</code>（-interval + state-file 探针）</td><td>覆盖率 / 分歧 / 状态对齐 / 卡住清单，写 markdown + JSON</td><td><code>logs/audit/shadow/shadow-audit-YYYYMMDD.md</code></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="note">
+    <div class="tt">影子模式（工作流最小改造）</div>
+    <code>OrderWorkflowParams</code> 增加 <code>Shadow bool</code>：为 true 时 <code>ApprovalRemindAfter / ApprovalEscalateAfter / ReceiptExceptionAfter</code> 全部不调度；新增 shadow-only 控制信号 <code>shadow-inject</code>，由 feed 在旧系统出现「无回单超期进例外」等 timer 触发事件时注入等价分支。推进<strong>只认信号，不靠真实时间</strong>——保证同一事件序列可确定性重放。
+  </div>
+
+  <h2 id="s6"><span class="no">6 ·</span> 事件 → 信号映射规范</h2>
+
+  <p>映射配置 <code>config/shadow-feed.example.json</code>，结构与 <code>sync.example.json</code> 同源：<code>stage_code + action</code> → <code>{signal, payload 字段}</code>。基础映射表（T1.3 现场调研后冻结为权威版）：</p>
+  <div class="note">
+    <span class="tt">权威基线 · 2026-08-20 已按旧系统最新代码生成</span>
+    用户已把飞书三方审批代码库更新到最新（<code>tripartite-approval @ f3ed1f80</code>，工作区路径 <code>/data/home/laurence/tripartite-approval</code>）。
+    已据代码事实把 <code>config/shadow-feed.example.json</code> 的占位中文动作替换为<strong>真实 status 枚举</strong>：
+    <code>ORDER_SUBMIT_ACCEPTED → start</code>；<code>MANAGER_APPROVED / SUPERVISOR_PENDING / CHAIRMAN_PENDING / CHAIRMAN_SKIPPED / CONTRACT_STUB_CREATED → ignore</code>；
+    <code>SUPERVISOR_APPROVED/REJECTED → price-review</code>；<code>CHAIRMAN_APPROVED/REJECTED → chairman-review</code>；
+    <code>STOCK_RESERVATION_APPROVED → stock-review</code>；<code>FINANCE_PAYMENT_CONFIRMED → payment-confirm</code>；
+    <code>WAREHOUSE_SHIPPED/TRANSFERRED → ship-action</code>；<code>COMPLETION_EVIDENCE_SUBMITTED → receipt-provided</code>；
+    <code>FINANCE_ISSUE_APPROVED / NO_INVOICE_SALE_HANDLED → invoice-issued</code>；<code>COLLECTION_FOLLOWUP_SUBMITTED / INVOICE_ARCHIVED → payment-tracked</code>。
+    仍待业务逐条签字；真实 JSONL 的两处形态差异<strong>已在代码侧适配</strong>：决策事件无顶层 <code>flow_id</code> → <code>join_source</code> 按 <code>instance_id</code> 关联 orders.jsonl 快照；<code>detail</code> 嵌套对象 → FileFetcher 紧凑序列化保留。剩余 T1.3 工作：detail 内字段名（operator/qty/warehouse）与业务语义逐条冻结。
+  </div>
+
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>旧系统事件（示例）</th><th>影子动作</th><th>payload 要点</th></tr></thead>
+    <tbody>
+      <tr><td>创建订单 / 信息确认自动通过</td><td>建影子订单 + StartWorkflow</td><td>idempotency_key / customer_id（pgAPI record_id）/ payment_term</td></tr>
+      <tr><td>主管通过 / 退回 / 驳回</td><td><code>price-review</code></td><td>APPROVED / RETURNED / REJECTED + operator + reason</td></tr>
+      <tr><td>董事长通过 / 要求修改 / 驳回</td><td><code>chairman-review</code></td><td>APPROVED / RETURNED / REJECTED + operator</td></tr>
+      <tr><td>商务备货通过（选仓）/ 驳回</td><td><code>stock-review</code></td><td>APPROVED + warehouse_id + note / RETURNED</td></tr>
+      <tr><td>仓管确认 / 退回 / 转仓</td><td><code>warehouse-confirm</code></td><td>APPROVED / RETURNED / TRANSFER</td></tr>
+      <tr><td>商务转仓审核</td><td><code>transfer-decision</code></td><td>APPROVE_TRANSFER + warehouse_id / APPROVE_ORIGINAL / REJECT</td></tr>
+      <tr><td>财务确认到款 / 未到账</td><td><code>payment-confirm</code></td><td>APPROVED / RETURNED + ledger_ref</td></tr>
+      <tr><td>仓管确认发货（含数量）</td><td><code>ship-action</code></td><td>SHIP + qty；RETURN；TRANSFER + warehouse_id</td></tr>
+      <tr><td>补回单</td><td><code>receipt-provided</code></td><td>—</td></tr>
+      <tr><td>无回单超期进入例外</td><td><code>shadow-inject</code></td><td>kind=receipt-exception（影子模式专用）</td></tr>
+      <tr><td>例外审核放行 / 拒绝</td><td><code>receipt-ex-review</code></td><td>APPROVED(+deadline_days) / REJECTED</td></tr>
+      <tr><td>财务开票完成 / 失败 / 无需开票</td><td><code>invoice-issued</code></td><td>ISSUED / FAILED / NO_NEED + tax_no</td></tr>
+      <tr><td>回款登记 / 归档</td><td><code>payment-tracked</code> / 归档事件</td><td>amount / operator</td></tr>
+      <tr><td>修改重提（字段变更）</td><td><code>modify-order</code></td><td>按 A/B/C/D/E 分类规则判定 class + changes</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>映射三规则：</p>
+  <ul>
+    <li><strong>白名单推进</strong>：只投递映射表里已确认的动作；未知 / 新动作写 <code>UNMAPPED_EVENT</code> 分歧，绝不猜测；</li>
+    <li><strong>幂等投递</strong>：<code>(tenant_id, legacy_flow_id, legacy_event_id)</code> 唯一，重放 / 重跑不重复推进；</li>
+    <li><strong>事件时间序</strong>：同一 flow 按 <code>occurred_at</code> 串行投递；乱序或时间倒挂记录为 <code>DATA_GAP</code>。</li>
+  </ul>
+
+  <h2 id="s7"><span class="no">7 ·</span> 影子栈部署（compose · 端口 · 环境变量）</h2>
+
+  <p>新增 <code>docker-compose.shadow.yml</code>，作为<strong>独立 compose 项目</strong>运行：<code>docker compose -p b2b-shadow -f docker-compose.shadow.yml up</code>。按 D-010，影子栈部署在<strong>单独一套环境</strong>，compose 自带 <code>shadow-temporal</code>（auto-setup 独立实例），不再依赖宿主 <code>17233</code>；独立项目自带独立默认网络，影子容器<strong>无法解析 A 轨任何主机名</strong>，唯一出网面是只读数据源与运维通道。<code>B2B_SHADOW_ENABLED=true</code> 时纳入 v0.1 发布物。</p>
+
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>服务</th><th>镜像 / target</th><th>端口（宿主）</th><th>职责</th></tr></thead>
+    <tbody>
+      <tr><td>shadow-postgres</td><td>postgres:16-alpine</td><td><code>127.0.0.1:15433</code></td><td>影子数据库 <code>b2b_shadow</code>（独立实例，可整库重建；只绑回环，不暴露公网）</td></tr>
+      <tr><td>shadow-migrate</td><td>postgres:16-alpine（一次性）</td><td>—</td><td>对影子库应用 <code>migrations/*.sql</code> + <code>migrations/shadow/*.sql</code>；DSN 经守卫校验后才允许执行</td></tr>
+      <tr><td>shadow-spicedb</td><td>authzed/spicedb:v1.39.1</td><td><code>127.0.0.1:15052</code></td><td>影子授权判定（memory datastore；与生产 SpiceDB 隔离；只绑回环）</td></tr>
+      <tr><td>shadow-seedrel</td><td>Dockerfile target seedrel（一次性）</td><td>—</td><td>影子关系基线（tenant#ops / warehouse#staff / accounting）</td></tr>
+      <tr><td>shadow-ingest</td><td>Dockerfile target shadowingest（新增）</td><td>—</td><td>真实事件只读摄入（周期 5m，幂等批次）</td></tr>
+      <tr><td>shadow-feed</td><td>Dockerfile target shadowfeed（新增）</td><td>—</td><td>源事件 → Signal 翻译投递；单 flow 串行、幂等</td></tr>
+      <tr><td>shadow-worker</td><td>Dockerfile target worker</td><td>—</td><td>Temporal Worker：全量 OrderWorkflow / PreOrderWorkflow（影子模式）</td></tr>
+      <tr><td>shadow-api</td><td>Dockerfile target api</td><td><code>127.0.0.1:18082</code></td><td>内部查询影子订单 / 事件 / 待办；桥接禁用、白名单收紧</td></tr>
+      <tr><td>shadow-audit</td><td>Dockerfile target shadowaudit（新增）</td><td>—</td><td>每日审计报告（覆盖率 / 分歧 / 状态对齐 / 卡住清单）</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>D-010 后 Temporal 改为<strong>影子自带实例</strong>（compose 服务 <code>shadow-temporal</code>），在其中注册 namespace <code>b2b-shadow</code>（一次性 <code>shadow-temporal-init</code> 任务）；所有影子工作流使用独立 task queue <code>b2b-shadow-order</code> 与 <code>shadow-</code> WorkflowID 前缀。A-03 的代码侧改造<strong>已完成</strong>：<code>B2B_TASK_QUEUE</code> 注入 worker 与 Starter、<code>shadow-</code> 前缀、影子租户 <code>chang-an-shadow</code> 均落地并有回归测试。</p>
+
+  <h3><span class="no">7.1</span> 关键环境变量</h3>
+  <pre><code># shadow-ingest / shadow-feed / shadow-worker / shadow-api 共用
+B2B_PG_DSN=postgres://postgres:postgres@shadow-postgres:5432/b2b_shadow?sslmode=disable
+B2B_SPICEDB_ADDR=shadow-spicedb:50051
+B2B_TEMPORAL_ADDR=shadow-temporal:7233   # D-010 独立环境：影子自带 Temporal
+B2B_TEMPORAL_NS=b2b-shadow
+B2B_TASK_QUEUE=b2b-shadow-order
+B2B_SHADOW_MODE=true
+B2B_SHADOW_PRINCIPALS=dev-a:ADMIN,audit-b:AUDITOR
+B2B_WECOM_PROVIDER=mock          # 零出站
+B2B_FEISHU_BRIDGE_ENABLED=false # 零回写 / 无桥接
+
+# shadow-worker / shadow-api 只读使用 pgAPI 真实主数据
+B2B_PGAPI_BASE_URL=https://api.renheng.com/pgapi
+B2B_PGAPI_API_KEY=&lt;只读凭据&gt;
+
+# shadow-ingest 源配置
+SHADOW_INGEST_CONFIG=/etc/b2b/ingest.json
+B2B_SYNC_INTERVAL=5m</code></pre>
+
+  <h3><span class="no">7.2</span> 健康检查与探针</h3>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>服务</th><th>探针</th><th>告警口径</th></tr></thead>
+    <tbody>
+      <tr><td>shadow-postgres</td><td><code>pg_isready</code></td><td>—</td></tr>
+      <tr><td>shadow-spicedb</td><td><code>spicedb-healthcheck -addr 127.0.0.1:50051</code>（gRPC health + preshared key）</td><td>非 SERVING</td></tr>
+      <tr><td>shadow-api</td><td><code>GET /healthz</code>（Header <code>X-User-Id</code> = 白名单首 principal）</td><td>非 200</td></tr>
+      <tr><td>shadow-ingest</td><td>state-file 最近成功时间</td><td>&gt; 2× 同步周期</td></tr>
+      <tr><td>shadow-feed</td><td>state-file + <code>shadow_signal_log</code> FAILED 数</td><td>FAILED &gt; 0 或投递停滞</td></tr>
+      <tr><td>shadow-audit</td><td>报告文件时间戳</td><td>超过 26h 无新报告</td></tr>
+      <tr><td>影子轨道整体</td><td>「写哨兵」定期校验影子栈未持有生产 DSN、mock 通知器零外部请求</td><td>任何生产写 / 外部请求即拉停</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2 id="s8"><span class="no">8 ·</span> 数据收集与审计报告</h2>
+
+  <h3><span class="no">8.1</span> 新表（migrations/shadow/008_shadow.sql · 只进影子库）</h3>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>表</th><th>关键字段</th><th>用途</th></tr></thead>
+    <tbody>
+      <tr><td><code>shadow_runs</code></td><td>run_id, ingest_config_digest, feed_config_digest, started_at, finished_at, status</td><td>每次重建 / 重放的运行档案</td></tr>
+      <tr><td><code>shadow_source_events</code></td><td>tenant_id, legacy_flow_id, legacy_event_id, stage_code, action, payload, occurred_at, source, checksum, state</td><td>旧系统真实事件原文（剥离后），只追加，是重放的输入</td></tr>
+      <tr><td><code>shadow_signal_log</code></td><td>source_event_id, signal, payload, workflow_id, delivered_at, state, error</td><td>翻译与投递台账（NEW → DELIVERED / FAILED）</td></tr>
+      <tr><td><code>shadow_divergences</code></td><td>run_id, order_id, legacy_flow_id, kind, severity, from_state, to_state, detail, status, owner, fix_commit, replay_run_id</td><td>分歧清单：发现 → 分类 → 裁决 → 修复 → 重放验证</td></tr>
+      <tr><td><code>shadow_coverage</code></td><td>fsm_name, from_state, to_state, hit_count, first_hit_at, last_hit_at, source</td><td>79 条迁移边的真实数据命中矩阵</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="note">
+    <div class="tt">迁移目录拆分（隔离审计 A-02）</div>
+    008 必须放在 <code>migrations/shadow/</code> 子目录：主 compose 的 <code>migrate</code> 只循环 <code>migrations/*.sql</code>（顶层 glob 不会进入子目录），生产库不会建影子表；<code>shadow-migrate</code> 先应用顶层 001-007，再应用 <code>migrations/shadow/*.sql</code>，且 DSN 必须先通过启动守卫（库名必须是 <code>b2b_shadow</code>）才允许执行。
+  </div>
+
+  <h3><span class="no">8.2</span> 每日报告四张数</h3>
+  <ol>
+    <li><strong>FSM 边覆盖率</strong>：已命中边 / 79，按 ORD / STK / SHP / INV / PRE / Gatekeeper 分组；真实数据未覆盖的边由内部种子补齐并标注 <code>source=seed</code>；</li>
+    <li><strong>分歧清单</strong>：P0 / P1 / P2 × 四分类（§9），每条有 owner、状态、fix_commit；</li>
+    <li><strong>状态对齐</strong>：影子订单终态 vs 飞书同步快照（容忍一个同步周期滞后）；差异进入分歧表；</li>
+    <li><strong>卡住清单</strong>：等待某信号超过 N 天的影子工作流——视为数据缺口而非静默放过。</li>
+  </ol>
+
+  <h3><span class="no">8.3</span> v0.2 数据正式迁入的 Go 条件（建议写入门禁）</h3>
+  <ul>
+    <li>ORD / STK / SHP / INV 四主段 happy path 在真实数据上覆盖 100%；总边覆盖 ≥ 60%（稀缺边 seed 补齐）；</li>
+    <li>无未裁决 P0 / P1 分歧；每条分歧有 owner 与 <code>fix_commit</code>；</li>
+    <li>每次修复后完整重放通过；连续 7 个审计日无新增 P0 / P1；</li>
+    <li><code>FSM_GAP</code> 类分歧全部修复或经 owner 裁决「接受 + 写入例外清单」。</li>
+  </ul>
+
+  <h2 id="s9"><span class="no">9 ·</span> 修复-重放闭环</h2>
+
+  <h3><span class="no">9.1</span> 分歧四分类</h3>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>分类</th><th>含义</th><th>处置</th></tr></thead>
+    <tbody>
+      <tr><td><code>MAPPING</code></td><td>旧系统事件语义映射错 / 字段取错</td><td>改 <code>shadow-feed.json</code>，重放该 flow</td></tr>
+      <tr><td><code>FSM_GAP</code></td><td>真实业务合法但我们的 FSM 拒绝（最值钱的发现）</td><td>改 <code>domain</code> + workflow + 补 L0-L3 测试，重放受影响批次 + 新单全集 + 种子（D-012）</td></tr>
+      <tr><td><code>LEGACY_ANOMALY</code></td><td>飞书侧数据本身断链 / 非法迁移 / 缺事件</td><td>不修旧系统；登记为 v0.3 回填前清洗清单</td></tr>
+      <tr><td><code>DATA_GAP</code></td><td>同步源缺事件 / 前缀缺失 / 乱序倒挂</td><td>补同步源或标注「前缀缺口」，重放后复检</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3><span class="no">9.2</span> 闭环</h3>
+  <div class="mermaid">
+flowchart LR
+  D["分歧发现<br/>shadow_divergences"] --> T{"四分类"}
+  T -->|"MAPPING"| M["修映射配置"]
+  T -->|"FSM_GAP"| F["修 domain / workflows<br/>补测试（L0-L3）"]
+  T -->|"LEGACY_ANOMALY"| L["登记 v0.3 清洗清单<br/>不进修复路径"]
+  T -->|"DATA_GAP"| G["补同步源 / 标前缀缺口"]
+  M --> R["shadow-replay<br/>重建影子库 + 新单全集 / 受影响批次重放"]
+  F --> R
+  R --> A["shadow-audit 复跑"]
+  A -->|"分歧未清"| D
+  A -->|"清零 / 裁决关闭"| V["形成 v0.2 数据迁入 Go 证据"]
+  </div>
+  <figcaption>图 2 · 修复-重放闭环——影子区即抛即建；每次代码或映射变更必须重放「上线以来新单全集 + 种子集」证明（D-012）；历史存量不参与</figcaption>
+
+  <ul>
+    <li><strong>可重放性</strong>：<code>make shadow-replay</code> = 停影子栈 → drop <code>b2b_shadow</code> → migrate → 从真相源重新摄入<strong>上线以来新单全集</strong> → 按事件时间序重放（种子补边）→ 复跑审计；</li>
+    <li><strong>证据链</strong>：每个分歧的 <code>replay_run_id</code> 指向验证它的那次重放，报告可复核；</li>
+    <li><strong>范围纪律</strong>：影子轨不做新业务功能；每新增一条映射必须绑定一条已确认的旧系统真实事件。</li>
+  </ul>
+
+  <h2 id="s10"><span class="no">10 ·</span> 测试与验收（S-01..S-09）</h2>
+
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>ID</th><th>级别</th><th>用例内容（Given / When / Then）</th></tr></thead>
+    <tbody>
+      <tr><td>S-01</td><td>L0</td><td>FSM 回放器穷举：79 条合法边全通过；任意非法边 → 分歧 <code>FSM_GAP</code>；重放同输入两次 → 结果与覆盖计数一致</td></tr>
+      <tr><td>S-02</td><td>L0</td><td>映射配置：已知动作正确翻译；未知动作 → <code>UNMAPPED_EVENT</code>；缺必填字段不投递并留痕</td></tr>
+      <tr><td>S-03</td><td>L0</td><td>分歧四分类判定纯函数穷举；幂等键（flow_id + source_event_id）重复投递只记录一次</td></tr>
+      <tr><td>S-04</td><td>L1</td><td>shadow-ingest：同批次重跑无重复（migration_batches checksum）；敏感字段零残留；源事件 append-only</td></tr>
+      <tr><td>S-05</td><td>L2</td><td>shadow-feed E2E（Temporal TestSuite）：建单 → price-review → stock-review → warehouse-confirm → ship-action → invoice-issued 全链投递推进，每步事件链与 FSM 一致</td></tr>
+      <tr><td>S-06</td><td>L2</td><td>影子模式：Timer 全部不调度；<code>shadow-inject</code> 注入无回单例外分支可确定性重放；非影子模式行为不变</td></tr>
+      <tr><td>S-07</td><td>L2/L3</td><td>隔离哨兵（附录 A）：影子二进制用生产库名 DSN 启动 → 拒绝退出；用 <code>b2b-order</code> 队列 / default namespace 启动 → 拒绝退出；官方企微 / 桥接开启 → 拒绝启动；影子容器无法解析 <code>postgres</code> 主机名；停影子栈后 A 轨无损、生产库无影子表无影子租户行</td></tr>
+      <tr><td>S-08</td><td>L3</td><td>shadow-audit：覆盖率 / 分歧 / 状态对齐 / 卡住清单四张数生成；报告文件与影子库一致可复核</td></tr>
+      <tr><td>S-09</td><td>L3</td><td>验收口径：真实数据覆盖 §8.3 门槛；seed 补齐 79 边全量；连续 7 日无新增 P0/P1</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>与既有 <code>09-testing.html</code> 的 N-01..N-10 互补：N 系列验证「0.1 面向客户的行为正确」，S 系列验证「完整状态机在真实数据上的可接住性」。两套都绿，才允许 v0.2 把数据正式迁入、开放除销售 / 主管 / 董事长外的企微体系。</p>
+
+  <h2 id="s11"><span class="no">11 ·</span> 发布 / 门禁 / 回滚</h2>
+
+  <h3><span class="no">11.1</span> 双环境（沿用 R1 测试 → R2 生产）</h3>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>阶段</th><th>影子轨动作</th><th>通过标准</th></tr></thead>
+    <tbody>
+      <tr><td>R1 测试环境</td><td>影子栈先在<strong>专用影子环境</strong>起（独立 compose + 自带 shadow-temporal）；接入新单实时 hook 源（D-012）+ 内部种子，对上线以来新单全集重放一遍（历史存量不做前置）</td><td>S-01..S-08 全绿；四张数首次生成；覆盖基线记录</td></tr>
+      <tr><td>R2 生产环境</td><td>同一镜像在影子专用环境正式上线；接入新单实时 hook 源 + JSONL 每日对账（D-012）；内部白名单启用</td><td>零出站 / 零回写哨兵通过；24h 影子轨稳定且与 A 轨零互相影响</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p><strong>D-011 持续发布验证线</strong>：R2 之后、v0.3 撤销之前，影子系统不绑定 v0.1/v0.2 单次窗口，可按验证需要多次发布。
+  S 线（映射表 / 种子集 / 审计口径 / ingest-feed-replay 工具）高频发布，每次发布仍过六铁律 + 守卫 + 零出站/零回写哨兵 + 新单全集重放（D-012）；
+  F 线（domain FSM / workflow 变更）影子先行验证，通过后作为 A 轨发布的前置证据。A 轨不因影子发布而重新发布。</p>
+  <p><strong>D-012 补充裁决</strong>：影子摄入改为<strong>新单实时增量模式（hook 驱动）</strong>，不依赖存量；本文档中「全量重放」的口径 = <strong>上线以来新单全集 + 内部种子集</strong>重放，历史存量回填降级为可选。</p>
+
+  <h3><span class="no">11.2</span> 门禁增量</h3>
+  <ul>
+    <li><strong>G1</strong>（数据 / 代码就绪）：T1.3 升级为「状态 + 事件动作语义映射」并冻结；008 迁移与影子容器纳入发布物；</li>
+    <li><strong>G2</strong>（生产预演 / UAT / 回退演练）：增加影子证据表——R1 影子重放覆盖率、P0 分歧清单、零出站哨兵结果；</li>
+    <li><strong>G4</strong>（发布后 8h 稳定）：影子轨 24h 审计无异常，且与 A 轨零互相影响。</li>
+  </ul>
+  <p><strong>Go/No-Go 口径</strong>：影子轨的隔离与零出站是硬门禁，不通过则影子轨不发；<strong>分歧发现本身不阻塞 A 轨对客户发布</strong>（A 轨不依赖影子），但任何未裁决 P0/P1 都阻塞 v0.2 数据迁入决策——这正是影子轨的价值边界。</p>
+
+  <h3><span class="no">11.3</span> 回滚与兜底</h3>
+  <ul>
+    <li>影子轨回滚 = <code>B2B_SHADOW_ENABLED=false</code> + <code>docker compose -p b2b-shadow -f docker-compose.shadow.yml down</code>；影子库保留或 drop 均可；</li>
+    <li>A 轨与飞书零感知：桥接照跑，旧审批流不停（三条铁律不因影子轨而改变）；</li>
+    <li>影子数据兜底：真相在飞书，影子库随时重建，不留「只有影子有」的数据资产。</li>
+  </ul>
+
+  <h2 id="s12"><span class="no">12 ·</span> 实施任务与文档关联</h2>
+
+  <h3><span class="no">12.1</span> 实施任务（线 S，建议并入 v0.1 发布跟踪）</h3>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>ID</th><th>任务</th><th>产出</th><th>依赖</th></tr></thead>
+    <tbody>
+      <tr><td>SH-01</td><td>本设计冻结 + D-008 决策记录</td><td>12-shadow-full-flow.html + project/decisions/D-008.yaml</td><td>—</td></tr>
+      <tr><td>SH-02</td><td>migrations/shadow/008_shadow.sql（5 表，影子库专用目录）</td><td>幂等迁移 + L1 测试 + 主 migrate 不触达验证</td><td>SH-01</td></tr>
+      <tr><td>SH-03</td><td>config：B2B_SHADOW_* / B2B_TASK_QUEUE / ShadowMode 参数 + 隔离启动守卫</td><td>配置解析 + 单测 + 拒绝式守卫测试（A-01）</td><td>SH-01</td></tr>
+      <tr><td>SH-04</td><td>cmd/shadow-ingest（真实事件只读摄入）</td><td>新 target + 配置模板 + S-04</td><td>SH-02 / T1.1-T1.3 同步成果</td></tr>
+      <tr><td>SH-05</td><td>internal/shadow（回放器 / 映射 / 分歧分类）</td><td>纯函数包 + S-01..S-03</td><td>SH-01</td></tr>
+      <tr><td>SH-06</td><td>workflows 影子模式（Timer 抑制 + shadow-inject）</td><td>最小改造 + S-06 + 回归</td><td>SH-03</td></tr>
+      <tr><td>SH-07</td><td>cmd/shadow-feed（翻译 + 幂等投递）</td><td>新 target + S-05</td><td>SH-04 / SH-05 / SH-06</td></tr>
+      <tr><td>SH-08</td><td>cmd/shadow-audit（四张数日报）</td><td>新 target + S-08</td><td>SH-05 / SH-07</td></tr>
+      <tr><td>SH-09</td><td>docker-compose.shadow.yml（独立项目 p b2b-shadow）+ Makefile（shadow-up / replay / audit / report）</td><td>独立网络 + 一键起停/重放；shadow-postgres / spicedb 只绑回环</td><td>SH-03 / SH-04 / SH-07 / SH-08</td></tr>
+      <tr><td>SH-10</td><td>R1 测试环境：新单实时源 + 种子集重放 + 基线报告（D-012）</td><td>G2 影子证据包</td><td>SH-09</td></tr>
+      <tr><td>SH-11</td><td>R2 生产环境：hook 接入 + 内部白名单 + 24h（D-012）</td><td>24h 观察 + G4 证据</td><td>SH-10 / 主发布物锁定</td></tr>
+      <tr><td>SH-12</td><td>v0.2 数据迁入 Go 证据：连续 K 笔新单门槛 + 覆盖率 / 分歧裁决（D-012）</td><td>v0.2 设计评审输入</td><td>SH-11 + 连续 7 日审计</td></tr>
+      <tr><td>SH-13</td><td>影子栈启动守卫（DSN 库名 / namespace / task queue / WeCom / bridge / SpiceDB 地址六项 fail-fast）</td><td>internal/shadowguard + 六个二进制接入 + S-07</td><td>SH-03</td></tr>
+      <tr><td>SH-14</td><td>Temporal 隔离改造：B2B_TASK_QUEUE 注入 + shadow- WorkflowID 前缀 + 影子 tenant 后缀</td><td>client / worker 可配置化 + 回归测试</td><td>SH-03 / SH-06</td></tr>
+      <tr><td>SH-15</td><td>生产库写哨兵：每日校验生产库无 shadow_* 表、无影子租户行、影子容器进程启动参数无生产 DSN</td><td>哨兵脚本 + 告警 + S-07 L3</td><td>SH-09</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3><span class="no">12.2</span> 文档联动清单（设计定稿后的后续动作）</h3>
+  <ul>
+    <li><code>docs/v0.1/index.html</code>：挂入第 12 章，0.1 范围声明补「内部影子轨」；</li>
+    <li><code>04-architecture.html</code>：总体架构图加影子区、分层表加 shadow 组件、§5 标注影子复用点；</li>
+    <li><code>10-deployment.html</code>：影子 compose / 端口 / 环境变量 / 健康检查 / 上线步骤 / 回滚；</li>
+    <li><code>07-database.html</code>：补 008 五表；<code>09-testing.html</code>：补 S-01..S-09；</li>
+    <li>根目录 <code>10-v0.1-release-prep.html</code>：新增 块5「影子预演 T5.x」，T1.3 升级为「状态 + 事件动作语义映射」；</li>
+    <li>根目录 <code>v0.1发布过程任务列表.html / v0.1发布过程跟踪.html</code>：新增线 S（SH-01..SH-15）、门禁与物料清单；</li>
+    <li><code>project/decisions/D-008.yaml</code>：按项目惯例记录本设计决策；</li>
+    <li><code>v0.2_设计_preview.html</code>（讨论稿）+ <code>docs/发布计划v2/渐进式发布计划v2.html</code>：v0.2 = 数据正式迁入新系统（唯一真相），除销售 / 主管 / 董事长外全部上企微；v0.3 = 企微体系发布完成（销售 / 主管 / 董事长迁入 + 全量数据迁完 + 影子撤销 + 旧系统只读归档）；定稿时引用本影子轨的覆盖与分歧证据。</li>
+  </ul>
+
+  <h2 id="appendix-a"><span class="no">附录 A ·</span> 隔离审计：影子库不触碰生产业务库</h2>
+
+  <blockquote><strong>审计结论</strong>：设计方向（独立 PG 实例 + 独立 Temporal namespace / task queue + 独立 SpiceDB + 独立 compose 网络）正确；但按原稿仅凭「影子栈不持有生产 DSN」一条人工约定，仍有 4 类配置失误可直接写穿生产库。采纳 A-01..A-06 护栏（对应 SH-13..SH-15 与 S-07）后，「增加影子库不影响生产业务库」才成为可验证的工程属性：正常运转与常规误配置下对生产库 <code>b2b_pilot</code> 零写路径；残余风险仅剩「持有生产凭据者蓄意绕行」，由权限与审计兜底。</blockquote>
+
+  <h3><span class="no">A.1</span> 写穿路径审计（逐条核对代码与 compose 现状）</h3>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>#</th><th>泄漏路径</th><th>最坏后果</th><th>原设计控制</th><th>审计发现（代码事实）</th><th>必做护栏</th></tr></thead>
+    <tbody>
+      <tr><td>T1</td><td>影子组件 <code>B2B_PG_DSN</code> 错配 / 照抄主 compose 的 <code>postgres:5432/b2b_pilot</code></td><td><strong>直接写生产库</strong>：orders / 事件链 / 备货 / 发货 / 开票全部落进 <code>b2b_pilot</code></td><td>S-铁4「不持有生产 DSN」</td><td><code>repo.New</code> 接受任意 DSN 只做 Ping；<code>config.Load</code> 默认指向本地测试库；主 compose 有 4 处硬编码生产 DSN，照抄即中招</td><td>A-01 启动守卫：DSN 库名必须 = <code>b2b_shadow</code>，命中 <code>b2b_pilot</code> 直接退出；生产 secret 不挂载到影子容器</td></tr>
+      <tr><td>T2</td><td><code>shadow-migrate</code> 照抄主 compose <code>migrate</code> 的硬编码 <code>psql postgres:5432/b2b_pilot</code></td><td><strong>在生产库执行 DDL</strong>（误建 shadow_* 表）</td><td>无</td><td>主 <code>migrate</code> 服务 DSN 写死在 compose；复制改造时极易漏改</td><td>A-02 迁移目录拆分 + shadow-migrate 用环境 DSN 且先过守卫</td></tr>
+      <tr><td>T3</td><td>影子 worker 注册到生产 Temporal namespace / 生产队列 <code>b2b-order</code></td><td>影子 worker 抢跑生产 workflow 任务，活动写影子库 → 生产流程状态错乱（不直接写 PG，但破坏生产业务执行）</td><td>D-010 后已消除（影子自带 shadow-temporal）+ 代码已改造</td><td><code>B2B_TASK_QUEUE</code> 已可配置；影子 Starter 使用 <code>shadow-</code> 前缀；ShadowMode 下 shadowguard 拒绝 default namespace 与 <code>b2b-order</code> 队列</td><td>A-03：<code>B2B_TASK_QUEUE</code> 注入 + <code>shadow-</code> WorkflowID 前缀 + 影子租户 <code>chang-an-shadow</code>（均已落地）</td></tr>
+      <tr><td>T4</td><td>影子 worker 的 <code>B2B_SPICEDB_ADDR</code> 指向生产 SpiceDB</td><td>Outbox projector 把影子关系写进生产授权图（不写 PG，但污染生产权限）</td><td>独立 shadow-spicedb</td><td>worker 启动无条件连接 SpiceDB 并跑 projector，无任何 ShadowMode 校验</td><td>A-01 守卫拒绝非 shadow 地址；A-04 独立网络使 <code>spicedb</code> 主机名不可解析</td></tr>
+      <tr><td>T5</td><td>影子 API 误开 bridge / official 企微</td><td>经影子入口创建真实飞书订单 / 发客户消息（破坏零出站、零回写）</td><td>环境变量 false / mock</td><td>config 允许任意组合，无 ShadowMode 强制关系</td><td>A-01 守卫：ShadowMode=true 时 official provider 与 bridge=true 一律拒绝启动</td></tr>
+      <tr><td>T6</td><td>与主 compose 共网络 → 影子容器可直接解析 <code>postgres</code> / <code>spicedb</code></td><td>把 T1/T2/T4 从「配错才发生」放大为「一条 DNS 可达」</td><td>D-010 后已消除</td><td>影子栈改为专用环境 + 专用 compose 项目，自带 shadow-temporal；影子容器对 A 轨主机名零可达</td><td>A-04 独立 compose 项目（<code>-p b2b-shadow</code>）独立网络；只读数据源与运维通道是唯一出网面</td></tr>
+      <tr><td>T7</td><td>误配置发生后无哨兵，长时间不发现</td><td>污染数据越滚越多、审计无法定位</td><td>「写哨兵」一句话</td><td>无实现物、无检查 SQL、无告警口径</td><td>A-06 每日哨兵：生产库无 shadow_* 表、无影子租户行、影子容器启动参数无生产 DSN；异常即拉停</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3><span class="no">A.2</span> 必做护栏（A-01..A-06，纳入 SH-13..SH-15）</h3>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>护栏</th><th>实现</th><th>验证</th></tr></thead>
+    <tbody>
+      <tr><td>A-01 启动守卫</td><td>新 <code>internal/shadowguard</code>：<code>B2B_SHADOW_MODE=true</code> 时六项 fail-fast——DSN 库名 ∈ {<code>b2b_shadow</code>}（命中 <code>b2b_pilot</code> 拒绝）、namespace=<code>b2b-shadow</code>、task queue=<code>b2b-shadow-order</code>、WeCom=mock、bridge=false、SpiceDB host ∈ 影子白名单；接入 shadow-api/worker/feed/ingest/audit 六个入口</td><td>负向启动测试：任意一项违反 → 非零退出 + 明确日志；S-07</td></tr>
+      <tr><td>A-02 迁移目录拆分</td><td><code>migrations/shadow/008_*.sql</code> 子目录；主 migrate 循环 <code>migrations/*.sql</code>（顶层 glob 不递归，生产库不建影子表）；shadow-migrate 先 001-007 再 shadow/008，DSN 先过守卫</td><td>L1：主 migrate 在生产库执行后 <code>to_regclass('shadow_runs') IS NULL</code>；影子库 008 五表齐备</td></tr>
+      <tr><td>A-03 Temporal 隔离</td><td><strong>已实现</strong>：<code>B2B_TASK_QUEUE</code> 注入 worker 与 Starter；ShadowMode 下 WorkflowID = <code>shadow-&lt;tenant&gt;-&lt;idemKey&gt;</code>；影子 tenant 用 <code>chang-an-shadow</code>；<code>shadow-temporal-init</code> 在影子自带 Temporal 一次性注册 namespace；影子 Starter 另设 AllowDuplicate + TerminateExisting 保证可确定重放</td><td>L2：影子 worker 只在影子队列轮询；同信号对拍（<code>TestShadowParityWithNonShadow</code>）事件链与终态一致；同名订单双轨 ID 不冲突</td></tr>
+      <tr><td>A-04 网络隔离</td><td>影子栈专用环境 + 独立 compose 项目（<code>-p b2b-shadow</code>）独立默认网络；自带 shadow-temporal，与 A 轨零共享面；shadow-postgres / spicedb / api 只绑 <code>127.0.0.1</code>；生产 PG 端口同样建议改绑回环 + 防火墙</td><td>部署后探针：影子容器内 <code>getent hosts postgres</code> 不可解析、<code>15432</code> 不可达、仅只读源可达</td></tr>
+      <tr><td>A-05 凭据卫生</td><td>影子 env 文件只含影子 DSN / 只读 pgAPI key；主 compose 生产 secret 不挂载、不复制进影子项目；影子迁移/重放脚本不引用生产连接串</td><td>发布前配置审计：<code>grep b2b_pilot docker-compose.shadow.yml config/shadow-*</code> 零命中</td></tr>
+      <tr><td>A-06 写哨兵</td><td>每日脚本校验生产库：<code>pg_tables</code> 无 shadow_*、<code>orders</code> 无 <code>chang-an-shadow</code> 租户行、生产事件链无 <code>ShadowMode</code> 动作；同时扫描影子容器 env/启动参数无生产 DSN；异常拉停影子栈并告警</td><td>S-07 L3 + 发布后 24h/7d 连续观察记录</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3><span class="no">A.3</span> 验收口径（回答「不影响生产业务库」）</h3>
+  <ul>
+    <li>负向守卫全绿：把生产 DSN / 生产队列 / default namespace / official 企微 / bridge=true 依次喂给影子二进制，全部拒绝启动；</li>
+    <li>网络不可达：影子容器无法解析并连接 A 轨任何主机名；影子与 A 轨共享面为零（D-010 独立环境）；</li>
+    <li>迁移隔离：生产库执行主 migrate 后无任何 shadow_* 表；影子库才有 008 五表；</li>
+    <li>零写证明：影子 R1 新单全集重放前后，生产库订单数 / 事件数 / 表清单抽样一致；写哨兵 7 天无告警；</li>
+    <li>A 轨无感：影子轨开/停/重放三个动作前后，桥接 API、生产 workflow 队列深度、生产 SpiceDB 授权判定均无异常（G4 证据）。</li>
+  </ul>
+
+  <h3><span class="no">A.4</span> 残余风险（不隐瞒）</h3>
+  <ul>
+    <li><strong>共享 Temporal 集群</strong>：namespace 提供逻辑隔离，但影子重放量大时可能占用集群资源——属于可用性风险，不写生产 PG；必要时升级为独立 Temporal 实例（SH-04 待决项）；</li>
+    <li><strong>蓄意绕行</strong>：持有生产凭据的人手动把生产 DSN 灌进影子容器可绕过守卫——护栏是「默认拒绝 + 权限最小化 + 操作审计」，不承诺防内鬼；</li>
+    <li><strong>宿主机端口</strong>：若生产 PG 继续绑 0.0.0.0，影子容器理论上可经宿主 IP 尝试连接——必须执行生产端口回环绑定/防火墙（A-04 验收项）；</li>
+    <li><strong>pgAPI 凭据</strong>：影子只应持有只读 key；若误发写权限，影响面在 pgAPI/飞书侧而非生产 PG，仍属发布配置审计红线。</li>
+  </ul>
+
+  <div class="note">
+    <div class="tt">设计定稿状态</div>
+    本文档为影子轨的<strong>设计定稿</strong>（2026-08-20），含隔离审计附录 A，对应实施任务 SH-01..SH-15。v0.2 方向以 <code>v0.2_设计_preview.html</code> 为讨论输入，尚未进入正式文档体系；本文档不依赖其定稿，只预留承接接口。<br/>
+    <strong>实现物对照（2026-08-20 随 v0.1 合入，并已吸收 D-009/D-010/D-011/D-012）</strong>：SH-01 → <code>project/decisions/D-008.yaml</code> + 本文档；D-009 → 无托底 + 全节点覆盖/差异映射可接受；D-010 → 独立环境（compose 自带 shadow-temporal）+ v0.3 后撤销 + ≤1 万条/天；D-011 → 多次发布验证线 + 六同原则（含 <code>TestShadowParityWithNonShadow</code> 同信号对拍）；D-012 → 新单实时增量模式（hook 驱动，存量不前置；采集准确=尺子；重放=上线以来新单全集+种子；SH-10/11 按此口径）；D-013 → v0.2 数据迁入新系统（唯一真相，除销售/主管/董事长外全部上企微）+ v0.3 企微体系发布完成（三岗位企微切换 + 全量数据迁完 + 影子撤销 + 旧系统只读归档）。SH-02 → <code>migrations/shadow/008_shadow.sql</code>（5 表 + submission_mode=shadow + 影子租户/审批人/仓库基座）；SH-03/13 → <code>internal/shadowguard</code> 六项 fail-fast；SH-05 → <code>internal/shadow</code>（回放/映射/分歧/计划 + S-01..S-03）；SH-06 → <code>workflows.Shadow</code> + <code>shadow-inject</code>（S-06）；SH-14 → <code>B2B_TASK_QUEUE</code> + <code>shadow-</code> 前缀 + 影子租户；SH-04/07/08 → <code>cmd/shadow-ingest|shadow-feed|shadow-audit</code>（audit 支持 -interval + state-file 健康检查）；SH-09 → <code>docker-compose.shadow.yml</code>（shadow-temporal / shadow-migrate 前置守卫 / audit 26h 探针）+ Makefile shadow-*（含 shadow-reset-skipped）；A9 → 影子 Starter AllowDuplicate + TerminateExisting；SH-15 → <code>scripts/shadow_sentinel</code>。SH-10/11（R1/R2 环境重放）与 SH-12（v0.2 Go 证据）为环境侧任务；剩余两个高风险外部输入：映射表/状态语义冻结（HR1）与 pgAPI 只读凭据+真实契约（HR2）。
+  </div>
+
+  <footer class="colophon">
+    <span><a href="index.html">← v0.1 Docs</a></span>
+    <span>12 · Shadow Full-Flow · 影子全流程预演</span>
+    <span>内部轨 · 零出站 · 零回写 · 可重放 · 2026-08-20</span>
+  </footer>
+
+</div>
+</body>
+</html>

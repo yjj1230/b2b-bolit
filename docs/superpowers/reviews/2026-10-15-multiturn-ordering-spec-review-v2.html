@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spec 复审 v2 · Agent 多轮下单与订单草稿归并</title>
+<style>
+  :root{
+    --bg:#f7f8fa; --card:#ffffff; --ink:#1f2328; --ink-2:#57606a; --ink-3:#8b949e;
+    --line:#e6e8eb; --line-2:#d0d7de;
+    --red:#cf222e; --red-bg:#fff0ee; --amber:#9a6700; --amber-bg:#fff8e6;
+    --green:#1a7f37; --green-bg:#eaf7ee; --blue:#0969da; --blue-bg:#eef4ff;
+    --mono:'Cascadia Code','SF Mono',Consolas,Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+    line-height:1.7;font-size:15px}
+  .wrap{max-width:1080px;margin:0 auto;padding:48px 28px 80px}
+  header{border-bottom:2px solid var(--line-2);padding-bottom:22px;margin-bottom:30px}
+  h1{font-size:27px;margin:0 0 10px;letter-spacing:-.4px}
+  .meta{color:var(--ink-3);font-size:13.5px;display:flex;gap:18px;flex-wrap:wrap}
+  .meta b{color:var(--ink-2);font-weight:600}
+  h2{font-size:20px;margin:44px 0 16px;padding-left:12px;border-left:4px solid var(--blue)}
+  h3{font-size:16.5px;margin:26px 0 10px}
+  p{margin:10px 0}
+  code{font-family:var(--mono);background:#eff1f3;padding:1.5px 6px;border-radius:5px;
+    font-size:12.8px;color:#0a3069}
+  pre{background:#0d1117;color:#e6edf3;padding:15px 18px;border-radius:10px;overflow-x:auto;
+    font-family:var(--mono);font-size:12.6px;line-height:1.6;margin:14px 0}
+  pre code{background:none;color:inherit;padding:0}
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13.5px;background:var(--card);
+    border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+  th,td{padding:10px 13px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:#f2f4f6;font-weight:600;color:var(--ink-2);font-size:12.8px;
+    white-space:nowrap;border-bottom:2px solid var(--line-2)}
+  tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:#fafbfc}
+  .tag{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:20px;
+    letter-spacing:.3px;white-space:nowrap}
+  .t-block{background:var(--red-bg);color:var(--red);border:1px solid #ffcdc6}
+  .t-warn{background:var(--amber-bg);color:var(--amber);border:1px solid #f3e0a6}
+  .t-ok{background:var(--green-bg);color:var(--green);border:1px solid #b9e5c5}
+  .t-info{background:var(--blue-bg);color:var(--blue);border:1px solid #c8ddff}
+  .t-gray{background:#f0f1f3;color:var(--ink-2);border:1px solid var(--line-2)}
+  .score{display:flex;gap:12px;flex-wrap:wrap;margin:22px 0}
+  .score .box{flex:1;min-width:160px;background:var(--card);border:1px solid var(--line);
+    border-radius:12px;padding:15px 16px;text-align:center}
+  .score .l{font-size:12.5px;color:var(--ink-3);margin-bottom:6px}
+  .score .row{display:flex;align-items:baseline;justify-content:center;gap:8px}
+  .score .old{font-size:16px;color:var(--ink-3);text-decoration:line-through}
+  .score .arrow{color:var(--ink-3)}
+  .score .new{font-size:25px;font-weight:700;letter-spacing:-.5px}
+  .callout{border-left:4px solid var(--blue);background:var(--blue-bg);padding:14px 18px;
+    border-radius:0 8px 8px 0;margin:16px 0}
+  .callout.red{border-color:var(--red);background:var(--red-bg)}
+  .callout.amber{border-color:var(--amber);background:var(--amber-bg)}
+  .callout.green{border-color:var(--green);background:var(--green-bg)}
+  .callout p:first-child{margin-top:0} .callout p:last-child{margin-bottom:0}
+  .issue{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--red);
+    border-radius:0 10px 10px 0;padding:16px 20px;margin:16px 0}
+  .issue.w{border-left-color:var(--amber)}
+  .issue.s{border-left-color:var(--ink-3)}
+  .issue h4{margin:0 0 8px;font-size:15.5px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .issue .id{font-family:var(--mono);color:var(--ink-3);font-size:13px;font-weight:600}
+  ul,ol{margin:10px 0;padding-left:24px}
+  li{margin:6px 0}
+  .scroll{overflow-x:auto}
+  .num{font-variant-numeric:tabular-nums}
+  hr{border:none;border-top:1px solid var(--line);margin:34px 0}
+  .foot{color:var(--ink-3);font-size:12.5px;margin-top:40px;padding-top:18px;
+    border-top:1px solid var(--line);text-align:center}
+  .yes{color:var(--green);font-weight:700}
+  .no{color:var(--red);font-weight:700}
+  .fix{background:#f6f8fa;border:1px dashed var(--line-2);border-radius:8px;
+    padding:10px 14px;margin:10px 0;font-size:13.4px}
+  .fix b{color:var(--green)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Spec 复审 · v2 版 · Agent 多轮下单与订单草稿归并</h1>
+  <div class="meta">
+    <span><b>评审对象</b> 2026-10-15-agent-multiturn-ordering-design.md（Spec v2）</span>
+    <span><b>基准</b> v1 + 2026-10-15 评审报告</span>
+    <span><b>复审日期</b> 2026-10-15</span>
+    <span><b>方法</b> 闭环验证 + 增量找新问题</span>
+  </div>
+</header>
+
+<div class="callout green">
+  <p><b>复审结论：</b>v2 是一次<b>高质量修订</b>——上一轮我提的 <b>9 条问题（4 阻断 + 5 重要）全部有明确回应</b>，且改法基本都选对了方向。文档也从"设计稿"升级为接近"可实施规格"。但 v2 在解决旧问题的同时<b>引入了 2 个新的阻断级问题</b>（1 处自相矛盾、1 处设计缺陷），需再修一轮才能进入 plan。</p>
+  <p>特别值得肯定：第 1 节"<b>本次修订做出以下不可再解释的决定</b>"这种写法，把关键决策固化成不再重复争论的清单——这是成熟规格的标志。</p>
+</div>
+
+<div class="score">
+  <div class="box"><div class="l">架构思想</div><div class="row"><span class="old">A−</span><span class="arrow">→</span><span class="new" style="color:var(--green)">A</span></div></div>
+  <div class="box"><div class="l">方案完整性</div><div class="row"><span class="old">B−</span><span class="arrow">→</span><span class="new" style="color:var(--green)">B+</span></div></div>
+  <div class="box"><div class="l">与现有代码契合度</div><div class="row"><span class="old">C+</span><span class="arrow">→</span><span class="new" style="color:var(--green)">B</span></div></div>
+  <div class="box"><div class="l">可测试性</div><div class="row"><span class="old">B</span><span class="arrow">→</span><span class="new" style="color:var(--green)">B+</span></div></div>
+  <div class="box"><div class="l">边界清晰度</div><div class="row"><span class="old">C</span><span class="arrow">→</span><span class="new" style="color:var(--green)">B</span></div></div>
+</div>
+
+<h2>一、上一轮问题闭环验证（9/9 已回应）</h2>
+<p>逐条对照 v1 报告的问题编号，核 v2 的落点与闭环质量：</p>
+
+<div class="scroll">
+<table>
+<thead><tr><th>上轮编号</th><th>问题</th><th>v2 落点</th><th>闭环</th></tr></thead>
+<tbody>
+<tr>
+  <td class="num">B-1</td>
+  <td>归并载体缺失（一消息一预订单）</td>
+  <td>§4.1 新增 <code>inbound_messages</code>、§4.2 新增 <code>order_conversations</code>，明确"一会话一主预订单"；§13.1 降消息幂等粒度</td>
+  <td><span class="tag t-ok">✅ 完全</span></td>
+</tr>
+<tr>
+  <td class="num">B-2</td>
+  <td>DraftVersion 语义未定义、无合并器</td>
+  <td>§4.3 <code>snapshot_json</code>+<code>patch_json</code>+<code>diff_json</code> 三件套；§7 合并器定义为<b>无 IO 纯函数</b> <code>Merge(...)</code>，落在 <code>merger.go</code></td>
+  <td><span class="tag t-ok">✅ 完全</span></td>
+</tr>
+<tr>
+  <td class="num">B-3</td>
+  <td>FSM 不支持 PRE_COLLECTING / 无回退边</td>
+  <td>§8.1 新增 <code>PRE_COLLECTING</code>+<code>PRE_EXPIRED</code> 并给出完整入出边（含 <code>PENDING_CONFIRM→COLLECTING</code> 回退）</td>
+  <td><span class="tag t-warn">⚠️ 漏一条边</span></td>
+</tr>
+<tr>
+  <td class="num">B-4</td>
+  <td>旧卡片导致 Workflow 终止（真 bug）</td>
+  <td>§9 改为<b>可恢复业务拒绝</b>：返回结构化 <code>VALID/STALE/NOT_FOUND</code>，写 <code>STALE_CARD_REJECTED</code> 事件后<b>回到选择器</b>，仅系统故障才失败</td>
+  <td><span class="tag t-ok">✅ 完全</span></td>
+</tr>
+<tr>
+  <td class="num">W-1</td>
+  <td>相似度候选是确定性裂缝</td>
+  <td>§5 第 5 条明确"<b>仅生成最多三个候选</b>，不自动归并、不以阈值决定归属"</td>
+  <td><span class="tag t-ok">✅ 完全</span></td>
+</tr>
+<tr>
+  <td class="num">W-2</td>
+  <td>两套超时机制职责重叠、无 PRE_EXPIRED</td>
+  <td>§8.2 明确 <code>escalate_at</code>（24h 提醒/升级，会话可续）与 <code>expires_at</code>（72h 硬过期，终态）分工；补 <code>PRE_EXPIRED</code></td>
+  <td><span class="tag t-warn">⚠️ 事务漏更新</span></td>
+</tr>
+<tr>
+  <td class="num">W-3</td>
+  <td>并发锁对象与机制未定</td>
+  <td>§10 明确"<b>采用数据库 FOR UPDATE 作为唯一并发机制</b>"，锁对象为 <code>order_conversations</code>，且明确版本号<b>不替代</b>行锁</td>
+  <td><span class="tag t-ok">✅ 完全</span></td>
+</tr>
+<tr>
+  <td class="num">W-4</td>
+  <td>缺少原始消息落库表</td>
+  <td>§4.1 <code>inbound_messages</code>，含原文加密、哈希、<code>reply_to_msg_id</code>、解析状态、回填 <code>session_id</code>；并划定与 <code>pre_order_events</code> 的边界</td>
+  <td><span class="tag t-ok">✅ 完全</span></td>
+</tr>
+<tr>
+  <td class="num">W-5</td>
+  <td>correlation_id 归并后失效</td>
+  <td>§11 改为会话级稳定值 <code>agent:{tenant_id}:{session_id}</code>，msg_id 只作链路节点</td>
+  <td><span class="tag t-ok">✅ 完全</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout">
+<p><b>闭环质量评价：</b>9 条里 <b>7 条完全闭环</b>，2 条（B-3、W-2）方向对但收尾差一口气——分别对应下面的 N-3 和 N-4。整体改法都选在了正确的方向上，没有出现"改了一半反而更乱"的情况。</p>
+</div>
+
+<hr>
+
+<h2>二、v2 新引入的问题</h2>
+
+<h3><span class="tag t-block">阻断级</span> 必须解决后才能进 plan</h3>
+
+<div class="issue">
+<h4><span class="id">N-1</span> 草稿状态枚举漏了 <code>CONFLICT</code>——自相矛盾</h4>
+<p>§4.3 定义的 <code>pre_order_drafts.status</code> 枚举是：</p>
+<pre><code>status   // CURRENT、SUPERSEDED、CONFIRMED、REJECTED
+</code></pre>
+<p>但 §7 和 §12 都要求写入一个 <code>status=CONFLICT</code> 的版本：</p>
+<pre><code>§7  ：…同时写入一个 status=CONFLICT 的不可确认版本记录本次冲突
+§12 ：字段冲突：创建一个 status=CONFLICT 的不可确认版本…
+</code></pre>
+<p>枚举里没有 <code>CONFLICT</code>，但正文要求写入它。<b>这是文档内部直接打架</b>，实现者按 §4.3 建枚举就会漏掉这个状态，按 §7 写又会越出枚举。</p>
+<div class="fix"><b>修法：</b>§4.3 枚举补为 <code>CURRENT、SUPERSEDED、CONFIRMED、REJECTED、CONFLICT</code>，并说明 <code>CONFLICT</code> 版本对唯一"CURRENT"约束不产生干扰（因为它不在部分唯一索引的谓词内）。</div>
+</div>
+
+<div class="issue">
+<h4><span class="id">N-2</span> CONFLICT 版本编号与"current_draft_version 不前进"冲突——真设计缺陷</h4>
+<p>这是 v2 最严重的问题，而且是<b>为了解决旧问题而新引入的</b>。把它拆开看：</p>
+<p>§7 规定冲突时"写入一个不可确认版本，<b>current_draft_version 不前进</b>"。§10 的事务又规定新版本编号方式是：</p>
+<pre><code>读取 current_draft_version
+…
+INSERT pre_order_drafts(version + 1)
+UPDATE order_conversations(current_draft_version, last_message_at)
+</code></pre>
+<p>两者相乘，得到一条自相矛盾的路径：</p>
+<pre><code>当前 current_draft_version = 3
+→ 消息"D90"判为冲突，写入一条版本记录
+→ current_draft_version 保持 3，但该条冲突记录占用了哪个版本号？
+
+若是 4：
+  下一条合法消息（"改成D90"）按 §10 用 version+1 = 4
+  → 主键 (tenant_id, pre_order_id, 4) 与冲突版本相撞 ❌
+</code></pre>
+<p>注意现有实现 <code>CreatePreOrderDraftVersion</code> 用的是 <code>MAX(draft_version)+1</code>（不会撞），但 §10 白纸黑字写的是"读取 <code>current_draft_version</code> 后 <code>version+1</code>"——<b>两个版本的编号口径不一致</b>，实现者照 §10 写就会踩主键冲突。</p>
+<div class="fix">
+<b>修法（三选一，spec 必须明确）：</b>
+<ul style="margin-top:6px;margin-bottom:0">
+  <li><b>方案 a</b>：编号统一改为 <code>MAX(draft_version)+1</code>（"版本槽"），<code>current_draft_version</code> 只指向"最后一个<b>可确认</b>版本"，两个指针分离；</li>
+  <li><b>方案 b</b>：冲突版本不占用 <code>pre_order_drafts</code> 的版本序列，改存独立 <code>draft_conflicts</code> 表；</li>
+  <li><b>方案 c</b>：冲突不落版本，只写 <code>pre_order_events</code> 审计 + 会话转 <code>MANUAL_REQUIRED</code>（最简，但丢失"冲突内容"的版本化留痕）。</li>
+</ul>
+</div>
+</div>
+
+<h3><span class="tag t-warn">重要级</span> 会变成实现期返工点</h3>
+
+<div class="issue w">
+<h4><span class="id">N-3</span> <code>PRE_PENDING_CONFIRM</code> 缺 <code>→ PRE_EXPIRED</code> 边（B-3 的收尾）</h4>
+<p>§8.2 说 <code>expires_at</code> 到期后"进入 <code>PRE_EXPIRED</code>"，但 §8.1 的边表里 <code>PRE_COLLECTING / PRE_AMBIGUOUS / PRE_ESCALATED</code> 都有 <code>→ PRE_EXPIRED</code>，<b>唯独 PRE_PENDING_CONFIRM 没有</b>。而 §13.6 又要求"加入 PRE_COLLECTING、PRE_EXPIRED 和完整入出边"。</p>
+<p>后果：一个已推卡、销售迟迟不点的会话（最典型的过期场景），走 <code>PENDING_CONFIRM → EXPIRED</code> 会被 FSM 拒绝，会话无法过期。</p>
+<div class="fix"><b>修法：</b>§8.1 的 <code>PRE_PENDING_CONFIRM</code> 出边补 <code>→ PRE_EXPIRED</code>。</div>
+</div>
+
+<div class="issue w">
+<h4><span class="id">N-4</span> §10 事务序列漏更新 <code>escalate_at</code>（W-2 的收尾）</h4>
+<p>§8.2 明确规则："收到有效补充后<b>重新计算 escalate_at</b>，不延长 expires_at"。但 §10 的事务只写了：</p>
+<pre><code>UPDATE order_conversations(current_draft_version, last_message_at)
+</code></pre>
+<p>没有 <code>escalate_at</code>。实现者照事务序列写，升级 Timer 不会因新消息而顺延——24h 提醒会在用户仍在积极补充时错误触发。</p>
+<div class="fix"><b>修法：</b>§10 改为 <code>UPDATE order_conversations(current_draft_version, last_message_at, escalate_at)</code>，并注明 <code>escalate_at = now() + 24h</code>、<code>expires_at</code> 不变。</div>
+</div>
+
+<div class="issue w">
+<h4><span class="id">N-5</span> §5 已确认会话三分支的"明确"判定主体未定义——自设门禁过不了</h4>
+<p>§5 规定已确认会话收到新消息时：</p>
+<pre><code>- 消息明确表示新订单 → 创建新会话
+- 消息明确引用已确认订单 → 进入修改/售后入口
+- 两者都不明确 → 创建人工关联待办
+</code></pre>
+<p>问题：<b>谁判"明确"？用什么判？</b> 这三种分叉是会话归属判定，本身就是 §3.2 划红线的领域。若交给 LLM 判"是否新订单"，就触碰了"不让 LLM 自主决定会话归属"的边界；若用规则判，spec 又没给规则。</p>
+<p>更关键的是：§14 结尾你自己立了门禁——"<b>Spec 只有在以上 18 条均能由固定输入得到固定结果后，才允许进入实现计划阶段</b>"。而 TC-13 的 Then 正是这三个分支，判定标准缺失 → <b>TC-13 无法由固定输入得到固定结果 → 自设的门禁自己过不了</b>。</p>
+<div class="fix">
+<b>修法：</b>把三分支判定显式绑定到 §5 前四条确定性规则上（引用/订单号/唯一会话），并补齐兜底规则：
+<ul style="margin-top:6px;margin-bottom:0">
+  <li>能命中前四条确定性规则 → 按规则归属；</li>
+  <li>否则一律 <code>MANUAL_REQUIRED</code> + 人工待办（<b>不做"新订单/修改"的自动分叉</b>）。</li>
+</ul>
+这样 TC-13 就有确定结果了。
+</div>
+</div>
+
+<div class="issue w">
+<h4><span class="id">N-6</span> <code>pre_orders</code> 唯一约束的处置未定义（B-1 的收尾）</h4>
+<p>§13.2 只说"调整 <code>pre_orders</code> 关系，使一个会话拥有一个主预订单，并保留根消息作为审计字段"，但没说现有的这条约束怎么办：</p>
+<pre><code>UNIQUE (tenant_id, group_id, msg_id)   -- migrations/003_preorder.sql L18
+</code></pre>
+<p>消息幂等若已迁移到 <code>inbound_messages</code>，这条约束是<b>保留、放宽还是删除</b>？保留的话，"会话由非消息事件创建"（如相似度候选被选中后建会话）时没有根消息，约束会误伤；删除的话，要说明消息幂等的防线已完全由 <code>inbound_messages</code> 承接。</p>
+<div class="fix"><b>修法：</b>§13.2 明确该约束的去留，并给出迁移 010 的字段级改动清单。</div>
+</div>
+
+<div class="issue w">
+<h4><span class="id">N-7</span> <code>pre_order_drafts</code> 字段级迁移清单不全</h4>
+<p>把 v2 §4.3 的字段列表与已建成的 migration 009 逐项对齐，差异远不止 §13.3 提的三项：</p>
+<div class="scroll">
+<table>
+<thead><tr><th>变更类型</th><th>字段</th><th>§13 是否提及</th></tr></thead>
+<tbody>
+<tr><td>新增</td><td><code>snapshot_json</code>、<code>patch_json</code>（diff 已有）</td><td><span class="tag t-ok">✅ 提及</span></td>
+</tr>
+<tr><td>改名+改类型</td><td><code>source_msg_id</code>(TEXT) → <code>source_message_ids</code>(多值)</td><td><span class="tag t-block">✗ 未提</span></td>
+</tr>
+<tr><td>新增</td><td><code>created_by</code></td><td><span class="tag t-block">✗ 未提</span></td>
+</tr>
+<tr><td>去向未说明</td><td><code>customer_basis</code> / <code>product_basis</code> / <code>contract_basis</code> / <code>price_basis</code>（009 用于主数据匹配追溯）</td><td><span class="tag t-block">✗ 未提</span></td>
+</tr>
+<tr><td>去向未说明</td><td><code>source_msg_hash</code> / <code>quote</code> / <code>policy_status</code> / <code>expires_at</code></td><td><span class="tag t-block">✗ 未提</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>其中 <b>basis 系列的消失最需要警惕</b>：§7 合并器第 3 步要"应用主数据匹配结果"，§15 门禁要"可追溯到…"。这些"匹配依据"在 009 里是专门存字段，v2 §4.3 把它们删了却没交代转移去向——<b>可能是无意的审计能力回退</b>。</p>
+<div class="fix"><b>修法：</b>§13.3 扩为完整的字段级 diff 清单，明确 basis 系列是保留、搬表还是明确放弃。</div>
+</div>
+
+<h3><span class="tag t-gray">建议级</span> 打磨项</h3>
+<ul>
+  <li><b>N-8</b>：<code>PRE_EXPIRED</code> 需纳入 <code>domain.IsTerminal()</code>（现只认 <code>PRE_IGNORED</code>/<code>ORD_REJECTED</code>/<code>INV_CLOSED</code>）；§13.6 建议点名 <code>IsTerminal</code>，否则"终态"语义与 FSM 不同步。</li>
+  <li><b>N-9</b>：<b>会话与主预订单的创建事务边界未定义</b>。§10 只管"合并"，不管"创建"。会话创建与主预订单创建是否同事务？谁先谁后？§4.2 的 <code>pre_order_id</code> 是否加 FK 到 <code>pre_orders(tenant_id, id)</code>？未说明会导致孤儿会话。</li>
+  <li><b>N-10</b>：群会话数超上限（§5 默认 10）时，已落库的 <code>inbound_messages</code> 该是什么 <code>parse_status</code>？现有枚举 <code>RECEIVED/PARSED/FAILED/IGNORED</code> 覆盖不了"因上限被挂起"，会留下永不回填 <code>session_id</code> 的消息。</li>
+  <li><b>N-11</b>：验收矩阵补 2 条用例——① CONFLICT 版本的编号与唯一 CURRENT 约束（验 N-2）；② 有效补充后 <code>escalate_at</code> 顺延、<code>expires_at</code> 不变（验 §8.2 与 N-4）。v2 新增的这两条承重规则目前无用例覆盖。</li>
+  <li><b>N-12</b>：§4.3 <code>status</code> 含 <code>CONFIRMED</code>，确认后该版本离开 <code>CURRENT</code>；若此时再触发"读取当前 CURRENT 版本"（§9）会取不到。需说明确认流程的读取时序（先读后改），或保留一个 <code>CONFIRMED</code> 作为可读终态。</li>
+</ul>
+
+<hr>
+
+<h2>三、验收矩阵可判定性（对比上一轮）</h2>
+<p>上一轮 18 条里 <b>8 条标 ✗</b>。v2 把这 18 条正式写进了 §14，且多数已可判定：</p>
+
+<div class="scroll">
+<table>
+<thead><tr><th>上轮 ✗ 的用例</th><th>v2 后</th><th>依据</th></tr></thead>
+<tbody>
+<tr><td class="num">TC-04</td><td class="yes">✓ 已可判定</td><td>§9 定义 STALE 语义 + Workflow 存活</td></tr>
+<tr><td class="num">TC-05</td><td class="no">✗ 仍不可判定</td><td>依赖 N-2：CONFLICT 版本编号规则未定，用例无法断言 <code>draft_version</code></td></tr>
+<tr><td class="num">TC-09</td><td class="yes">✓ 已可判定</td><td>§8.1 补 <code>PENDING_CONFIRM→COLLECTING</code> 边</td></tr>
+<tr><td class="num">TC-12</td><td class="yes">✓ 已可判定</td><td>§6/§12 量化为"最多 3 次"</td></tr>
+<tr><td class="num">TC-13</td><td class="no">✗ 仍不可判定</td><td>依赖 N-5：三分支的"明确"判定主体未定义</td></tr>
+<tr><td class="num">TC-14</td><td class="yes">✓ 已可判定</td><td>§5 第 5 条明确"仅候选、不自动归并"</td></tr>
+<tr><td class="num">TC-15</td><td class="yes">✓ 已可判定</td><td>§10 明确 FOR UPDATE 唯一机制</td></tr>
+<tr><td class="num">TC-16</td><td class="yes">✓ 已可判定</td><td>§8.2 明确 72h 硬过期</td></tr>
+<tr><td class="num">TC-18</td><td class="yes">✓ 已可判定</td><td>§11 定义会话级 correlation_id</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout amber">
+<p><b>8 条 ✗ → 2 条 ✗。</b>剩的 TC-05、TC-13 恰好就卡在 N-2、N-5 两个未闭合点上——这再次印证了那个规律：<b>可判定性缺口与规格缺口是一一对应的</b>。把 N-2、N-5 修掉，18 条矩阵就全绿，你的自设门禁也就真正成立了。</p>
+</div>
+
+<hr>
+
+<h2>四、建议的下一步（按优先级）</h2>
+<ol>
+  <li><b>修 N-2（最高优先）</b>：CONFLICT 版本编号方案三选一。它同时是 TC-05 的门禁，不解决则矩阵过不了。</li>
+  <li><b>修 N-5</b>：把 §5 已确认会话的三分支判定绑到确定性规则上，兜底一律 MANUAL_REQUIRED。解锁 TC-13。</li>
+  <li><b>修 N-1</b>：§4.3 枚举补 CONFLICT（一行改动，但不改会让实现者二义）。</li>
+  <li><b>补 N-3 / N-4</b>：两条都是"方向对了、收尾差一脚"——补 <code>PENDING_CONFIRM→EXPIRED</code> 边 + 事务里加 <code>escalate_at</code>。</li>
+  <li><b>补 N-6 / N-7</b>：先把迁移 010 的字段级清单写全（尤其 basis 系列的去向），再动代码。</li>
+  <li>以上完成后，18 条矩阵全绿 = <b>你的自设门禁达成</b>，此时进入 plan 阶段才稳。</li>
+</ol>
+
+<div class="foot">
+  复审基于 2026-10-15 仓库快照 · 对照：spec v2、v1 评审报告、internal/domain/{preorder.go,state.go}、internal/workflows/preorder.go、internal/repo/preorder_drafts.go、migrations/003、009
+</div>
+
+</div>
+</body>
+</html>

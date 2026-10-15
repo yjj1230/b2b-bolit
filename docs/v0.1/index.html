@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>v0.1 文档家族 · 订单助手（0.1 发布版）</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+SC:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:#f5f4ed; --paper2:#efeee5; --ink:#1f1d18; --ink2:#6b665b;
+    --ink3:#3a382f; --blue:#1B365D; --rule:#d4d1c5; --amber:#8a6d3b; --red:#9b3b3b; --green:#3b6d3b;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif; line-height:1.6;}
+  .wrap{max-width:960px; margin:0 auto; padding:48px 40px 80px;}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;}
+  .folio{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--rule); padding-bottom:10px;
+    font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink2);}
+  .folio a{color:var(--ink2); border:none;}
+  .folio a:hover{color:var(--blue);}
+  .tag{display:inline-block; padding:3px 10px; font-size:11px; letter-spacing:.16em; background:var(--paper2); color:var(--blue);}
+  .tag.red{background:#f3e3e3; color:var(--red);}
+  .tag.green{background:#e3f0e3; color:var(--green);}
+  .kicker{display:flex; align-items:baseline; gap:12px; margin-top:48px; flex-wrap:wrap;}
+  h1{font-size:clamp(30px,4.6vw,46px); line-height:1.14; font-weight:500; margin-top:14px; letter-spacing:-.01em;}
+  .lede{margin-top:18px; font-size:16.5px; line-height:1.7; color:var(--ink3); max-width:760px;}
+  h2{font-size:23px; font-weight:600; margin:52px 0 14px; color:var(--blue); display:flex; align-items:baseline; gap:12px; border-top:1px solid var(--rule); padding-top:26px;}
+  h2 .no{font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.12em;}
+  p{margin:10px 0; color:var(--ink3);}
+  a{color:var(--blue); text-decoration:none; border-bottom:1px solid var(--rule);}
+  a:hover{border-bottom-color:var(--blue);}
+  table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  .table-wrap{overflow-x:auto; margin:16px 0 24px; border:1px solid var(--rule);}
+  .table-wrap table{margin:0;}
+  th{background:var(--paper2); color:var(--blue); text-align:left; font-weight:600; padding:9px 12px; border-bottom:1.5px solid var(--blue); font-size:12.5px; white-space:nowrap;}
+  td{padding:9px 12px; border-bottom:1px solid var(--rule); vertical-align:top; color:var(--ink3);}
+  tr:nth-child(even) td{background:#faf9f3;}
+  tr:hover td{background:#f0ede0;}
+  footer.colophon{margin-top:56px; padding-top:14px; border-top:1px solid var(--rule); display:flex; justify-content:space-between;
+    font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink2); flex-wrap:wrap; gap:8px;}
+  footer.colophon a{color:var(--ink2); border:none;}
+  footer.colophon a:hover{color:var(--blue);}
+  .cards{display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; margin:24px 0;}
+  .card{border:1px solid var(--rule); background:#faf9f3; padding:18px 20px; text-decoration:none; color:var(--ink3); display:block; transition:all .15s;}
+  .card:hover{background:#f0ede0; border-color:var(--blue);}
+  .card .no{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.14em; color:var(--blue);}
+  .card h3{font-size:16px; color:var(--ink); margin:6px 0 4px; font-weight:600;}
+  .card p{font-size:13px; color:var(--ink3); margin:0;}
+  .card .role{font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); margin-top:8px; font-family:'IBM Plex Mono',monospace;}
+  .note{background:#f3ecdc; border:1px solid #d8c9a3; padding:12px 16px; margin:16px 0; font-size:13.5px; color:var(--ink3);}
+  .note .tt{font-size:10.5px; letter-spacing:.18em; color:var(--amber); font-family:'IBM Plex Mono',monospace;}
+  @media(max-width:720px){.wrap{padding:28px 18px 60px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="folio">
+    <span><a href="../index.html">← Docs</a> · B2B Order Fulfillment</span>
+    <span>v0.1 · 订单助手</span>
+    <span>发布版文档家族 · 2026-08-16</span>
+  </header>
+
+  <div class="kicker">
+    <span class="tag">v0.1 文档家族</span>
+    <span class="tag red">裁决源：ord_fulfill demo</span>
+    <span class="tag green">0.1 发布版</span>
+  </div>
+
+  <h1>订单助手 · v0.1<br/><span style="font-style:italic; color:var(--blue);">12 章节文档家族</span></h1>
+
+  <p class="lede">0.1 版以 <span class="mono">ord_fulfill</span> demo（已集成运营、产品、客户直接反馈）为<strong>现实需求裁决源</strong>，对既有文档体系（docs/01-09）进行大规模重构：12 个独立章节，覆盖双 graph、产品、交互、架构、业务流程、企微对接、数据库、API、测试、部署、迁移，以及新增的<strong>影子全流程预演</strong>。<strong>阅读顺序 = 编号顺序</strong>：先看双 graph 建立全局，再沿产品 → 交互 → 架构 → 流程 → 企微 → 数据库 → API → 测试 → 部署 → 迁移 → 影子全流程逐层落实。</p><div style="background:#fff7ed;border:1.5px solid #f59e0b;border-radius:10px;padding:10px 14px;margin:14px 0;color:#92400e;font-size:13.5px;"><b>⚠️ 发布口径更新（D-013 · 2026-08-20）：</b>v0.1 实际开放 = 虹励（<b>销售助理身份</b>）桥接代下单 + 查自己的订单 + 影子新单实时重放；本文 02/06/07/08 章节中的商务履约（备货 / 发货 / 开票）与多角色入口是 demo 全量设计和后续版本资产，按 <b>v0.2（商务 / 财务 / 仓管）、v0.3（销售 / 主管 / 董事长）</b>开放，核心依据见 <a href="../版本规划.html">版本规划.html</a>。</div>
+
+  <div class="note"><span class="tt">0.1 范围（A8 + D-008 双轨裁决）</span><br/>
+    仅<strong>虹励（销售助理身份）</strong>使用 · 08-21 前上线 · <strong>不打扰现有飞书流程</strong>（原审批流不停；飞书侧单向只读同步，存量订单同步已裁决：v0.1 不做（归 v0.2 数据迁入））· 自动下单移出一期（智能下单人工确认段保留）· 锁库存暂不做 · 文档驱动迭代（一个文档进去，所有东西自动跟它同步）。<br/>
+    <strong>双轨发布</strong>：对外轨 A（虹励/客户可见：桥接下单、飞书流续跑、我的订单/状态回显）不变；新增影子轨 S（仅内部：完整状态机按 D-012 新单实时增量预演、收集覆盖/分歧/审计证据，零客户触达、零出站、零回写、可重建重放）。D-009 无托底 + 全节点覆盖/差异映射可接受；D-010 独立环境（自带 shadow-temporal）并运行到 v0.3 后撤销；D-011 多次发布验证线 + 六同原则保持近乎真实系统。</div>
+
+  <nav class="cards">
+    <a class="card" href="01-business-graphs.html">
+      <span class="no">01 · BUSINESS GRAPHS</span>
+      <h3>双 Graph · 业务知识图谱 × 业务流程操作图谱</h3>
+      <p>18 个能力问题、0.1 校准本体与 ER、业务规则、授权模型、事件图谱；7 角色 17 场景的全部操作与交互、订单四节点状态机、0.1 特殊机制（守门员/合并开票/仓库群回单）。</p>
+      <div class="role">起点 · 所有设计的核心</div>
+    </a>
+    <a class="card" href="02-product.html">
+      <span class="no">02 · PRODUCT</span>
+      <h3>产品 · 业务场景体系</h3>
+      <p>0.1 版本定位与范围、17 场景-角色-动作-状态映射、五大业务使命、A1-A8 变更产品化清单、待确认决策门。</p>
+      <div class="role">承接双 graph · 业务知识的着落点</div>
+    </a>
+    <a class="card" href="03-interaction.html">
+      <span class="no">03 · INTERACTION</span>
+      <h3>交互 · demo 全操作对应</h3>
+      <p>17 场景逐场景操作明细（入口/表单/按钮/卡片/反馈）、守门员/确认卡/选仓/合并开票/回单关键交互、企微形态映射。</p>
+      <div class="role">demo 上所有操作一一对应</div>
+    </a>
+    <a class="card" href="04-architecture.html">
+      <span class="no">04 · ARCHITECTURE</span>
+      <h3>架构 · 分层与依赖</h3>
+      <p>总体架构（含飞书同步 Job）、八层分层、服务依赖关系、Temporal/SpiceDB/防线/幂等沿用、0.1 多余部分清单 M1-M8（标记不删除）。</p>
+      <div class="role">把现有已经做的用好</div>
+    </a>
+    <a class="card" href="05-business-flow.html">
+      <span class="no">05 · BUSINESS FLOW</span>
+      <h3>业务流程 · 已核对流程</h3>
+      <p>下单→审价→终审→备货→发货→开票→回单八节点详述（角色/操作/状态/守恒/异常）、0.1 特殊处理 S1-S8、异常与例外路径。</p>
+      <div class="role">对应已核对好的业务流程</div>
+    </a>
+    <a class="card" href="06-wecom.html">
+      <span class="no">06 · WECOM</span>
+      <h3>企微对接 · 角色/入口/回调</h3>
+      <p>7 角色操作入口、能力接入矩阵、回调接口（消息/审批/OAuth/会话存档）、出站通道、仓库群升级/凭证机器人/守门员特殊接入。</p>
+      <div class="role">与 07 互补 · 以 demo 为准</div>
+    </a>
+    <a class="card" href="07-database.html">
+      <span class="no">07 · DATABASE</span>
+      <h3>数据库 · 表结构</h3>
+      <p>30 张表清单与分组详述、ER 图、关键约束/防线/幂等键/索引、0.1 多余表标记（inventory_items 等，不删除）。</p>
+      <div class="role">migrations 001-005</div>
+    </a>
+    <a class="card" href="08-api.html">
+      <span class="no">08 · HTTP API</span>
+      <h3>API · 全接口描述</h3>
+      <p>16 端点全描述（请求/响应/权限/幂等）、15 信号清单、通用约定、接口↔流程↔企微回调调用关系映射。</p>
+      <div class="role">与 server.go 路由一致</div>
+    </a>
+    <a class="card" href="09-testing.html">
+      <span class="no">09 · TESTING</span>
+      <h3>测试设计 · L0-L3 × 场景用例</h3>
+      <p>分层策略、7 角色 17 场景覆盖映射、0.1 新增用例 N-01..N-10（守门员/合并开票/仓库群回单/超发拦截等）、覆盖率门禁、18 CQ 映射。</p>
+      <div class="role">与 03-testing 互补</div>
+    </a>
+    <a class="card" href="10-deployment.html">
+      <span class="no">10 · DEPLOYMENT</span>
+      <h3>部署 · 实例规划/compose/同步 Job</h3>
+      <p>部署架构与实例安排（9 容器）、物理目录规划、docker-compose 要求、飞书同步 Job、0.1 上线 10 步、运维要点。</p>
+      <div class="role">不打扰现有飞书流程</div>
+    </a>
+    <a class="card" href="11-migration.html">
+      <span class="no">11 · MIGRATION</span>
+      <h3>迁移 · 飞书 → 本系统同步</h3>
+      <p>平行流模型、同步架构、程序员调研清单 T1-T3、同步策略（周期/实时/增量）、数据映射方案、敏感边界、验证验收 V1-V6。</p>
+      <div class="role">原审批流不停 · 数据同步可见可操作</div>
+    </a>
+    <a class="card" href="12-shadow-full-flow.html">
+      <span class="no">12 · SHADOW FULL-FLOW</span>
+      <h3>影子全流程预演 · 内部轨 S</h3>
+      <p>完整状态机（52 状态 79 边）在真实飞书数据上运行：双轨三区、事件→Signal 映射、零出站/零回写铁律、覆盖率/分歧/对齐审计、修复-重放闭环、隔离审计附录 A、S-01..S-09 验收；D-009..D-011 最新裁决（无托底 / 独立环境 / 多次发布 + 六同原则）已并入。</p>
+      <div class="role">v0.2 数据迁入 Go/No-Go 证据 · 仅内部</div>
+    </a>
+  </nav>
+
+  <h2><span class="no">·</span> 与既有文档家族的关系</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>既有文档（docs/）</th><th>与 v0.1 的关系</th></tr>
+    <tr><td>01-core-graph.html</td><td>技术基座：CQ/本体/ER/SpiceDB/事件图与四流程状态机保留；v0.1/01 为 0.1 校准版（新增 CQ-16/17/18 与 demo 业务点）</td></tr>
+    <tr><td>02-architecture.html</td><td>完整架构设计保留；v0.1/04 为 0.1 裁剪视图（M1-M8 标记不删除）；v0.1/07 为数据库 0.1 视图；v0.1/10 为部署 0.1 方案</td></tr>
+    <tr><td>03-testing.html / 09-http-api-scorecard.html</td><td>49 用例与 13 端点 Score Card 保留；v0.1/09 补充 0.1 场景用例 N-01..N-10；v0.1/08 为接口规范</td></tr>
+    <tr><td>07-wecom-integration.html / 07a</td><td>完整企微设计与交互 PRD 保留；v0.1/06 为 0.1 对接视图（冲突以 demo 为准）</td></tr>
+    <tr><td>08-external-integration.html</td><td>接入层设计保留；v0.1/04 引用其主数据审计结论</td></tr>
+    <tr><td>04-development-plan.html</td><td>M0-M8 里程碑保留；0.1 上线步骤见 v0.1/10 §6</td></tr>
+    <tr><td>gap-analysis.md</td><td>0.1 重构的差距分析与重构决策记录（本章节的推导过程）</td></tr>
+  </table>
+  </div>
+
+  <footer class="colophon">
+    <span><a href="../index.html">← Docs Index</a></span>
+    <span>v0.1 · 12 章节</span>
+    <span>裁决源 ord_fulfill demo · 2026-08-16 / 影子轨定稿 2026-08-20</span>
+  </footer>
+
+</div>
+</body>
+</html>

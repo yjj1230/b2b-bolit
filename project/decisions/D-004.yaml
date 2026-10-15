@@ -1,0 +1,15 @@
+# D-004 机制状态标 PROPOSED 不激活
+decision_id: D-004
+choice: >
+  current.yaml.status 与 project.yaml.mechanism.status 均标 PROPOSED，
+  bootstrap=true，activation_decision=NONE
+rationale: >
+  ECM-ACT-001 要求 ACTIVE 同时发布 schema/canonicalizer/测试向量/validator 并通过 10 类激活测试，
+  本次无法满足；§10 禁止伪造 ACTIVE 指针（ECM-REC-004）
+premises:
+  - 附录 A.12 硬约束
+objections: []
+decider: project-governance（bootstrap 执行者 reasonix-executor）
+effective_interval: {from: "2026-08-13T00:00:00+00:00", to: null}
+supersedes: []
+review_condition: 机制激活评估时复核

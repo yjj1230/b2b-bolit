@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>订单助手 · 销售助理</title>
+<style>
+  :root{--blue:#3370ff;--ink:#1f2329;--muted:#86909c;--line:#e5e6eb;--soft:#f2f3f5;--green:#00bd66;--green-soft:#dcfae6;--danger:#fa5151}
+  *{box-sizing:border-box;margin:0;padding:0}[hidden],.runtime-only{display:none!important}
+  body{min-width:1100px;background:#f5f6f8;color:var(--ink);font:14px/1.5 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
+  .web-header{min-width:1100px;height:92px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:stretch;position:sticky;top:0;z-index:20}
+  .brand-box{width:200px;padding:22px 30px 14px;flex:none}.brand{font-size:23px;font-weight:700;line-height:1.2}.brand-sub{font-size:15px;color:var(--muted);margin-top:2px}
+  .web-nav{display:flex;align-items:flex-end;margin-left:0}.nav-item{height:70px;min-width:128px;padding:24px 38px 20px;font-size:23px;font-weight:700;border-bottom:4px solid var(--blue)}
+  .header-spacer{flex:1}.assistant-avatar{align-self:center;margin-right:28px;width:50px;height:50px;border:0;border-radius:8px;background:var(--blue);color:#fff;font-size:23px;font-weight:700;cursor:pointer}
+  .workspace{max-width:1384px;margin:0 auto;padding:0 0 48px}.order-sheet{background:#fff;border-left:1px solid var(--line);border-right:1px solid var(--line);min-height:calc(100vh - 92px)}
+  .form-head{position:sticky;top:92px;z-index:12;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:20px;padding:18px 24px 16px}
+  .form-title{font-size:24px;font-weight:700}.context-chip{display:inline-flex;margin-top:8px;padding:6px 11px;border-radius:7px;background:var(--green-soft);border:1px solid #abefc6;color:#067647;font-size:14px;font-weight:700}
+  button{font:inherit;border:0;border-radius:6px;cursor:pointer}.submit-order{min-width:146px;height:56px;padding:0 22px;background:var(--green);color:#fff;font-size:20px;font-weight:700}.submit-order:disabled{cursor:not-allowed;opacity:1}
+  .form-section{padding:22px 24px 24px;border-bottom:1px dashed var(--line)}.section-title{font-size:16px;color:#5f6b7a;font-weight:700;margin:0 0 16px;display:flex;align-items:center;gap:9px}.section-title::before{content:"";width:8px;height:8px;border-radius:50%;background:#08c76f;flex:none}
+  .owner-section .form-grid{max-width:650px}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 32px}.row{display:flex;flex-direction:column;gap:6px;min-width:0}.field-full,.field-wide{grid-column:1/-1}
+  label{font-size:15px;color:#3d4a5d;font-weight:700}label.required::after{content:" *";color:var(--danger)}
+  input,select,textarea{width:100%;border:1px solid #d8dde7;border-radius:7px;background:#fff;color:var(--ink);font:inherit;outline:none;transition:border-color .15s,box-shadow .15s}
+  input,select{height:48px;padding:0 14px}select,.searchable-input{appearance:none;padding-right:34px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7'%3E%3Cpath fill='%2386909C' d='M0 0l6 7 6-7z'/%3E%3C/svg%3E") no-repeat right 14px center}textarea{min-height:110px;padding:13px 14px;resize:vertical}
+  input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(51,112,255,.12)}input[readonly]{background:var(--soft);color:#646f7d}
+  .source-note,.section-note{font-size:12px;color:#a6adb8}.section-note{margin-top:10px}.row.lock input,.row.lock select{background:var(--soft)}
+  .detail-toolbar{display:flex;flex-direction:column;align-items:flex-start;gap:10px;margin-bottom:14px}.toolbar-actions,.toolbar-sums{display:flex;align-items:center;gap:16px;flex-wrap:wrap}.secondary{height:48px;padding:0 20px;background:var(--soft);color:var(--blue);font-size:16px;font-weight:700}.currency{display:flex;align-items:center;gap:8px;font-size:16px}.currency select{height:48px;width:190px}.toolbar-sums{font-size:16px;color:#3f4a5b}.toolbar-sums b{font-size:18px;color:#202633}.total-unit{font-style:normal}
+  .table-wrap{overflow-x:auto;padding-bottom:4px}.item-table{min-width:1320px;width:100%;border-collapse:separate;border-spacing:0 8px}.item-table th{text-align:left;color:#7f8998;font-size:14px;font-weight:700;white-space:nowrap;padding:0 7px 5px}.item-table td{padding:0 6px;vertical-align:middle}.item-table td input,.item-table td select{height:46px;padding-left:12px;padding-right:12px}.item-table .product-cell{min-width:270px}.item-table .quantity-cell{min-width:120px}.item-table .price-cell{min-width:140px}.item-table .amount-cell{min-width:135px}.item-table .pack-cell{min-width:180px}.item-table .pack-note-cell{min-width:190px}.item-table .spec-cell{min-width:115px}.item-table .quality-cell{min-width:160px}.item-table .date-cell{min-width:145px}.item-table .delete-cell{width:46px}.product-picker{position:relative}.product-picker .item-product{padding-right:36px}.item-product-clear{position:absolute;right:6px;top:6px;width:34px;height:34px;background:transparent;color:#8993a1;font-size:20px}.item-product-clear:hover{color:var(--danger)}.item-amount{display:flex;align-items:center;height:46px;padding:0 12px;border:1px solid #e1e5eb;border-radius:7px;background:var(--soft);color:#8b96a5;font-size:16px}.delete-item{width:34px;height:34px;background:transparent;color:#8993a1;font-size:20px}.delete-item:hover{color:var(--danger);background:#fff1f0}
+  .actions{min-height:26px;margin-top:14px}.muted{font-size:12px;color:var(--muted)}.ok{color:#079455}.err{color:var(--danger)}.warn{color:#d89614}
+  .modal-mask{position:fixed;inset:0;background:rgba(20,20,20,.45);display:none;align-items:flex-start;justify-content:center;z-index:99;padding:40px 16px;overflow:auto}.modal-mask.show{display:flex}.modal{background:#fff;border-radius:10px;max-width:720px;width:100%;padding:22px 24px}.modal .close{float:right;padding:6px 12px}.kv-grid{display:grid;grid-template-columns:130px 1fr;gap:6px 12px}.link-btn{background:none;color:var(--blue);text-decoration:underline}
+</style>
+</head>
+<body>
+<header class="web-header">
+  <div class="brand-box"><div class="brand">订单助手</div><div class="brand-sub">网页工作台</div></div>
+  <nav class="web-nav"><div class="nav-item">下单</div></nav>
+  <div class="header-spacer"></div>
+  <button id="btn-reauth" type="button" class="assistant-avatar" title="授权或重新授权">助</button>
+</header>
+
+<main class="workspace">
+  <div class="order-sheet" id="order-form-card">
+    <div class="form-head">
+      <div><div class="form-title">人工下单（代下单）</div><div class="context-chip" id="context-hint">🔒 工作台下单 · 先选下单归属销售，其余与销售下单一致</div></div>
+      <button id="btn-submit" class="submit-order" disabled>提交订单</button>
+    </div>
+
+    <section class="form-section owner-section">
+      <h2 class="section-title">代下单归属（先选）</h2>
+      <div class="form-grid">
+        <div class="row" id="owner-row"><label class="required">下单归属销售</label><select id="sales_name"><option value="">请选择</option></select><span class="source-note">先选择代下单的销售，决定可选客户范围</span><input id="sales_user_id" type="hidden" /><input id="sales_open_id" type="hidden" /></div>
+      </div>
+    </section>
+
+    <section class="form-section">
+      <h2 class="section-title">订单信息</h2>
+      <div class="form-grid">
+        <div class="row"><label>销售员</label><input id="sales_display" class="searchable-input" list="sales-display-list" placeholder="搜索或选择销售员" /></div>
+        <div class="row"><label>代办人</label><input id="agent_name" readonly placeholder="当前操作人" /><span class="source-note">当前已授权操作人</span><input id="agent_user_id" type="hidden" value="" /></div>
+        <div class="row"><label>客户名称</label><input id="customer_name" placeholder="搜索已有客户，或直接填写新客户" list="customer-name-list" /><span class="source-note">可选择已有客户，也可填写新客户名称</span></div>
+        <div class="row"><label>税号</label><input id="tax_no" placeholder="选择客户后自动带出，可改" /><span class="source-note">选择客户后自动带出，可改</span></div>
+        <div class="row"><label class="required">是否自提</label><select id="is_self_pickup"><option value="" selected>请选择</option><option value="false">否</option><option value="true">是</option></select></div>
+        <div class="row"><label>供方</label><input id="supplier" class="searchable-input" list="supplier-list" placeholder="搜索或选择供方" /></div>
+        <div class="row field-full"><label>订单备注</label><textarea id="order_remark" maxlength="500" placeholder="请输入订单备注"></textarea></div>
+      </div>
+      <span id="prefill-note" class="runtime-only"></span>
+    </section>
+
+    <section class="form-section">
+      <h2 class="section-title">商品明细</h2>
+      <div class="detail-toolbar">
+        <div class="toolbar-actions"><button id="btn-add-item" type="button" class="secondary">＋ 添加明细</button><label class="currency">币种 <select id="currency"><option value="CNY" data-unit="元" selected>人民币 (元)</option><option value="USD" data-unit="美元">美元 (USD)</option><option value="EUR" data-unit="欧元">欧元 (EUR)</option></select></label></div>
+        <div class="toolbar-sums"><span>数量合计: <b id="order-quantity-total">0.00</b> kg</span><span>金额合计: <b id="order-total">0.00</b> <em class="total-unit" id="total-unit">元</em></span></div>
+      </div>
+      <div class="table-wrap"><table class="item-table"><thead><tr><th class="product-cell">产品型号</th><th class="quantity-cell">数量(kg)</th><th class="price-cell" id="unit-price-header">单价(元/kg)</th><th class="amount-cell" id="amount-header">合计(元)</th><th class="pack-cell">包装类型</th><th class="pack-note-cell">打包备注</th><th class="spec-cell">规格</th><th class="quality-cell">是否需要质检报告</th><th class="date-cell">到货时间</th><th class="delete-cell"></th></tr></thead><tbody id="item-rows"></tbody></table></div>
+    </section>
+
+    <section class="form-section" id="shipping-card">
+      <h2 class="section-title">收货方式</h2>
+      <div class="form-grid" id="delivery-fields">
+        <div class="row"><label>指定收货人</label><input id="receiver" class="searchable-input" list="contact-list" placeholder="搜索、选择或填写收货人" /><span class="source-note">选择客户后自动带出，可改</span></div>
+        <div class="row"><label>联系方式</label><input id="phone" placeholder="选择客户后自动带出，可改" /><span class="source-note">选择客户后自动带出，可改</span></div>
+        <div class="row field-wide"><label>收货地址</label><input id="shipping_address" class="searchable-input" list="address-list" placeholder="搜索、选择或填写收货地址" /><span class="source-note">选择客户后自动带出，可改</span></div>
+      </div>
+      <div class="form-grid" id="pickup-fields" hidden><div class="row field-wide"><label>自提仓库</label><input id="pickup_warehouse" placeholder="请输入自提仓库" /></div></div>
+    </section>
+
+    <section class="form-section">
+      <h2 class="section-title">结算方式</h2>
+      <div class="form-grid">
+        <div class="row"><label class="required">货款的结算方式</label><select id="payment_terms"><option value="" selected>请选择</option><option>款到发货</option><option>货到付款</option><option>货到7天</option><option>货到30天</option><option>货到45天</option><option>票到30天</option><option>票到60天</option><option>月结30天</option><option>月结35天</option><option>月结45天</option><option>月结60天</option><option>月结90天</option><option>规定付款日</option><option>月底付款</option><option>自提，提货前付款</option><option>货到票到7日内付款</option><option>提单日期后30天</option><option>提单日期后90天</option><option>提单日期后60天</option></select></div>
+        <div class="row"><label class="required">汇款方式</label><select id="remittance_method"><option value="" selected>请选择</option><option>电汇</option><option>银行承兑</option><option>电汇或银行承兑</option></select></div>
+      </div>
+      <div class="actions"><span class="muted" id="order-status"></span></div>
+    </section>
+  </div>
+</main>
+
+<div class="runtime-only">
+  <input id="user-id" type="hidden" value="" /><input id="identity" readonly /><span id="auth-status"></span><span id="mode-badge"></span>
+  <input id="customer_type" value="EXISTING" /><input id="customer_level" value="A" /><input id="customer_record_id" list="customer-list" /><input id="sales_role_key" value="sales" /><input id="order_id" />
+  <textarea id="special_spec_requirements" maxlength="500"></textarea><span id="special-count">0</span><span id="remark-count">0</span>
+  <button id="btn-refresh" type="button">刷新</button><table><tbody id="orders"></tbody></table>
+  <datalist id="agent-list"></datalist><datalist id="customer-list"></datalist><datalist id="customer-name-list"></datalist><datalist id="product-list"></datalist>
+  <datalist id="sales-display-list"></datalist>
+  <datalist id="supplier-list"><option value="长安仁恒"></option><option value="克莱明顿"></option><option value="仁恒新材料"></option><option value="华南供应"></option></datalist>
+  <datalist id="contact-list"><option value="王志明"></option><option value="李采购"></option><option value="陈仓管"></option></datalist>
+  <datalist id="address-list"><option value="湖南岳阳 · 云溪区"></option><option value="广西南宁 · 良庆区"></option><option value="长沙市岳麓区"></option><option value="广州市黄埔区"></option></datalist>
+</div>
+
+<div class="modal-mask" id="detail-mask">
+  <div class="modal">
+    <button class="close" id="detail-close">✕ 关闭</button>
+    <h3>📋 订单详情</h3>
+    <div class="kv-grid" id="detail-body"><span class="muted">加载中…</span></div>
+    <p class="muted" id="detail-foot"></p>
+  </div>
+</div>
+
+<script>
+var identity = null;
+try { identity = JSON.parse(localStorage.getItem('bridge_identity') || 'null'); } catch (e) {}
+
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+function $(id){ return document.getElementById(id); }
+function uid(){ return $('user-id').value; }
+var wecomCtx = null;
+try { wecomCtx = JSON.parse(localStorage.getItem('wecom_context') || 'null'); } catch (e) {}
+function authHeader(){
+  var h = { 'Content-Type':'application/json', 'X-User-Id': uid() };
+  if (wecomCtx && wecomCtx.context_token) h['X-WeCom-Context'] = wecomCtx.context_token;
+  return h;
+}
+
+// UI-01 收敛：pgAPI 客户/产品预填（页面保留手工填写为降级）。
+// 老客户：名称即输即搜 → 自动带出供方/等级/收货地址/收件人/电话/税号 + 回填 record_id。
+// 产品型号同样即输即搜（≥2 字符触发）。
+var customerByName = {};     // 名称 → record_id（提交时关联老客户）
+var customerRecords = {};    // 名称 → 完整客户记录（自动带出明细字段）
+function fillCustomerList(items) {
+  var cl = $('customer-list'), cn = $('customer-name-list');
+  cl.innerHTML = ''; cn.innerHTML = '';
+  customerByName = {}; customerRecords = {};
+  (items || []).forEach(function (x) {
+    if (!x || !x.customer_name) return;
+    var o1 = document.createElement('option'); o1.value = x.record_id || ''; cl.appendChild(o1);
+    var o2 = document.createElement('option'); o2.value = x.customer_name; cn.appendChild(o2);
+    customerByName[x.customer_name] = x.record_id || '';
+    customerRecords[x.customer_name] = x;
+  });
+}
+// 清空老客户搜索残留，避免切换销售员或客户类型后继续使用上一归属的数据。
+function resetCustomerSearch(clearDetails) {
+  fillCustomerList([]);
+  $('customer_record_id').value = '';
+  if (clearDetails) clearCustomerDerivedFields();
+}
+function fillProductList(items) {
+  var pl = $('product-list');
+  pl.innerHTML = '';
+  (items || []).forEach(function (x) {
+    if (!x || !x.product_name) return;
+    var o = document.createElement('option'); o.value = x.product_name; pl.appendChild(o);
+  });
+}
+async function searchCustomers(kw) {
+  kw = (kw || '').trim();
+  if (kw.length < 2) { resetCustomerSearch(false); return; }
+  var sel = $('sales_name');
+  var option = sel && sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex] : null;
+  var openID = option ? (option.dataset.openId || '').trim() : '';
+  var salesName = option ? (option.textContent || '').trim() : '';
+  if (!openID && !salesName) { fillCustomerList([]); return; }
+  try {
+    var items = await searchCustomersWith(kw, openID || salesName);
+    if (!items.length && openID && salesName) items = await searchCustomersWith(kw, salesName);
+    fillCustomerList(items);
+  } catch (e) { /* pgAPI 未配置时保持手工填写降级 */ }
+}
+async function searchCustomersWith(kw, salesKey) {
+  var c = await (await fetch('/api/v1/orderdata/customers?q=' + encodeURIComponent(kw) + '&salesperson=' + encodeURIComponent(salesKey) + '&page_size=50', { headers: authHeader() })).json();
+  return c.items || [];
+}
+async function searchProducts(kw) {
+  kw = (kw || '').trim();
+  if (kw.length < 2) return;
+  try {
+    var pr = await (await fetch('/api/v1/orderdata/products?q=' + encodeURIComponent(kw) + '&page_size=30', { headers: authHeader() })).json();
+    fillProductList(pr.items || []);
+  } catch (e) { /* 降级 */ }
+}
+function clearCustomerDerivedFields() {
+  $('customer_record_id').value = '';
+  $('supplier').value = '';
+  $('customer_level').value = 'A';
+  $('shipping_address').value = '';
+  $('receiver').value = '';
+  $('phone').value = '';
+  $('tax_no').value = '';
+}
+// 命中老客户后先清空上一客户派生值，再带出新档案，避免残留（可手动修改）。
+function applyCustomerRecord(cust) {
+  if (!cust) return;
+  clearCustomerDerivedFields();
+  if (cust.record_id) $('customer_record_id').value = cust.record_id;
+  if (cust.supplier) $('supplier').value = cust.supplier;
+  if (cust.customer_level) $('customer_level').value = cust.customer_level;
+  if (cust.shipping_address) $('shipping_address').value = cust.shipping_address;
+  if (cust.receiver) $('receiver').value = cust.receiver;
+  if (cust.phone) $('phone').value = cust.phone;
+  if (cust.tax_no) $('tax_no').value = cust.tax_no;
+  var paymentTerms = normPaymentTerms(cust.payment_terms);
+  if (paymentTerms) {
+    var paymentSelect = $('payment_terms');
+    var matched = Array.prototype.some.call(paymentSelect.options, function (option) { return option.value === paymentTerms; });
+    if (matched) paymentSelect.value = paymentTerms;
+  }
+}
+function normPaymentTerms(value) {
+  if (!value) return '';
+  var normalized = String(value).trim();
+  if (normalized.charAt(0) === '[') {
+    try {
+      var values = JSON.parse(normalized);
+      if (Array.isArray(values) && values.length) normalized = String(values[0]);
+    } catch (e) {}
+  }
+  return normalized.trim();
+}
+async function loadPrefill(){
+  try {
+    var pr = await (await fetch('/api/v1/orderdata/products?page_size=50', { headers: authHeader() })).json();
+    fillProductList(pr.items || []);
+  } catch (e) { /* pgAPI 未配置时保持手工填写降级 */ }
+}
+
+// 归属销售下拉：选项值=销售 user_id，展示=姓名；选中后回填 sales_user_id / sales_open_id / sales_role_key。
+function bindSalesSelect() {
+  var sel = $('sales_name');
+  sel.addEventListener('change', function () {
+    var o = sel.options[sel.selectedIndex];
+    $('sales_user_id').value = o ? (o.value || '') : '';
+    $('sales_open_id').value = o ? (o.dataset.openId || '') : '';
+    $('sales_role_key').value = o ? (o.dataset.roleKey || 'sales') : 'sales';
+    $('sales_display').value = o && o.value ? o.textContent : '';
+    if (!GROUP_MODE) {
+      $('customer_name').value = '';
+      resetCustomerSearch(true);
+      $('customer_name').placeholder = o && o.value ? '输入至少 2 个字搜索该销售的客户' : '请先选择销售员';
+    }
+  });
+  $('sales_display').addEventListener('change', function () {
+    var typedName = $('sales_display').value.trim();
+    var matched = Array.prototype.find.call(sel.options, function (o) { return o.value && o.textContent === typedName; });
+    sel.value = matched ? matched.value : '';
+    sel.dispatchEvent(new Event('change'));
+    if (!matched) $('sales_display').value = typedName;
+  });
+}
+// 拉取可选归属销售（pilot_v3 代理旧系统 /api/approval/sales-persons，仅代办可查）。
+async function loadSalesPersons() {
+  try {
+    var r = await fetch('/api/v1/bridge/sales-persons', { headers: authHeader() });
+    var j = await r.json();
+    var sel = $('sales_name');
+    if (!r.ok) {
+      if (sel.options.length <= 1) {
+        $('order-status').innerHTML = '<span class="err">销售列表加载失败：' + esc(j.error || ('HTTP ' + r.status)) + '（请先点击授权，或重新授权后刷新页面）</span>';
+      }
+      return;
+    }
+    // 先清空既有数据选项（保留首项占位），避免 init/回调/刷新多次拉取导致下拉累积重复
+    while (sel.options.length > 1) sel.remove(sel.options.length - 1);
+    $('sales-display-list').innerHTML = '';
+    (j.items || []).forEach(function (s) {
+      var o = document.createElement('option');
+      o.value = s.user_id || s.open_id || '';
+      o.textContent = s.name || s.user_id || s.open_id || '';
+      o.dataset.openId = s.open_id || '';
+      o.dataset.roleKey = s.role_key || 'sales';
+      sel.appendChild(o);
+      var displayOption = document.createElement('option');
+      displayOption.value = o.textContent;
+      $('sales-display-list').appendChild(displayOption);
+    });
+    if (GROUP_MODE) {
+      // 群入口：归属销售由上下文锁定，重新补回锁定项并保持禁用
+      var ownerUID = params.get('owner_user_id') || '';
+      var ownerName = params.get('owner_name') || '';
+      var exists = Array.prototype.some.call(sel.options, function (o) { return o.value === ownerUID || o.textContent === ownerName; });
+      if (ownerName && !exists) {
+        var _o = document.createElement('option');
+        _o.value = ownerUID;
+        _o.textContent = ownerName;
+        sel.appendChild(_o);
+      }
+      if (ownerUID) sel.value = ownerUID;
+      sel.disabled = true;
+      $('sales_user_id').value = ownerUID;
+      $('sales_display').value = ownerName;
+    }
+  } catch (e) {
+    if ($('sales_name').options.length <= 1) {
+      $('order-status').innerHTML = '<span class="err">销售列表加载失败：网络错误（' + esc(e.message) + '）</span>';
+    }
+  }
+}
+
+// 入口识别：工作台 vs 客户群
+var params = new URLSearchParams(location.search);
+// 飞书桥接回调（redirect_uri 直指本下单页）：state=assistant_v01:<uid>:<回跳目标>
+var feishuState = params.get('state') || '';
+var feishuCode = params.get('code') || '';
+var IS_FEISHU_BRIDGE = feishuState.indexOf('assistant_v01:') === 0;
+var bridgeRet = ''; // 回跳目标（发起时的下单页 URL），兑换完成后清理 code/state 用
+if (IS_FEISHU_BRIDGE) {
+  // Feishu 重定向把原查询覆盖为 code/state；从 state 的 <回跳目标> 还原原始业务参数（客户群/工作台）
+  try {
+    var _parts = feishuState.slice('assistant_v01:'.length).split(':');
+    bridgeRet = decodeURIComponent(_parts.slice(1).join(':') || '');
+    if (bridgeRet.indexOf('?') >= 0) params = new URLSearchParams(bridgeRet.slice(bridgeRet.indexOf('?') + 1));
+  } catch (e) {}
+}
+var GROUP_MODE = !!(params.get('chat_id') || params.get('group_id') || params.get('customer_record_id') || params.get('customer_name'));
+if (GROUP_MODE) {
+  $('mode-badge').textContent = '客户群入口';
+  $('mode-badge').className = 'mode';
+  $('context-hint').textContent = '🔒 客户群下单 · 客户与归属销售由群上下文锁定';
+  // 归属销售下拉：群入口由上下文锁定，追加锁定值并禁用
+  var _ownerName = params.get('owner_name') || '';
+  var _ownerUID = params.get('owner_user_id') || '';
+  if (_ownerName) {
+    var _o = document.createElement('option');
+    _o.value = _ownerUID;
+    _o.textContent = _ownerName;
+    $('sales_name').appendChild(_o);
+    $('sales_name').value = _ownerUID;
+    $('sales_display').value = _ownerName;
+  }
+  $('sales_name').disabled = true;
+  $('sales_user_id').value = _ownerUID;
+  lock($('customer_record_id'), params.get('customer_record_id') || '');
+  lock($('customer_name'), params.get('customer_name') || '');
+  $('owner-row').classList.add('lock');
+} else {
+  $('mode-badge').textContent = '工作台 · PC/H5';
+  $('mode-badge').className = 'mode pc';
+}
+if (params.get('agent_name')) $('agent_name').value = params.get('agent_name');
+if (params.get('agent_user_id')) $('agent_user_id').value = params.get('agent_user_id');
+
+function lock(input, value) { if (value) input.value = value; input.setAttribute('readonly', 'readonly'); }
+
+function setAuthState(authorized) {
+  var status = $('auth-status');
+  status.className = authorized ? 'ok' : 'err';
+  status.textContent = authorized ? '已授权' : '未授权';
+}
+
+function fillIdentity() {
+  $('identity').value = identity ? (identity.name + ' / ' + identity.role) : '未授权';
+  if (identity && !params.get('agent_user_id')) $('agent_user_id').value = identity.user_id || uid();
+  if (identity && !params.get('agent_name')) $('agent_name').value = identity.name || '';
+  if (identity && !params.get('sales_role_key')) $('sales_role_key').value = identity.role || 'agent';
+}
+
+// 企微 JS-SDK + OAuth（真实企微环境；mock 环境同样可走通确定性签名）
+async function initWeCom() {
+  var wecomAuthUntil = Number(localStorage.getItem('wecom_auth_until') || 0);
+  if (wecomCtx && wecomAuthUntil && Date.now() > wecomAuthUntil) {
+    localStorage.removeItem('wecom_context');
+    localStorage.removeItem('wecom_auth_until');
+    wecomCtx = null;
+  }
+  // 生产 strict 模式不信任页面自填 X-User-Id，无上下文时先静默解析真实企微身份。
+  if (!wecomCtx && !params.get('code') && !IS_FEISHU_BRIDGE) {
+    try {
+      var oauth = await (await fetch('/api/v1/wecom/oauth-url?state=workbench')).json();
+      if (oauth && oauth.strict && oauth.auth_url) { location.href = oauth.auth_url; return; }
+    } catch (e) {}
+  }
+  // 飞书桥接回跳的 code 在下方单独兑换；此处只处理企微 OAuth code（state 无 assistant_v01 前缀）
+  if (params.get('code') && !IS_FEISHU_BRIDGE) {
+    try {
+      var chat = params.get('chat_id') || params.get('group_id') || '';
+      var r = await fetch('/api/v1/auth/exchange', { method:'POST', headers: authHeader(), body: JSON.stringify({ code: params.get('code'), chat_id: chat }) });
+      var j = await r.json();
+      if (r.ok && j.context_token) {
+        wecomCtx = j;
+        localStorage.setItem('wecom_context', JSON.stringify(j));
+        localStorage.setItem('wecom_auth_until', String(Date.now() + 2 * 3600 * 1000));
+        if (j.principal_id) $('user-id').value = j.principal_id;
+        if (j.customer_id) lock($('customer_record_id'), j.customer_id);
+      } else {
+        setAuthState(false);
+      }
+    } catch (e) { setAuthState(false); }
+  }
+  try {
+    var cfg = await (await fetch('/api/v1/wecom/jsapi-config?url=' + encodeURIComponent(location.href), { headers: { 'X-User-Id': uid() } })).json();
+    if (cfg && cfg.signature) {
+      if (window.wx) {
+        wx.config({ beta:true, debug:false, appId: cfg.corp_id, timestamp: cfg.timestamp, nonceStr: cfg.nonce_str, signature: cfg.signature, jsApiList: ['getCurExternalChat','openDefaultBrowser'] });
+        wx.agentConfig({ corpid: cfg.corp_id, agentid: cfg.agent_id, timestamp: cfg.agent_timestamp, nonceStr: cfg.agent_nonce_str, signature: cfg.agent_signature, jsApiList: ['getCurExternalChat','openDefaultBrowser'], success: function(){}, fail: function(){} });
+        wx.ready(function(){
+          if (wx.getCurExternalChat && GROUP_MODE) {
+            try {
+              wx.getCurExternalChat({ success: function(res){ if (res.chat_id) history.replaceState(null,'', '?chat_id=' + encodeURIComponent(res.chat_id)); }, fail: function(){} });
+            } catch (e) {}
+          }
+        });
+      }
+    }
+  } catch (e) {}
+}
+
+// 飞书 OAuth（v0.1 桥接）：同页跳转授权，redirect_uri 直指本下单页，授权完成后回到本页就地兑换，不新开外部页面。
+$('btn-reauth').addEventListener('click', async function () {
+  // state 携带发起页用户 + 回跳目标，经 URL 传递，授权后随回调 URL 带回本页。
+  var state = 'assistant_v01:' + encodeURIComponent(uid()) + ':' + encodeURIComponent(location.pathname + location.search);
+  var r = await fetch('/api/v1/bridge/auth-url?state=' + encodeURIComponent(state), { headers: authHeader() });
+  var j = await r.json();
+  if (!r.ok) { setAuthState(false); return; }
+  // 同页跳转：不新开外部标签页；授权完成后飞书重定向回本页（企业微信工作台进入的原页面上下文），原地兑换。
+  location.href = j.auth_url;
+});
+
+// 飞书 OAuth 回调（redirect_uri 直指本页，state=assistant_v01:<uid>:<回跳目标>）：在此就地兑换并留在下单页。
+if (feishuCode && IS_FEISHU_BRIDGE) {
+  (async function () {
+    var stParts = feishuState.slice('assistant_v01:'.length).split(':');
+    var bridgeUID = '';
+    try { bridgeUID = decodeURIComponent(stParts[0] || ''); } catch (e) {}
+    // strict 模式下以服务端解析的企微 principal 为令牌键，不信任 state 中的用户标识。
+    var cr = await fetch('/api/v1/bridge/callback', { method: 'POST', headers: authHeader(), body: JSON.stringify({ code: feishuCode }) });
+    var cj = await cr.json();
+    if (!cr.ok) { setAuthState(false); return; }
+    identity = cj.identity;
+    localStorage.setItem('bridge_identity', JSON.stringify(identity));
+    localStorage.setItem('bridge_auth_until', String(Date.now() + (cj.expires_in_seconds || 7200) * 1000));
+    $('user-id').value = identity.user_id || bridgeUID;
+    $('identity').value = identity.name + ' / ' + identity.role;
+    setAuthState(true);
+    $('btn-submit').disabled = false;
+    $('btn-submit').textContent = '提交订单';
+    if (!params.get('agent_user_id')) $('agent_user_id').value = identity.user_id || '';
+    if (!params.get('agent_name')) $('agent_name').value = identity.name || '';
+    // 授权成功、token 已缓存后拉取可选归属销售下拉
+    loadSalesPersons();
+    // 清理一次性 code/state，避免刷新重复兑换
+    history.replaceState(null, '', bridgeRet || (location.pathname));
+  })();
+}
+
+// 授权回到本页（或页面刷新）时自动刷新身份绑定状态（不覆盖已填表单）。
+function refreshIdentityStatus() {
+  try { identity = JSON.parse(localStorage.getItem('bridge_identity') || 'null'); } catch (e) {}
+  var authUntil = parseInt(localStorage.getItem('bridge_auth_until') || '0', 10);
+  if (identity && authUntil > Date.now()) {
+    $('identity').value = identity.name + ' / ' + identity.role;
+    setAuthState(true);
+    $('btn-submit').disabled = false;
+    $('btn-submit').textContent = '提交订单';
+    $('user-id').value = identity.user_id || $('user-id').value;
+    loadSalesPersons();
+  } else {
+    identity = null;
+    $('identity').value = '未授权';
+    setAuthState(false);
+    $('btn-submit').disabled = true;
+    $('btn-submit').textContent = '身份未验证，无法提交';
+  }
+}
+window.addEventListener('pageshow', refreshIdentityStatus);
+document.addEventListener('visibilitychange', function () { if (!document.hidden) refreshIdentityStatus(); });
+
+// 飞书授权由旧系统回调页完成（本地 localStorage 桥接）；企微 OAuth code 只用于 auth/exchange。
+fillIdentity();
+refreshIdentityStatus();
+var wecomUntil = parseInt(localStorage.getItem('wecom_auth_until') || '0', 10);
+if (wecomCtx && wecomCtx.principal_id && wecomUntil > Date.now()) {
+  $('user-id').value = wecomCtx.principal_id;
+}
+
+// 商品明细：产品字段结构化录入，合计与币种单位随数量/单价变化。
+var itemRowSeed = 0;
+function selectOptions(values, selected, placeholder) {
+  var html = placeholder ? '<option value="">' + esc(placeholder) + '</option>' : '';
+  values.forEach(function (value) { html += '<option' + (value === selected ? ' selected' : '') + '>' + esc(value) + '</option>'; });
+  return html;
+}
+function addItemRow(item) {
+  item = item || {};
+  var rowID = 'item-' + (++itemRowSeed);
+  var tr = document.createElement('tr');
+  tr.dataset.rowId = rowID;
+  tr.innerHTML =
+    '<td><div class="product-picker"><input class="item-product" value="' + esc(item.product_name || '') + '" placeholder="搜索或选择产品型号" list="product-list" /><button class="item-product-clear" type="button" title="清空产品">×</button></div></td>' +
+    '<td><input class="item-quantity" type="number" min="0" step="0.01" value="' + esc(item.quantity == null ? '' : item.quantity) + '" /></td>' +
+    '<td><input class="item-price" type="number" min="0" step="0.0001" value="' + esc(item.unit_price == null ? '' : item.unit_price) + '" /></td>' +
+    '<td class="amount-cell"><span class="item-amount">0.00</span></td>' +
+    '<td><select class="item-packaging">' + selectOptions(['长安仁恒包装','克莱明顿包装','无字包装','厂家袋'], item.packaging || '', '请选择包装类型') + '</select></td>' +
+    '<td><select class="item-packing-remark">' + selectOptions(['小袋套吨袋','打托(木托盘)','打托(胶木托盘)','打托(塑料托盘)','桶装','散装'], item.packing_remark || '', '请选择打包备注') + '</select></td>' +
+    '<td><select class="item-spec">' + selectOptions(['20','25','50','700','800','1000'], item.package_spec || '', '请选择规格') + '</select></td>' +
+    '<td><select class="item-quality"><option value="">请选择</option><option value="true"' + (item.quality_report_required === true ? ' selected' : '') + '>是</option><option value="false"' + (item.quality_report_required === false ? ' selected' : '') + '>否</option></select></td>' +
+    '<td><input class="item-arrival" type="date" value="' + esc(item.arrival_date || '') + '" /></td>' +
+    '<td><button class="delete-item" type="button" title="删除">✕</button></td>';
+  $('item-rows').appendChild(tr);
+  if (item.packaging) tr.querySelector('.item-packaging').value = item.packaging;
+  updateItemTotals();
+}
+
+function updateItemTotals() {
+  var total = 0, quantityTotal = 0;
+  Array.prototype.forEach.call(document.querySelectorAll('#item-rows tr'), function (tr) {
+    var quantity = parseFloat(tr.querySelector('.item-quantity').value) || 0;
+    var price = parseFloat(tr.querySelector('.item-price').value) || 0;
+    var amount = quantity * price;
+    tr.querySelector('.item-amount').textContent = amount.toFixed(2);
+    quantityTotal += quantity;
+    total += amount;
+  });
+  $('order-quantity-total').textContent = quantityTotal.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  $('order-total').textContent = total.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function updateCurrencyUnit() {
+  var option = $('currency').options[$('currency').selectedIndex];
+  var unit = option ? option.dataset.unit : '元';
+  $('unit-price-header').textContent = '单价(' + unit + '/kg)';
+  $('amount-header').textContent = '合计(' + unit + ')';
+  $('total-unit').textContent = unit;
+}
+
+function collectItems() {
+  return Array.prototype.map.call(document.querySelectorAll('#item-rows tr'), function (tr) {
+    return {
+      product_name: tr.querySelector('.item-product').value,
+      quantity: parseFloat(tr.querySelector('.item-quantity').value) || 0,
+      unit_price: parseFloat(tr.querySelector('.item-price').value) || 0,
+      unit_price_cents: Math.round((parseFloat(tr.querySelector('.item-price').value) || 0) * 100),
+      packaging: tr.querySelector('.item-packaging').value,
+      packing_remark: tr.querySelector('.item-packing-remark').value,
+      package_spec: tr.querySelector('.item-spec').value,
+      arrival_date: tr.querySelector('.item-arrival').value,
+      quality_report_required: tr.querySelector('.item-quality').value === 'true'
+    };
+  }).filter(function (item) { return item.product_name || item.quantity || item.unit_price_cents; });
+}
+
+addItemRow({});
+$('btn-add-item').addEventListener('click', function () { addItemRow(); });
+$('currency').addEventListener('change', function () { updateCurrencyUnit(); updateItemTotals(); });
+updateCurrencyUnit();
+// 产品型号即输即搜：≥2 字符防抖调用 pgAPI 产品搜索，更新 datalist 供选择。
+var _productSearchTimer = null;
+$('item-rows').addEventListener('input', function (ev) {
+  updateItemTotals();
+  var t = ev.target;
+  if (t && t.classList && t.classList.contains('item-product')) {
+    var v = t.value;
+    clearTimeout(_productSearchTimer);
+    _productSearchTimer = setTimeout(function () { searchProducts(v); }, 300);
+  }
+});
+$('item-rows').addEventListener('change', updateItemTotals);
+$('item-rows').addEventListener('click', function (ev) {
+  if (ev.target.classList.contains('item-product-clear')) {
+    ev.target.closest('.product-picker').querySelector('.item-product').value = '';
+    updateItemTotals();
+    return;
+  }
+  if (!ev.target.classList.contains('delete-item')) return;
+  ev.target.closest('tr').remove();
+  updateItemTotals();
+});
+
+function updateCustomerType() {
+  var existing = $('customer_type').value === 'EXISTING';
+  $('customer_record_id').value = existing ? $('customer_record_id').value : '';
+  if (!existing) {
+    // 新客户：默认等级 A；档案字段需手动补充（对齐旧系统）。
+    clearCustomerDerivedFields();
+  }
+  $('prefill-note').textContent = existing
+    ? '选择老客户后，将自动带出供方、客户等级、收货地址、收件人、电话、税号等信息（可手动修改）。'
+    : '新客户默认等级 A，请填写客户名称，供方、收货地址、收件人、电话和税号等信息需要手动补充。';
+}
+$('customer_type').addEventListener('change', updateCustomerType);
+updateCustomerType();
+// 老客户：名称即输即搜（≥2 字符防抖）；命中后自动带出档案字段。
+var _customerSearchTimer = null;
+$('customer_name').addEventListener('input', function () {
+  var v = $('customer_name').value;
+  if (customerRecords[v]) {
+    $('customer_type').value = 'EXISTING';
+    applyCustomerRecord(customerRecords[v]);
+    return;
+  }
+  if ($('customer_record_id').value) clearCustomerDerivedFields();
+  $('customer_type').value = 'NEW';
+  $('customer_record_id').value = '';
+  clearTimeout(_customerSearchTimer);
+  _customerSearchTimer = setTimeout(function () { searchCustomers(v); }, 350);
+});
+$('customer_name').addEventListener('change', function () {
+  if (customerRecords[$('customer_name').value]) {
+    $('customer_type').value = 'EXISTING';
+    applyCustomerRecord(customerRecords[$('customer_name').value]);
+  }
+});
+
+function updatePickupMode() {
+  var pickup = $('is_self_pickup').value === 'true';
+  $('delivery-fields').hidden = pickup;
+  $('pickup-fields').hidden = !pickup;
+  if (!pickup) $('pickup_warehouse').value = '';
+}
+$('is_self_pickup').addEventListener('change', updatePickupMode);
+updatePickupMode();
+
+function bindCounter(inputID, counterID) {
+  $(inputID).addEventListener('input', function () { $(counterID).textContent = String($(inputID).value.length); });
+}
+bindCounter('special_spec_requirements', 'special-count');
+bindCounter('order_remark', 'remark-count');
+
+// 下单
+$('btn-submit').addEventListener('click', async function () {
+  var items = collectItems();
+  if (!items.length) {
+    $('order-status').innerHTML = '<span class="err">请至少填写一项商品明细。</span>';
+    return;
+  }
+  var body = {
+    order_id: $('order_id').value,
+    customer_record_id: $('customer_type').value === 'EXISTING' ? $('customer_record_id').value : '',
+    customer_name: $('customer_name').value,
+    customer_level: $('customer_level').value,
+    tax_no: $('tax_no').value,
+    supplier: $('supplier').value,
+    items: items,
+    payment_terms: $('payment_terms').value,
+    remittance_method: $('remittance_method').value,
+    currency: $('currency').value,
+    shipping_address: $('shipping_address').value,
+    receiver: $('receiver').value,
+    phone: $('phone').value,
+    is_self_pickup: $('is_self_pickup').value === 'true',
+    pickup_warehouse: $('pickup_warehouse').value,
+    order_remark: $('order_remark').value,
+    special_spec_requirements: $('special_spec_requirements').value,
+    sales_name: $('sales_name').options[$('sales_name').selectedIndex] ? $('sales_name').options[$('sales_name').selectedIndex].textContent : '',
+    sales_open_id: $('sales_open_id').value,
+    sales_user_id: $('sales_user_id').value,
+    sales_role_key: $('sales_role_key').value,
+    agent_name: $('agent_name').value,
+    agent_open_id: identity ? identity.open_id : '',
+    agent_user_id: $('agent_user_id').value,
+    agent_role_key: 'agent'
+  };
+  if (!$('sales_user_id').value) {
+    $('order-status').innerHTML = '<span class="err">请选择归属销售员。</span>';
+    return;
+  }
+  if (!$('is_self_pickup').value) {
+    $('order-status').innerHTML = '<span class="err">请选择是否自提。</span>';
+    return;
+  }
+  if (!$('agent_user_id').value && $('agent_name').value) $('agent_user_id').value = $('agent_name').value;
+  body.agent_user_id = $('agent_user_id').value;
+  if ($('customer_type').value === 'EXISTING' && !body.customer_record_id) {
+    $('order-status').innerHTML = '<span class="err">请选择已匹配的老客户；如无客户档案，请切换为新客户。</span>';
+    return;
+  }
+  if (!body.payment_terms) {
+    $('order-status').innerHTML = '<span class="err">请选择货款的结算方式。</span>';
+    return;
+  }
+  if (!body.remittance_method) {
+    $('order-status').innerHTML = '<span class="err">请选择汇款方式。</span>';
+    return;
+  }
+  if (GROUP_MODE && (!body.customer_record_id && !body.customer_name)) {
+    $('order-status').innerHTML = '<span class="err">群入口必须解析到客户上下文；请确认 wecom_context_bindings 已录入。</span>';
+    return;
+  }
+  var r = await fetch('/api/v1/bridge/orders', { method:'POST', headers: authHeader(), body: JSON.stringify(body) });
+  var j = await r.json();
+  if (!r.ok) { $('order-status').innerHTML = '<span class="err">' + esc(j.error || '下单失败') + '</span>'; return; }
+  $('order-status').innerHTML = '<span class="ok">已提交：flow_id=' + esc(j.flow_id) + ' instance_id=' + esc(j.instance_id) + '</span>';
+  refreshOrders();
+});
+
+// 我的订单 + 详情
+var _bridgeOrders = [];
+async function refreshOrders() {
+  try {
+    var r = await fetch('/api/v1/bridge/orders', { headers: authHeader() });
+    var j = await r.json();
+    _bridgeOrders = j.items || [];
+    var tbody = $('orders');
+    tbody.innerHTML = '';
+    _bridgeOrders.forEach(function(it){
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td>' + esc(it.order_id) + '</td><td>' + esc(it.flow_id) + '</td><td>' + esc(it.instance_id) + '</td>' +
+        '<td><button class="link-btn" onclick="showOrderDetail(\'' + esc(it.order_id) + '\')">查看详情</button>' +
+        ' · <a target="_blank" href="' + esc(it.detail_url || '#') + '">flows</a></td>';
+      tbody.appendChild(tr);
+    });
+  } catch (e) {
+    // 静态预览或桥接未启用时，列表保持空态，不阻断下单表单。
+  }
+}
+$('btn-refresh').addEventListener('click', refreshOrders);
+bindSalesSelect();
+loadPrefill();
+loadSalesPersons();
+
+function fmtCents(cents){ return cents == null ? '—' : '¥' + (cents/100).toFixed(2); }
+function kvRow(k,v){ return '<div class="k">' + esc(k) + '</div><div class="v">' + (v == null || v === '' ? '—' : esc(v)) + '</div>'; }
+async function showOrderDetail(orderID){
+  var mask = $('detail-mask'); var body = $('detail-body'); var foot = $('detail-foot');
+  mask.classList.add('show'); body.innerHTML = '<span class="muted">加载中…</span>'; foot.textContent = '';
+  var it = null;
+  for (var i = 0; i < _bridgeOrders.length; i++) { if (_bridgeOrders[i].order_id === orderID) { it = _bridgeOrders[i]; break; } }
+  if (!it) { body.innerHTML = '<span class="err">未找到该订单（列表可能为空或未刷新）。</span>'; return; }
+  body.innerHTML = kvRow('订单ID', it.order_id) + kvRow('状态', it.state) +
+    kvRow('审批流', it.flow_id) + kvRow('审批实例', it.instance_id) +
+    kvRow('创建时间', it.created_at);
+  foot.innerHTML = '桥接台账视图：完整履约时间线/物流/审批链以订单详情 H5 与旧系统 <a target="_blank" href="' + esc(it.detail_url || '#') + '">/flows 页</a>为准。';
+}
+function closeOrderDetail(){ $('detail-mask').classList.remove('show'); }
+$('detail-close').addEventListener('click', closeOrderDetail);
+$('detail-mask').addEventListener('click', function(e){ if (e.target === this) closeOrderDetail(); });
+
+initWeCom();
+refreshOrders();
+</script>
+</body>
+</html>

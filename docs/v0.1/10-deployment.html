@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>10 · 部署 · 0.1 订单助手（实例规划 / 目录 / compose / 同步 Job）</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+SC:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:#f5f4ed; --paper2:#efeee5; --ink:#1f1d18; --ink2:#6b665b;
+    --ink3:#3a382f; --blue:#1B365D; --rule:#d4d1c5; --amber:#8a6d3b; --red:#9b3b3b; --green:#3b6d3b;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif; line-height:1.6;}
+  .wrap{max-width:980px; margin:0 auto; padding:48px 40px 80px;}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;}
+  .folio{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--rule); padding-bottom:10px;
+    font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink2);}
+  .folio a{color:var(--ink2); border:none;}
+  .folio a:hover{color:var(--blue);}
+  .tag{display:inline-block; padding:3px 10px; font-size:11px; letter-spacing:.16em; background:var(--paper2); color:var(--blue);}
+  .tag.red{background:#f3e3e3; color:var(--red);}
+  .tag.amber{background:#f3ecdc; color:var(--amber);}
+  .tag.green{background:#e3f0e3; color:var(--green);}
+  .kicker{display:flex; align-items:baseline; gap:12px; margin-top:48px; flex-wrap:wrap;}
+  h1{font-size:clamp(30px,4.6vw,46px); line-height:1.14; font-weight:500; margin-top:14px; letter-spacing:-.01em;}
+  .lede{margin-top:18px; font-size:16.5px; line-height:1.7; color:var(--ink3); max-width:760px;}
+  h2{font-size:23px; font-weight:600; margin:52px 0 14px; color:var(--blue); display:flex; align-items:baseline; gap:12px; border-top:1px solid var(--rule); padding-top:26px;}
+  h2 .no{font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.12em;}
+  h3{font-size:17.5px; font-weight:600; margin:30px 0 10px; color:var(--ink);}
+  h3 .no{color:var(--blue); font-family:'IBM Plex Mono',monospace; font-size:12px; margin-right:8px;}
+  p{margin:10px 0; color:var(--ink3);}
+  ul,ol{margin:10px 0 10px 26px; color:var(--ink3);}
+  li{margin:5px 0;}
+  a{color:var(--blue); text-decoration:none; border-bottom:1px solid var(--rule);}
+  a:hover{border-bottom-color:var(--blue);}
+  blockquote{border-left:2px solid var(--blue); padding:10px 18px; margin:16px 0; background:var(--paper2); font-style:italic;}
+  table{width:100%; border-collapse:collapse; font-size:13px;}
+  .table-wrap{overflow-x:auto; margin:16px 0 24px; border:1px solid var(--rule);}
+  .table-wrap table{margin:0;}
+  th{background:var(--paper2); color:var(--blue); text-align:left; font-weight:600; padding:9px 12px; border-bottom:1.5px solid var(--blue); font-size:12px; white-space:nowrap;}
+  td{padding:8px 12px; border-bottom:1px solid var(--rule); vertical-align:top; color:var(--ink3);}
+  tr:nth-child(even) td{background:#faf9f3;}
+  tr:hover td{background:#f0ede0;}
+  td .tag{font-size:10px; padding:1px 6px;}
+  td code{font-size:11.5px;}
+  .mermaid{background:var(--paper); border:1px solid var(--rule); padding:18px; overflow-x:auto; text-align:center; margin:20px 0;}
+  .mermaid svg{max-width:100%; height:auto;}
+  figcaption{text-align:center; font-size:12px; color:var(--ink2); margin:-10px 0 26px; font-style:italic;}
+  code{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace; font-size:13px; background:var(--paper2); padding:1px 5px;}
+  pre{background:var(--paper2); border:1px solid var(--rule); padding:16px 18px; overflow-x:auto; font-size:12.5px; line-height:1.55; margin:14px 0;}
+  pre code{background:none; padding:0;}
+  footer.colophon{margin-top:56px; padding-top:14px; border-top:1px solid var(--rule); display:flex; justify-content:space-between;
+    font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink2); flex-wrap:wrap; gap:8px;}
+  footer.colophon a{color:var(--ink2); border:none;}
+  footer.colophon a:hover{color:var(--blue);}
+  .toc{border:1px solid var(--rule); background:var(--paper2); padding:18px 24px; margin:26px 0;}
+  .toc .tt{font-size:11px; letter-spacing:.2em; color:var(--blue); margin-bottom:8px;}
+  .toc a{display:block; padding:3px 0; color:var(--ink3); border:none;}
+  .toc a:hover{color:var(--blue);}
+  .toc .mono{font-size:12px; color:var(--blue); margin-right:8px;}
+  .note{background:#f3ecdc; border:1px solid #d8c9a3; padding:12px 16px; margin:16px 0; font-size:13.5px; color:var(--ink3);}
+  .note .tt{font-size:10.5px; letter-spacing:.18em; color:var(--amber); font-family:'IBM Plex Mono',monospace;}
+  @media(max-width:720px){.wrap{padding:28px 18px 60px;}}
+</style>
+<script>
+  mermaid.initialize({startOnLoad:true, theme:'neutral', themeVariables:{primaryColor:'#efeee5', primaryBorderColor:'#1B365D', primaryTextColor:'#1f1d18', lineColor:'#6b665b', secondaryColor:'#f3ecdc', tertiaryColor:'#f5f4ed'}});
+</script>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="folio">
+    <span><a href="index.html">← Docs</a> · B2B Order Fulfillment · <a href="index.html">v0.1</a></span>
+    <span>10 · Deployment</span>
+    <span>实例规划 · compose · Job</span>
+  </header>
+
+  <div class="kicker">
+    <span class="tag">部署 · 0.1 版本</span>
+    <span class="tag red">裁决源：ord_fulfill demo</span>
+    <span class="mono" style="font-size:11px; letter-spacing:.18em; color:var(--ink2);">不打扰现有飞书流程 · 仅开放部分流程给商务</span>
+  </div>
+
+  <h1>部署设计 · 0.1<br/><span style="font-style:italic; color:var(--blue);">架构 · 目录 · compose · 同步 Job</span></h1>
+
+  <p class="lede">本文档描述 0.1 最终部署形态：<strong>部署架构与服务实例安排</strong>（Go API / PG / SpiceDB / Temporal / 企微 / 飞书同步 Job）、<strong>物理目录规划</strong>（代码/配置/数据/日志/审计）、<strong>docker-compose 要求</strong>、<strong>外部数据源周期性同步 Job</strong>。0.1 部署策略：<strong>不打扰现有飞书流程</strong>，仅开放部分流程给商务同学用——原审批流不停，数据同步进本系统流里可见可操作。</p>
+
+  <nav class="toc">
+    <div class="tt">CONTENTS · 目录</div>
+    <a href="#s1"><span class="mono">1</span>部署架构与实例安排</a>
+    <a href="#s2"><span class="mono">2</span>物理目录规划</a>
+    <a href="#s3"><span class="mono">3</span>docker-compose 服务定义</a>
+    <a href="#s4"><span class="mono">4</span>环境变量与健康检查</a>
+    <a href="#s5"><span class="mono">5</span>飞书同步 Job（cmd/sync）</a>
+    <a href="#s6"><span class="mono">6</span>0.1 上线步骤</a>
+    <a href="#s7"><span class="mono">7</span>运维要点（备份 · 日志 · 审计）</a>
+    <a href="#s8"><span class="mono">8</span>影子轨 compose（12-shadow-full-flow §7）</a>
+  </nav>
+
+  <h2 id="s1"><span class="no">1 ·</span> 部署架构与实例安排</h2>
+  <div class="mermaid">
+flowchart TB
+  subgraph PROD["生产主机（docker compose）"]
+    subgraph INFRA["基础设施容器"]
+      PG["postgres:16-alpine<br/>事实+事件链 · 15432 映射 5432"]
+      SPDB["spicedb:v1.39.1<br/>授权判定 · 15051"]
+      TMP["temporalio/auto-setup:1.24.2<br/>编排引擎 · 17233"]
+    end
+    subgraph APP["应用容器"]
+      API["api<br/>HTTP API · 18080"]
+      WE["wecom<br/>企微接入 · 18081"]
+      WK["worker<br/>Temporal Worker"]
+      SYNC["sync（0.1 新增）<br/>飞书同步 Job"]
+    end
+    MIG["migrate<br/>001-005 幂等迁移"]
+  end
+  subgraph EXT["外部"]
+    WX["企业微信<br/>回调域名 HTTPS 反代"]
+    FS["飞书数据库/多维表/三方审批流<br/>（原流程不停）"]
+    WH["仓库群（企微群）"]
+  end
+  WX -->|"HTTPS"| WE
+  WE -->|"转接"| API
+  FS -->|"只读拉取"| SYNC
+  WH -->|"回单图片"| WE
+  API --> PG
+  API --> SPDB
+  API --> TMP
+  WK --> PG
+  WK --> SPDB
+  SYNC --> PG
+  </div>
+  <figcaption>图 1 · 0.1 生产部署 —— 单主机 docker compose 9 容器（8 既有 + sync）；企微经公网 HTTPS 反向代理接入</figcaption>
+
+  <div class="table-wrap">
+  <table>
+    <tr><th>服务</th><th>镜像</th><th>实例数</th><th>端口（宿主）</th><th>职责</th></tr>
+    <tr><td>postgres</td><td>postgres:16-alpine</td><td>1</td><td>15432</td><td>事实 + 事件链 + 幂等映射 + 存档游标</td></tr>
+    <tr><td>migrate</td><td>postgres:16-alpine（一次性）</td><td>0（运行后退出）</td><td>—</td><td>应用 migrations 001-006（幂等可重跑）</td></tr>
+    <tr><td>spicedb</td><td>Dockerfile target spicedb（authzed v1.39.1 + gRPC 探针）</td><td>1</td><td>15051</td><td>RBAC/ReBAC + caveat 授权判定</td></tr>
+    <tr><td>spicedb-schema</td><td>Dockerfile target seedrel（一次性）</td><td>0</td><td>—</td><td>写 schema.zed + 演示授权关系基线（幂等）</td></tr>
+    <tr><td>temporal</td><td>temporalio/auto-setup:1.24.2</td><td>1</td><td>17233</td><td>主流程/子流程/Signal/Timer（PG 后端）</td></tr>
+    <tr><td>api</td><td>本仓库 Dockerfile target api</td><td>1</td><td>18080</td><td>HTTP API（16 端点）+ BFF 投影</td></tr>
+    <tr><td>worker</td><td>Dockerfile target worker</td><td>1</td><td>—</td><td>Temporal Worker（Activity 池）</td></tr>
+    <tr><td>wecom</td><td>Dockerfile target wecom</td><td>1</td><td>18081</td><td>企微接入（回调验签/出站卡片/凭证机器人）</td></tr>
+    <tr><td><strong>sync（0.1 新增）</strong></td><td>Dockerfile target sync（新增）</td><td>1（周期性 Job）</td><td>—</td><td>飞书数据库/多维表/三方审批流 → 本系统 PG 单向只读同步</td></tr>
+  </table>
+  </div>
+
+  <h2 id="s2"><span class="no">2 ·</span> 物理目录规划</h2>
+  <pre><code>/opt/b2b_pilot_v3/                  # 部署根目录
+├── code/                          # 代码（git clone）
+│   ├── cmd/{api,wecom,worker,sync}/
+│   ├── internal/                  # domain/repo/workflows/authz/wecom/integration
+│   ├── migrations/                # 001-005 幂等迁移
+│   ├── schema.zed
+│   └── docker-compose.yml
+├── config/                        # 配置（不入 git 的敏感项）
+│   ├── wecom-tenant.json          # 企微租户配置（corp_id/agent/密钥引用）
+│   └── sync-feishu.json           # 飞书同步配置（0.1 新增）
+├── data/                          # 数据卷（docker volumes 或 bind mount）
+│   ├── pg/                        # PostgreSQL 数据（facts + events）
+│   ├── temporal/                  # Temporal PG 后端数据
+│   └── evidence/                  # 凭证/回单文件存储（租户隔离 + 静态加密）
+├── logs/                          # 日志
+│   ├── api/ wecom/ worker/ sync/
+│   └── audit/                     # 审计日志（append-only，不入代码库）
+├── secrets/                       # 敏感凭据（0600，仅当次运行）
+│   ├── encoding_aes_key
+│   ├── archive_private_keys/
+│   └── feishu_app_secret
+└── scripts/                       # 运维脚本（备份/回滚/对账）</code></pre>
+  <ul>
+    <li><strong>代码/配置分离</strong>：代码只含默认值与占位；真实配置放 config/（敏感项引用 secrets/）；</li>
+    <li><strong>敏感与参数分离</strong>：非敏感参数进版本化配置；敏感凭据只进当次运行目录（权限 0600、日志零回显、不入 git）——承诺冻结不冻结秘密；</li>
+    <li><strong>审计不入代码库</strong>：审计是机器本地事实，与代码生命周期不同（logs/audit/），避免提交噪音与多机冲突；</li>
+    <li><strong>凭证文件存储</strong>：evidence/ 与业务库分离（沿用 02 §8.4 文件路径引用模式 + 对象存储 SSE）。</li>
+  </ul>
+
+  <h2 id="s3"><span class="no">3 ·</span> docker-compose 服务定义</h2>
+  <p>既有 compose 已定义 8 服务（postgres/migrate/spicedb/spicedb-schema/temporal/api/worker/wecom，详见仓库根 <span class="mono">docker-compose.yml</span>）。0.1 补充要求：</p>
+  <div class="table-wrap">
+  <table>
+    <tr><th>要求</th><th>既有现状</th><th>0.1 补充</th></tr>
+    <tr><td>服务定义</td><td>8 服务齐全</td><td>新增 <code>sync</code> 服务（Dockerfile 增加 target sync；command 按 cron 调度或常驻定时器）</td></tr>
+    <tr><td>网络</td><td>默认 compose 网络</td><td>服务间用服务名互访（api:8080 / spicedb:50051 / temporal:7233 / postgres:5432）；wecom 回调经宿主 HTTPS 反代</td></tr>
+    <tr><td>卷</td><td>—</td><td>pg 数据卷（持久化）；evidence 卷（凭证文件）；logs 卷（bind mount 到 /opt/b2b_pilot_v3/logs）</td></tr>
+    <tr><td>环境变量</td><td>B2B_PG_DSN / B2B_SPICEDB_ADDR / B2B_TEMPORAL_ADDR / B2B_HTTP_ADDR / B2B_WECOM_PROVIDER</td><td>B2B_WECOM_TENANT_CFG（wecom-tenant.json 挂载）、sync 的飞书凭据（B2B_FEISHU_* 环境变量）</td></tr>
+    <tr><td>健康检查</td><td>postgres（pg_isready）/ spicedb（healthcheck）/ api（wget /healthz）</td><td>wecom 增加 <code>GET /wecom/healthz</code> 探针；sync 增加批次状态探针（migration_batches 最近成功时间）</td></tr>
+    <tr><td>启动顺序</td><td>depends_on + condition: service_healthy</td><td>sync depends_on postgres（healthy）</td></tr>
+  </table>
+  </div>
+
+  <h2 id="s4"><span class="no">4 ·</span> 环境变量与健康检查</h2>
+  <pre><code># api / worker / wecom（既有）
+B2B_PG_DSN=postgres://postgres:postgres@postgres:5432/b2b_pilot?sslmode=disable
+B2B_SPICEDB_ADDR=spicedb:50051
+B2B_TEMPORAL_ADDR=temporal:7233
+B2B_HTTP_ADDR=:8080
+B2B_WECOM_PROVIDER=official        # 0.1 生产走 official；测试用 mock
+
+# wecom（0.1 生产）
+B2B_WECOM_TENANT_CFG=/config/wecom-tenant.json   # 挂载 config/wecom-tenant.json
+B2B_API_ADDR=http://api:8080                     # 回调转接目标
+
+# sync（0.1 新增）
+B2B_FEISHU_APP_ID=...             # 飞书自建应用
+B2B_FEISHU_APP_SECRET=...         # 敏感，走 secrets/ 或 KMS
+B2B_FEISHU_BITABLE_TOKENS=...     # 多维表 token 清单
+B2B_SYNC_INTERVAL=5m              # 周期（建议 5m-1h，或 cron 表达式）
+B2B_SYNC_SOURCES=database,bitable,approval</code></pre>
+  <div class="table-wrap">
+  <table>
+    <tr><th>探针</th><th>命令/路径</th><th>用途</th></tr>
+    <tr><td>postgres</td><td>pg_isready -U postgres</td><td>迁移/应用依赖</td></tr>
+    <tr><td>spicedb</td><td>spicedb-healthcheck -addr 127.0.0.1:50051 -token …（v1.39 无 healthcheck 子命令）</td><td>授权依赖</td></tr>
+    <tr><td>api</td><td>wget -qO- http://localhost:8080/healthz</td><td>容器健康</td></tr>
+    <tr><td>wecom</td><td>GET /wecom/healthz（0.1 补）</td><td>回调/出站通道探测</td></tr>
+    <tr><td>sync</td><td>migration_batches 最近成功批次（0.1 补）</td><td>同步健康（超期告警）</td></tr>
+  </table>
+  </div>
+
+  <h2 id="s5"><span class="no">5 ·</span> 飞书同步 Job（cmd/sync）</h2>
+  <div class="mermaid">
+flowchart LR
+  T["定时触发（cron / 间隔）"] --> P["拉取增量<br/>飞书数据库 / 多维表 / 三方审批流"]
+  P --> M["映射<br/>flow_id → order_id 链路（legacy_flow_mapping）"]
+  M --> V["校验<br/>checksum + 幂等批次（migration_batches）"]
+  V --> W["写入 PG<br/>订单/审批/回单视图"]
+  W --> L["留痕<br/>批次日志 + 审计"]
+  </div>
+  <figcaption>图 5 · 同步 Job 执行链 —— 周期运行、幂等可重跑、审计留痕</figcaption>
+  <ul>
+    <li><strong>调度</strong>：容器内常驻定时器或宿主 cron；周期可配（建议 5m-1h 按业务时效需求）；</li>
+    <li><strong>数据源</strong>：① 飞书数据库（原订单/审批表）；② 飞书多维表（bitable_flow_records / customer_bitable_sync）；③ 飞书三方审批流（审批实例/任务）；</li>
+    <li><strong>单向只读</strong>：0.1 只同步不进、不回写——原审批流不停；商务在本系统流里看到飞书侧数据并操作（操作结果留本系统）；</li>
+    <li><strong>幂等</strong>：migration_batches（UNIQUE(tenant_id, source, checksum)）锚点，重跑不重复；</li>
+    <li><strong>映射</strong>：复用 02 §8 迁移布局——flow_id/stage_code/instance_id → legacy_flow_mapping；</li>
+    <li><strong>敏感边界</strong>：Open ID/访问令牌/原始表单 JSON 不迁移（02 §8.4 mapping/retention 冻结）；</li>
+    <li><strong>失败处理</strong>：单批次失败重试 + 告警，不阻塞后续批次；同步状态可在系统内查看。</li>
+  </ul>
+
+  <h2 id="s6"><span class="no">6 ·</span> 0.1 上线步骤</h2>
+  <ol>
+    <li><strong>调研冻结</strong>：程序员调研飞书侧结构（数据库/多维表/三方审批流部署），产出调研清单（见 11-migration.html §3）；</li>
+    <li><strong>仓库准备</strong>：git clone 到 /opt/b2b_pilot_v3/code；配置 config/ 与 secrets/（0600）；</li>
+    <li><strong>镜像构建</strong>：docker compose build（api/worker/wecom/sync 四 target）；</li>
+    <li><strong>基础设施</strong>：docker compose up -d postgres spicedb temporal → migrate（001-005）→ spicedb-schema（seedrel 写 schema.zed + 关系基线）；</li>
+    <li><strong>应用启动</strong>：docker compose up -d api worker wecom → 健康检查全绿（healthz / wecom/healthz）；</li>
+    <li><strong>同步接入</strong>：配置 sync → 首跑全量 + 增量验证（抽样核对飞书 vs 本系统订单数）；</li>
+    <li><strong>企微回调</strong>：企微后台配置回调 URL（HTTPS 反代）→ URL 验证通过 → 出站卡片冒烟；</li>
+    <li><strong>商务试用</strong>：虹励账号开通 → 跑通一笔完整订单（下单→审价→备货→发货→开票→回单）；</li>
+    <li><strong>验收</strong>：17 场景 walkthrough + N-01..N-10 测试 + 守门员/合并开票/仓库群回单专项验证；</li>
+    <li><strong>上线</strong>：飞书原流程不动，0.1 平行流运行；使用中快速升级 0.2/0.3（文档驱动迭代）。</li>
+  </ol>
+
+  <h2 id="s7"><span class="no">7 ·</span> 运维要点</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>项</th><th>要求</th></tr>
+    <tr><td>备份</td><td>PG 每日全量 + WAL 归档；evidence 卷增量备份；备份加密存储；恢复演练季度执行</td></tr>
+    <tr><td>日志</td><td>应用日志按服务分目录（logs/）；审计日志 append-only（logs/audit/）不入代码库；日志保留 30 天</td></tr>
+    <tr><td>监控</td><td>探针三件套（api/wecom/sync）；同步超期告警（migration_batches 最近成功时间 &gt; 2×周期）；Temporal 队列深度</td></tr>
+    <tr><td>回滚</td><td>数据库：PG 备份恢复 + 迁移回滚（001-005 幂等可重跑）；应用：docker compose 镜像回退；发布动作与代码同版本演化</td></tr>
+    <tr><td>安全红线（部署面）</td><td>备份先行、默认 dry-run、禁止破坏性操作、操作审计、失败自动回滚（沿用 证据收敛式 Review V2 §第七幕 五条红线）</td></tr>
+    <tr><td>密钥轮换</td><td>企微 EncodingAESKey / 存档私钥（publickey_ver 保留历史）/ 飞书 secret 定期轮换，轮换留痕</td></tr>
+  </table>
+  </div>
+
+  <h2 id="s8"><span class="no">8 ·</span> 影子轨 compose（12-shadow-full-flow §7）</h2>
+  <p>影子轨 S 随 v0.1 同发但<strong>独立环境、独立开关、独立回滚</strong>（D-010）：<span class="mono">docker compose -p b2b-shadow -f docker-compose.shadow.yml up</span>（专用 compose 项目/网络，<strong>自带 shadow-temporal 独立实例</strong>，与 A 轨零共享面）。端口全部只绑回环：shadow-postgres 15433 / shadow-spicedb 15052 / shadow-api 18082；唯一出网面是只读数据源与运维通道。命令：<span class="mono">make shadow-up / shadow-down / shadow-audit / shadow-replay / shadow-reset-skipped</span>。生命周期：运行到 v0.3 正式上线后撤销（归档 → 停栈 → drop b2b_shadow）；期间按 D-011 可多次发布影子系统（S 线高频工具/配置，F 线 workflow 影子先行）。上线步骤：R1 影子专用环境全量重放（S-01..S-08 全绿 + 基线报告）→ 正式上线 + 零出站/零回写哨兵 + 24h 稳定（G4 证据）。影子轨故障不影响 A 轨：<span class="mono">docker compose -p b2b-shadow -f docker-compose.shadow.yml down</span>。</p>
+
+  <footer class="colophon">
+    <span><a href="index.html">← v0.1 Docs</a></span>
+    <span>10 · Deployment · 部署章节</span>
+    <span>裁决源 ord_fulfill demo · 2026-08-16</span>
+  </footer>
+
+</div>
+</body>
+</html>

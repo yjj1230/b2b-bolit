@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数据表字段使用情况核对 · b2b_pilot_v3</title>
+<style>
+  :root {
+    --ink:#1c1917; --ink-soft:#57534e; --paper:#faf9f7; --card:#fff; --line:#e7e5e4;
+    --teal:#0f766e; --amber:#b45309; --rose:#be123c; --gray:#64748b;
+    --rose-soft:#ffe4e6; --amber-soft:#fef3c7; --teal-soft:#ccfbf1; --gray-soft:#f1f5f9;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Microsoft YaHei","PingFang SC",sans-serif;background:var(--paper);color:var(--ink);line-height:1.75;font-size:14.5px;padding:24px}
+  .wrap{max-width:1080px;margin:0 auto}
+  header.hero{background:linear-gradient(135deg,#0f172a,#1e3a5f);color:#fff;border-radius:14px;padding:28px 34px;margin-bottom:20px}
+  header.hero h1{font-size:24px;margin-bottom:6px}
+  header.hero .sub{color:#cbd5e1;font-size:13.5px}
+  .badges{margin-top:12px;display:flex;gap:10px;flex-wrap:wrap}
+  .badge{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);padding:4px 14px;border-radius:999px;font-size:12.5px}
+  section.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px 24px;margin-bottom:16px}
+  h2{font-size:18px;margin-bottom:10px;padding-bottom:7px;border-bottom:2px solid var(--line)}
+  h2 .no{color:var(--rose);margin-right:8px}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin:10px 0}
+  th{background:#f1f5f9;color:#334155;text-align:left;padding:7px 10px;border:1px solid var(--line);white-space:nowrap}
+  td{padding:7px 10px;border:1px solid var(--line);vertical-align:top}
+  tr:nth-child(even) td{background:#fafbfc}
+  .mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:var(--teal)}
+  h3{font-size:15px;color:var(--teal);margin:16px 0 8px}
+  h3 .cnt{font-size:12px;color:var(--ink-soft);font-weight:400;margin-left:8px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+  .chip{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:#f1f5f9;color:var(--teal);padding:3px 10px;border-radius:6px;border:1px solid var(--line)}
+  .callout{border-left:4px solid var(--teal);background:var(--teal-soft);padding:12px 16px;border-radius:0 8px 8px 0;margin:12px 0;font-size:13.5px}
+  .callout.rose{border-color:var(--rose);background:var(--rose-soft)}
+  .callout.amber{border-color:var(--amber);background:var(--amber-soft)}
+  .callout.gray{border-color:var(--gray);background:var(--gray-soft)}
+  .callout b{display:block;margin-bottom:2px}
+  footer{text-align:center;color:#a8a29e;font-size:12px;margin-top:18px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <h1>📋 数据表字段使用情况核对</h1>
+  <div class="sub">b2b_pilot_v3 · 企微端字段权限矩阵 vs 代码实际使用 · 2026-08-12</div>
+  <div class="badges">
+    <span class="badge">共核对 29 张表 · 200 列</span>
+    <span class="badge">184 列已使用（92%）</span>
+    <span class="badge">16 个建表未用（3 张表）</span>
+    <span class="badge">1 张表待建（8 字段）</span>
+    <span class="badge">14 个占位字段</span>
+  </div>
+</header>
+
+<section class="card">
+  <h2><span class="no">一</span>已建表但字段从未被代码读写（16 个 · 3 张表）</h2>
+  <div class="callout rose"><b>说明</b>这 16 个字段全部集中在 3 张"功能未实现"的表：审批评论（DEF-027）、迁移服务（DEF-015）。表结构已建，但业务代码里这 16 列一次都没读写。修复对应功能时需一并补上。</div>
+  <h3>📌 approval_comments（审批评论 · 功能未实现 DEF-027）</h3><table><tr><th>字段</th><th>类型</th><th>业务含义</th></tr><tr><td class='mono'>attachments</td><td>JSONB</td><td>附件</td></tr><tr><td class='mono'>notify_user_ids</td><td>JSONB</td><td>通知用户 ID 列表</td></tr><tr><td class='mono'>author_id</td><td>TEXT</td><td>评论作者</td></tr><tr><td class='mono'>scope</td><td>TEXT</td><td>作用域（ORD/STK/SHP/INV）</td></tr><tr><td class='mono'>target_id</td><td>TEXT</td><td>目标对象 ID</td></tr></table>
+<h3>📌 legacy_flow_mapping（迁移映射 · 服务未实现 DEF-015）</h3><table><tr><th>字段</th><th>类型</th><th>业务含义</th></tr><tr><td class='mono'>imported_at</td><td>TIMESTAMPTZ</td><td>导入时间</td></tr><tr><td class='mono'>legacy_instance_id</td><td>TEXT</td><td>旧实例 ID</td></tr><tr><td class='mono'>legacy_stage_id</td><td>TEXT</td><td>旧阶段 ID</td></tr><tr><td class='mono'>stage_seq</td><td>INTEGER</td><td>阶段序号</td></tr><tr><td class='mono'>target_id</td><td>TEXT</td><td>目标 ID</td></tr><tr><td class='mono'>target_order_id</td><td>TEXT</td><td>目标订单 ID</td></tr><tr><td class='mono'>target_revision</td><td>INTEGER</td><td>目标修订</td></tr><tr><td class='mono'>target_type</td><td>TEXT</td><td>目标类型</td></tr></table>
+<h3>📌 migration_batches（迁移批次 · 服务未实现 DEF-015）</h3><table><tr><th>字段</th><th>类型</th><th>业务含义</th></tr><tr><td class='mono'>checksum</td><td>TEXT</td><td>校验和</td></tr><tr><td class='mono'>finished_at</td><td>TIMESTAMPTZ</td><td>完成时间</td></tr><tr><td class='mono'>started_at</td><td>TIMESTAMPTZ</td><td>开始时间</td></tr></table>
+</section>
+
+<section class="card">
+  <h2><span class="no">二</span>文档规划但整张表未建（1 张表 · 8 字段）</h2>
+  <div class="callout amber"><b>说明</b>本表在项目计划中有规划依据（01-core-graph CQ-11 / 04-development-plan / 07-wecom-integration），属真实规划能力，当前尚未建表。</div>
+  <table>
+    <tr><th>表</th><th>字段</th><th>来源</th><th>业务含义</th></tr>
+    <h3>📌 wecom_messages（企微消息原始记录） <span class='cnt'>8 个字段待建</span></h3><table><tr><th>字段</th><th>来源</th><th>业务含义</th></tr><tr><td class='mono'>tenant_id</td><td>业务</td><td>租户上下文</td></tr><tr><td class='mono'>group_id</td><td>业务</td><td>企微群 ID</td></tr><tr><td class='mono'>msg_id</td><td>业务</td><td>企微消息 ID（幂等键）</td></tr><tr><td class='mono'>sender_id</td><td>业务</td><td>发送者 ID</td></tr><tr><td class='mono'>sender_type</td><td>系统</td><td>发送者类型</td></tr><tr><td class='mono'>content</td><td>人工</td><td>消息内容（原文）</td></tr><tr><td class='mono'>media_url</td><td>人工</td><td>图片或文件地址</td></tr><tr><td class='mono'>sent_at</td><td>系统</td><td>发送时间</td></tr></table>
+  </table>
+</section>
+
+<section class="card">
+  <h2><span class="no">三</span>已建表但字段为"原型占位"（2 张表 · 14 字段）</h2>
+  <div class="callout gray"><b>说明</b>以下字段文档标注"原型占位·后端未定义"，现有表结构中未包含。</div>
+  <table>
+    <tr><th>表</th><th>占位字段</th></tr>
+    <h3>📌 orders.payload（订单载荷） <span class='cnt'>9 个占位字段</span></h3><div class='chips'><span class='chip'>delivery_address</span><span class='chip'>estimated_arrival_at</span><span class='chip'>sales_user_id</span><span class='chip'>customer_type</span><span class='chip'>customer_contract</span><span class='chip'>delivery_date</span><span class='chip'>packaging_type</span><span class='chip'>special_mark</span><span class='chip'>internal_note</span></div>
+<h3>📌 pre_orders.candidates[]（预订单候选） <span class='cnt'>5 个占位字段</span></h3><div class='chips'><span class='chip'>packaging_type</span><span class='chip'>payment_method</span><span class='chip'>delivery_date</span><span class='chip'>special_mark</span><span class='chip'>quality_risk</span></div>
+  </table>
+</section>
+
+<section class="card">
+  <h2><span class="no">四</span>总结</h2>
+  <div class="callout"><b>核心结论</b>
+    · 真正"建了表但代码没用到"的字段共 <b>16 个</b>，集中在 3 张表：approval_comments(5)、legacy_flow_mapping(8)、migration_batches(3)，对应审批评论（DEF-027）与迁移服务（DEF-015）两个未实现能力；<br>
+    · <b>1 张整表未建</b>（wecom_messages，8 字段）——有项目计划依据（CQ-11 / S2 全链）；<br>
+    · <b>14 个 payload 占位字段</b>（orders.payload 9 个 + pre_orders.candidates[] 5 个）。<br>
+    代码侧几乎无"白建字段"，缺口集中在"文档前瞻设计、后端未落地"的能力，与测试发现的 DEF-027 等同源。</div>
+</section>
+
+<footer>字段使用情况核对 · b2b_pilot_v3 · 依据：项目流程角色字段权限矩阵(1).html + migrations + internal 代码扫描 · 2026-08-12</footer>
+</div>
+</body>
+</html>

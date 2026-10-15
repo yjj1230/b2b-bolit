@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>版本规划 · v0.1 / v0.2 / v0.3 上线后的效果状态</title>
+<style>
+:root{
+  --bg:#f6f7f9; --card:#ffffff; --ink:#1f2328; --muted:#667085; --line:#e5e7eb;
+  --blue:#2563eb; --green:#059669; --amber:#b45309; --purple:#7c3aed;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.75;font-size:15px;}
+.page{max-width:960px;margin:0 auto;padding:28px 18px 64px;}
+header.hero{background:linear-gradient(135deg,#0f172a,#1e3a8a 60%,#7c3aed 130%);color:#fff;border-radius:18px;padding:26px 30px;margin-bottom:20px;box-shadow:0 8px 30px rgba(15,23,42,.18);}
+header.hero h1{margin:0 0 8px;font-size:26px;letter-spacing:.5px;}
+header.hero p{margin:4px 0;opacity:.92;font-size:13.5px;}
+header.hero .meta{margin-top:12px;display:flex;flex-wrap:wrap;gap:8px;}
+header.hero .meta span{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);padding:2px 10px;border-radius:999px;font-size:12px;}
+h2.chap{display:flex;align-items:center;gap:12px;margin:30px 0 12px;font-size:20px;}
+h2.chap .no{flex:none;width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:17px;font-weight:800;}
+.no.v01{background:var(--blue)} .no.v02{background:var(--green)} .no.v03{background:var(--purple)}
+h3{margin:16px 0 6px;font-size:15.5px;}
+.one{background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:10px 14px;color:#1e3a8a;margin:6px 0 12px;}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 18px;margin:10px 0;box-shadow:0 1px 2px rgba(16,24,40,.04);}
+.card h3{margin-top:0;}
+ul{margin:6px 0;padding-left:22px;}
+li{margin:3px 0;}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.5px;background:#fff;border-radius:12px;overflow:hidden;}
+th,td{border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top;}
+th{background:#0f172a;color:#e2e8f0;font-weight:600;}
+tr:nth-child(even) td{background:#f8fafc;}
+.tag{display:inline-block;padding:1px 9px;border-radius:999px;font-size:12px;border:1px solid;}
+.tag-blue{background:#eff6ff;color:#1d4ed8;border-color:#2563eb;}
+.tag-green{background:#ecfdf5;color:#065f46;border-color:#059669;}
+.tag-purple{background:#f5f3ff;color:#6d28d9;border-color:#7c3aed;}
+.summary{background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:12px 16px;color:#92400e;margin:18px 0;}
+footer{margin-top:30px;color:var(--muted);font-size:12px;border-top:1px solid var(--line);padding-top:12px;}
+a{color:var(--blue);text-decoration:none} a:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="hero">
+  <h1>版本规划 · v0.1 / v0.2 / v0.3</h1>
+  <p>用大白话讲清楚：每个版本上线之后希望看到的效果状态，以及这个阶段还可以做什么。<b>注意：本页描述的是目标状态；能否宣称达成，以文末「设计前提与未决项」为准。</b></p>
+  <p>读者：产品同学 + 非架构方向程序员。所有结论来自仓库内已冻结文档：docs/v0.1/01–12、project/decisions/D-006..D-011、v0.1业务发布梳理.html 与《发布计划可行性验证》。</p>
+  <div class="meta">
+    <span>v0.1 = 双卡双待 + 后台沙盘推演</span>
+    <span>v0.2 = 数据正式迁入新系统，除销售/主管/董事长外全部上企微</span>
+    <span>v0.3 = 企微体系发布完成：全员迁入 + 全量数据迁完 + 影子撤销</span>
+  </div>
+</header>
+
+<!-- ══════════════════════ 第一章 v0.1 ══════════════════════ -->
+<h2 class="chap"><span class="no v01">1</span>v0.1 上线后：旧流程照跑，虹励以“销售助理”身份先跑通下单闭环 + 后台“沙盘推演”商务全流程</h2>
+
+<div class="one"><b>一句话状态：</b>财务、仓管继续用飞书原流程，一点不受影响；虹励以<b>销售助理身份</b>完成“OAuth 授权 → 桥接代下单 → 飞书待办 → 状态回显 → 查我的订单”闭环（企微 / PC）。她作为商务的“备货 → 发货 → 开票”操作<b>本期不迁入新系统</b>，继续在飞书原流程办。与此同时，影子系统在后台用真实飞书数据把完整订单流程（含商务备货 / 发货 / 开票）暗中重演一遍，为 v0.2 数据正式迁入新系统做流程校验。</div>
+
+<div class="card">
+<h3>具体效果</h3>
+<ul>
+  <li>飞书侧数据<b>单向只读</b>同步进新系统：看得到、查得到，但新系统<b>绝不写回飞书</b>。（飞书 → 新系统，只进不出）</li>
+  <li><b>虹励</b>（她既是商务、也是销售助理）：v0.1 开放的只是她的<b>销售助理身份</b>——OAuth 授权（飞书）→ 桥接代下单（企微 / PC）→ 飞书旧流程续跑（飞书）→ 状态回显 + 查“我的订单”（企微 / PC）。她作为商务的“备货 → 发货 → 开票”<b>本期不在新系统开放</b>，继续在飞书原流程办（飞书）。</li>
+  <li><b>其他销售助理</b>：同一套企微 H5 / PC 桥接入口代下单 + 查自己的订单（企微 / PC）。</li>
+  <li><b>销售 / 主管 / 董事长</b>：企微侧边栏、审价卡、终审卡等能力在系统里已实现（demo 已演示），但按 v0.1 发布口径<b>本期不开放他们登录操作</b>（企微端不开放）；是否提前放行由发布范围单 + 白名单决定。</li>
+  <li><b>财务 / 仓管</b>：继续在<b>飞书</b>干活，<b>企微端本期不开放操作</b>；他们的数据同步进新系统是设计目标，“存量订单同步”已裁决：<b>v0.1 不做</b>（归 v0.2 数据迁入），本刀不承诺存量可见（飞书 → 新系统，给后续版本用）。</li>
+  <li><b>影子系统</b>：内部专用、零客户触达、零出站（不发企微）、零回写（不写飞书）。v0.1 目标是<b>新单实时 hook 模式（D-012，主通道由 T3 落定：旧系统埋点或飞书事件订阅）</b>：客户在飞书下单 / 审批的同时，事件实时进影子（飞书 → 影子库），把商务备货 / 发货 / 开票等完整流程重演一遍；<b>hook 未接线前用 JSONL / 列表轮询兜底（实时性降级，不阻塞上线）</b>；存量数据不依赖；每天产出覆盖率 / 分歧 / 审计报告，连续迭代提前完成 v0.2 发布前的流程校验测试，把 v0.2 数据迁入的安全系数大幅提高。</li>
+</ul>
+</div>
+
+<div class="one"><b>v0.1 企微端开放名单（避免混淆）：</b>本期只开放<b>销售助理身份</b>——① <b>虹励</b>（她同时是商务，但这一刀只用销售助理身份）：桥接代下单 + 查自己的订单（企微 / PC）；② <b>其他销售助理</b>：同一套入口（企微 / PC）。<b>商务功能（备货 / 发货 / 开票）本期不在新系统开放</b>，继续在飞书原流程办；销售、主管、董事长、财务、仓管企微端也不开放。</div>
+
+<div class="card">
+<h3>边界（0.1 明确不做的）</h3>
+<ul>
+  <li>商务的备货 / 发货 / 开票操作不迁入新系统（继续在飞书原流程跑；影子轨只在后台预演这些流程）。</li>
+  <li>自动下单不做（企微会话存档备案未完成，人工确认段保留）。</li>
+  <li>锁库存不做（发货只做数量守恒校验）。</li>
+  <li>其他角色不迁入（先让一个人跑起来）。</li>
+</ul>
+</div>
+
+<div class="card">
+<h3>这个阶段还可以做什么</h3>
+<ul>
+  <li><b>换真实数据</b>：真实用户、两个外租仓库、真实客户 / 产品（现在是演示数据）。</li>
+  <li><b>飞书侧调研</b>：16 张表字段映射、状态语义映射、只读账号、敏感字段清理。</li>
+  <li><b>旧系统小改</b>：识别 B2B_V01_ 前缀自动确认“信息确认”、配好审批人（防 fallback 错人）。</li>
+  <li><b>企微侧</b>：回调 URL、应用主页、可信域名、卡片 / 侧边栏验证、仓库群升级企微群（回单机器人前置）。</li>
+  <li><b>把待确认规则定下来</b>：无回单能否开票（A5）、合并开票业财归属（P4）、守门员直发规则（P5）——这些不阻塞 v0.1 下单闭环，是为 v0.2 数据迁入做准备。</li>
+  <li><b>发布动作本身</b>：R1 测试环境 → UAT → 回退演练 → Go/No-Go → R2 生产 → 8 小时稳定复盘；影子 R1 新单全集重放（D-012） + R2 上线 24 小时。</li>
+</ul>
+</div>
+
+<!-- ══════════════════════ 第二章 v0.2 ══════════════════════ -->
+<h2 class="chap"><span class="no v02">2</span>v0.2 上线后：数据正式迁到新系统；除销售、主管、董事长外，全部岗位切换到企微体系</h2>
+
+<div class="one"><b>一句话状态：</b>因为有 v0.1 + 影子系统<b>提前做完了 v0.2 发布前的流程校验测试，安全系数大幅提高</b>，v0.2 敢把<b>数据正式迁到新系统</b>：飞书 JSONL → 新系统 PG，<b>新系统成为唯一状态机与数据真相</b>。商务、财务、仓管、销售助理全部在<b>企微手机 / PC</b>上处理流程；销售、主管、董事长<b>不开放企微手机 / PC</b>，继续用飞书——旧复杂流程冻结，飞书侧只保留为这三个岗位新增的极简单节点审批。</div>
+
+<div class="card">
+<h3>具体效果</h3>
+<ul>
+  <li><b>数据正式迁移</b>：飞书 JSONL 全量迁入新系统 PG（含事件链）（飞书 → 新系统），新系统成为<b>唯一状态机与数据真相</b>。</li>
+  <li><b>商务</b>：在企微办备货“选仓 / 自提 + 收件人 + 收货地址 → 通过 / 驳回”（企微 / PC），数据落新系统。</li>
+  <li><b>财务</b>：款到类订单确认到款、开票相关处理在企微办（企微 / PC），数据落新系统。</li>
+  <li><b>仓管</b>：在企微确认发货（数量守恒、超发拦截）+ 上传回单（企微 / PC）；仓管视图金额不可见（剥价）。</li>
+  <li><b>销售助理</b>：继续在企微 / PC 下单 + 查“我的订单”（v0.1 已有），订单直接落新系统。</li>
+  <li><b>销售 / 主管 / 董事长</b>：<b>不开放企微手机 / PC</b>，继续在飞书办审价、C/D 终审、开票信息、盖章回传等（飞书）；旧系统复杂流程冻结，飞书侧只保留为这三个岗位新增的<b>极简单节点审批 + 轻量飞书通道服务</b>对接新系统（<b>通道服务尚未实现，属 v0.2 前提项</b>）。</li>
+  <li><b>旧系统</b>：不再承接新业务、不再是状态机（飞书）；复杂流程冻结，历史只读。</li>
+  <li><b>影子系统</b>：v0.1 攒下的新单实时重放证据（D-012）就是这一刀的 Go/No-Go 尺子——连续 K 笔新单门槛达标才放行。</li>
+</ul>
+</div>
+
+<div class="card">
+<h3>这个阶段还可以做什么</h3>
+<ul>
+  <li>全量数据迁移 + 四层对账（订单数 / 状态 / 事件链 / 附件）与回滚演练。</li>
+  <li>轻量飞书通道服务落地：只为销售 / 主管 / 董事长的单节点审批做桥接，不把旧复杂状态机带进来。</li>
+  <li>商务 / 财务 / 仓管 / 销售助理的企微工作台与待办视图（按角色过滤）。</li>
+  <li>旧系统复杂流程冻结 + 三个岗位的极简飞书审批定义（下单 / 信息确认 / 开票信息 / 盖章回传 / 审价 / 终审）。</li>
+  <li>企微官方通道补全 template_card；企微备案域名未就绪时先用 PC 订单后台。</li>
+  <li>影子系统持续发布（D-012 新单实时增量）：连续 K 笔新单门槛（UNMAPPED=0、FSM_GAP P0=0、终态对齐、零出站 / 零回写哨兵全绿）达标才放行。</li>
+</ul>
+</div>
+
+<!-- ══════════════════════ 第三章 v0.3 ══════════════════════ -->
+<h2 class="chap"><span class="no v03">3</span>v0.3 上线后：企微体系发布完成——全员迁入、全量数据迁完、影子撤销</h2>
+
+<div class="one"><b>一句话状态：</b>v0.3 = <b>企微体系的发布完成</b>：销售、主管、董事长也迁入企微（开放企微手机 / PC），<b>全员都在企微体系里处理流程</b>；<b>全量数据一定已经全部迁完</b>（存量订单 + 事件链 + 附件四层对账 100% 一致）；旧飞书只读归档 / 下线；<b>影子系统正式撤销</b>。</div>
+
+<div class="card">
+<h3>具体效果</h3>
+<ul>
+  <li><b>全量数据迁完</b>：全部存量订单 + 事件链 + 附件 100% 回填进新系统（飞书 → 新系统），订单数 / 状态 / 事件链 / 附件四层对账一致，业务方抽单签字。</li>
+  <li><b>销售全员</b>：迁入企微（开放企微手机 / PC）：填写开票信息 + 盖章回传，本人订单数据可见。</li>
+  <li><b>销售主管 / 董事长</b>：迁入企微（开放企微手机 / PC）：新系统审批台做审价、C/D 终审，有通知和超时提醒。</li>
+  <li><b>企微体系发布完成</b>：所有岗位都在企微手机 / PC 上处理流程；飞书通道摘除，旧系统只读归档 / 下线（飞书）。</li>
+  <li><b>pgAPI 收口</b>：停飞书上游同步，三方审批镜像改只读历史 / 台账，或由新系统接管写入。</li>
+  <li><b>影子系统撤销</b>：归档报告和分歧清单 → 停栈 → drop 影子库——全量数据已迁完、企微体系已发布完成，它不再常驻。</li>
+</ul>
+</div>
+
+<div class="card">
+<h3>这个阶段还可以做什么</h3>
+<ul>
+  <li>销售 / 主管 / 董事长的企微入口与审批台落地（这是 v0.3 完成企微体系的最后一批岗位）。</li>
+  <li>全量回填脚本 + 幂等批次（影子轨已演练过迁移和重放）+ 四层对账 + 业务签字。</li>
+  <li>旧系统只读归档 / 下线 + 附件保留期管理（附件 6 个月）。</li>
+  <li>飞书通道摘除演练 + 回滚预案；观察期每日对账无差异。</li>
+  <li>pgAPI 定位拍板：只读历史 / 台账，还是新系统接管写入。</li>
+  <li>影子撤销清单 + teardown 演练（归档 → 停栈 → drop）。</li>
+</ul>
+</div>
+
+<!-- ══════════════════════ 一页总览 ══════════════════════ -->
+<h2 class="chap"><span class="no" style="background:#0f172a">总</span>三个版本一页看明白</h2>
+<table>
+<thead>
+<tr><th>版本</th><th>一句话状态</th><th>谁先动</th><th>旧系统</th><th>影子系统</th><th>本阶段最该做的 3 件事</th></tr>
+</thead>
+<tbody>
+<tr>
+  <td><span class="tag tag-blue">v0.1</span></td>
+  <td>双卡双待 + 后台沙盘推演</td>
+  <td>虹励（销售助理身份：桥接下单 + 查单）</td>
+  <td>原流程不停（含商务备货/发货/开票照跑飞书）</td>
+  <td>上线（新单实时 hook，D-012），每天出报告</td>
+  <td>① 虹励真实账号下单联调 ② 旧系统 V01 小改 ③ 影子 R1 重放 + 企微配置</td>
+</tr>
+<tr>
+  <td><span class="tag tag-green">v0.2</span></td>
+  <td>数据正式迁入新系统（唯一真相），除销售/主管/董事长外全部上企微</td>
+  <td>商务 / 财务 / 仓管 / 销售助理</td>
+  <td>复杂流程冻结；只留三岗位极简飞书审批</td>
+  <td>v0.1 流程校验证据放行 Go/No-Go</td>
+  <td>① 全量迁移四层对账 ② 飞书极简审批+通道服务 ③ 企微工作台/待办</td>
+</tr>
+<tr>
+  <td><span class="tag tag-purple">v0.3</span></td>
+  <td>企微体系发布完成：全员迁入 + 全量数据迁完 + 影子撤销</td>
+  <td>销售全员 + 主管 + 董事长（最后一批）</td>
+  <td>只读归档 / 下线</td>
+  <td>归档 → 停栈 → 撤销</td>
+  <td>① 三岗位企微迁入 ② 全量回填四层对账 ③ 飞书摘除+影子 teardown</td>
+</tr>
+</tbody>
+</table>
+
+<div class="summary">
+<b>给非技术同学的三句总结：</b><br>
+① <b>v0.1 = 双卡双待</b>：旧手机照用，新手机先跑通一条真实业务，同时后台默默“沙盘推演”全流程。<br>
+② <b>v0.2 = 数据正式迁到企微体系</b>：新系统成为唯一真相，除销售、主管、董事长外全部岗位切到企微；影子证据说了算。<br>
+③ <b>v0.3 = 企微体系发布完成</b>：销售、主管、董事长也上企微，全员迁入；全量数据 100% 迁完并对账一致；旧飞书只读归档，影子系统撤销。
+</div>
+
+<h2 class="chap"><span class="no" style="background:#b91c1c">查</span>设计前提与未决项（发布前必须闭合，否则对应版本不能宣称达成）</h2>
+<table>
+<thead><tr><th>#</th><th>前提 / 未决项</th><th>属于</th><th>当前状态</th><th>不闭合的影响</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>影子 hook 主通道 T3 落定（旧系统埋点 vs 飞书事件订阅）；若选埋点，需书面放宽“旧系统唯一小改”边界</td><td>v0.1 / 影子</td><td>未定；代码当前只有 file / http 轮询</td><td>实时性降级为轮询；不影响 v0.1 上线，影响影子迭代速度</td></tr>
+<tr><td>2</td><td>企微备案域名与可信 IP / 域名</td><td>v0.2</td><td>未就绪（G9）</td><td>“全部切到企微体系”是硬前提；未就绪只能 PC 兜底，不能宣称企微完成</td></tr>
+<tr><td>3</td><td>pgAPI 定位与上游同步停止时点</td><td>v0.2</td><td>未决（G12 原定第 3 次，需提前到 v0.2）</td><td>新系统 v0.2 成为真相后，pgAPI 继续同步飞书会用旧数据覆盖新真相</td></tr>
+<tr><td>4</td><td>全量数据迁移工具：JSONL 全家族 + 事件链 + 附件 + open_id 映射 + legacy 归档</td><td>v0.2 / v0.3</td><td>部分：sync / 影子演练了核心链路；附件与归档未实现</td><td>v0.2 数据迁入与 v0.3“全量数据一定迁完”是工程前提，不能假设现成</td></tr>
+<tr><td>5</td><td>商务 / 财务 / 仓管的企微工作台、待办视图与官方卡片</td><td>v0.2</td><td>部分：ops_ui 是最小操作台；SendCard(template_card) 已实现；通讯录同步未实现</td><td>三角色在企微的可操作性不完整</td></tr>
+<tr><td>6</td><td>销售 / 主管 / 董事长的企微审批台与入口</td><td>v0.3</td><td>未建：现有 price-review / chairman-review / invoice-issued 等信号 API，但无三岗位专用 UI 与通知/超时台</td><td>v0.3“三岗位完成企微切换”是新增 UI 工作量，不能视为现成</td></tr>
+<tr><td>7</td><td>附件 / 对象存储与文件上传（evidence 目录 + SSE）</td><td>v0.2 / v0.3</td><td>未实现：evidence 接口只存 file_url / file_hash，无 multipart 存储</td><td>回单 / 发票 / 合同的上传、直传与迁移没有落点</td></tr>
+<tr><td>8</td><td>T1.3 状态 + 事件动作语义映射冻结签字（HR1）</td><td>v0.1 影子 / v0.2</td><td>代码基线已生成，业务签字未完成</td><td>影子结论与迁移映射的可信度不足</td></tr>
+<tr><td>9</td><td>D-013 落档 + 旧口径文档归档标注（docs/v0.1/index、v0.1业务发布梳理、v0.1_CQ 的 OT/V01 组、任务列表 E/D 线）</td><td>已基本同步</td><td>CQ OT/V01 组、发布图谱、任务列表已按 D-013 重标；v0.1业务发布梳理等旧文档以归档提示标版</td><td>仍有少量旧口径正文，执行时以版本规划与 D-013 为准</td></tr>
+</tbody>
+</table>
+
+<h2 class="chap"><span class="no" style="background:#0f172a">核</span>一致性说明与技术可行性结论</h2>
+<div class="card">
+<ul>
+<li><b>方向自洽</b>：v0.1 影子提前校验 → v0.2 数据迁入新系统（唯一真相）→ v0.3 三岗位完成企微切换 + 全量数据迁完 + 影子撤销，顺序正确、风险前置合理。</li>
+<li><b>v0.1 技术可行</b>：桥接下单 / 查单代码与测试在库；影子栈代码已实现并本地预演；hook 未实现但不阻塞上线（轮询兜底）。</li>
+<li><b>v0.2 / v0.3 方向可行、不等于已就绪</b>：全量迁移、附件存储、三岗位飞书通道与企微审批台、pgAPI 停同步时点等均为未完成工程项，必须排入对应版本发布任务后才能宣称达成。</li>
+<li><b>一致性残余漂移（已收敛）</b>：v0.1_CQ 的 OT/V01 组已按 D-013 重标；任务列表已增加 release 字段，D 线存量同步类任务标 v0.2；v0.1业务发布梳理等旧文档以顶部归档提示标版。</li>
+</ul>
+</div>
+
+<footer>
+  事实源：<a href="docs/v0.1/index.html">docs/v0.1/01–12</a> · <a href="project/decisions/D-006.yaml">project/decisions/D-006..D-013</a> ·
+  <a href="v0.1业务发布梳理.html">v0.1业务发布梳理.html</a> · <a href="docs/发布计划/发布计划可行性验证.md">发布计划可行性验证.md</a> · <a href="docs/发布计划v2/渐进式发布计划v2.html">渐进式发布计划 v2</a> · <a href="v0.2_设计_preview.html">v0.2 设计 Preview（讨论稿）</a> ·
+  <a href="v0.1发布图谱.html">v0.1发布图谱.html</a> · <a href="v0.1_CQ.html">v0.1_CQ.html</a>
+</footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,789 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>三方审批（现状） vs b2b_pilot_v3 v0.1：业务流程对比与数据同步设计</title>
+<script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+mermaid.initialize({
+  startOnLoad: true,
+  theme: "base",
+  themeVariables: {
+    primaryColor: "#eef3f9", primaryBorderColor: "#1f4f86", primaryTextColor: "#20282f",
+    lineColor: "#9fb0c4", secondaryColor: "#eef6f1", tertiaryColor: "#faf4e6",
+    fontSize: "15px", fontFamily: '"PingFang SC","Microsoft YaHei",sans-serif'
+  },
+  flowchart: { useMaxWidth: true, htmlLabels: true, curve: "basis", padding: 10 }
+});
+</script>
+<style>
+:root{
+  --ink:#20282f; --sub:#5d6772; --line:#e3e7ed; --bg:#f7f8fa;
+  --blue:#1f4f86; --blue-soft:#eef3f9; --green:#2e6b4e; --green-soft:#eef6f1;
+  --amber:#9c6307; --amber-soft:#faf4e6; --red:#a83c3c; --red-soft:#f9efef;
+  --purple:#5b4e96; --purple-soft:#f1eefa; --cyan:#0f6b7d; --cyan-soft:#ecf5f7;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); line-height:1.75; -webkit-font-smoothing:antialiased;}
+.wrap{max-width:1120px; margin:0 auto; padding:0 24px 72px;}
+/* ---------- Hero (light, crisp) ---------- */
+.hero{background:#ffffff; border-bottom:1px solid var(--line); box-shadow:0 1px 2px rgba(16,24,40,.03); padding:46px 24px 38px; text-align:center;}
+.hero .kicker{display:inline-block; font-size:12.5px; letter-spacing:.14em; color:var(--blue); background:var(--blue-soft); border:1px solid #d8e2ef; padding:4px 14px; border-radius:999px; margin-bottom:16px; font-weight:600;}
+.hero h1{font-size:30px; font-weight:700; letter-spacing:.01em; color:#16202b;}
+.hero .sub{margin-top:12px; font-size:15px; color:var(--sub); max-width:820px; margin-left:auto; margin-right:auto;}
+.hero .badges{margin-top:26px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;}
+.hero .badge{background:#f8f9fb; border:1px solid var(--line); border-radius:8px; padding:10px 16px; font-size:13px; color:#3c4551; text-align:left;}
+.hero .badge b{display:block; font-size:12.5px; color:var(--blue); margin-bottom:3px; letter-spacing:.03em; font-weight:600;}
+/* ---------- Sections ---------- */
+section{margin-top:48px;}
+h2{font-size:22px; font-weight:700; display:flex; align-items:center; gap:10px; margin-bottom:5px; color:#16202b;}
+h2 .no{background:var(--blue); color:#fff; width:30px; height:30px; border-radius:6px; display:inline-flex; align-items:center; justify-content:center; font-size:15px; flex:0 0 auto;}
+.sec-sub{color:var(--sub); font-size:14px; margin-bottom:20px; max-width:960px;}
+h3{font-size:16px; margin:24px 0 10px; color:#20282f;}
+h4{font-size:14.5px; margin:18px 0 8px; color:#20282f;}
+/* ---------- Cards ---------- */
+.grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:14px;}
+.card{background:#fff; border:1px solid var(--line); border-radius:10px; padding:18px 20px; box-shadow:0 1px 2px rgba(16,24,40,.04);}
+.card h4{font-size:15px; margin-bottom:6px; display:flex; align-items:center; gap:8px;}
+.card p{font-size:13.5px; color:#3c4551; margin-bottom:6px;}
+.card p:last-child{margin-bottom:0;}
+/* ---------- Tables ---------- */
+table{width:100%; border-collapse:collapse; background:#fff; border-radius:10px; overflow:hidden; border:1px solid var(--line); font-size:13px; margin:10px 0;}
+th{background:#f4f6f9; text-align:left; padding:9px 12px; font-weight:600; color:#37424f; border-bottom:1px solid var(--line); white-space:nowrap;}
+td{padding:8px 12px; border-bottom:1px solid #eef0f3; vertical-align:top;}
+tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:#fafbfc;}
+td code, p code, li code{background:#eef1f5; border-radius:4px; padding:1px 6px; font-size:12px;}
+/* ---------- Pills ---------- */
+.pill{display:inline-block; border-radius:999px; padding:1px 9px; font-size:11.5px; font-weight:600; white-space:nowrap;}
+.pill.g{background:var(--green-soft); color:var(--green);}
+.pill.b{background:var(--blue-soft); color:var(--blue);}
+.pill.a{background:var(--amber-soft); color:var(--amber);}
+.pill.p{background:var(--purple-soft); color:var(--purple);}
+.pill.c{background:var(--cyan-soft); color:var(--cyan);}
+.pill.n{background:#f1f3f6; color:#5d6772;}
+.pill.r{background:var(--red-soft); color:var(--red);}
+/* ---------- Mermaid ---------- */
+.diagram{background:#fff; border:1px solid var(--line); border-radius:10px; padding:18px 14px; margin:14px 0 6px; overflow:auto;}
+.diagram .diagram-title{margin:0 6px 8px; font-size:13.5px; font-weight:700; color:#16202b;}
+/* ---------- Callouts ---------- */
+.effect{background:var(--blue-soft); border-left:4px solid var(--blue); border-radius:8px; padding:14px 18px; margin:14px 0;}
+.effect .lead{font-weight:600; font-size:15px; margin-bottom:6px; color:#20282f;}
+.effect ul{margin:0 0 0 18px;}
+.effect li{font-size:13.5px; margin:3px 0; color:#37424f;}
+.note{background:var(--amber-soft); border:1px solid #e7dcc0; border-radius:8px; padding:14px 18px; font-size:13.5px; color:#6b4d12; margin-top:16px;}
+.note b{color:var(--amber);}
+.warn{background:var(--red-soft); border:1px solid #ecd2d2; border-radius:8px; padding:14px 18px; font-size:13.5px; color:#7a3c3c; margin-top:16px;}
+.warn b{color:var(--red);}
+ul.list{margin:8px 0 8px 20px; font-size:13.5px; color:#37424f;}
+ul.list li{margin:3px 0;}
+ul.list b{color:#20282f;}
+/* ---------- Appendix ---------- */
+.appendix{background:#fff; border:1px solid var(--line); border-radius:10px; padding:20px 24px; margin-top:28px;}
+.appendix h3{margin-top:4px; display:flex; align-items:center; gap:8px;}
+.appendix h3 .no{background:var(--sub); width:24px; height:24px; border-radius:6px; color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:13px; flex:0 0 auto;}
+footer{margin-top:56px; text-align:center; color:var(--sub); font-size:12.5px; border-top:1px solid var(--line); padding-top:22px;}
+@media (max-width:640px){ .hero h1{font-size:23px;} .hero{padding:34px 20px 30px;} }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <span class="kicker">B2B 订单履约 · 三方审批 vs v0.1 设计</span>
+  <h1>三方审批（现状） vs b2b_pilot_v3 v0.1</h1>
+  <p class="sub">业务流程对比与数据同步设计 · 生成 2026-08-18 · 依据 tripartite-approval 代码 / b2b_pilot_v3 文档与 spec<br>
+  产出：① 可对比的三方审批业务主流程；② "v0.1 销售助手下单、后续业务流继续在飞书三方审批跑" 的决策与节奏；③ 数据兼容/同步必要性与补漏清单。</p>
+  <div class="badges">
+    <div class="badge"><b>业务语义</b>两套流程高度同构，节点可一一映射（ORD/STK/SHP/INV）</div>
+    <div class="badge"><b>方向性差异</b>v0.1 需新增「写进飞书流」路径（原设计是平行只读流）</div>
+    <div class="badge"><b>数据兼容</b>不迁 JSONL 进 PG 即可上线；全部开发量在 v0.1 侧</div>
+    <div class="badge"><b>最终目标</b>以企微版流程取代飞书三方审批流（v0.1→v0.4→0.5）</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- ============ 0. 结论摘要 ============ -->
+<section>
+  <h2><span class="no">0</span>结论摘要（TL;DR）</h2>
+  <div class="grid">
+    <div class="card"><h4>① 业务语义高度同构</h4><p>两套流程都是「下单→审价→终审(C/D)→备货→发货→开票/回单→归档」，节点一一映射（gap-analysis §2：ORD=已开单、STK=已备货、SHP=已发货、INV=已开票）。</p></div>
+    <div class="card"><h4>② 结构差异仅 4 处</h4><p>审价归属（旧系统在订单创建内 3 步审批 vs v0.1 独立 N2）；备货多「财务确认到款」闸门；开票节点数（旧系统 8 节点、5 深链不可达）；回单/凭证的位置与载体。</p></div>
+    <div class="card"><h4>③ 方向性差异（最关键）</h4><p>v0.1 原设计是<strong>平行流</strong>；你要的是 v0.1 把订单<strong>写进</strong>旧系统/飞书流。现有 v0.1 设计没有这条写路径，需要新增；新增开发量全部归 v0.1，旧系统<strong>仅一处针对性小改</strong>。</p></div>
+    <div class="card"><h4>④ 数据兼容结论</h4><p><strong>不需要</strong>把 JSONL 迁入 PG 才能上线。只需做三件事（全在 v0.1 侧）：写方向（代理 OAuth + 既有接口）、读方向（cmd/sync 多维表源 + PG 直查）、5 项状态语义先拍板。</p></div>
+    <div class="card"><h4>⑤ 上线节奏</h4><p>v0.1 作为「下单入口 + 订单列表/状态视图」，飞书流全权续跑，销售助手获得完整体验闭环（下单→飞书审批→状态回显→驳回重提）。关键路径仍是企微备案域名。</p></div>
+    <div class="card"><h4>⑥ 最终目标（用户确认）</h4><p><strong>以企微版流程取代飞书三方审批流</strong>：v0.1–v0.4 逐版迁移办理动作，0.5 完成两级终审迁入与真相源切换后飞书整体下线（历史只读归档 + 回滚通道）。完整路线见渐进式发布计划.html。</p></div>
+  </div>
+</section>
+
+<!-- ============ 1. 三方审批现状 ============ -->
+<section>
+  <h2><span class="no">1</span>三方审批现状业务主流程（代码级）</h2>
+  <p class="sec-sub">依据 submitExternalOrder.ts / stockPrepareApproval.ts / shipmentApproval.ts / invoiceApproval.ts / feishuActionCallback.ts / wecomProductionBridge.ts（nodeLabel/activeNodes 为节点全集）、README、飞书三方审批手册、PROJECT_HANDOFF_SNAPSHOT。</p>
+
+  <div class="diagram">
+    <div class="diagram-title">图一 · 三方审批（现状）业务主流程</div>
+<pre class="mermaid">
+flowchart TD
+    START(["销售员/代办人从飞书 H5 创建订单<br/>POST /external-orders/create"]) --> S0["系统：客户多维表同步 →<br/>生成草稿合同/导入客户合同 →<br/>创建飞书外部审批实例 external_instance"]
+    S0 --> ORD1
+
+    subgraph ORD["① 订单创建审批 ORD"]
+        ORD1["信息确认 MANAGER_PENDING<br/>提交人(销售员/代办人)<br/>核对客户/商品/合同/金额/收货信息"]
+        ORD2["主管审批 SUPERVISOR_PENDING<br/>主管：审价、客户等级、商务合理性"]
+        ORD3{"客户等级<br/>C/D？"}
+        ORD4["董事长审批 CHAIRMAN_PENDING<br/>董事长终审"]
+    end
+
+    ORD1 -->|同意| ORD2
+    ORD2 -->|同意| ORD3
+    ORD2 -->|拒绝| REJ1["REJECTED 终态<br/>订单终止，可重新提交"]
+    ORD3 -->|"是（C/D）"| ORD4
+    ORD3 -->|"否（A/B）"| CON1
+    ORD4 -->|同意| CON1["系统：生成正式盖章合同<br/>创建唯一备货审批实例"]
+    ORD4 -->|拒绝| REJ1
+
+    subgraph STK["② 备货审批 STK"]
+        STK0{"结算方式<br/>是否款到类？"}
+        STK1["备货预定 STOCK_RESERVATION<br/>仓库：备货/库存确认"]
+        STK2["财务确认到款 FINANCE_CONFIRM_PAYMENT<br/>财务：应收/实收/到账时间"]
+        STK3["商务填写发货仓 BUSINESS_FILL_WAREHOUSE<br/>商务：发货仓/计划发货日期/收货信息"]
+    end
+
+    CON1 --> STK0
+    STK0 -->|"结算方式恰为『款到发货』"| STK1
+    STK0 -->|"其他款到类（先款/款到/预付/现款/提货前付款）"| STK2
+    STK0 -->|"非款到发货"| STK3
+    STK1 -->|同意| STK2
+    STK2 -->|同意| STK3
+    STK3 -->|同意<br/>生成出库单| CON2["系统：创建发货审批实例"]
+    STK1 -->|拒绝| REJ2["REJECTED 终态"]
+    STK2 -->|拒绝| REJ2
+    STK3 -->|拒绝| REJ2
+
+    subgraph SHP["③ 发货审批 SHP"]
+        SHP1["仓库发货 WAREHOUSE_SHIP<br/>仓管：实际数量/物流/分批<br/>数量约束 0 &lt; 实发 ≤ 计划"]
+        SHP2["上传回单/完成信息 COMPLETION_EVIDENCE<br/>回单附件必填"]
+        SHP3{"填写开票信息 INVOICE_INFO_FILL<br/>提交人：是否需要开票？"}
+    end
+
+    CON2 --> SHP1
+    SHP1 -->|同意（可分批发货，<br/>未发完回备货层续批）| SHP2
+    SHP2 -->|同意| SHP3
+    SHP1 -->|拒绝| REJ3["REJECTED 终态"]
+    SHP3 -->|"不开票 → 系统归档"| ARC["SYSTEM_ARCHIVED 归档<br/>多维表格台账同步"]
+    SHP3 -->|"开票（单订单/合并开票）"| INV1
+
+    subgraph INV["④ 开票审批 INV"]
+        INV1["开票申请 SALES_INVOICE_APPLY<br/>开票信息在发货阶段(INVOICE_INFO_FILL)已填<br/>系统生成开票申请 Excel；本节点为抄送(cc)，非任务"]
+        INV1B{"发票模式？"}
+        INV2["客户订单盖章回传<br/>CUSTOMER_ORDER_STAMP_RETURN<br/>销售/代办办理，附件可选"]
+        INV8["无票销售 NO_INVOICE_SALE<br/>客户确定永久不开票"]
+        INVX["代码已定义但当前创建路径不可达的深链：<br/>销售确认 SALES_CONFIRM → 财务开票 → 财务上传发票 →<br/>销售接收发票 → 回款跟进"]
+    end
+
+    INV1 --> INV1B
+    INV1B -->|"开票"| INV2
+    INV1B -->|"无票销售（会签）"| INV8
+    INV8 --> INV2
+    INV2 --> ARC
+    INV2 -->|拒绝| REJ4["REJECTED 终态"]
+    INVX -.->|"（未接线）"| ARC
+
+    ARC --> END(["订单工作台 / 商务对账台 / 监管台查询"])
+</pre>
+  </div>
+
+  <h3>节点全集（代码事实，wecomProductionBridge.ts:162-183）</h3>
+  <table>
+    <thead><tr><th>阶段</th><th>节点 ID</th><th>节点名</th><th>办理角色</th><th>关键约束/动作</th></tr></thead>
+    <tbody>
+      <tr><td>ORD</td><td><code>MANAGER_PENDING</code></td><td>信息确认</td><td>提交人（销售员/代办人）</td><td>核对数据；同意→主管审批</td></tr>
+      <tr><td>ORD</td><td><code>SUPERVISOR_PENDING</code></td><td>主管审批</td><td>主管</td><td>审价；同意→按客户等级分支；拒绝→终态</td></tr>
+      <tr><td>ORD</td><td><code>CHAIRMAN_PENDING</code></td><td>董事长审批</td><td>董事长</td><td>仅 C/D 级客户进入；同意→生成正式合同+创建备货</td></tr>
+      <tr><td>STK</td><td><code>STOCK_RESERVATION</code></td><td>备货预定</td><td>仓库</td><td>仅当结算方式<strong>恰为"款到发货"</strong>时先走（stockPrepareApproval.ts:464-466）</td></tr>
+      <tr><td>STK</td><td><code>FINANCE_CONFIRM_PAYMENT</code></td><td>财务确认到款</td><td>财务</td><td>应收/实收/到账时间；结算匹配款到类即进入（:459-462）</td></tr>
+      <tr><td>STK</td><td><code>BUSINESS_FILL_WAREHOUSE</code></td><td>商务填写发货仓</td><td>商务</td><td>发货仓/计划发货日期/收货信息；通过→生成出库单</td></tr>
+      <tr><td>SHP</td><td><code>WAREHOUSE_SHIP</code></td><td>仓库发货</td><td>仓管</td><td>实发数量&gt;0 且≤计划；支持分批</td></tr>
+      <tr><td>SHP</td><td><code>COMPLETION_EVIDENCE</code></td><td>上传回单/完成信息</td><td>回单办理人</td><td>回单附件必填</td></tr>
+      <tr><td>SHP</td><td><code>INVOICE_INFO_FILL</code></td><td>填写开票信息</td><td>提交人</td><td>是否开票 / 单订单 / 合并开票 / 无票销售</td></tr>
+      <tr><td>INV</td><td><code>SALES_INVOICE_APPLY</code></td><td>开票申请</td><td>提交人（抄送）</td><td>系统生成开票申请 Excel；<strong>本节点是抄送而非办理任务</strong></td></tr>
+      <tr><td>INV</td><td><code>NO_INVOICE_SALE</code></td><td>无票销售</td><td>无票销售办理人</td><td>永久不开票；多人会签通过后仍进入盖章回传，再归档</td></tr>
+      <tr><td>INV</td><td><code>CUSTOMER_ORDER_STAMP_RETURN</code></td><td>客户订单盖章回传</td><td>销售/代办</td><td><strong>开票实例首个办理任务</strong>；附件可选；通过后直接归档</td></tr>
+      <tr><td>INV</td><td><code>SALES_CONFIRM</code> 等 5 节点</td><td>财务开票/上传发票/接收/回款跟进</td><td>销售/财务</td><td>代码已定义但<strong>当前创建路径不产出，生产不可达</strong>（invoiceApproval.ts:1018-1029）</td></tr>
+      <tr><td>—</td><td><code>SYSTEM_ARCHIVED / REJECTED / CANCELED</code></td><td>归档/拒绝/撤销</td><td>系统</td><td>终态；多维表台账同步</td></tr>
+    </tbody>
+  </table>
+
+  <h3>关键机制（决定"最小成本接入"的事实）</h3>
+  <ul class="list">
+    <li><b>主键体系：</b><code>flow_id = SO-YYYYMMDD-XXXX</code>（贯穿四环节）；<code>instance_id = &lt;order_id&gt;-&lt;14位时间戳&gt;</code>；<code>stage_id = &lt;flow_id&gt;-&lt;STAGE_CODE&gt;-&lt;seq&gt;</code>（submitExternalOrder.ts:218-321）。</li>
+    <li><b>全链路由飞书回调驱动：</b><code>POST /feishu/approval/action-callback</code> 接收同意/拒绝/退回/撤回 → 推进本地 JSONL 状态、更新飞书实例、best-effort 同步多维表。无本地轮询。</li>
+    <li><b>订单创建幂等：</b><code>create_idempotency_key</code>（8-200 字符）+ 内容指纹 + 内存去重 + 文件锁，重复提交返回既有订单。</li>
+    <li><b>身份与鉴权：</b>创建页需 OAuth 换取的 HMAC token（<code>CREATE_ORDER_AUTH_SECRET</code>，2h TTL，白名单）；机器通道 <code>x-renheng-wecom-bridge</code> header <strong>当前硬编码只允许王杰</strong>并强制 <code>approval_profile=WECOM_WANGJIE_TEST</code>。</li>
+    <li><b>审批人解析：</b><code>data/approval_role_map.json</code> 按角色 key 映射 open_id；提交人与主管同一人时主管自动通过；<code>approval_profile</code> 字段已存在。<span class="pill n">注意 <code>auto_approve</code> 只声明不赋值，实际不生效</span></li>
+    <li><b>董事长触发：</b><code>customer_level ∈ {C,D}</code>（:1537），与金额无关。</li>
+    <li><b>台账：</b>多维表按 flow_id 建行/更新（flowBitableSync.ts）；<strong>JSONL 是生产真相，多维表是对账副本</strong>。</li>
+    <li><b>开票深链现状：</b>生产的开票实例首任务=盖章回传（无票模式先走会签再回传），通过后直接归档；「财务开票→上传发票→接收→回款跟进」5 节点<strong>代码存在但创建路径不产出，不可达</strong>。</li>
+  </ul>
+</section>
+
+<!-- ============ 2. v0.1 设计流程 ============ -->
+<section>
+  <h2><span class="no">2</span>v0.1 设计流程（docs/v0.1 已核对）</h2>
+  <p class="sec-sub">依据 docs/v0.1/05-business-flow.html（已核对流程，裁决源 ord_fulfill demo）、01-business-graphs.html、gap-analysis.md。</p>
+
+  <div class="diagram">
+    <div class="diagram-title">图二 · v0.1 设计流程（N1–N9 + 守门员横切）</div>
+<pre class="mermaid">
+flowchart TD
+    N1["N1 下单<br/>销售(XS2人工 / XS3智能确认卡) / 助理(XSZL1/2代下) / 商务(虹励 约20%)<br/>幂等键防重复 → 已开单"]
+    N2["N2 审价审批 XSZG1<br/>销售主管：审批即审价<br/>单价受限、风控额度校验"]
+    N3{"客户等级<br/>C/D？"}
+    N4["N3 董事长终审 DSZ1<br/>仅 C/D 级进入<br/>驳回=终态+出站被驳回卡片"]
+    N5["N4 备货 SW1<br/>商务：选备货仓+收货地址+备注<br/>备货守恒 ∑确认量≤订单量；锁库存暂不做"]
+    N6["N5 发货 CG1/CG2<br/>仓管：①确认接受 ②确认发货<br/>守恒校验 超发拦截"]
+    N7["N6 开票 CW1/CW2<br/>财务：订单后台上传凭证→AI识别匹配<br/>多单合并开票（发票-订单分离、关联可追加）<br/>无回单→例外审核（规则待确认 A5）"]
+    N8["N7 回单 CG3<br/>仓库群(企微群)→凭证机器人抓取→OCR→登记归档<br/>凭证只追加 版本单调"]
+    N9["闭环<br/>回单闭合 · 回款跟踪"]
+
+    N1 --> N2
+    N2 --> N3
+    N3 -->|"A/B 级"| N5
+    N3 -->|"C/D 级"| N4
+    N4 -->|通过| N5
+    N4 -->|驳回| X1["已驳回 终态"]
+    N5 -->|通过→备货单→发货单| N6
+    N5 -->|驳回| X2["通知销售 可修改重提"]
+    N6 --> N7
+    N7 --> N8
+    N8 --> N9
+
+    N6 -.->|"横切 N8 守门员：<br/>任何内容发客户群前销售确认"| G["发客户群内容<br/>订单卡片/物流图片/发票"]
+</pre>
+  </div>
+
+  <h3>v0.1 节点明细</h3>
+  <table>
+    <thead><tr><th>节点</th><th>名称</th><th>角色</th><th>与三方审批对应（gap-analysis §2 术语映射）</th></tr></thead>
+    <tbody>
+      <tr><td>N1</td><td>下单（人工/智能确认/代下）</td><td>销售/助理/商务</td><td>ORD 创建（信息确认段）</td></tr>
+      <tr><td>N2</td><td>审价审批</td><td>销售主管</td><td>ORD 主管审批</td></tr>
+      <tr><td>N3</td><td>董事长终审（C/D）</td><td>董事长</td><td>ORD 董事长审批</td></tr>
+      <tr><td>N4</td><td>备货（选仓+收货地址）</td><td>商务</td><td>STK 商务填写发货仓（合并备货预定/到款确认）</td></tr>
+      <tr><td>N5</td><td>发货（两步确认）</td><td>仓管</td><td>SHP 仓库发货（多"确认接受"一步）</td></tr>
+      <tr><td>N6</td><td>开票（凭证+合并开票）</td><td>财务</td><td>INV 开票申请→…→财务上传发票（压缩）</td></tr>
+      <tr><td>N7</td><td>回单（仓库群→机器人）</td><td>仓管/系统</td><td>SHP 上传回单（载体不同）</td></tr>
+      <tr><td>—</td><td>守门员横切</td><td>销售</td><td>无对应（新能力，发群前确认）</td></tr>
+      <tr><td>—</td><td>闭环：回款跟踪</td><td>—</td><td>INV 回款跟进</td></tr>
+    </tbody>
+  </table>
+
+  <div class="effect">
+    <div class="lead">状态机与事件图谱</div>
+    <ul>
+      <li><b>v0.1 状态机：</b>已开单 → 待审价 → 待终审(C/D) / 待备货(A/B 或终审通过) → 已备货 → 待发货 → 已发货 → 待开票 → 已开票；异常终态：已驳回、待补回单。</li>
+      <li><b>v0.1 事件图谱（append-only）：</b>OrderRequested → PriceReviewed → ChairmanReviewed → StockAssigned → WarehouseConfirmed → GoodsShipped → ReceiptRegistered → InvoiceApplied → InvoiceLinked → InvoiceIssued / ReceiptException。</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ 3. 同构对比 ============ -->
+<section>
+  <h2><span class="no">3</span>同构对比：逐节点映射表</h2>
+  <table>
+    <thead><tr><th>业务步骤</th><th>三方审批（飞书，现状）</th><th>v0.1 设计</th><th>差异性质</th></tr></thead>
+    <tbody>
+      <tr><td>下单入口</td><td>飞书 H5 创建页（销售员/代办人）</td><td>企微群侧边栏/确认卡/工作台/群入口</td><td><span class="pill b">平台差异</span>；角色覆盖不同（A7）</td></tr>
+      <tr><td>信息确认</td><td>独立节点 MANAGER_PENDING</td><td>并入 N1 下单提交</td><td>节点合并</td></tr>
+      <tr><td>审价</td><td>ORD 主管审批</td><td>N2 独立审价节点</td><td>语义一致，位置相同</td></tr>
+      <tr><td>终审</td><td>ORD 董事长审批（C/D 触发）</td><td>N3 董事长终审（C/D 触发）</td><td>语义一致</td></tr>
+      <tr><td>合同</td><td>草稿→通过后生成正式盖章合同</td><td>合同自动匹配（HT-2025-0038）</td><td>旧系统合同链更重</td></tr>
+      <tr><td>备货预定/库存确认</td><td>STOCK_RESERVATION 节点</td><td>无（锁库存暂不做，A1）</td><td>旧系统多一闸门</td></tr>
+      <tr><td>财务确认到款</td><td>FINANCE_CONFIRM_PAYMENT（款到发货类必走）</td><td>无独立节点（闭环跟踪）</td><td><span class="pill r">结构性差异</span></td></tr>
+      <tr><td>商务备货</td><td>BUSINESS_FILL_WAREHOUSE</td><td>N4 选备货仓+收货地址</td><td>语义一致</td></tr>
+      <tr><td>出库单</td><td>商务通过后系统生成</td><td>备货通过后生成备货单/发货单</td><td>一致</td></tr>
+      <tr><td>发货</td><td>WAREHOUSE_SHIP（数量约束+分批）</td><td>N5 两步确认</td><td>v0.1 多"确认接受"步</td></tr>
+      <tr><td>回单</td><td>COMPLETION_EVIDENCE（附件必填）</td><td>N7 仓库群→凭证机器人 OCR</td><td><span class="pill a">载体差异</span></td></tr>
+      <tr><td>开票信息</td><td>INVOICE_INFO_FILL（发货阶段填）</td><td>并入 N6 财务凭证上传</td><td>前置差异</td></tr>
+      <tr><td>开票申请</td><td>SALES_INVOICE_APPLY（生成 Excel，抄送）</td><td>无独立节点</td><td>节点裁剪</td></tr>
+      <tr><td>盖章回传</td><td>CUSTOMER_ORDER_STAMP_RETURN（可选附件）</td><td>无（走凭证机器人）</td><td>节点裁剪</td></tr>
+      <tr><td>财务开票/上传发票</td><td>2 节点（<strong>当前不可达</strong>）</td><td>N6 财务上传凭证（AI 识别）</td><td>旧系统实际未接线</td></tr>
+      <tr><td>回款跟进</td><td>SALES_COLLECTION_FOLLOWUP（<strong>当前不可达</strong>）</td><td>闭环回款跟踪</td><td>语义一致</td></tr>
+      <tr><td>无票销售</td><td>NO_INVOICE_SALE 分支</td><td>无对应</td><td>旧系统显式分支</td></tr>
+      <tr><td>无回单开票</td><td>无（回单必须上传才能继续）</td><td>CW2 例外审核</td><td><span class="pill r">结构性差异</span></td></tr>
+      <tr><td>发群通知</td><td>无</td><td>N8 守门员横切</td><td><span class="pill g">全新能力</span></td></tr>
+      <tr><td>归档</td><td>SYSTEM_ARCHIVED + 台账</td><td>闭环（回单闭合+回款跟踪）</td><td>语义一致</td></tr>
+      <tr><td>撤回/重提</td><td>完整 resubmit 链（root/revision）</td><td>驳回→修改重提</td><td>v0.1 简化</td></tr>
+      <tr><td>整单撤销</td><td>full-cancel 四环节统一 CANCELED</td><td>无对应（M7 待确认）</td><td>旧系统能力更多</td></tr>
+      <tr><td>超时提醒</td><td>全节点超时通知（24h/48h）</td><td>仅 N2 超时 Timer</td><td>旧系统全节点覆盖</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 4. 差异分析 ============ -->
+<section>
+  <h2><span class="no">4</span>差异分析（决策视角）</h2>
+
+  <h3>4.1 结构差异 → 对"下单进飞书流"的影响</h3>
+  <p class="sec-sub">与下单本身相关的差异只有<strong>入口/平台差异</strong>（飞书 H5 vs 企微助手）。一旦订单在 v0.1 创建并桥接进旧系统，后续审价/终审/备货/发货/开票的差异全部由飞书流现有实现承担，v0.1 无需关心。因此对「v0.1 只做下单入口」而言业务差异<strong>不构成阻塞</strong>；真正要处理的是 v0.1 表单字段 ↔ 旧系统 SubmitOrderInput 的映射（§6.2）。</p>
+
+  <h3>4.2 状态语义差异（T1.3 未对口径的 5 项，上线前必须拍板）</h3>
+  <table>
+    <thead><tr><th>#</th><th>待对口径项</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>订单已撤回/作废（CANCELED）</td><td>v0.1 ORD 无取消终态：用 ORD_REJECTED 兜底 or 新增 CANCELLED？</td></tr>
+      <tr><td>2</td><td>发货单已取消/已驳回</td><td>SHP 无取消/驳回态。</td></tr>
+      <tr><td>3</td><td>待上传回单位置</td><td>旧系统回单在 SHP 段（RECEIPT_PENDING）；T1.3 建议回单不独立成状态（receipt.go 分流 HAVE_RECEIPT/RECEIPT_EXCEPTION）。</td></tr>
+      <tr><td>4</td><td>开票信息填写位置</td><td>旧系统 INVOICE_INFO_FILL 在 SHP 段，T1.3 建议移 INV 段。</td></tr>
+      <tr><td>5</td><td>待客户盖章回传</td><td>代码有 CUSTOMER_ORDER_STAMP_RETURN 节点（附件可选）；<strong>以代码为准</strong>（invoiceApproval.ts:593-681）——T1.3 曾认为代码无此节点。</td></tr>
+    </tbody>
+  </table>
+  <div class="note"><b>提醒：</b>这 5 项不拍板，cmd/sync 的状态映射配置就无法冻结；但只要 v0.1 只做"下单+视图"，可先用「旧系统原始状态直存 payload + 视图层粗粒度映射」过渡（§6.3）。</div>
+
+  <h3>4.3 数据与平台差异</h3>
+  <table>
+    <thead><tr><th>维度</th><th>三方审批（现状）</th><th>v0.1</th><th>影响</th></tr></thead>
+    <tbody>
+      <tr><td>数据真相</td><td>16 个 JSONL 追加文件（115,690 行/179MB）</td><td>PG 31 表（事件链 append-only）</td><td>同步必须按"快照链取末条"规则</td></tr>
+      <tr><td>主数据</td><td>客户/商品在多维表 + 本地 contacts xlsx</td><td>pgAPI（RHCRM PG：客户池 3,217/产品 306，D-006）</td><td>下单字段来源要对齐</td></tr>
+      <tr><td>订单汇聚</td><td>三方审批流程表 → rhcrm_contract_sync.py → RHCRM 购销合同表（<strong>唯一订单源</strong>，8,784 单）</td><td>pgAPI 读合同表（已裁只读）</td><td>写方向必须绕开合同表（合同表是结果不是审批入口）</td></tr>
+      <tr><td>审批载体</td><td>飞书三方审批 external_instance</td><td>approval_tasks 视图（Signal 人工闸门）</td><td>目标模型下 v0.1 不承载审批</td></tr>
+      <tr><td>身份</td><td>飞书 open_id/user_id</td><td>企微 user_id + SpiceDB</td><td>open_id 映射表 + 审批人映射调研（T3）</td></tr>
+      <tr><td>部署</td><td>Windows Server + Node/Express 101.37.66.110:3000</td><td>Docker + Go + PG + Temporal + SpiceDB + 企微</td><td>v0.1→旧系统公网可达即可</td></tr>
+      <tr><td>金额</td><td>元（amount/unit_price）</td><td>分（*_cents）</td><td>桥接与同步都要显式换算（C8）</td></tr>
+    </tbody>
+  </table>
+
+  <h3>4.4 对上线节奏的含义</h3>
+  <p class="sec-sub">旧系统已有已知缺陷（22 高/48 中/12 低），最相关：<strong>回款金额不参与业务判断、修改订单服务端不重判、48h 升级链未接线</strong>。这些缺陷在"飞书流续跑"模型下<strong>继续存在但不新增暴露面</strong>——v0.1 下单只新增"创建"入口，不触碰修改/回款逻辑。</p>
+  <div class="effect"><div class="lead">结论：比"平行流"更稳</div>
+  <p>"v0.1 下单 + 飞书流续跑"比 v0.1 原"平行流"（商务在 v0.1 操作备货/发货/开票）更稳：原平行流要求商务操作与飞书流并行执行同一批节点（双执行、一致性靠单向同步兜底），而"下单+续跑"模型下<strong>旧系统是唯一执行者</strong>，不存在双执行一致性问题。</p></div>
+</section>
+
+<!-- ============ 5. 目标模型 ============ -->
+<section>
+  <h2><span class="no">5</span>目标模型：v0.1 下单 + 飞书流续跑（图三）</h2>
+
+  <div class="diagram">
+    <div class="diagram-title">图三 · 目标模型：v0.1 下单 + 飞书流续跑</div>
+<pre class="mermaid">
+flowchart LR
+    subgraph V01["v0.1（Go + PG + 企微，Docker）——全部新增开发量在此"]
+        A["销售助手（虹励/助理）<br/>企微群聊确认卡 / 侧边栏 / 工作台"]
+        BR["下单桥接模块（v0.1 新增）<br/>①代理飞书 OAuth 换 create-order token（2h 缓存）<br/>②调旧系统既有创建接口（幂等）"]
+        PG[("PG：本系统订单<br/>flow_id/instance_id/状态摘要")]
+        SY["cmd/sync（已有，配多维表源）<br/>存量订单列表摘要"]
+    end
+    subgraph OLD["三方审批系统（仅一处针对性小改：自动确认+profile 注入；其余零改动）"]
+        OA["POST /api/approval/feishu-user-by-code<br/>（既有：code 换 create-order token）"]
+        API["POST /external-orders/create<br/>（既有：创建订单+审批实例+合同+通知+台账）"]
+        JL[("16 个 JSONL + 附件<br/>+ 多维表台账（best-effort）")]
+        FL["GET /flows/:flow_id<br/>（既有：只读全流程详情页）"]
+    end
+    subgraph FS["飞书"]
+        EX["三方审批实例（审批中心）<br/>信息确认/主管/董事长/备货/发货/开票"]
+        BT["多维表流程表<br/>（状态/节点/处理人/链接）"]
+    end
+    A --> BR
+    BR -->|"① 授权（首次/过期）"| OA
+    OA -->|"create-order token"| BR
+    BR -->|"② 下单（Bearer token + 幂等键）"| API
+    API --> JL
+    JL <-->|"③ 审批实例创建/动作回调（旧系统既有机制）"| EX
+    BR -.->|"④ 回写 flow_id/instance_id 到 v0.1 PG"| PG
+    JL -.->|"⑤ best-effort 同步（旧系统既有）"| BT
+    SY -->|"⑥ v0.1 周期拉取（存量+状态回显）"| BT
+    SY --> PG
+    A -->|"⑦ 详情跳转（v0.1 只存 flow_id，无需 token）"| FL
+    FL -.->|"实时读 JSONL 渲染"| JL
+</pre>
+  </div>
+
+  <h3>原则</h3>
+  <ul class="list">
+    <li>① 旧系统（飞书流）是状态机执行者，<strong>仅两处针对性小改</strong>（§5.1 边界 1 的 v0.1 改动 + v0.2 起的受信办理通道），其余零改动——v0.1 只调用其既有接口、只跳转其既有页面。</li>
+    <li>② 为上线新增的一切开发量（OAuth 代理、token 缓存、下单桥接、同步配置、列表/视图、跳转、v0.2 起的执行迁移）<strong>全部计入 v0.1 侧</strong>。</li>
+    <li>③ v0.1 只做<strong>下单入口 + 订单列表/状态视图</strong>，不并行执行任何审批节点。</li>
+    <li>④ 敏感项（view_token 等）不落 v0.1 PG——详情跳转 <code>/flows/:flow_id</code> 无需任何 token（无鉴权只读页），符合 11-migration V4 敏感边界。</li>
+    <li>⑤ <strong>最终目标=以企微版流程取代飞书三方审批流</strong>：v0.2 起按环节渐进迁移办理动作，0.5 完成两级终审迁入与真相源切换后飞书整体下线。</li>
+  </ul>
+
+  <h3>5.1 审批链路无感续跑（飞书侧视角）</h3>
+  <div class="effect"><div class="lead">结论：销售主管审批、董事长审批、以及后续备货/发货/开票审批，在飞书侧完全无感</div>
+  <p>它们与飞书 H5 下单的订单走同一套机制，审批人感知不到订单来自 v0.1（企微）。</p></div>
+
+  <h4>机制证据（代码级）</h4>
+  <ul class="list">
+    <li>① <b>订单创建 = 同一入口：</b>v0.1 调 <code>POST /external-orders/create</code> → submitExternalOrderFromFormSync → createExternalInstance（同一 FEISHU_APPROVAL_CODE）→ 审批机器人消息卡片 + 飞书审批中心待办。</li>
+    <li>② <b>审批人解析 = 同一 role map：</b>approval_role_map.json（TEST_*）决定审批人，与下单渠道无关。</li>
+    <li>③ <b>后续节点自动推进：</b>审批动作 → action-callback → 本地 JSONL 状态推进 → 自动创建备货/发货/开票实例；v0.1 全程不介入。</li>
+    <li>④ <b>审批表单无渠道痕迹：</b>external instance 的 i18n 只有订单号/客户/金额等；orders.jsonl 的 <code>source</code> 固定为 <code>"external-orders-create-form"</code>；不带桥接头时 approval_profile 为空。</li>
+    <li>⑤ <b>身份链路透明：</b>企微 user_id 只在 v0.1 内部；落到旧系统与飞书的身份 = OAuth 换到的飞书 open_id/user_id。</li>
+  </ul>
+
+  <h4>三个"有感觉"的边界（必须知晓，均非缺陷）</h4>
+  <table>
+    <thead><tr><th>#</th><th>边界</th><th>说明</th><th>处置（已确认）</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>1</td><td><b>信息确认节点由提交人办理</b></td>
+        <td>销售助手下单后（若本人为提交人）需在飞书点一次「信息确认」——飞书 H5 下单同样如此，是旧流程既有第一步；代下单时由代办人确认。</td>
+        <td><span class="pill p">已决策：旧系统针对性小改</span>。办理需 approver_token（JSONL 中 manager_approver_view_token），该 token 下单响应不返回、多维表链接不带、submitter 视角拿不到；伪造回调需 FEISHU_ACTION_CALLBACK_TOKEN（禁止）。<b>改动三点</b>（集中 submitExternalOrder.ts + approval_role_map.json）：识别（幂等键 v0.1 前缀）→ 自动确认（系统内部直接调既有 decision 核心，审计等价提交人本人）→ profile 注入（V01_SALES_ASSISTANT 配真实审批人，与王杰解耦）。</td>
+      </tr>
+      <tr>
+        <td>2</td><td><b>审批人 = 当前角色映射（王杰被配置进不该进的角色）</b></td>
+        <td>生产 role map 中主管/董事长 fallback 到 TEST_MANAGER=王杰；财务/开票 or-sign 组含王杰（附录 D）。</td>
+        <td><span class="pill a">已决策：默认映射完全不理会、保持原样</span>。背景：王杰/王鑫力=程序员不点审批；张有连=董事长（自动跳过主管=正确业务勿动）。<b>唯一前置</b>：V01 profile 必须在 approval_profiles 显式配置 TEST_SUPERVISOR（建议同时 TEST_CHAIRMAN）——profile 覆盖是 merge 非替换（approvalOrSign.ts:79-96），不配则仍 fallback 到王杰。</td>
+      </tr>
+      <tr>
+        <td>3</td><td><b>驳回/重提在 v0.1 操作</b></td>
+        <td>驳回后销售助手在 v0.1 看原因、复制重提（reuse-data）。</td>
+        <td><span class="pill g">已确认：其它用户零影响</span>。驳回订单在旧系统所有视图照常可见（工作台/审批中心已办/详情页/对账台）。v0.1 对旧系统全部影响面=多一个下单入口 + cmd/sync 只读拉取 + 授权回调白名单 + 白名单追加虹励。</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="note"><b>一句话：</b>审批人（主管/董事长/财务/仓管）在飞书里看到的是标准待办、渠道透明零感知。已决策的旧系统小改让虹励在企微端完全无感，且与默认映射解耦；该小改只影响 v0.1 订单，不影响飞书 H5 用户。上线前需现场查证生产 role map 实际内容与现有滞留单（边界 2）。</div>
+</section>
+
+<!-- ============ 6. 数据兼容与同步 ============ -->
+<section>
+  <h2><span class="no">6</span>数据兼容与同步设计</h2>
+
+  <h3>6.1 现状盘点（数据面清单）</h3>
+  <table>
+    <thead><tr><th>数据面</th><th>位置/形态</th><th>角色</th></tr></thead>
+    <tbody>
+      <tr><td>旧系统业务真相</td><td><code>tripartite-approval/data/*.jsonl</code>（16 文件）</td><td><strong>唯一权威</strong>：orders/stock_prepares/shipments/invoices + 事件表</td></tr>
+      <tr><td>飞书审批实例</td><td>external_instance + external_instances.jsonl 本地索引</td><td>审批中心待办/已办载体</td></tr>
+      <tr><td>多维表格台账</td><td>流程表 1,316 行 / 明细表 1,116 行 / 客户档案 2,387 行</td><td>对账副本，<strong>非真相</strong></td></tr>
+      <tr><td>RHCRM 购销合同表</td><td>PG（rhcrm_contract_sync.py，44 字段，8,784 单）</td><td><strong>唯一订单源</strong>（D-007 裁：只读可见）</td></tr>
+      <tr><td>v0.1 PG</td><td>31 张表（001-007 迁移）</td><td>流程引擎数据 + 同步视图</td></tr>
+    </tbody>
+  </table>
+
+  <h3>6.2 写方向：v0.1 下单 → 飞书流（需要新增，本设计的核心）</h3>
+  <h4>方案对比（开发量边界：除标注"旧系统代码"外，全部计入 v0.1）</h4>
+  <table>
+    <thead><tr><th>方案</th><th>做法</th><th>旧系统代码</th><th>v0.1 开发量</th><th>风险</th><th>结论</th></tr></thead>
+    <tbody>
+      <tr><td><b>A1. 代理 OAuth（推荐）</b></td><td>v0.1 跳飞书授权 → code 交既有 feishu-user-by-code 换 token（2h 缓存）→ 调既有 create 接口下单</td><td><span class="pill g">零</span></td><td>中</td><td>token 2h 过期需重授权；回调地址加白名单（配置）</td><td><span class="pill g">✅ 0.1 采用</span></td></tr>
+      <tr><td>A2. 桥接泛化</td><td>旧系统新增"secret 换 token"端点</td><td><span class="pill r">需旧系统开发</span></td><td>低</td><td>动旧系统代码+生产部署</td><td>⏳ 0.2 再说</td></tr>
+      <tr><td>B. JSONL 直写</td><td>v0.1 直接写 data/orders.jsonl</td><td><span class="pill g">零</span></td><td>看似低</td><td>绕过锁/幂等/合同/实例创建逻辑，<strong>极高</strong></td><td><span class="pill r">❌ 禁止</span></td></tr>
+      <tr><td>C. 直调飞书 API 建实例</td><td>v0.1 自己创建 external instance</td><td><span class="pill g">零</span></td><td>中</td><td>与索引/回调/JSONL 脱节；两套真相</td><td><span class="pill r">❌ 不推荐</span></td></tr>
+      <tr><td>D. 写 RHCRM 合同表</td><td>v0.1 调 purchase-contracts 接口</td><td><span class="pill g">零</span></td><td>低</td><td>合同表是结果非审批入口；D-007 已裁写路径后置</td><td><span class="pill r">❌ 0.1 不做</span></td></tr>
+    </tbody>
+  </table>
+
+  <h4>A1 落地细节（全部 v0.1 侧实现）— 新增「下单桥接模块」（internal/bridge 或 cmd/bridge）</h4>
+  <ul class="list">
+    <li><b>1. OAuth 代理：</b>构造飞书授权 URL（旧系统 FEISHU_APP_ID，redirect 指 v0.1 回调）→ code 交既有 feishu-user-by-code → 返回 create-order token + 身份。token 加密缓存（2h，过期前 15 分钟提示）；open_id/user_id 落 v0.1 身份映射表（顺带补 T1.2 G3）。</li>
+    <li><b>2. 下单调用器：</b>表单映射为 SubmitOrderInput，幂等键 <code>order:&lt;tenant&gt;:&lt;source&gt;:&lt;uuid&gt;</code> 直接作为 create_idempotency_key；Bearer 调 <code>POST /external-orders/create</code>；成功后回写 flow_id/instance_id/stage_id 到 v0.1 PG（orders.legacy_flow_id + UNIQUE）。<b>不带</b> x-renheng-wecom-bridge 桥接头（该头强制王杰+测试 profile）。提交人语义：agent 可代下、sales 只能本人。</li>
+    <li><b>3. 字段映射：</b>客户（老客户传 customer_record_id / 新客户传字段回写客户池）；商品 items[]（旧系统补全规格）；结算 payment_terms（款到发货|先款|款到|预付|现款|提货前付款 → 决定是否走财务闸门）+ remittance_method；收货；<b>0.1 不传合同文件</b>（旧系统自动生成）；金额元↔分换算。</li>
+    <li><b>4. 复制/重提（P1）：</b>调既有 reuse-data 取可复用数据；<b>submitter_view_token 不落 PG</b>，仅会话内持有或重新授权后取回。</li>
+  </ul>
+  <h4>旧系统侧非开发配合（配置/数据，不写代码）</h4>
+  <ul class="list">
+    <li>5. 旧系统飞书应用后台：v0.1 授权回调地址加入重定向白名单（一次配置）。</li>
+    <li>6. agent_person_map.json（或 sales_person_map.json）加入销售助手（追加式修改、先备份）。</li>
+    <li>7. <b>审批人映射（已审计，勿按旧手册操作）：</b>默认 roles 保持原样；销售助手订单走 V01_SALES_ASSISTANT profile（merge 语义下<strong>必须显式配置 TEST_SUPERVISOR/TEST_CHAIRMAN</strong>，附录 D-4）。</li>
+    <li>8. 若需"主管自动通过"——旧系统既有逻辑（提交人==销售员==唯一主管）会自动通过，确认是否期望。</li>
+  </ul>
+
+  <h3>6.3 读方向：飞书流 → v0.1（全部 v0.1 侧，不依赖旧系统新能力）</h3>
+  <table>
+    <thead><tr><th>#</th><th>目标</th><th>级别</th><th>实现</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>自建订单列表</td><td><span class="pill.g">P0</span></td><td>桥接回写天然在 v0.1 PG，工作台"我创建的订单"直接查 PG，<strong>零同步开发</strong></td></tr>
+      <tr><td>2</td><td>存量订单列表</td><td><span class="pill b">P1</span></td><td>cmd/sync（已实现 http 拉取器+幂等）配<strong>多维表 http 源</strong>即可，周期拉取（先 1h）；<strong>不需旧系统导出端点</strong>；前置 v0.1 飞书应用 bitable 读权限（T3.1）</td></tr>
+      <tr><td>3</td><td>订单详情</td><td><span class="pill.g">P0</span></td><td>跳旧系统既有 <code>GET /flows/:flow_id</code>（无鉴权只读页，实时渲染）；v0.1 只存 flow_id，<strong>不落 token</strong></td></tr>
+      <tr><td>4</td><td>实时性</td><td>—</td><td>以飞书审批中心 + flows 页为准；v0.1 列表为周期回显；不指望 webhook（零改动）</td></tr>
+      <tr><td>5</td><td>状态映射</td><td>—</td><td>5 项未拍板前，先展示旧系统原始 status/status_label + 当前节点（多维表直接有中文），不阻塞上线</td></tr>
+      <tr><td>6</td><td>敏感边界</td><td>—</td><td>open_id 映射内部 user_id；view_token 不进 PG；列表/详情不落审批表单原始 JSON</td></tr>
+    </tbody>
+  </table>
+
+  <h3>6.4 兼容性检查清单（补漏）</h3>
+  <table>
+    <thead><tr><th>#</th><th>检查项</th><th>级别</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>存量订单可见性</td><td><span class="pill b">P1</span></td><td>cmd/sync 多维表源同步摘要；自建单直查 PG，不依赖存量同步也能开工</td></tr>
+      <tr><td>2</td><td>审批中订单</td><td><span class="pill.g">P0</span></td><td>同步只读不影响飞书侧审批；飞书原流程冒烟照常</td></tr>
+      <tr><td>3</td><td>撤回/驳回/撤销单</td><td><span class="pill.g">P0</span></td><td>CANCELED/REJECTED 单正确显示（未拍板前先显示原始状态/节点）</td></tr>
+      <tr><td>4</td><td>身份映射</td><td><span class="pill.g">P0</span></td><td>OAuth 绑定企微↔飞书身份；旧系统白名单须含销售助手</td></tr>
+      <tr><td>5</td><td>结算方式枚举对齐</td><td><span class="pill.g">P0</span></td><td>"账期 30 天/月结"→旧系统款到类判定（决定财务闸门）</td></tr>
+      <tr><td>6</td><td>金额单位换算</td><td><span class="pill.g">P0</span></td><td>分↔元，桥接与同步双向显式换算</td></tr>
+      <tr><td>7</td><td>幂等</td><td><span class="pill.g">P0</span></td><td>幂等键直作 create_idempotency_key；重试安全；submission-status 可查结果</td></tr>
+      <tr><td>8</td><td>附件/文件</td><td><span class="pill b">P1</span></td><td>0.1 不传合同；存量附件经 flows 页/多维表链接查看，不迁移文件本体</td></tr>
+      <tr><td>9</td><td>分批/合并开票单</td><td><span class="pill b">P1</span></td><td>列表状态回显即可；不进入 v0.1 操作链</td></tr>
+      <tr><td>10</td><td>网络拓扑</td><td><span class="pill.g">P0</span></td><td>v0.1→旧系统公网与飞书 API；<strong>不需要</strong>旧系统→v0.1 方向（零 webhook）</td></tr>
+      <tr><td>11</td><td>时区/时间语义</td><td><span class="pill b">P1</span></td><td>多维表/JSONL 为旧系统时区语义；展示层统一转换</td></tr>
+      <tr><td>12</td><td>监控对账</td><td><span class="pill b">P1</span></td><td>自建单 vs 多维表每日对账；同步失败告警+连续 N 次停止人工介入</td></tr>
+      <tr><td>13</td><td>数据区分</td><td><span class="pill.g">P0</span></td><td>同一 JSONL 存储（approval_profile 区分，不隔离存储）；v0.1 侧按 flow_id 维度过滤</td></tr>
+      <tr><td>14</td><td>回滚</td><td><span class="pill.g">P0</span></td><td>v0.1 关桥接开关即停用；同步 Job 可停；旧系统零回滚</td></tr>
+      <tr><td>15</td><td>旧系统缺陷规避</td><td><span class="pill b">P1</span></td><td>不新增暴露面；销售助手<strong>不提供修改/撤销</strong>能力</td></tr>
+      <tr><td>16</td><td>审批人同人自动通过</td><td><span class="pill b">P1</span></td><td>确认虹励若同时为提交人+审批角色的自动通过是否为期望行为</td></tr>
+      <tr><td>17</td><td>飞书应用配置</td><td><span class="pill.g">P0</span></td><td>v0.1 授权回调地址加入重定向白名单（配置，非代码）</td></tr>
+      <tr><td>18</td><td>授权体验</td><td><span class="pill b">P1</span></td><td>2h 过期缓存+提醒；"我的订单"放"重新授权"入口</td></tr>
+    </tbody>
+  </table>
+
+  <h3>6.5 风险与红线</h3>
+  <div class="warn"><b>红线（沿用旧系统 README）：</b>不清空/覆盖 data/*.jsonl；测试服务不得读写生产 data 目录；桥接 secret 不进 Git；生产修复保留前后证据。</div>
+  <ul class="list">
+    <li><b>风险 1：</b>create 接口是浏览器表单接口（multipart），v0.1 以 Bearer 调用——高并发需确认旧系统锁/幂等能扛住（销售助手单人场景量级小无碍）。</li>
+    <li><b>风险 2：</b>企微备案域名未就绪 → 群聊入口不可用；备用 PC 订单后台/侧边栏走通数据线。</li>
+    <li><b>风险 3：</b>T3 调研（webhook 可行性）未完成前，实时性按轮询兜底，不阻塞。</li>
+    <li><b>风险 4：</b>开票阶段 4 个"销售/代办"节点处理人仍是飞书侧销售员，v0.1 不代做——需确认销售员会继续用飞书办理。</li>
+    <li><b>风险 5（现状事实）：</b>开票深链财务开票→回款跟进<strong>当前不可达</strong>，生产开票止于"盖章回传→归档"。若业务方期望这些环节真实生效，需旧系统单独排期修复，<strong>不要</strong>算进 v0.1 上线范围。</li>
+    <li><b>风险 6（流程小修）：</b>发布中主要流程不变、允许小修，优先在飞书端临时修补；<strong>唯一硬约束：0.5 真相源切换前流程必须冻结</strong>（附录 C D13）。</li>
+  </ul>
+
+  <h3>6.6 执行迁移通道（v0.2 起）· 受信办理 —— 已验证成立</h3>
+  <div class="note">v0.2 起，环节办理动作从飞书迁入新系统：新系统办理 → 受信端点 → 旧系统 decision 核心 → 状态机推进 + 飞书实例同步显示已办。完整验证见 docs/发布计划可行性验证.md。</div>
+  <h4>已验证的代码事实（无鉴权死路）</h4>
+  <table>
+    <thead><tr><th>环节</th><th>decision 鉴权</th><th>文件上传</th><th>证据</th></tr></thead>
+    <tbody>
+      <tr><td>订单</td><td>approver_token + task_id + entry=approval_center 免身份</td><td>无</td><td>externalOrders.ts:4965-5007</td></tr>
+      <tr><td>备货</td><td><strong>仅 approver_token 匹配</strong></td><td>无（字段型 extraData）</td><td>stockPrepares.ts:963-977</td></tr>
+      <tr><td>发货</td><td>仅 approver_token 匹配</td><td>receipt_files 必传（回单节点）</td><td>shipments.ts:1853-1871,1954</td></tr>
+      <tr><td>开票</td><td>仅 approver_token 匹配</td><td>invoice_files</td><td>invoices.ts:772-789</td></tr>
+    </tbody>
+  </table>
+  <h4>两个需临时修补的缺陷（旧系统临时性修补，很小）</h4>
+  <ul class="list">
+    <li>1. <b>operatorOpenId 是占位符</b>（"(stock-prepare-web-approver)" 等）——审计"谁办的"不精确；受信端点传真实办理人。</li>
+    <li>2. <b>无并发锁</b>——受信端点加幂等锁，防双通道并发办理（新系统 + 飞书残留待办）。</li>
+  </ul>
+  <h4>必须堵上的点（P0，执行迁移的安全前提）</h4>
+  <table>
+    <thead><tr><th>#</th><th>时点</th><th>必须堵上</th></tr></thead>
+    <tbody>
+      <tr><td>P0-2</td><td>v0.2 前</td><td>存量待办规则：迁移开关只对新单生效（按 flow_id 批次），存量单飞书走完</td></tr>
+      <tr><td>P0-3</td><td>v0.2 前</td><td>受信端点 + 并发锁 + 真实办理人</td></tr>
+      <tr><td>P0-4</td><td>v0.3 前</td><td>开票迁移按真实任务定义（「开票申请」是抄送非任务、财务深链不可达）→ 迁「确认到款」+「盖章回传」</td></tr>
+      <tr><td>P0-5</td><td>v0.3 前</td><td>受信通道文件转发（multipart 直传）+ 附件归属定稿</td></tr>
+      <tr><td>P0-6</td><td>v0.4 前</td><td>新系统详情页 + 附件查看自立（0.5 后旧系统若停机，flows 页不可依赖）</td></tr>
+      <tr><td>P0-7</td><td>0.5 前</td><td>T1.3 五项目拍板（新系统状态机接住所有中间状态）</td></tr>
+      <tr><td>P0-8</td><td>0.5 前</td><td>JSONL 级全量迁移（含事件链）+ 真相源切换仪式 + 切换/回滚演练</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 7. 上线节奏 ============ -->
+<section>
+  <h2><span class="no">7</span>上线节奏建议</h2>
+  <p class="sec-sub">与 11-migration.html 的 P0-P4 计划对齐，新增"桥接"工作线。目标：<strong>本周（08-21 窗口）内，v0.1 提供销售助手下单 + 订单状态视图，飞书流不停</strong>。</p>
+  <table>
+    <thead><tr><th>阶段</th><th>工作内容（全部 v0.1 开发量）</th><th>依赖/前置</th><th>验收标准</th></tr></thead>
+    <tbody>
+      <tr><td>S0 调研冻结（已大部完成）</td><td>T1.1 存储 ✅；T1.2 字段映射 ✅；T1.3 状态映射 ✅（5 项拍板）；T3 权限/部署调研</td><td>—</td><td>5 项拍板记录；T3 归档；白名单/角色映射确认单</td></tr>
+      <tr><td>S1 桥接与旧系统小改</td><td>① v0.1 桥接模块；② 旧系统针对性小改（自动确认 + V01 profile 注入）</td><td>S0、重定向白名单配置</td><td>联调：授权→下单→信息确认自动通过→审批推到真实审批人→飞书可见→PG 有 flow_id/instance_id</td></tr>
+      <tr><td>S2 列表与视图</td><td>自建单列表；存量单多维表源；详情跳转 flows 页</td><td>S1</td><td>10 笔测试单（新老/款到非款到/自提）全链路可见；存量列表出现</td></tr>
+      <tr><td>S3 体验增强（P1）</td><td>复制/重提；重新授权入口；驳回原因展示</td><td>S1+S2</td><td>体验清单 6 项（§8）通过</td></tr>
+      <tr><td>S4 灰度</td><td>仅虹励一人；真实下单 1-2 笔</td><td>S1+S2</td><td>销售助手体验闭环验收</td></tr>
+      <tr><td>S5 上线</td><td>开桥接开关；监控/对账告警；回滚预案</td><td>S4</td><td>3 天观察：成功率/实例创建率/回显延迟</td></tr>
+      <tr><td>0.2+</td><td>执行迁移：v0.2 商务/备货 → v0.3 仓管·财务 → v0.4 销售 → 0.5 两级终审迁入 + 真相源切换 + 飞书整体下线</td><td>0.1 数据验证</td><td>—</td></tr>
+    </tbody>
+  </table>
+  <div class="note"><b>节奏要点：</b>关键路径仍是企微备案域名；全部开发量在 v0.1 侧；若赶不上，<strong>最小可上线切片</strong>=S1 桥接 + S4 灰度先跑通"下单→审批实例→flows 详情"，存量同步可后置 1 周（销售助手下单后第一时间在飞书审批中心看到待办，v0.1 视图只是增强）。</div>
+</section>
+
+<!-- ============ 8. 开发量/动作/验收 ============ -->
+<section>
+  <h2><span class="no">8</span>开发量边界、动作清单与体验闭环验收</h2>
+
+  <h3>8.1 开发量边界（已确认原则）</h3>
+  <table>
+    <thead><tr><th>工作项</th><th>归属</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>OAuth 代理、token 缓存、下单桥接、字段映射、幂等、回写 PG</td><td><span class="pill g">v0.1 开发量</span></td><td>§6.2 全部实现点</td></tr>
+      <tr><td>自建单列表、存量同步、详情跳转、复制重提、重新授权</td><td><span class="pill g">v0.1 开发量</span></td><td>§6.3 全部实现点</td></tr>
+      <tr><td>旧系统针对性小改（① 自动确认+profile 注入；② 受信办理通道）</td><td><span class="pill b">v0.1 主导、旧系统落地</span></td><td>改动收敛于 submitExternalOrder.ts + 受信端点 + approval_profiles 配置；独立测试服务验证后上生产；①只影响 v0.1 订单，②只受理信凭证</td></tr>
+      <tr><td>旧系统其它代码改动（桥接泛化/导出/webhook）</td><td><span class="pill n">0（不做）</span></td><td>0.2 需要时再议</td></tr>
+      <tr><td>旧系统 bug 修复（开票深链/auto_approve/修改校验/回款/48h）</td><td><span class="pill n">0（不做）</span></td><td>旧系统程序员职责；v0.1 只规避不触碰</td></tr>
+      <tr><td>旧系统配置/数据操作（白名单/角色映射确认）</td><td><span class="pill c">配置操作（非开发）</span></td><td>旧系统侧执行或 v0.1 团队代操作</td></tr>
+    </tbody>
+  </table>
+
+  <h3>8.2 动作清单（按阶段）</h3>
+  <table>
+    <thead><tr><th>阶段</th><th>动作</th><th>责任人</th><th>产出</th></tr></thead>
+    <tbody>
+      <tr><td>S0</td><td>5 项 T1.3 状态口径拍板</td><td>业务方</td><td>拍板记录</td></tr>
+      <tr><td>S0</td><td>v0.1 授权回调地址加重定向白名单</td><td>旧系统侧/管理员</td><td>配置完成截图</td></tr>
+      <tr><td>S0</td><td>白名单加销售助手；角色映射确认</td><td>旧系统侧/管理员</td><td>白名单与映射确认单</td></tr>
+      <tr><td>S1</td><td>v0.1 新增 internal/bridge（OAuth+token+调用器+错误分类）</td><td>v0.1 开发</td><td>联调通过</td></tr>
+      <tr><td>S1</td><td>字段映射表落地（→代码常量）</td><td>v0.1 开发</td><td>映射单测</td></tr>
+      <tr><td>S2</td><td>自建单列表 + 存量多维表源 + 详情跳转</td><td>v0.1 开发</td><td>10 笔测试单全链路可见</td></tr>
+      <tr><td>S3</td><td>复制/重提、重新授权、驳回原因展示</td><td>v0.1 开发（P1）</td><td>体验清单 6 项通过</td></tr>
+      <tr><td>S4</td><td>虹励一人灰度，真实下单 1-2 笔</td><td>v0.1 + 虹励</td><td>体验闭环验收通过</td></tr>
+      <tr><td>S5</td><td>开桥接开关、监控对账上线、回滚预案</td><td>v0.1 运维</td><td>3 天观察报告</td></tr>
+    </tbody>
+  </table>
+
+  <h3>8.3 销售助手体验闭环（0.1 验收定义）</h3>
+  <table>
+    <thead><tr><th>#</th><th>体验项</th><th>实现载体</th><th>验收标准</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>下单</td><td>企微入口（群聊确认卡/侧边栏/工作台）</td><td>提交成功提示"已进入审批"；记录 flow_id/instance_id</td></tr>
+      <tr><td>2</td><td>审批可见</td><td>飞书审批中心 + 机器人消息卡片</td><td>下单后飞书出现信息确认待办（本人）或审批人待办</td></tr>
+      <tr><td>3</td><td>进度回显</td><td>"我的订单"列表 + 详情跳 flows</td><td>列表显示状态/节点；详情看四环节快照+时间线+评论</td></tr>
+      <tr><td>4</td><td>驳回/通过感知</td><td>列表状态回显 + flows 审批意见</td><td>状态变化周期内回显；驳回原因可见</td></tr>
+      <tr><td>5</td><td>重提/复制</td><td>reuse-data（P1）</td><td>驳回/已完成单可一键复制</td></tr>
+      <tr><td>6</td><td>授权续期</td><td>过期提醒 + 一键重新授权</td><td>过期不再静默失败；跳转一次完成</td></tr>
+    </tbody>
+  </table>
+
+  <h3>8.4 明确不做（防范围蔓延）</h3>
+  <ul class="list">
+    <li>不修旧系统任何 bug / 深链（开票财务链、auto_approve、EMAIL_ARCHIVE 占位等）。</li>
+    <li><b>旧系统唯一改动</b>（已决策）= §5.1 边界 1 的针对性小改；除此之外旧系统零代码改动。</li>
+    <li>不在 v0.1 执行备货/发货/开票操作——执行迁移自 v0.2 起按环节渐进推进。</li>
+    <li>自动下单（会话存档+意图建单）移出一期；锁库存不做。</li>
+    <li>不迁移 JSONL 数据（只做只读同步视图 + 跳转既有页面）。</li>
+    <li>不新增旧系统导出端点 / webhook / 桥接泛化（0.2 再议）。</li>
+  </ul>
+</section>
+
+<!-- ============ 附录 ============ -->
+<section>
+  <h2><span class="no">附</span>附录</h2>
+
+  <div class="appendix">
+    <h3><span class="no">A</span>证据索引（关键文件:行号）</h3>
+    <table>
+      <thead><tr><th>事实</th><th>位置</th></tr></thead>
+      <tbody>
+        <tr><td>flow_id/instance_id/stage_id 生成</td><td>tripartite-approval/src/services/submitExternalOrder.ts:218-321</td></tr>
+        <tr><td>幂等键/指纹/去重</td><td>同文件 :112-1503</td></tr>
+        <tr><td>提交人语义与角色解析</td><td>同文件 :1471-1500、approvalOrSign.ts</td></tr>
+        <tr><td>主管同人自动通过</td><td>同文件 :1106-1137</td></tr>
+        <tr><td>董事长触发条件 C/D</td><td>同文件 :1537</td></tr>
+        <tr><td>创建接口与桥接硬编码</td><td>src/routes/externalOrders.ts:4120-4167、createOrderAuth.ts</td></tr>
+        <tr><td>桥接只读接口/profile 硬编码</td><td>src/routes/wecomProductionBridge.ts:255-342</td></tr>
+        <tr><td>节点全集/标签</td><td>同文件 :162-183</td></tr>
+        <tr><td>备货节点/款到分支</td><td>src/services/stockPrepareApproval.ts:459-466,645-667,1070-1320</td></tr>
+        <tr><td>发货节点/数量约束</td><td>src/services/shipmentApproval.ts</td></tr>
+        <tr><td>开票节点链/深链不可达</td><td>src/services/invoiceApproval.ts:592-593,686-687,998-1031,1075-1148,1415-1427</td></tr>
+        <tr><td>回调驱动</td><td>src/routes/feishuActionCallback.ts</td></tr>
+        <tr><td>整单撤销</td><td>src/routes/externalOrders.ts:4820-4905</td></tr>
+        <tr><td>超时提醒</td><td>src/services/shipmentDelayReminder.ts</td></tr>
+        <tr><td>16 表字段清单</td><td>b2b_pilot_v3/spec/biz/飞书三方审批系统存储表及字段说明.md</td></tr>
+        <tr><td>飞书侧数据现状</td><td>b2b_pilot_v3/spec/飞书侧数据现状清单.html</td></tr>
+        <tr><td>字段映射/缺口</td><td>spec/T1.2-字段映射核对表.html</td></tr>
+        <tr><td>状态映射（169→34）</td><td>b2b_pilot_v3/spec/T1.3-状态枚举语义映射设计.html</td></tr>
+        <tr><td>RHCRM 数据源/唯一订单源/D-007</td><td>b2b_pilot_v3/spec/RHCRM-订单数据源架构说明.html</td></tr>
+        <tr><td>v0.1 业务流程（N1-N8）</td><td>b2b_pilot_v3/docs/v0.1/05-business-flow.html</td></tr>
+        <tr><td>平行流/同步方案/敏感边界</td><td>b2b_pilot_v3/docs/v0.1/11-migration.html</td></tr>
+        <tr><td>同步 Job 实现</td><td>b2b_pilot_v3/cmd/sync/main.go、internal/sync/sync.go、config/sync.example.json</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="appendix">
+    <h3><span class="no">B</span>术语对照表</h3>
+    <table>
+      <thead><tr><th>三方审批（旧）</th><th>v0.1</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td>flow_id（SO-YYYYMMDD-XXXX）</td><td>orders.legacy_flow_id</td><td>主流程贯穿键</td></tr>
+        <tr><td>instance_id</td><td>legacy_flow_mapping.legacy_instance_id</td><td>各环节审批实例</td></tr>
+        <tr><td>ORD/STK/SHP/INV</td><td>stage_code</td><td>四环节代码一致</td></tr>
+        <tr><td>status（169 枚举）</td><td>state（34 状态）</td><td>T1.3 映射</td></tr>
+        <tr><td>approval_profile</td><td>—</td><td>审批配置隔离；v0.1 桥接用独立 profile</td></tr>
+        <tr><td>款到发货/非款到发货</td><td>payment_term（账期 30 天/月结 30 天）</td><td>需枚举对齐</td></tr>
+        <tr><td>无票销售 NO_INVOICE_SALE</td><td>—</td><td>旧系统显式分支</td></tr>
+        <tr><td>合并开票</td><td>invoice_order_links</td><td>旧 24 字段，v0.1 独立关联表</td></tr>
+        <tr><td>external_instance</td><td>approval_tasks（视图）</td><td>审批载体</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="appendix">
+    <h3><span class="no">C</span>决策记录（2026-08-18，用户确认，勿再推翻）</h3>
+    <table>
+      <thead><tr><th>#</th><th>决策</th><th>内容</th><th>依据/背景</th></tr></thead>
+      <tbody>
+        <tr><td>D1</td><td>开发量边界</td><td>为 v0.1 上线新增的一切 = v0.1 侧开发量；旧系统不修 bug</td><td>用户："额外的 job/同步动作，认为是我们的开发量"</td></tr>
+        <tr><td>D2</td><td>旧系统改动态度</td><td>可以改，但尽量不改（质量不可控）</td><td>用户原话</td></tr>
+        <tr><td>D3</td><td>信息确认自动化</td><td>旧系统针对性小改：前缀识别 → 自动确认 + V01 profile</td><td>用户："增加一点特殊代码，直接自动确认"</td></tr>
+        <tr><td>D4</td><td>v0.1 角色</td><td>唯一用户=销售助手虹励；其它用户零影响</td><td>用户原话</td></tr>
+        <tr><td>D5</td><td>驳回/重提体验</td><td>虹励企微端重提；其它用户飞书端照旧</td><td>用户确认</td></tr>
+        <tr><td>D6</td><td>默认 role map</td><td>完全不理会、保持原样</td><td>用户："我并不想解决这些问题…现状如何就是如何"</td></tr>
+        <tr><td>D7</td><td>审批人背景</td><td>王杰/王鑫力=程序员、不会点审批</td><td>用户确认</td></tr>
+        <tr><td>D8</td><td>张有连</td><td>=董事长；自动跳过主管=正确业务，勿动</td><td>用户确认；:1129</td></tr>
+        <tr><td>D9</td><td>生产 role map 审计</td><td>依据 production_approval_role_map.json 完成（附录 D）</td><td>用户提供文件</td></tr>
+        <tr><td>D10</td><td><b>最终目标</b></td><td>以企微版流程取代飞书三方审批流，0.5 整体下线</td><td>用户："核心目的就是推企微版流程上线，取代飞书三方审批流"</td></tr>
+        <tr><td>D11</td><td>版本用户规划</td><td>v0.1 虹励→v0.2 +商务→v0.3 +仓管财务→v0.4 +销售→0.5 两级终审迁入</td><td>用户逐版指定</td></tr>
+        <tr><td>D12</td><td>每周迭代 + 数据范围渐进</td><td>每周一版；同步管道一次建成、范围逐版打开</td><td>用户原话</td></tr>
+        <tr><td>D13</td><td>流程小修 + 飞书临时修补</td><td>允许流程修正，优先飞书端临时修补；0.5 前流程冻结</td><td>用户原话</td></tr>
+        <tr><td>D14</td><td>最高验证视角</td><td>发布计划以「数据不可丢失、不可有不能解决的死路」为最高标准</td><td>用户原话</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="appendix">
+    <h3><span class="no">D</span>生产 approval_role_map.json 审计明细（2026-08-18）</h3>
+    <p class="sec-sub">文件：production_approval_role_map.json（用户从生产拷贝）。<b>前提：</b>用户提供时描述为"所有跟王杰相关的配置项"——若生产实际文件还有其它顶层 roles/special_approvers，需按实际文件复核。</p>
+    <h4>D-1 默认 roles（无 profile 时生效）</h4>
+    <table>
+      <thead><tr><th>角色 key</th><th>mode</th><th>审批人</th><th>对应节点</th><th>对 v0.1 影响</th></tr></thead>
+      <tbody>
+        <tr><td>TEST_MANAGER</td><td>FIXED_USERS</td><td>王杰</td><td>主管审批 fallback</td><td><span class="pill r">🔴 主管审批=王杰</span></td></tr>
+        <tr><td>（未配 TEST_SUPERVISOR / TEST_CHAIRMAN）</td><td>—</td><td>—</td><td>主管/董事长 fallback 到 TEST_MANAGER=王杰</td><td><span class="pill r">🔴 董事长审批=王杰</span></td></tr>
+        <tr><td>TEST_STOCK_FINANCE</td><td>FIXED_USERS</td><td>王杰、李丽姣</td><td>备货·财务确认到款（or-sign）</td><td><span class="pill a">🟡 李丽姣会点则不卡</span></td></tr>
+        <tr><td>TEST_STOCK_BUSINESS</td><td>FIXED_USERS</td><td><b>陈虹励</b>、王杰、宋海斌</td><td>备货·商务填写发货仓</td><td><span class="pill g">🟢 虹励本人在组</span></td></tr>
+        <tr><td>TEST_SHIPMENT_WAREHOUSE</td><td>FIXED_USERS</td><td><b>陈虹励</b>、王杰、宋海斌</td><td>发货·仓库发货</td><td><span class="pill g">🟢 同上</span></td></tr>
+        <tr><td>TEST_SHIPMENT_RECEIPT</td><td>FIXED_USERS</td><td><b>陈虹励</b>、王杰</td><td>发货·上传回单</td><td><span class="pill g">🟢 同上</span></td></tr>
+        <tr><td>TEST_INVOICE_APPLY</td><td>FIXED_USERS</td><td>王杰、李丽姣</td><td>开票·开票申请</td><td><span class="pill a">🟡 同财务</span></td></tr>
+      </tbody>
+    </table>
+    <p class="sec-sub">注：信息确认节点办理人=提交人本人（不走 role map）；王鑫力<strong>不在</strong>审批映射（仅销售/代办白名单）。</p>
+    <h4>D-2 approval_profiles（已存在，模板可用）</h4>
+    <ul class="list">
+      <li><code>FEISHU_WANGJIE_TEST</code>：TEST_MANAGER=王杰</li>
+      <li><code>WECOM_MA_HONGYI_TEAM</code>：TEST_CHAIRMAN=王杰、TEST_SHIPMENT_WAREHOUSE=王杰 + special_approvers 四仓=王杰（马弘毅专属）——<b>v0.1 的 V01 profile 照此结构新增即可</b></li>
+    </ul>
+    <h4>D-3 关键代码机制</h4>
+    <ul class="list">
+      <li>profile 覆盖 = merge 非替换（roleMapForContext，approvalOrSign.ts:79-96）</li>
+      <li>或签（or-sign）：任一同意即整组完成（:299-336）</li>
+      <li>主管自动跳过：销售员=张有连 或 提交人==销售员==唯一主管（:1106-1131）</li>
+      <li>虹励 open_id（已在生产 map）：ou_042bb3a1a9c5dd9505a9cff92dc8fbc9</li>
+    </ul>
+    <h4>D-4 V01 profile 配置要求（已决策，实施时执行）</h4>
+    <table>
+      <thead><tr><th>角色</th><th>必配/建议</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td>TEST_SUPERVISOR</td><td><span class="pill r">必配</span></td><td>不配则 fallback 到 TEST_MANAGER=王杰（merge 语义）→ 卡单</td></tr>
+        <tr><td>TEST_CHAIRMAN</td><td><span class="pill a">建议配</span></td><td>仅 C/D 级触发；张有连=董事长，如需可配张有连</td></tr>
+        <tr><td>TEST_STOCK_FINANCE / TEST_INVOICE_APPLY</td><td><span class="pill n">可不配</span></td><td>base=王杰 或签 李丽姣</td></tr>
+        <tr><td>TEST_STOCK_BUSINESS / TEST_SHIPMENT_*</td><td><span class="pill n">可不配</span></td><td>base 已含虹励 or-sign 组</td></tr>
+      </tbody>
+    </table>
+    <h4>D-5 未决项清单（上线前逐项关闭，均不阻塞下单主链）</h4>
+    <table>
+      <thead><tr><th>#</th><th>未决项</th><th>归属</th><th>关闭条件</th></tr></thead>
+      <tbody>
+        <tr><td>U1</td><td>T1.3 状态语义 5 项差异拍板</td><td>业务方</td><td>拍板记录</td></tr>
+        <tr><td>U2</td><td>v0.1 飞书应用权限（bitable 读/审批 API）</td><td>v0.1</td><td>权限确认（存量列表 P1 依赖）</td></tr>
+        <tr><td>U3</td><td>生产 role map 是否=提供文件全量</td><td>旧系统侧</td><td>对比生产实际文件确认</td></tr>
+        <tr><td>U4</td><td>V01 profile 真实审批人 open_id</td><td>业务方/v0.1</td><td>提供 open_id 后配置</td></tr>
+        <tr><td>U5</td><td>企微备案域名</td><td>v0.1</td><td>备案完成（否则 PC 订单后台/侧边栏先行）</td></tr>
+        <tr><td>U6</td><td>王杰是否处理现有滞留待办（知情项）</td><td>旧系统侧</td><td>不构成 v0.1 阻塞</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<footer>
+  B2B 订单履约 · 三方审批（现状） vs b2b_pilot_v3 v0.1：业务流程对比与数据同步设计 · 生成 2026-08-18<br>
+  依据 tripartite-approval 代码与文档、b2b_pilot_v3 docs/v0.1（11 章）、docs/gap-analysis.md、spec/（T1.1-T1.3、RHCRM、字段映射、缺陷汇总）与 migrations/
+</footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,35 @@
+# project/project.yaml — 项目控制面入口（ECM §03 / §07）
+# 与 project/policies/mechanism/current.yaml 共同决定机制解析结果（附录 A.5）。
+# 当前机制状态 PROPOSED：A.5 步骤 06 要求 ACTIVE，未激活前 Agent 处于 BOOTSTRAP_DIAGNOSTIC，
+# 只允许只读盘点与执行用户已授权的控制面迁移（附录 A.4）。
+
+project_id: b2b_pilot_v3
+project_name: B2B 销售-履约 pilot (v3)
+repo_root: .
+created_at: 2026-08-13T08:37:00+00:00
+owner: project-governance
+
+mechanism:
+  id: ECM
+  version: 1.0.0
+  status: PROPOSED                     # 与 current.yaml.status 一致（激活时原子更新）
+  pointer: project/policies/mechanism/current.yaml
+  spec_digest: sha256:e8f561b240c0cd571a11eedb5609d96853ecfbe382ee73f81337780679032411
+  policy_component_digests:            # A.5 步骤 11：与 ECM-1.0.0.yaml components 一致
+    ontology: sha256:d22312aa0cc32b80fb3a89fd0dfe32bd837198eeec6a376725e8e6ded6c29da3
+    authority_matrix: sha256:8b7362f967366363504aebd7418be689f024aa037c14bcf4835400124a02e395
+    state_machine: sha256:9ad44634996a8c3a12f7b826c81dd230ee968c7d58fee98bc1e70cd8b9982b72
+    evidence_policy: sha256:9a6ef66c6497e03aadc1240c64ad837655b875aae60ae0a7277fc3aad7e68475
+    handoff_policy: sha256:e5ecfc8c8314ce4a4376d68eacfac72572fc26e2ba043eac3b420e449dfe0be4
+
+bootstrap:
+  mode: true
+  note: 首次迁移：仅建立控制面结构与机制双制品（M0/M1，§09）；未抽取业务 claims（M2 需 owner 参与）
+
+baseline:
+  id: NONE             # 尚无已发布 ECM baseline（ECM-REC-004 / §11）
+  manifest_digest: UNKNOWN
+
+governance:
+  calendar: UNKNOWN    # 定期检查频率未设定（M5 范围外）
+  current_iteration: UNKNOWN

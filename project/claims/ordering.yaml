@@ -1,0 +1,196 @@
+# project/claims/ordering.yaml — 订单域原子声明（ECM §04 Claim 模型）
+# M2 落库（2026-08-13 首批）+ 修订（2026-08-14，基于最新原始需求：
+#   spec/Demo意见收集_文字版.html 第 1/3/4/5/7 项 + docs/demo/index.html fb29859 落地）
+# 来源引用：SRC-ADVICE = spec/demo意见收集_文字版.html（+ spec/Demo意见收集.docx）；
+#           SRC-REVIEW-20260812 = spec/review/202608121845_修改意见.html；
+#           SRC-USECASE-V2 = docs/用例总表.html；SRC-DEMO = docs/demo/index.html
+# claim_id 稳定、不随文件移动；owner 为推定（M2 退出条件要求 R2/R3 100% 有 owner，待 owner 确认）。
+
+claims:
+  # ---- 群内人工下单交互形态 ----
+  - claim_id: CLM-ORDER-ENTRY-UI-001
+    statement: {subject: 群内人工下单(XS2), predicate: uses_interaction_pattern, object: 单页长表单（客户锁定不设分步；五组字段纵向排列）}
+    scope: {product: wecom-order-assistant, role: sales, scenario: XS2, phase: pilot-v0}
+    authority: {basis: 评审共识·必改 XS2-01/XS2-02 + 原始需求第 3 项（字段覆盖原业务表单）细化, sources: [SRC-REVIEW-20260812#XS2-02, SRC-ADVICE#manual-order, SRC-DEMO#XS2]}
+    semantic_status: ACCEPTED
+    implementation: {demo: IMPLEMENTED, backend: NOT_APPLICABLE, production_ui: UNPLANNED}
+    verification: {demo_smoke: PASS, business_uat: UNVERIFIED}
+    risk: R1
+    owner: product-ordering
+    acceptance: {oracle: 下一版 demo 复评核对单页长表单与五组字段（CLM-ORDER-FORM-FIELDS-001）}
+    relations: {supersedes: CLM-ORDER-ENTRY-UI-000(4 步向导), refined_by: CLM-ORDER-FORM-FIELDS-001}
+    open_note: 2026-08-19 用例总表已按 demo 同步为单页长表单，STALE_VIEW 关闭（OI-011）
+  - claim_id: CLM-ORDER-FORM-FIELDS-001
+    statement: {subject: 人工下单表单字段, predicate: covers, object: 原业务表单五组（客户与归属/结算/合同附件/商品明细/补充说明）}
+    scope: {product: wecom-order-assistant, role: sales, scenario: XS2, phase: pilot-v0}
+    authority: {basis: 原始需求第 3 项（P1）, sources: [SRC-ADVICE#manual-order, SRC-DEMO#XS2]}
+    semantic_status: ACCEPTED
+    implementation: {demo: IMPLEMENTED, backend: NOT_APPLICABLE, production_ui: UNPLANNED}
+    verification: {demo_smoke: PASS, business_uat: UNVERIFIED}
+    risk: R2   # 字段覆盖不全将导致线下补录/业务偏差
+    owner: product-ordering
+    acceptance: {oracle: 验收：逐项找到上表字段或自动匹配结果；移动端无横向滚动；预填来源标注（群上下文/档案/最近订单/框架合同）}
+    relations: {refines: CLM-ORDER-ENTRY-UI-001, detail: 结算=是否自提/结算方式/汇款方式（账期与付款方式≠全部）；合同=按主体自动匹配并展示结果+附件入口；明细=产品/数量kg/单价/合计/包装/规格/到货时间/备注；补充=特殊规格要求/订单备注（特殊标记升级为勾选+文本）}
+  - claim_id: CLM-ORDER-ENTRY-UI-002
+    statement: {subject: 群内下单客户, predicate: is_locked_by, object: 群上下文（不可更换）}
+    scope: {product: wecom-order-assistant, role: sales, scenario: XS2, phase: pilot-v0}
+    authority: {basis: 评审共识·必改 XS2-01, sources: [SRC-REVIEW-20260812#XS2-01, SRC-DEMO#XS2]}
+    semantic_status: ACCEPTED
+    implementation: {demo: IMPLEMENTED, backend: NOT_APPLICABLE, production_ui: UNPLANNED}
+    verification: {demo_smoke: PASS, business_uat: UNVERIFIED}
+    risk: R1
+    owner: product-ordering
+    acceptance: {oracle: demo 复评：群内进入下单无选客户步骤}
+    relations: {refines: CLM-ORDER-ENTRY-UI-001}
+  - claim_id: CLM-ORDER-ENTRY-CONTRACT-001
+    statement: {subject: 下单合同模板, predicate: auto_matched_by, object: 下单主体（无需人工选择；展示匹配结果与附件入口）}
+    scope: {product: wecom-order-assistant, role: sales, scenario: XS2, phase: pilot-v0}
+    authority: {basis: 评审共识·必改 XS2-03 + 原始需求第 3 项细化, sources: [SRC-REVIEW-20260812#XS2-03, SRC-ADVICE#manual-order, SRC-DEMO#XS2]}
+    semantic_status: ACCEPTED
+    implementation: {demo: IMPLEMENTED, backend: UNPLANNED, production_ui: UNPLANNED}
+    verification: {demo_smoke: PASS, business_uat: UNVERIFIED}
+    risk: R1
+    owner: product-ordering
+    acceptance: {oracle: demo 复评：合同字段改为“主体”且自动匹配+附件入口}
+    relations: {depends_on: CLM-ORDER-ENTRY-UI-001}
+  - claim_id: CLM-ORDER-ENTRY-PRICE-001
+    statement: {subject: 下单单价, predicate: defaults_to, object: 该客户最近一次历史订单单价（协议价上限内可改；参考价在审价侧单独显示）}
+    scope: {product: wecom-order-assistant, role: sales, scenario: XS2, phase: pilot-v0}
+    authority: {basis: 评审共识 XS2-05 + 原始需求第 7 项（协议/历史参考价单独显示）, sources: [SRC-REVIEW-20260812#XS2-05, SRC-ADVICE#manager, SRC-DEMO#XS2]}
+    semantic_status: ACCEPTED
+    implementation: {demo: IMPLEMENTED, backend: UNPLANNED, production_ui: UNPLANNED}
+    verification: {demo_smoke: PASS, business_uat: UNVERIFIED}
+    risk: R2   # 涉及价格数据来源与协议价上限校验
+    owner: business-pricing
+    acceptance: {oracle: 协议价上限校验逻辑与历史单价查询（后端实现后验证）}
+    relations: {depends_on: CLM-GROUP-ACL-001, related_to: CLM-PRICE-REVIEW-FIELDS-001}
+  - claim_id: CLM-ORDER-ENTRY-UI-003
+    statement: {subject: 群内下单表单, predicate: max_prefills, object: 群上下文与客户档案默认值（客户只明确产品+数量+日期时）}
+    scope: {product: wecom-order-assistant, role: sales, scenario: XS2, phase: pilot-v0}
+    authority: {basis: 评审共识 XS2-06, sources: [SRC-REVIEW-20260812#XS2-06, SRC-DEMO#XS2]}
+    semantic_status: ACCEPTED
+    implementation: {demo: IMPLEMENTED, backend: UNPLANNED, production_ui: UNPLANNED}
+    verification: {demo_smoke: PASS, business_uat: UNVERIFIED}
+    risk: R1
+    owner: product-ordering
+    acceptance: {oracle: demo 复评：预填字段覆盖产品/数量/单价/包装/账期/付款方式，来源标注}
+    relations: {refines: CLM-ORDER-ENTRY-UI-001}
+  - claim_id: CLM-ORDER-ENTRY-ASSISTANT-001
+    statement: {subject: 销售助理代下单(XSZL1), predicate: uses_interaction_pattern, object: 单页长表单（与销售下单完全一致，唯一区别：先选下单归属销售决定客户范围）}
+    scope: {product: wecom-order-assistant, role: assistant, scenario: XSZL1, phase: pilot-v0}
+    authority: {basis: 原始需求落地（代下单改单页长表单）, sources: [SRC-DEMO#XSZL1, SRC-ADVICE#manual-order]}
+    semantic_status: ACCEPTED
+    implementation: {demo: IMPLEMENTED, backend: NOT_APPLICABLE, production_ui: UNPLANNED}
+    verification: {demo_smoke: PASS, business_uat: UNVERIFIED}
+    risk: R1
+    owner: product-ordering
+    acceptance: {oracle: demo 复评：先选归属销售→客户自动补全→五组字段单页长表单}
+    relations: {supersedes: CLM-ORDER-ENTRY-ASSISTANT-000(4 步向导, 2026-08-14 修订), refines: CLM-ORDER-ENTRY-UI-001}
+    open_note: 2026-08-14 修订：原 4 步向导声明已随 demo 改版作废（SIM-02 关联）；2026-08-19 用例总表已同步为单页长表单并新增 XSZL2（OI-011）
+  - claim_id: CLM-ORDER-ENTRY-ASSISTANT-002
+    statement: {subject: 销售助理客户群入口代下单(XSZL2), predicate: uses_interaction_pattern, object: 单页长表单（群上下文确定客户；归属销售自动带出并锁定 readonly，不可重新选择）}
+    scope: {product: wecom-order-assistant, role: assistant, scenario: XSZL2, phase: pilot-v0}
+    authority: {basis: 0.1 新增（B6/C2 每个客户归属销售明确；docs/v0.1 03-interaction §2.4）, sources: [SRC-DEMO#XSZL2, SRC-V01-INTERACTION#XSZL2]}
+    semantic_status: ACCEPTED
+    implementation: {demo: IMPLEMENTED, backend: UNPLANNED, production_ui: UNPLANNED}
+    verification: {demo_smoke: PASS, business_uat: UNVERIFIED}
+    risk: R2   # 归属锁定错误会串单到错误销售
+    owner: product-ordering
+    acceptance: {oracle: demo 复评：群入口客户自动带出、归属销售 readonly 不可改；提交后订单归属正确销售}
+    relations: {refines: CLM-ORDER-ENTRY-UI-001, related_to: CLM-GROUP-ACL-001}
+  - claim_id: CLM-ORDER-DETAIL-001
+    statement: {subject: 订单详情页, predicate: provides, object: 四节点履约时间线（已开单→已备货→已发货→已开票）+ 订单头/明细 + 物流/预计送达（已发货）或审批链/风险（未发货）+ 按角色字段投影（仓管/客户联系人剥价）}
+    scope: {product: wecom-order-assistant, role: [sales, commerce, warehouse, finance, chairman, assistant], scenario: [XS1, SW2, CW1, CG1, DSZ1, XSZL1, XSZL2], phase: pilot-v0}
+    authority: {basis: "demo 已实现的 detail 组件 + docs/v0.1 08-api GET /api/v1/orders/{orderID}; 角色字段投影 CQ-03", sources: [SRC-DEMO#XS1, SRC-DEMO#XSZL1, SRC-API#order-detail]}
+    semantic_status: ACCEPTED
+    implementation: {demo: IMPLEMENTED, backend: IMPLEMENTED, production_ui: UNPLANNED}
+    verification: {demo_smoke: PASS, business_uat: UNVERIFIED}
+    risk: R2   # 字段投影错误会导致资金/内部信息越权
+    owner: product-ordering
+    acceptance: {oracle: 各角色打开订单详情：全字段角色可见金额/审批链；仓管/客户联系人视图无金额/内部备注；已发货展示物流/预计送达}
+    relations: {refines: CLM-ORDER-QUERY-HOME-001, related_to: CLM-GROUP-ACL-001}
+  - claim_id: CLM-ORDER-ENTRY-ENTITY-001
+    statement: {subject: 下单主体, predicate: switchable_within, object: 客户档案多主体实体（如广西天华→广西顺华）}
+    scope: {product: wecom-order-assistant, role: sales, scenario: XS2, phase: vnext}
+    authority: {basis: 评审待定 XS2-10（需档案支持）, sources: [SRC-REVIEW-20260812#XS2-10]}
+    semantic_status: DEFERRED
+    implementation: {demo: UNPLANNED, backend: UNPLANNED, production_ui: UNPLANNED}
+    verification: {demo_smoke: NOT_APPLICABLE, business_uat: UNVERIFIED}
+    risk: R2   # 涉及客户档案数据模型
+    owner: product-ordering
+    acceptance: {oracle: 客户档案多实体评估结论（跟进行动项·产品经理待位）}
+    relations: {depends_on: 客户档案多实体数据模型}
+    open_note: 评估动作 owner = 产品经理（待位）；本 claim owner 为域推定
+  - claim_id: CLM-ORDER-ENTRY-CHANGE-001
+    statement: {subject: 订单修改（地址/日期/数量）, predicate: goes_through, object: 正式修改动作而非评论（区分直接可改/须驳回后改两类）}
+    scope: {product: wecom-order-assistant, role: sales, scenario: XS3, phase: pilot-v0}
+    authority: {basis: 评审共识·流程规则 XS3-09, sources: [SRC-REVIEW-20260812#XS3-09]}
+    semantic_status: ACCEPTED
+    implementation: {demo: UNPLANNED, backend: UNPLANNED, production_ui: UNPLANNED}
+    verification: {demo_smoke: UNVERIFIED, business_uat: UNVERIFIED}
+    risk: R2   # 流程规则，影响订单数据一致性
+    owner: product-ordering
+    acceptance: {oracle: 修改动作分类规则（阻断/非阻断）与退回链路（XS3-04/CLM-ORDER-REJECT-001）一并验证}
+    relations: {related_to: [CLM-ORDER-ENTRY-UI-001, CLM-ORDER-REJECT-001]}
+
+  # ---- 查订单与订单 Home（原始需求第 1 项 P0）----
+  - claim_id: CLM-ORDER-QUERY-HOME-001
+    statement: {subject: 客户订单 Home, predicate: provides, object: 汇总（全部/进行中/待发货/已完成）+ 状态筛选 + 按收货地归类 + 从详情返回入口（销售不依赖 AI 也可人工查找）}
+    scope: {product: wecom-order-assistant, role: sales, scenario: XS1, phase: pilot-v0}
+    authority: {basis: 原始需求第 1 项（P0）, sources: [SRC-ADVICE#order-home, SRC-DEMO#XS1]}
+    semantic_status: ACCEPTED
+    implementation: {demo: IMPLEMENTED, backend: UNPLANNED, production_ui: UNPLANNED}
+    verification: {demo_smoke: PASS, business_uat: UNVERIFIED}
+    risk: R1
+    owner: product-ordering
+    acceptance: {oracle: 验收：先 AI 直达详情→返回订单 Home→筛选→手工打开另一笔；筛选数量与列表一致}
+    relations: {refines: CLM-ORDER-ENTRY-UI-001, note: 保留 AI 智能定位能力，Home 为兜底人工路径}
+
+  # ---- 驳回处理（原始需求第 4 项 P0）----
+  - claim_id: CLM-ORDER-REJECT-001
+    statement: {subject: 审价驳回再处理, predicate: offers, object: 解析驳回意见→建议修改字段（原值/建议值/依据）；未涉及字段只读；无法判断时完整表单人工修改；重新提交回到同一审价节点}
+    scope: {product: wecom-order-assistant, role: sales, scenario: XS4, phase: pilot-v0}
+    authority: {basis: 原始需求第 4 项（P0，产品结论“是”）, sources: [SRC-ADVICE#reject, SRC-DEMO#XS4]}
+    semantic_status: ACCEPTED
+    implementation: {demo: IMPLEMENTED, backend: UNPLANNED, production_ui: UNPLANNED}
+    verification: {demo_smoke: PASS, business_uat: UNVERIFIED}
+    risk: R2   # 错误改值风险；AI 建议不得擅自改值
+    owner: product-ordering
+    acceptance: {oracle: 验收：仅驳回涉及字段为主编辑字段；驳回人/时间/原因/订单号常驻可见；重新提交显示“重新进入审价审批”非新订单}
+    relations: {related_to: CLM-ORDER-ENTRY-CHANGE-001}
+
+  # ---- 智能下单确认（原始需求第 5 项 P0）----
+  - claim_id: CLM-SMART-ORDER-CONFIRM-001
+    statement: {subject: 智能下单确认, predicate: happens_once, object: 候选卡唯一“确认”→立即生成正式订单（幂等键防重复），无二次确认页}
+    scope: {product: wecom-order-assistant, role: sales, scenario: XS3, phase: pilot-v0}
+    authority: {basis: 原始需求第 5 项（P0，Word 批注认定二次确认为 bug）, sources: [SRC-ADVICE#smart-order, SRC-DEMO#XS3]}
+    semantic_status: ACCEPTED
+    implementation: {demo: IMPLEMENTED, backend: UNPLANNED, production_ui: UNPLANNED}
+    verification: {demo_smoke: PASS, business_uat: UNVERIFIED}
+    risk: R2   # AI 安全边界：首次人工确认不可删（不应误改清单）；重复确认破坏流程
+    owner: product-ordering
+    acceptance: {oracle: 验收：XS3 全程仅一个“确认”按钮；确认后下一帧即含正式订单号}
+    relations: {depends_on: 订单机器人, related_to: CLM-ORDER-APPROVAL-CHAIN-001}
+
+  # ---- 审批链（原始需求第 5 项 + 全局一致性）----
+  - claim_id: CLM-ORDER-APPROVAL-CHAIN-001
+    statement: {subject: 订单审批链, predicate: is, object: 已生成正式订单→销售主管审价审批→商务审核/备货→仓库发货→财务开票；仅 C/D 级插入董事长终审（按客户等级动态路由）}
+    scope: {product: wecom-order-assistant, role: [sales, sales-mgr, commerce, warehouse, finance, chairman], phase: pilot-v0}
+    authority: {basis: 原始需求第 5 项（统一口径，不硬编码矛盾流程）, sources: [SRC-ADVICE#smart-order, SRC-DEMO#XS3]}
+    semantic_status: ACCEPTED
+    implementation: {demo: IMPLEMENTED, backend: UNPLANNED, production_ui: UNPLANNED}
+    verification: {demo_smoke: PASS, business_uat: UNVERIFIED}
+    risk: R2   # 流程口径不一致将导致角色待办错位
+    owner: product-org
+    acceptance: {oracle: 验收：B 级不出现董事长终审；成功卡/销售回复/Agent 记录流程名一致（弃用“商务复核/财务审批/仓库确认”旧口径）}
+    relations: {refines: CLM-GROUP-ACL-006, related_to: CLM-SMART-ORDER-CONFIRM-001}
+  - claim_id: CLM-PRICE-REVIEW-FIELDS-001
+    statement: {subject: 主管审价, predicate: reviews_with_fields, object: 订单毛利/价格差异/信用暴露风险摘要（审批即审价）}
+    scope: {product: wecom-order-assistant, role: sales-mgr, scenario: XSZG1, phase: pilot-v0}
+    authority: {basis: 评审共识 XSZG1 + docs/demo 审价场景, sources: [SRC-REVIEW-20260812#XSZG1, SRC-DEMO#XSZG1]}
+    semantic_status: ACCEPTED
+    implementation: {demo: IMPLEMENTED, backend: PARTIAL, production_ui: UNPLANNED}
+    verification: {demo_smoke: PASS, business_uat: UNVERIFIED}
+    risk: R1
+    owner: business-pricing
+    acceptance: {oracle: 审价卡展示价格差异/毛利字段；通过/驳回按钮语义正确；缺失字段显式标注}

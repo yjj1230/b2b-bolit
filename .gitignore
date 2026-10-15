@@ -1,0 +1,77 @@
+# Added by code-review-graph
+.playwright-cli/
+.code-review-graph/
+.claude/
+.codebuddy/
+.cursorrules
+.gemini/
+.github/
+.kiro/
+#.mcp.json
+.qoder/
+.windsurfrules
+#AGENTS.md
+#CLAUDE.md
+#CODEBUDDY.md
+#GEMINI.md
+#QODER.md
+#opencode.jsonc
+/wecom
+
+# Reasonix client runtime metadata (clipboard attachments, desktop topic state)
+.reasonix/
+
+# Reasonix client runtime metadata (permission approvals)
+reasonix.toml
+
+spec/202608151416_会议纪要.html
+spec/Demo意见收集.docx
+spec/review/202608121845_逐字稿.html
+spec/《企微群聊自动化订单》技术核验报告.html
+spec/三方审批流程图_完整.html
+spec/企微Agent智能接单_技术文案调研.html
+spec/企微_自动下单_技术细节.html
+spec/企微群聊自动化订单.md
+spec/企微群聊自动化订单_技术review.html
+spec/概念验证项目设计_COO版.html
+# local go build cache/tmp & smoke data/logs
+.gocache/
+.gotmp/
+/data/
+/logs/
+
+.audit_cache/
+
+# 本地审查补丁与备注（不入库）
+.wip-review/
+
+# Python bytecode cache
+__pycache__/
+*.pyc
+
+# macOS 系统文件
+.DS_Store
+
+# 外部克隆仓库（rhcrm-server / tripartite-approval 等，不入本仓库）
+_repos/
+
+# 真实企微租户密钥配置（含 app.secret/token/encoding_aes_key，禁止入库；只提交 example）
+config/wecom-tenant.json
+
+# 本地环境变量与密钥（只提交 .env_example）
+.env
+.env.*
+!.env_example
+
+# 本地工具状态与生成产物
+.jspace/
+.workbuddy/
+.mcp.json
+output/
+tmp/
+tmp_*.py
+coverage.out
+coverage.txt
+
+# 未应用的本地修复补丁（不入库）
+fix_approver_notification.diff

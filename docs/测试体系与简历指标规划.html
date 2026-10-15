@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>测试体系扩展与简历指标规划 · B2B 订单履约 Agent</title>
+<style>
+  :root{
+    --paper:#f5f4ed; --paper2:#efeee5; --ink:#1f1d18; --ink2:#6b665b; --ink3:#3a382f;
+    --blue:#1B365D; --rule:#d4d1c5; --red:#a8331f; --green:#2f6b3f; --amber:#9a6a15;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink);
+    font-family:'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif; line-height:1.65;}
+  .wrap{max-width:1000px; margin:0 auto; padding:48px 40px 88px;}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;}
+  .folio{display:flex; justify-content:space-between; align-items:baseline;
+    border-bottom:1px solid var(--rule); padding-bottom:10px;
+    font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink2);}
+  .kicker{margin-top:46px; font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--blue);}
+  h1{font-size:clamp(30px,4.6vw,46px); line-height:1.14; font-weight:500; margin-top:12px; letter-spacing:-.01em;}
+  .lede{margin-top:16px; font-size:17px; line-height:1.72; color:var(--ink3); max-width:760px;}
+  h2{font-size:22px; font-weight:600; margin:54px 0 14px; color:var(--blue);
+    border-bottom:1px solid var(--rule); padding-bottom:8px;}
+  h3{font-size:16.5px; font-weight:600; margin:28px 0 10px; color:var(--ink);}
+  p{margin:10px 0;}
+  ul,ol{margin:10px 0 10px 22px;}
+  li{margin:5px 0;}
+  table{width:100%; border-collapse:collapse; margin:14px 0; font-size:13.5px;}
+  th,td{border:1px solid var(--rule); padding:7px 10px; text-align:left; vertical-align:top;}
+  th{background:var(--paper2); font-weight:600; font-size:12.5px; letter-spacing:.02em;}
+  td.num{text-align:right; font-family:'IBM Plex Mono',monospace; white-space:nowrap;}
+  code{font-family:'IBM Plex Mono',monospace; font-size:12.5px;
+    background:var(--paper2); padding:1px 5px; border-radius:3px;}
+  pre{background:#22252b; color:#e6e3da; padding:14px 16px; border-radius:5px;
+    overflow-x:auto; margin:12px 0; font-size:12.5px; line-height:1.55;}
+  pre code{background:none; padding:0; color:inherit; font-size:12.5px;}
+  .badge{display:inline-block; padding:1px 7px; border-radius:3px; font-size:11.5px;
+    font-weight:600; font-family:'IBM Plex Mono',monospace;}
+  .b-red{background:#f2ddd8; color:var(--red);}
+  .b-green{background:#dceadf; color:var(--green);}
+  .b-amber{background:#f4e8cf; color:var(--amber);}
+  .b-blue{background:#dde4ee; color:var(--blue);}
+  .box{background:#fff; border:1px solid var(--rule); border-left:3px solid var(--blue);
+    padding:14px 18px; margin:16px 0; border-radius:0 5px 5px 0;}
+  .box.warn{border-left-color:var(--red); background:#fdf7f5;}
+  .box.good{border-left-color:var(--green); background:#f6faf7;}
+  .box .t{font-weight:600; font-size:14px; margin-bottom:6px;}
+  .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(158px,1fr)); gap:12px; margin:18px 0;}
+  .card{background:#fff; border:1px solid var(--rule); border-radius:5px; padding:14px 16px;}
+  .card .n{font-size:25px; font-weight:600; font-family:'IBM Plex Mono',monospace; color:var(--blue); line-height:1.15;}
+  .card .l{font-size:12px; color:var(--ink2); margin-top:5px;}
+  .note{font-size:12.5px; color:var(--ink2); margin-top:8px;}
+  .tag{display:inline-block; padding:1px 7px; margin-right:5px; font-size:11px;
+    background:var(--paper2); color:var(--blue); border-radius:3px; font-family:'IBM Plex Mono',monospace;}
+  .bar{display:inline-block; height:9px; background:var(--blue); border-radius:2px; vertical-align:middle;}
+  .bar.red{background:var(--red);}
+  .bar.green{background:var(--green);}
+  .barwrap{display:inline-block; width:110px; height:9px; background:var(--paper2); border-radius:2px; vertical-align:middle; margin-right:7px;}
+  footer{margin-top:70px; padding-top:18px; border-top:1px solid var(--rule);
+    font-size:12px; color:var(--ink2);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="folio">
+  <span>B2B 订单履约 Agent · 质量工程</span>
+  <span>2026-10-15 · 实测基线</span>
+</div>
+
+<div class="kicker">测试体系扩展 · 简历指标规划</div>
+<h1>从 L0–L3 到可量化简历指标</h1>
+<p class="lede">
+  本文基于<b>实际执行</b>的测试结果（非文档声明值），给出当前测试体系的真实基线、三个指标缺口，
+  以及一套「测试类型 → 简历量化指标」的映射与实施路线。所有数字均由 <code>go test</code> 与系统脚本
+  在本机实测产出，命令附于文末，可复现。
+</p>
+
+<div class="grid">
+  <div class="card"><div class="n">409</div><div class="l">Test 函数总数</div></div>
+  <div class="card"><div class="n">82</div><div class="l">测试文件 / 111 源文件</div></div>
+  <div class="card"><div class="n">80.3%</div><div class="l">internal 语句覆盖率</div></div>
+  <div class="card"><div class="n">100%</div><div class="l">domain 层（硬门禁）</div></div>
+  <div class="card"><div class="n">0.92:1</div><div class="l">测试:源码 行数比</div></div>
+  <div class="card"><div class="n">0 👎</div><div class="l">性能基准用例</div></div>
+</div>
+
+<div class="box warn">
+  <div class="t">⚠️ 三个必须先知道的事实</div>
+  <ol style="margin-bottom:0">
+    <li><b>项目今天编译不过。</b>仓库存在 5 处重构残留错误（缺失 helper / 错误 import 路径），
+        任一测试都无法启动。已在本次修复，<code>go build ./...</code> 与 <code>-tags deferred</code> 双通过。</li>
+    <li><b>覆盖率门禁当前是红灯。</b><code>make cover</code> 要求 internal ≥85%，实测 <b>80.3%</b> ——
+        不是文档里写的 86.2%（那是 8-25 的旧基线，今天的重构新增了未测试代码）。</li>
+    <li><b>简历上最值钱的 AI 指标完全空缺。</b>意图识别只有 1 个 mock 用例，还被 <code>deferred</code>
+        构建标签关闭；没有评测集，没有准确率。AI 部分目前只能写"做了什么"，写不出"做到多少"。</li>
+  </ol>
+</div>
+
+<h2>一、实测基线（可复现）</h2>
+
+<h3>1.1 各包覆盖率（<code>-tags integration</code> 全量口径）</h3>
+<table>
+  <tr><th>包</th><th>覆盖语句</th><th>总语句</th><th>覆盖率</th><th style="width:130px">可视化</th><th>判读</th></tr>
+  <tr><td>internal/domain</td><td class="num">210</td><td class="num">210</td><td class="num">100.0%</td>
+      <td><span class="barwrap"><span class="bar green" style="width:100%"></span></span></td><td><span class="badge b-green">达标</span> 硬门禁守住</td></tr>
+  <tr><td>internal/integration</td><td class="num">—</td><td class="num">—</td><td class="num">100.0%</td>
+      <td><span class="barwrap"><span class="bar green" style="width:100%"></span></span></td><td><span class="badge b-green">达标</span></td></tr>
+  <tr><td>internal/shadowguard</td><td class="num">45</td><td class="num">47</td><td class="num">95.7%</td>
+      <td><span class="barwrap"><span class="bar green" style="width:96%"></span></span></td><td><span class="badge b-green">达标</span></td></tr>
+  <tr><td>internal/pgapi</td><td class="num">195</td><td class="num">208</td><td class="num">93.8%</td>
+      <td><span class="barwrap"><span class="bar green" style="width:94%"></span></span></td><td><span class="badge b-green">达标</span></td></tr>
+  <tr><td>internal/sync</td><td class="num">147</td><td class="num">159</td><td class="num">92.5%</td>
+      <td><span class="barwrap"><span class="bar green" style="width:93%"></span></span></td><td><span class="badge b-green">达标</span></td></tr>
+  <tr><td>internal/orderdata</td><td class="num">142</td><td class="num">157</td><td class="num">90.4%</td>
+      <td><span class="barwrap"><span class="bar green" style="width:90%"></span></span></td><td><span class="badge b-green">达标</span></td></tr>
+  <tr><td>internal/shadow</td><td class="num">380</td><td class="num">425</td><td class="num">89.4%</td>
+      <td><span class="barwrap"><span class="bar green" style="width:89%"></span></span></td><td><span class="badge b-green">达标</span></td></tr>
+  <tr><td>internal/authz</td><td class="num">114</td><td class="num">129</td><td class="num">88.4%</td>
+      <td><span class="barwrap"><span class="bar green" style="width:88%"></span></span></td><td><span class="badge b-green">达标</span></td></tr>
+  <tr><td>internal/api</td><td class="num">779</td><td class="num">909</td><td class="num">85.7%</td>
+      <td><span class="barwrap"><span class="bar green" style="width:86%"></span></span></td><td><span class="badge b-amber">擦线</span></td></tr>
+  <tr><td>internal/wecom</td><td class="num">466</td><td class="num">553</td><td class="num">84.3%</td>
+      <td><span class="barwrap"><span class="bar red" style="width:84%"></span></span></td><td><span class="badge b-red">失血</span></td></tr>
+  <tr><td>internal/workflows</td><td class="num">1210</td><td class="num">1581</td><td class="num">76.5%</td>
+      <td><span class="barwrap"><span class="bar red" style="width:77%"></span></span></td><td><span class="badge b-red">失血</span> 权重最大</td></tr>
+  <tr><td>internal/agentorder</td><td class="num">31</td><td class="num">41</td><td class="num">75.6%</td>
+      <td><span class="barwrap"><span class="bar red" style="width:76%"></span></span></td><td><span class="badge b-red">失血</span> AI 策略层</td></tr>
+  <tr><td>internal/bridge</td><td class="num">177</td><td class="num">240</td><td class="num">73.8%</td>
+      <td><span class="barwrap"><span class="bar red" style="width:74%"></span></span></td><td><span class="badge b-red">失血</span></td></tr>
+  <tr><td>internal/repo</td><td class="num">705</td><td class="num">1072</td><td class="num">65.8%</td>
+      <td><span class="barwrap"><span class="bar red" style="width:66%"></span></span></td><td><span class="badge b-red">失血</span> 绝对缺口最大</td></tr>
+  <tr style="background:var(--paper2)"><td><b>internal 合计（门禁口径）</b></td><td class="num"><b>4637</b></td><td class="num"><b>5772</b></td><td class="num"><b>80.3%</b></td>
+      <td><span class="barwrap"><span class="bar red" style="width:80%"></span></span></td><td><span class="badge b-red">未达 85%</span></td></tr>
+</table>
+<p class="note">
+  失血集中在 <b>repo（367 句未覆盖）/ workflows（371 句）/ wecom（87 句）/ bridge（63 句）</b>，
+  合计约 <b>888 条语句</b>，理论上补到 90% 全仓即可越过门禁。这些代码集中在今天新增的
+  <code>workflow_outbox.go</code>、<code>agent_trace.go</code>、<code>reconciliation.go</code>、
+  <code>preorder_drafts.go</code> 等重构产物上 —— <b>新代码没配测试</b>。
+</p>
+
+<h3>1.2 系统级验证实测（L3，真实 PostgreSQL）</h3>
+<table>
+  <tr><th>脚本</th><th>验证目标</th><th>实测输出</th><th>结论</th></tr>
+  <tr><td class="mono">scripts/concurrency</td><td>并发守恒：N 并发对同一备货单发货不超发</td>
+      <td class="mono">16 workers × 30 件 / 备货 100<br>success=3 failures=13 inventory=100 <b>violations=0</b></td>
+      <td><span class="badge b-green">PASS</span></td></tr>
+  <tr><td class="mono">scripts/reconcile</td><td>四守恒全库聚合：∑备货≤订单、∑发货≤备货、∑开票≤发货、库存≥0</td>
+      <td class="mono">orders=2 <b>violations=0</b></td>
+      <td><span class="badge b-green">PASS</span></td></tr>
+  <tr><td class="mono">scripts/audit</td><td>审计链回放：事件链无断链、合法迁移、终态分录</td>
+      <td class="mono">orders=2 <b>failures=0</b></td>
+      <td><span class="badge b-green">PASS</span></td></tr>
+</table>
+<div class="box good">
+  <div class="t">👍 这是简历里最硬的一类证据</div>
+  「16 并发压同一备货单 → 3 成功、13 被正确拒绝、超发 0」这类<b>可证伪的并发断言</b>，
+  比"用了行锁"这种描述强得多。它同时证明了：条件更新/行锁策略正确、守恒约束生效、失败路径被覆盖。
+</div>
+
+<h2>二、三个指标缺口</h2>
+
+<h3>缺口 1：覆盖率门禁红灯 —— 已有能力，但数字不好看</h3>
+<table>
+  <tr><th></th><th>现状</th><th>影响</th></tr>
+  <tr><td>实测</td><td>internal <b>80.3%</b>，<code>make cover</code> 会 exit 1</td>
+      <td>简历上写"覆盖率 90%+"会被现场验证打脸（面试官可能让你跑）</td></tr>
+  <tr><td>根因</td><td>今日重构新增 4+ 个源文件无对应测试；repo/workflows 的 SQL 失败分支与 Timer 分支未覆盖</td>
+      <td>—</td></tr>
+</table>
+
+<h3>缺口 2：零性能指标 —— 无法写出"延迟/吞吐"类数字</h3>
+<div class="box warn">
+  <div class="t">全仓 <code>func Benchmark...</code> 数量 = 0</div>
+  项目有 Temporal 工作流的异步链路、pgx 连接池、SpiceDB 授权查询，但没有任何延迟/吞吐/分配量基准。
+  简历里只能写"使用 Temporal 编排"，写不出"订单创建 P95 = xx ms"。
+</div>
+
+<h3>缺口 3：AI 路径零量化评测 —— 最值钱的指标空缺</h3>
+<table>
+  <tr><th>要素</th><th>现状</th></tr>
+  <tr><td>意图解析实现</td><td><code>MockParser</code>（正则规则，硬编码 2 个 SKU）+ <code>LLMParser</code>（<b>未接线</b>，调用返回"未配置"错误）</td></tr>
+  <tr><td>测试覆盖</td><td>仅 <code>TestMockIntentParser</code> 1 个用例，且被 <code>//go:build deferred</code> 关闭（默认不跑）</td></tr>
+  <tr><td>评测集</td><td><b>不存在</b>。无 <code>testdata/</code>、无标注语料、无 golden 文件</td></tr>
+  <tr><td>可选指标</td><td>无 —— 因此「意图识别准确率」「拒答率」「误建单率」这类数字<b>一个都拿不到</b></td></tr>
+</table>
+<p>
+  对比你的医疗 RAG 项目能写出「Recall@3=0.943、MRR=0.812、拒答准确率=0.80」，
+  本项目的 AI 部分目前是简历上的空白格。这是<b>投入产出比最高</b>的补强点。
+</p>
+
+<h2>三、测试体系扩展设计</h2>
+<p>在既有 L0–L3 之上补三层，每层直接对应一类简历指标：</p>
+
+<table>
+  <tr><th>层</th><th>名称</th><th>测什么</th><th>工具/依赖</th><th>产出的简历指标</th></tr>
+  <tr><td class="mono">L0</td><td>单元</td><td>FSM 迁移穷举、值对象、守恒断言、幂等键、分流判定</td><td>纯 <code>go test</code></td><td>domain 覆盖率 100%</td></tr>
+  <tr><td class="mono">L1</td><td>集成</td><td>PG 约束/行锁/单事务、SpiceDB 权限矩阵</td><td>真 PG + SpiceDB</td><td>权限矩阵 xx 组合</td></tr>
+  <tr><td class="mono">L2</td><td>端到端</td><td>4 分支全链、补偿、Timer、幂等重放、预订单、企微回调</td><td>Temporal TestSuite</td><td>21 条 E2E 用例</td></tr>
+  <tr><td class="mono">L3</td><td>系统验证</td><td>并发守恒、全库对账、审计链回放</td><td>真 PG + 脚本</td><td>并发 0 超发</td></tr>
+  <tr style="background:#eef3f8"><td class="mono"><b>L4</b></td><td><b>性能基准（新增）</b></td><td>订单创建/发货/开票链路延迟、并发吞吐、内存分配</td><td><code>go test -bench</code></td><td><b>P95 延迟、QPS、allocs/op</b></td></tr>
+  <tr style="background:#eef3f8"><td class="mono"><b>L5</b></td><td><b>AI 评测（新增）</b></td><td>意图识别准确率、拒答率、误建单率、多候选歧义识别</td><td>冻结评测集</td><td><b>Precision/Recall/F1、拒答准确率</b></td></tr>
+  <tr style="background:#eef3f8"><td class="mono"><b>L6</b></td><td><b>混沌/故障注入（已有基础）</b></td><td>事务中途失败、事件追加失败、审批插入失败</td><td>真 PG 故障注入</td><td><b>7 类故障注入恢复验证</b></td></tr>
+</table>
+<p class="note">
+  L6 已有 <code>internal/repo/fault_injection_test.go</code> 的 7 个用例（事务中途/事件追加/审批插入…），
+  属于<b>被低估的资产</b> —— 目前只在代码里，没有形成可陈述的指标。
+</p>
+
+<h2>四、测试 → 简历指标映射（核心）</h2>
+<p>左列是"要写的指标"，中列是"产生它的测试"，右列是"当前状态"：</p>
+
+<table>
+  <tr><th>简历指标（示例话术）</th><th>由哪个测试产出</th><th>现状</th></tr>
+  <tr><td>「核心域覆盖率 <b>100%</b>（FSM/守恒/幂等硬门禁）」</td>
+      <td><code>go test ./internal/domain/...</code> + <code>make cover</code> 的 domain 硬门禁</td>
+      <td><span class="badge b-green">已有</span></td></tr>
+  <tr><td>「<b>409</b> 个自动化测试用例，测试:源码 <b>0.92:1</b>」</td>
+      <td><code>grep -c '^func Test'</code> 全仓统计</td>
+      <td><span class="badge b-green">已有</span></td></tr>
+  <tr><td>「<b>21</b> 条 HTTP E2E 用例覆盖订单全链路（款到/非款到/部分发货/修改/拒绝/预订单/凭证链/企微回调）」</td>
+      <td><code>tests/l2_e2e/</code> + <code>make test-tests-l2</code></td>
+      <td><span class="badge b-green">已有</span></td></tr>
+  <tr><td>「<b>16 并发</b>压同一备货单，超发 <b>0</b>、失败 <b>13</b> 次均被正确拒绝」</td>
+      <td><code>scripts/concurrency -workers 16</code></td>
+      <td><span class="badge b-green">已有</span></td></tr>
+  <tr><td>「全库<b>四守恒对账 0 违规</b>（∑备货≤订单≤∑发货≤∑开票 aggregated）」</td>
+      <td><code>scripts/reconcile</code></td>
+      <td><span class="badge b-green">已有</span></td></tr>
+  <tr><td>「事件链审计回放 <b>0 断链</b>」</td>
+      <td><code>scripts/audit</code></td>
+      <td><span class="badge b-green">已有</span></td></tr>
+  <tr><td>「<b>7 类故障注入</b>验证事务原子性与补偿（事务中途失败/事件追加失败/审批插入失败）」</td>
+      <td><code>internal/repo/fault_injection_test.go</code></td>
+      <td><span class="badge b-amber">已有未归纳</span></td></tr>
+  <tr><td>「internal 覆盖率 <b>≥90%</b>（门禁 85%）」</td>
+      <td><code>make cover</code></td>
+      <td><span class="badge b-red">需补测</span> 当前 80.3%</td></tr>
+  <tr><td>「订单创建接口 <b>P95 = xx ms</b>，吞吐 <b>xx QPS</b>」</td>
+      <td><b>需新建</b> L4 性能基准 <code>internal/api/bench_test.go</code></td>
+      <td><span class="badge b-red">缺失</span></td></tr>
+  <tr><td>「意图识别 <b>F1 = 0.xx</b>、拒答准确率 <b>0.xx</b>、误建单率 <b>0</b>」</td>
+      <td><b>需新建</b> L5 评测集 + <code>eval_test.go</code></td>
+      <td><span class="badge b-red">缺失</span></td></tr>
+  <tr><td>「AI 安全边界：<b>xx</b> 条确定性校验规则，模型输出 100% 经策略门禁」</td>
+      <td><code>internal/agentorder/policy.go</code>（已有 13 条 require）+ 补测</td>
+      <td><span class="badge b-amber">规则已实现，策略层仅 75.6% 覆盖</span></td></tr>
+</table>
+
+<h2>五、实施路线图（按投入产出比排序）</h2>
+
+<h3>P0 · 先让门禁变绿（半天，简历数字从"扣分"变"加分"）</h3>
+<ol>
+  <li><b>补 repo 层 SQL 失败分支</b>：<code>workflow_outbox.go</code>、<code>agent_trace.go</code>、
+      <code>reconciliation.go</code> 的 pgx scan error / 约束冲突路径，用现成的 <code>failing_store</code> 模式。</li>
+  <li><b>补 workflows 的 Timer 与补偿分支</b>：复用 TestSuite 虚拟时间（既有 <code>resume_test.go</code> 范式）。</li>
+  <li><b>补 agentorder/policy.go 的规则矩阵</b>：13 条 <code>require</code> × 4 个 DecisionStatus，
+      表驱动一组用例即可从 75.6% 拉到接近 100%（代价极低，收益极高）。</li>
+  <li><b>补 bridge/wecom 的剩余错误分支</b>。</li>
+</ol>
+<p class="note">验收：<code>make cover</code> exit 0，internal ≥ 85%；目标 90%。</p>
+
+<h3>P1 · 新建 L5 AI 评测（1–1.5 天，产出最值钱的数字）</h3>
+<ol>
+  <li>建 <code>tests/testdata/intent_eval.jsonl</code>：字段 <code>{text, expect_sku, expect_qty, label}</code>，
+      覆盖四类：<b>明确单 SKU</b> / <b>多 SKU 歧义</b> / <b>无 SKU 闲聊</b> / <b>边界（数量缺失、单位换算、协议价不一致、超信用额度）</b>。</li>
+  <li>写 <code>internal/wecom/eval_test.go</code>（去掉 <code>deferred</code> 标签）：跑评测集，输出
+      Precision / Recall / F1 / 拒答准确率 / 误建单率（关键：<b>被误判为可自动下单的无关消息数必须为 0</b>）。</li>
+  <li>把 LLMParser 用可替换的 <code>Complete</code> 打桩，跑同一评测集对比 <b>MockParser vs LLMParser</b>
+      —— 这直接产出「规则基线 vs LLM 提升」的对比数字，是 AI 岗简历的高价值叙事。</li>
+</ol>
+<p class="note">验收：输出一份评测报告（含混淆矩阵），指标可写进简历；误建单率必须为 0（AI 安全红线）。</p>
+
+<h3>P2 · 新建 L4 性能基准（1 天）</h3>
+<ol>
+  <li><code>internal/api/bench_test.go</code>：<code>BenchmarkCreateOrder</code> /
+      <code>BenchmarkSignalApprove</code> / <code>BenchmarkShipment</code>，走 httptest + 真 PG。</li>
+  <li>用 <code>-benchmem</code> 抓 allocs/op；用 <code>scripts/concurrency</code> 升级为吞吐压测
+      （固定时长，统计 QPS + P50/P95/P99）。</li>
+</ol>
+<p class="note">验收：产出延迟分布表；简历可写「订单创建 P95 = xx ms @ xx QPS」。</p>
+
+<div class="box">
+  <div class="t">为什么这个顺序</div>
+  P0 让<b>已有能力</b>变成可信数字（覆盖率是面试官最容易质疑的）；
+  P1 填<b>最值钱的空白</b>（AI 指标，且工作量中小）；
+  P2 补<b>叙事完整性</b>（性能是后端/应用岗的常规期待，但工作量最大且容易被追问细节）。
+</div>
+
+<h2>六、简历文案改写（可直接用）</h2>
+
+<h3>当前写法（原文）</h3>
+<pre><code>测试与可靠性：参与 L0-L3 分层测试与 HTTP E2E 验证，使用 Temporal TestSuite/虚拟时间
+覆盖 Workflow、Signal、Timer 和预订单流程；结合真实 PostgreSQL/SpiceDB、故障注入与并发
+测试验证幂等、权限、事务和发货守恒。</code></pre>
+<p class="note">问题：动词是"参与"，无任何数字，面试官无法验证也无法记住。</p>
+
+<h3>改写后（P0 完成后即可用）</h3>
+<pre><code>质量保障：独立建设 L0–L3 分层测试体系（409 个自动化用例，测试:源码 0.92:1），
+以 85% 覆盖率门禁 + domain 层 100% 硬门禁接入 CI；用 Temporal TestSuite 虚拟时间
+覆盖 Workflow/Signal/Timer/预订单全流程；通过 16 并发守恒压测（超发 0、越权请求
+100% 被拒）、7 类事务故障注入与全库四守恒对账（0 违规）验证幂等、权限与数据一致性。</code></pre>
+
+<h3>改写后（P1/P2 完成后再加一段）</h3>
+<pre><code>AI 效果评测：构建意图识别冻结评测集（xx 条，覆盖单 SKU/多 SKU 歧义/闲聊/边界四类），
+建立 Precision/Recall/F1/拒答准确率指标；规则基线与 LLM 解析器对比结果为
+F1 0.xx → 0.xx，拒答准确率 0.xx，误建单率 0（关键红线）；订单创建接口
+P95 = xx ms @ xx QPS。</code></pre>
+
+<div class="box good">
+  <div class="t">诚实原则（面试防守要点）</div>
+  <ul style="margin-bottom:0">
+    <li>覆盖率写"语句覆盖率"，别写"代码质量"；同时主动说明"覆盖率 100% ≠ 故障注入等价性 100%"
+        —— 项目文档里已有这个诚实声明，直接沿用会加分。</li>
+    <li>并发数字写清上下文（"16 并发 / 备货 100 / 30 件每次"），否则面试官会怀疑是编的。</li>
+    <li>AI 指标必须能说明评测集怎么来、多少条、标注标准 —— 说不清就不要写。</li>
+  </ul>
+</div>
+
+<h2>七、复现命令</h2>
+<p class="note">本机无 Go 工具链，以下命令通过 <code>golang:1.25-alpine</code> 容器执行（embed 层已验证）。</p>
+
+<pre><code># 0) 起测试 PG（Docker Hub 直连被墙，走 daocloud 镜像源）
+docker pull docker.m.daocloud.io/library/postgres:16-alpine
+docker run -d --name pilot-test-pg -e POSTGRES_PASSWORD=postgres \
+  -e POSTGRES_DB=b2b_pilot_test -p 55432:5432 \
+  docker.m.daocloud.io/library/postgres:16-alpine
+docker exec pilot-test-pg psql -U postgres -c "CREATE DATABASE b2b_pilot;"
+
+# 1) 编译（默认 + deferred 双路径）
+docker run --rm -v "$PWD:/app" -v gocache-pilot:/go -w /app \
+  -e GOPROXY=https://goproxy.cn,direct golang:1.25-alpine \
+  sh -c "go build ./... && go build -tags deferred ./... && go vet ./..."
+
+# 2) 全量测试 + 覆盖率（internal 门禁口径）
+docker run --rm --network host -v "$PWD:/app" -v gocache-pilot:/go -w /app \
+  -e GOPROXY=https://goproxy.cn,direct \
+  -e PILOT_TEST_PG_DSN="postgres://postgres:postgres@127.0.0.1:55432/b2b_pilot_test?sslmode=disable" \
+  -e B2B_L3_PG_DSN="postgres://postgres:postgres@127.0.0.1:55432/b2b_pilot?sslmode=disable" \
+  golang:1.25-alpine sh -c \
+  "go test -count=1 -p 1 -tags integration -coverprofile=/tmp/cov.out ./internal/... ./tests/... && \
+   go tool cover -func=/tmp/cov.out | tail -1"
+
+# 3) 系统级守恒/对账/审计
+docker run --rm --network host -v "$PWD:/app" -v gocache-pilot:/go -w /app \
+  -e GOPROXY=https://goproxy.cn,direct golang:1.25-alpine sh -c \
+  "go run ./scripts/concurrency -dsn '...127.0.0.1:55432/b2b_pilot' -workers 16 -qty 30 && \
+   go run ./scripts/reconcile   -dsn '...127.0.0.1:55432/b2b_pilot' && \
+   go run ./scripts/audit       -dsn '...127.0.0.1:55432/b2b_pilot'"
+
+# 4) 统计用例规模
+grep -rhoE '^func Test[A-Za-z0-9_]+' --include='*_test.go' . | wc -l   # → 409</code></pre>
+
+<h2>附：本次顺手修复的 5 处编译残留</h2>
+<p>这些是 2026-10-15 重构留下的半成品，会让整个项目无法编译（因此<b>所有</b>测试都跑不起来）：</p>
+<table>
+  <tr><th>文件</th><th>问题</th><th>修复</th></tr>
+  <tr><td class="mono">internal/workflows/workflow_outbox_dispatcher.go</td>
+      <td>import <code>go.temporal.io/sdk/serviceerror</code>（不存在）</td>
+      <td>改为 <code>go.temporal.io/api/serviceerror</code>（与同包 <code>client.go</code> 一致）</td></tr>
+  <tr><td class="mono">internal/workflows/preorder.go</td>
+      <td><code>candidateCustomer()</code> 被调用但未定义</td>
+      <td>补实现（与既有 <code>candidateOrderFields</code> 同范式）</td></tr>
+  <tr><td class="mono">internal/api/server.go</td>
+      <td><code>writeJSONErr</code> 未定义；<code>writeJSON</code> 缺 code 参数</td>
+      <td>改用同文件已有的 <code>writeErr</code></td></tr>
+  <tr><td class="mono">cmd/wecom/main.go</td>
+      <td>注释错位覆盖了 <code>writeJSON</code> 签名，且 <code>writeErr</code> 重复</td>
+      <td>恢复三个 helper 的正确定义</td></tr>
+  <tr><td class="mono">cmd/wecom/{service,starter,deferred}.go</td>
+      <td><code>wecomPreKey</code> 只定义在 <code>deferred</code> 构建里，默认构建不可见</td>
+      <td>移到无构建标签的 <code>starter.go</code>，两条构建路径共用</td></tr>
+</table>
+<p class="note">
+  另修复 1 处既有测试缺陷：<code>internal/wecom/w1_test.go</code> 的
+  <code>TestOfficialProductionPathsWithTenantConfig</code> 长期失败 —— 测试按裸明文加密，
+  未按企微协议包裹 <code>16 随机 + 4 字节长度 + msg + corpid</code>，且 IV 约定与生产实现不一致
+  （生产用 <code>IV = key[:16]</code> 不前置）。已补 <code>wecomEncryptEnvelope</code> 辅助函数对齐生产实现。
+</p>
+
+<footer>
+  B2B 订单履约 Agent · 测试体系扩展与简历指标规划 · 2026-10-15<br>
+  所有数字均为本次实机执行产出：Go 1.25.14 (linux/amd64, 容器) + PostgreSQL 16-alpine · 测试全绿
+</footer>
+
+</div>
+</body>
+</html>

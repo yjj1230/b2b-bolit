@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>v0.1 发布后架构 · 生产部署 / 系统流 / 数据流 / 影子系统</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      primaryColor: '#f6f1e9', primaryBorderColor: '#c96442', primaryTextColor: '#2a2722',
+      lineColor: '#b9b2a6', fontSize: '14px',
+      fontFamily: '"Inter","Noto Sans SC",system-ui,-apple-system,sans-serif',
+      sequenceMessageMargin: 28, actorBkg: '#f6f1e9', actorBorder: '#c96442',
+      signalColor: '#3a372f', actorTextColor: '#2a2722'
+    },
+    flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'basis' },
+    sequence: { useMaxWidth: true, showSequenceNumbers: true, wrap: true, mirrorActors: false }
+  });
+</script>
+<style>
+  :root{
+    --bg:#fafaf7; --paper:#f6f1e9;
+    --ink:#15140f; --ink2:#5a564e; --ink3:#8a8478;
+    --line:#e7e5e0; --line2:#d8d3c8;
+    --accent:#c96442; --accent-soft:#fbf1ec;
+    --green:#1f7a3a; --green-bg:#e9f3ec; --green-line:#cfe3d4;
+    --amber:#9a6b00; --amber-bg:#f8f1df; --amber-line:#ead8ac;
+    --red:#9c2a25; --red-bg:#f6e7e6; --red-line:#e6c6c4;
+    --violet:#5b3a8a; --violet-bg:#efeaef; --violet-line:#d9cceb;
+    --cyan:#156b74; --cyan-bg:#e2f0f1; --cyan-line:#bfdfe2;
+    --card:#ffffff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter','Noto Sans SC',system-ui,-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;line-height:1.8;font-size:15px;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1240px;margin:0 auto;padding:40px 26px 90px}
+  header.hero{background:linear-gradient(135deg,#14110d 0%,#332b23 50%,#6a4a35 100%);color:#fdf6ec;border-radius:22px;padding:38px 38px 30px;margin-bottom:28px;box-shadow:0 18px 40px -18px rgba(21,20,15,.45)}
+  header.hero h1{margin:0 0 12px;font-size:31px;letter-spacing:-.02em;font-weight:800}
+  header.hero p{margin:4px 0;color:#e9dfd2;font-size:14px}
+  header.hero strong{color:#fff}
+  .hero-badges{margin-top:18px;display:flex;flex-wrap:wrap;gap:8px}
+  .badge{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 13px;font-size:12px;font-weight:600;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.10);color:#f3ecdf}
+  .kicker{display:block;font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#e0a285;margin-bottom:4px}
+  h2{font-size:21px;font-weight:700;margin:54px 0 8px;padding-bottom:12px;border-bottom:2px solid var(--line)}
+  h2 .ln{display:inline-block;margin-right:10px;font-size:11px;font-weight:800;letter-spacing:.16em;color:var(--accent);vertical-align:2px}
+  h3{font-size:16.5px;font-weight:700;margin:28px 0 10px}
+  h4{font-size:14.5px;font-weight:700;margin:20px 0 8px}
+  p{margin:8px 0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:24px 26px;margin:16px 0;box-shadow:0 1px 0 #f0ece5,0 8px 24px -20px rgba(21,20,15,.18)}
+  .card.blue{border-color:var(--cyan-line);background:linear-gradient(180deg,#fbfefe,#fff)}
+  .card.green{border-color:var(--green-line);background:linear-gradient(180deg,#fbfdfb,#fff)}
+  .card.amber{border-color:var(--amber-line);background:linear-gradient(180deg,#fdfbf4,#fff)}
+  .card.red{border-color:var(--red-line);background:linear-gradient(180deg,#fdf8f7,#fff)}
+  .card.violet{border-color:var(--violet-line);background:linear-gradient(180deg,#fcfafd,#fff)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr}}
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:16px;background:#fff;margin:16px 0;box-shadow:0 1px 0 #f0ece5}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{background:#f4f1ec;color:var(--ink2);text-align:left;font-weight:700;padding:11px 14px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--line);white-space:nowrap}
+  td{padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  tbody tr:nth-child(even){background:#fbfaf7}
+  tbody tr:hover td{background:#f4f1ec}
+  .tag{display:inline-block;border-radius:999px;padding:1px 9px;font-size:11.5px;font-weight:700;white-space:nowrap;border:1px solid transparent}
+  .tag.green{background:var(--green-bg);color:var(--green);border-color:var(--green-line)}
+  .tag.blue{background:var(--cyan-bg);color:var(--cyan);border-color:var(--cyan-line)}
+  .tag.amber{background:var(--amber-bg);color:var(--amber);border-color:var(--amber-line)}
+  .tag.red{background:var(--red-bg);color:var(--red);border-color:var(--red-line)}
+  .tag.violet{background:var(--violet-bg);color:var(--violet);border-color:var(--violet-line)}
+  .tag.gray{background:#f2efe9;color:var(--ink2);border-color:var(--line)}
+  .mermaid{background:#fff;border:1px solid var(--line);border-radius:20px;padding:18px;margin:16px 0;overflow-x:auto;box-shadow:0 1px 0 #f0ece5;text-align:center}
+  .mermaid svg{max-width:100%}
+  .small{font-size:12.5px;color:var(--ink3)}
+  code,.mono{font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9em;background:#f4f1ec;border-radius:6px;padding:1px 6px;color:#2a2722}
+  pre{background:#201d18;color:#e9dfd2;border-radius:14px;padding:16px 18px;overflow-x:auto;font-size:13px;line-height:1.6}
+  pre code{background:none;color:inherit;padding:0}
+  .toc{column-count:2;column-gap:30px;font-size:14px}
+  .toc a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line);line-height:2.1}
+  .toc a:hover{color:var(--accent);border-bottom-color:var(--accent)}
+  @media(max-width:760px){.toc{column-count:1}}
+  ul,ol{margin:8px 0 8px 1.3em;padding:0}
+  li{margin:4px 0}
+  .legend{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+  .conclusion-box{border-left:4px solid var(--green);background:var(--green-bg);padding:18px 22px;border-radius:14px;margin:18px 0}
+  .callout{border-left:4px solid var(--accent);background:var(--accent-soft);padding:14px 18px;border-radius:14px;margin:14px 0}
+  .callout.red{border-left-color:var(--red);background:var(--red-bg)}
+  .callout.green{border-left-color:var(--green);background:var(--green-bg)}
+  footer{margin-top:60px;text-align:center;color:var(--ink3);font-size:12px;border-top:1px solid var(--line);padding-top:22px;line-height:1.9}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <span class="kicker">Post-v0.1 Architecture · 2026-08-20</span>
+  <h1>v0.1 发布后架构：生产部署、系统流、数据流与影子系统</h1>
+  <p>本页回答四个问题：<strong>① v0.1 发布后生产环境长什么样；② 销售助理代下订单怎么跑；③ 非销售助理下单怎么跑；④ 影子系统怎么跑、怎么做到持续发布而不影响生产。</strong></p>
+  <p>事实基线：本仓 <code>b2b_pilot_v3 · feat_v0.1 · 7f4ec57</code>（影子代码 4e53763）· 测试服务器 pilot_v3@85eb85d / 旧系统 tripartite-approval@f3ed1f80 + e9505509/d7dcb649 · 决策 D-008..D-013。</p>
+  <div class="hero-badges">
+    <span class="badge">A 轨 · 对外业务（虹励/商务可见）</span>
+    <span class="badge">S 轨 · 影子预演（仅内部）</span>
+    <span class="badge">R1 测试环境先发 → R2 生产环境后发</span>
+    <span class="badge">独立影子环境 · 共享面为零</span>
+    <span class="badge">六同原则 · 六条铁律</span>
+  </div>
+</header>
+
+<div class="card">
+  <h3 style="margin-top:0">目录</h3>
+  <div class="toc">
+    <a href="#s0">0 · 一图总览：v0.1 发布后的完整拓扑</a><br>
+    <a href="#s1">1 · 生产部署架构与端口矩阵</a><br>
+    <a href="#s2">2 · 销售助理代下订单：系统流 + 数据流</a><br>
+    <a href="#s3">3 · 非销售助理下单：系统流 + 数据流</a><br>
+    <a href="#s4">4 · 影子系统：业务流 + 数据流</a><br>
+    <a href="#s5">5 · 持续发布影子系统、不影响生产的设计</a><br>
+    <a href="#s6">6 · 数据边界与敏感字段红线</a><br>
+    <a href="#s7">7 · 当前事实基线与开放项</a><br>
+    <a href="#s8">8 · 阅读小结</a>
+  </div>
+</div>
+
+<!-- ================= 0 ================= -->
+<h2 id="s0"><span class="ln">0</span>一图总览：v0.1 发布后的完整拓扑</h2>
+
+<div class="mermaid">
+flowchart TB
+    subgraph USERS["使用方（对外轨 A）"]
+        HL["销售助理 · 虹励<br/>企微 H5 / PC 兜底"]
+        OTHER["销售 / 主管 / 董事长 / 商务 / 财务 / 仓管<br/>继续在飞书工作"]
+    end
+
+    subgraph ATRACK["A 轨 · 新系统 b2b_pilot_v3（生产 compose / 可写副本）"]
+        WX["企微网关 wecom<br/>:18081 · official 回调/JS-SDK"]
+        API["api<br/>:18080 · 桥接/订单/待办/信号"]
+        WK["worker<br/>Temporal worker · 事件链/投影/通知"]
+        SYNC["sync<br/>周期 5m · 只读同步"]
+        PG[("PG 可写副本<br/>b2b_pilot · 台账/事件链")]
+        SD[("SpiceDB<br/>对象级授权")]
+        TP[("Temporal<br/>工作流引擎")]
+    end
+
+    subgraph LEGACY["旧飞书三方审批系统 tripartite-approval"]
+        OLD["Node/TS :3000<br/>external-orders / decision"]
+        JSONL[("16 个 JSONL 文件<br/>v0.1 期间业务真相")]
+        INST["飞书审批中心<br/>external_instance"]
+        BITABLE[("飞书多维表台账")]
+    end
+
+    subgraph EXTERNAL["外部只读数据面"]
+        PGAPI["pgAPI<br/>customers/products/purchase-contracts<br/>approval-flows 镜像"]
+    end
+
+    subgraph SHADOW["影子轨 S · 独立 compose 项目（专用环境）"]
+        SAPI["shadow-api :18082<br/>127.0.0.1 内部查询"]
+        SWK["shadow-worker<br/>Shadow=true 新单重放（D-012）"]
+        SIG["shadow-ingest → shadow-feed<br/>摄入 → 映射 → 投递"]
+        SAU["shadow-audit<br/>24h 日报 · 26h 探针"]
+        SPG[("shadow-postgres<br/>b2b_shadow · :15433")]
+        SSD[("shadow-spicedb<br/>memory · :15052")]
+        STP[("shadow-temporal<br/>独立 auto-setup 实例")]
+        SENT["shadow_sentinel<br/>生产库 shadow_* 零存在校验"]
+    end
+
+    HL -->|"① 授权 + 下单 + 查单"| WX
+    WX --> API
+    API --> PG
+    API --> WK
+    WK --> PG
+    WK --> TP
+    API --> SD
+
+    API -->|"POST /external-orders/create<br/>B2B_V01_ 幂等键"| OLD
+    OLD --> INST
+    OLD --> JSONL
+    OTHER -->|"飞书 H5 / 审批中心原生操作"| OLD
+    BITABLE -->|"只读拉取"| PGAPI
+    JSONL -.->|"导出/镜像"| PGAPI
+    PGAPI -->|"周期只读同步"| SYNC
+    SYNC --> PG
+
+    PG -.->|"状态回显"| HL
+    PG -->|"详情跳转 /flows/:flow_id"| OLD
+
+    PGAPI -.->|"只读真实主数据/事件（需 HR2 凭据）"| SIG
+    JSONL -.->|"只读 JSONL 文件源"| SIG
+    SIG --> SPG
+    SWK --> SPG
+    SWK --> STP
+    SAPI --> SPG
+    SAU --> SPG
+    SENT -.->|"跨环境只读检查"| PG
+</div>
+<p class="small">读法：<span class="tag green">绿色路径 = v0.1 主链（销售助理代下单）</span> · <span class="tag gray">灰色虚线 = 只读/回显</span> · <span class="tag violet">影子轨全部在独立网络命名空间内，仅保留「只读数据源 + 运维通道」两条出网面。</span></p>
+
+<!-- ================= 1 ================= -->
+<h2 id="s1"><span class="ln">1</span>生产部署架构与端口矩阵</h2>
+
+<div class="card blue">
+  <h3 style="margin-top:0">1.1 目标生产形态（R2 发布后）</h3>
+  <p>v0.1 生产发布把新系统部署在<strong>可写副本 PG</strong>上（D-007 P3 口径：主库继续同步，发布前由备库 promote），主库只做同步与准备。新系统与旧飞书系统按「<strong>一次写入、其余只读</strong>」的原则耦合：</p>
+  <ul>
+    <li><strong>新系统唯一对外写</strong>：<code>POST /api/v1/bridge/orders</code> → 旧系统 <code>POST /external-orders/create</code>（写飞书审批实例 + JSONL 真相）。</li>
+    <li><strong>新系统本地写</strong>：只写自己的台账（<code>orders</code> 桥接行 + <code>legacy_flow_mapping</code>），不写旧系统其它表。</li>
+    <li><strong>读方向</strong>：旧系统 JSONL → 多维表 / pgAPI → <code>cmd/sync</code> 周期同步 → 新系统 PG → 我的订单/状态回显；详情实时跳旧系统只读页。</li>
+    <li><strong>回退</strong>：关闭 <code>B2B_FEISHU_BRIDGE_ENABLED</code> 即停新入口，商务回到原飞书流程；旧系统零回滚。</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h3>1.2 A 轨 compose 组件与端口矩阵</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>组件</th><th>端口</th><th>职责</th><th>v0.1 关键配置</th></tr>
+    <tr><td><code>postgres</code></td><td>25432 主库 · 25433 可写副本</td><td>可写副本：31 表 + 事件链 + 台账；主库保留同步/归档</td><td><code>B2B_PG_DSN</code> 指向 b2b-replica；主备流复制</td></tr>
+    <tr><td><code>spicedb</code></td><td>15051</td><td>对象级授权关系（tenant/order/shipment/evidence）</td><td>v1.56.0 + <code>--grpc-preshared-key</code>；内存态，seedrel 幂等初始化</td></tr>
+    <tr><td><code>temporal</code></td><td>17233</td><td>订单/预订单工作流引擎</td><td>auto-setup 1.24.2；元数据存可写副本</td></tr>
+    <tr><td><code>api</code></td><td>28080</td><td>桥接、订单、待办、信号、UI（/bridge /assistant /ops）</td><td><code>B2B_FEISHU_BRIDGE_ENABLED=true</code>、V01 白名单、<code>B2B_ASSIGNEE_*</code></td></tr>
+    <tr><td><code>worker</code></td><td>—</td><td>Temporal worker：事件链、Outbox 投影器、通知</td><td>pgAPI 只读 key、WeCom provider</td></tr>
+    <tr><td><code>wecom</code></td><td>18081</td><td>企微回调/JS-SDK/模板卡/群机器人网关</td><td><code>B2B_API_ADDR=http://api:8080</code>、official 双签名</td></tr>
+    <tr><td><code>sync</code></td><td>—</td><td>飞书/pgAPI 数据只读同步（5m 循环 + 15min 探针）</td><td>file/http 源 + <code>-interval 5m -state-file</code></td></tr>
+  </table></div>
+  <p class="small">测试环境实况（2026-08-20）：api 28080 healthy、auth-url 200、/assistant /bridge 200；企微网关 wecom-test.renheng.com/wecom/{assistant,bridge,healthz} 全 200；旧系统 121.43.58.1:3002 已部署 B2B_V01_ 小改（f3ed1f80 + e9505509/d7dcb649 信息确认豁免）；pgAPI 测试 pgapi-test / carh_test 已接通（customers 3,144 / products 293 / purchase-contracts 7,473）；<b>可写副本 b2b-replica:25433 已 promote、全项目已切备库（override f3592ea）、sync 已灌 5,214 条真实订单（cfdad13）</b>。生产端口/域名按 R2CFG 冻结。</p>
+</div>
+
+<div class="card green">
+  <h3>1.3 发布边界与回滚口径</h3>
+  <div class="grid3">
+    <div><h4 style="margin-top:0">可以写</h4><ul><li>新系统 → 旧系统创建外部订单</li><li>新系统自己的台账/事件链</li><li>旧系统既有审批动作（飞书侧）</li></ul></div>
+    <div><h4 style="margin-top:0">只读</h4><ul><li>pgAPI 客户/产品/合同</li><li>多维表/pgAPI 订单镜像</li><li>旧系统 /flows/:flow_id 详情</li></ul></div>
+    <div><h4 style="margin-top:0">禁止</h4><ul><li>新系统回写旧 JSONL 业务表</li><li>新系统代飞书审批动作</li><li>生产桥接与影子栈共用凭据</li></ul></div>
+  </div>
+  <p class="small">回退矩阵：关桥接开关（停止新入口）→ 商务回飞书；副本异常回切主库；企微不可达回 PC 兜底（/bridge、/assistant PC 端）。</p>
+</div>
+
+<!-- ================= 2 ================= -->
+<h2 id="s2"><span class="ln">2</span>销售助理代下订单：系统流 + 数据流</h2>
+
+<div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant HL as 销售助理·虹励
+    participant WX as 企微网关/PC UI
+    participant API as 新系统 api
+    participant BR as internal/bridge
+    participant OLD as 旧系统 tripartite-approval
+    participant FS as 飞书审批中心
+    participant JSONL as 旧 JSONL（真相）
+    participant PG as 新系统 PG 台账
+    participant SYNC as cmd/sync
+    participant PGAPI as pgAPI/多维表镜像
+
+    HL->>WX: 打开 /assistant 或 /bridge
+    WX->>API: GET /api/v1/bridge/auth-url
+    API->>BR: 构造飞书授权 URL（B2B_FEISHU_*）
+    BR-->>HL: 跳转飞书授权
+    HL->>OLD: 授权并返回 code
+    API->>BR: POST /api/v1/bridge/callback(code)
+    BR->>OLD: POST /api/approval/feishu-user-by-code
+    OLD-->>BR: create-order token + 身份
+    HL->>WX: 填写客户/产品/数量并提交
+    WX->>API: POST /api/v1/bridge/orders
+    API->>BR: 构造幂等键 B2B_V01_&lt;tenant&gt;:&lt;orderID&gt;
+    BR->>OLD: multipart POST /external-orders/create
+    OLD->>FS: 创建 external_instance
+    OLD->>JSONL: 追加订单与审批事件
+    FS->>FS: 信息确认（B2B_V01_ 前缀自动通过）
+    FS->>FS: 主管审批 → C/D 董事长 → 备货 → 发货 → 开票/回单
+    OLD-->>BR: 303 → submission-status（flow_id/instance_id/stage_id/detail_url）
+    BR->>PG: Recorder 回写 orders + legacy_flow_mapping
+    Note over PG: 只写轻量台账，不写审批节点/商品明细/事件链
+    PGAPI-->>SYNC: 周期只读拉取 approval-flows / 多维表
+    SYNC->>PG: 映射 + 敏感剥离 + migration_batches 幂等落库
+    HL->>API: GET /api/v1/bridge/orders（我的订单/状态回显）
+    API-->>HL: 列表 + detailURL
+    HL->>OLD: 详情跳转 GET /flows/:flow_id
+</div>
+
+<div class="card">
+  <h3>2.1 系统流步骤表</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th style="width:52px">#</th><th>动作</th><th>系统/组件</th><th>结果</th></tr>
+    <tr><td>1</td><td>打开入口</td><td>企微 H5（/assistant）或 PC（/bridge）</td><td>按群上下文预填客户/归属销售（XSZL2），PC 兜底可用</td></tr>
+    <tr><td>2</td><td>飞书授权</td><td>新系统 bridge + 旧系统 OAuth 代理</td><td>code 换 create-order token（2h 缓存，提前 15min 视为过期）</td></tr>
+    <tr><td>3</td><td>下单</td><td><code>POST /api/v1/bridge/orders</code> → <code>POST /external-orders/create</code></td><td>飞书审批中心出现标准待办；订单写旧 JSONL</td></tr>
+    <tr><td>4</td><td>信息确认</td><td>旧系统唯一小改（f3ed1f80 + e9505509/d7dcb649）</td><td>识别 <code>B2B_V01_</code> 前缀自动确认 + 注入 V01 profile；信息确认自动确认豁免 + 事件特征双兜底（已修复）</td></tr>
+    <tr><td>5</td><td>审批续跑</td><td>飞书审批中心</td><td>主管审价 → C/D 董事长终审 → 备货 → 发货 → 开票/回单 → 归档（原流程不停）</td></tr>
+    <tr><td>6</td><td>回执回写</td><td><code>internal/repo/bridge.go</code></td><td>orders（state=ORD_REQUESTED, legacy_flow_id, payload 含 flow_id/instance_id/detail_url）+ legacy_flow_mapping</td></tr>
+    <tr><td>7</td><td>状态回显</td><td><code>cmd/sync</code> 周期拉取 pgAPI/多维表</td><td>新系统 PG 同步视图更新；我的订单显示最新状态</td></tr>
+    <tr><td>8</td><td>详情</td><td>旧系统 <code>GET /flows/:flow_id</code></td><td>实时只读全流程详情页，新系统不复制敏感 token</td></tr>
+  </table></div>
+</div>
+
+<div class="card">
+  <h3>2.2 数据流：写路径 vs 读路径</h3>
+  <div class="mermaid">
+flowchart LR
+    subgraph WRITE["写路径（单向）"]
+        N["新系统 bridge"] -->|"multipart 下单"| O["旧系统 /external-orders/create"]
+        O --> J[("JSONL 真相")]
+        O --> F["飞书 external_instance"]
+        O -->|"303 → 回执"| N
+        N --> P[("新系统 PG 台账")]
+    end
+    subgraph READ["读路径（单向只读）"]
+        J -.-> M["多维表 / pgAPI approval-flows"]
+        M -.-> S["cmd/sync（5m）"]
+        S -.-> P
+        P -.-> U["我的订单/状态回显"]
+        U -.->|"详情跳转"| L["/flows/:flow_id"]
+    end
+  </div>
+  <p><strong>真相源规则（v0.1 期间）：</strong>旧系统 JSONL + 飞书审批实例 = 业务真相；新系统 PG = 可重建的轻量台账/视图。写方向只有「新系统创建订单」一次；其余全部只读。</p>
+</div>
+
+<!-- ================= 3 ================= -->
+<h2 id="s3"><span class="ln">3</span>非销售助理下单：系统流 + 数据流</h2>
+
+<div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant U as 销售/其他角色
+    participant OLD as 旧系统 tripartite-approval
+    participant FS as 飞书审批中心
+    participant JSONL as 旧 JSONL（真相）
+    participant PGAPI as pgAPI / 多维表
+    participant SYNC as 新系统 cmd/sync
+    participant PG as 新系统 PG 只读视图
+
+    U->>OLD: 飞书 H5 填单并提交
+    OLD->>FS: 创建 external_instance
+    OLD->>JSONL: 追加订单/审批事件
+    FS->>U: 主管/董事长/财务/仓管等审批待办
+    U->>FS: 按原流程审批（信息确认→审价→终审→备货→发货→开票→回单）
+    JSONL-->>PGAPI: 多维表/pgAPI 镜像同步
+    PGAPI-->>SYNC: 只读拉取 approval-flows
+    SYNC->>PG: 映射/敏感剥离/幂等落库
+    PG-->>U: 新系统订单视图（如已开放）
+    Note over SYNC,PG: 新系统绝不回写飞书；本路径完全单向只读
+</div>
+
+<div class="card">
+  <h3>3.1 两条下单路径对比</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>维度</th><th>销售助理代下（A 轨新入口）</th><th>非销售助理下单（旧入口）</th></tr>
+    <tr><td>入口</td><td>企微 H5 / PC /bridge</td><td>飞书 H5 / 原业务入口</td></tr>
+    <tr><td>创建调用</td><td>新系统 bridge → <code>POST /external-orders/create</code></td><td>旧系统直接 <code>POST /external-orders/create</code></td></tr>
+    <tr><td>幂等键</td><td><code>B2B_V01_&lt;tenant&gt;:&lt;orderID&gt;</code></td><td>旧系统原幂等键</td></tr>
+    <tr><td>信息确认</td><td><code>B2B_V01_</code> 前缀自动确认</td><td>提交人手工确认</td></tr>
+    <tr><td>审批 profile</td><td>V01 profile（v0.1 审批链）</td><td>原 approval_profile</td></tr>
+    <tr><td>新系统台账</td><td>bridge 回写轻量台账</td><td>仅 sync 只读同步（不新增 bridge 行）</td></tr>
+    <tr><td>详情/状态</td><td>新系统列表 + 旧系统详情页</td><td>旧系统页面 / 飞书审批中心</td></tr>
+  </table></div>
+  <p class="small">共同点：两条路径的<strong>业务真相都在旧 JSONL + 飞书审批实例</strong>；新系统在任何情况下都不代办飞书审批动作、不回写业务数据。</p>
+</div>
+
+<!-- ================= 4 ================= -->
+<h2 id="s4"><span class="ln">4</span>影子系统：业务流 + 数据流</h2>
+
+<div class="card violet">
+  <h3 style="margin-top:0">4.1 影子栈部署（独立环境，共享面为零）</h3>
+  <div class="mermaid">
+flowchart TB
+    subgraph SH["影子专用环境 · docker compose -p b2b-shadow -f docker-compose.shadow.yml"]
+        PG[("shadow-postgres<br/>b2b_shadow · 127.0.0.1:15433")]
+        TP[("shadow-temporal<br/>独立 auto-setup · namespace b2b-shadow")]
+        SD[("shadow-spicedb<br/>memory · 127.0.0.1:15052")]
+        MG["shadow-migrate<br/>001-007 + 008 五表<br/>DSN 库名守卫"]
+        SR["shadow-seedrel<br/>影子授权基线"]
+        ING["shadow-ingest<br/>只读摄入 · 5m"]
+        FED["shadow-feed<br/>映射投递 · 1m"]
+        WK["shadow-worker<br/>Shadow=true 新单重放（D-012）"]
+        API["shadow-api<br/>127.0.0.1:18082 内部查询"]
+        AUD["shadow-audit<br/>24h 日报 · 26h 探针"]
+        MG --> PG
+        SR --> SD
+        ING --> PG
+        FED --> PG
+        WK --> PG
+        WK --> TP
+        API --> PG
+        AUD --> PG
+    end
+    subgraph SRC["只读数据源（唯一数据出网面之一）"]
+        JSONL[("真实 JSONL 文件")]
+        PGAPI["真实 pgAPI 只读 key"]
+    end
+    JSONL -->|"5 源摄入"| ING
+    PGAPI -->|"客户/产品主数据"| WK
+    FED -->|"Signal + Shadow 模式启动"| TP
+    SENT["shadow_sentinel<br/>生产库 shadow_* 零存在校验"] -.->|"只读检查"| PROD[("生产 PG")]
+  </div>
+  <p class="small">端口全绑 127.0.0.1；影子容器解析不到 A 轨任何主机名；唯一出网面 = 只读源（JSONL/pgAPI）与运维通道。</p>
+</div>
+
+<div class="card">
+  <h3>4.2 影子业务流（真实数据 → 影子订单 → 审计证据）</h3>
+  <div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant SRC as 只读源（JSONL/pgAPI）
+    participant ING as shadow-ingest
+    participant DB as shadow_source_events
+    participant FED as shadow-feed
+    participant TP as shadow-temporal
+    participant WK as shadow-worker
+    participant AUD as shadow-audit
+
+    SRC->>ING: 拉取 orders/order_events/stock/shipment/invoice 五源
+    ING->>ING: 列映射 + join_source 关联 orders.jsonl + 嵌套 detail 紧凑化
+    ING->>DB: 幂等批次写入（flow_id/event_id/action/stage_code/payload）
+    DB->>FED: 每 1m 扫 NEW 事件（每轮 ≤10000，自排空）
+    FED->>FED: 35 条真实 status 规则翻译（未知 → UNMAPPED，绝不猜测）
+    FED->>TP: 建单 Signal(start) + WorkflowID shadow-&lt;flow&gt;
+    TP->>WK: Shadow=true 执行（Timer 全抑制）
+    FED->>TP: 按 occurred_at 投递 price-review/stock-review/ship-action/invoice-issued 等
+    WK->>DB: 事件链/待办/守恒与 A 轨同一 repo 事务
+    AUD->>DB: 每日聚合 coverage/divergence/state-alignment/stuck
+    AUD-->>AUD: 四张数 md+json → logs/audit/shadow/
+  </div>
+  <p><strong>影子模式与真实系统唯一差异：</strong><code>Shadow=true</code> 抑制 Timer；旧系统「定时推进」的事件由 <code>SignalShadowInject</code> 显式注入与 Timer 等价的分支。除此之外，domain/workflow/repo/api 是同一份代码（六同原则）。</p>
+</div>
+
+<div class="card">
+  <h3>4.3 五个只读数据源</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>源</th><th>内容</th><th>ingest 关键处理</th></tr>
+    <tr><td><code>feishu_orders</code></td><td>订单主记录（flow_id/instance_id/order_id/客户）</td><td>join 索引基准（instance_id → flow_id/stage_code/order_id）</td></tr>
+    <tr><td><code>feishu_order_events</code></td><td>订单阶段事件（决策事件无顶层 flow_id）</td><td><code>join_source=feishu_orders</code> 补 flow_id/stage_code</td></tr>
+    <tr><td><code>feishu_stock_prepare_events</code></td><td>备货/到款/选仓事件</td><td>列映射 + 幂等批次</td></tr>
+    <tr><td><code>feishu_shipment_events</code></td><td>发货/回单事件</td><td>列映射 + 幂等批次</td></tr>
+    <tr><td><code>feishu_invoice_events</code></td><td>开票/回款/归档事件</td><td>列映射 + 幂等批次</td></tr>
+  </table></div>
+</div>
+
+<div class="card">
+  <h3>4.4 事件 → Signal 映射（真实 status 基线摘要）</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>旧系统 status（代码事实 f3ed1f80）</th><th>影子动作</th><th>新系统 Signal / verdict</th></tr>
+    <tr><td><code>ORDER_SUBMIT_RECEIVED / ORDER_SUBMIT_ACCEPTED</code></td><td>建单</td><td><code>start</code></td></tr>
+    <tr><td><code>MANAGER_APPROVED / SUPERVISOR_PENDING</code></td><td>忽略（等价已发生/待发生）</td><td><code>ignore</code></td></tr>
+    <tr><td><code>SUPERVISOR_APPROVED / SUPERVISOR_REJECTED</code></td><td>主管审价</td><td><code>price-review</code> + APPROVED/REJECTED</td></tr>
+    <tr><td><code>CHAIRMAN_APPROVED / CHAIRMAN_REJECTED / CHAIRMAN_SKIPPED</code></td><td>董事长终审 / A-B 级跳过</td><td><code>chairman-review</code> + 裁决 / <code>ignore</code></td></tr>
+    <tr><td><code>STOCK_RESERVATION_APPROVED / FINANCE_PAYMENT_CONFIRMED</code></td><td>备货 / 到款</td><td><code>stock-review</code> / <code>payment-confirm</code></td></tr>
+    <tr><td><code>BUSINESS_WAREHOUSE_SUBMITTED / WAREHOUSE_SHIPPED / WAREHOUSE_TRANSFERRED</code></td><td>选仓 / 发货 / 转仓</td><td><code>warehouse-confirm</code> / <code>ship-action</code>（SHIP/TRANSFER）</td></tr>
+    <tr><td><code>COMPLETION_EVIDENCE_SUBMITTED / FINANCE_ISSUE_APPROVED</code></td><td>回单 / 开票</td><td><code>receipt-provided</code> / <code>invoice-issued</code></td></tr>
+    <tr><td><code>COLLECTION_FOLLOWUP_SUBMITTED / INVOICE_ARCHIVED</code></td><td>回款 / 归档闭合</td><td><code>payment-tracked</code>（差异映射，业务签字待办）</td></tr>
+    <tr><td>未列入规则的 status</td><td>不猜测</td><td><code>UNMAPPED_EVENT</code> 分歧（可接受但必须可见、有 owner）</td></tr>
+  </table></div>
+  <p class="small">完整 35 条规则见 <code>config/shadow-feed.example.json</code>；权威版需业务逐条签字 + detail 字段名 T1.3 冻结（HR1）。</p>
+</div>
+
+<div class="card">
+  <h3>4.5 影子「像真人一样推进」的驱动来源（A13）</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>方案</th><th>真实感</th><th>生产风险</th><th>建议</th></tr>
+    <tr><td>A · 影子侧合成注入</td><td>中（代码同源，事件 source=seed）</td><td><span class="tag green">零</span></td><td><strong>日常主选</strong>：事件写 shadow_source_events，报告 seed/real 分开统计</td></tr>
+    <tr><td>B · 飞书测试环境注入</td><td>高（真实飞书代码/审批引擎）</td><td><span class="tag green">低</span></td><td>要「跟真人一样」时选；需脱敏测试环境</td></tr>
+    <tr><td>C · 生产飞书补丁注入</td><td>最高</td><td><span class="tag red">中高</span></td><td>默认不做；会发真实通知、推进真实订单、污染审计前提</td></tr>
+  </table></div>
+</div>
+
+<!-- ================= 5 ================= -->
+<h2 id="s5"><span class="ln">5</span>持续发布影子系统、不影响生产的设计</h2>
+
+<div class="card green">
+  <h3 style="margin-top:0">5.1 隔离设计：把「不影响生产」做成物理事实</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>维度</th><th>A 轨生产</th><th>影子轨 S</th><th>为什么不影响</th></tr>
+    <tr><td>compose 项目</td><td><code>b2b_pilot</code>（主栈）</td><td><code>-p b2b-shadow</code>（独立项目）</td><td>不同网络命名空间，影子容器解析不到 A 轨主机名</td></tr>
+    <tr><td>PostgreSQL</td><td>可写副本 b2b_pilot</td><td>独立 b2b_shadow（127.0.0.1:15433）</td><td>零共享库；migrate 前置守卫校验库名</td></tr>
+    <tr><td>Temporal</td><td>宿主 17233</td><td>影子自带 auto-setup 实例</td><td>不抢生产 Temporal 容量；namespace b2b-shadow + queue b2b-shadow-order</td></tr>
+    <tr><td>SpiceDB</td><td>主实例</td><td>独立 memory 实例 + 独立 key</td><td>授权图完全隔离</td></tr>
+    <tr><td>出站</td><td>企微 official</td><td>WeCom=mock（只记录不发送）</td><td>零客户触达</td></tr>
+    <tr><td>回写</td><td>桥接可开</td><td>bridge=false + 无写凭据 + 写哨兵</td><td>零回写生产飞书/生产库</td></tr>
+    <tr><td>入口</td><td>域名对外</td><td>shadow-api 仅 127.0.0.1:18082 + 白名单</td><td>无公网入口</td></tr>
+  </table></div>
+</div>
+
+<div class="card">
+  <h3>5.2 六条铁律 + 六项启动守卫</h3>
+  <div class="grid2">
+    <div>
+      <h4 style="margin-top:0">六条铁律（S-铁1..6）</h4>
+      <ol>
+        <li>零客户触达</li>
+        <li>零出站（通知器 mock）</li>
+        <li>零回写（无桥接/写凭据）</li>
+        <li>零污染生产（独立环境）</li>
+        <li>可重建重放（真相源新单全集重建 + 种子，D-012）</li>
+        <li>影子故障不动 A 轨</li>
+      </ol>
+    </div>
+    <div>
+      <h4 style="margin-top:0">六项 fail-fast 守卫（internal/shadowguard）</h4>
+      <ol>
+        <li>DSN 库名必须 <code>b2b_shadow</code></li>
+        <li>Temporal namespace 必须 <code>b2b-shadow</code></li>
+        <li>Task queue 必须 <code>b2b-shadow-order</code></li>
+        <li>WeCom provider 必须 <code>mock</code></li>
+        <li>Feishu bridge 必须 <code>false</code></li>
+        <li>SpiceDB 地址必须在白名单</li>
+      </ol>
+    </div>
+  </div>
+  <p class="small">六个二进制入口（api/worker/ingest/feed/audit + migrate）全部接入；任一违反即拒绝启动，而不是「运行时才发现」。</p>
+</div>
+
+<div class="card violet">
+  <h3>5.3 持续发布流水线：S 线高频发布 / F 线影子先行</h3>
+  <div class="mermaid">
+flowchart TD
+    START["影子发布需求<br/>映射表 / 种子集 / 审计口径 / ingest / feed / replay 工具"] --> CODE["代码/配置变更（仅影子仓路径）"]
+    CODE --> REVIEW["code review + compose config 校验"]
+    REVIEW --> GUARD["shadowguard 六项 fail-fast"]
+    GUARD --> SENT["零出站/零回写哨兵"]
+    SENT --> REPLAY["重放（上线以来新单全集 + 种子，D-012）"]
+    REPLAY --> AUDIT["shadow-audit 四张数"]
+    AUDIT -->|"通过"| REL["独立发布到影子专用环境<br/>不触碰 A 轨镜像/配置"]
+    AUDIT -->|"不通过"| FIX["修复 → 重放受影响批次 + 新单全集 + 种子"]
+    REL --> OBS["24h 探针 + 告警闭环（D-009 无托底）"]
+
+    FCHG["F 线 · workflow/domain 变更"] -.->|"影子先行"| REPLAY
+    FCHG -->|"影子真实数据验证通过后"| ACHG["A 轨发布前证据"]
+  </div>
+  <p><strong>D-011 节奏规则：</strong>影子系统可以在 v0.1 之后多次发布，不绑定 v0.1/v0.2 窗口；A 轨不因影子发布而重新发布。反过来，A 轨的 workflow/domain 变更必须先过影子新单全集重放（D-012）与同信号对拍。</p>
+</div>
+
+<div class="card">
+  <h3>5.4 六同原则：保证「影子结论 ≈ 真实系统结论」</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>六同</th><th>含义</th><th>现状</th></tr>
+    <tr><td>① 同代码同镜像</td><td>shadow-* 与 A 轨同一提交、同一 Dockerfile、同一 workflow/domain/repo</td><td><span class="tag green">已满足</span></td></tr>
+    <tr><td>② 同数据</td><td>真实只读源 + 完整事件链 + 同一 SanitizeRow</td><td><span class="tag amber">待 HR2 真实 pgAPI 凭据</span></td></tr>
+    <tr><td>③ 同状态机</td><td>无 shadow-only FSM 分支；shadow-inject 只注入 Timer 等价分支</td><td><span class="tag green">已满足（TestShadowParityWithNonShadow）</span></td></tr>
+    <tr><td>④ 同执行环境</td><td>真实 PG/Temporal/SpiceDB 引擎；SpiceDB 默认向 postgres 升级</td><td><span class="tag amber">PG/Temporal 已满足；SpiceDB postgres 化待做</span></td></tr>
+    <tr><td>⑤ 同查询面</td><td>shadow-api 复用 api 二进制与投影代码，仅换白名单/租户</td><td><span class="tag green">已满足</span></td></tr>
+    <tr><td>⑥ 同审计</td><td>事件链、守恒、待办与 A 轨同一 repo 事务</td><td><span class="tag green">已满足</span></td></tr>
+  </table></div>
+  <p><strong>显式例外只有四类：</strong>零出站通知器、零回写、无公网入口、PRE/Gatekeeper 内部种子。除此之外的任何差异都视为缺陷。</p>
+</div>
+
+<div class="card amber">
+  <h3>5.5 运维节奏与生命周期</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>任务</th><th>节奏</th><th>探针</th></tr>
+    <tr><td>shadow-ingest</td><td>5 分钟/轮</td><td>state-file 15min 时效</td></tr>
+    <tr><td>shadow-feed</td><td>1 分钟/轮（单轮 ≤10000 条自排空）</td><td>state-file 5min 时效</td></tr>
+    <tr><td>shadow-audit</td><td>24 小时/次</td><td>报告 26h 未更新即告警</td></tr>
+    <tr><td>shadow_sentinel</td><td>每日（或接定时平台）</td><td>生产库 shadow_* 零存在；查询失败也产生 finding</td></tr>
+    <tr><td>Temporal 保留</td><td>namespace retention 14 天</td><td>—</td></tr>
+    <tr><td>生命周期</td><td>v0.1 上线 → 多次影子发布 → v0.3 正式上线后撤销</td><td>归档报告/分歧/覆盖基线 → 停栈 → drop b2b_shadow → 回收凭据</td></tr>
+  </table></div>
+  <p class="small">D-009 无托底：影子栈上线即生产组件，自身健康检查/告警/回滚全部按生产口径，不允许「内部系统先不接告警」。</p>
+</div>
+
+<!-- ================= 6 ================= -->
+<h2 id="s6"><span class="ln">6</span>数据边界与敏感字段红线</h2>
+
+<div class="card red">
+  <div class="tbl-wrap"><table>
+    <tr><th>数据</th><th>A 轨新系统</th><th>影子轨</th></tr>
+    <tr><td><code>view_token / submitter_token / approver_token</code></td><td>不落库；只用于调用旧系统</td><td>同左；影子 worker 不用任何审批 token</td></tr>
+    <tr><td><code>open_id</code></td><td>仅桥接调用期使用；身份映射独立保存</td><td>摄入经 SanitizeRow；敏感值命中即 REDACTED</td></tr>
+    <tr><td>客户/合同/金额</td><td>同步视图可读；不写旧系统</td><td>真实只读副本进 b2b_shadow；v0.3 后 drop</td></tr>
+    <tr><td>flow_id/instance_id/detail_url</td><td>台账安全字段，允许落库</td><td>source_events 保留，用于关联与审计</td></tr>
+    <tr><td>生产写凭据</td><td>按 secrets 管理</td><td><strong>绝不挂载</strong>；pgAPI 只读 key 强制非空且权限外验</td></tr>
+  </table></div>
+</div>
+
+<!-- ================= 7 ================= -->
+<h2 id="s7"><span class="ln">7</span>当前事实基线与开放项</h2>
+
+<div class="card">
+  <div class="tbl-wrap"><table>
+    <tr><th>项</th><th>状态</th><th>下一步 / 归属</th></tr>
+    <tr><td>本仓影子全流程代码</td><td><span class="tag green">已提交</span></td><td>本仓 7f4ec57；影子代码 4e53763（internal/shadow · shadowguard · 008 · compose · 三命令 · 哨兵；D-008..D-013）</td></tr>
+    <tr><td>测试服务器 A 轨</td><td><span class="tag green">R-01..R-05/R-08 已收敛</span></td><td>pilot_v3@85eb85d；api auth-url/assistant/bridge 200；旧系统 f3ed1f80 + e9505509/d7dcb649；pgAPI 测试 pgapi-test/carh_test 已接通</td></tr>
+    <tr><td>R-06 虹励真实下单闭环</td><td><span class="tag amber">部分进展</span></td><td>授权链路已实测；约虹励走完整闭环（S1/S2）</td></tr>
+    <tr><td>R-08 可写副本/回填 dry-run</td><td><span class="tag green">已解决</span></td><td>备库 b2b-replica:25433 已 promote、全项目已切备库（override f3592ea）；sync 已灌 5,214 条真实订单（cfdad13）；backfill dry-run 确认测试环境无源数据，O-08 不适用</td></tr>
+    <tr><td>R-10 UAT / Go-No-Go</td><td><span class="tag red">未决</span></td><td>R1 验收证据齐备后执行</td></tr>
+    <tr><td>影子 HR1 映射签字</td><td><span class="tag amber">代码基线完成</span></td><td>35 条 status 规则业务逐条签字 + detail 字段名 T1.3 冻结</td></tr>
+    <tr><td>影子 HR2 pgAPI 只读凭据</td><td><span class="tag red">未决</span></td><td>只读 key + 真实响应样例 + 写接口被拒证据</td></tr>
+    <tr><td>SH-10 R1 独立环境新单全集重放（D-012）</td><td><span class="tag gray">环境侧待执行</span></td><td>上线以来新单全集 + 内部种子重放 + S-01..S-08 + 基线报告</td></tr>
+    <tr><td>SH-11 影子正式上线 24h</td><td><span class="tag gray">环境侧待执行</span></td><td>独立环境同镜像 + 真实只读源 + 哨兵 + 24h 稳定</td></tr>
+    <tr><td>SH-12 v0.2 Go 证据</td><td><span class="tag gray">依赖 SH-11</span></td><td>连续 7 日审计 + 分歧裁决 + 复用清单</td></tr>
+    <tr><td>A13 影子驱动源</td><td><span class="tag amber">待拍板</span></td><td>推荐影子侧种子 → 飞书测试环境 → 生产注入默认不做</td></tr>
+    <tr><td>v0.3 后 teardown</td><td><span class="tag gray">v0.3 后执行</span></td><td>归档 → 停栈 → drop b2b_shadow → 回收凭据</td></tr>
+  </table></div>
+</div>
+
+<div class="conclusion-box">
+  <h3 style="margin-top:0;margin-bottom:6px">一句话总结</h3>
+  <p style="margin:0"><strong>v0.1 发布后：A 轨用「桥接 + 可写副本 + 单向只读同步」让销售助理下单无缝进入旧飞书审批流；影子轨 S 用「独立环境 + 六同原则 + 六条铁律 + 新单实时增量重放（D-012）」在真实数据上持续预演完整状态机。两条轨的唯一物理关系是只读数据源，因此影子系统可以高频发布、影子先行，而生产系统永远只有一条被桥接开关保护的下单写路径。</strong></p>
+</div>
+
+<h2 id="s8"><span class="ln">8</span>阅读小结</h2>
+<div class="card">
+  <ul>
+    <li>想快速看拓扑 → 第 0 节一图总览；想部署落地 → 第 1 节端口矩阵。</li>
+    <li>想理解虹励下单 → 第 2 节 sequence 图；想理解旧入口 → 第 3 节对比表。</li>
+    <li>想理解影子系统 → 第 4 节数据流 + 4.4 映射表；想论证「不影响生产」→ 第 5 节隔离表与发布流水线。</li>
+    <li>想看还差什么 → 第 7 节开放项：HR1 签字、HR2 只读凭据、SH-10/11/12、A13 驱动源。</li>
+  </ul>
+</div>
+
+<footer>
+  v0.1 发布后架构 · 生产部署 / 系统流 / 数据流 / 影子系统 · 2026-08-20 · 本仓 7f4ec57 · 配套：docs/v0.1/12-shadow-full-flow.html · v0.1发布影子系统待定.html · v0.1发布过程跟踪.html · v0.2_设计_preview.html
+</footer>
+
+</div>
+</body>
+</html>

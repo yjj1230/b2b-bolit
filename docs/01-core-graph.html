@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>01 · 核心图谱 · B2B 订单履约验证项目</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+SC:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:#f5f4ed; --paper2:#efeee5; --ink:#1f1d18; --ink2:#6b665b;
+    --ink3:#3a382f; --blue:#1B365D; --rule:#d4d1c5;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif; line-height:1.6;}
+  .wrap{max-width:960px; margin:0 auto; padding:48px 40px 80px;}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;}
+  .folio{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--rule); padding-bottom:10px;
+    font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink2);}
+  .folio a{color:var(--ink2); border:none;}
+  .folio a:hover{color:var(--blue);}
+  .tag{display:inline-block; padding:3px 10px; font-size:11px; letter-spacing:.16em; background:var(--paper2); color:var(--blue);}
+  .kicker{display:flex; align-items:baseline; gap:12px; margin-top:48px;}
+  h1{font-size:clamp(32px,5vw,50px); line-height:1.12; font-weight:500; margin-top:14px; letter-spacing:-.01em;}
+  .lede{margin-top:18px; font-size:17px; line-height:1.7; color:var(--ink3); max-width:720px;}
+  h2{font-size:23px; font-weight:600; margin:52px 0 14px; color:var(--blue); display:flex; align-items:baseline; gap:12px; border-top:1px solid var(--rule); padding-top:26px;}
+  h2 .no{font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.12em;}
+  h3{font-size:17.5px; font-weight:600; margin:30px 0 10px; color:var(--ink);}
+  h3 .no{color:var(--blue); font-family:'IBM Plex Mono',monospace; font-size:12px; margin-right:8px;}
+  p{margin:10px 0; color:var(--ink3);}
+  ul,ol{margin:10px 0 10px 26px; color:var(--ink3);}
+  li{margin:5px 0;}
+  a{color:var(--blue); text-decoration:none; border-bottom:1px solid var(--rule);}
+  a:hover{border-bottom-color:var(--blue);}
+  blockquote{border-left:2px solid var(--blue); padding:10px 18px; margin:16px 0; background:var(--paper2); font-style:italic;}
+  table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  .table-wrap{overflow-x:auto; margin:16px 0 24px; border:1px solid var(--rule);}
+  .table-wrap table{margin:0;}
+  th{background:var(--paper2); color:var(--blue); text-align:left; font-weight:600; padding:9px 12px; border-bottom:1.5px solid var(--blue); font-size:12.5px; white-space:nowrap;}
+  td{padding:9px 12px; border-bottom:1px solid var(--rule); vertical-align:top; color:var(--ink3);}
+  tr:nth-child(even) td{background:#faf9f3;}
+  tr:hover td{background:#f0ede0;}
+  .mermaid{background:var(--paper); border:1px solid var(--rule); padding:18px; overflow-x:auto; text-align:center; margin:20px 0;}
+  .mermaid svg{max-width:100%; height:auto;}
+  .mermaid svg.statediagram span,.mermaid svg.statediagram div{color:#1f1d18 !important;}
+  .mermaid svg.statediagram text{fill:#1f1d18 !important;}
+  figcaption{text-align:center; font-size:12px; color:var(--ink2); margin:-10px 0 26px; font-style:italic;}
+  code{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace; font-size:13px; background:var(--paper2); padding:1px 5px;}
+  pre{background:var(--paper2); border:1px solid var(--rule); padding:16px 18px; overflow-x:auto; font-size:12.8px; line-height:1.55; margin:14px 0;}
+  pre code{background:none; padding:0;}
+  footer.colophon{margin-top:56px; padding-top:14px; border-top:1px solid var(--rule); display:flex; justify-content:space-between;
+    font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink2); flex-wrap:wrap; gap:8px;}
+  footer.colophon a{color:var(--ink2); border:none;}
+  footer.colophon a:hover{color:var(--blue);}
+  .toc{border:1px solid var(--rule); background:var(--paper2); padding:18px 24px; margin:26px 0;}
+  .toc .tt{font-size:11px; letter-spacing:.2em; color:var(--blue); margin-bottom:8px;}
+  .toc a{display:block; padding:3px 0; color:var(--ink3); border:none;}
+  .toc a:hover{color:var(--blue);}
+  .toc .mono{font-size:12px; color:var(--blue); margin-right:8px;}
+  @media(max-width:720px){.wrap{padding:28px 18px 60px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="folio">
+    <span><a href="index.html">← Docs</a> · B2B Order Fulfillment</span>
+    <span>01 · Core Graph</span>
+    <span>World KG × Task Graph</span>
+  </header>
+
+  <div class="kicker">
+    <span class="tag">Core Graph · 核心图谱</span>
+    <span class="mono" style="font-size:11px; letter-spacing:.18em; color:var(--ink2);">所有设计的核心与起点</span>
+  </div>
+
+  <h1>世界知识图谱<br/><span style="font-style:italic; color:var(--blue);">× 任务图谱</span></h1>
+
+  <p class="lede">本文档是所有设计的核心与起点。架构、测试、开发计划全部从这张图派生；实现完成后，用 code-review-graph 把代码读回成图，回到这张图做 <strong>roundtrip</strong> 验证 ——「能力问题 → 本体 → 代码 → 图 → 业务问题 → 修正本体」。方法论来源：<span class="mono">spec/graph-engineering.html</span> 与 <span class="mono">spec/code-graph-engineering-philosophy.html</span>；结构范式来源：<span class="mono">pilot_app/docs/01-core-graph.md</span>。</p>
+
+  <nav class="toc">
+    <div class="tt">CONTENTS · 目录</div>
+    <a href="#s0"><span class="mono">0</span>方法论定位</a>
+    <a href="#s1"><span class="mono">1</span>世界知识图谱（能力问题 · 本体 · ER · 授权 · 事件）</a>
+    <a href="#s2"><span class="mono">2</span>任务图谱（主流程模板 · 四流程状态机 · 预订单 · roundtrip）</a>
+    <a href="#s3"><span class="mono">3</span>图谱维护规则</a>
+  </nav>
+
+  <h2 id="s0"><span class="no">0 ·</span> 方法论定位</h2>
+  <p>Graph Engineering 分两个半边，本项目完整应用：</p>
+  <div class="table-wrap">
+  <table>
+    <tr><th>半边</th><th>回答的问题</th><th>本项目的落地物</th></tr>
+    <tr><td>🧠 知识图谱</td><td>智能体/系统<strong>记住什么</strong></td><td>§1 世界知识图谱：订单、客户、产品、库存、授权、事件的 ontology</td></tr>
+    <tr><td>⚙️ 任务图谱</td><td>智能体/系统<strong>如何工作</strong></td><td>§2 任务图谱：ORD / STK / SHP / INV 四流程状态机 + 主流程/子流程编排 + 预订单 AI 流程</td></tr>
+  </table>
+  </div>
+  <blockquote>核心心智模型：<strong>先建模后抽取、先融合后存储、每个阶段都验证</strong>。本体是有 schema 的产品，不是三元组的堆砌 —— 本文档从<strong>能力问题（competency questions）</strong>出发定义 schema，能力问题同时就是后续测试的规格（见 <span class="mono">03-testing.html</span> 的 roundtrip 映射表）。</blockquote>
+  <p>业务事实基线（源自 <span class="mono">spec/</span> 调研）：</p>
+  <ul>
+    <li>客户样板：<strong>长安仁恒</strong>，订单履约型 B2B 企业，四仓（阳原 / 长兴 / 东莞 / 成都），销售用公司工作机登录个人微信（可被会话存档）。</li>
+    <li>履约闭环四分支：<strong>ORD 订单创建 → STK 备货审批 → SHP 发货分配及出库 → INV 开票回单审批</strong> → 回款跟踪 → 合同归档 → 订单关闭。</li>
+    <li>三方审批 = <strong>商务 · 财务 · 仓管</strong> 三方协同；客户 C/D 级触发<strong>董事长</strong>审批；款到发货按供方分流财务确认到账。</li>
+    <li>核心业务原则：① <strong>订单提交 ≠ 已履约</strong>，状态必须由实际业务结果汇总；② <strong>回单不卡开票</strong>（四分流）；③ <strong>仓管不查看价格/金额</strong>；④ <strong>销售只看本人客户</strong>；⑤ 流程可审计、可回溯、版本固化。</li>
+    <li>技术输入：SpiceDB RBAC+ReBAC 混合、Temporal 主流程+子流程+Signal/Timer、企微 S1–S4 场景、AI 安全边界（LLM 只产候选 + 确定性代码校验 + 人工确认才生效）。</li>
+  </ul>
+
+  <h2 id="s1"><span class="no">1 ·</span> 世界知识图谱（World Knowledge Graph）</h2>
+
+  <h3><span class="no">1.1</span> 能力问题 —— 本体的规格与测试</h3>
+  <p>方法论要求：先写能力问题，再设计 schema，克制添加实体，直到某个能力问题要求为止。</p>
+  <div class="table-wrap">
+  <table>
+    <tr><th>#</th><th>能力问题（CQ）</th><th>所属域</th></tr>
+    <tr><td class="mono">CQ-01</td><td>用户 U 对订单 O 当前<strong>拥有</strong>哪些操作权限（查看 / 提交 / 审批 / 备货 / 发货 / 开票 / 关闭）？</td><td>授权</td></tr>
+    <tr><td class="mono">CQ-02</td><td>用户 U 的<strong>数据可见范围</strong>是什么？（销售本人及代办 / 商务全公司 / 仓管本仓 / 财务按供方分流 / 管理层全量）</td><td>授权</td></tr>
+    <tr><td class="mono">CQ-03</td><td>仓管查看订单时，<strong>价格/金额字段是否已被剥离</strong>（字段级授权投影）？</td><td>授权</td></tr>
+    <tr><td class="mono">CQ-04</td><td>订单 O 当前处于什么状态？允许哪些状态迁移？哪些迁移是禁止的？</td><td>流程</td></tr>
+    <tr><td class="mono">CQ-05</td><td>订单 O 的<strong>审批链</strong>（销售主管审价 → C/D 级董事长）当前状态与结果是什么？</td><td>流程</td></tr>
+    <tr><td class="mono">CQ-06</td><td><strong>备货守恒</strong>：订单 O 的累计备货确认量是否 ≤ 订单数量（含分批、退回、转仓）？</td><td>业务一致性</td></tr>
+    <tr><td class="mono">CQ-07</td><td><strong>发货守恒</strong>：累计发货量 ≤ 备货量？订单全部发货（累计发货 = 订单量）的完成条件是否成立？</td><td>业务一致性</td></tr>
+    <tr><td class="mono">CQ-08</td><td><strong>库存联动</strong>：实际发货与库存扣减是否同事务？任何时刻库存不为负？</td><td>业务一致性</td></tr>
+    <tr><td class="mono">CQ-09</td><td><strong>开票守恒</strong>：累计开票金额/数量 ≤ 可开票金额/数量（按有效发货计算，双维度）？（开票不超发货，回单不卡开票）</td><td>业务一致性</td></tr>
+    <tr><td class="mono">CQ-10</td><td>订单 O 的<strong>回单状态</strong>（按发货批次汇总：未回 / 部分 / 全部；无回单超 5 天自动进例外审核）？</td><td>流程</td></tr>
+    <tr><td class="mono">CQ-11</td><td>企微消息 M 生成的<strong>预订单</strong>当前状态与确认结果？消息 → 预订单 → 正式订单的全链<strong>幂等</strong>是否成立？</td><td>流程 + AI</td></tr>
+    <tr><td class="mono">CQ-12</td><td>订单 O 的完整<strong>事件链</strong>（谁、何时、何因、结果）是什么？能否回放？</td><td>流程 + 审计</td></tr>
+    <tr><td class="mono">CQ-13</td><td>代办授权 D 是否<strong>在有效期内</strong>？到期后代办权限是否即时失效？</td><td>授权</td></tr>
+    <tr><td class="mono">CQ-14</td><td>哪些操作<strong>并发</strong>作用于同一订单/库存（重复确认、超发、重复开票、并发扣减）？如何被阻止？</td><td>业务一致性</td></tr>
+    <tr><td class="mono">CQ-15</td><td>凭证链（签收单/回单）是否<strong>只追加不覆盖</strong>？任一版本能否回放？上传者权限如何界定？</td><td>流程 + 审计</td></tr>
+  </table>
+  </div>
+  <p>这 15 个能力问题即本体存在意义的判据：<strong>schema 中每个实体/关系/事件都必须至少服务一个 CQ</strong>，否则删除。</p>
+
+  <h3><span class="no">1.2</span> 本体 Schema（Ontology）</h3>
+  <pre><code># ontology.yaml —— 项目单一事实源（此处的权威版本；实现后由代码 schema 回填并 roundtrip 校验）
+entities:
+  Tenant:      { desc: 企业租户（长安仁恒 / 智厨…），多租户隔离根节点, ex: [chang-an] }
+  User:        { desc: 系统用户（销售/销售主管/董事长/商务/财务/仓管/管理员）, ex: [alice-sales] }
+  Customer:    { desc: 客户，带等级（A/B/C/D，C/D 触发董事长审批）, ex: [cust-0001] }
+  Product:     { desc: 产品（标准型号，SKU 归一化目标）, ex: [SKU-C68] }
+  Warehouse:   { desc: 仓库（阳原/长兴/东莞/成都）, ex: [wh-yangyuan] }
+  Order:       { desc: 订单主档（统一订单总表），四分支状态机载体, ex: [ORD-2026-0001] }
+  OrderItem:   { desc: 订单产品明细（产品/数量/单价/账期/仓库分配）, ex: [item-01] }
+  StockPrepare:{ desc: 备货审批聚合（预定量/到款确认/仓库分配/出库单）, ex: [STK-0001] }
+  Shipment:    { desc: 发货单（一次发货，关闭后不再自动新建）, ex: [SHP-0001] }
+  Invoice:     { desc: 开票申请/发票（状态：待开票/处理中/已开票/失败/无需开票）, ex: [INV-0001] }
+  PreOrder:    { desc: 预订单（企微群消息 → AI 候选 → 人工确认 → 正式订单）, ex: [PRE-0001] }
+  ApprovalTask:{ desc: 审批任务（主管审价/董事长/仓管确认/财务到账/回单异常）, ex: [AT-0001] }
+  Event:       { desc: 事件（append-only 事件链，审计回放根基）, ex: [EV-0001] }
+  Evidence:    { desc: 凭证（签收单/回单，只追加版本，rebac 场景 D）, ex: [EVD-0001] }
+  Permission:  { desc: 授权关系（RBAC/ReBAC + caveat），由 SpiceDB 托管, ex: [alice:ship@wh-yangyuan] }
+
+relations:
+  BELONGS_TO:   { domain: User,      range: Tenant,    desc: 用户属于租户（多租户隔离） }
+  OWNS:         { domain: User,      range: Customer,  desc: 销售负责客户（ReBAC 直接关系） }
+  DELEGATED_TO: { domain: User,      range: User,      desc: 代办授权（caveat: 有效期） }
+  COVERS:       { domain: Order,     range: Customer,  desc: 订单属于客户 }
+  CONTAINS:     { domain: Order,     range: OrderItem, desc: 订单含明细（可多条） }
+  EXECUTES:     { domain: Warehouse, range: OrderItem, desc: 明细执行的仓库（仓库分配） }
+  STORES:       { domain: Warehouse, range: Product,   desc: 仓库库存（数量，数量守恒载体） }
+  PREPARES:     { domain: Order,     range: StockPrepare, desc: 订单产生备货审批（可分批） }
+  FULFILLS:     { domain: StockPrepare, range: Shipment, desc: 备货审批产生发货单（可多张） }
+  GENERATES_INV:{ domain: Order,     range: Invoice,   desc: 订单产生开票（可合并/拆分） }
+  DERIVES:      { domain: PreOrder,  range: Order,     desc: 预订单确认后派生正式订单（1:1） }
+  TRIGGERS:     { domain: PreOrder,  range: Event,     desc: 预订单产生事件（msgid 幂等） }
+  PRODUCES:     { domain: Order,     range: Event,     desc: 订单产生事件（append-only） }
+  CONTACT_OF:   { domain: User,      range: Customer,  desc: 客户联系人（rebac 场景 D/H，customer#contact） }
+  ASSIGNED_TO:  { domain: User,      range: Shipment,  desc: 仓管被分配发货单（rebac 场景 C，shipment#warehouse_operator） }
+  REQUESTS:     { domain: User,      range: Shipment,  desc: 发货发起人（rebac 场景 B/F，shipment#requester） }
+  UPLOADS:      { domain: User,      range: Evidence,  desc: 凭证上传者（rebac 场景 D，evidence#uploader） }
+
+events:
+  PreOrderCaptured:   { trigger: 企微会话存档拉到消息, args: [tenant, group, msgid, intent_features, archive_ref] }
+  IntentParsed:       { trigger: 意图识别（LLM 候选+确定性校验）, args: [pre_order_id, confidence, candidates] }
+  PreOrderConfirmed:  { trigger: 销售人工确认（卡片按钮）, args: [pre_order_id, operator] }
+  OrderRequested:     { trigger: 预订单确认 或 销售/代办快速下单, args: [order, customer, items] }
+  OrderModified:      { trigger: 已生效订单修改请求（按 A/B/C/D/E 分类走不同回退路径）, args: [order, class, revision, resubmit_root_flow_id] }
+  PriceReviewed:      { trigger: 销售主管审批, args: [task, verdict: APPROVED/RETURNED/REJECTED] }
+  ChairmanReviewed:   { trigger: 董事长审批（仅 C/D 级）, args: [task, verdict] }
+  ContractGenerated:  { trigger: 合同生成校验通过, args: [order, contract_no] }
+  StockAssigned:      { trigger: 商务备货（选仓+发货量）, args: [order, warehouse, qty] }
+  WarehouseConfirmed: { trigger: 仓管确认可执行/退回/申请转仓, args: [task, verdict] }
+  PaymentConfirmed:   { trigger: 财务确认到账（按供方分流）, args: [task, ledger_ref] }
+  ShipOrderIssued:    { trigger: 商务发出发货命令, args: [order] }
+  GoodsShipped:       { trigger: 仓管填实际发货量（库存联动事务）, args: [shipment, qty] }
+  InvoiceApplied:     { trigger: 提交开票申请, args: [order, items] }
+  InvoiceIssued:      { trigger: 财务确认开票完成, args: [invoice, tax_no] }
+  PaymentTracked:     { trigger: 回款登记, args: [order, amount] }
+  ReceiptException:   { trigger: 无回单超 5 天 Timer / 提交人提前申请, args: [order, shipment_ids] }
+  OrderClosed:        { trigger: 合同归档完成, args: [order] }
+  FlowFailed:         { trigger: 异常/超时/补偿, args: [order, error, compensation] }
+
+constraints:
+  - 备货守恒: "∑(备货确认量) ≤ 订单数量（每明细）"
+  - 发货守恒: "∑(发货量) ≤ ∑(备货量)；订单全部发货 ⇔ ∑(发货量) = 订单数量"
+  - 库存守恒: "库存 = 初始 + 入 - 出（出与发货同事务，恒 ≥ 0）"
+  - 开票守恒: "∑(开票金额) ≤ ∑(可开票金额)；∑(开票数量) ≤ ∑(有效发货数量)（金额+数量双维度，开票不超发货；available_invoice_amount/qty 随发货推进更新）"
+  - 回单不卡开票: "无回单超 5 天自动进例外审核，不阻断开票流程"
+  - 事件不可变: "Event 只追加（append-only），无 UPDATE/DELETE"
+  - 原始聊天不落业务库: "事件链只存意图特征与存档引用（archive_ref），原始文本存独立加密可过期存档，业务库零留存"
+  - 消息幂等: "同一 (tenant, group, msgid) 只生成一个 PreOrder"
+  - 订单幂等: "同一 idempotency_key 只生效一次（预订单确认与快速下单共用）"
+  - 修改分类: "A/B/C/D/E 修改分类规则为配置数据（源自三方审批流程图原图 fig12/13），不同类别走不同流程动作；修改产生新 revision（resubmit 链）"</code></pre>
+
+  <h3><span class="no">1.3</span> 实体关系图（ER）</h3>
+  <pre class="mermaid">
+erDiagram
+    TENANT ||--o{ USER : "BELONGS_TO"
+    USER ||--o{ CUSTOMER : "OWNS (ReBAC)"
+    USER ||--o{ USER : "DELEGATED_TO (caveat)"
+    CUSTOMER ||--o{ ORDER : "COVERS"
+    ORDER ||--o{ ORDER_ITEM : "CONTAINS"
+    WAREHOUSE ||--o{ ORDER_ITEM : "EXECUTES (仓库分配)"
+    WAREHOUSE ||--o{ PRODUCT : "STORES (库存)"
+    ORDER ||--o{ STOCK_PREPARE : "PREPARES"
+    STOCK_PREPARE ||--o{ SHIPMENT : "FULFILLS"
+    ORDER ||--o{ INVOICE : "GENERATES_INV"
+    INVOICE ||--o{ INVOICE_ITEM : "CONTAINS"
+    PRE_ORDER ||--o| ORDER : "DERIVES (1:1)"
+    ORDER ||--o{ APPROVAL_TASK : "HAS"
+    ORDER ||--o{ EVENT : "PRODUCES"
+    STOCK_PREPARE ||--o{ STOCK_PREPARE_EVENT : "PRODUCES"
+    SHIPMENT ||--o{ SHIPMENT_EVENT : "PRODUCES"
+    INVOICE ||--o{ INVOICE_EVENT : "PRODUCES"
+    PRE_ORDER ||--o{ PRE_ORDER_EVENT : "TRIGGERS"
+
+    TENANT {
+        string id PK
+        string name
+    }
+    USER {
+        string id PK
+        string tenant_id FK
+        string role "SALES/SUPERVISOR/CHAIRMAN/OP/ACCOUNTING/WAREHOUSE/ADMIN"
+    }
+    CUSTOMER {
+        string id PK
+        string owner_id FK "归属销售"
+        string grade "A/B/C/D"
+    }
+    PRODUCT {
+        string id PK
+        string sku UK
+        string name
+    }
+    WAREHOUSE {
+        string id PK
+        string name
+    }
+    ORDER {
+        string id PK
+        string tenant_id FK
+        string customer_id FK
+        string state "四分支状态机"
+        string payment_term "款到/非款到"
+        string supplier_channel "供方分流"
+        string idempotency_key UK
+        jsonb payload
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    ORDER_ITEM {
+        string id PK
+        string tenant_id FK
+        string order_id FK
+        string product_id FK
+        string warehouse_id FK
+        bigint quantity "订单数量（守恒基准）"
+        bigint unit_price_cents "价格（仓管不可见）"
+    }
+    STOCK_PREPARE {
+        string id PK
+        string tenant_id FK
+        string order_id FK
+        string state "备货审批状态"
+        string warehouse_id FK "预定/分配仓库，可变更"
+        bigint planned_qty "本批备货确认量"
+        bigint remaining_qty "剩余待备货量"
+        string previous_id FK "上一批备货"
+        string idempotency_key UK
+    }
+    SHIPMENT {
+        string id PK
+        string tenant_id FK
+        string order_id FK
+        string stock_prepare_id FK
+        string warehouse_id FK
+        string state "OPEN/SHIPPED/CLOSED"
+        bigint planned_qty "备货确认量"
+        bigint shipped_qty "实际发货量"
+        string idempotency_key UK
+    }
+    INVOICE {
+        string id PK
+        string tenant_id FK
+        string order_id FK
+        string state "PENDING/PROCESSING/ISSUED/FAILED/NONE"
+        bigint amount_cents
+        bigint qty "开票数量（双维度守恒）"
+        string idempotency_key UK
+    }
+    INVOICE_ITEM {
+        string id PK
+        string tenant_id FK
+        string invoice_id FK
+        string order_item_id FK "守恒基准：订单明细"
+        string product_id FK
+        bigint qty "开票数量"
+        bigint amount_cents "开票金额"
+        string idempotency_key UK
+    }
+    PRE_ORDER {
+        string id PK
+        string tenant_id FK
+        string group_id
+        string msg_id UK "消息幂等"
+        string state "预订单状态机"
+        string idempotency_key UK "订单幂等"
+        jsonb candidates "LLM 候选"
+    }
+    APPROVAL_TASK {
+        string id PK
+        string tenant_id FK
+        string order_id FK
+        string stage_code "ORD/STK/SHP/INV"
+        string kind "业务节点类型（含 INV 七节点）"
+        string legacy_task_id "迁移源 task_id，可空"
+        string state "PENDING/APPROVED/RETURNED/REJECTED"
+        string assignee_id FK
+        timestamptz deadline
+    }
+    EVENT {
+        bigint id PK
+        string tenant_id FK
+        string order_id FK "订单事件链"
+        string from_state
+        string to_state
+        string reason
+        string operator_id
+        timestamptz created_at
+    }
+    STOCK_PREPARE_EVENT {
+        bigint id PK
+        string tenant_id FK
+        string stock_prepare_id FK
+        string order_id FK
+        string from_state
+        string to_state
+        string action
+        string reason
+        string error
+        string operator_id
+        timestamptz created_at
+    }
+    SHIPMENT_EVENT {
+        bigint id PK
+        string tenant_id FK
+        string shipment_id FK
+        string stock_prepare_id FK
+        string order_id FK
+        string from_state
+        string to_state
+        string action
+        string reason
+        string error
+        string operator_id
+        timestamptz created_at
+    }
+    INVOICE_EVENT {
+        bigint id PK
+        string tenant_id FK
+        string invoice_id FK
+        string shipment_id FK
+        string stock_prepare_id FK
+        string order_id FK
+        string from_state
+        string to_state
+        string action
+        string reason
+        string error
+        string operator_id
+        timestamptz created_at
+    }
+    PRE_ORDER_EVENT {
+        bigint id PK
+        string pre_order_id FK "预订单事件链（独立表）"
+        string from_state
+        string to_state
+        string reason
+        string operator_id
+        timestamptz created_at
+    }
+  </pre>
+  <figcaption>图 1-3 · 实体关系图 —— 数量守恒基准、库存事实与事件链的关系布局</figcaption>
+  <blockquote><strong>事实单一来源</strong>：<span class="mono">ORDER_ITEM.quantity</span> 是数量守恒基准（CQ-06/07/09 的推导根）；<span class="mono">WAREHOUSE × PRODUCT</span> 库存是物理事实（CQ-08）；ORD/STK/SHP/INV/PreOrder 各自的事件表是审计与回放的唯一事件源（CQ-12），按原系统四环节事件表分域保存，禁止把备货审批压缩成发货记录。任何「状态」都不得绕过对应事件链直接改写；预订单确认派生订单的边界事件（<span class="mono">PreOrderConfirmed</span> → <span class="mono">OrderRequested</span>）分属两表，靠 <span class="mono">idempotency_key</span> 串联。</blockquote>
+
+  <h3><span class="no">1.4</span> 授权本体（SpiceDB Schema 设计）</h3>
+  <pre><code>// schema.zed —— RBAC/ReBAC 合一 + caveat（条件关系）的图式授权
+// 设计来源：docs/01-core-graph.html §1.4（权威版本）+ spec/rebac_cases_spicedb.html 全景表
+// 三层模型：租户隔离（tenant-&gt;member 兜底）→ 资源级关系（ReBAC：account_owner/contact/
+//   owner/warehouse_operator/requester/uploader）→ 条件关系（caveat：expiry_ok 代办时效；
+//   阶段二：within_void_window 作废窗口）
+// 注：SpiceDB v1.39 起权限表达式中的图遍历使用 `-&gt;` 箭头；版本固定：spicedb v1.39+，
+// M1 门禁要求 schema 实际编译通过（L1-07 集成测试前置）。
+// 【实施校准（roundtrip）】v1.33+ caveat 语法为「名 类型」空格分隔（冒号形式已移除），
+// 且 CEL 环境不含内置时钟：`now` 是 caveat 参数，判定侧由 authz.Checker 注入（RFC3339）。
+// 【人类架构师决策（2026-08，docs/CHANGELOG-rebac-cases.html §6）】
+//   D1 全量迁移：prestock/shipment/evidence 一等授权对象（order 保留聚合视图）
+//   D2 命名统一：customer.owner → customer.account_owner
+//   D3 权限细化：8 个细粒度 permission（create_prestock/change_quota/request_shipment/
+//      confirm/reject/append_evidence/void/close）
+//   D4 Outbox 投影器落地：业务事务写 outbox_event → 投影器同步 SpiceDB 关系（场景 G/H）
+
+caveat expiry_ok(expires_at timestamp, now timestamp) {
+    expires_at &gt; now
+}
+
+definition user {}
+
+definition tenant {
+    relation member: user
+    relation ops: user          // 商务（全公司）
+    relation accounting: user   // 财务（按供方分流由关系限定）
+    relation admin: user
+    permission manage_all = admin
+}
+
+definition customer {
+    relation account_owner: user            // 客户负责人（场景 A/H；D2：原 owner）
+    relation contact: user                  // 客户联系人（场景 D/H）
+    relation delegate: user with expiry_ok  // 代办授权（caveat：有效期，CQ-13）
+    relation tenant: tenant                 // 层级边
+    permission view            = account_owner + contact + delegate + tenant-&gt;ops + tenant-&gt;admin
+    permission create_prestock = account_owner + tenant-&gt;ops   // 场景 A：客户负责人可开备货单
+}
+
+definition warehouse {
+    relation staff: user                    // 本仓仓管
+    relation tenant: tenant
+    permission manage = staff + tenant-&gt;admin
+}
+
+// 备货单（场景 A/B/G）：一等授权对象（01 §1.2 StockPrepare 的授权投影）
+definition prestock {
+    relation owner: user                    // 负责人（创建时由 Outbox 自动绑定，场景 B/G）
+    relation delegate: user with expiry_ok  // 临时代办（场景 G：TTL 到期 Outbox 删除元组）
+    relation customer: customer             // 层级边：经 customer 继承 account_owner/ops
+    relation tenant: tenant
+    permission view             = owner + delegate + customer-&gt;account_owner + customer-&gt;delegate + tenant-&gt;ops + tenant-&gt;admin
+    permission change_quota     = owner + delegate + tenant-&gt;ops       // 场景 B
+    permission request_shipment = owner + delegate + tenant-&gt;ops       // 场景 B
+    permission close            = owner + delegate + tenant-&gt;ops       // 场景 B
+}
+
+// 发货单（场景 C/D/F）：一等授权对象（01 §1.2 Shipment 的授权投影）
+definition shipment {
+    relation requester: user                // 发货发起人（场景 B/F；创建时 Outbox 绑定）
+    relation warehouse_operator: user       // 仓管（场景 C；分配时 Outbox 写入）
+    relation customer_contact: user         // 客户联系人（场景 D；物流视图 + 凭证上传）
+    relation tenant: tenant
+    permission view            = requester + warehouse_operator + customer_contact + tenant-&gt;ops + tenant-&gt;admin
+    permission confirm         = warehouse_operator + tenant-&gt;admin    // 场景 C
+    permission reject          = warehouse_operator + tenant-&gt;admin    // 场景 C
+    permission append_evidence = requester + warehouse_operator + customer_contact  // 场景 D
+    permission void            = requester   // 场景 F（阶段二：within_void_window caveat 30min 窗口）
+}
+
+// 凭证（场景 D）：只追加版本（CQ-15）
+definition evidence {
+    relation uploader: user
+    relation tenant: tenant
+    permission view   = uploader + tenant-&gt;ops + tenant-&gt;admin
+    permission append = uploader + tenant-&gt;ops
+}
+
+// order：跨段聚合视图（保留原权限语义；对象级判定以 prestock/shipment 为准）
+definition order {
+    relation owner: user                    // 下单销售（本人）
+    relation delegate: user with expiry_ok  // 代办（caveat）
+    relation reviewer: user                 // 审批链当前节点（主管/董事长/商务/财务）
+    relation customer: customer             // 层级边：经 customer 继承 account_owner/ops
+    relation tenant: tenant
+    relation warehouse: warehouse           // 发货仓（ReBAC 层级边）：仓管经此获得发货权
+
+    // 读权限：销售本人+代办、客户 account_owner、本仓仓管、管理层（联系人见 shipment#customer_contact）
+    permission view            = owner + delegate + customer-&gt;account_owner + customer-&gt;delegate + warehouse-&gt;staff + tenant-&gt;ops + tenant-&gt;admin
+    // 写权限：仅销售本人/代办/商务（提交、修改）
+    permission edit            = owner + delegate + tenant-&gt;ops
+    // 审批权限：审批链节点 + 管理层
+    permission approve         = reviewer + tenant-&gt;admin
+    // 场景 A 聚合入口：客户负责人（经 customer 层级边）或商务可开备货单
+    permission create_prestock = customer-&gt;create_prestock + tenant-&gt;ops
+    // 备货/发货（聚合视图；对象级判定见 prestock/shipment）
+    permission stock           = tenant-&gt;ops
+    permission ship            = tenant-&gt;ops + warehouse-&gt;manage
+    // 财务确认到账：财务角色 + 供方分流关系（关系按 tenant-&gt;accounting + reviewer 绑定）
+    permission confirm_payment = reviewer + tenant-&gt;accounting + tenant-&gt;admin
+}
+
+// 字段级授权（CQ-03）说明：本仓仓管拥有 order.view/shipment.confirm，但不获得价格字段；
+// 客户联系人拥有 shipment.view（物流视图），但不获得价格/内部备注。
+// 字段投影由 BFF 按「授权判定结果 + 角色」执行（验证项目设计：字段投影由 BFF 做），
+// SpiceDB 不感知字段级，但授权判定是唯一前置。</code></pre>
+  <p><strong>ReBAC 的体现</strong>（含 rebac_cases_spicedb.html 场景 A–H）：<span class="mono">customer-&gt;account_owner</span> 层级边使<strong>客户负责人</strong>自动获得其客户下订单/备货单的权限（新增订单无需逐条授权）；<span class="mono">customer.contact</span> 使<strong>客户联系人</strong>获得发货单物流视图（场景 D，字段投影裁剪价格）；<span class="mono">prestock#owner</span>/<span class="mono">shipment#warehouse_operator</span>/<span class="mono">shipment#requester</span> 为<strong>对象级直接关系</strong>（场景 A/B/C，创建/分配时由 Outbox 投影器自动写入）；<span class="mono">delegate</span> 用 caveat <span class="mono">expiry_ok</span> 表达<strong>代办有效期</strong>（CQ-13，场景 G：TTL 到期 Outbox 删除元组）；<strong>撤销即删边，即时生效（FullyConsistent 读）</strong>；跨租户由 <span class="mono">&amp; tenant-&gt;member</span> 语义兜底（场景 E）。</p>
+
+  <h3><span class="no">1.5</span> 事件图谱（Event Graph）</h3>
+  <pre class="mermaid">
+flowchart LR
+    subgraph sg0["企微域（外部输入）"]
+        MC["PreOrderCaptured&lt;br/&gt;(会话存档 msgid)"]
+        IP["IntentParsed&lt;br/&gt;(LLM 候选+确定性校验)"]
+        PC["PreOrderConfirmed&lt;br/&gt;(销售人工确认)"]
+    end
+    subgraph sg1["订单域 ORD"]
+        OR["OrderRequested"]
+        PR["PriceReviewed&lt;br/&gt;(主管)"]
+        CR["ChairmanReviewed&lt;br/&gt;(C/D 级)"]
+        CG["ContractGenerated"]
+    end
+    subgraph sg2["备货域 STK"]
+        SA["StockAssigned&lt;br/&gt;(商务选仓)"]
+        WC["WarehouseConfirmed&lt;br/&gt;(仓管)"]
+        PM["PaymentConfirmed&lt;br/&gt;(财务,按供方分流)"]
+        SO["ShipOrderIssued"]
+    end
+    subgraph sg3["发货域 SHP"]
+        GS["GoodsShipped&lt;br/&gt;(库存联动事务)"]
+    end
+    subgraph sg4["开票域 INV"]
+        IA["InvoiceApplied"]
+        II["InvoiceIssued"]
+        PT["PaymentTracked"]
+        OC["OrderClosed"]
+    end
+    subgraph sg5["异常域"]
+        FF["FlowFailed&lt;br/&gt;(→ 补偿/退回)"]
+        EX["ReceiptException&lt;br/&gt;(无回单超5天/提前申请)"]
+    end
+
+    MC --> IP --> PC --> OR
+    OR --> PR --> CR --> CG
+    CG --> SA --> WC --> PM --> SO
+    SO --> GS --> IA --> II --> PT --> OC
+    IA --> EX
+    GS -.->|超发/库存不足| FF
+    PM -.->|未到账| FF
+    PR -.->|退回/拒绝| FF
+    EX -.->|例外拒绝| FF
+  </pre>
+  <figcaption>图 1-5 · 事件图谱 —— 事件是头等节点，按业务聚合分域保存</figcaption>
+  <blockquote>事件是头等节点（方法论：绝不把事件压平成成对边）。<span class="mono">legacy_flow_id</span>/<span class="mono">order_id</span> 串联 ORD/STK/SHP/INV，五类聚合事件表分别按自身 ID 建索引，既可单段回放，也可按订单合并时间线；<span class="mono">msg_id</span> 幂等锚点贯穿企微域，使 CQ-11 可验证。</blockquote>
+
+  <h2 id="s2"><span class="no">2 ·</span> 任务图谱（Task Graph）</h2>
+
+  <h3><span class="no">2.1</span> 主流程任务图模板（OrderWorkflow 编排骨架）</h3>
+  <pre class="mermaid">
+flowchart TD
+    T0["⓪ 入口分流&lt;br/&gt;预订单确认 / 快速下单&lt;br/&gt;(幂等键)"]
+    T1["① ORD 段&lt;br/&gt;校验→审价→(C/D)董事长→合同&lt;br/&gt;(人类闸门×2, Signal)"]
+    T2["② STK 段&lt;br/&gt;商务备货→仓管确认→(款到)财务→发货命令&lt;br/&gt;(人类闸门×2~3, Signal)"]
+    T3["③ SHP 段&lt;br/&gt;商务分配→仓管实际发货&lt;br/&gt;(库存联动单事务)"]
+    T4["④ INV 段&lt;br/&gt;回单四分流→开票申请→财务开票&lt;br/&gt;(回款→归档)"]
+    T5["⑤ 完成&lt;br/&gt;OrderClosed"]
+
+    T0 --> T1 --> T2 --> T3 --> T4 --> T5
+    T1 -.->|退回/拒绝| F["❌ FAILED/REJECTED&lt;br/&gt;事件链终态"]
+    T2 -.->|仓管退回/转仓申请| T2
+    T3 -.->|部分发货| T3
+    T4 -.->|无回单超5天| E["例外开票子流程&lt;br/&gt;(回单异常审核)"]
+    T1 -.->|审批超时| UP["Timer 催办升级&lt;br/&gt;(24h 提醒, 48h 升级)"]
+  </pre>
+  <figcaption>图 2-1 · 主流程任务图模板 —— 四段强顺序 + 人类闸门 Signal 等待</figcaption>
+
+  <p><strong>Graph Engineering 四规则在本项目的落地</strong>：</p>
+  <div class="table-wrap">
+  <table>
+    <tr><th>方法论规则</th><th>本项目实现</th></tr>
+    <tr><td>并行扇出（fan-out）</td><td>发货/开票的数量守恒走<strong>单事务串行</strong>（业务一致性优先）；通知类副作用（催办、卡片提醒）可扇出</td></tr>
+    <tr><td>独立验证者（independent verifier）</td><td>授权检查是独立 Activity，且<strong>每个业务副作用前重复验证</strong>（纵深防御）；企微预订单的意图识别 LLM 只产候选，SKU/数量/价格/库存/权限由<strong>确定性代码校验</strong>（AI 安全边界）</td></tr>
+    <tr><td>停止规则（stop rule）</td><td>审批节点用 Signal 等待 + Timer 催办升级（24h/48h）；Activity 全局超时 + 重试上限；无回单 5 天 Timer 自动触发例外分流</td></tr>
+    <tr><td>人类闸门（human gate）</td><td><strong>三方审批是本项目的业务主体</strong>：主管审价 / 董事长（C/D 级）/ 仓管确认 / 财务到账确认全部是 Signal 等待的人工节点；Agent 预订单<strong>必须人工确认才生成正式订单</strong></td></tr>
+  </table>
+  </div>
+
+  <h3><span class="no">2.2</span> ORD · 订单创建流程状态图</h3>
+  <pre class="mermaid">
+stateDiagram-v2
+    [*] --> REQUESTED: 预订单确认 / 销售代办快速下单（幂等键）
+    REQUESTED --> PRICE_REVIEWING: 基础校验+客户等级校验通过
+    REQUESTED --> REJECTED: ❌ 校验失败
+    PRICE_REVIEWING --> PRICE_APPROVED: ✅ 销售主管通过（Signal）
+    PRICE_REVIEWING --> RETURNED: 退回修改（Signal）
+    PRICE_REVIEWING --> REJECTED: 拒绝终止（Signal）
+    PRICE_APPROVED --> CHAIRMAN_REVIEWING: 客户等级 C/D
+    PRICE_APPROVED --> CONTRACT_GENERATING: 客户等级 A/B（跳过董事长）
+    CHAIRMAN_REVIEWING --> CONTRACT_GENERATING: ✅ 董事长通过（Signal）
+    CHAIRMAN_REVIEWING --> REJECTED: ❌ 董事长拒绝
+    CONTRACT_GENERATING --> CONTRACTED: 合同生成校验通过（模板/要素/编号）
+    CONTRACT_GENERATING --> CONTRACT_GENERATING: 要素不全→补全重校验
+    CONTRACTED --> READY_FOR_STOCK: 进入备货段
+    CONTRACTED --> MODIFYING: 修改请求（A/B/C/D/E 分类）
+    MODIFYING --> PRICE_REVIEWING: A 类：回待价格审批重审（着重显示修改内容）
+    MODIFYING --> READY_FOR_SHIPMENT: B 类：账期改非款到→直达发货阶段
+    MODIFYING --> CONTRACT_GENERATING: C 类：仅重新生成合同
+    MODIFYING --> READY_FOR_SHIPMENT: D 类：重生成合同+跳过备货财务→直达发货
+    MODIFYING --> CONTRACTED: E 类：静默修改（仅更新 payload+事件）
+    RETURNED --> PRICE_REVIEWING: 修改后重提
+    REJECTED --> [*]
+  </pre>
+  <p><strong>修改分类规则表</strong>（源自《三方审批流程图_v2》fig12/13 业务原图，规则为配置数据）：</p>
+  <div class="table-wrap">
+  <table>
+    <tr><th>等级</th><th>修改内容</th><th>流程动作</th></tr>
+    <tr><td><strong>A 类</strong></td><td>任一满足：客户名称；产品型号及产品单价；客户等级</td><td>回到待价格审批环节，着重显示修改内容，领导重新审核</td></tr>
+    <tr><td><strong>B 类</strong></td><td>修改包含账期</td><td>非款到发货直接进入发货阶段</td></tr>
+    <tr><td><strong>C 类</strong></td><td>修改包含供方</td><td>仅重新生成合同并发送给提交人</td></tr>
+    <tr><td><strong>D 类</strong></td><td>修改包含收货地址、产品型号、产品数量</td><td>重新生成合同，省略备货审批、财务确认款项，直接进入发货环节</td></tr>
+    <tr><td><strong>E 类</strong></td><td>除 A/B/C/D 类修改</td><td>静默修改</td></tr>
+  </table>
+  </div>
+  <p><strong>resubmit 链数据模型</strong>（对齐原系统 <span class="mono">orders</span> 字段）：<span class="mono">submission_mode</span>（创建/复制/重新提交）、<span class="mono">resubmit_from_instance_id</span> / <span class="mono">resubmit_from_flow_id</span> / <span class="mono">resubmit_root_flow_id</span> / <span class="mono">resubmit_revision</span>、<span class="mono">create_fingerprint</span>（内容指纹）——修改即产生新 revision 的 resubmit 记录，指纹用于「同内容不重复审批」判定；修改分类与 resubmit 链的落地映射见 02-architecture.html §8 数据迁移布局。</p>
+
+  <h3><span class="no">2.3</span> STK · 备货审批流程状态图</h3>
+  <pre class="mermaid">
+stateDiagram-v2
+    [*] --> READY_FOR_STOCK: ORD 段合同完成
+    READY_FOR_STOCK --> STOCK_REVIEWING: 款到发货（商务备货：选仓+发货量）
+    READY_FOR_STOCK --> SHIP_ASSIGNING: 非款到发货（跳过备货审批，直接发货分配）
+    STOCK_REVIEWING --> WAREHOUSE_CONFIRMING: 提交仓管确认
+    WAREHOUSE_CONFIRMING --> WAREHOUSE_CONFIRMED: ✅ 仓管确认可执行（Signal）
+    WAREHOUSE_CONFIRMING --> WAREHOUSE_RETURNED: 仓管退回（Signal）
+    WAREHOUSE_CONFIRMING --> TRANSFER_REQUESTED: 仓管申请转仓（Signal）
+    TRANSFER_REQUESTED --> WAREHOUSE_CONFIRMING: 商务审核同意转仓（换仓重确认）
+    TRANSFER_REQUESTED --> WAREHOUSE_CONFIRMED: 商务审核同意原仓
+    TRANSFER_REQUESTED --> RETURNED: 商务驳回转仓（退回修改）
+    WAREHOUSE_CONFIRMED --> PAYMENT_CONFIRMING: 款到发货（财务确认到账，按供方分流）
+    WAREHOUSE_CONFIRMED --> SHIP_ORDER_ISSUED: 非款到发货
+    PAYMENT_CONFIRMING --> PAYMENT_CONFIRMED: ✅ 财务确认到账（Signal）
+    PAYMENT_CONFIRMING --> RETURNED: 未到账→退回商务
+    PAYMENT_CONFIRMED --> SHIP_ORDER_ISSUED: 商务发出发货命令
+    SHIP_ORDER_ISSUED --> READY_FOR_SHIPMENT: 进入发货段
+    RETURNED --> STOCK_REVIEWING: 修改后重提
+  </pre>
+
+  <h3><span class="no">2.4</span> SHP · 发货分配及出库流程状态图</h3>
+  <pre class="mermaid">
+stateDiagram-v2
+    [*] --> READY_FOR_SHIPMENT: 发货命令已发出
+    READY_FOR_SHIPMENT --> SHIP_ASSIGNING: 商务选仓+发货量
+    SHIP_ASSIGNING --> WAREHOUSE_SHIPPING: 提交仓管实际发货
+    SHIP_ASSIGNING --> SHIPPED: ✅ 实发完成（信号直达：发货+库存扣减单事务）
+    WAREHOUSE_SHIPPING --> SHIPPED: ✅ 实际发货完成（发货单+库存扣减单事务）
+    WAREHOUSE_SHIPPING --> SHIP_ASSIGNING: 仓管退回（少发→回退备货层）
+    SHIPPED --> FULLY_SHIPPED: 累计发货 = 订单总量
+    SHIPPED --> PARTIAL_SHIPPED: 累计发货 &lt; 订单总量
+    PARTIAL_SHIPPED --> SHIP_ASSIGNING: 按原分批计划继续
+    PARTIAL_SHIPPED --> WAREHOUSE_CONFIRMING: 仓管申请退回/转仓（回 STK 段）
+    PARTIAL_SHIPPED --> READY_FOR_INVOICE: 已发部分申请开票
+    FULLY_SHIPPED --> READY_FOR_INVOICE: 全部发货完成
+    FULLY_SHIPPED --> [*]
+  </pre>
+  <blockquote><strong>发货单纪律</strong>（业务规则）：一张发货单只发一次（<span class="mono">SHIPMENT.state: OPEN→SHIPPED→CLOSED</span>，关闭后不再自动创建下一单）；少发回退备货层；办理人/仓库可转交（留痕）。</blockquote>
+
+  <h3><span class="no">2.5</span> INV · 开票回单审批流程状态图</h3>
+  <pre class="mermaid">
+stateDiagram-v2
+    [*] --> READY_FOR_INVOICE: 订单合同完成（开票独立于发货：可先申请，开票量按有效发货核验）
+    READY_FOR_INVOICE --> INVOICE_APPLYING: 回单四分流①：款到发货直接进入
+    READY_FOR_INVOICE --> INVOICE_APPLYING: 分流②：有回单
+    READY_FOR_INVOICE --> RECEIPT_EXCEPTION_REVIEWING: 分流③：无回单超 5 天（Timer 自动进入）
+    READY_FOR_INVOICE --> RECEIPT_EXCEPTION_REVIEWING: 分流④：5 天内提交人提前申请
+    RECEIPT_EXCEPTION_REVIEWING --> INVOICE_APPLYING: ✅ 例外审核通过（Signal）
+    RECEIPT_EXCEPTION_REVIEWING --> WAITING_RECEIPT: ❌ 例外拒绝→待补回单
+    WAITING_RECEIPT --> INVOICE_APPLYING: 补回单后进入开票
+    INVOICE_APPLYING --> INVOICING: 提交开票申请→推送财务
+    INVOICING --> INVOICED: ✅ 财务确认开票完成（Signal，开票守恒校验）
+    INVOICING --> INVOICE_FAILED: ❌ 开票失败（可重试）
+    INVOICING --> NO_INVOICE_NEEDED: 无需开票（业务判定）
+    INVOICED --> PAYMENT_TRACKING: 回款跟踪
+    NO_INVOICE_NEEDED --> PAYMENT_TRACKING: 直接进入回款跟踪
+    INVOICE_FAILED --> INVOICING: 重试开票
+    PAYMENT_TRACKING --> CONTRACT_ARCHIVED: 回款登记/合同资料归档
+    CONTRACT_ARCHIVED --> CLOSED: 订单关闭
+  </pre>
+  <blockquote><strong>回单不卡开票</strong>（业务原则）：回单状态（CQ-10）与开票状态解耦，仅作为例外审核的触发条件；<strong>开票守恒</strong>（CQ-09）在 <span class="mono">INVOICING → INVOICED</span> 的事务内校验「∑开票 ≤ ∑有效发货（可开票量）」——开票与发货解耦（业务注记 #17/#24：订单存在即可开票、按有效发货勾选合并开票），<span class="mono">available_invoice_amount/qty</span> 随发货推进而更新。</blockquote>
+  <blockquote>⚠️ <strong>待业务确认（开放问题）</strong>：来源 spec（验证项目设计 §审批注记）与早期设计的「未发货不可开票」存在冲突。本设计采用折中方案：<strong>订单合同完成即可申请开票（申请早），开票金额/数量在开票时按有效发货核验（核验严）</strong>——与业务注记 #17/#24 及原系统 <span class="mono">available_invoice_qty</span> 语义一致。</blockquote>
+  <blockquote><strong>决策门</strong>（04-development-plan.html §0 Phase 0 业务规则确认项之一，必须以书面决策关闭，不得以本默认值代替）：<strong>选项 A（当前默认）</strong>：合同完成即可申请开票（核验严）；<strong>选项 B</strong>：必须先有部分/全部发货才可申请开票（收紧入口）。</blockquote>
+  <blockquote><strong>决策后改动点清单</strong>（无论选 A/B，仅改以下 5 处，其余不变）：① INV 状态图入口条件（<span class="mono">READY_FOR_INVOICE</span> 进入标签）；② <span class="mono">domain/receipt.go</span> 分流判定（款到/回单分流是否需先有发货）；③ L0-04/L2-10 用例断言（INV FSM 入口合法迁移集合）；④ L3-02 对账规则（开票守恒是否包含「无发货即开票」违规项）；⑤ 验收脚本断言。</blockquote>
+
+  <h3><span class="no">2.6</span> 预订单流程状态图（企微 S2 核心）</h3>
+  <pre class="mermaid">
+stateDiagram-v2
+    [*] --> CAPTURED: 会话存档拉到消息（msgid 幂等去重）
+    CAPTURED --> INTENT_PARSING: 意图识别（LLM 只产候选 + 确定性校验）
+    INTENT_PARSING --> PENDING_CONFIRM: 高置信且校验通过（SKU/数量/价格/库存/权限）
+    INTENT_PARSING --> AMBIGUOUS: 低置信/多候选/高金额（AI 安全边界）
+    INTENT_PARSING --> IGNORED: 发送者权限校验失败（07 §3.3：忽略 + 审计）
+    AMBIGUOUS --> PENDING_CONFIRM: 轻提醒后销售修正确认
+    AMBIGUOUS --> IGNORED: 销售忽略
+    PENDING_CONFIRM --> CONFIRMED: ✅ 销售确认（卡片按钮→Signal）
+    PENDING_CONFIRM --> MODIFIED: 销售修改后确认
+    PENDING_CONFIRM --> IGNORED: 销售忽略
+    PENDING_CONFIRM --> ESCALATED: 24h 未处理→Timer 升级
+    CONFIRMED --> ORDER_REQUESTED: 生成正式订单（订单幂等键）
+    MODIFIED --> ORDER_REQUESTED: 生成正式订单（修改后参数）
+    ESCALATED --> PENDING_CONFIRM: 升级后继续等待确认
+    IGNORED --> [*]
+  </pre>
+  <blockquote><strong>AI 安全边界</strong>：任何生成结果都需人工确认才能成为正式订单（红线）；低置信只发轻提醒、不自动建单；消息幂等（msgid）+ 订单幂等（idempotency_key）双层防重（CQ-11）。</blockquote>
+
+  <h3><span class="no">2.7</span> 任务图 ↔ 世界图 的 roundtrip</h3>
+  <pre class="mermaid">
+flowchart LR
+    CQ["能力问题&lt;br/&gt;(CQ-01..15)"] -->|规格| ONT["本体&lt;br/&gt;ontology.yaml"]
+    ONT -->|schema| CODE["代码&lt;br/&gt;Go 类型+SQL+Zed"]
+    CODE -->|"抽取(确定性解析)"| GRAPH["code-review-graph"]
+    GRAPH -->|"查询"| ANS["回答业务问题&lt;br/&gt;(CQ 验证)"]
+    ANS -->|"不一致→修正"| ONT
+    ANS -->|"新问题→新能力问题"| CQ
+  </pre>
+  <blockquote><strong>验证终点</strong>：测试文档 <span class="mono">03-testing.html</span> §4 给出 CQ → 测试的映射表；开发计划把「roundtrip 检查」设为每个里程碑的完成定义（DoD）。</blockquote>
+
+  <h2 id="s3"><span class="no">3 ·</span> 图谱维护规则（方法论纪律）</h2>
+  <ol>
+    <li><strong>克制添加</strong>：新增实体/关系必须先绑定一个 CQ，否则不加。</li>
+    <li><strong>事实单一来源</strong>：数量守恒基准只在 <span class="mono">order_items.quantity</span>；库存只在 <span class="mono">warehouse × product</span>；任何状态更新必须与事件链同事务。</li>
+    <li><strong>授权是图不是表</strong>：权限判定只走 SpiceDB（应用代码不做 if-else 硬编码授权），授权变更即图拓扑变更；字段级投影由 BFF 基于授权判定结果执行。</li>
+    <li><strong>事件链完整</strong>：每个订单/预订单的每步迁移都产生事件，事件不可删改（append-only）。</li>
+    <li><strong>人工闸门不可绕过</strong>：任何 AI/自动化路径都不得生成正式订单或推进关键审批节点（Signal 之外无旁路）。</li>
+    <li><strong>roundtrip 是验收</strong>：代码实现后必须能回答本文档全部 15 个 CQ；答不出的就是设计裂缝。</li>
+  </ol>
+
+  <footer class="colophon">
+    <span><a href="index.html">← Docs Index</a></span>
+    <span>01 · Core Graph · B2B Order Fulfillment</span>
+  </footer>
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad:true, theme:'base',
+    themeVariables:{
+      fontFamily:"'Noto Serif SC','Source Serif Pro',serif",
+      primaryColor:'#efeee5', primaryBorderColor:'#1B365D', primaryTextColor:'#1f1d18',
+      lineColor:'#1B365D', secondaryColor:'#f5f4ed', tertiaryColor:'#f5f4ed',
+      edgeLabelBackground:'#f5f4ed', clusterBkg:'#f5f4ed', clusterBorder:'#d4d1c5',
+      stateBkg:'#efeee5', stateBorder:'#1B365D', stateLabel:'#1f1d18',
+      stateLabelColor:'#1f1d18', labelTextColor:'#1f1d18', transitionLabelColor:'#1f1d18',
+      actorBkg:'#efeee5', actorBorder:'#1B365D', actorTextColor:'#1f1d18', actorLineColor:'#1B365D',
+      noteBkg:'#efeee5', noteBorder:'#d4d1c5'
+    },
+    flowchart:{curve:'basis'}, er:{useMaxWidth:true}
+  });
+</script>
+</body>
+</html>

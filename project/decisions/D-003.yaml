@@ -1,0 +1,14 @@
+# D-003 claims 域划分
+decision_id: D-003
+choice: >
+  建立四个 claims 域占位（ordering/fulfillment/authorization/wecom-interaction），M2 再抽取具体声明
+rationale: >
+  §09 M2 的 R2/R3 声明 100% 有 owner 依赖业务/产品/技术/验收 owner 可识别；
+  本次只建结构不抽 claim
+premises:
+  - 文档 §09 首选声明簇为签收凭证链；群内权限交集为横切声明
+objections: []
+decider: project-governance（bootstrap 执行者 reasonix-executor）
+effective_interval: {from: "2026-08-13T00:00:00+00:00", to: null}
+supersedes: []
+review_condition: 机制激活评估时复核

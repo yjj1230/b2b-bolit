@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Demo 意见收集 - 文字版修改指导</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #182230;
+      --muted: #596579;
+      --line: #d7dde5;
+      --soft: #f5f7f9;
+      --brand: #087443;
+      --brand-soft: #e9f7ef;
+      --warn: #a15c07;
+      --warn-soft: #fff7e8;
+      --danger: #b42318;
+      --danger-soft: #fff1f0;
+      --code: #eef2f5;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: #ffffff;
+      font: 15px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    main {
+      width: min(1080px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 48px 0 72px;
+    }
+
+    h1, h2, h3 { line-height: 1.35; }
+    h1 { margin: 0 0 10px; font-size: 30px; }
+    h2 { margin: 44px 0 14px; padding-bottom: 9px; border-bottom: 2px solid var(--ink); font-size: 22px; }
+    h3 { margin: 30px 0 10px; font-size: 18px; }
+    p { margin: 8px 0 12px; }
+    ul, ol { margin: 8px 0 14px; padding-left: 24px; }
+    li + li { margin-top: 5px; }
+    a { color: #075e3a; }
+
+    code {
+      padding: 2px 5px;
+      border-radius: 4px;
+      background: var(--code);
+      color: #263445;
+      font: 0.92em/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    .meta {
+      margin: 16px 0 24px;
+      padding: 14px 16px;
+      border-left: 4px solid var(--brand);
+      background: var(--brand-soft);
+    }
+
+    .meta strong { color: #075e3a; }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin: 20px 0 8px;
+    }
+
+    .summary div {
+      padding: 13px 15px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--soft);
+    }
+
+    .summary b { display: block; font-size: 20px; }
+    .summary span { color: var(--muted); font-size: 13px; }
+
+    .toc {
+      columns: 2;
+      padding: 16px 20px 16px 40px;
+      border: 1px solid var(--line);
+      background: #fbfcfd;
+    }
+
+    .item {
+      margin: 18px 0 28px;
+      padding: 18px 20px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+    }
+
+    .item h3 { margin-top: 0; }
+
+    .priority {
+      display: inline-block;
+      min-width: 34px;
+      margin-right: 8px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      color: #ffffff;
+      background: var(--danger);
+      text-align: center;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .priority.p1 { background: var(--warn); }
+
+    .label {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .decision, .warning {
+      margin: 14px 0;
+      padding: 12px 14px;
+      border-radius: 5px;
+    }
+
+    .decision { border: 1px solid #9ad8b5; background: var(--brand-soft); }
+    .warning { border: 1px solid #f3c77b; background: var(--warn-soft); }
+    .delete { border-color: #f3a8a2; background: var(--danger-soft); }
+
+    table {
+      width: 100%;
+      margin: 12px 0 20px;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th, td {
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th { background: var(--soft); }
+
+    .flow {
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      background: #fbfcfd;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      overflow-wrap: anywhere;
+    }
+
+    .checklist li { padding-left: 2px; }
+
+    @media (max-width: 720px) {
+      main { width: min(100% - 24px, 1080px); padding-top: 28px; }
+      h1 { font-size: 25px; }
+      .summary { grid-template-columns: 1fr; }
+      .toc { columns: 1; }
+      table { display: block; overflow-x: auto; white-space: normal; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Demo 意见收集：文字版修改指导</h1>
+  <p>目标文件：<code>docs/demo/index.html</code></p>
+
+  <div class="meta">
+    <strong>给无法查看原始图片的 Agent：</strong>
+    本文已把 <code>spec/Demo意见收集.docx</code> 中的正文、12 张截图和 10 条 Word 批注转写为可执行规格。不要依赖原图猜测界面，也不要修改 DOCX。本轮应修改 Demo 页面数据；只有在现有渲染块无法表达目标 UI 时，才同步扩展 <code>docs/demo/_shared/demo-engine.js</code> 与 <code>docs/demo/_shared/demo.css</code>。
+  </div>
+
+  <div class="summary">
+    <div><b>7</b><span>项明确修改</span></div>
+    <div><b>5</b><span>P0 必改项</span></div>
+    <div><b>1</b><span>销售侧场景必须删除</span></div>
+  </div>
+
+  <h2>结论先行</h2>
+  <ol class="toc">
+    <li><a href="#order-home">查订单补齐客户订单首页与筛选</a></li>
+    <li><a href="#send-customer">“生成订单截图”改为“发给客户”</a></li>
+    <li><a href="#manual-order">人工下单字段与原业务表单对齐</a></li>
+    <li><a href="#reject">驳回后按原因建议修改字段</a></li>
+    <li><a href="#smart-order">智能下单只确认一次，并展示完整审批链</a></li>
+    <li><a href="#receipt">删除客户上传签收凭证的销售场景</a></li>
+    <li><a href="#manager">主管审价补齐业务字段</a></li>
+  </ol>
+
+  <h2>逐项修改意见</h2>
+
+  <section class="item" id="order-home">
+    <h3><span class="priority">P0</span>1. 查订单：既能智能定位，也能返回客户订单首页人工查找</h3>
+    <p class="label">对应代码</p>
+    <p><code>SALES / XS1</code>，重点是 <code>initialSide</code>、<code>messages</code> 中的 <code>order-list</code> 和 <code>detail</code>。</p>
+
+    <p class="label">原图表达的业务要求</p>
+    <p>当前 Demo 能展示广西天华的两笔订单和单笔详情。评审要求保留 AI 根据客户问法直接定位目标订单的能力，同时在详情页提供返回入口，回到“该客户的订单 Home”，让销售不依赖 AI 也能手工翻看、筛选和查找。</p>
+    <p>参考图中的客户订单 Home 包含：公司名称、客户编号、负责销售；全部订单数、进行中订单数、订单总额；“全部 / 进行中 / 待发货 / 已完成”状态筛选；订单按收货地归类；卡片展示状态、备货仓、预计交付、当前节点和订单进度。</p>
+
+    <div class="decision"><strong>目标演示链：</strong>客户询问 → AI 直接打开最匹配订单详情 → 销售点返回 → 进入广西天华订单 Home → 选择状态筛选 → 手工打开另一笔订单。</div>
+
+    <p class="label">实现建议</p>
+    <ul>
+      <li>调整 <code>XS1.messages</code> 顺序，不要只演示“列表 → 详情”。先演示 AI 直达详情，再演示返回客户订单 Home。</li>
+      <li>在订单详情顶部显示明确的返回语义，例如“‹ 广西天华订单”，不能让手机顶栏的返回键含义不明。</li>
+      <li>为客户订单 Home 增加汇总：全部 4、进行中 2、待发货 1、已完成 1；数字仅是演示数据，但各筛选数量必须与列表一致。</li>
+      <li>增加状态筛选。至少演示一次从“全部”切到“进行中”或“待发货”，并让列表内容随之变化。</li>
+      <li>卡片保留现有订单号、产品、数量、金额、节点时间线；补充预计交付、备货仓和当前节点。不要照搬参考图的蓝色视觉风格，继续使用本 Demo 的企微绿色设计系统。</li>
+      <li>推荐新增数据块 <code>kind: 'customer-order-home'</code>。若不扩展共享引擎，也可组合“汇总块 + 筛选块 + order-list”，但必须在视觉上形成一个客户订单首页。</li>
+    </ul>
+
+    <p class="label">验收</p>
+    <ul class="checklist">
+      <li>步进时先看到被 AI 命中的订单详情，而不是只能看到列表。</li>
+      <li>下一步能看到广西天华订单 Home、汇总数字和状态筛选。</li>
+      <li>筛选后的数量、状态与订单卡一致，并能继续打开其他订单。</li>
+    </ul>
+  </section>
+
+  <section class="item" id="send-customer">
+    <h3><span class="priority">P0</span>2. 订单详情：按钮改为“发给客户”，出库后补预计到货时间</h3>
+    <p class="label">对应代码</p>
+    <p><code>XS1.messages</code> 中两处 <code>生成订单截图</code>，以及相关系统文案、注解和客户消息图片；同时检查 <code>XS5</code> 的物流发送文案是否统一。</p>
+
+    <p class="label">问题</p>
+    <p>“生成订单截图”是内部实现动作，不是销售的任务语言。销售真正要做的是把订单信息发给客户。当前数据还存在矛盾：系统文案说客户图“不含金额”，部分注解却写“含金额”；这些描述必须统一。</p>
+
+    <p class="label">目标行为</p>
+    <ul>
+      <li>主按钮文案统一为 <strong>发给客户</strong>。点击后系统在后台生成客户可见卡片或图片，并发送到当前企微群，不再要求销售理解“截图生成”。</li>
+      <li>未出库订单：展示订单号、产品与数量、收货地、当前状态；预计到货只有在系统已有可靠承诺时间时才展示。</li>
+      <li>已出库/已发货订单：必须增加“预计到货/预计送达”，并优先展示物流公司、物流单号和当前运输进度。</li>
+      <li>客户图默认不放内部审批意见、合同信息和内部备注。金额是否展示按现有权限原则统一处理；本 Demo 当前主叙事是“不含金额”，所以注解也应改为不含金额。</li>
+      <li>系统消息、Agent 执行记录、推荐动作和销售回复都改成“发给客户/已发到群里”，不要再混用“生成截图”“准备发送”。</li>
+    </ul>
+
+    <p class="label">验收</p>
+    <p>订单详情主按钮为“发给客户”；已发货示例里客户收到的信息明确含预计送达时间；全场景不再出现互相冲突的“含金额/不含金额”描述。</p>
+  </section>
+
+  <section class="item" id="manual-order">
+    <h3><span class="priority p1">P1</span>3. 人工下单：字段应覆盖原业务表单，不只保留简化字段</h3>
+    <p class="label">对应代码</p>
+    <p><code>SALES / XS2</code> 的 <code>long-form</code> 初始数据和首次进入下单的快照。</p>
+
+    <p class="label">原图中的字段清单</p>
+    <table>
+      <thead><tr><th>分组</th><th>原系统字段</th><th>移动端 Demo 建议</th></tr></thead>
+      <tbody>
+        <tr><td>客户信息</td><td>销售员、代办人（可选）、客户类型、客户名称</td><td>销售员和客户由群上下文锁定；代办人可选；客户类型自动带出。</td></tr>
+        <tr><td>结算信息</td><td>是否自提、货款的结算方式、汇款方式</td><td>补齐三个字段；不可把“账期”和“付款方式”当作全部结算信息。</td></tr>
+        <tr><td>合同附件</td><td>客户合同、合同编号、标签/送货单等其他附件</td><td>合同可继续按主体自动匹配，但应展示匹配结果，并保留合同/其他附件入口。</td></tr>
+        <tr><td>商品明细</td><td>产品名称、数量(kg)、单价(元/kg)、合计、包装类型、规格、到货时间、备注</td><td>支持至少一条完整明细；合计自动计算；“规格”和“明细备注”不能遗漏。</td></tr>
+        <tr><td>补充说明</td><td>特殊规格要求、订单备注</td><td>把“特殊标记”升级为可勾选标记 + 文本补充，不要只有单个固定选项。</td></tr>
+      </tbody>
+    </table>
+
+    <p class="label">实现边界</p>
+    <ul>
+      <li>不要把桌面端大表格原样缩进手机。继续使用当前单页长表单和分组结构，按“客户与归属 / 结算 / 合同附件 / 商品明细 / 补充说明”纵向排列。</li>
+      <li>保留现有自动预填能力，并在字段旁说明来源：群上下文、客户档案、最近订单、框架合同。</li>
+      <li>明确必填与选填。自动锁定字段保持只读；可变字段必须看起来可编辑。</li>
+      <li>提交前显示金额合计、额度校验和关键字段摘要，但不要再增加第二个确认页。</li>
+    </ul>
+
+    <p class="label">验收</p>
+    <p>Demo 中能逐项找到上表所列字段或明确的自动匹配结果；移动端无横向滚动；销售能看出哪些字段自动带出、哪些字段可修改。</p>
+  </section>
+
+  <section class="item" id="reject">
+    <h3><span class="priority">P0</span>4. 驳回：根据驳回内容生成建议修改字段</h3>
+    <p class="label">对应代码</p>
+    <p><code>SALES / XS4</code> 的“审价驳回 · 待补充”步骤。当前示例已经只显示单价字段，方向正确，但要把规则和 UI 说清楚。</p>
+
+    <div class="decision"><strong>产品结论：</strong>是。驳回再次进入销售待办时，应解析驳回意见，优先展示与驳回原因直接相关的建议修改字段。</div>
+
+    <p class="label">目标卡片</p>
+    <ul>
+      <li>顶部展示驳回人、驳回时间、完整驳回原因和订单号。</li>
+      <li>AI 从驳回文本抽取需修改字段。示例“单价偏高，请按协议价上限内调整”只展开单价，显示原值 <code>¥3,200/吨</code>、建议值 <code>¥3,000/吨</code> 和建议依据。</li>
+      <li>未被驳回涉及的字段默认只读或折叠，允许销售点“查看全部订单字段”。</li>
+      <li>无法可靠判断字段时，不可擅自改值；显示完整表单并标记“请根据驳回意见人工修改”。</li>
+      <li>“重新提交”后回到同一审价节点，并保留前次驳回意见和本次修改记录。</li>
+    </ul>
+
+    <p class="label">验收</p>
+    <p>示例中只有单价是主编辑字段，主管备注始终可见；重新提交后明确显示“重新进入审价审批”，而不是生成新订单。</p>
+  </section>
+
+  <section class="item" id="smart-order">
+    <h3><span class="priority">P0</span>5. 智能下单：只确认一次，成功页展示全部审批节点与办理人</h3>
+    <p class="label">对应代码</p>
+    <p><code>SALES / XS3</code> 的智能下单确认卡、完成态 <code>preorder done</code>、后续系统消息和注解；还要检查 <code>demo-engine.js</code> 中 <code>preorder</code> 完成态的渲染。</p>
+
+    <p class="label">原图中的完整路径</p>
+    <p class="flow">客户群消息 → 机器人提示已创建候选单 → 销售打开“智能下单待确认” → 可忽略/修改/确认 → 点击确认即生成正式订单 → 成功页展示审批流程与办理人</p>
+
+    <div class="warning"><strong>必须修复：</strong>“确认”只能发生一次。销售在候选卡点击确认后，正式订单立即生成；后续页面不应再出现需要用户操作的第二个“确认”。Word 批注意见已明确把再次确认认定为 Demo bug。</div>
+
+    <p class="label">完成态应显示的内容</p>
+    <ul>
+      <li>成功标题、正式订单号、当前节点。</li>
+      <li>下方空白区域改为完整审批/履约路径。建议使用移动端纵向时间线，而不是缩小桌面表格。</li>
+      <li>每个节点至少显示：节点名称、负责角色、办理人（已知时显示姓名，未知时显示“待分配”）、状态/结果、审批意见或待处理提示。</li>
+      <li>以当前 B 级示例的真实路由动态展示，不要硬编码互相矛盾的流程。建议统一为：已生成正式订单 → 销售主管审价审批 → 商务审核/备货 → 仓库发货 → 财务开票。只有 C/D 级订单才插入董事长终审。</li>
+      <li>统一 <code>doneSub</code>、销售回复、Agent 执行记录中的流程名称。当前页面同时出现“商务复核 / 财务审批 / 仓库确认”和“备货 / 发货 / 开票”，需要选定同一业务口径。</li>
+      <li>成功页可提供“查看订单”或“发给客户”，但不能再使用“确认”。</li>
+    </ul>
+
+    <p class="label">验收</p>
+    <ul>
+      <li>整个 XS3 只有候选卡上一个“确认”按钮。</li>
+      <li>确认后的下一帧已经有正式订单号。</li>
+      <li>完成卡下方不是空白，能看到完整节点、角色/办理人和状态。</li>
+      <li>B 级订单不出现董事长终审；C/D 级流程可动态出现。</li>
+    </ul>
+  </section>
+
+  <section class="item" id="receipt">
+    <h3><span class="priority">P0</span>6. 签收凭证：删除销售侧客户上传场景，保留仓管与司机场景</h3>
+    <p class="label">对应代码</p>
+    <p>删除 <code>SALES / XS6</code>；保留并校准 <code>WAREHOUSE / CG3</code>。</p>
+
+    <div class="warning delete"><strong>明确删除：</strong>客户在供应协同群发送签收凭证照片 → 销售转发凭证机器人。这一业务环节不存在，不应只改文案后继续保留在销售角色中。</div>
+
+    <p class="label">正确业务关系</p>
+    <ul>
+      <li>司机会把回单/签收照片给仓管。使用运满满时，司机可直接上传到系统；其他情况下由仓管人工下载或接收。</li>
+      <li>Demo 的正确对象应是仓管与司机，或外部仓库仓管之间，不是客户与销售。</li>
+      <li>客户通常不会提供签收凭证。客户只会在货物有问题时在客户群反馈异常，此异常反馈是另一类场景，不要冒充签收凭证流程。</li>
+      <li><code>CG3</code> 当前“司机私聊 → 仓管转发凭证机器人 → OCR 匹配订单 → 已办可查”的方向已符合意见，应作为唯一凭证示例。</li>
+      <li>同步修改销售角色注释中的“6 用例”、场景列表和任何 XS6 引用，避免删除数据后仍显示错误数量。</li>
+    </ul>
+
+    <p class="label">验收</p>
+    <p>销售角色下不再出现“签收凭证自动识别”；全页面搜索不到“客户拍摄的签收单照片”“销售将签收照片转发”等叙事；仓管 CG3 仍能完整演示司机/仓管回单链路。</p>
+  </section>
+
+  <section class="item" id="manager">
+    <h3><span class="priority p1">P1</span>7. 销售主管审价：补齐公司、账期、产品、数量、单价和到货地址</h3>
+    <p class="label">对应代码</p>
+    <p><code>SALES_MGR / XSZG1</code> 的待办列表摘要、ORD-2026-0105 详情和相应注解。</p>
+
+    <p class="label">当前缺口</p>
+    <p>现有详情只有客户、总金额（括号中混合数量与单价）、账期、备注。评审明确要求审批者能直接看到产品、公司名称、账期、数量、单价和到货地址，地址可展示到省/市/区。</p>
+
+    <p class="label">建议字段顺序</p>
+    <ol>
+      <li>客户公司：宏远铸造有限公司（不要只写简称）。</li>
+      <li>客户等级：D 级；归属销售：王销售。</li>
+      <li>产品：具体产品型号。</li>
+      <li>数量：10 吨。</li>
+      <li>本次单价：¥2,800 / 吨；协议/历史参考价单独显示。</li>
+      <li>订单金额：¥28,000。</li>
+      <li>账期：45 天。</li>
+      <li>到货地址：省 / 市 / 区，隐藏更细门牌信息即可。</li>
+      <li>备注与价格风险：新客户首单、特批价；D 级通过后进入董事长终审。</li>
+    </ol>
+
+    <p class="label">验收</p>
+    <p>主管无需从金额算式反推数量和单价；一屏内可核对公司、产品、量、价、账期和省市区地址，再执行“写备注 / 驳回 / 通过”。</p>
+  </section>
+
+  <h2>代码落点建议</h2>
+  <table>
+    <thead><tr><th>文件/锚点</th><th>建议操作</th></tr></thead>
+    <tbody>
+      <tr><td><code>docs/demo/index.html</code> / <code>XS1</code></td><td>重排直达详情与返回 Home 的步骤；增加汇总、筛选；统一“发给客户”和预计到货规则。</td></tr>
+      <tr><td><code>docs/demo/index.html</code> / <code>XS2</code></td><td>补齐原业务表单字段、附件和商品明细字段，保留移动端分组长表单。</td></tr>
+      <tr><td><code>docs/demo/index.html</code> / <code>XS3</code></td><td>去除任何二次确认语义；完成态增加完整流程与办理人数据。</td></tr>
+      <tr><td><code>docs/demo/index.html</code> / <code>XS4</code></td><td>显式展示驳回原因解析、建议字段、原值与建议值。</td></tr>
+      <tr><td><code>docs/demo/index.html</code> / <code>XS6</code></td><td>整段删除，并更新销售场景数量说明。</td></tr>
+      <tr><td><code>docs/demo/index.html</code> / <code>XSZG1</code></td><td>补齐主管审价所需字段。</td></tr>
+      <tr><td><code>docs/demo/index.html</code> / <code>CG3</code></td><td>保留正确的司机/仓管凭证链，仅做文案一致性检查。</td></tr>
+      <tr><td><code>docs/demo/_shared/demo-engine.js</code></td><td>若新增客户订单 Home 或审批时间线数据块，在 <code>buildBlock</code> 中增加对应渲染；不要把大量专用 HTML 塞进消息文本。</td></tr>
+      <tr><td><code>docs/demo/_shared/demo.css</code></td><td>为汇总筛选、订单 Home、审批时间线补样式；沿用现有品牌色、6-8px 圆角和手机端密度。</td></tr>
+    </tbody>
+  </table>
+
+  <h2>全局一致性检查</h2>
+  <ul class="checklist">
+    <li>搜索并清理旧词：<code>生成订单截图</code>、销售侧 <code>客户发送签收凭证</code>、任何二次确认文案。</li>
+    <li>同一订单的客户等级、金额、数量、地址、状态在不同角色中保持一致。</li>
+    <li>订单流程名称在成功卡、销售回复、Agent 执行记录中一致，并根据客户等级动态决定是否有董事长终审。</li>
+    <li>按钮代表用户任务，不暴露内部实现术语；“发给客户”优于“生成图片/截图”。</li>
+    <li>所有新增步骤都同步补齐 <code>annotations</code>，且数组长度与 <code>messages</code> 对齐。</li>
+    <li>桌面和手机宽度下文字不溢出；客户订单 Home 与审批时间线在手机屏内可纵向滚动，不产生横向滚动。</li>
+    <li>用顶部“步进”完整跑完 XS1、XS2、XS3、XS4、XSZG1、CG3；重置与后退后快照仍正确。</li>
+  </ul>
+
+  <h2>不应误改的内容</h2>
+  <ul>
+    <li>不要删除智能下单的第一次人工确认。它是 AI 安全边界；需要删除的是确认后的再次确认。</li>
+    <li>不要删除仓管 CG3 的回单凭证识别。意见只是纠正上传对象和发生场景。</li>
+    <li>不要把销售只能看本人客户订单的 <code>OWNS</code> 权限改成全量可见。全量订单属于商务/ops 视角。</li>
+    <li>不要照抄参考系统的桌面 UI；参考图用于确定字段和信息结构，视觉上继续遵循当前 Demo。</li>
+  </ul>
+</main>
+</body>
+</html>

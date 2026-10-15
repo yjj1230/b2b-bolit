@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>订单详情 · 通用页面规约｜长安仁恒</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+SC:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="wecom-tokens.css" />
+<link rel="stylesheet" href="wecom-pc-frame.css" />
+<style>
+  :root{
+    --paper:#f5f4ed; --paper2:#efeee5; --ink:#1f1d18; --ink2:#6b665b;
+    --ink3:#3a382f; --blue:#1B365D; --rule:#d4d1c5; --red:#c0392b; --green:#1a7f37;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif; line-height:1.6;}
+  .wrap{max-width:960px; margin:0 auto; padding:48px 40px 80px;}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;}
+  .folio{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--rule); padding-bottom:10px;
+    font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink2);}
+  .folio a{color:var(--ink2); border:none;}
+  .folio a:hover{color:var(--blue);}
+  .tag{display:inline-block; padding:3px 10px; font-size:11px; letter-spacing:.16em; background:var(--paper2); color:var(--blue);}
+  .kicker{display:flex; align-items:baseline; gap:12px; margin-top:48px;}
+  h1{font-size:clamp(32px,5vw,50px); line-height:1.12; font-weight:500; margin-top:14px; letter-spacing:-.01em;}
+  .lede{margin-top:18px; font-size:17px; line-height:1.7; color:var(--ink3); max-width:720px;}
+  h2{font-size:23px; font-weight:600; margin:52px 0 14px; color:var(--blue); display:flex; align-items:baseline; gap:12px; border-top:1px solid var(--rule); padding-top:26px;}
+  h2 .no{font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.12em;}
+  h3{font-size:17.5px; font-weight:600; margin:30px 0 10px; color:var(--ink);}
+  h3 .no{color:var(--blue); font-family:'IBM Plex Mono',monospace; font-size:12px; margin-right:8px;}
+  h4{font-size:15.5px; font-weight:600; margin:24px 0 8px; color:var(--ink);}
+  p{margin:10px 0; color:var(--ink3);}
+  ul,ol{margin:10px 0 10px 26px; color:var(--ink3);}
+  li{margin:5px 0;}
+  a{color:var(--blue); text-decoration:none; border-bottom:1px solid var(--rule);}
+  a:hover{border-bottom-color:var(--blue);}
+  blockquote{border-left:2px solid var(--blue); padding:10px 18px; margin:16px 0; background:var(--paper2); font-style:italic;}
+  table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  .table-wrap{overflow-x:auto; margin:16px 0 24px; border:1px solid var(--rule);}
+  .table-wrap table{margin:0;}
+  th{background:var(--paper2); color:var(--blue); text-align:left; font-weight:600; padding:9px 12px; border-bottom:1.5px solid var(--blue); font-size:12.5px; white-space:nowrap;}
+  td{padding:9px 12px; border-bottom:1px solid var(--rule); vertical-align:top; color:var(--ink3);}
+  tr:nth-child(even) td{background:#faf9f3;}
+  .mermaid{background:var(--paper); border:1px solid var(--rule); padding:18px; overflow-x:auto; text-align:center; margin:20px 0;}
+  .mermaid svg{max-width:100%; height:auto;}
+  figcaption{text-align:center; font-size:12px; color:var(--ink2); margin:-10px 0 26px; font-style:italic;}
+  code{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace; font-size:13px; background:var(--paper2); padding:1px 5px;}
+  footer.colophon{margin-top:56px; padding-top:14px; border-top:1px solid var(--rule); display:flex; justify-content:space-between;
+    font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink2); flex-wrap:wrap; gap:8px;}
+  footer.colophon a{color:var(--ink2); border:none;}
+  footer.colophon a:hover{color:var(--blue);}
+  .toc{border:1px solid var(--rule); background:var(--paper2); padding:18px 24px; margin:26px 0;}
+  .toc .tt{font-size:11px; letter-spacing:.2em; color:var(--blue); margin-bottom:8px;}
+  .toc a{display:block; padding:3px 0; color:var(--ink3); border:none;}
+  .toc a:hover{color:var(--blue);}
+  .toc .mono{font-size:12px; color:var(--blue); margin-right:8px;}
+  .ui-step{margin:18px 0 34px;}
+  .ui-step .desc{flex:1 1 300px; min-width:280px;}
+  .ui-step .desc .stepno{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.14em; color:var(--blue);}
+  .ui-step .desc h4{font-size:15px; margin:4px 0 6px;}
+  .ui-step .desc p{font-size:13.5px; margin:6px 0;}
+  .ui-step .desc .hint{font-size:12px; color:var(--ink2); background:var(--paper2); border-left:2px solid var(--rule); padding:6px 10px; margin-top:8px;}
+  .ui-shot{margin-top:12px; display:flex; justify-content:center; flex-wrap:wrap; gap:22px; align-items:flex-start;}
+  .shot-label{flex-basis:100%; text-align:center; font-size:11px; color:var(--ink2); margin-bottom:-14px; letter-spacing:.12em;}
+  @media(max-width:720px){.wrap{padding:28px 18px 60px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="folio">
+    <span><a href="index.html">← Role Specs</a></span>
+    <span>ORDER DETAIL · Component Spec</span>
+    <span>订单详情 · 通用页面</span>
+  </header>
+
+  <div class="kicker">
+    <span class="tag">Component Spec · 订单详情</span>
+    <span class="mono" style="font-size:11px; letter-spacing:.18em; color:var(--ink2);">四节点时间线 · 字段投影 · 物流/审批链</span>
+  </div>
+
+  <h1>查看订单详情<span style="font-style:italic; color:var(--blue);">· 通用页面规约</span></h1>
+
+  <p class="lede">订单详情是<strong>全部角色的通用页面</strong>：从订单列表、待办审批条、AI 问单直达、或工作台均可进入。页面必须展示<strong>四节点履约时间线</strong>（已开单 → 已备货 → 已发货 → 已开票），并按角色做<strong>字段投影</strong>（仓管/客户联系人剥价，销售/商务/主管/董事长看全字段）。本页定义两种形态：全字段详情与剥价详情；<strong>UI 操作图同时呈现 PC 端四栏与移动端手机屏幕</strong>。</p>
+
+  <nav class="toc">
+    <div class="tt">CONTENTS · 2 BLOCKS</div>
+    <a href="#b1"><span class="mono">B1</span>全字段订单详情（销售 / 商务 / 主管 / 董事长）</a>
+    <a href="#b2"><span class="mono">B2</span>剥价订单详情（仓管 / 客户联系人）</a>
+  </nav>
+
+  <!-- ============ BLOCK 1 ============ -->
+  <h2 id="b1"><span class="no">B1 ·</span> 全字段订单详情</h2>
+
+  <h3><span class="no">①</span> 用例图</h3>
+  <pre class="mermaid">
+flowchart LR
+    subgraph ACT["参与者"]
+        SALES["销售 / 商务 / 主管 / 董事长"]
+    end
+    subgraph SYS["企微订单助手（系统边界）"]
+        UC1["(查看订单详情)"]
+        UC2["(查看四节点状态)"]
+        UC3["(查看物流/预计送达)"]
+        UC4["(查看审批链/风险)"]
+    end
+    SALES --> UC1
+    SALES --> UC2
+    SALES --> UC3
+    SALES --> UC4
+  </pre>
+  <figcaption>用例图 B1：全字段详情用于查询、决策与对客沟通准备</figcaption>
+
+  <h3><span class="no">②</span> 流程图</h3>
+  <pre class="mermaid">
+flowchart TD
+    A["订单列表 / 待办 / AI 直达"] --> B["打开订单详情"]
+    B --> C["BFF 按角色投影字段"]
+    C --> D["展示订单头 + 明细 + 四节点时间线"]
+    D --> E["展示物流/预计送达（已发货）或审批链（未发货）"]
+    E --> F["操作：发给客户 / 去待办处理 / 审批"]
+  </pre>
+  <figcaption>流程图 B1：详情页只读展示，操作按钮按角色与状态呈现</figcaption>
+
+  <h3><span class="no">③</span> UI 操作图（PC + 移动端）</h3>
+
+  <div class="ui-step">
+    <div class="desc">
+      <span class="stepno">操作 1.1</span>
+      <h4>已发货订单：物流 + 预计送达 + 四节点时间线</h4>
+      <p>销售从客户群问单直达 ORD-2026-0112 详情：订单头显示状态「已发货」，明细区展示产品/数量/金额，时间线当前节点高亮「已发货」，下方展示物流公司、物流单号、当前进度与预计送达；主按钮为「发给客户」。</p>
+      <div class="hint">已发货订单的客户可见卡片含物流与预计送达；内部详情仍含金额（销售/商务全字段）。</div>
+    </div>
+    <div class="ui-shot">
+      <div class="shot-label">PC 端 · 侧边栏应用订单详情（全字段 · 已发货）</div>
+      <div class="wc-pc">
+        <div class="tl"><i class="r"></i><i class="y"></i><i class="g"></i></div>
+        <div class="rail">
+          <div class="av">李</div>
+          <div class="nav on"><span class="ico">💬</span>消息<span class="bdg">2</span></div>
+          <div class="nav"><span class="ico">✉</span>邮件</div>
+          <div class="nav"><span class="ico">📄</span>文档</div>
+          <div class="nav"><span class="ico">📅</span>日程</div>
+          <div class="nav"><span class="ico">✓</span>待办</div>
+          <div class="nav"><span class="ico">🎥</span>会议</div>
+          <div class="nav"><span class="ico">🧩</span>工作台</div>
+          <div class="nav"><span class="ico">👥</span>通讯录</div>
+          <div class="nav"><span class="ico">☁</span>微盘</div>
+        </div>
+        <div class="conv">
+          <div class="search"><span class="box">⌕ 搜索</span><span class="plus">＋</span></div>
+          <div class="conv-item on">
+            <div class="cav">天</div>
+            <div class="meta"><div class="nm">广西天华 · 供应协同群<span class="tm">09:24</span></div><div class="pv">王总：帮我看看最近这两单的进度</div></div>
+          </div>
+        </div>
+        <div class="chat">
+          <div class="ch-head"><div><div class="nm">广西天华 · 供应协同群（8）</div><div class="sub">外部客户群 · 已开启订单助手</div></div></div>
+          <div class="ch-body">
+            <div class="msg o"><span class="mav">王</span><div class="mb"><div class="who">王志明｜广西天华采购部</div><div class="bub">李经理，帮我看看最近这两单的进度</div></div></div>
+            <div class="msg s"><span class="mav">李</span><div class="mb"><div class="who">张销售</div><div class="bub">好嘞王总，我看下订单助手</div></div></div>
+          </div>
+          <div class="input-area"><span class="tools">☺ ▧ 📁</span><span class="field">输入消息…</span><span class="send">发送</span></div>
+        </div>
+        <div class="aside">
+          <div class="marker">订单助手 · 侧边栏应用</div>
+          <div class="tabs">
+            <span class="tab">待办</span><span class="tab on">订单</span><span class="tab">下单</span>
+          </div>
+          <div class="content">
+            <div class="pc-card">
+              <div class="tt"><span class="d" style="background:#07C160;"></span>ORD-2026-0112 · 已发货</div>
+              <div class="pc-row"><span class="k">客户</span><span class="v">广西天华 · C 级</span></div>
+              <div class="pc-row"><span class="k">产品</span><span class="v">膨润土 AB-3（袋装）· 2 吨</span></div>
+              <div class="pc-row"><span class="k">物流公司</span><span class="v">德邦快递</span></div>
+              <div class="pc-row"><span class="k">物流单号</span><span class="v">DBL2026073000387</span></div>
+              <div class="pc-row"><span class="k">当前进度</span><span class="v">运输中 · 已离开始发站</span></div>
+              <div class="pc-row"><span class="k">预计送达</span><span class="v">08-01 前</span></div>
+            </div>
+            <div class="pc-tl-line"><span class="dot done"></span><span class="bar done"></span><span class="dot done"></span><span class="bar done"></span><span class="dot cur"></span><span class="bar"></span><span class="dot"></span></div>
+            <div class="pc-btns"><span class="b ok">发给客户</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="wc-phone">
+        <div class="st-bar"><span>9:30</span><span>📶 🔋</span></div>
+        <div class="nav"><span class="back">‹</span><span class="title">订单助手</span><span class="more">⋯</span></div>
+        <div class="wc-full">
+          <div class="aside-tabs">
+            <span class="aside-tab">待办</span><span class="aside-tab on">订单</span><span class="aside-tab">下单</span>
+          </div>
+          <div class="aside-scroll">
+            <div class="wc-detail">
+              <div class="od-back">‹ 广西天华订单</div>
+              <div class="od-head"><span class="od-no">ORD-2026-0112</span><span class="od-state"><span class="state st-ship" style="font-size:10px;padding:2px 6px;border-radius:3px;font-weight:500;">已发货</span></span></div>
+              <div class="od-kv">
+                <div class="row"><span class="k">客户</span><span class="v">广西天华 · C 级</span></div>
+                <div class="row"><span class="k">产品</span><span class="v">膨润土 AB-3（袋装）· 2 吨</span></div>
+                <div class="row"><span class="k">物流公司</span><span class="v">德邦快递</span></div>
+                <div class="row"><span class="k">物流单号</span><span class="v">DBL2026073000387</span></div>
+                <div class="row"><span class="k">当前进度</span><span class="v">运输中 · 已离开始发站</span></div>
+                <div class="row"><span class="k">预计送达</span><span class="v">08-01 前</span></div>
+              </div>
+              <div class="tl4"><span class="tl4-node done">已开单</span><span class="tl4-line done"></span><span class="tl4-node done">已备货</span><span class="tl4-line done"></span><span class="tl4-node cur">已发货</span><span class="tl4-line"></span><span class="tl4-node">已开票</span></div>
+            </div>
+            <div class="wc-po-actions"><span class="btn btn-confirm">发给客户</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ BLOCK 2 ============ -->
+  <h2 id="b2"><span class="no">B2 ·</span> 剥价订单详情</h2>
+
+  <h3><span class="no">①</span> 用例图</h3>
+  <pre class="mermaid">
+flowchart LR
+    subgraph ACT2["参与者"]
+        WH["仓管 / 客户联系人"]
+    end
+    subgraph SYS2["企微订单助手（系统边界）"]
+        UC21["(查看订单详情)"]
+        UC22["(查看可执行要素)"]
+        UC23["(不展示金额/内部备注)"]
+    end
+    WH --> UC21
+    WH --> UC22
+    WH --> UC23
+  </pre>
+  <figcaption>用例图 B2：剥价详情只展示执行/物流要素，不展示价格与内部字段</figcaption>
+
+  <h3><span class="no">②</span> 流程图</h3>
+  <pre class="mermaid">
+flowchart TD
+    A["仓管待办 / 客户物流入口"] --> B["打开订单详情"]
+    B --> C["BFF 识别角色为 WAREHOUSE/CONTACT"]
+    C --> D["剥离单价/金额/内部备注"]
+    D --> E["展示产品/数量/仓库/地址/交期（或物流）"]
+    E --> F["操作：确认接受 / 查看物流"]
+  </pre>
+  <figcaption>流程图 B2：剥价视图由服务端字段投影保证，不是前端隐藏</figcaption>
+
+  <h3><span class="no">③</span> UI 操作图（PC + 移动端）</h3>
+
+  <div class="ui-step">
+    <div class="desc">
+      <span class="stepno">操作 2.1</span>
+      <h4>仓管发货任务：金额不可见</h4>
+      <p>仓管打开发货任务详情：只展示产品、数量、发货仓、收货地址、交期；金额字段整体不渲染，不留空列，也不显示「—」。底部「确认接受」/「拒绝并说明」。</p>
+      <div class="hint">剥价是 CQ-03 强制规则：仓管视图不出现价格/金额，字段级投影由后端完成。</div>
+    </div>
+    <div class="ui-shot">
+      <div class="shot-label">PC 端 · 侧边栏应用订单详情（仓管剥价）</div>
+      <div class="wc-pc">
+        <div class="tl"><i class="r"></i><i class="y"></i><i class="g"></i></div>
+        <div class="rail">
+          <div class="av">仓</div>
+          <div class="nav on"><span class="ico">💬</span>消息<span class="bdg">2</span></div>
+          <div class="nav"><span class="ico">✉</span>邮件</div>
+          <div class="nav"><span class="ico">📄</span>文档</div>
+          <div class="nav"><span class="ico">📅</span>日程</div>
+          <div class="nav"><span class="ico">✓</span>待办</div>
+          <div class="nav"><span class="ico">🎥</span>会议</div>
+          <div class="nav"><span class="ico">🧩</span>工作台</div>
+          <div class="nav"><span class="ico">👥</span>通讯录</div>
+          <div class="nav"><span class="ico">☁</span>微盘</div>
+        </div>
+        <div class="conv">
+          <div class="search"><span class="box">⌕ 搜索</span><span class="plus">＋</span></div>
+          <div class="conv-item on">
+            <div class="cav">仓</div>
+            <div class="meta"><div class="nm">订单助手 · 本仓工作台<span class="tm">10:12</span></div><div class="pv">发货任务 · ORD-2026-0118</div></div>
+          </div>
+        </div>
+        <div class="chat">
+          <div class="ch-head"><div><div class="nm">订单助手 · 本仓工作台</div><div class="sub">发货任务</div></div></div>
+          <div class="ch-body">
+            <div class="msg o"><span class="mav">仓</span><div class="mb"><div class="who">仓管</div><div class="bub">核对发货任务要素</div></div></div>
+          </div>
+          <div class="input-area"><span class="tools">☺ ▧ 📁</span><span class="field">输入消息…</span><span class="send">发送</span></div>
+        </div>
+        <div class="aside">
+          <div class="marker">订单助手 · 侧边栏应用</div>
+          <div class="tabs">
+            <span class="tab on">待办</span><span class="tab">订单</span><span class="tab">上传凭证</span>
+          </div>
+          <div class="content">
+            <div class="pc-card">
+              <div class="tt"><span class="d" style="background:#07C160;"></span>ORD-2026-0118 · 待接受</div>
+              <div class="pc-row"><span class="k">产品</span><span class="v">膨润土 AB-3（吨袋）</span></div>
+              <div class="pc-row"><span class="k">数量</span><span class="v">5 吨</span></div>
+              <div class="pc-row"><span class="k">发货仓</span><span class="v">华南仓</span></div>
+              <div class="pc-row"><span class="k">收货地址</span><span class="v">湖南岳阳 · 云溪区</span></div>
+              <div class="pc-row"><span class="k">交期</span><span class="v">2026-08-18</span></div>
+            </div>
+            <div class="pc-btns"><span class="b gray">拒绝并说明</span><span class="b ok">确认接受</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="wc-phone">
+        <div class="st-bar"><span>9:30</span><span>📶 🔋</span></div>
+        <div class="nav"><span class="back">‹</span><span class="title">订单助手</span><span class="more">⋯</span></div>
+        <div class="wc-full">
+          <div class="aside-tabs">
+            <span class="aside-tab on">待办</span><span class="aside-tab">订单</span><span class="aside-tab">上传凭证</span>
+          </div>
+          <div class="aside-scroll">
+            <div class="wc-detail">
+              <div class="od-head"><span class="od-no">ORD-2026-0118</span><span class="od-state"><span class="state st-approving" style="font-size:10px;padding:2px 6px;border-radius:3px;font-weight:500;">待接受</span></span></div>
+              <div class="od-kv">
+                <div class="row"><span class="k">产品</span><span class="v">膨润土 AB-3（吨袋）</span></div>
+                <div class="row"><span class="k">数量</span><span class="v">5 吨</span></div>
+                <div class="row"><span class="k">发货仓</span><span class="v">华南仓</span></div>
+                <div class="row"><span class="k">收货地址</span><span class="v">湖南岳阳 · 云溪区</span></div>
+                <div class="row"><span class="k">交期</span><span class="v">2026-08-18</span></div>
+              </div>
+              <div class="tl4"><span class="tl4-node done">已开单</span><span class="tl4-line done"></span><span class="tl4-node cur">已备货</span><span class="tl4-line"></span><span class="tl4-node">已发货</span><span class="tl4-line"></span><span class="tl4-node">已开票</span></div>
+            </div>
+            <div class="wc-risk warn"><div class="rk-head"><span class="rk-badge">⚠</span><span class="rk-title">确认接受</span></div><div class="rk-items"><div class="rk-item"><span class="mk warn">!</span><span class="text">金额不展示：仓管仅确认本仓可执行要素</span></div></div></div>
+            <div class="wc-po-actions"><span class="btn btn-ignore">拒绝并说明</span><span class="btn btn-confirm">确认接受</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="colophon">
+    <span><a href="index.html">← Role Specs</a></span>
+    <span>ORDER DETAIL · B2B Order Fulfillment</span>
+    <span>全字段 / 剥价</span>
+  </footer>
+</div>
+</body>
+</html>

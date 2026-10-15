@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>v0.2 设计 Preview · 飞书完全下线路线</title>
+<style>
+  :root{
+    --ink:#1f1d18; --muted:#6f6a5e; --paper:#f6f5ef; --panel:#ffffff;
+    --blue:#1B365D; --green:#2f6b3a; --red:#9b3b3b; --amber:#9a6b00;
+    --rule:#d8d5c8; --soft:#f0eee4;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);font:15px/1.75 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;padding:32px 16px}
+  .wrap{max-width:1080px;margin:0 auto}
+  header{border-bottom:3px solid var(--blue);padding-bottom:16px;margin-bottom:24px}
+  header .badge{display:inline-block;background:var(--blue);color:#fff;font-size:12px;padding:3px 10px;border-radius:12px;margin-bottom:10px}
+  header .warn{background:var(--amber)}
+  h1{font-size:26px;color:var(--blue);line-height:1.4}
+  .meta{color:var(--muted);font-size:13px;margin-top:8px}
+  h2{font-size:21px;color:var(--blue);margin:36px 0 14px;padding-left:10px;border-left:5px solid var(--blue)}
+  h3{font-size:17px;color:var(--blue);margin:24px 0 10px}
+  p{margin:10px 0}
+  ul,ol{margin:10px 0 10px 24px}
+  li{margin:6px 0}
+  .card{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:16px 20px;margin:14px 0}
+  .card.red{border-left:5px solid var(--red)}
+  .card.green{border-left:5px solid var(--green)}
+  .card.blue{border-left:5px solid var(--blue)}
+  table{width:100%;border-collapse:collapse;background:var(--panel);margin:12px 0;font-size:13.5px}
+  th,td{border:1px solid var(--rule);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--soft);color:var(--blue)}
+  code{background:var(--soft);padding:2px 6px;border-radius:4px;font:12.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  pre{background:#2b2b2b;color:#eee;padding:14px 16px;border-radius:8px;overflow:auto;font:12.5px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;margin:12px 0}
+  pre code{background:none;padding:0;color:inherit}
+  .mermaid{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:18px;margin:16px 0;text-align:center}
+  .tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600}
+  .muted{color:var(--muted);font-size:12px}
+  .tag.red{background:rgba(155,59,59,.12);color:var(--red)}
+  .tag.green{background:rgba(47,107,58,.12);color:var(--green)}
+  .tag.amber{background:rgba(154,107,0,.12);color:var(--amber)}
+  .tag.blue{background:rgba(27,54,93,.10);color:var(--blue)}
+  .foot{margin-top:40px;padding-top:16px;border-top:1px solid var(--rule);color:var(--muted);font-size:12.5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <span class="badge">v0.2 设计 Preview</span> <span class="badge warn">纯讨论稿 · 未定稿</span>
+  <h1>v0.2 设计：把飞书降级为“可插拔审批渠道”，最终完全下线</h1>
+  <div class="meta">综合多轮讨论结论 · 对应项目：b2b_pilot_v3 · 参考：docs/发布计划v2/渐进式发布计划v2.html · docs/发布计划/B2B_V01_对比与同步设计_20260818.md · 2026-08-20 刷新：本仓 4e53763 / 旧系统 f3ed1f80（+3 fix） / 影子轨 D-008..D-011</div>
+</header>
+
+<div class="card blue">
+  <h3>交接说明（给接手 Agent）</h3>
+  <p>本文件是一份<strong>自包含的 v0.2 设计讨论交接稿</strong>，已包含接手所需的完整来龙去脉：项目背景、现有代码、旧系统契约、原始发布计划、三轮讨论过程、最终采纳路线、风险与未决项。建议阅读顺序：</p>
+  <ol>
+    <li><strong>0 · TL;DR</strong> —— 先建立最终结论。</li>
+    <li><strong>0.1 · 项目背景</strong> —— 理解两个系统与当前代码现状。</li>
+    <li><strong>0.2 · 原始 v2 发布计划</strong> —— 理解为什么要重新设计 v0.2/v0.3。</li>
+    <li><strong>1 · 完整讨论过程</strong> —— 理解三轮想法如何收敛到最终路线。</li>
+    <li><strong>2 之后各节</strong> —— 目标模型、架构、动作映射、风险与未决决策。</li>
+  </ol>
+</div>
+
+<h2>0 · TL;DR</h2>
+<div class="card green">
+  <p><strong>最终采纳方向：</strong></p>
+  <ul>
+    <li>旧飞书复杂三方审批流程：<strong>不改造、不再承接新业务</strong>，冻结后只读归档。</li>
+    <li>飞书侧：<strong>新增几个极简单节点审批流程</strong>，只服务销售、销售主管、董事长。</li>
+    <li>新系统：<strong>不新增飞书支持</strong>，只暴露通用 REST API，成为唯一状态机与数据真相。</li>
+    <li>商务、财务、仓管、销售助理：全部在企微上处理流程。</li>
+    <li>v0.3 的“全量切换”因此退化为：<strong>历史数据回填 + 四层对账 + 旧系统只读归档</strong>，不再等同于重新发布一次项目。</li>
+    <li>最终目标：飞书通道作为可插拔组件，随时可以整体摘除，飞书完全下线。</li>
+  </ul>
+</div>
+
+<h2>0.1 · 项目背景（接手 Agent 必读）</h2>
+
+<div class="card">
+  <h3>两个系统</h3>
+  <table>
+    <tr><th></th><th>旧系统：tripartite-approval</th><th>新系统：b2b_pilot_v3</th></tr>
+    <tr><td>技术栈</td><td>Node/TS + Express，生产公网 101.37.66.110:3000；测试环境 121.43.58.1:3002（feat_v0.1 @ f3ed1f80）</td><td>Go + PostgreSQL 16 + SpiceDB + Temporal + 企业微信</td></tr>
+    <tr><td>业务真相</td><td>16 个 JSONL 追加文件（orders / stock_prepares / shipments / invoices + 事件表）</td><td>PG 31 张表，事件链 append-only</td></tr>
+    <tr><td>审批载体</td><td>飞书三方审批 external_instance（审批中心）</td><td>自研 approval_tasks 待办视图 + Signal 人工闸门</td></tr>
+    <tr><td>对账副本</td><td>飞书多维表格 bitable</td><td>pgAPI 镜像 / cmd/sync 同步视图</td></tr>
+    <tr><td>主流程</td><td>下单 → 信息确认 → 主管审批 → C/D 董事长终审 → 备货 → 发货 → 开票/回单 → 归档</td><td>下单 N1 → 审价 N2 → 董事长终审 N3 → 备货 N4 → 发货 N5 → 开票 N6 → 回单 N7</td></tr>
+    <tr><td>关键角色</td><td>销售/代办、主管、董事长、财务、仓管、商务</td><td>销售、销售助理、销售主管、商务、财务、仓管、董事长</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <h3>当前 v0.1 已经落地的东西</h3>
+  <table>
+    <tr><th>组件</th><th>位置</th><th>作用</th></tr>
+    <tr><td>下单桥接客户端</td><td><code>internal/bridge/bridge.go</code></td><td>代理飞书 OAuth 换 create-order token（2h 缓存）；构造 <code>B2B_V01_&lt;tenant&gt;:&lt;orderID&gt;</code> 幂等键；multipart 调旧系统 <code>POST /external-orders/create</code>；303 后轮询 <code>submission-status</code>；错误分类；Recorder 回写。测试环境 auth-url 实测 200</td></tr>
+    <tr><td>桥接 API</td><td><code>internal/api/bridge_handlers.go</code></td><td><code>GET /api/v1/bridge/auth-url</code>、<code>POST /api/v1/bridge/callback</code>、<code>POST /api/v1/bridge/orders</code>、<code>GET /api/v1/bridge/orders</code></td></tr>
+    <tr><td>台账回写</td><td><code>internal/repo/bridge.go</code></td><td>UPSERT <code>orders</code>（state=ORD_REQUESTED + legacy_flow_id + payload 含 flow_id/instance_id/stage_id/detail_url）与 <code>legacy_flow_mapping</code></td></tr>
+    <tr><td>PC 兜底 UI</td><td><code>internal/api/bridge_ui.html</code></td><td><code>/bridge</code>：飞书授权 + 下单 + 我的订单</td></tr>
+    <tr><td>销售助理 UI</td><td><code>internal/api/assistant_ui.html</code></td><td><code>/assistant</code>：企微上下文 + 飞书 OAuth + 代下单 + 订单列表</td></tr>
+    <tr><td>同步 Job</td><td><code>cmd/sync/main.go</code> + <code>internal/sync/sync.go</code></td><td>配置驱动：file JSONL 源 / http pgAPI 源；<code>GET /api/db/approval-flows</code> 分页拉取；敏感字段剥离；migration_batches 幂等</td></tr>
+    <tr><td>配置开关</td><td><code>internal/config/config.go</code> + <code>cmd/api/main.go</code></td><td><code>B2B_FEISHU_BRIDGE_ENABLED / BASE_URL / APP_ID / REDIRECT_URI</code></td></tr>
+    <tr><td>影子轨 S（2026-08-20 新增）</td><td><code>internal/shadow/*</code> · <code>internal/shadowguard/*</code> · <code>cmd/shadow-*</code> · <code>docker-compose.shadow.yml</code> · <code>migrations/shadow/008</code></td><td>真实事件摄入 → 映射投递 → 影子工作流全量重放 → 覆盖率/分歧/对齐审计；独立环境 + 自带 shadow-temporal；D-008..D-011 已落档并 commit 4e53763</td></tr>
+  </table>
+</div>
+
+<div class="card blue">
+  <h3>0.15 · 2026-08-20 影子轨与 v0.2 的证据衔接（D-008..D-011）</h3>
+  <p>v0.2 不是「拍脑袋迁角色」，而是先由<strong>影子轨 S</strong>在真实飞书数据上把六台状态机（ORD/STK/SHP/INV/PRE/Gatekeeper · 52 状态 79 边）跑出来：覆盖率、分歧清单、状态对齐与映射签字共同构成 v0.2 角色迁入的 Go/No-Go 输入。</p>
+  <table>
+    <tr><th>v0.2 要回答的问题</th><th>影子轨给出的证据</th><th>当前状态（2026-08-20）</th></tr>
+    <tr><td>新状态机能否接住旧飞书全部节点？</td><td>79 边回放 + 全量重放 + 四类分歧（MAPPING/FSM_GAP/LEGACY_ANOMALY/DATA_GAP）</td><td>✅ 代码已实现并本地全栈预演（4e53763）；R1 独立环境全量重放待执行（SH-10）</td></tr>
+    <tr><td>飞书 status/事件怎么翻译成新系统 Signal？</td><td><code>config/shadow-feed.example.json</code> 35 条真实 status 规则（按旧系统 f3ed1f80 代码事实生成）</td><td>🟡 代码基线已提交；业务逐条签字 + detail 字段名冻结待办（HR1）</td></tr>
+    <tr><td>影子 worker 的主数据是真实的吗？</td><td>pgAPI 只读客户/产品 + 零回写哨兵</td><td>🔴 真实只读凭据与响应契约未决（HR2）</td></tr>
+    <tr><td>连续运行稳定吗？</td><td>shadow-audit 24h 日报 + 26h 探针 + 无托底告警（D-009）</td><td>✅ 代码已实现；连续 7 日审计证据（SH-12）待环境执行</td></tr>
+    <tr><td>A 轨 workflow/domain 变更可发吗？</td><td>六同原则：影子先行验证 → A 轨后发（D-011）</td><td>✅ 决策已落档；每次影子发布过六铁律 + 守卫 + 哨兵 + 全量重放</td></tr>
+  </table>
+  <p>因此本文档 §7「新系统不新增飞书支持」的边界，在 v0.2 定稿时要与影子轨的「六同例外」清单对齐：A 轨没有飞书支持，但影子轨显式保留四类例外（零出站通知器、零回写、无公网入口、PRE/Gatekeeper 内部种子）。</p>
+</div>
+
+<div class="card">
+  <h3>旧系统关键既有接口（v0.1 已验证 / 未来要避开的对象）</h3>
+  <table>
+    <tr><th>接口</th><th>作用</th></tr>
+    <tr><td><code>POST /api/approval/feishu-user-by-code</code></td><td>飞书 OAuth code 换 create-order token + 身份（open_id/user_id/role）</td></tr>
+    <tr><td><code>POST /external-orders/create</code></td><td>multipart 创建订单 + 创建飞书外部审批实例；成功返回 303</td></tr>
+    <tr><td><code>GET /external-orders/submission-status?key=...</code></td><td>按幂等键查提交结果，返回 flow_id/instance_id/stage_id/detail_url</td></tr>
+    <tr><td><code>GET /flows/:flow_id</code></td><td>无鉴权只读全流程详情页</td></tr>
+    <tr><td><code>POST /stock-prepares/:id/decision</code>、<code>POST /shipments/:id/decision</code>、<code>POST /invoices/:id/decision</code></td><td>旧系统 decision 接口；已核验只校验 approver_token，是原计划“受信办理通道”的命门</td></tr>
+    <tr><td>JSONL 文件</td><td>旧系统唯一业务真相，16 个文件；<code>approval_role_map.json</code> 决定审批人路由</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <h3>新系统已有且与 v0.2 直接相关的 API</h3>
+  <table>
+    <tr><th>端点</th><th>用途</th></tr>
+    <tr><td><code>POST /api/v1/orders</code></td><td>创建订单（授权预检 + 幂等 + 启动 Workflow）</td></tr>
+    <tr><td><code>GET /api/v1/orders</code> / <code>GET /api/v1/orders/{id}</code></td><td>订单列表 / 详情</td></tr>
+    <tr><td><code>POST /api/v1/orders/{id}/signal/{signal}</code></td><td>审批动作信号；<code>price-review</code>、<code>chairman-review</code>、<code>resubmit</code> 等均已定义</td></tr>
+    <tr><td><code>GET /api/v1/todos?assignee=...&amp;kind=...&amp;state=...</code></td><td>待办查询，可作为飞书通道轮询主管/董事长待办的来源</td></tr>
+    <tr><td><code>GET /api/v1/orders/{id}/events</code></td><td>事件链查询</td></tr>
+  </table>
+</div>
+
+<div class="card red">
+  <h3>敏感边界（后续设计必须遵守）</h3>
+  <ul>
+    <li><code>view_token / submitter_token / approver_token</code> 不落新系统 PG。</li>
+    <li>新系统只存 <code>flow_id / instance_id / detail_url</code> 等安全字段。</li>
+    <li>open_id ↔ user_id 映射独立保存（建议放飞书通道服务），新系统只认内部 user_id。</li>
+    <li>旧 JSONL 是 v0.1 期间唯一真相；v0.2 若反转真相，必须做冻结 + 回填 + 对账。</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h3>关键文档与证据</h3>
+  <ul>
+    <li><code>docs/发布计划/B2B_V01_对比与同步设计_20260818.md</code>：旧飞书流程与 v0.1 逐节点对比、A1 桥接方案、受信通道验证、决策记录。</li>
+    <li><code>docs/发布计划v2/渐进式发布计划v2.html</code>：三次发布计划（v0.1/v0.2/v0.3 原口径）。</li>
+    <li><code>docs/发布计划/发布计划可行性验证.md</code>：受信办理通道代码级验证结论。</li>
+    <li><code>spec/evidence/第一次发布-Go-NoGo结论.md</code>：现场生产未就绪，No-Go 阻塞项。</li>
+    <li><code>spec/biz/飞书三方审批系统存储表及字段说明.md</code>：旧系统 16 表字段清单。</li>
+    <li><code>docs/v0.1/05-business-flow.html</code>、<code>docs/v0.1/11-migration.html</code>：新系统业务流程与同步设计。</li>
+  </ul>
+</div>
+
+<h2>0.2 · 原始 v2 发布计划（讨论的起点）</h2>
+<div class="card">
+  <table>
+    <tr><th>发布</th><th>原计划内容</th></tr>
+    <tr><td>第 1 次（v0.1）</td><td>销售助理（虹励）接入；新系统只做下单入口 + 状态视图；订单写进旧飞书流，后续全部飞书续跑</td></tr>
+    <tr><td>第 2 次（v0.2）</td><td>商务 + 财务 + 仓管迁入企微；新系统办理 → 受信办理通道 → 旧系统 decision 推进；旧系统仍是真相</td></tr>
+    <tr><td>第 3 次（v0.3）</td><td>销售 + 销售主管 + 董事长迁入企微；全量迁移 JSONL → PG；真相源切换；飞书三方审批流整体下线</td></tr>
+  </table>
+  <p>用户对原计划的核心质疑：<strong>v0.3 的全量切换“跟重新发一次项目没有区别”</strong>。本次设计讨论正是围绕如何绕开这个二次发布展开。</p>
+</div>
+
+<h2>1 · 完整讨论过程（来龙去脉）</h2>
+
+<div class="card">
+  <h3>第 1 轮 · v0.2 现状与“旧系统最小动作”</h3>
+  <p><strong>用户提出：</strong>到 v0.2，除了销售、销售主管、董事长，其它角色都已经上到企微流程；这三个角色在流中做的事情很有限。所以是否更适合反过来：对旧飞书系统做一些额外的最小动作，仅支持好销售、销售主管、董事长的动作处理，其它全都在企微上？</p>
+  <p><strong>分析结论：</strong>可行。本质是“旧系统继续当真相 + 多前端”：商务/财务/仓管在企微操作，通过受信办理通道写回旧系统；销售/主管/董事长继续用飞书原生审批。优点是不为三个低频角色做重 UI、不需要提前切换真相；缺点是旧系统仍长期存在，且要解决 approver_token 安全获取、双通道并发等受信通道问题。</p>
+</div>
+
+<div class="card">
+  <h3>第 2 轮 · v0.2 直接迁数据，新系统当真相，旧系统降级为 UI</h3>
+  <p><strong>用户提出：</strong>如果 v0.2 就把数据都迁到新系统；只有销售、主管、董事长还在老系统上走自己的几个重要节点；其它人都在企微上处理流程，这样的风险和可能性如何？</p>
+  <p><strong>用户进一步明确（最新确认）：</strong>旧飞书系统不能再自己当“状态机”，只能退化成这三个角色的“审批 UI / 输入终端”。销售的操作最终确认为：<strong>下单（如果销售仍然自己下单）、信息确认（如果销售是提交人）、填写开票信息（SHP 阶段）、盖章回传（INV 阶段）、驳回后重提</strong>。</p>
+  <p><strong>分析结论：</strong>终态更干净，但这是“旧系统核心重构 + 新系统状态机接管 + 全量切换”，风险高：双状态机、飞书回调转发丢失、节点重复创建、重提链双写。四个销售动作逐个映射后，信息确认最简单，下单和开票信息是表单反转，驳回重提最重（root/revision/resubmit 链必须搬进新系统）。</p>
+</div>
+
+<div class="card green">
+  <h3>第 3 轮 · 最终想法：旧系统不改造，新增几个单节点飞书流程</h3>
+  <p><strong>用户提出：</strong></p>
+  <ol>
+    <li>最终目标是飞书完全下掉。</li>
+    <li>v0.3 做全量切换，感觉跟重新发一次项目没有区别。</li>
+    <li>旧系统如果不是改造，而是新做几个单节点流程呢？</li>
+    <li>新系统如果不新增飞书支持，全部都以旧飞书系统的新增需求来解决呢？</li>
+  </ol>
+  <p><strong>最终结论：</strong>这是三条路线里最优的一条。旧飞书复杂流程不再改造、不再使用，冻结 + 只读归档；飞书侧新增几个极简单节点流程 + 一个轻量飞书通道服务；新系统不增加任何飞书支持，只提供通用 REST API；v0.3 的全量切换退化为“历史数据回填 + 四层对账 + 旧系统只读归档”。最终把飞书完全下掉时，只需停掉通道服务和单节点审批定义。</p>
+  <p><strong>核心洞察：</strong>新系统 = 业务大脑（渠道无关）；飞书 = 可插拔审批渠道；企微 = 另一条渠道。旧系统复杂状态机不再是架构的一部分。</p>
+</div>
+
+<div class="card">
+  <h3>第 4 轮 · 汇总与交接</h3>
+  <p>将上述讨论沉淀为本文档，供后续 Agent 接手 v0.2 设计。接手时需要继续推进：</p>
+  <ol>
+    <li>按本文第 11 节确认未决决策。</li>
+    <li>细化飞书通道服务的接口契约与部署形态。</li>
+    <li>评估新系统 v0.2 全流程建设范围与现有代码差距。</li>
+    <li>制定历史数据回填与四层对账方案。</li>
+  </ol>
+</div>
+
+<h2>2 · v0.2 目标模型</h2>
+<div class="card">
+  <table>
+    <tr><th>维度</th><th>内容</th></tr>
+    <tr><td>用户范围</td><td>销售助理、商务、财务、仓管 → 企微；销售、销售主管、董事长 → 飞书（单节点流程）</td></tr>
+    <tr><td>状态机</td><td>新系统（Go + Temporal/本地 runner）</td></tr>
+    <tr><td>数据真相</td><td>新系统 PostgreSQL</td></tr>
+    <tr><td>旧飞书复杂流程</td><td>冻结：新单新办法，存量单飞书走完，之后只读归档</td></tr>
+    <tr><td>飞书在架构中的位置</td><td>一个“审批渠道适配器”，不是业务系统</td></tr>
+    <tr><td>最终下线方式</td><td>停飞书通道服务 + 删除单节点审批定义 + 三个角色迁企微</td></tr>
+  </table>
+</div>
+
+<h2>3 · 目标架构总览</h2>
+<pre class="mermaid">
+flowchart TB
+    subgraph NEW["新系统（v0.2 起 = 唯一真相 + 状态机）"]
+        WG["企微工作台<br/>销售助理 / 商务 / 财务 / 仓管"]
+        API["通用 REST API<br/>订单 / 待办 / 信号 / 详情 / 重提"]
+        PG[("PostgreSQL<br/>订单 + 事件链 + 待办")]
+    end
+
+    subgraph FSG["飞书通道服务（新增，轻量）"]
+        H5["飞书 H5 表单<br/>销售下单 / 重提 / 开票信息"]
+        APR["飞书审批实例创建<br/>单节点审批"]
+        CB["飞书回调接收"]
+        MAP["open_id ↔ 新系统 user_id 映射"]
+        CALL["受信调用新系统 API"]
+    end
+
+    subgraph FS["飞书用户"]
+        S["销售"]
+        SUP["销售主管"]
+        CH["董事长"]
+    end
+
+    subgraph OLD["旧飞书三方审批系统（旧主流程）"]
+        LEGACY["冻结 · 存量单走完 · 只读归档"]
+    end
+
+    S -->|"H5 填单"| H5
+    SUP -->|"审批中心点同意/驳回"| APR
+    CH -->|"审批中心点同意/驳回"| APR
+
+    H5 --> CALL
+    APR --> CB
+    CB --> MAP
+    MAP --> CALL
+
+    CALL -->|"创建订单 / 信号 / 重提"| API
+    API --> PG
+    API -->|"待办轮询"| CALL
+
+    WG --> API
+    LEGACY -.->|"历史数据回填 + 对账"| PG
+</pre>
+
+<div class="card blue">
+  <p><strong>三条铁律：</strong></p>
+  <ol>
+    <li>新系统不知道飞书、不调飞书 API、不存飞书 token。</li>
+    <li>飞书通道服务不知道业务规则，只做“飞书 UI ↔ 新系统 API”的翻译。</li>
+    <li>旧飞书复杂流程不再承接新业务，只保留历史查询。</li>
+  </ol>
+</div>
+
+<h2>4 · 三条路线对比</h2>
+<table>
+  <tr>
+    <th>维度</th>
+    <th>路线 A<br/>旧系统继续当真相</th>
+    <th>路线 B<br/>新系统当真相 + 旧系统改造为 UI 壳</th>
+    <th>路线 C（最终采纳）<br/>旧系统冻结 + 新增单节点飞书流程</th>
+  </tr>
+  <tr>
+    <td>旧复杂流程</td>
+    <td>继续运行，继续当状态机</td>
+    <td>核心改造，状态逻辑移交新系统</td>
+    <td><span class="tag green">冻结 + 只读归档，不改造</span></td>
+  </tr>
+  <tr>
+    <td>数据真相</td>
+    <td>旧 JSONL</td>
+    <td>新 PG</td>
+    <td><span class="tag green">新 PG</span></td>
+  </tr>
+  <tr>
+    <td>销售/主管/董事长</td>
+    <td>旧飞书原生流程</td>
+    <td>旧飞书 UI，动作转发新系统</td>
+    <td><span class="tag green">新增单节点飞书流程</span></td>
+  </tr>
+  <tr>
+    <td>新系统飞书耦合</td>
+    <td>受信通道调用旧系统</td>
+    <td>接收旧系统转发，耦合较强</td>
+    <td><span class="tag green">零飞书支持，只提供 REST</span></td>
+  </tr>
+  <tr>
+    <td>双状态机风险</td>
+    <td>无（旧系统唯一）</td>
+    <td><span class="tag red">极高</span></td>
+    <td><span class="tag green">无（旧流程已冻结）</span></td>
+  </tr>
+  <tr>
+    <td>v0.3 切换</td>
+    <td>全量迁移 + 大切换</td>
+    <td>功能 + 数据 + 切换混在一起</td>
+    <td><span class="tag green">退化为回填 + 对账 + 归档</span></td>
+  </tr>
+  <tr>
+    <td>最终飞书下线</td>
+    <td>仍需后续大迁移</td>
+    <td>仍需收尾切换</td>
+    <td><span class="tag green">停通道服务即可，可插拔</span></td>
+  </tr>
+</table>
+
+<h2>5 · 飞书通道服务职责</h2>
+<div class="card">
+  <table>
+    <tr><th>职责</th><th>说明</th></tr>
+    <tr><td>审批实例创建</td><td>轮询新系统待办 API，发现主管/董事长待办后，调用飞书 API 创建单节点审批实例，审批人按 open_id 指定</td></tr>
+    <tr><td>飞书回调接收</td><td>接收同意/驳回等回调，按 approval_code 路由，做签名校验与幂等去重</td></tr>
+    <tr><td>H5 表单承载</td><td>销售下单、信息确认、填写开票信息、盖章回传、驳回后重提等表单/附件页面</td></tr>
+    <tr><td>身份映射</td><td>维护 open_id ↔ 新系统 user_id 映射；新系统永远只见内部 user_id</td></tr>
+    <tr><td>关联表</td><td>维护 feishu_instance_code ↔ new_order_id / task_id，防重复推进</td></tr>
+    <tr><td>受信调用</td><td>以“系统级凭证 + 代表用户”方式调用新系统 REST API</td></tr>
+    <tr><td>不做什么</td><td>不存业务状态、不推进业务状态机、不写业务真相、不复制旧复杂流程逻辑</td></tr>
+  </table>
+</div>
+
+<h2>6 · 销售 / 主管 / 董事长的动作映射</h2>
+<table>
+  <tr><th>角色</th><th>飞书侧动作</th><th>飞书侧形态</th><th>通道服务动作</th><th>新系统动作</th></tr>
+  <tr>
+    <td rowspan="5">销售</td>
+    <td>下单<br/><span class="muted">（如果销售仍然自己下单）</span></td>
+    <td>H5 表单</td>
+    <td>表单转 JSON，受信身份调用新系统</td>
+    <td><code>POST /api/v1/orders</code>，创建订单并启动工作流</td>
+  </tr>
+  <tr>
+    <td>信息确认<br/><span class="muted">（如果销售是提交人）</span></td>
+    <td>单节点审批，或并入下单后无需单独确认</td>
+    <td>审批回调 → 调新系统信号</td>
+    <td>确认信号，推进至主管审批</td>
+  </tr>
+  <tr>
+    <td>填写开票信息<br/><span class="muted">（SHP 阶段）</span></td>
+    <td>单节点审批或 H5 表单</td>
+    <td>提交/回调 → 调新系统开票接口</td>
+    <td>开票信息落 PG，推进 INV 流程</td>
+  </tr>
+  <tr>
+    <td>盖章回传<br/><span class="muted">（INV 阶段）</span></td>
+    <td>单节点审批 + 附件上传</td>
+    <td>回调 + multipart 文件 → 调新系统</td>
+    <td>新系统需新增盖章回传信号 + 附件上传接口（或复用证据追加接口）</td>
+  </tr>
+  <tr>
+    <td>驳回后重提</td>
+    <td>H5 表单，预填驳回数据</td>
+    <td>轮询被驳回订单 → 渲染 H5 → 提交后调新系统</td>
+    <td><code>signal: resubmit</code>（已有）</td>
+  </tr>
+  <tr>
+    <td>销售主管</td>
+    <td>审价审批</td>
+    <td>单节点审批</td>
+    <td>轮询待办 → 创建实例 → 回调转信号</td>
+    <td><code>signal: price-review</code>（已有）</td>
+  </tr>
+  <tr>
+    <td>董事长</td>
+    <td>C/D 级终审</td>
+    <td>单节点审批</td>
+    <td>轮询待办 → 创建实例 → 回调转信号</td>
+    <td><code>signal: chairman-review</code>（已有）</td>
+  </tr>
+</table>
+
+<div class="card">
+  <p><strong>关键判断：</strong>销售主管、董事长的审批动作是纯 approve/reject，最适合做成单节点飞书流程；销售的下单、信息确认、开票信息、盖章回传是表单/附件类动作，用 H5 表单或单节点审批均可，驳回重提走 H5 预填重提，均不触碰旧复杂流程。</p>
+</div>
+
+<h2>7 · 新系统“不新增飞书支持”的边界</h2>
+<div class="card green">
+  <p><strong>可以做到，且应该做到。</strong>新系统只需要补齐三个通用能力，它们都不属于飞书支持：</p>
+  <ol>
+    <li><strong>服务间受信身份</strong>：飞书通道以“系统级凭证 + 代表用户”方式调新系统；新系统只认内部 user_id，不认识 open_id。</li>
+    <li><strong>稳定的待办查询 API</strong>：飞书通道靠 <code>GET /api/v1/todos?assignee=...</code> 轮询主管/董事长待办（现有端点，按需扩展过滤）。</li>
+    <li><strong>业务信号/表单接口</strong>：创建订单、price-review、chairman-review、resubmit 信号均已存在；开票信息提交与盖章回传（含附件）按需补普通 HTTP 接口/信号。</li>
+  </ol>
+  <p>当前 v0.1 的 <code>internal/bridge</code> 与 <code>B2B_FEISHU_*</code> 配置，在 v0.2 可以作为临时兼容层逐步退场，不再是长期架构。</p>
+</div>
+
+<h2>8 · 对“v0.3 全量切换 = 重新发一次项目”的重新判断</h2>
+<table>
+  <tr><th>原方案 v0.3</th><th>新方案下的切换</th></tr>
+  <tr><td>全量迁移是“切换仪式”的一部分</td><td>历史数据回填是独立的一次性工程</td></tr>
+  <tr><td>切换当天所有业务从旧到新</td><td>新系统 v0.2 起就是唯一业务入口</td></tr>
+  <tr><td>旧系统切换后还要被三个角色使用</td><td>旧复杂流程 v0.2 起冻结</td></tr>
+  <tr><td>功能 + 数据 + 切换一起上</td><td>只剩：存量单收口 + 回填 + 对账 + 归档</td></tr>
+  <tr><td>风险：等同重新发布项目</td><td>风险：等同一次数据迁移验收</td></tr>
+</table>
+
+<pre class="mermaid">
+flowchart LR
+    V02["v0.2<br/>新系统全流程上线<br/>+ 飞书单节点通道<br/>+ 冻结旧复杂流程"]
+    V03["v0.3<br/>历史数据回填<br/>+ 四层对账<br/>+ 旧系统只读归档"]
+    FINAL["最终<br/>三个角色迁企微<br/>飞书通道整体摘除"]
+
+    V02 --> V03 --> FINAL
+</pre>
+
+<div class="card">
+  <p><strong>说明：</strong>真正重的活被挪到 v0.2 的“新系统全流程建设”。这个活本来就躲不掉，但它是常规功能开发，不是二次发布。v0.3 不再是一个功能版本，而是一个数据收口与验证阶段。影子轨在 v0.3 正式上线后按 D-010 归档 → 停栈 → drop b2b_shadow → 回收只读凭据，作为“飞书完全下线”的最后一个环境动作。</p>
+</div>
+
+<h2>9 · 仍然不能省的硬工作</h2>
+<div class="card">
+  <ol>
+    <li><strong>历史数据回填</strong>：16 个 JSONL 文件 → 新 PG；订单、事件链、附件、审批历史；<code>migration_batches</code> 幂等回填。</li>
+    <li><strong>存量单规则</strong>：新单新办法，存量单在旧飞书复杂流程里走完；旧复杂流程只出不进。</li>
+    <li><strong>open_id ↔ user_id 映射</strong>：放在飞书通道服务，不放新系统；新系统永远只看到内部 user_id。</li>
+    <li><strong>飞书审批定义配置</strong>：新增主管审批、董事长审批等单节点定义；旧飞书应用若支持多 approval_code 可复用，否则新建独立飞书应用。</li>
+    <li><strong>回调幂等 + 关联表</strong>：feishu_instance_code ↔ new_order_id / task_id；飞书回调重试、重复点击都不能重复推进。</li>
+    <li><strong>通道服务可靠性</strong>：它是销售/主管/董事长的唯一入口；待办轮询有延迟，若要求实时，可让新系统发通用 webhook（仍是普通 HTTP，不算飞书支持）。</li>
+    <li><strong>服务间鉴权</strong>：新系统与飞书通道之间的受信凭证、用户代表机制、审计链路。</li>
+  </ol>
+</div>
+
+<h2>10 · 剩余风险</h2>
+<table>
+  <tr><th>风险</th><th>等级</th><th>说明</th></tr>
+  <tr><td>飞书通道故障，三个角色办不了事</td><td><span class="tag amber">中</span></td><td>比旧系统改造风险低，但仍需监控和快速回退</td></tr>
+  <tr><td>待办轮询延迟</td><td><span class="tag blue">低</span></td><td>主管/董事长晚几分钟看到待办，业务可接受</td></tr>
+  <tr><td>open_id 映射错误</td><td><span class="tag amber">中</span></td><td>映射错会把审批推错人，上线前必须逐人核对</td></tr>
+  <tr><td>单节点审批实例和企微待办重复</td><td><span class="tag blue">低</span></td><td>只要旧复杂流程冻结，就不存在双待办</td></tr>
+  <tr><td>旧复杂流程残留存量单</td><td><span class="tag amber">中</span></td><td>需要明确收口规则，否则销售可能两边都有单</td></tr>
+  <tr><td>历史回填漏事件链</td><td><span class="tag amber">中</span></td><td>用批次校验和 + 四层对账兜底</td></tr>
+<tr><td>影子 HR1 映射未签字 → v0.2 证据不可信</td><td><span class="tag amber">中</span></td><td>代码事实基线已生成；业务逐条签字 + detail 字段名冻结后权威化</td></tr>
+<tr><td>影子 HR2 pgAPI 只读凭据未决</td><td><span class="tag red">高</span></td><td>影子 worker 无法用真实主数据跑预演；需只读 key + 响应样例 + 写接口被拒证据</td></tr>
+<tr><td>影子轨与 A 轨发布节奏耦合</td><td><span class="tag blue">低</span></td><td>D-011：影子系统可多次独立发布，A 轨不因影子发布而重新发布</td></tr>
+</table>
+
+<h2>11 · 待确认决策清单</h2>
+<div class="card">
+  <ol>
+    <li>v0.2 是否明确采用“旧复杂流程冻结 + 新增单节点飞书流程 + 新系统当真相”？</li>
+    <li>飞书通道服务部署形态：旧系统仓库内独立模块，还是独立服务/独立飞书应用？</li>
+    <li>销售的“信息确认”是否保留独立节点，还是并入下单后直接进入主管审批？</li>
+    <li>主管/董事长待办下发用轮询还是通用 webhook？</li>
+    <li>存量单收口规则：按 flow_id 批次、按时间点，还是按角色？</li>
+    <li>历史附件迁移范围：全量迁对象存储，还是旧系统只读访问 6 个月？</li>
+    <li>v0.3 是否正式定义为“数据回填 + 对账验收”，不再叫“切换发布”？</li>
+  <li>影子轨 v0.2 Go 门槛是否正式引用 SH-12（连续 7 日审计 + 四主段 happy path 100% + 总边覆盖 ≥60% seed 补齐 + 无未裁决 P0/P1）？</li>
+  </ol>
+</div>
+
+<h2>12 · 最终结论</h2>
+<div class="card green">
+  <p><strong>采纳路线：</strong></p>
+  <ol>
+    <li>旧系统不改造，旧复杂流程冻结归档；</li>
+    <li>飞书侧新增几个单节点流程，由轻量飞书通道服务承接；</li>
+    <li>新系统不增加飞书支持，只暴露通用 REST API；</li>
+    <li>v0.2 是新系统的功能上线，v0.3 退化为历史数据回填 + 对账验收，不再等同于重新发一次项目；</li>
+    <li>最终下飞书时，只需停掉飞书通道服务和单节点审批定义，把销售/主管/董事长迁到企微。</li>
+  </ol>
+  <p style="margin-top:10px"><strong>一句话：</strong>把飞书从“复杂旧系统”降级为“一个可插拔的审批渠道”，是最接近最终目标、且每一步都可回退的路线。影子轨是这条路线上的“真实数据预演器”，v0.2 的每一步角色迁移都应以它的覆盖率与分歧裁决为证据。</p>
+</div>
+
+<div class="foot">
+  本文件为多轮讨论的 Preview 汇总，属于设计讨论稿，未进入正式文档体系；后续定稿后再并入 docs/v0.2 正式设计文档。2026-08-20 已按最新项目状态刷新：本仓 4e53763、旧系统 f3ed1f80（+3 fix）、影子轨 D-008..D-011。
+</div>
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({ startOnLoad: true, theme: 'default', securityLevel: 'loose' });
+</script>
+</body>
+</html>

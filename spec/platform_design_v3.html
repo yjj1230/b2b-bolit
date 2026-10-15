@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>B2B 销售 AI 平台 v3</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true, theme: "base", themeVariables: {
+        primaryColor: "#eef4ff", primaryBorderColor: "#4f73a8", primaryTextColor: "#1f2933",
+        secondaryColor: "#f5f8ec", tertiaryColor: "#fff7e8", lineColor: "#7b8794",
+        fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif", fontSize: "14px"
+      }
+    });
+  </script>
+  <style>
+    :root {
+      --ink: #1f2933; --muted: #667085; --soft: #f7f8f5; --paper: #ffffff; --line: #d9e0e8;
+      --blue: #315b8c; --blue-soft: #eef4ff; --green: #52745b; --green-soft: #eef6ee;
+      --gold: #946b2d; --gold-soft: #fff7e8; --red: #a34d4d; --red-soft: #fff0ef;
+      --purple: #5a3e8a; --purple-soft: #f3edf8; --domain: #1a5c6b; --domain-soft: #e4f0f3;
+      --service: #2e6780; --service-soft: #e6f0f5;
+      --shadow: 0 14px 40px rgba(31, 41, 51, 0.06);
+    }
+    * { box-sizing: border-box; } html { scroll-behavior: smooth; }
+    body { margin: 0; color: var(--ink); background: var(--soft);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; line-height: 1.72; }
+    .page { max-width: 1180px; margin: 0 auto; padding: 44px 24px 64px; }
+    header { background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 34px 38px; box-shadow: var(--shadow); }
+    .eyebrow { margin: 0 0 8px; color: var(--domain); font-size: 13px; font-weight: 700; letter-spacing: 0; }
+    h1 { margin: 0; font-size: clamp(28px, 4vw, 42px); line-height: 1.18; letter-spacing: 0; }
+    .lead { max-width: 860px; margin: 18px 0 0; color: var(--muted); font-size: 16px; }
+    .meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+    .pill { display: inline-flex; align-items: center; min-height: 30px; padding: 4px 12px; border: 1px solid var(--line); border-radius: 999px; background: #fbfcfd; color: #475467; font-size: 13px; white-space: nowrap; }
+    .pill.highlight { background: var(--domain-soft); border-color: #b0cfd9; color: var(--domain); }
+    .pill.service { background: var(--service-soft); border-color: #b0cfd9; color: var(--service); }
+    nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 8px; }
+    nav a { color: var(--blue); text-decoration: none; background: var(--blue-soft); border: 1px solid #d4e2f7; border-radius: 6px; padding: 7px 10px; font-size: 13px; font-weight: 600; }
+    nav a.domain-link { color: var(--domain); background: var(--domain-soft); border-color: #bdd7e0; }
+    section { margin-top: 22px; padding: 30px 0 8px; border-top: 1px solid var(--line); }
+    .section-inner { background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 28px; box-shadow: 0 6px 24px rgba(31, 41, 51, 0.035); }
+    h2 { margin: 0 0 8px; color: var(--blue); font-size: 22px; line-height: 1.3; letter-spacing: 0; }
+    h2.domain-h2 { color: var(--domain); } h2.service-h2 { color: var(--service); }
+    h3 { margin: 24px 0 8px; font-size: 16px; line-height: 1.35; letter-spacing: 0; }
+    p { margin: 8px 0; font-size: 14px; } .desc { max-width: 900px; margin: 0 0 18px; color: var(--muted); font-size: 14px; }
+    .summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 24px; }
+    .metric { border: 1px solid var(--line); border-radius: 8px; padding: 16px; background: #fbfcfd; min-height: 112px; }
+    .metric strong { display: block; margin-bottom: 8px; color: var(--domain); font-size: 24px; line-height: 1; }
+    .metric span { display: block; color: var(--ink); font-size: 14px; font-weight: 700; }
+    .metric small { display: block; margin-top: 5px; color: var(--muted); font-size: 12px; line-height: 1.55; }
+    .callout { margin: 18px 0; padding: 14px 16px; border-left: 4px solid var(--blue); background: var(--blue-soft); border-radius: 0 6px 6px 0; font-size: 14px; color: #314054; }
+    .callout.green { border-left-color: var(--green); background: var(--green-soft); } .callout.gold { border-left-color: var(--gold); background: var(--gold-soft); }
+    .callout.red { border-left-color: var(--red); background: var(--red-soft); } .callout.domain { border-left-color: var(--domain); background: var(--domain-soft); }
+    .callout.service { border-left-color: var(--service); background: var(--service-soft); }
+    .callout.domain strong { color: var(--domain); } .callout.service strong { color: var(--service); }
+    .mermaid-wrap { width: 100%; overflow-x: auto; padding: 8px 0 14px; border: 1px solid #edf1f5; border-radius: 8px; background: #fcfdff; }
+    .mermaid { min-width: 720px; display: flex; justify-content: center; } .caption { margin: 6px 0 0; color: var(--muted); font-size: 12px; text-align: center; }
+    table { width: 100%; border-collapse: collapse; margin: 14px 0 10px; font-size: 13px; background: var(--paper); }
+    th, td { padding: 10px 11px; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { color: #263d59; background: var(--blue-soft); font-weight: 700; white-space: nowrap; }
+    td:first-child { font-weight: 700; color: #25364a; white-space: nowrap; } tr:nth-child(even) td { background: #fbfcfd; }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .mini-panel { border: 1px solid var(--line); border-radius: 8px; padding: 16px; background: #fbfcfd; }
+    .mini-panel.domain-panel { border-color: #b0cfd9; background: var(--domain-soft); }
+    .mini-panel.service-panel { border-color: #b5cdda; background: var(--service-soft); }
+    .mini-panel h3 { margin-top: 0; color: #25364a; }
+    .mini-panel.domain-panel h3 { color: var(--domain); }
+    .mini-panel.service-panel h3 { color: var(--service); }
+    ul { margin: 8px 0 0; padding-left: 18px; font-size: 13px; } li { margin: 4px 0; }
+    .tag { display: inline-block; margin: 2px 4px 2px 0; padding: 3px 8px; border-radius: 999px; background: var(--green-soft); color: #385943; font-size: 12px; font-weight: 650; white-space: nowrap; }
+    .tag.gold { background: var(--gold-soft); color: #74501a; } .tag.red { background: var(--red-soft); color: #8a3f3f; }
+    .tag.domain-tag { background: var(--domain-soft); color: var(--domain); } .tag.service-tag { background: var(--service-soft); color: var(--service); }
+    .supply-chain { display: grid; grid-template-columns: 1fr 48px 1.4fr 48px 1fr; align-items: center; margin: 22px 0; }
+    .supply-node { min-height: 180px; padding: 20px 16px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); }
+    .supply-node h4 { margin: 0 0 10px; font-size: 14px; } .supply-node p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+    .supply-node ul { margin: 10px 0 0; padding-left: 16px; } .supply-node li { font-size: 12px; color: var(--muted); }
+    .supply-node.upstream-left { border-top: 3px solid var(--blue); } .supply-node.upstream-right { border-top: 3px solid var(--green); }
+    .supply-node.hub { border: 2px solid var(--domain); border-top: 4px solid var(--domain); background: var(--domain-soft); }
+    .supply-arrow { display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 22px; font-weight: 300; }
+    .domain-center { border: 2px solid var(--domain); border-radius: 8px; padding: 20px 22px; background: var(--domain-soft); margin: 18px 0; }
+    .domain-center h3 { margin-top: 0; color: var(--domain); } .domain-center table th { background: var(--domain-soft); color: var(--domain); }
+    .service-center { border: 2px solid var(--service); border-radius: 8px; padding: 20px 22px; background: var(--service-soft); margin: 18px 0; }
+    .service-center h3 { margin-top: 0; color: var(--service); } .service-center table th { background: var(--service-soft); color: var(--service); }
+    .wiki-block { margin: 18px 0; padding: 20px 22px; background: var(--purple-soft); border: 1px solid #cfc2e0; border-radius: 8px; }
+    .wiki-block h4 { margin: 0 0 8px; color: var(--purple); font-size: 15px; } .wiki-block p { margin: 0 0 8px; font-size: 13px; }
+    .wiki-block ul { margin: 0; padding-left: 18px; } .wiki-block li { font-size: 13px; margin: 4px 0; }
+    .two-col-asym { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 18px; }
+    .scope-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 22px; }
+    .scope-band { padding: 20px; background: var(--paper); border: 1px solid var(--line); border-radius: 7px; }
+    .scope-band h3 { display: flex; align-items: center; gap: 8px; } .scope-band ul { margin: 12px 0 0; padding-left: 20px; }
+    .scope-band li { margin: 7px 0; color: #435358; font-size: 13px; } .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--green); } .dot.stop { background: var(--red); }
+    .tabs { margin-top: 4px; } .tab-list { display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 1px solid var(--line); }
+    .tab { padding: 9px 14px; color: var(--muted); background: transparent; border: 0; border-bottom: 3px solid transparent; cursor: pointer; font-weight: 700; }
+    .tab[aria-selected="true"] { color: var(--blue); border-bottom-color: var(--blue); } .tab-panel[hidden] { display: none; }
+    .contract { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; counter-reset: contract; background: var(--paper); border: 1px solid var(--line); }
+    .contract div { min-height: 138px; padding: 16px; border-right: 1px solid var(--line); counter-increment: contract; }
+    .contract div:last-child { border-right: 0; }
+    .contract div::before { content: "0" counter(contract); display: block; margin-bottom: 16px; color: var(--gold); font-size: 12px; font-weight: 700; }
+    .contract strong { display: block; font-size: 14px; } .contract span { display: block; margin-top: 5px; color: var(--muted); font-size: 12px; line-height: 1.55; }
+    .flywheel { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 18px; }
+    .flywheel article { position: relative; padding: 18px 16px; background: var(--paper); border-top: 3px solid var(--blue); }
+    .flywheel article:nth-child(2) { border-top-color: var(--green); } .flywheel article:nth-child(3) { border-top-color: var(--gold); }
+    .flywheel article:nth-child(4) { border-top-color: var(--red); } .flywheel b { display: block; margin-bottom: 6px; font-size: 14px; }
+    .flywheel span { color: var(--muted); font-size: 12px; line-height: 1.55; }
+    .workflow-strip { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); margin-top: 18px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .workflow-strip div { position: relative; min-height: 116px; padding: 16px 12px; border-right: 1px solid var(--line); }
+    .workflow-strip div:last-child { border-right: 0; } .workflow-strip b { display: block; color: var(--blue); font-size: 12px; }
+    .workflow-strip span { display: block; margin-top: 7px; font-size: 12px; line-height: 1.5; }
+    .workflow-strip small { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; }
+    .pilot-plan { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+    .timeline { border-left: 2px solid #b8c5c2; margin-left: 8px; } .phase { position: relative; padding: 0 0 22px 24px; }
+    .phase::before { content: ""; position: absolute; left: -7px; top: 5px; width: 12px; height: 12px; border-radius: 50%; background: var(--paper); border: 3px solid var(--blue); }
+    .phase:last-child { padding-bottom: 0; } .phase b { display: block; font-size: 14px; } .phase span { display: block; margin-top: 3px; color: var(--muted); font-size: 12px; }
+    .acceptance { padding: 20px; background: #1a3b44; color: #eef6f7; border-radius: 7px; }
+    .acceptance h3 { color: #ffffff; } .acceptance ol { margin: 12px 0 0; padding-left: 20px; }
+    .acceptance li { margin: 10px 0; color: #d3e2e4; font-size: 13px; } .acceptance strong { color: #f0c985; }
+    .decision { margin-top: 40px; padding: 24px 28px; background: var(--gold-soft); border: 1px solid #ecd3a8; border-radius: 7px; }
+    .decision strong { color: #6e4b1c; } footer { padding: 28px 0 0; color: var(--muted); font-size: 12px; text-align: center; }
+
+    /* v3 workflow specific */
+    .granularity-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 18px 0; }
+    .gran-card { padding: 18px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); }
+    .gran-card.atom { border-top: 3px solid var(--blue); } .gran-card.flow { border-top: 3px solid var(--service); }
+    .gran-card.agent { border-top: 3px solid var(--purple); }
+    .gran-card h4 { margin: 0 0 8px; font-size: 14px; } .gran-card p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+    .gran-card ul { margin: 10px 0 0; padding-left: 16px; } .gran-card li { font-size: 12px; color: var(--muted); }
+    .evo-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 12px 0; }
+    .evo-card { padding: 14px 16px; border-radius: 6px; border: 1px solid var(--line); }
+    .evo-card.replace { background: var(--green-soft); border-left: 4px solid var(--green); }
+    .evo-card.assist { background: var(--gold-soft); border-left: 4px solid var(--gold); }
+    .evo-card.policy { background: var(--service-soft); border-left: 4px solid var(--service); }
+    .evo-card h4 { margin: 0 0 4px; font-size: 13px; } .evo-card p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+
+    @media (max-width: 900px) {
+      .summary-grid { grid-template-columns: 1fr 1fr; } .two-col, .two-col-asym, .scope-grid, .supply-chain, .pilot-plan, .granularity-grid, .evo-row { grid-template-columns: 1fr; }
+      .supply-arrow { transform: rotate(90deg); } header, .section-inner { padding: 22px; } .page { padding: 26px 14px 46px; }
+      .contract { grid-template-columns: 1fr 1fr; } .contract div { border-bottom: 1px solid var(--line); } .workflow-strip { grid-template-columns: repeat(4, 1fr); }
+      .flywheel { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 560px) { .summary-grid { grid-template-columns: 1fr; } h1 { font-size: 28px; } table { font-size: 12px; } th, td { padding: 8px; } }
+    @media print { body { background: #fff; } .page { max-width: none; padding: 0; } header, .section-inner { box-shadow: none; } nav { display: none; } section { break-inside: avoid; } }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <p class="eyebrow">平台系统设计文档 v3 · 业务服务层细化</p>
+      <h1>B2B 销售 AI 平台</h1>
+      <p class="lead">
+        以<strong>核心领域层为中枢</strong>，以<strong>业务服务层为引擎</strong>——不仅仅是单个服务的编排，而是
+        原子服务、流程服务和 Agent 自主编排<strong>三层粒度共存</strong>。流程即服务：从"人审"到"AI Agent 替代"的渐进路径天然内建。
+      </p>
+      <div class="meta">
+        <span class="pill">业务入口：小程序为主，WebUI 辅助</span>
+        <span class="pill">核心方法：自然语言转工单，工单驱动服务</span>
+        <span class="pill">权限模型：工单上下文 + 双层 ReBAC</span>
+        <span class="pill highlight">领域：中枢 + 双数据供应链</span>
+        <span class="pill highlight">笔记：LLM Wiki · SQLite 加密</span>
+        <span class="pill service">v3：原子服务 · 流程服务 · 自主编排</span>
+      </div>
+      <nav>
+        <a href="#layer">体系分层</a>
+        <a href="#domain" class="domain-link">核心领域层</a>
+        <a href="#service">业务服务层三层粒度</a>
+        <a href="#supply" class="domain-link">数据供应链</a>
+        <a href="#wiki">LLM Wiki 笔记</a>
+        <a href="#module">接入与升级</a>
+        <a href="#flow">端到端服务</a>
+        <a href="#auth">授权设计</a>
+        <a href="#knowledge">数据与知识</a>
+        <a href="#gateway">统一网关</a>
+        <a href="#learn">分析与迭代</a>
+        <a href="#pilot">Pilot 实施</a>
+      </nav>
+      <div class="summary-grid">
+        <div class="metric"><strong>1</strong><span>语义心脏</span><small>核心领域层：对象、关系、装配、授权。唯一数据出口。</small></div>
+        <div class="metric"><strong>3</strong><span>服务粒度</span><small>原子服务 + 流程服务 + Agent 自主编排。乐高积木 → 组合积木 → 自由搭建。</small></div>
+        <div class="metric"><strong>2</strong><span>数据供应链</span><small>内部（DB+知识+Wiki）+ 外部（网关），向核心领域层输送数据。</small></div>
+        <div class="metric"><strong>7</strong><span>高频任务</span><small>查订单、下订单、催单、查资质、查产品、寄样品、通知发货。</small></div>
+      </div>
+    </header>
+
+    <!-- ========== 一、v3 体系分层 ========== -->
+    <section id="layer">
+      <div class="section-inner">
+        <h2>一、平台系统的分层视角</h2>
+        <p class="desc">
+          六层星型拓扑。中枢（核心领域层）定义所有业务对象、装配来自两条供应链的数据、执行字段级授权。
+          引擎（业务服务层）以三层粒度承接编排——从单个原子能力，到预组合的流程服务，到 Agent 自主决策。
+        </p>
+        <div class="mermaid-wrap">
+          <div class="mermaid">
+flowchart TB
+    subgraph Top["上层 · 需求入口与编排"]
+        A["场景入口层<br/>小程序为主，WebUI 辅助"] --> T["工单服务层<br/>诉求结构化 · 发起人 · 场景 · 数据诉求"]
+        T --> B["业务服务层<br/>原子服务 · 流程服务 · Agent 自主编排<br/>服务级授权核查 · 人工审批 + AI 决策混合"]
+    end
+    subgraph Heart["中枢 · 业务语义心脏"]
+        C["★ 核心领域层<br/>对象定义 · 关系建模 · 数据装配 · 授权内核"]
+    end
+    subgraph Supply["底层 · 双数据供应链"]
+        D["内部数据供应链<br/>数据库 · 资料库 · 图谱 · LLM Wiki"]
+        E["外部数据供应链<br/>统一网关 · ERP · 财务 · CRM"]
+    end
+    Top --> Heart
+    D --> C
+    E --> C
+    C -.-> B
+
+    classDef top fill:#eef4ff,stroke:#4f73a8,color:#203550
+    classDef heart fill:#d8ecf2,stroke:#1a5c6b,color:#0f3540,font-weight:bold
+    classDef supply fill:#eef6ee,stroke:#52745b,color:#20381e
+    class A,T,B top
+    class C heart
+    class D,E supply
+          </div>
+        </div>
+        <p class="caption">v3 关键细化：业务服务层从单一"编排"升级为三层粒度——原子服务、流程服务、Agent 自主编排三者共存。</p>
+
+        <table>
+          <thead><tr><th>层级</th><th>定位</th><th>核心职责</th><th>与核心领域层的关系</th></tr></thead>
+          <tbody>
+            <tr><td>场景入口层</td><td>用户界面壳</td><td>接收请求、展示进度、让人确认关键动作</td><td>通过工单层间接消费领域对象</td></tr>
+            <tr><td>工单服务层</td><td>诉求的结构化入口</td><td>识别发起人、场景、意图、数据诉求、确认点</td><td>引用领域层的对象类型和授权边界来定义工单模板</td></tr>
+            <tr>
+              <td style="color:var(--service); font-weight:900;">★ 业务服务层</td>
+              <td style="color:var(--service); font-weight:700;">编排引擎 · 三层粒度</td>
+              <td style="color:var(--service);">
+                <strong>原子服务：</strong>单个业务能力——查订单、创建草稿、查库存、发通知<br>
+                <strong>流程服务：</strong>预组合的审批/业务流程——由多个原子服务 + 人工审批节点 + AI 决策节点编排而成<br>
+                <strong>Agent 自主编排：</strong>Agent 基于工单上下文动态决定调用哪些原子服务或流程服务<br>
+                所有三种模式经同一服务注册体系、同一授权核查
+              </td>
+              <td style="color:var(--service);">不直连数据源；所有数据经领域层装配授权后返回</td>
+            </tr>
+            <tr>
+              <td style="color:var(--domain); font-weight:900;">★ 核心领域层</td>
+              <td style="color:var(--domain); font-weight:700;">语义心脏 · 数据装配唯一入口</td>
+              <td style="color:var(--domain);">定义业务对象、状态、关系、口径；统一装配来自两条供应链的数据；以数据授权为内核</td>
+              <td style="color:var(--domain);">—</td>
+            </tr>
+            <tr><td>数据与知识层</td><td>内部数据供应链</td><td>沉淀结构化事实、资料知识、业务图谱；每人一个加密 SQLite LLM Wiki</td><td>为领域层提供事实、知识和经验</td></tr>
+            <tr><td>统一系统网关</td><td>外部数据供应链</td><td>统一对接外部系统，封装接口、凭证、字段转换、审计和限流</td><td>为领域层提供外部系统数据</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ========== 二、核心领域层 ========== -->
+    <section id="domain">
+      <div class="section-inner">
+        <h2 class="domain-h2">二、核心领域层：语义心脏与授权内核</h2>
+        <p class="desc">四个关键角色：对象注册、关系建模、数据装配、授权内核。这是为什么它必须是平台中枢。</p>
+        <div class="domain-center">
+          <h3>核心领域层的四个能力维度</h3>
+          <table>
+            <thead><tr><th style="width:16%">能力</th><th>业务含义</th><th>技术表达</th></tr></thead>
+            <tbody>
+              <tr><td><strong>对象注册</strong></td><td>定义公司如何统一理解业务——"销售订单"有统一的 ID、字段和状态集合</td><td>销售订单、客户、合同、发票、样品、产品。每个对象有唯一 ID、标准字段和生命周期状态机。</td></tr>
+              <tr><td><strong>关系建模</strong></td><td>"谁负责这个客户"、"谁参与过这张订单"——业务关系是 ReBAC 的事实依据</td><td>客户负责人关系、订单参与人关系、业务单元归属关系。以关系图为锚支撑"为什么有权限"判断。</td></tr>
+              <tr><td><strong>数据装配</strong></td><td>一个完整的"客户"对象可能由客户库 + CRM + Wiki 笔记 + 最近订单状态组装而成</td><td>每个领域对象声明其数据来源清单（供应链依赖）。装配逻辑集中，不在各模块重复。</td></tr>
+              <tr><td><strong>授权内核</strong></td><td>"这个人通过什么业务关系、能看这个对象的哪些字段"——在领域层执行</td><td>对象级、记录级、字段级。双层模型：服务授权（能不能调）+ 数据授权（能看什么）。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout domain">
+          <strong>为什么授权必须在领域层执行：</strong>只有领域层同时拥有对象定义、关系数据和调用上下文。如果在服务层执行→每个模块重复实现。如果在数据库层→粒度只能到表。
+          这是 Agent 可以自由编排服务但<strong>数据授权永远绕不过领域层</strong>的底层保证。
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 三、业务服务层三层粒度 ========== -->
+    <section id="service">
+      <div class="section-inner">
+        <h2 class="service-h2">三、业务服务层：原子服务 · 流程服务 · Agent 自主编排</h2>
+        <p class="desc">
+          v3 的核心修正。业务服务层不只是"单个服务的编排"，而是<strong>三层粒度共存</strong>。
+          它们的共同点：都通过同一套服务注册体系、同一套授权核查、同一套版本管理机制。
+          它们的差异：粒度不同，适用场景不同，且形成自然的演进路径。
+        </p>
+
+        <div class="granularity-grid">
+          <div class="gran-card atom">
+            <h4>🧱 原子服务 Atomic</h4>
+            <p>单个不可拆的业务能力。</p>
+            <ul>
+              <li>查订单状态、创建订单草稿</li>
+              <li>查库存、查客户信息</li>
+              <li>发送质检单、通知发货</li>
+              <li>查 Wiki 笔记、写入 Wiki 笔记</li>
+            </ul>
+            <p style="margin-top:10px;"><strong>特点：</strong>独立注册、独立授权、独立版本。最细粒度的乐高积木。所有上层编排都基于原子服务。</p>
+          </div>
+          <div class="gran-card flow">
+            <h4>🧩 流程服务 Workflow</h4>
+            <p>由多个原子服务 + 审批节点 + 决策节点预组合而成的业务流程。</p>
+            <ul>
+              <li>"订单审批流程" = 受理→补全→创建草稿→<strong>人工审批</strong>→写入ERP→通知履约</li>
+              <li>"样品申请流程" = 查客户→推样品→创建申请→<strong>主管审批</strong>→通知仓库→追踪物流</li>
+              <li>"合同签署流程" = 查模板→生成草稿→<strong>法务审批</strong>→盖章→寄出→追踪签收</li>
+            </ul>
+            <p style="margin-top:10px;"><strong>特点：</strong>流程本身也是可注册、可调用、可版本化的一等服务。是已经用几块原子积木搭好的"大块积木"。</p>
+          </div>
+          <div class="gran-card agent">
+            <h4>🤖 Agent 自主编排 Autonomous</h4>
+            <p>Agent 基于工单上下文动态决定调用哪些原子服务或流程服务，不依赖预定义的调用顺序。</p>
+            <ul>
+              <li>建联时同时查客户画像 + Wiki笔记 + 竞品信息 + 产品资料</li>
+              <li>根据客户类型选择不同的流程服务（大客户走完整审批、小客户走快速通道）</li>
+              <li>识别异常模式后自主触发异常处理子流程</li>
+            </ul>
+            <p style="margin-top:10px;"><strong>特点：</strong>不预设顺序。Agent 像从乐高盒子里自由选取积木来搭建——可以取原子积木，也可以取现成的组合积木。</p>
+          </div>
+        </div>
+
+        <div class="callout service">
+          <strong>三者关系：</strong>原子服务是基础积木。流程服务是用几块积木搭好的大块积木——它本身也是一块积木。
+          Agent 自主编排是自由搭建——但从盒子里拿的时候，既可以是原子积木也可以是组合积木。
+          三者不冲突、不替代，而是<strong>互补共存</strong>。它们的共同点：<strong>都通过核心领域层获取装配好的、授权合规的领域对象。</strong>
+        </div>
+
+        <h3>流程服务的设计要点</h3>
+        <div class="service-center">
+          <h3>流程即服务：Workflow as a Service</h3>
+          <table>
+            <thead><tr><th style="width:18%">设计维度</th><th>含义</th><th>设计原则</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><strong>注册为服务</strong></td>
+                <td>流程被注册为平台的一等公民——有服务 ID、有输入输出声明、有版本号</td>
+                <td>流程服务与原子服务共用同一套契约体系；外部调用者不感知内部实现</td>
+              </tr>
+              <tr>
+                <td><strong>混合节点编排</strong></td>
+                <td>流程中包含三类节点：原子服务调用、人工审批节点、AI Agent 决策节点</td>
+                <td>基于 workflow.md 调研结论——原生支持"人工审批节点"与"AI Agent节点"混合编排，确保从人审到Agent的平滑演进</td>
+              </tr>
+              <tr>
+                <td><strong>人工审批节点</strong></td>
+                <td>挂起流程执行，等待指定角色确认或驳回。支持通过、退回、会签、并行网关</td>
+                <td>审批节点是流程的一等节点类型——不是"外部回调"，而是流程引擎内建能力</td>
+              </tr>
+              <tr>
+                <td><strong>版本化与灰度</strong></td>
+                <td>流程服务与原子服务一样支持版本并存、灰度发布、回退</td>
+                <td>变更审批节点的参与者或替换为 AI 决策节点时可以安全灰度</td>
+              </tr>
+              <tr>
+                <td><strong>状态持久化</strong></td>
+                <td>流程执行状态（当前节点、等待谁、已执行历史）持久化，支持暂停、恢复、超时处理</td>
+                <td>流程中断后可从断点恢复——与工单服务的"工单上下文"协同而非冲突</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>从"人审"到"AI Agent 替代"的渐进演进路径</h3>
+        <p class="desc">这是 workflow.md 调研的核心诉求——不能一开始就全量 AI 审批，需要一条从人审逐步过渡到 Agent 的路径。流程服务的混合节点编排天然支持三种渐进方式：</p>
+
+        <div class="evo-row">
+          <div class="evo-card replace">
+            <h4>🔄 节点替换</h4>
+            <p>将流程中的某个"人工审批节点"直接替换为"AI Agent 决策节点"。先在灰度环境验证替换后的正确率和异常率，达标后逐步扩大范围。BrokerFlowAI / AStudio / n8n 原生支持此模式。</p>
+          </div>
+          <div class="evo-card assist">
+            <h4>💡 AI 辅助审批</h4>
+            <p>保留人工审批节点，但 AI Agent 先给出审批建议（"建议通过：该客户历史回款良好，订单金额在授信额度内"），供人参考后决策。降低人的认知负担，同时人保留最终决策权。</p>
+          </div>
+          <div class="evo-card policy">
+            <h4>⚡ 策略驱动路由</h4>
+            <p>设定规则：简单场景（金额 &lt; 阈值、客户白名单、标准产品）AI 自动批；复杂场景（大额、新客户、非标产品）转人工审批。n8n 的 HITL 节点和 LightAgent 的审批节点均支持此模式。</p>
+          </div>
+        </div>
+
+        <div class="callout green">
+          <strong>平台不绑定特定工作流引擎：</strong>流程服务的抽象——注册、混合节点编排、审批节点、版本化——是平台级概念。
+          底层可以用 BrokerFlowAI（LangGraph 原生审批）、n8n（HITL 可视化编排）、Warm-Flow（极轻量 Java BPM）等来实现。
+          选型取决于团队技术栈和场景需求，但平台层面的<strong>服务注册契约</strong>是统一的。
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 四、双数据供应链 ========== -->
+    <section id="supply">
+      <div class="section-inner">
+        <h2 class="domain-h2">四、两条数据供应链</h2>
+        <p class="desc">核心领域层从两条供应链获取原始数据 → 装配为领域对象 → 施加授权过滤 → 返回给业务服务层（无论原子、流程还是 Agent 编排）。</p>
+        <div class="supply-chain">
+          <div class="supply-node upstream-left">
+            <h4>🔼 内部数据供应链</h4><p>平台自己沉淀和控制的数据</p>
+            <ul><li><strong>结构化数据库：</strong>客户库、订单库、产品库、合同库、发票库</li>
+              <li><strong>资料知识库：</strong>产品手册、质检单、宣发素材、制度规则</li>
+              <li><strong>业务图谱：</strong>客户-产品-订单-人员关系图</li>
+              <li><strong>🗒 LLM Wiki：</strong>每个销售/商务的私有加密笔记，Agent 维护</li></ul>
+          </div>
+          <div class="supply-arrow">→</div>
+          <div class="supply-node hub">
+            <h4>★ 核心领域层</h4>
+            <p>从两条供应链取原始数据 → 装配为领域对象 → 施加授权过滤 → 返回。</p>
+            <p style="margin-top:10px;font-weight:700;color:var(--domain);"><strong>唯一的数据出口。</strong>原子服务、流程服务、Agent 自主编排都通过它获取数据。</p>
+          </div>
+          <div class="supply-arrow">→</div>
+          <div class="supply-node upstream-right">
+            <h4>🔼 外部数据供应链</h4><p>外部系统的数据和能力</p>
+            <ul><li><strong>ERP：</strong>订单/库存/价格</li><li><strong>CRM：</strong>客户/线索/商机</li>
+              <li><strong>财务系统：</strong>发票/应收/回款</li><li><strong>供应链：</strong>仓储/物流/排产</li>
+              <li><strong>外部服务：</strong>企查查、天眼查、邮件、微信</li></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 五、LLM Wiki ========== -->
+    <section id="wiki">
+      <div class="section-inner">
+        <h2 class="domain-h2">五、LLM Wiki：极轻量、加密、个人的知识笔记</h2>
+        <p class="desc">销售和商务积累的隐性知识（"佘总说半吨C68"、"这个客户偏好圆通"）需要极轻量的知识载体。</p>
+        <div class="wiki-block">
+          <h4>🗒 LLM Wiki 核心设计</h4>
+          <ul>
+            <li><strong>极轻量存储：</strong>每个人的知识笔记是一个加密 SQLite 文件。Agent 通过 SQL 读写，无额外 API 层。</li>
+            <li><strong>加密与授权天然一体：</strong>默认仅本人可见。授权共享 = 临时密钥授权。天然处理了"销售怕被替代"的防御心理。</li>
+            <li><strong>Agent 可持续维护：</strong>每次工单完成后，Agent 提取关键发现写入 Wiki。"编译一次、持续复合"——不是每次都重新推导。</li>
+            <li><strong>从个人到团队的渐进路径：</strong>高频高价值笔记经 owner 审批后升级为共享知识。</li>
+          </ul>
+        </div>
+        <div class="two-col">
+          <div class="mini-panel domain-panel">
+            <h3>LLM Wiki 的生命周期</h3>
+            <ul><li><strong>创建：</strong>新人入职时自动创建加密 SQLite，注入初始模板</li>
+              <li><strong>Agent 写入：</strong>每次工单完成后提取关键发现</li><li><strong>Agent 查询：</strong>新指令进来时检索补全</li>
+              <li><strong>授权共享：</strong>Owner 授权特定同事或 Agent，共享有有效期</li>
+              <li><strong>升级：</strong>经审批后结构化发布到共享知识图谱</li></ul>
+          </div>
+          <div class="mini-panel">
+            <h3>为什么选 SQLite 加密</h3>
+            <ul><li>不去用中心化知识库——太重</li><li>不去用纯文件——Agent 读写不便</li>
+              <li>SQLite 加密文件 = 恰好够用：结构化但不重、加密但无需运维、Agent 友好但 owner 可控</li></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 六、模块接入与升级 ========== -->
+    <section id="module">
+      <div class="section-inner">
+        <h2>六、业务模块如何接入、如何升级</h2>
+        <p class="desc">v3 中，业务模块接入时可以提交原子服务、也可以提交流程服务。两者走同一套契约。</p>
+        <div class="tabs">
+          <div class="tab-list" role="tablist">
+            <button class="tab" role="tab" id="tab-add" aria-controls="panel-add" aria-selected="true">接入新模块</button>
+            <button class="tab" role="tab" id="tab-upgrade" aria-controls="panel-upgrade" aria-selected="false">升级现有模块</button>
+          </div>
+          <div class="tab-panel" id="panel-add" role="tabpanel">
+            <div class="callout"><strong>接入答案：</strong>提交"六件套契约"——业务对象、动作（原子或流程）、输入输出、权限审计、数据供应链依赖。流程服务额外声明其内部节点编排和审批节点定义。</div>
+            <div class="contract">
+              <div><strong>声明业务对象</strong><span>使用客户、订单、发票，或注册新对象。</span></div>
+              <div><strong>声明动作</strong><span>原子服务：查询、创建、提交。或流程服务：声明子服务+审批节点+决策节点。</span></div>
+              <div><strong>声明输入输出</strong><span>字段、状态、错误码和上下游事件。</span></div>
+              <div><strong>声明权限审计</strong><span>谁能做、何时确认、哪些字段要脱敏。</span></div>
+              <div><strong>声明数据供应链依赖</strong><span>内部供应链 + 外部供应链的数据来源声明。</span></div>
+            </div>
+          </div>
+          <div class="tab-panel" id="panel-upgrade" role="tabpanel" hidden>
+            <div class="callout"><strong>升级答案：</strong>新旧版本并存——原子服务升级和流程服务升级走同一套灰度、回放、回退机制。流程服务升级时可以安全地将人工审批节点替换为 AI 决策节点。</div>
+            <div class="contract">
+              <div><strong>登记新版本</strong><span>说明规则、字段、接口和权限变化。</span></div>
+              <div><strong>兼容性检查</strong><span>契约校验；破坏性变化必须提供迁移方案。</span></div>
+              <div><strong>历史工单回放</strong><span>用脱敏样本比较新旧结果。</span></div>
+              <div><strong>灰度与观察</strong><span>限定组织/用户/比例，包括流程服务节点替换的正确率和异常率。</span></div>
+              <div><strong>切换或回退</strong><span>审计记录版本；未达门槛一键恢复旧版。</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 七、端到端 ========== -->
+    <section id="flow">
+      <div class="section-inner">
+        <h2>七、端到端的业务服务如何发生</h2>
+        <p class="desc">以"订单审批流程服务"为例：它是一个注册好的流程服务——内部编排了受理→补全→创建草稿→人工审批→写入ERP→通知履约的完整链路。</p>
+        <div class="callout"><strong>案例：</strong>销售说"给华东客户做 500kg C68，月底前到，按上次价格"。工单触发"订单审批流程服务"——该流程编排了多个原子服务和一个<strong>人工审批节点</strong>。</div>
+        <div class="mermaid-wrap">
+          <div class="mermaid">
+sequenceDiagram
+    actor Sales as 销售
+    participant Ticket as 工单服务
+    participant WF as 流程服务<br/>「订单审批流程」
+    participant Atomic as 原子服务<br/>查客户/创建草稿/查库存
+    participant Domain as ★ 核心领域层
+    participant Human as 人工审批节点
+
+    Sales->>Ticket: 提交自然语言诉求
+    Ticket->>Ticket: 补全客户、产品、数量、交期
+    Ticket-->>Sales: 展示草稿与授权范围
+    Sales->>WF: 确认下单 → 触发流程服务
+
+    Note over WF,Atomic: 流程服务按预定义顺序调用原子服务
+    WF->>Atomic: Step1: 受理并补全
+    Atomic->>Domain: 查客户+Wiki笔记+ERP历史
+    Domain-->>Atomic: 装配后的领域对象
+    Atomic-->>WF: 补全完成
+
+    WF->>Atomic: Step2: 创建订单草稿
+    Atomic->>Domain: 写订单库
+    Domain-->>Atomic: 订单草稿
+    Atomic-->>WF: 草稿就绪
+
+    WF->>Human: Step3: 人工审批节点（挂起）
+    Human-->>WF: 审批通过（或：未来替换为 AI 决策节点）
+
+    WF->>Atomic: Step4: 写入ERP
+    Atomic->>Domain: 经网关写ERP
+    Domain-->>Atomic: 订单号
+
+    WF->>Atomic: Step5: 通知履约
+    Atomic->>Domain: 发布"订单已确认"事件
+
+    WF-->>Ticket: 汇总结果与异常
+    Ticket-->>Sales: 一个工单查看全程
+          </div>
+        </div>
+        <div class="workflow-strip">
+          <div><b>1 · 受理</b><span>自然语言转工单</span><small>工单层</small></div>
+          <div><b>2 · 触发流程</b><span>调用订单审批流程服务</span><small>流程服务</small></div>
+          <div><b>3 · 原子执行</b><span>查补+创建草稿</span><small>领域层装配</small></div>
+          <div><b>4 · 人工审批</b><span>挂起→通过/驳回</span><small>流程服务节点</small></div>
+          <div><b>5 · 写ERP</b><span>经网关+领域层</span><small>原子服务</small></div>
+          <div><b>6 · 通知履约</b><span>发布事件</span><small>原子服务</small></div>
+          <div><b>7 · 闭环</b><span>结果·日志·Wiki</span><small>平台能力</small></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 八、授权 ========== -->
+    <section id="auth">
+      <div class="section-inner">
+        <h2>八、授权设计：双层模型 + 流程服务的授权覆盖</h2>
+        <p class="desc">服务授权（能不能调）→ 数据授权（能看什么）。流程服务作为一等服务，其内部每个原子调用的授权都需满足。</p>
+        <div class="callout domain">
+          <strong>流程服务的授权特殊性：</strong>一个流程服务可能调用 5 个原子服务。调用者需要对这 5 个原子服务都有调用权限——流程服务不能"绕过"其内部调用的服务授权。
+          但<strong>可以预授权</strong>：当调用者被授予"订单审批流程"的调用权时，平台自动检查其对内部所有原子服务的权限，缺失的提示补授权。
+        </div>
+        <table>
+          <thead><tr><th>授权视角</th><th>业务表达</th><th>在领域层的实现</th></tr></thead>
+          <tbody>
+            <tr><td>岗位视角</td><td>我是商务/销售/仓库/主管</td><td>领域层内建角色-对象-动作映射表</td></tr>
+            <tr><td>客户负责视角</td><td>谁负责这个客户，谁看客户相关订单</td><td>以"客户负责人"关系为锚</td></tr>
+            <tr><td>订单参与视角</td><td>参与过这张订单的人可处理相关事项</td><td>以"订单参与人"关系为锚</td></tr>
+            <tr><td style="color:var(--purple); font-weight:700;">🗒 LLM Wiki 视角</td><td>个人笔记默认仅本人可见</td><td>SQLite 文件加密密钥为授权锚点</td></tr>
+            <tr><td style="color:var(--service); font-weight:700;">🔄 流程服务调用视角</td><td>能调用"订单审批流程"的人需对所有内部原子服务有权限</td><td>预授权检查——平台自动验证，缺失补授权</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ========== 九、数据与知识 ========== -->
+    <section id="knowledge">
+      <div class="section-inner">
+        <h2>九、内部数据供应链：数据与知识层</h2>
+        <p class="desc">提供结构化事实、非结构化知识和个人经验笔记。不直接对业务服务层开放——必须通过领域层。</p>
+        <div class="two-col">
+          <div class="mini-panel">
+            <h3>结构化事实</h3>
+            <span class="tag">客户库</span><span class="tag">订单库</span><span class="tag">产品库</span><span class="tag">合同库</span><span class="tag">发票库</span>
+            <ul><li>用于查询、校验、统计、台账同步</li><li>不直对业务服务层开放</li></ul>
+          </div>
+          <div class="mini-panel">
+            <h3>非结构化知识</h3>
+            <span class="tag gold">产品资料</span><span class="tag gold">制度规则</span><span class="tag gold">宣发素材</span><span class="tag gold">业务图谱</span>
+            <ul><li>用于意图识别、资料匹配、规则解释</li><li>通过领域层授权后对外提供</li></ul>
+          </div>
+        </div>
+        <h3>🗒 LLM Wiki 个人笔记</h3>
+        <table>
+          <thead><tr><th>知识形态</th><th>载体</th><th>解决的问题</th><th>治理要点</th></tr></thead>
+          <tbody><tr>
+            <td style="color:var(--purple); font-weight:700;">LLM Wiki</td>
+            <td>加密 SQLite（每人一个）</td>
+            <td>"佘总说半吨C68"对应什么客户和产品</td>
+            <td>默认加密仅本人；共享=临时密钥；Agent 维护；可审批升级为团队知识</td>
+          </tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ========== 十、网关 ========== -->
+    <section id="gateway">
+      <div class="section-inner">
+        <h2>十、外部数据供应链：统一系统网关</h2>
+        <p class="desc">所有外部系统依赖通过网关接入，领域层只与网关交互。</p>
+        <table>
+          <thead><tr><th>网关能力</th><th>业务价值</th><th>对领域层的意义</th></tr></thead>
+          <tbody>
+            <tr><td>统一认证</td><td>系统不用到处保存账号密码</td><td>领域层不感知凭证细节</td></tr>
+            <tr><td>接口封装</td><td>技术接口→业务动作</td><td>领域层调用"查库存"而非"GET /api/..."</td></tr>
+            <tr><td>数据转换</td><td>跨系统字段口径统一</td><td>领域层拿到标准字段可直接装配</td></tr>
+            <tr><td>审计日志</td><td>谁在何时查了什么</td><td>每个字段可回答"从哪个系统来"</td></tr>
+            <tr><td>异常兜底</td><td>系统不可用不中断业务</td><td>领域层拿到数据或明确的失败信号</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ========== 十一、分析迭代 ========== -->
+    <section id="learn">
+      <div class="section-inner">
+        <h2>十一、平台如何分析、整理并推动业务迭代</h2>
+        <div class="flywheel">
+          <article><b>记录</b><span>经领域层访问了哪些对象、做了什么、人工审批点在哪个节点卡住。</span></article>
+          <article><b>整理</b><span>按对象、异常类型、审批耗时、Wiki 置信度变化自动聚合。</span></article>
+          <article><b>建议</b><span>识别可被AI替代的审批节点、Wiki中可升级的高频知识。</span></article>
+          <article><b>验证</b><span>审批后生成候选版本，回放、灰度、对比、回退。</span></article>
+        </div>
+        <table>
+          <thead><tr><th>信号</th><th>结论</th><th>改进</th><th>决策人</th></tr></thead>
+          <tbody>
+            <tr><td>订单审批流程中"主管审批"节点平均耗时 4h，通过率 99.2%</td><td>该节点可被 AI 策略替代</td><td>升级为策略驱动路由：金额&lt;阈值自动批</td><td>销售运营</td></tr>
+            <tr><td>某销售 Wiki 中"物流偏好"笔记被高频跨个体检索</td><td>隐性知识有团队价值</td><td>建议 owner 升级为共享知识</td><td>销售本人</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ========== 十二、Pilot ========== -->
+    <section id="pilot">
+      <div class="section-inner">
+        <h2>十二、低成本 Pilot：6–8 周可演示闭环</h2>
+        <div class="pilot-plan">
+          <div class="timeline">
+            <div class="phase"><b>第 1–2 周 · 固定契约与样本</b><span>确认对象、权限、模块边界和供应链依赖；选脱敏工单。定义第一个流程服务："订单审批流程"。</span></div>
+            <div class="phase"><b>第 3–4 周 · 打通最小闭环</b><span>完成工单、授权、审计、网关；实现订单审批流程（人工审批节点先由模拟审批替代）。</span></div>
+            <div class="phase"><b>第 5–6 周 · 小范围真实运行</b><span>1 个业务单元、5–10 名用户；关键写操作人工确认；验证流程服务的审批节点运作。</span></div>
+            <div class="phase"><b>第 7–8 周 · 升级演示与复盘</b><span>演示流程服务版本升级（例如将模拟审批替换为 AI 辅助审批）；验证灰度回退。</span></div>
+          </div>
+          <div class="acceptance">
+            <h3>五项"继续投入"门槛</h3>
+            <ol>
+              <li><strong>业务闭环：</strong>至少 80% 试点工单在一个入口看见完整状态。</li>
+              <li><strong>领域层中枢验证：</strong>所有数据读写经核心领域层；原子和流程服务不直连数据源。</li>
+              <li><strong>流程服务验证：</strong>至少一个流程服务包含人工审批节点并成功完成端到端闭环。</li>
+              <li><strong>安全追溯：</strong>每次读取、提交、审批都能回答"谁、为何、哪个版本"。</li>
+              <li><strong>Wiki 有效性：</strong>至少一位销售的个人 Wiki 在 Pilot 期内形成可度量的补全准确率提升。</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 十三、蓝图 ========== -->
+    <section id="final-view">
+      <div class="section-inner">
+        <h2>十三、最终平台蓝图</h2>
+        <div class="mermaid-wrap">
+          <div class="mermaid">
+flowchart TB
+    subgraph Users["业务参与方"]
+      U1["销售总监"] & U2["销售/助理"] & U3["商务/主任"] & U4["仓库"] & U5["客户"]
+    end
+    subgraph Front["场景入口层"]
+      F1["小程序"] & F2["WebUI"] & F3["微信/邮件导入"] & F4["工单工作台"]
+    end
+    subgraph Middle["业务平台中台"]
+      M1["工单服务 · 上下文聚合"]
+      M2["业务服务层 · 三层粒度<br/>原子服务 ◇ 流程服务 ◇ Agent自主编排"]
+    end
+    subgraph Heart["★ 核心领域层 · 语义心脏"]
+      C1["对象定义 · 关系模型"] & C2["数据装配引擎"] & C3["授权执行内核"]
+    end
+    subgraph SupplyInt["内部供应链"]
+      B1["业务数据库"] & B2["资料知识库"] & B3["业务图谱"] & B4["🗒 LLM Wiki"]
+    end
+    subgraph SupplyExt["外部供应链"]
+      E1["统一网关 · ERP/CRM/财务/供应链"]
+    end
+    Users --> Front --> Middle --> Heart
+    SupplyInt --> Heart
+    SupplyExt --> Heart
+    Heart --> Middle --> Front
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="decision">
+      <strong>v3 架构修正摘要：</strong>核心领域层是语义心脏——所有数据在此装配、所有授权在此执行。业务服务层以<strong>三层粒度</strong>承接编排——
+      原子服务（单个能力）、流程服务（原子+审批+决策组合）、Agent 自主编排（基于上下文自由选取）。<br>
+      流程服务是一等公民——可注册、可版本、可灰度、可演进。从"人工审批"到"AI Agent替代"的三条渐进路径（节点替换、AI辅助、策略驱动）天然内建于混合节点编排模型。
+    </div>
+
+    <footer>
+      B2B 销售 AI 平台 v3 · 基于 v2 的修订：业务服务层三层粒度模型（原子/流程/自主编排）。
+      参考：platform_design_v2.html / workflow.md / llm_wiki_explained.html / 核心业务分层设计.md
+    </footer>
+  </main>
+  <script>
+    const tabs = document.querySelectorAll('[role="tab"]');
+    tabs.forEach(function(t){ t.addEventListener('click',function(){
+      tabs.forEach(function(i){ const s=i===t;
+        i.setAttribute('aria-selected',String(s));
+        document.getElementById(i.getAttribute('aria-controls')).hidden=!s;
+      });
+    })});
+  </script>
+</body>
+</html>

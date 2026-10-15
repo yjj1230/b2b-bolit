@@ -1,0 +1,10 @@
+# project/handoffs/current.yaml — 最近 handoff 指针（§10）
+# 严格语义：指向最近一次**已接受** handoff 的包；禁止按 mtime 选"最新包"（A.6 步骤 02）。
+# bootstrap 例外：尚无已接受包，本指针临时指向 OFFERED 包并显式标注 accepted=false；
+# 机制 PROPOSED 未激活，后续 Agent 不得把本指针当作已接受的交接起点。
+handoff_id: HOF-20260813-001
+status: OFFERED
+path: project/handoffs/HOF-20260813-001/manifest.yaml
+accepted: false
+note: 由独立接手方（不同 Agent 或人工）完成 A.6 校验并填写 acceptance.yaml 后，
+      本指针才可更新为指向已接受包；ECM-REC-004 禁止 bootstrap 模式写 ACCEPTED。

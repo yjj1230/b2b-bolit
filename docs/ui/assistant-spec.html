@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>销售助理 · 角色规约页｜长安仁恒</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+SC:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="wecom-tokens.css" />
+<link rel="stylesheet" href="wecom-pc-frame.css" />
+<style>
+  :root{
+    --paper:#f5f4ed; --paper2:#efeee5; --ink:#1f1d18; --ink2:#6b665b;
+    --ink3:#3a382f; --blue:#1B365D; --rule:#d4d1c5; --red:#c0392b; --green:#1a7f37;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif; line-height:1.6;}
+  .wrap{max-width:960px; margin:0 auto; padding:48px 40px 80px;}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;}
+  .folio{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--rule); padding-bottom:10px;
+    font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink2);}
+  .folio a{color:var(--ink2); border:none;}
+  .folio a:hover{color:var(--blue);}
+  .tag{display:inline-block; padding:3px 10px; font-size:11px; letter-spacing:.16em; background:var(--paper2); color:var(--blue);}
+  .kicker{display:flex; align-items:baseline; gap:12px; margin-top:48px;}
+  h1{font-size:clamp(32px,5vw,50px); line-height:1.12; font-weight:500; margin-top:14px; letter-spacing:-.01em;}
+  .lede{margin-top:18px; font-size:17px; line-height:1.7; color:var(--ink3); max-width:720px;}
+  h2{font-size:23px; font-weight:600; margin:52px 0 14px; color:var(--blue); display:flex; align-items:baseline; gap:12px; border-top:1px solid var(--rule); padding-top:26px;}
+  h2 .no{font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.12em;}
+  h3{font-size:17.5px; font-weight:600; margin:30px 0 10px; color:var(--ink);}
+  h3 .no{color:var(--blue); font-family:'IBM Plex Mono',monospace; font-size:12px; margin-right:8px;}
+  h4{font-size:15.5px; font-weight:600; margin:24px 0 8px; color:var(--ink);}
+  p{margin:10px 0; color:var(--ink3);}
+  ul,ol{margin:10px 0 10px 26px; color:var(--ink3);}
+  li{margin:5px 0;}
+  a{color:var(--blue); text-decoration:none; border-bottom:1px solid var(--rule);}
+  a:hover{border-bottom-color:var(--blue);}
+  blockquote{border-left:2px solid var(--blue); padding:10px 18px; margin:16px 0; background:var(--paper2); font-style:italic;}
+  table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  .table-wrap{overflow-x:auto; margin:16px 0 24px; border:1px solid var(--rule);}
+  .table-wrap table{margin:0;}
+  th{background:var(--paper2); color:var(--blue); text-align:left; font-weight:600; padding:9px 12px; border-bottom:1.5px solid var(--blue); font-size:12.5px; white-space:nowrap;}
+  td{padding:9px 12px; border-bottom:1px solid var(--rule); vertical-align:top; color:var(--ink3);}
+  tr:nth-child(even) td{background:#faf9f3;}
+  .mermaid{background:var(--paper); border:1px solid var(--rule); padding:18px; overflow-x:auto; text-align:center; margin:20px 0;}
+  .mermaid svg{max-width:100%; height:auto;}
+  figcaption{text-align:center; font-size:12px; color:var(--ink2); margin:-10px 0 26px; font-style:italic;}
+  code{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace; font-size:13px; background:var(--paper2); padding:1px 5px;}
+  footer.colophon{margin-top:56px; padding-top:14px; border-top:1px solid var(--rule); display:flex; justify-content:space-between;
+    font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink2); flex-wrap:wrap; gap:8px;}
+  footer.colophon a{color:var(--ink2); border:none;}
+  footer.colophon a:hover{color:var(--blue);}
+  .toc{border:1px solid var(--rule); background:var(--paper2); padding:18px 24px; margin:26px 0;}
+  .toc .tt{font-size:11px; letter-spacing:.2em; color:var(--blue); margin-bottom:8px;}
+  .toc a{display:block; padding:3px 0; color:var(--ink3); border:none;}
+  .toc a:hover{color:var(--blue);}
+  .toc .mono{font-size:12px; color:var(--blue); margin-right:8px;}
+  .ui-step{margin:18px 0 34px;}
+  .ui-step .desc{flex:1 1 300px; min-width:280px;}
+  .ui-step .desc .stepno{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.14em; color:var(--blue);}
+  .ui-step .desc h4{font-size:15px; margin:4px 0 6px;}
+  .ui-step .desc p{font-size:13.5px; margin:6px 0;}
+  .ui-step .desc .hint{font-size:12px; color:var(--ink2); background:var(--paper2); border-left:2px solid var(--rule); padding:6px 10px; margin-top:8px;}
+  .ui-shot{margin-top:12px; display:flex; justify-content:center; flex-wrap:wrap; gap:22px; align-items:flex-start;}
+  .shot-label{flex-basis:100%; text-align:center; font-size:11px; color:var(--ink2); margin-bottom:-14px; letter-spacing:.12em;}
+  @media(max-width:720px){.wrap{padding:28px 18px 60px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="folio">
+    <span><a href="index.html">← Role Specs</a></span>
+    <span>SALES_ASSISTANT · Role Spec</span>
+    <span>销售助理 · 2 Block</span>
+  </header>
+
+  <div class="kicker">
+    <span class="tag">Role Spec · 销售助理</span>
+    <span class="mono" style="font-size:11px; letter-spacing:.18em; color:var(--ink2);">代销售下单 · 归属锁定</span>
+  </div>
+
+  <h1>销售助理<span style="font-style:italic; color:var(--blue);">· 角色规约页</span></h1>
+
+  <p class="lede">销售助理是<strong>代下单</strong>角色：可为指定销售创建订单，但不能代替销售确认智能下单、审批或对客决策。本页 2 个 Block 覆盖销售助理在企微的<strong>全部场景</strong>：工作台代下单（XSZL1）与客户群入口代下单（XSZL2）。<strong>UI 操作图同时呈现 PC 端四栏与移动端手机屏幕</strong>，严格采用产品稿 <span class="mono">spec/ui/wecom-sidebar</span> 的企微设计语言。每个 Block = 用例图 + 流程图 + UI 操作图。</p>
+
+  <nav class="toc">
+    <div class="tt">CONTENTS · 2 BLOCKS</div>
+    <a href="#b1"><span class="mono">B1</span>工作台代下单（XSZL1 · 先选归属销售）</a>
+    <a href="#b2"><span class="mono">B2</span>客户群入口代下单（XSZL2 · 归属锁定）</a>
+  </nav>
+
+  <!-- ============ BLOCK 1 ============ -->
+  <h2 id="b1"><span class="no">B1 ·</span> 工作台代下单（XSZL1）</h2>
+
+  <h3><span class="no">①</span> 用例图</h3>
+  <pre class="mermaid">
+flowchart LR
+    subgraph ACT["参与者"]
+        SA["销售助理<br/>(delegate/代办)"]
+        SALE["归属销售<br/>(order.owner)"]
+    end
+    subgraph SYS["企微订单助手（系统边界）"]
+        UC1["(工作台代下单)"]
+        UC2["(选择归属销售)"]
+        UC3["(关联客户并预填)"]
+    end
+    SA --> UC1
+    SA --> UC2
+    SA --> UC3
+    UC3 --> SALE
+  </pre>
+  <figcaption>用例图 B1：销售助理从工作台代下单，归属销售决定可选客户范围</figcaption>
+
+  <h3><span class="no">②</span> 流程图</h3>
+  <pre class="mermaid">
+flowchart TD
+    A["工作台打开「下单」Tab"] --> B["先选「下单归属销售」"]
+    B --> C["客户范围收窄 → 人工选择客户"]
+    C --> D["表单最大化预填（与销售下单一致）"]
+    D --> E["核对履约字段与来源"]
+    E --> F["提交订单（幂等键防重复）"]
+    F --> G["已代归属销售提交 · 进入审批流"]
+  </pre>
+  <figcaption>流程图 B1：工作台入口必须显式选择归属销售，不能猜测客户归属</figcaption>
+
+  <h3><span class="no">③</span> UI 操作图（PC + 移动端）</h3>
+
+  <div class="ui-step">
+    <div class="desc">
+      <span class="stepno">操作 1.1</span>
+      <h4>工作台 → 下单 Tab → 选择归属销售</h4>
+      <p>销售助理从手机/PC 工作台打开订单助手，切到「下单」Tab；表单顶部出现<strong>「下单归属销售」选择器</strong>，决定后续可选客户范围。</p>
+      <div class="hint">工作台没有群上下文，系统不能自动确定客户；必须先选归属销售，再人工选客（A7 多方分担）。</div>
+    </div>
+    <div class="ui-shot">
+      <div class="shot-label">PC 端 · 侧边栏应用「下单」Tab（先选归属销售）</div>
+      <div class="wc-pc">
+        <div class="tl"><i class="r"></i><i class="y"></i><i class="g"></i></div>
+        <div class="rail">
+          <div class="av">助</div>
+          <div class="nav on"><span class="ico">💬</span>消息<span class="bdg">2</span></div>
+          <div class="nav"><span class="ico">✉</span>邮件</div>
+          <div class="nav"><span class="ico">📄</span>文档</div>
+          <div class="nav"><span class="ico">📅</span>日程</div>
+          <div class="nav"><span class="ico">✓</span>待办</div>
+          <div class="nav"><span class="ico">🎥</span>会议</div>
+          <div class="nav"><span class="ico">🧩</span>工作台</div>
+          <div class="nav"><span class="ico">👥</span>通讯录</div>
+          <div class="nav"><span class="ico">☁</span>微盘</div>
+        </div>
+        <div class="conv">
+          <div class="search"><span class="box">⌕ 搜索</span><span class="plus">＋</span></div>
+          <div class="conv-item on">
+            <div class="cav">助</div>
+            <div class="meta"><div class="nm">订单助手 · 销售助理工作台<span class="tm">10:05</span></div><div class="pv">待办 3 · 下单入口</div></div>
+          </div>
+        </div>
+        <div class="chat">
+          <div class="ch-head"><div><div class="nm">订单助手 · 销售助理工作台</div><div class="sub">无群上下文 · 工作台入口</div></div></div>
+          <div class="ch-body">
+            <div class="msg o"><span class="mav">助</span><div class="mb"><div class="who">销售助理</div><div class="bub">代张销售创建订单：先选择归属销售</div></div></div>
+          </div>
+          <div class="input-area"><span class="tools">☺ ▧ 📁</span><span class="field">输入消息…</span><span class="send">发送</span></div>
+        </div>
+        <div class="aside">
+          <div class="marker">订单助手 · 侧边栏应用</div>
+          <div class="tabs">
+            <span class="tab">待办</span><span class="tab">订单</span><span class="tab on">下单</span>
+          </div>
+          <div class="content">
+            <div class="pc-card">
+              <div class="tt"><span class="d" style="background:#07C160;"></span>代下单归属（先选）</div>
+              <div class="pc-form-row"><label>下单归属销售</label><div class="inp">请选择 ▾</div></div>
+              <div class="pc-form-row"><label>客户</label><div class="inp">待选择（先选归属销售）</div></div>
+              <div class="pc-form-row"><label>销售员</label><div class="inp">待定（由归属销售带入）</div></div>
+              <div class="pc-form-row"><div class="hint">先选择归属销售，决定可选客户范围</div></div>
+            </div>
+            <div class="pc-btns"><span class="b ok">下一步</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="wc-phone">
+        <div class="st-bar"><span>9:30</span><span>📶 🔋</span></div>
+        <div class="nav"><span class="back">‹</span><span class="title">订单助手</span><span class="more">⋯</span></div>
+        <div class="wc-full">
+          <div class="aside-tabs">
+            <span class="aside-tab">待办</span><span class="aside-tab">订单</span><span class="aside-tab on">下单</span>
+          </div>
+          <div class="aside-scroll">
+            <div class="wc-long-form">
+              <div class="lf-head"><span class="lf-title">人工下单（代下单）</span><div class="lf-ctx">🔒 工作台下单 · 先选下单归属销售，其余与销售下单一致</div></div>
+              <div class="lf-group">
+                <div class="lf-group-title">代下单归属（先选）</div>
+                <div class="wc-form-row"><label>下单归属销售</label><input value="请选择 ▾" /></div>
+                <div class="wc-form-row"><label>客户</label><input value="待选择" readonly class="ro" /></div>
+                <div class="wc-form-row"><label>销售员</label><input value="待定（由归属销售带入）" readonly class="ro" /></div>
+                <div class="wc-form-row"><div class="hint">先选择代下单的销售，决定可选客户范围</div></div>
+              </div>
+              <div class="wc-po-actions"><span class="btn btn-confirm">下一步</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ui-step">
+    <div class="desc">
+      <span class="stepno">操作 1.2</span>
+      <h4>选定归属销售 → 客户自动补全 + 表单预填</h4>
+      <p>选定「张销售」后，客户范围收窄；销售助理搜索并人工选择「广西天华」，系统加载客户档案、最近订单和框架合同，按与销售下单一致的单页长表单最大化预填。</p>
+      <div class="hint">所有预填值均标注来源：地址/联系人来自客户档案；单价来自最近历史订单；合同按主体自动匹配；销售员由归属销售带入并锁定。</div>
+    </div>
+    <div class="ui-shot">
+      <div class="shot-label">PC 端 · 侧边栏应用「下单」Tab（已选归属销售 + 客户）</div>
+      <div class="wc-pc">
+        <div class="tl"><i class="r"></i><i class="y"></i><i class="g"></i></div>
+        <div class="rail">
+          <div class="av">助</div>
+          <div class="nav on"><span class="ico">💬</span>消息<span class="bdg">2</span></div>
+          <div class="nav"><span class="ico">✉</span>邮件</div>
+          <div class="nav"><span class="ico">📄</span>文档</div>
+          <div class="nav"><span class="ico">📅</span>日程</div>
+          <div class="nav"><span class="ico">✓</span>待办</div>
+          <div class="nav"><span class="ico">🎥</span>会议</div>
+          <div class="nav"><span class="ico">🧩</span>工作台</div>
+          <div class="nav"><span class="ico">👥</span>通讯录</div>
+          <div class="nav"><span class="ico">☁</span>微盘</div>
+        </div>
+        <div class="conv">
+          <div class="search"><span class="box">⌕ 搜索</span><span class="plus">＋</span></div>
+          <div class="conv-item on">
+            <div class="cav">助</div>
+            <div class="meta"><div class="nm">订单助手 · 销售助理工作台<span class="tm">10:06</span></div><div class="pv">归属销售 张销售 · 客户 广西天华</div></div>
+          </div>
+        </div>
+        <div class="chat">
+          <div class="ch-head"><div><div class="nm">订单助手 · 销售助理工作台</div><div class="sub">代张销售下单</div></div></div>
+          <div class="ch-body">
+            <div class="msg o"><span class="mav">助</span><div class="mb"><div class="who">销售助理</div><div class="bub">已选归属销售 张销售，客户广西天华</div></div></div>
+          </div>
+          <div class="input-area"><span class="tools">☺ ▧ 📁</span><span class="field">输入消息…</span><span class="send">发送</span></div>
+        </div>
+        <div class="aside">
+          <div class="marker">订单助手 · 侧边栏应用</div>
+          <div class="tabs">
+            <span class="tab">待办</span><span class="tab">订单</span><span class="tab on">下单</span>
+          </div>
+          <div class="content">
+            <div class="pc-card">
+              <div class="tt"><span class="d" style="background:#07C160;"></span>人工下单（代下单）</div>
+              <div class="pc-form-row"><label>下单归属销售</label><div class="inp">张销售 ▾</div></div>
+              <div class="pc-form-row"><label>客户</label><div class="inp">广西天华（人工选择）</div></div>
+              <div class="pc-form-row"><label>销售员</label><div class="inp">张销售（由归属销售带入）</div></div>
+              <div class="pc-form-row"><label>发货仓</label><div class="inp">华南仓（库存建议）</div></div>
+              <div class="pc-form-row"><label>收货地址</label><div class="inp">湖南岳阳 · 云溪区（客户档案）</div></div>
+              <div class="pc-form-row"><label>合计</label><div class="inp">¥9,600（自动计算）</div></div>
+              <div class="pc-form-row"><div class="hint">风控校验：额度使用 76%，在额度内</div></div>
+            </div>
+            <div class="pc-btns"><span class="b ok">提交订单</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="wc-phone">
+        <div class="st-bar"><span>9:30</span><span>📶 🔋</span></div>
+        <div class="nav"><span class="back">‹</span><span class="title">订单助手</span><span class="more">⋯</span></div>
+        <div class="wc-full">
+          <div class="aside-tabs">
+            <span class="aside-tab">待办</span><span class="aside-tab">订单</span><span class="aside-tab on">下单</span>
+          </div>
+          <div class="aside-scroll">
+            <div class="wc-long-form">
+              <div class="lf-head"><span class="lf-title">人工下单（代下单）</span><div class="lf-ctx">🔒 工作台下单 · 归属销售 张销售 · 客户已人工选择</div></div>
+              <div class="lf-group">
+                <div class="lf-group-title">代下单归属（先选）</div>
+                <div class="wc-form-row"><label>下单归属销售</label><input value="张销售 ▾" /></div>
+                <div class="wc-form-row"><label>客户</label><input value="广西天华（人工选择）" /></div>
+                <div class="wc-form-row"><label>销售员</label><input value="张销售（由归属销售带入）" readonly class="ro" /></div>
+              </div>
+              <div class="lf-group">
+                <div class="lf-group-title">履约信息（提交前必核对）</div>
+                <div class="wc-form-row"><label>发货仓</label><input value="华南仓（库存建议）" /></div>
+                <div class="wc-form-row"><label>收货地址</label><input value="湖南岳阳 · 云溪区（客户档案）" /></div>
+                <div class="wc-form-row"><label>收货联系人</label><input value="王志明 · 138****2816（客户档案）" /></div>
+                <div class="wc-form-row"><div class="quota">风控校验：额度使用 76%，在额度内 · 合计 ¥9,600</div></div>
+              </div>
+              <div class="wc-po-actions"><span class="btn btn-confirm">提交订单</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ BLOCK 2 ============ -->
+  <h2 id="b2"><span class="no">B2 ·</span> 客户群入口代下单（XSZL2）</h2>
+
+  <h3><span class="no">①</span> 用例图</h3>
+  <pre class="mermaid">
+flowchart LR
+    subgraph ACT2["参与者"]
+        SA2["销售助理<br/>(delegate/代办)"]
+        CTX["客户群上下文"]
+    end
+    subgraph SYS2["企微订单助手（系统边界）"]
+        UC21["(群入口代下单)"]
+        UC22["(自动带出客户)"]
+        UC23["(自动带出归属销售并锁定)"]
+    end
+    SA2 --> UC21
+    CTX --> UC22
+    CTX --> UC23
+  </pre>
+  <figcaption>用例图 B2：客户群入口由群上下文直接确定客户与归属销售</figcaption>
+
+  <h3><span class="no">②</span> 流程图</h3>
+  <pre class="mermaid">
+flowchart TD
+    A["客户群内点「订单助手」"] --> B["进入「下单」Tab"]
+    B --> C["群上下文确定客户（广西天华）"]
+    C --> D["归属销售自动带出并锁定（张销售 readonly）"]
+    D --> E["表单最大化预填（与销售下单一致）"]
+    E --> F["核对履约字段与来源"]
+    F --> G["提交订单（幂等键防重复）"]
+    G --> H["已代张销售提交 · 进入审批流"]
+  </pre>
+  <figcaption>流程图 B2：群入口无需手动选客/选销售，归属销售锁定不可改</figcaption>
+
+  <h3><span class="no">③</span> UI 操作图（PC + 移动端）</h3>
+
+  <div class="ui-step">
+    <div class="desc">
+      <span class="stepno">操作 2.1</span>
+      <h4>客户群 → 订单助手 → 下单 Tab（归属锁定）</h4>
+      <p>销售助理在「广西天华 · 供应协同群」点击「订单助手」，打开后进入「下单」Tab；群上下文直接确定客户，<strong>归属销售自动带出并锁定</strong>（readonly 不可改）。</p>
+      <div class="hint">每个客户归属的销售是明确的（B6/C2）；群入口与工作台入口的本质区别就是无需手动选择归属销售。</div>
+    </div>
+    <div class="ui-shot">
+      <div class="shot-label">PC 端 · 客户群侧边栏「下单」Tab（归属销售锁定）</div>
+      <div class="wc-pc">
+        <div class="tl"><i class="r"></i><i class="y"></i><i class="g"></i></div>
+        <div class="rail">
+          <div class="av">助</div>
+          <div class="nav on"><span class="ico">💬</span>消息<span class="bdg">2</span></div>
+          <div class="nav"><span class="ico">✉</span>邮件</div>
+          <div class="nav"><span class="ico">📄</span>文档</div>
+          <div class="nav"><span class="ico">📅</span>日程</div>
+          <div class="nav"><span class="ico">✓</span>待办</div>
+          <div class="nav"><span class="ico">🎥</span>会议</div>
+          <div class="nav"><span class="ico">🧩</span>工作台</div>
+          <div class="nav"><span class="ico">👥</span>通讯录</div>
+          <div class="nav"><span class="ico">☁</span>微盘</div>
+        </div>
+        <div class="conv">
+          <div class="search"><span class="box">⌕ 搜索</span><span class="plus">＋</span></div>
+          <div class="conv-item on">
+            <div class="cav">天</div>
+            <div class="meta"><div class="nm">广西天华 · 供应协同群<span class="tm">09:24</span></div><div class="pv">王总：再发5吨膨润土 AB-3…</div></div>
+          </div>
+        </div>
+        <div class="chat">
+          <div class="ch-head"><div><div class="nm">广西天华 · 供应协同群（8）</div><div class="sub">外部客户群 · 已开启订单助手</div></div></div>
+          <div class="ch-body">
+            <div class="msg o"><span class="mav">王</span><div class="mb"><div class="who">王志明｜广西天华采购部</div><div class="bub">李助理，帮张销售再发3吨膨润土 AB-3，老规格</div></div></div>
+          </div>
+          <div class="input-area"><span class="tools">☺ ▧ 📁</span><span class="field">输入消息…</span><span class="send">发送</span></div>
+        </div>
+        <div class="aside">
+          <div class="marker">订单助手 · 侧边栏应用</div>
+          <div class="tabs">
+            <span class="tab">待办</span><span class="tab">订单</span><span class="tab on">下单</span>
+          </div>
+          <div class="content">
+            <div class="pc-card">
+              <div class="tt"><span class="d" style="background:#07C160;"></span>人工下单（代下单）</div>
+              <div class="pc-form-row"><label>客户</label><div class="inp">广西天华（群上下文）</div></div>
+              <div class="pc-form-row"><label>销售员</label><div class="inp">张销售（群上下文锁定）</div></div>
+              <div class="pc-form-row"><label>代办人</label><div class="inp">李助理（当前操作人）</div></div>
+              <div class="pc-form-row"><label>发货仓</label><div class="inp">华南仓（库存建议）</div></div>
+              <div class="pc-form-row"><label>收货地址</label><div class="inp">湖南岳阳 · 云溪区（客户档案）</div></div>
+              <div class="pc-form-row"><div class="hint">归属销售 readonly 不可改；预填来源均标注</div></div>
+            </div>
+            <div class="pc-btns"><span class="b ok">提交订单</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="wc-phone">
+        <div class="st-bar"><span>9:30</span><span>📶 🔋</span></div>
+        <div class="nav"><span class="back">‹</span><span class="title">广西天华 · 供应协同群</span><span class="more">⋯</span></div>
+        <div class="wc-full">
+          <div class="aside-tabs">
+            <span class="aside-tab">待办</span><span class="aside-tab">订单</span><span class="aside-tab on">下单</span>
+          </div>
+          <div class="aside-scroll">
+            <div class="wc-long-form">
+              <div class="lf-head"><span class="lf-title">人工下单（代下单）</span><div class="lf-ctx">🔒 当前群客户：广西天华（C 级）· 归属销售 张销售（锁定）</div></div>
+              <div class="lf-group">
+                <div class="lf-group-title">客户与归属（群上下文锁定）</div>
+                <div class="wc-form-row"><label>客户</label><input value="广西天华（群上下文）" readonly class="ro" /></div>
+                <div class="wc-form-row"><label>销售员</label><input value="张销售（群上下文锁定）" readonly class="ro" /></div>
+                <div class="wc-form-row"><label>代办人</label><input value="李助理（当前操作人）" readonly class="ro" /></div>
+              </div>
+              <div class="lf-group">
+                <div class="lf-group-title">履约信息（提交前必核对）</div>
+                <div class="wc-form-row"><label>发货仓</label><input value="华南仓（库存建议）" /></div>
+                <div class="wc-form-row"><label>收货地址</label><input value="湖南岳阳 · 云溪区（客户档案）" /></div>
+                <div class="wc-form-row"><label>收货联系人</label><input value="王志明 · 138****2816（客户档案）" /></div>
+                <div class="wc-form-row"><div class="quota">风控校验：额度使用 76%，在额度内 · 合计 ¥9,600</div></div>
+              </div>
+              <div class="wc-po-actions"><span class="btn btn-confirm">提交订单</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ui-step">
+    <div class="desc">
+      <span class="stepno">操作 2.2</span>
+      <h4>提交成功 → 后续审批链</h4>
+      <p>销售助理核对无误后点「提交订单」→ 已代张销售提交正式订单，展示订单号与完整后续流程（主管审价 → C 级董事长终审 → 商务库存/交期确认 → 仓管发货 → 回单 → 财务开票）。</p>
+      <div class="hint">提交后订单进入正常审批链；销售助理不承担审批职责，可「去待办跟踪」查看状态。</div>
+    </div>
+    <div class="ui-shot">
+      <div class="shot-label">PC 端 · 侧边栏应用提交成功态 + 订单详情</div>
+      <div class="wc-pc">
+        <div class="tl"><i class="r"></i><i class="y"></i><i class="g"></i></div>
+        <div class="rail">
+          <div class="av">助</div>
+          <div class="nav on"><span class="ico">💬</span>消息<span class="bdg">2</span></div>
+          <div class="nav"><span class="ico">✉</span>邮件</div>
+          <div class="nav"><span class="ico">📄</span>文档</div>
+          <div class="nav"><span class="ico">📅</span>日程</div>
+          <div class="nav"><span class="ico">✓</span>待办</div>
+          <div class="nav"><span class="ico">🎥</span>会议</div>
+          <div class="nav"><span class="ico">🧩</span>工作台</div>
+          <div class="nav"><span class="ico">👥</span>通讯录</div>
+          <div class="nav"><span class="ico">☁</span>微盘</div>
+        </div>
+        <div class="conv">
+          <div class="search"><span class="box">⌕ 搜索</span><span class="plus">＋</span></div>
+          <div class="conv-item on">
+            <div class="cav">天</div>
+            <div class="meta"><div class="nm">广西天华 · 供应协同群<span class="tm">10:20</span></div><div class="pv">订单已提交</div></div>
+          </div>
+        </div>
+        <div class="chat">
+          <div class="ch-head"><div><div class="nm">广西天华 · 供应协同群（8）</div><div class="sub">外部客户群 · 已开启订单助手</div></div></div>
+          <div class="ch-body">
+            <div class="msg o"><span class="mav">王</span><div class="mb"><div class="who">王志明｜广西天华采购部</div><div class="bub">李助理，帮张销售再发3吨膨润土 AB-3，老规格</div></div></div>
+            <div class="msg s"><span class="mav">助</span><div class="mb"><div class="who">销售助理</div><div class="bub">已提交，我这边会跟进审批状态</div></div></div>
+          </div>
+          <div class="input-area"><span class="tools">☺ ▧ 📁</span><span class="field">输入消息…</span><span class="send">发送</span></div>
+        </div>
+        <div class="aside">
+          <div class="marker">订单助手 · 侧边栏应用</div>
+          <div class="tabs">
+            <span class="tab">待办</span><span class="tab">订单</span><span class="tab on">下单</span>
+          </div>
+          <div class="content">
+            <div class="pc-ok"><div class="ico">✓</div><h5>代下单成功</h5><p>订单已归属销售 张销售，进入审批流</p><div class="no">ORD-20260811-0112</div></div>
+            <div class="pc-card">
+              <div class="tt"><span class="d" style="background:#07C160;"></span>订单详情</div>
+              <div class="pc-row"><span class="k">归属销售</span><span class="v">张销售（群上下文锁定）</span></div>
+              <div class="pc-row"><span class="k">客户</span><span class="v">广西天华 · C 级</span></div>
+              <div class="pc-row"><span class="k">产品</span><span class="v">膨润土 AB-3 · 3000 公斤</span></div>
+              <div class="pc-row"><span class="k">合计</span><span class="v">¥9,600</span></div>
+              <div class="pc-row"><span class="k">到货时间</span><span class="v">2026-08-20</span></div>
+            </div>
+            <div class="pc-btns"><span class="b ghost">去待办跟踪</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="wc-phone">
+        <div class="st-bar"><span>9:30</span><span>📶 🔋</span></div>
+        <div class="nav"><span class="back">‹</span><span class="title">订单助手</span><span class="more">⋯</span></div>
+        <div class="wc-full">
+          <div class="aside-tabs">
+            <span class="aside-tab">待办</span><span class="aside-tab">订单</span><span class="aside-tab on">下单</span>
+          </div>
+          <div class="aside-scroll">
+            <div class="wc-success"><div class="ok-ico">✓</div><h4>代下单成功</h4><p>订单已归属销售 张销售，进入主管审价 → C 级董事长终审 → 商务库存/交期确认 → 仓管发货 → 回单 → 财务开票</p><div class="no">ORD-20260811-0112</div></div>
+            <div class="wc-detail">
+              <div class="od-head"><span class="od-no">ORD-20260811-0112</span><span class="od-state"><span class="state st-approving" style="font-size:10px;padding:2px 6px;border-radius:3px;font-weight:500;">待价格审批</span></span></div>
+              <div class="od-kv">
+                <div class="row"><span class="k">归属销售</span><span class="v">张销售（群上下文锁定）</span></div>
+                <div class="row"><span class="k">客户</span><span class="v">广西天华 · C 级</span></div>
+                <div class="row"><span class="k">产品</span><span class="v">膨润土 AB-3 · 3000 公斤</span></div>
+                <div class="row"><span class="k">合计</span><span class="v">¥9,600</span></div>
+                <div class="row"><span class="k">到货时间</span><span class="v">2026-08-20</span></div>
+              </div>
+            </div>
+            <div class="wc-po-actions"><span class="btn btn-confirm">去待办跟踪</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="colophon">
+    <span><a href="index.html">← Role Specs</a></span>
+    <span>SALES_ASSISTANT · B2B Order Fulfillment</span>
+    <span>XSZL1 · XSZL2</span>
+  </footer>
+</div>
+</body>
+</html>

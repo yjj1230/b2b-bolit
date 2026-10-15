@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>09 · 测试设计 · 0.1 订单助手（L0-L3 + 场景用例）</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+SC:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:#f5f4ed; --paper2:#efeee5; --ink:#1f1d18; --ink2:#6b665b;
+    --ink3:#3a382f; --blue:#1B365D; --rule:#d4d1c5; --amber:#8a6d3b; --red:#9b3b3b; --green:#3b6d3b;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif; line-height:1.6;}
+  .wrap{max-width:980px; margin:0 auto; padding:48px 40px 80px;}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;}
+  .folio{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--rule); padding-bottom:10px;
+    font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink2);}
+  .folio a{color:var(--ink2); border:none;}
+  .folio a:hover{color:var(--blue);}
+  .tag{display:inline-block; padding:3px 10px; font-size:11px; letter-spacing:.16em; background:var(--paper2); color:var(--blue);}
+  .tag.red{background:#f3e3e3; color:var(--red);}
+  .tag.amber{background:#f3ecdc; color:var(--amber);}
+  .tag.green{background:#e3f0e3; color:var(--green);}
+  .kicker{display:flex; align-items:baseline; gap:12px; margin-top:48px; flex-wrap:wrap;}
+  h1{font-size:clamp(30px,4.6vw,46px); line-height:1.14; font-weight:500; margin-top:14px; letter-spacing:-.01em;}
+  .lede{margin-top:18px; font-size:16.5px; line-height:1.7; color:var(--ink3); max-width:760px;}
+  h2{font-size:23px; font-weight:600; margin:52px 0 14px; color:var(--blue); display:flex; align-items:baseline; gap:12px; border-top:1px solid var(--rule); padding-top:26px;}
+  h2 .no{font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.12em;}
+  h3{font-size:17.5px; font-weight:600; margin:30px 0 10px; color:var(--ink);}
+  h3 .no{color:var(--blue); font-family:'IBM Plex Mono',monospace; font-size:12px; margin-right:8px;}
+  p{margin:10px 0; color:var(--ink3);}
+  ul,ol{margin:10px 0 10px 26px; color:var(--ink3);}
+  li{margin:5px 0;}
+  a{color:var(--blue); text-decoration:none; border-bottom:1px solid var(--rule);}
+  a:hover{border-bottom-color:var(--blue);}
+  blockquote{border-left:2px solid var(--blue); padding:10px 18px; margin:16px 0; background:var(--paper2); font-style:italic;}
+  table{width:100%; border-collapse:collapse; font-size:13px;}
+  .table-wrap{overflow-x:auto; margin:16px 0 24px; border:1px solid var(--rule);}
+  .table-wrap table{margin:0;}
+  th{background:var(--paper2); color:var(--blue); text-align:left; font-weight:600; padding:9px 12px; border-bottom:1.5px solid var(--blue); font-size:12px; white-space:nowrap;}
+  td{padding:8px 12px; border-bottom:1px solid var(--rule); vertical-align:top; color:var(--ink3);}
+  tr:nth-child(even) td{background:#faf9f3;}
+  tr:hover td{background:#f0ede0;}
+  td .tag{font-size:10px; padding:1px 6px;}
+  td code{font-size:11.5px;}
+  .mermaid{background:var(--paper); border:1px solid var(--rule); padding:18px; overflow-x:auto; text-align:center; margin:20px 0;}
+  .mermaid svg{max-width:100%; height:auto;}
+  figcaption{text-align:center; font-size:12px; color:var(--ink2); margin:-10px 0 26px; font-style:italic;}
+  code{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace; font-size:13px; background:var(--paper2); padding:1px 5px;}
+  pre{background:var(--paper2); border:1px solid var(--rule); padding:16px 18px; overflow-x:auto; font-size:12.5px; line-height:1.55; margin:14px 0;}
+  pre code{background:none; padding:0;}
+  footer.colophon{margin-top:56px; padding-top:14px; border-top:1px solid var(--rule); display:flex; justify-content:space-between;
+    font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink2); flex-wrap:wrap; gap:8px;}
+  footer.colophon a{color:var(--ink2); border:none;}
+  footer.colophon a:hover{color:var(--blue);}
+  .toc{border:1px solid var(--rule); background:var(--paper2); padding:18px 24px; margin:26px 0;}
+  .toc .tt{font-size:11px; letter-spacing:.2em; color:var(--blue); margin-bottom:8px;}
+  .toc a{display:block; padding:3px 0; color:var(--ink3); border:none;}
+  .toc a:hover{color:var(--blue);}
+  .toc .mono{font-size:12px; color:var(--blue); margin-right:8px;}
+  .note{background:#f3ecdc; border:1px solid #d8c9a3; padding:12px 16px; margin:16px 0; font-size:13.5px; color:var(--ink3);}
+  .note .tt{font-size:10.5px; letter-spacing:.18em; color:var(--amber); font-family:'IBM Plex Mono',monospace;}
+  @media(max-width:720px){.wrap{padding:28px 18px 60px;}}
+</style>
+<script>
+  mermaid.initialize({startOnLoad:true, theme:'neutral', themeVariables:{primaryColor:'#efeee5', primaryBorderColor:'#1B365D', primaryTextColor:'#1f1d18', lineColor:'#6b665b', secondaryColor:'#f3ecdc', tertiaryColor:'#f5f4ed'}});
+</script>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="folio">
+    <span><a href="index.html">← Docs</a> · B2B Order Fulfillment · <a href="index.html">v0.1</a></span>
+    <span>09 · Testing</span>
+    <span>L0-L3 · 0.1 场景</span>
+  </header>
+
+  <div class="kicker">
+    <span class="tag">测试设计 · 0.1 版本</span>
+    <span class="tag red">裁决源：ord_fulfill demo</span>
+    <span class="mono" style="font-size:11px; letter-spacing:.18em; color:var(--ink2);">与 03-testing 互补 · 聚焦 0.1 场景</span>
+  </div>
+
+  <h1>测试设计 · 0.1<br/><span style="font-style:italic; color:var(--blue);">L0-L3 分层 × 场景用例</span></h1>
+
+  <p class="lede">本文档在既有 <span class="mono">docs/03-testing.html</span>（L0-L3 分层 + 49 例 Score Card + 覆盖率门禁）基础上，聚焦 0.1 场景：7 角色 17 场景的测试覆盖、0.1 关键用例（守门员 / 多单合并开票 / 仓库群回单 / 选仓+收货地址 / 无回单开票规则待确认）、覆盖率门禁与 CQ 映射。</p>
+
+  <nav class="toc">
+    <div class="tt">CONTENTS · 目录</div>
+    <a href="#s1"><span class="mono">1</span>测试分层（L0-L3）</a>
+    <a href="#s2"><span class="mono">2</span>0.1 场景用例覆盖（7 角色 17 场景）</a>
+    <a href="#s3"><span class="mono">3</span>0.1 新增关键用例</a>
+    <a href="#s4"><span class="mono">4</span>覆盖率门禁</a>
+    <a href="#s5"><span class="mono">5</span>CQ → 测试映射（0.1 18 CQ）</a>
+    <a href="#s6"><span class="mono">6</span>测试基础设施与命令</a>
+    <a href="#s7"><span class="mono">7</span>影子轨 S-01..S-09（12-shadow-full-flow）</a>
+  </nav>
+
+  <h2 id="s1"><span class="no">1 ·</span> 测试分层（L0-L3）</h2>
+  <div class="mermaid">
+flowchart TB
+  L0["L0 单元<br/>纯 Go 零依赖<br/>FSM/值对象/守恒/幂等/分流判定"] --> L1
+  L1["L1 集成<br/>真 PG + spicedb testserver<br/>约束/行锁/单事务/权限矩阵/caveat"] --> L2
+  L2["L2 端到端<br/>Temporal TestSuite + fakeStore<br/>全链/补偿/Timer/预订单/守门员"] --> L3
+  L3["L3 系统验证<br/>并发/对账/审计脚本 + 覆盖率门禁 + roundtrip"]
+  </div>
+  <figcaption>图 1 · L0-L3 分层（沿用 03-testing；0.1 聚焦 L2 场景用例扩展）</figcaption>
+  <div class="table-wrap">
+  <table>
+    <tr><th>层</th><th>范围</th><th>工具/依赖</th><th>运行频率</th></tr>
+    <tr><td>L0 单元</td><td>FSM 状态迁移穷举（4 流程 + 预订单）、数量/金额值对象、守恒断言、幂等键规范、授权决策纯函数、回单分流判定、<strong>守门员判定纯函数</strong></td><td>go test（表驱动）</td><td>每次提交</td></tr>
+    <tr><td>L1 集成</td><td>repo×PG（CHECK 约束、行锁并发、单事务守恒、迁移、待办检索）、authz×SpiceDB（权限矩阵、ReBAC、caveat）、BFF 投影</td><td>真 PG（PILOT_TEST_PG_DSN）+ spicedb serve-testing</td><td>每次提交</td></tr>
+    <tr><td>L2 端到端</td><td>四分支全链 happy path/退回/补偿/Timer/幂等重放/预订单确认流/授权拒绝/<strong>守门员发群流/多单合并开票流</strong></td><td>Temporal TestSuite + fakeStore/fakeStarter + httptest</td><td>每次合并</td></tr>
+    <tr><td>L3 系统验证</td><td>并发守恒、全库对账、覆盖率门禁、图谱 roundtrip、审计链回放、种子数据可重复</td><td>scripts/ + make cover</td><td>每个里程碑</td></tr>
+  </table>
+  </div>
+
+  <h2 id="s2"><span class="no">2 ·</span> 0.1 场景用例覆盖（7 角色 17 场景）</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>角色</th><th>场景</th><th>测试覆盖（既有 + 0.1 新增）</th><th>关键断言</th></tr>
+    <tr><td rowspan="5">销售</td><td class="mono">XS1 查订单</td><td>L1-10 投影、E2E Projection、<strong>N-01 守门员发群</strong></td><td>发给客户需二次确认；确认记录进事件链</td></tr>
+    <tr><td class="mono">XS2 人工下单</td><td>L2-01/02、E2E FullChain 系列</td><td>幂等防重复；预填规则；额度校验</td></tr>
+    <tr><td class="mono">XS3 智能下单确认</td><td>L2-12/13、E2E PreOrderChain/<strong>N-02 确认一次成单</strong></td><td>销售唯一确认角色；确认只发生一次；非 PENDING_CONFIRM → 409</td></tr>
+    <tr><td class="mono">XS4 工作台</td><td>L1-11、E2E TodosDuringFlow</td><td>驳回重提重新审批；评论确认更新地址</td></tr>
+    <tr><td class="mono">XS5 查物流</td><td>L1-10、<strong>N-01 守门员（物流图片）</strong></td><td>物流图片发群守门员确认</td></tr>
+    <tr><td>销售主管</td><td class="mono">XSZG1 审价</td><td>L0-01、L2-03/04、E2E RejectPath</td><td>审价通过/驳回；D 级自动进终审；历史可追溯</td></tr>
+    <tr><td rowspan="3">商务</td><td class="mono">SW1 备货/发货/开票</td><td>L0-02/06、L1-01/13、L2-06/07/09、<strong>N-03 选仓+收货地址</strong></td><td>根据收货地址选仓；备货通过生成发货单；驳回通知销售</td></tr>
+    <tr><td class="mono">SW2 查全量（ops）</td><td>L1-07/08（ops 聚合）、L1-10</td><td>商务全字段可见；四节点状态</td></tr>
+    <tr><td class="mono">SW3 工作台待办</td><td>L1-11、E2E TodosDuringFlow</td><td>闸门类型标注；同一套卡片复用</td></tr>
+    <tr><td rowspan="2">销售助理</td><td class="mono">XSZL1 工作台代下</td><td>L2-01（代下路径）、<strong>N-04 归属销售选择</strong></td><td>归属销售决定客户范围</td></tr>
+    <tr><td class="mono">XSZL2 群入口代下</td><td><strong>N-04 归属锁定</strong></td><td>群上下文带出归属销售且锁定不可改</td></tr>
+    <tr><td rowspan="2">财务</td><td class="mono">CW1 上传凭证</td><td>L1-16、L2-15、E2E EvidenceChain、<strong>N-05 合并开票关联</strong>、<strong>N-06 凭证金额守恒</strong></td><td>凭证只追加版本；开票金额 = 已发货金额；关联可追加；三金额分展</td></tr>
+    <tr><td class="mono">CW2 无回单开票</td><td>L0-04/10、L2-11、<strong>N-07 例外审核（规则待确认标记）</strong></td><td>例外依据展示；放行后开票继续；回单补齐自动闭合；<span class="tag red">规则待确认用例标注</span></td></tr>
+    <tr><td rowspan="3">仓管</td><td class="mono">CG1 确认接受</td><td>L2-14（权限）、<strong>N-08 金额不可见</strong></td><td>仓管视图剥价；任务要素无金额</td></tr>
+    <tr><td class="mono">CG2 确认发货</td><td>L0-03/07、L1-01/03/04、L2-08、E2E PartialShipment、<strong>N-09 超发拦截</strong></td><td>输入 6 应发 5 → 拒绝；修正 5 → 通过；守恒校验</td></tr>
+    <tr><td class="mono">CG3 回单凭证</td><td>L1-16、<strong>N-10 仓库群回单机器人</strong></td><td>回单凭证 v3 追加；只追加不覆盖；匹配订单</td></tr>
+    <tr><td>董事长</td><td class="mono">DSZ1 C/D 终审</td><td>L2-04、E2E ChairmanCD</td><td>仅 C/D 级进入终审；通过推进、驳回终态</td></tr>
+  </table>
+  </div>
+
+  <h2 id="s3"><span class="no">3 ·</span> 0.1 新增关键用例（N-01..N-10）</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>ID</th><th>场景</th><th>级别</th><th>用例内容（Given/When/Then）</th><th>倒推影响面</th></tr>
+    <tr><td class="mono">N-01</td><td>发群守门员（A3）</td><td>L2</td><td>销售点「发给客户」→ 系统弹守门员确认 → 未确认不发送、确认后发送且记录 GatekeeperConfirmed 事件；重复确认幂等</td><td>守门员机制（CQ-16）</td></tr>
+    <tr><td class="mono">N-02</td><td>智能下单确认一次成单</td><td>L2</td><td>DRAFT 卡确认 → 正式订单生成（幂等键）；再点确认 → 409；非销售角色确认 → 403</td><td>AI 安全边界（CQ-11/14）</td></tr>
+    <tr><td class="mono">N-03</td><td>选备货仓 + 收货地址（A1）</td><td>L2</td><td>备货详情展示收货地址 → 选备货仓 → 通过 → 生成备货单 → 发货单给仓管；锁库存暂缓断言（库存不变）</td><td>备货流程（CQ-06）</td></tr>
+    <tr><td class="mono">N-04</td><td>客户群入口归属销售锁定（B6/C2）</td><td>L2</td><td>群上下文 → 客户自动带出 → 归属销售自动带出且 readonly；工作台入口需先选归属销售</td><td>订单创建分担（A7）</td></tr>
+    <tr><td class="mono">N-05</td><td>多单合并开票（A4）</td><td>L2</td><td>发票关联订单 1、2 → 追加关联订单 3 → 三金额分展（收款/发货/开票）→ 未开票额度保留在订单上由财务确认继续开</td><td>合并开票（CQ-17）</td></tr>
+    <tr><td class="mono">N-06</td><td>凭证上传主路径 + 金额守恒</td><td>L2</td><td>订单后台上传凭证 → AI 识别匹配 → 校验开票金额 = 已发货金额 → 超限拒绝；凭证追加 v2 不覆盖 v1</td><td>凭证主路径反转（A2/CQ-09/15）</td></tr>
+    <tr><td class="mono">N-07</td><td>无回单开票例外审核（A5）</td><td>L2</td><td>无回单超期 → 例外依据展示 → 财务放行 → 开票继续；驳回 → 待补回单 → 补齐自动闭合；<span class="tag red">规则是否允许无回单开票：待确认后固化断言</span></td><td>回单不卡开票（CQ-10）</td></tr>
+    <tr><td class="mono">N-08</td><td>仓管金额不可见（CQ-03）</td><td>L1</td><td>仓管视图发货任务 → 响应剥离价格/金额字段；跨仓拒绝</td><td>字段投影</td></tr>
+    <tr><td class="mono">N-09</td><td>超发拦截（CQ-07）</td><td>L1+L2</td><td>输入 6（应发 5）→ CHECK/守恒拒绝；输入 5 → 通过；并发发货不超卖（行锁）</td><td>发货守恒</td></tr>
+    <tr><td class="mono">N-10</td><td>仓库群回单机器人（A6）</td><td>L2</td><td>仓库群回单图片 → 机器人 OCR 识别 → 匹配订单 → 登记 v3（只追加）；手动上传备选等价</td><td>回单闭合（CQ-18）</td></tr>
+  </table>
+  </div>
+
+  <h3><span class="no">3.1</span> 0.1 实现落点（2026-08-17 代码对齐）</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>用例</th><th>实现/测试落点</th><th>状态</th></tr>
+    <tr><td class="mono">N-01 守门员</td><td>domain/gatekeeper.go（FSM+幂等键，L0）；repo.AppendGatekeeperConfirmation；POST /orders/{id}/send-to-group；internal/api/v01_test.go TestN01GatekeeperSendToGroup；repo/v01_integration_test.go TestV01GatekeeperEventIdempotent</td><td><span class="tag green">已实现</span></td></tr>
+    <tr><td class="mono">N-02 确认一次成单</td><td>handlePreOrderSignal 销售角色校验（403）+ 终态 409；tests/l2_e2e TestV01N02PreOrderConfirmOnce</td><td><span class="tag green">已实现</span></td></tr>
+    <tr><td class="mono">N-03 选仓+收货地址</td><td>stock-review 信号（选仓必填校验）；order_items.receive_address；发货单继承所选仓库；workflows TestN03a/b/c</td><td><span class="tag green">已实现</span></td></tr>
+    <tr><td class="mono">N-04 归属锁定</td><td>IntentCandidate.customer_id（群上下文客户）→ 派生订单归属；workflows TestN04PreOrderCustomerFromGroupContext</td><td><span class="tag green">已实现</span></td></tr>
+    <tr><td class="mono">N-05 合并开票</td><td>invoice_order_links 表 + LinkInvoiceOrderTx（订单级守恒）+ POST /invoices/{id}/link-orders + GET /orders/{id}/invoice-summary；repo TestV01N05MergeInvoiceLinks；api TestN05InvoiceLinkAndSummaryHTTP；e2e TestV01N05MergeInvoiceE2E</td><td><span class="tag green">已实现</span></td></tr>
+    <tr><td class="mono">N-06 凭证守恒</td><td>handleAppendEvidence 金额校验（≤ 发货金额 → 409 拒绝）+ kind/source/invoice_no 识别字段；api TestN06EvidenceAmountConservation</td><td><span class="tag green">已实现</span></td></tr>
+    <tr><td class="mono">N-07 无回单开票</td><td>既有例外审核链（L2-11/E2E ReceiptException）；规则本身待确认（A5，标注）</td><td><span class="tag amber">流程已实现 · 规则待确认</span></td></tr>
+    <tr><td class="mono">N-08 仓管剥价</td><td>ProjectOrder/ProjectShipment 既有机制；api TestN08WarehouseAmountStripped；三金额视图仓管隐藏</td><td><span class="tag green">已实现</span></td></tr>
+    <tr><td class="mono">N-09 超发拦截</td><td>CHECK(shipped_qty &lt;= planned_qty) + 备货守恒（∑发货 ≤ ∑备货）；repo TestV01N09OvershipIntercepted、L1-03/04</td><td><span class="tag green">已实现</span></td></tr>
+    <tr><td class="mono">N-10 仓库群回单</td><td>wecom.ReceiptRobot（RuleRecognizer OCR 接线点）+ wecom_context_bindings 仓库群类型 + cmd/wecom 群图片回调；wecom/receipt_robot_test.go；repo TestV01N10WarehouseGroupReceiptRobot</td><td><span class="tag green">已实现（群升级 P2 前置）</span></td></tr>
+  </table>
+  </div>
+
+  <h2 id="s4"><span class="no">4 ·</span> 覆盖率门禁</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>包</th><th>门禁</th><th>说明</th></tr>
+    <tr><td>domain（FSM/值对象/守恒/幂等）</td><td><strong>100% 硬门禁</strong></td><td>图谱正确性的唯一事实源</td></tr>
+    <tr><td>authz / api / wecom</td><td>≥98%（目标）</td><td>余量为防御性错误分支</td></tr>
+    <tr><td>repo / workflows</td><td>≥98%（目标）</td><td>余量为 pgx scan error 与 SQL 失败返回</td></tr>
+    <tr><td>integration</td><td>100%</td><td>含 DemoPolicy 虚拟时长契约</td></tr>
+    <tr><td><strong>全仓合计</strong></td><td><strong>≥85% 实测门禁（目标 ≥98%）</strong></td><td>当前 87.8%（2026-08-07 基线）；0.1 新增 N-01..N-10 用例后回测</td></tr>
+  </table>
+  </div>
+  <blockquote>门禁实现：<code>go test -count=1 -tags integration -coverprofile=coverage.out ./internal/...</code> + awk 数值比较；domain 100% 硬门禁 + 全仓 ≥85%。（沿用 03-testing 诚实声明：错误注入 ≠ 真实故障形态；覆盖率 100% ≠ 故障注入等价性 100%。）</blockquote>
+
+  <h2 id="s5"><span class="no">5 ·</span> CQ → 测试映射（0.1 18 CQ）</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>CQ</th><th>测试背书（既有 + 0.1 新增）</th></tr>
+    <tr><td>CQ-01 操作权限</td><td>L0-09、L1-07、L2-14、N-02（非销售确认 403）</td></tr>
+    <tr><td>CQ-02 数据可见范围</td><td>L1-07/08/10、N-08</td></tr>
+    <tr><td>CQ-03 仓管字段投影</td><td>L1-10、N-08</td></tr>
+    <tr><td>CQ-04 状态与迁移</td><td>L0-01/02/03/04、L2-01/02/03/05</td></tr>
+    <tr><td>CQ-05 审批链状态</td><td>L0-02、L1-11、L2-02/04/06/07</td></tr>
+    <tr><td>CQ-06 备货守恒</td><td>L0-07、L1-01/13、L2-09、N-03</td></tr>
+    <tr><td>CQ-07 发货守恒/完成条件</td><td>L0-03/07、L1-01/03/04、L2-08、N-09</td></tr>
+    <tr><td>CQ-08 库存联动</td><td>L0-06/07、L1-01/03/04、L3-01/02（0.1 暂缓侧）</td></tr>
+    <tr><td>CQ-09 开票守恒</td><td>L0-04/07、L1-05、L2-10、N-06</td></tr>
+    <tr><td>CQ-10 回单状态/四分流</td><td>L0-04/10、L2-11、N-07</td></tr>
+    <tr><td>CQ-11 预订单幂等</td><td>L0-05/08、L1-02/14、L2-12/13、N-02</td></tr>
+    <tr><td>CQ-12 事件链回放</td><td>L1-06/12、L3-05/06、N-01（守门员事件）</td></tr>
+    <tr><td>CQ-13 代办有效期</td><td>L1-09</td></tr>
+    <tr><td>CQ-14 并发风险面</td><td>L1-02/03、L3-01</td></tr>
+    <tr><td>CQ-15 凭证链只追加</td><td>L1-16、L2-15、N-06/N-10</td></tr>
+    <tr><td><strong>CQ-16 守门员</strong></td><td><strong>N-01（0.1 新增）</strong></td></tr>
+    <tr><td><strong>CQ-17 合并开票</strong></td><td><strong>N-05（0.1 新增）</strong></td></tr>
+    <tr><td><strong>CQ-18 仓库群回单</strong></td><td><strong>N-10（0.1 新增）</strong></td></tr>
+  </table>
+  </div>
+
+  <h2 id="s6"><span class="no">6 ·</span> 测试基础设施与命令</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>项</th><th>内容</th></tr>
+    <tr><td>L1 前置</td><td>make up 起测试 PG（端口 55432）+ 迁移；spicedb serve-testing 需二进制在 PATH</td></tr>
+    <tr><td>L2 纯库</td><td>Temporal TestSuite + fakeStore（守恒失败/库存不足/开票失败钩子）+ fakeStarter（ErrWorkflowAlreadyStarted 竞态）</td></tr>
+    <tr><td>L3 脚本</td><td>concurrency（并发守恒）/ reconcile（四守恒全库聚合）/ audit（断链/合法迁移/终态分录）/ seeddata（runID 可重复）</td></tr>
+    <tr><td>命令</td><td>make test-l0 / test-l1（-tags integration）/ test-l2 / test-l3 / test-tests（黑盒 l0-l3）/ test-wecom / cover / l3-seed / up / down</td></tr>
+    <tr><td>全链 demo</td><td>go run ./scripts/fullchain（22 步 HTTP 全流程，退出码验收）——企微接入等价验证</td></tr>
+    <tr><td>0.1 验收口径</td><td>17 场景全绿（含 N-01..N-10）；domain 100%；全仓 ≥85%；守门员/合并开票/仓库群回单专项通过；无回单开票用例标注待确认</td></tr>
+  </table>
+  </div>
+
+  <h2 id="s7"><span class="no">7 ·</span> 影子轨 S-01..S-09（12-shadow-full-flow §10）</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>ID</th><th>层</th><th>用例</th><th>当前落点</th></tr>
+    <tr><td>S-01</td><td>L0</td><td>FSM 回放器穷举：79 边全通过；非法边 → FSM_GAP；同输入两次结果一致</td><td>internal/shadow/shadow_test.go</td></tr>
+    <tr><td>S-02</td><td>L0</td><td>映射配置：已知动作翻译 / 未知 → UNMAPPED_EVENT / 缺必填字段不投递</td><td>internal/shadow/shadow_test.go</td></tr>
+    <tr><td>S-03</td><td>L0</td><td>分歧四分类穷举；幂等键重复投递只记录一次</td><td>internal/shadow/shadow_test.go</td></tr>
+    <tr><td>S-04</td><td>L1</td><td>shadow-ingest：同批次重跑无重复；源事件 append-only</td><td>internal/shadow/store_integration_test.go（-tags integration）</td></tr>
+    <tr><td>S-05</td><td>L1/L2</td><td>shadow-feed 全链计划：建单 → price-review → stock-review …；执行侧真实 Temporal 栈验收</td><td>internal/shadow/shadow_test.go + signals_test.go</td></tr>
+    <tr><td>S-06</td><td>L2</td><td>影子模式 Timer 全不调度；shadow-inject 等价分支；非影子行为不变；<strong>同信号对拍 TestShadowParityWithNonShadow（事件链与终态一致，D-011 六同）</strong></td><td>internal/workflows/shadow_test.go</td></tr>
+    <tr><td>S-07</td><td>L2/L3</td><td>隔离哨兵：六项负向启动守卫 + 独立环境零共享面（D-010 自带 shadow-temporal）+ 迁移目录拆分 + shadow-migrate 前置库名断言</td><td>internal/shadowguard/shadowguard_test.go + docker-compose.shadow.yml</td></tr>
+    <tr><td>S-08</td><td>L3</td><td>shadow-audit 四张数（覆盖/分歧/对齐/卡住）生成；支持 -interval 周期 + state-file 健康探针（26h 告警）</td><td>cmd/shadow-audit + internal/shadow/store_integration_test.go</td></tr>
+    <tr><td>S-09</td><td>L3</td><td>验收口径：真实数据覆盖门槛 + seed 补齐 79 边 + 连续 7 日无新增 P0/P1</td><td>R1/R2 影子轨上线后执行（SH-10/11）</td></tr>
+  </table>
+  </div>
+  <p>D-009/D-010/D-011 后的测试口径：① 影子轨测试不再允许「降级跳过」——与 A 轨同标准；② 差异不追求为零，追求「全部映射或全部标记」：UNMAPPED/FSM_GAP/LEGACY_ANOMALY/DATA_GAP 都必须出现在分歧表并逐条裁决；③ 六同原则由同信号对拍与真实数据全量重放共同验证；④ v0.3 撤销前，影子系统每次发布（S 线/F 线）都必须重跑 S 系列与全量重放。</p>
+
+  <footer class="colophon">
+    <span><a href="index.html">← v0.1 Docs</a></span>
+    <span>09 · Testing · 测试设计章节</span>
+    <span>裁决源 ord_fulfill demo · 2026-08-16</span>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,2360 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>T1.1 · 飞书侧数据现状清单</title>
+<style>
+:root{
+  --bg:#f4f6fa; --card:#ffffff; --ink:#1c2333; --ink2:#5c6b84; --ink3:#3d4a63;
+  --brand:#2453a6; --brand2:#3b6fd4; --brand-bg:#e8f0fd;
+  --line:#e3e8f1; --amber:#a06a1f; --amber-bg:#fbf3e2; --red:#b04242; --red-bg:#fcefef;
+  --green:#2e7d4f; --green-bg:#e8f6ee;
+  --radius:14px; --shadow:0 1px 2px rgba(28,35,51,.05),0 6px 24px rgba(28,35,51,.07);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;line-height:1.6;}
+.mono,code,pre{font-family:'SF Mono',ui-monospace,Menlo,Consolas,'Courier New',monospace;}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px 72px;}
+
+/* hero */
+.hero{background:linear-gradient(135deg,#16283f 0%,#1d3a63 48%,#2453a6 100%);color:#f2f6fc;border-radius:0 0 22px 22px;padding:40px 44px 32px;position:relative;overflow:hidden;}
+.hero::after{content:"";position:absolute;right:-80px;top:-80px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.10),transparent 65%);}
+.hero .crumbs{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#9fb4d8;margin-bottom:14px;font-weight:500;}
+.hero h1{font-size:clamp(26px,4vw,36px);font-weight:700;letter-spacing:.01em;line-height:1.15;}
+.hero .sub{color:#c9d6ec;margin-top:8px;font-size:15px;}
+.hero .tags{margin-top:18px;display:flex;gap:8px;flex-wrap:wrap;}
+.hero .tag{display:inline-flex;align-items:center;gap:6px;padding:5px 13px;font-size:12px;border-radius:999px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);color:#e6edf8;}
+.hero .tag b{font-weight:600;}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:20px 0 0;}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);}
+.stat .v{font-size:27px;font-weight:700;color:var(--brand);font-variant-numeric:tabular-nums;line-height:1.1;}
+.stat .k{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--ink2);margin-top:5px;}
+.stat .d{font-size:12px;color:var(--ink3);margin-top:4px;}
+
+/* sticky nav */
+.nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);margin:18px -24px 0;padding:10px 24px;display:flex;gap:4px 18px;flex-wrap:wrap;font-size:13px;}
+.nav a{color:var(--ink3);text-decoration:none;padding:4px 2px;border-bottom:2px solid transparent;white-space:nowrap;}
+.nav a:hover{color:var(--brand);border-bottom-color:var(--brand);}
+.nav .no{color:var(--brand2);font-family:Menlo,monospace;font-size:11px;margin-right:3px;font-weight:600;}
+
+/* sections */
+h2{font-size:21px;font-weight:700;margin:44px 0 4px;color:var(--ink);display:flex;align-items:baseline;gap:12px;}
+h2 .no{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:30px;padding:0 8px;background:var(--brand);color:#fff;border-radius:9px;font-family:Menlo,monospace;font-size:13px;font-weight:700;}
+h2 .hint{font-size:12.5px;font-weight:400;color:var(--ink2);}
+h3{font-size:15.5px;font-weight:700;margin:22px 0 8px;}
+p{margin:8px 0;color:var(--ink3);}
+
+/* tables */
+table{width:100%;border-collapse:collapse;font-size:13px;margin:12px 0 20px;background:var(--card);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--line);}
+th{background:#f0f4fa;color:var(--ink);text-align:left;font-weight:600;padding:10px 14px;border-bottom:2px solid var(--brand2);font-size:12px;letter-spacing:.02em;white-space:nowrap;}
+td{padding:9px 14px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink3);}
+tr:last-child td{border-bottom:none;}
+tr:nth-child(even) td{background:#fafcff;}
+tr:hover td{background:#f2f6fd;}
+td.num{font-variant-numeric:tabular-nums;text-align:right;}
+td code{font-size:11.5px;background:#eef2f9;padding:1px 6px;border-radius:4px;color:#23406e;}
+.bar{display:inline-block;height:9px;border-radius:5px;background:linear-gradient(90deg,var(--brand2),#7fa7e6);vertical-align:middle;margin-right:9px;min-width:3px;}
+
+/* pills */
+.pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:.03em;white-space:nowrap;}
+.pill.g{background:var(--green-bg);color:var(--green);}
+.pill.a{background:var(--amber-bg);color:var(--amber);}
+.pill.r{background:var(--red-bg);color:var(--red);}
+
+/* tblcard */
+.tblcard{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--brand2);border-radius:var(--radius);padding:18px 22px;margin:16px 0;box-shadow:var(--shadow);}
+.tbl-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px;}
+.tbl-name{font-size:15px;font-weight:700;color:var(--ink);background:#eef2f9;padding:3px 10px;border-radius:7px;}
+.tbl-meta{font-size:12px;color:var(--ink2);}
+.tbl-keys{margin-left:auto;font-size:12px;font-weight:600;color:var(--brand2);background:var(--brand-bg);padding:3px 10px;border-radius:999px;}
+
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin:4px 0 2px;}
+.chip{font-family:Menlo,Consolas,monospace;font-size:10.5px;background:#f0f3f9;color:#31415f;border:1px solid #dde4f0;border-radius:5px;padding:2px 8px;}
+.chip.obj{background:var(--amber-bg);color:#8a5f1c;border-color:#e8d7ac;}
+.chip.sens{background:var(--red-bg);color:var(--red);border-color:#ebc9c9;}
+
+/* details / collapsible samples */
+details.samples{margin-top:12px;border:1px solid var(--line);border-radius:10px;background:#fafbfe;overflow:hidden;}
+details.samples summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:10px 14px;font-size:12.5px;color:var(--ink3);user-select:none;}
+details.samples summary::-webkit-details-marker{display:none;}
+details.samples summary:hover{background:#f2f6fd;}
+details.samples .sum-tt{font-weight:600;color:var(--brand);}
+details.samples .sum-meta{color:var(--ink2);font-size:11.5px;}
+details.samples .sum-ic{margin-left:auto;transition:transform .18s;color:var(--brand2);font-size:12px;}
+details.samples[open] .sum-ic{transform:rotate(90deg);}
+details.samples .samples-body{padding:2px 14px 14px;}
+
+/* pre / json */
+pre{background:#1b2233;color:#cfd8e6;border-radius:10px;padding:12px 14px;overflow-x:auto;font-size:11px;line-height:1.6;margin:8px 0 10px;}
+pre .c{color:#5d6b83;font-style:italic;}
+pre .k{color:#7db4f5;}
+pre .s{color:#a9d987;}
+pre .n{color:#eab56f;}
+pre .b{color:#d99ad9;}
+pre .u{color:#e88080;}
+
+/* notes */
+.note{background:var(--amber-bg);border:1px solid #ebd9ae;border-radius:var(--radius);padding:12px 16px;margin:12px 0;font-size:13px;color:var(--ink3);}
+.note .tt{font-family:Menlo,monospace;font-size:10px;font-weight:600;letter-spacing:.18em;color:var(--amber);display:block;margin-bottom:3px;}
+.note.red{background:var(--red-bg);border-color:#ebc9c9;}
+.note.red .tt{color:var(--red);}
+.note.green{background:var(--green-bg);border-color:#bfe0c9;}
+.note.green .tt{color:var(--green);}
+.note.blue{background:var(--brand-bg);border-color:#c6d9f5;}
+.note.blue .tt{color:var(--brand);}
+.fill{background:#fffcf0;border:1.5px dashed var(--amber);border-radius:var(--radius);padding:11px 15px;margin:12px 0;font-size:13px;color:var(--ink3);}
+.fill .tt{font-family:Menlo,monospace;font-size:10px;font-weight:600;letter-spacing:.16em;color:var(--amber);}
+
+/* back to top */
+.backtop{position:fixed;right:24px;bottom:24px;background:var(--brand);color:#fff;width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:18px;box-shadow:0 4px 14px rgba(36,83,166,.35);opacity:.9;transition:.15s;}
+.backtop:hover{opacity:1;transform:translateY(-2px);}
+
+footer{margin-top:52px;padding-top:16px;border-top:1px solid var(--line);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink2);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+@media(max-width:840px){.stats{grid-template-columns:repeat(2,1fr);}.hero{padding:28px 22px;}}
+@media print{pre{background:#f4f4f0;color:#222;}pre .k{color:#1b4fa0;}pre .s{color:#2e7d32;}pre .n{color:#a35d00;}pre .b{color:#7b1fa2;}pre .u{color:#b71c1c;}.hero{background:var(--brand);}.backtop,.nav{display:none;}details.samples{background:none;}details.samples summary{display:none;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="hero">
+  <div class="crumbs">B2B Order Fulfillment · v0.1 Release Prep · T1.1 数据现状调研</div>
+  <h1>飞书侧数据现状清单</h1>
+  <div class="sub">orders 等 16 张 JSONL 表 + 飞书多维表格 · 只读获取 · 零写入 · 2026-08-17</div>
+  <div class="tags">
+    <span class="tag"><b>16</b> 张表全部可访问</span>
+    <span class="tag"><b>115,690</b> 行 · 179 MB</span>
+    <span class="tag"><b>100</b> 张多维表</span>
+    <span class="tag"><b>48</b> 行抽样 · 敏感键已脱敏</span>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="v">16</div><div class="k">JSONL 表</div><div class="d">16/16 可访问 · 持续写入</div></div>
+  <div class="stat"><div class="v">115,690</div><div class="k">总行数</div><div class="d">追加式快照链</div></div>
+  <div class="stat"><div class="v">179 MB</div><div class="k">总文件大小</div><div class="d">external_instances 66.7MB 最大</div></div>
+  <div class="stat"><div class="v">100</div><div class="k">多维表格</div><div class="d">共享库 · 4 表已盘点</div></div>
+</div>
+
+<nav class="nav">
+  <a href="#s1"><span class="no">一</span>行数</a>
+  <a href="#s2"><span class="no">二</span>字段数</a>
+  <a href="#s3"><span class="no">三</span>16 表明细</a>
+  <a href="#s4"><span class="no">四</span>敏感字段</a>
+  <a href="#s5"><span class="no">五</span>状态枚举</a>
+  <a href="#s6"><span class="no">六</span>贯穿键</a>
+  <a href="#s7"><span class="no">七</span>多维表格</a>
+  <a href="#s8"><span class="no">八</span>验收</a>
+</nav>
+
+<h2 id="s1"><span class="no">一</span>16 张表行数与最新更新时间 <span class="hint">全部持续写入中</span></h2>
+<div style="overflow-x:auto;"><table>
+  <tr><th>#</th><th>表</th><th>行数</th><th>文件大小</th><th>最新写入</th><th>同步子集</th></tr>
+  <tr><td>1</td><td><code>orders</code></td><td class="num">7,224</td><td class="num"><span class="bar" style="width:42%"></span>28.4 MB</td><td>2026-08-17 13:16</td><td><span class="pill g">核心同步</span></td></tr>
+  <tr><td>2</td><td><code>order_events</code></td><td class="num">11,567</td><td class="num"><span class="bar" style="width:8%"></span>5.5 MB</td><td>2026-08-17 13:16</td><td><span class="pill g">同步</span></td></tr>
+  <tr><td>3</td><td><code>stock_prepares</code></td><td class="num">4,250</td><td class="num"><span class="bar" style="width:19%"></span>12.4 MB</td><td>2026-08-17 13:28</td><td><span class="pill g">核心同步</span></td></tr>
+  <tr><td>4</td><td><code>stock_prepare_events</code></td><td class="num">14,708</td><td class="num"><span class="bar" style="width:11%"></span>7.5 MB</td><td>2026-08-17 13:28</td><td><span class="pill g">同步</span></td></tr>
+  <tr><td>5</td><td><code>shipments</code></td><td class="num">4,048</td><td class="num"><span class="bar" style="width:23%"></span>15.6 MB</td><td>2026-08-17 13:28</td><td><span class="pill g">核心同步</span></td></tr>
+  <tr><td>6</td><td><code>shipment_events</code></td><td class="num">15,559</td><td class="num"><span class="bar" style="width:14%"></span>9.2 MB</td><td>2026-08-17 13:28</td><td><span class="pill g">同步</span></td></tr>
+  <tr><td>7</td><td><code>invoices</code></td><td class="num">1,267</td><td class="num"><span class="bar" style="width:8%"></span>5.3 MB</td><td>2026-08-17 12:13</td><td><span class="pill g">核心同步</span></td></tr>
+  <tr><td>8</td><td><code>invoice_events</code></td><td class="num">4,051</td><td class="num"><span class="bar" style="width:4%"></span>2.4 MB</td><td>2026-08-17 12:13</td><td><span class="pill g">同步</span></td></tr>
+  <tr><td>9</td><td><code>approval_comments</code></td><td class="num">324</td><td class="num"><span class="bar" style="width:1%"></span>250 KB</td><td>2026-08-15 16:24</td><td><span class="pill g">同步</span></td></tr>
+  <tr><td>10</td><td><code>external_instances</code></td><td class="num">12,165</td><td class="num"><span class="bar" style="width:100%"></span>66.7 MB</td><td>2026-08-17 13:28</td><td><span class="pill a">只读归档</span></td></tr>
+  <tr><td>11</td><td><code>background_jobs</code></td><td class="num">10,995</td><td class="num"><span class="bar" style="width:22%"></span>14.6 MB</td><td>2026-08-17 13:28</td><td><span class="pill a">只读归档</span></td></tr>
+  <tr><td>12</td><td><code>bitable_flow_records</code></td><td class="num">15,614</td><td class="num"><span class="bar" style="width:9%"></span>6.0 MB</td><td>2026-08-17 13:28</td><td><span class="pill a">归档+对账</span></td></tr>
+  <tr><td>13</td><td><code>callbacks</code></td><td class="num">139</td><td class="num"><span class="bar" style="width:1%"></span>72 KB</td><td>2026-08-17 09:47</td><td><span class="pill a">只读归档</span></td></tr>
+  <tr><td>14</td><td><code>customer_bitable_sync</code></td><td class="num">961</td><td class="num"><span class="bar" style="width:1%"></span>385 KB</td><td>2026-08-17 13:15</td><td><span class="pill a">归档+对账</span></td></tr>
+  <tr><td>15</td><td><code>approval_bot_messages</code></td><td class="num">12,803</td><td class="num"><span class="bar" style="width:7%"></span>4.9 MB</td><td>2026-08-17 13:28</td><td><span class="pill a">只读归档</span></td></tr>
+  <tr><td>16</td><td><code>warehouse_notice_cards</code></td><td class="num">15</td><td class="num"><span class="bar" style="width:1%"></span>18 KB</td><td>2026-08-15 16:23</td><td><span class="pill a">只读归档</span></td></tr>
+</table></div>
+<div class="note blue"><span class="tt">量级结论</span>业务主表 orders 7,224 行（含 POC 测试单 ORDER-POC-001 多条快照）；归档最大 external_instances 66.7 MB。全部 16 表持续写入中，追加式快照链形态确认。</div>
+
+<h2 id="s2"><span class="no">二</span>字段数（头部 vs 最新快照） <span class="hint">快照链演进证实</span></h2>
+<p>JSONL 追加式：同一业务对象早期记录字段少、后期字段多。<code>orders</code> 头部 65 键 → 最新 107 键，证明快照链演进，同步须按"最后一条有效记录"取当前态。</p>
+<div style="overflow-x:auto;"><table>
+  <tr><th>表</th><th>头部字段数</th><th>最新快照字段数</th><th>spec/biz 文档</th><th>差异</th></tr>
+  <tr><td><code>orders</code></td><td class="num">65</td><td class="num">107</td><td class="num">105</td><td><span class="pill a">+2 新字段</span></td></tr>
+  <tr><td><code>order_events</code></td><td class="num">12</td><td class="num">9</td><td class="num">16</td><td><span class="pill a">精简</span></td></tr>
+  <tr><td><code>stock_prepares</code></td><td class="num">46</td><td class="num">67</td><td class="num">60</td><td><span class="pill a">+7</span></td></tr>
+  <tr><td><code>stock_prepare_events</code></td><td class="num">8</td><td class="num">8</td><td class="num">16</td><td><span class="pill a">精简</span></td></tr>
+  <tr><td><code>shipments</code></td><td class="num">65</td><td class="num">72</td><td class="num">70</td><td><span class="pill a">+2</span></td></tr>
+  <tr><td><code>shipment_events</code></td><td class="num">10</td><td class="num">10</td><td class="num">17</td><td><span class="pill a">精简</span></td></tr>
+  <tr><td><code>invoices</code></td><td class="num">75</td><td class="num">85</td><td class="num">69</td><td><span class="pill r">+16 合并开票字段</span></td></tr>
+  <tr><td><code>invoice_events</code></td><td class="num">9</td><td class="num">9</td><td class="num">18</td><td><span class="pill a">精简</span></td></tr>
+  <tr><td><code>approval_comments</code></td><td class="num">14</td><td class="num">17</td><td class="num">18</td><td><span class="pill a">-1</span></td></tr>
+  <tr><td><code>external_instances</code></td><td class="num">13</td><td class="num">14</td><td class="num">23</td><td><span class="pill a">精简</span></td></tr>
+  <tr><td><code>background_jobs</code></td><td class="num">8</td><td class="num">11</td><td class="num">13</td><td><span class="pill a">-2</span></td></tr>
+  <tr><td><code>bitable_flow_records</code></td><td class="num">7</td><td class="num">10</td><td class="num">10</td><td>—</td></tr>
+  <tr><td><code>callbacks</code></td><td class="num">6</td><td class="num">6</td><td class="num">13</td><td><span class="pill a">精简</span></td></tr>
+  <tr><td><code>customer_bitable_sync</code></td><td class="num">10</td><td class="num">10</td><td class="num">13</td><td><span class="pill a">-3</span></td></tr>
+  <tr><td><code>approval_bot_messages</code></td><td class="num">7</td><td class="num">7</td><td class="num">12</td><td><span class="pill a">精简</span></td></tr>
+  <tr><td><code>warehouse_notice_cards</code></td><td class="num">19</td><td class="num">26</td><td class="num">12</td><td><span class="pill r">+14 卡片同步字段</span></td></tr>
+</table></div>
+<div class="note red"><span class="tt">字段差异提示（T1.2 核对输入）</span>orders 实际 107 键 &gt; 文档 105：新增 <code>contract_finalized_at / contract_final_trigger_stage / contract_final_files / contract_final_error / contract_final_failed_at / submission_retry_input / other_attachment_count / item_product_name</code> 等；invoices 出现 <code>source_shipment_ids / source_order_ids / source_flow_ids / combined_invoice_count / invoice_mode</code>（合并开票功能文档未覆盖）；事件表键数普遍 &lt; 文档（事件体精简）。</div>
+
+<h2 id="s3"><span class="no">三</span>各表字段清单与抽样记录 <span class="hint">48 行抽样 · 点击展开</span></h2>
+<p>每表列出<strong>最新快照完整字段清单</strong>（<span class="chip">普通</span> <span class="chip obj">对象/数组</span> <span class="chip sens">敏感</span>）与<strong>抽样记录</strong>（业务表 4 行：头 2+尾 2；归档表 2 行：头 1+尾 1）。抽样默认折叠，点击展开。敏感键已删除或置 <code>[MASKED]</code>。</p>
+<section class="tblcard">
+  <div class="tbl-head">
+    <code class="tbl-name">orders</code>
+    <span class="pill g">核心同步</span>
+    <span class="tbl-meta">7,224 行 · 28.4 MB · 更新 08-17 13:16</span>
+    <span class="tbl-keys">93 键</span>
+  </div>
+  <div class="chips"><span class="chip">order_id</span><span class="chip">customer_name</span><span class="chip">customer_type</span><span class="chip">customer_record_id</span><span class="chip">product_name</span><span class="chip">quantity</span><span class="chip">unit_price</span><span class="chip">amount</span><span class="chip">currency</span><span class="chip obj">items</span><span class="chip">supplier</span><span class="chip">customer_level</span><span class="chip">shipping_address</span><span class="chip">pickup_warehouse</span><span class="chip">receiver</span><span class="chip">phone</span><span class="chip">tax_no</span><span class="chip">is_self_pickup</span><span class="chip">payment_terms</span><span class="chip">remittance_method</span><span class="chip">order_remark</span><span class="chip">special_spec_requirements</span><span class="chip">customer_contract_no</span><span class="chip">request_id</span><span class="chip">submission_mode</span><span class="chip">resubmit_from_instance_id</span><span class="chip">resubmit_from_flow_id</span><span class="chip">resubmit_root_flow_id</span><span class="chip">approval_profile</span><span class="chip">sales_name</span><span class="chip">sales_user_id</span><span class="chip">sales_role_key</span><span class="chip">agent_name</span><span class="chip">agent_user_id</span><span class="chip">agent_role_key</span><span class="chip">submitter_name</span><span class="chip">submitter_user_id</span><span class="chip">submitter_role_key</span><span class="chip obj">other_attachment_files</span><span class="chip">status</span><span class="chip">status_label</span><span class="chip">created_at</span><span class="chip">updated_at</span><span class="chip">flow_id</span><span class="chip">stage_id</span><span class="chip">stage_code</span><span class="chip">stage_seq</span><span class="chip">instance_id</span><span class="chip">task_id</span><span class="chip">supervisor_task_id</span><span class="chip">chairman_task_id</span><span class="chip">manager_name</span><span class="chip">supervisor_name</span><span class="chip obj">supervisor_names</span><span class="chip">supervisor_auto_approve</span><span class="chip">supervisor_auto_approve_reason</span><span class="chip">chairman_name</span><span class="chip obj">chairman_names</span><span class="chip">chairman_auto_approve</span><span class="chip">chairman_auto_approve_reason</span><span class="chip">needs_chairman_approval</span><span class="chip">source</span><span class="chip">contract_source</span><span class="chip">contract_status</span><span class="chip">background_status</span><span class="chip">create_fingerprint</span><span class="chip">resubmit_revision</span><span class="chip">submission_retry_input</span><span class="chip">customer_sync_status</span><span class="chip">bitable_sync_status</span><span class="chip">error</span><span class="chip">background_job_id</span><span class="chip">bitable_sync_job_id</span><span class="chip">bitable_sync_background_status</span><span class="chip">other_attachment_count</span><span class="chip">contract_source_label</span><span class="chip">customer_contract_original_name</span><span class="chip obj">customer_contract_files</span><span class="chip obj">contract_draft_files</span><span class="chip">contract_draft_url</span><span class="chip obj">contract_draft_warnings</span><span class="chip">external_instance_sync_succeeded</span><span class="chip">bitable_sync_error</span><span class="chip">current_task_id</span><span class="chip">approval_reason</span><span class="chip">last_action</span><span class="chip">last_task_id</span><span class="chip">contract_final_error</span><span class="chip">contract_final_failed_at</span><span class="chip obj">contract_final_files</span><span class="chip">contract_finalized_at</span><span class="chip">contract_final_trigger_stage</span><span class="chip obj">contract_final_warnings</span></div>
+  <details class="samples"><summary><span class="sum-tt">抽样记录</span><span class="sum-meta">4 行 · 头+尾 · 敏感键已脱敏</span><span class="sum-ic">▸</span></summary><pre class="json"><span class="c"># sample 1/4</span>
+{
+ &quot;order_id&quot;: &quot;ORDER-POC-001&quot;,
+ &quot;customer_name&quot;: &quot;山东涵悦诚新材料有限公司&quot;,
+ &quot;customer_type&quot;: &quot;老客户&quot;,
+ &quot;product_name&quot;: &quot;Clayminton LB&quot;,
+ &quot;quantity&quot;: 500,
+ &quot;unit_price&quot;: 20.3,
+ &quot;amount&quot;: 10150,
+ &quot;currency&quot;: &quot;CNY&quot;,
+ &quot;items&quot;: [
+  {
+   &quot;product_name&quot;: &quot;Clayminton LB&quot;,
+   &quot;quantity&quot;: 500,
+   &quot;unit_price&quot;: 20.3,
+   &quot;packaging&quot;: &quot;&quot;,
+   &quot;arrival_date&quot;: &quot;&quot;,
+   &quot;remark&quot;: &quot;&quot;
+  }
+ ],
+ &quot;supplier&quot;: &quot;浙江长安仁恒科技股份有限公司&quot;,
+ &quot;customer_level&quot;: &quot;A&quot;,
+ &quot;shipping_address&quot;: &quot;天津东丽区金钟街道欢坨村津亚物流北永信路5号天津杨昇仓库长扬乐器院内&quot;,
+ &quot;pickup_warehouse&quot;: &quot;&quot;,
+ &quot;receiver&quot;: &quot;魏丽&quot;,
+ &quot;phone&quot;: &quot;15620789139&quot;,
+ &quot;tax_no&quot;: &quot;91370112MA3UE4LL27&quot;,
+ &quot;is_self_pickup&quot;: &quot;否&quot;,
+ &quot;payment_terms&quot;: &quot;款到发货&quot;,
+ &quot;order_remark&quot;: &quot;正规包装，到送货地址告知涵悦诚的货即可。&quot;,
+ &quot;customer_contract_no&quot;: &quot;&quot;,
+ &quot;sales_name&quot;: &quot;鞠炜&quot;,
+ &quot;sales_user_id&quot;: &quot;&quot;,
+ &quot;sales_role_key&quot;: &quot;FEISHU_CONTACT&quot;,
+ &quot;agent_name&quot;: &quot;&quot;,
+ &quot;agent_user_id&quot;: &quot;&quot;,
+ &quot;agent_role_key&quot;: &quot;&quot;,
+ &quot;submitter_name&quot;: &quot;鞠炜&quot;,
+ &quot;submitter_user_id&quot;: &quot;&quot;,
+ &quot;submitter_role_key&quot;: &quot;FEISHU_CONTACT&quot;,
+ &quot;status&quot;: &quot;SYSTEM_PROCESSING&quot;,
+ &quot;status_label&quot;: &quot;已受理，系统处理中&quot;,
+ &quot;created_at&quot;: &quot;2026-05-26T02:42:05.412Z&quot;,
+ &quot;updated_at&quot;: &quot;2026-05-26T02:42:05.412Z&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260526-0004&quot;,
+ &quot;stage_id&quot;: &quot;SO-20260526-0004-ORD-01&quot;,
+ &quot;stage_code&quot;: &quot;ORD&quot;,
+ &quot;stage_seq&quot;: &quot;01&quot;,
+ &quot;instance_id&quot;: &quot;ORDER-POC-001-20260526024205&quot;,
+ &quot;task_id&quot;: &quot;ORDER-POC-001-20260526024205-manager-task&quot;,
+ &quot;supervisor_task_id&quot;: &quot;ORDER-POC-001-20260526024205-supervisor-task&quot;,
+ &quot;chairman_task_id&quot;: &quot;ORDER-POC-001-20260526024205-chairman-task&quot;,
+ &quot;manager_name&quot;: &quot;鞠炜&quot;,
+ &quot;supervisor_name&quot;: &quot;佘文杰&quot;,
+ &quot;supervisor_names&quot;: [
+  &quot;佘文杰&quot;
+ ],
+ &quot;supervisor_auto_approve&quot;: false,
+ &quot;supervisor_auto_approve_reason&quot;: &quot;&quot;,
+ &quot;chairman_name&quot;: &quot;张有连&quot;,
+ &quot;chairman_names&quot;: [
+  &quot;张有连&quot;
+ ],
+ &quot;chairman_auto_approve&quot;: false,
+ &quot;chairman_auto_approve_reason&quot;: &quot;&quot;,
+ &quot;needs_chairman_approval&quot;: false,
+ &quot;source&quot;: &quot;external-orders-create-form&quot;,
+ &quot;contract_source&quot;: &quot;SYSTEM&quot;,
+ &quot;contract_status&quot;: &quot;系统处理中&quot;,
+ &quot;background_status&quot;: &quot;PENDING&quot;
+}</pre><pre class="json"><span class="c"># sample 2/4</span>
+{
+ &quot;order_id&quot;: &quot;ORDER-POC-001&quot;,
+ &quot;customer_name&quot;: &quot;山东涵悦诚新材料有限公司&quot;,
+ &quot;customer_type&quot;: &quot;老客户&quot;,
+ &quot;product_name&quot;: &quot;Clayminton LB&quot;,
+ &quot;quantity&quot;: 500,
+ &quot;unit_price&quot;: 20.3,
+ &quot;amount&quot;: 10150,
+ &quot;currency&quot;: &quot;CNY&quot;,
+ &quot;items&quot;: [
+  {
+   &quot;product_name&quot;: &quot;Clayminton LB&quot;,
+   &quot;item_product_name&quot;: &quot;无机凝胶&quot;,
+   &quot;quantity&quot;: 500,
+   &quot;unit_price&quot;: 20.3
+  }
+ ],
+ &quot;supplier&quot;: &quot;浙江长安仁恒科技股份有限公司&quot;,
+ &quot;customer_level&quot;: &quot;A&quot;,
+ &quot;shipping_address&quot;: &quot;天津东丽区金钟街道欢坨村津亚物流北永信路5号天津杨昇仓库长扬乐器院内&quot;,
+ &quot;pickup_warehouse&quot;: &quot;&quot;,
+ &quot;receiver&quot;: &quot;魏丽&quot;,
+ &quot;phone&quot;: &quot;15620789139&quot;,
+ &quot;tax_no&quot;: &quot;91370112MA3UE4LL27&quot;,
+ &quot;is_self_pickup&quot;: &quot;否&quot;,
+ &quot;payment_terms&quot;: &quot;款到发货&quot;,
+ &quot;order_remark&quot;: &quot;正规包装，到送货地址告知涵悦诚的货即可。&quot;,
+ &quot;customer_contract_no&quot;: &quot;&quot;,
+ &quot;sales_name&quot;: &quot;鞠炜&quot;,
+ &quot;sales_user_id&quot;: &quot;&quot;,
+ &quot;sales_role_key&quot;: &quot;FEISHU_CONTACT&quot;,
+ &quot;agent_name&quot;: &quot;&quot;,
+ &quot;agent_user_id&quot;: &quot;&quot;,
+ &quot;agent_role_key&quot;: &quot;&quot;,
+ &quot;submitter_name&quot;: &quot;鞠炜&quot;,
+ &quot;submitter_user_id&quot;: &quot;&quot;,
+ &quot;submitter_role_key&quot;: &quot;FEISHU_CONTACT&quot;,
+ &quot;status&quot;: &quot;MANAGER_PENDING&quot;,
+ &quot;created_at&quot;: &quot;2026-05-26T02:42:05.412Z&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260526-0004&quot;,
+ &quot;stage_id&quot;: &quot;SO-20260526-0004-ORD-01&quot;,
+ &quot;stage_code&quot;: &quot;ORD&quot;,
+ &quot;stage_seq&quot;: &quot;01&quot;,
+ &quot;instance_id&quot;: &quot;ORDER-POC-001-20260526024205&quot;,
+ &quot;task_id&quot;: &quot;ORDER-POC-001-20260526024205-manager-task&quot;,
+ &quot;supervisor_task_id&quot;: &quot;ORDER-POC-001-20260526024205-supervisor-task&quot;,
+ &quot;chairman_task_id&quot;: &quot;ORDER-POC-001-20260526024205-chairman-task&quot;,
+ &quot;manager_name&quot;: &quot;鞠炜&quot;,
+ &quot;supervisor_name&quot;: &quot;佘文杰&quot;,
+ &quot;supervisor_names&quot;: [
+  &quot;佘文杰&quot;
+ ],
+ &quot;supervisor_auto_approve&quot;: false,
+ &quot;supervisor_auto_approve_reason&quot;: &quot;&quot;,
+ &quot;chairman_name&quot;: &quot;张有连&quot;,
+ &quot;chairman_names&quot;: [
+  &quot;张有连&quot;
+ ],
+ &quot;chairman_auto_approve&quot;: false,
+ &quot;chairman_auto_approve_reason&quot;: &quot;&quot;,
+ &quot;needs_chairman_approval&quot;: false,
+ &quot;source&quot;: &quot;external-orders-create-form&quot;,
+ &quot;contract_source&quot;: &quot;SYSTEM&quot;,
+ &quot;contract_source_label&quot;: &quot;草稿合同&quot;,
+ &quot;customer_contract_original_name&quot;: &quot;&quot;,
+ &quot;customer_contract_files&quot;: [],
+ &quot;contract_status&quot;: &quot;草稿合同&quot;,
+ &quot;contract_draft_files&quot;: [
+  &quot;山东涵悦诚新材料有限公司合同-RH-20260526-4.pdf&quot;,
+  &quot;山东涵悦诚新材料有限公司合同-RH-20260526-4.docx&quot;
+ ],
+ &quot;contract_draft_url&quot;: &quot;1. 山东涵悦诚新材料有限公司合同-RH-20260526-4.pdf 预览: https://applink.feishu.cn/client/web_url/open?mode=window&amp;url=http%3A%2F%2F101.37.66.110%3A3000%2Fexternal-orders%2FORDER-POC-001-20260526024205%2Fcontract%2F%25E5%25B1%25B1%25E4%25B8%259C%25E6%25B6%25B5%25E6%2582%25A6%25E8%25AF%259A%25E6%2596%25B0%25E6%259D%2590%25E6%2596%2599%25E6%259C%2589%25E9%2599%2590%25E5%2585%25AC%25E5%258F%25B8%25E5%2590%2588%25E5%2590%258C-RH-20260526-4.pdf%2Fpreview&amp;width=1200&amp;height=800 下载: https://applink.feishu.cn/client/web_url/open?mode=window&amp;url=http%3A%2F%2F101.37.66.110%3A3000%2Fexternal-orders%2FORDER-POC-001-20260526024205%2Fcontract%2F%25E5%25B1%25B1%25E4%25B8%259C%25E6%25B6%25B5%25E6%2582%25A6%25E8%25AF%259A%25E6%2596%25B0%25E6%259D%2590%25E6%2596%2599%25E6%259C%2589%25E9%2599%2590%25E5%2585%25AC%25E5%258F%25B8%25E5%2590%2588%25E5%2590%258C-RH-20260526-4.pdf&amp;width=1200&amp;height=800\n2. 山东涵悦诚新材料有限公司合同-RH-20260526-4.docx 下载: https://applink.feishu.cn/client/web_url/open?mode=window&amp;url=http%3A%2F%2F101.37.66.110%3A3000%2Fexternal-orders%2FORDER-POC-001-20260526024205%2Fcontract%2F%25E5%25B1%25B1%25E4%25B8%259C%25E6%25B6%25B5%25E6%2582%25A6%25E8%25AF%259A%25E6%2596%25B0%25E6%259D%2590%25E6%2596%2599%25E6%259C%2589%25E9%2599%2590%25E5%2585%25AC%25E5%258F%25B8%25E5%2590%2588%25E5%2590%258C-RH-20260526-4.docx&amp;width=1200&amp;height=800&quot;,
+ &quot;contract_draft_warnings&quot;: []
+}</pre><pre class="json"><span class="c"># sample 3/4</span>
+{
+ &quot;order_id&quot;: &quot;ORDER-POC-001&quot;,
+ &quot;customer_name&quot;: &quot;上海万城化工科技有限公司&quot;,
+ &quot;customer_type&quot;: &quot;老客户&quot;,
+ &quot;customer_record_id&quot;: &quot;recvozZnCk2MHK&quot;,
+ &quot;product_name&quot;: &quot;多商品(3)&quot;,
+ &quot;quantity&quot;: 13500,
+ &quot;unit_price&quot;: 0,
+ &quot;amount&quot;: 102350,
+ &quot;currency&quot;: &quot;CNY&quot;,
+ &quot;items&quot;: [
+  {
+   &quot;product_name&quot;: &quot;Clayminton 62&quot;,
+   &quot;item_product_name&quot;: &quot;有机膨润土&quot;,
+   &quot;quantity&quot;: 500,
+   &quot;unit_price&quot;: 32.5,
+   &quot;total&quot;: 16250,
+   &quot;packaging&quot;: &quot;&quot;,
+   &quot;package_spec&quot;: &quot;&quot;,
+   &quot;arrival_date&quot;: &quot;&quot;,
+   &quot;remark&quot;: &quot;&quot;
+  },
+  {
+   &quot;product_name&quot;: &quot;Clayminton 48&quot;,
+   &quot;item_product_name&quot;: &quot;有机膨润土&quot;,
+   &quot;quantity&quot;: 3000,
+   &quot;unit_price&quot;: 8.7,
+   &quot;total&quot;: 26100,
+   &quot;packaging&quot;: &quot;&quot;,
+   &quot;package_spec&quot;: &quot;&quot;,
+   &quot;arrival_date&quot;: &quot;&quot;,
+   &quot;remark&quot;: &quot;&quot;
+  },
+  {
+   &quot;product_name&quot;: &quot;Clayminton TB-5S&quot;,
+   &quot;item_product_name&quot;: &quot;无机凝胶&quot;,
+   &quot;quantity&quot;: 10000,
+   &quot;unit_price&quot;: 6,
+   &quot;total&quot;: 60000,
+   &quot;packaging&quot;: &quot;&quot;,
+   &quot;package_spec&quot;: &quot;&quot;,
+   &quot;arrival_date&quot;: &quot;&quot;,
+   &quot;remark&quot;: &quot;&quot;
+  }
+ ],
+ &quot;supplier&quot;: &quot;浙江长安仁恒科技股份有限公司上海分公司&quot;,
+ &quot;customer_level&quot;: &quot;A&quot;,
+ &quot;shipping_address&quot;: &quot;广东省中山市民众街道接源行政村阳光大道3号&quot;,
+ &quot;pickup_warehouse&quot;: &quot;广东省中山市民众街道接源行政村阳光大道3号&quot;,
+ &quot;receiver&quot;: &quot;马金丽&quot;,
+ &quot;phone&quot;: &quot;13715560220&quot;,
+ &quot;tax_no&quot;: &quot;91310106776656584D&quot;,
+ &quot;is_self_pickup&quot;: &quot;否&quot;,
+ &quot;payment_terms&quot;: &quot;货到7天&quot;,
+ &quot;remittance_method&quot;: &quot;电汇或银行承兑&quot;,
+ &quot;order_remark&quot;: &quot;带COA&quot;,
+ &quot;special_spec_requirements&quot;: &quot;&quot;,
+ &quot;customer_contract_no&quot;: &quot;&quot;,
+ &quot;request_id&quot;: &quot;req_web_450fc6ab-c7e0-4656-8341-58f1814e19a2&quot;,
+ &quot;submission_mode&quot;: &quot;CREATE&quot;,
+ &quot;resubmit_from_instance_id&quot;: &quot;&quot;,
+ &quot;resubmit_from_flow_id&quot;: &quot;&quot;,
+ &quot;resubmit_root_flow_id&quot;: &quot;&quot;,
+ &quot;approval_profile&quot;: &quot;&quot;,
+ &quot;sales_name&quot;: &quot;张有连&quot;,
+ &quot;sales_user_id&quot;: &quot;7a845abc&quot;,
+ &quot;sales_role_key&quot;: &quot;SALES_PERSON&quot;,
+ &quot;agent_name&quot;: &quot;陈虹励&quot;,
+ &quot;agent_user_id&quot;: &quot;673gadg4&quot;,
+ &quot;agent_role_key&quot;: &quot;FEISHU_CONTACT,TEST_STOCK_BUSINESS,TEST_SHIPMENT_WAREHOUSE,TEST_SHIPMENT_RECEIPT&quot;,
+ &quot;submitter_name&quot;: &quot;陈虹励&quot;,
+ &quot;submitter_user_id&quot;: &quot;673gadg4&quot;,
+ &quot;submitter_role_key&quot;: &quot;agent&quot;,
+ &quot;other_attachment_files&quot;: [],
+ &quot;status&quot;: &quot;SUPERVISOR_APPROVED&quot;,
+ &quot;status_label&quot;: &quot;飞书审批已创建，等待信息确认&quot;,
+ &quot;created_at&quot;: &quot;2026-08-17T05:15:08.114Z&quot;,
+ &quot;updated_at&quot;: &quot;2026-08-17T05:16:10.134Z&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260817-0020&quot;,
+ &quot;stage_id&quot;: &quot;SO-20260817-0020-ORD-01&quot;,
+ &quot;stage_code&quot;: &quot;ORD&quot;,
+ &quot;stage_seq&quot;: &quot;01&quot;,
+ &quot;instance_id&quot;: &quot;ORDER-POC-001-20260817051508&quot;,
+ &quot;task_id&quot;: &quot;ORDER-POC-001-20260817051508-manager-task&quot;,
+ &quot;supervisor_task_id&quot;: &quot;ORDER-POC-001-20260817051508-supervisor-task&quot;,
+ &quot;chairman_task_id&quot;: &quot;ORDER-POC-001-20260817051508-chairman-task&quot;,
+ &quot;manager_name&quot;: &quot;陈虹励&quot;,
+ &quot;supervisor_name&quot;: &quot;张有连&quot;,
+ &quot;supervisor_names&quot;: [
+  &quot;张有连&quot;
+ ],
+ &quot;supervisor_auto_approve&quot;: true,
+ &quot;supervisor_auto_approve_reason&quot;: &quot;sales_is_zhang_you_lian&quot;,
+ &quot;chairman_name&quot;: &quot;张有连&quot;,
+ &quot;chairman_names&quot;: [
+  &quot;张有连&quot;
+ ],
+ &quot;chairman_auto_approve&quot;: false,
+ &quot;chairman_auto_approve_reason&quot;: &quot;&quot;,
+ &quot;needs_chairman_approval&quot;: false,
+ &quot;source&quot;: &quot;external-orders-create-form&quot;,
+ &quot;contract_source&quot;: &quot;SYSTEM&quot;,
+ &quot;contract_status&quot;: &quot;正式合同已盖章&quot;,
+ &quot;background_status&quot;: &quot;DONE&quot;,
+ &quot;create_fingerprint&quot;: &quot;f0355662f3dbb17e0679aef9abdd2ce595d15db7bd2bd2db747c317cf19ac250&quot;,
+ &quot;resubmit_revision&quot;: 1,
+ &quot;submission_retry_input&quot;: null,
+ &quot;customer_sync_status&quot;: &quot;SUCCEEDED&quot;,
+ &quot;bitable_sync_status&quot;: &quot;SUCCEEDED&quot;,
+ &quot;error&quot;: &quot;&quot;,
+ &quot;background_job_id&quot;: &quot;858073c9-da5c-4dd0-b964-3834074da05a&quot;,
+ &quot;bitable_sync_job_id&quot;: &quot;64a67d48-542d-4759-9a31-13539f42f90c&quot;,
+ &quot;bitable_sync_background_status&quot;: &quot;DONE&quot;,
+ &quot;other_attachment_count&quot;: 0,
+ &quot;contract_source_label&quot;: &quot;草稿合同&quot;,
+ &quot;customer_contract_original_name&quot;: &quot;&quot;,
+ &quot;customer_contract_files&quot;: [],
+ &quot;contract_draft_files&quot;: [
+  &quot;上海万城化工科技有限公司-20260817-草稿合同.pdf&quot;,
+  &quot;上海万城化工科技有限公司-20260817-草稿合同.docx&quot;
+ ],
+ &quot;contract_draft_url&quot;: &quot;1. 上海万城化工科技有限公司-20260817-草稿合同.pdf 预览: https://applink.feishu.cn/client/web_url/open?mode=window&amp;url=https%3A%2F%2Fapproval.renheng.com%2Fexternal-orders%2FORDER-POC-001-20260817051508%2Fcontract%2F%25E4%25B8%258A%25E6%25B5%25B7%25E4%25B8%2587%25E5%259F%258E%25E5%258C%2596%25E5%25B7%25A5%25E7%25A7%2591%25E6%258A%2580%25E6%259C%2589%25E9%2599%2590%25E5%2585%25AC%25E5%258F%25B8-20260817-%25E8%258D%2589%25E7%25A8%25BF%25E5%2590%2588%25E5%2590%258C.pdf%2Fpreview&amp;width=1200&amp;height=800 下载: https://applink.feishu.cn/client/web_url/open?mode=window&amp;url=https%3A%2F%2Fapproval.renheng.com%2Fexternal-orders%2FORDER-POC-001-20260817051508%2Fcontract%2F%25E4%25B8%258A%25E6%25B5%25B7%25E4%25B8%2587%25E5%259F%258E%25E5%258C%2596%25E5%25B7%25A5%25E7%25A7%2591%25E6%258A%2580%25E6%259C%2589%25E9%2599%2590%25E5%2585%25AC%25E5%258F%25B8-20260817-%25E8%258D%2589%25E7%25A8%25BF%25E5%2590%2588%25E5%2590%258C.pdf&amp;width=1200&amp;height=800\n2. 上海万城化工科技有限公司-20260817-草稿合同.docx 下载: https://applink.feishu.cn/client/web_url/open?mode=window&amp;url=https%3A%2F%2Fapproval.renheng.com%2Fexternal-orders%2FORDER-POC-001-20260817051508%2Fcontract%2F%25E4%25B8%258A%25E6%25B5%25B7%25E4%25B8%2587%25E5%259F%258E%25E5%258C%2596%25E5%25B7%25A5%25E7%25A7%2591%25E6%258A%2580%25E6%259C%2589%25E9%2599%2590%25E5%2585%25AC%25E5%258F%25B8-20260817-%25E8%258D%2589%25E7%25A8%25BF%25E5%2590%2588%25E5%2590%258C.docx&amp;width=1200&amp;height=800&quot;,
+ &quot;contract_draft_warnings&quot;: [],
+ &quot;bitable_sync_error&quot;: &quot;&quot;,
+ &quot;external_instance_sync_succeeded&quot;: true,
+ &quot;current_task_id&quot;: &quot;ORDER-POC-001-20260817051508-supervisor-task&quot;,
+ &quot;approval_reason&quot;: &quot;&quot;,
+ &quot;last_action&quot;: &quot;APPROVE&quot;,
+ &quot;last_task_id&quot;: &quot;ORDER-POC-001-20260817051508-manager-task&quot;,
+ &quot;contract_final_files&quot;: [
+  &quot;上海万城化工科技有限公司-20260817-正式合同.pdf&quot;
+ ],
+ &quot;contract_finalized_at&quot;: &quot;2026-08-17T05:16:10.134Z&quot;,
+ &quot;contract_final_trigger_stage&quot;: &quot;SUPERVISOR&quot;,
+ &quot;contract_final_warnings&quot;: [],
+ &quot;contract_final_error&quot;: &quot;&quot;,
+ &quot;contract_final_failed_at&quot;: &quot;&quot;
+}</pre><pre class="json"><span class="c"># sample 4/4</span>
+{
+ &quot;order_id&quot;: &quot;ORDER-POC-001&quot;,
+ &quot;customer_name&quot;: &quot;全椒亮克威泽工业涂料有限公司&quot;,
+ &quot;customer_type&quot;: &quot;老客户&quot;,
+ &quot;customer_record_id&quot;: &quot;recH5k8h4G&quot;,
+ &quot;product_name&quot;: &quot;Clayminton 72&quot;,
+ &quot;quantity&quot;: 500,
+ &quot;unit_price&quot;: 27,
+ &quot;amount&quot;: 13500,
+ &quot;currency&quot;: &quot;CNY&quot;,
+ &quot;items&quot;: [
+  {
+   &quot;product_name&quot;: &quot;Clayminton 72&quot;,
+   &quot;item_product_name&quot;: &quot;有机膨润土&quot;,
+   &quot;quantity&quot;: 500,
+   &quot;unit_price&quot;: 27,
+   &quot;total&quot;: 13500,
+   &quot;packaging&quot;: &quot;&quot;,
+   &quot;package_spec&quot;: &quot;20&quot;,
+   &quot;arrival_date&quot;: &quot;2026-08-27&quot;,
+   &quot;remark&quot;: &quot;&quot;
+  }
+ ],
+ &quot;supplier&quot;: &quot;浙江长安仁恒科技股份有限公司上海分公司&quot;,
+ &quot;customer_level&quot;: &quot;B&quot;,
+ &quot;shipping_address&quot;: &quot;安徽省滁州市全椒县十字镇十谭现代产业园远大路05号全椒亮克威泽工业涂料有限公司&quot;,
+ &quot;pickup_warehouse&quot;: &quot;安徽省滁州市全椒县十字镇十谭现代产业园远大路05号全椒亮克威泽工业涂料有限公司&quot;,
+ &quot;receiver&quot;: &quot;杨国发&quot;,
+ &quot;phone&quot;: &quot;18225778059&quot;,
+ &quot;tax_no&quot;: &quot;91341124MA2RK6UR2A&quot;,
+ &quot;is_self_pickup&quot;: &quot;否&quot;,
+ &quot;payment_terms&quot;: &quot;月结30天&quot;,
+ &quot;remittance_method&quot;: &quot;电汇&quot;,
+ &quot;order_remark&quot;: &quot;&quot;,
+ &quot;special_spec_requirements&quot;: &quot;&quot;,
+ &quot;customer_contract_no&quot;: &quot;CGDD019269&quot;,
+ &quot;request_id&quot;: &quot;req_web_4e288750-70cb-4a35-9f89-5f8e3642f856&quot;,
+ &quot;submission_mode&quot;: &quot;CREATE&quot;,
+ &quot;resubmit_from_instance_id&quot;: &quot;&quot;,
+ &quot;resubmit_from_flow_id&quot;: &quot;&quot;,
+ &quot;resubmit_root_flow_id&quot;: &quot;&quot;,
+ &quot;approval_profile&quot;: &quot;&quot;,
+ &quot;sales_name&quot;: &quot;张蕾&quot;,
+ &quot;sales_user_id&quot;: &quot;g82c98e1&quot;,
+ &quot;sales_role_key&quot;: &quot;SALES_PERSON&quot;,
+ &quot;agent_name&quot;: &quot;黄佳敏&quot;,
+ &quot;agent_user_id&quot;: &quot;96g68964&quot;,
+ &quot;agent_role_key&quot;: &quot;FEISHU_CONTACT&quot;,
+ &quot;submitter_name&quot;: &quot;黄佳敏&quot;,
+ &quot;submitter_user_id&quot;: &quot;96g68964&quot;,
+ &quot;submitter_role_key&quot;: &quot;agent&quot;,
+ &quot;other_attachment_files&quot;: [],
+ &quot;status&quot;: &quot;SUPERVISOR_APPROVED&quot;,
+ &quot;status_label&quot;: &quot;飞书审批已创建，等待信息确认&quot;,
+ &quot;created_at&quot;: &quot;2026-08-17T04:41:51.010Z&quot;,
+ &quot;updated_at&quot;: &quot;2026-08-17T05:32:19.073Z&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260817-0019&quot;,
+ &quot;stage_id&quot;: &quot;SO-20260817-0019-ORD-01&quot;,
+ &quot;stage_code&quot;: &quot;ORD&quot;,
+ &quot;stage_seq&quot;: &quot;01&quot;,
+ &quot;instance_id&quot;: &quot;ORDER-POC-001-20260817044150&quot;,
+ &quot;task_id&quot;: &quot;ORDER-POC-001-20260817044150-manager-task&quot;,
+ &quot;supervisor_task_id&quot;: &quot;ORDER-POC-001-20260817044150-supervisor-task&quot;,
+ &quot;chairman_task_id&quot;: &quot;ORDER-POC-001-20260817044150-chairman-task&quot;,
+ &quot;manager_name&quot;: &quot;黄佳敏&quot;,
+ &quot;supervisor_name&quot;: &quot;张蕾&quot;,
+ &quot;supervisor_names&quot;: [
+  &quot;张蕾&quot;
+ ],
+ &quot;supervisor_auto_approve&quot;: false,
+ &quot;supervisor_auto_approve_reason&quot;: &quot;&quot;,
+ &quot;chairman_name&quot;: &quot;张有连&quot;,
+ &quot;chairman_names&quot;: [
+  &quot;张有连&quot;
+ ],
+ &quot;chairman_auto_approve&quot;: false,
+ &quot;chairman_auto_approve_reason&quot;: &quot;&quot;,
+ &quot;needs_chairman_approval&quot;: false,
+ &quot;source&quot;: &quot;external-orders-create-form&quot;,
+ &quot;contract_source&quot;: &quot;CUSTOMER&quot;,
+ &quot;contract_status&quot;: &quot;正式合同已盖章&quot;,
+ &quot;background_status&quot;: &quot;DONE&quot;,
+ &quot;create_fingerprint&quot;: &quot;a20963db546b0a80c85998e2e2179b2b95841afbd4b7cc062896c1a3ebee6b7e&quot;,
+ &quot;resubmit_revision&quot;: 1,
+ &quot;submission_retry_input&quot;: null,
+ &quot;customer_sync_status&quot;: &quot;SUCCEEDED&quot;,
+ &quot;bitable_sync_status&quot;: &quot;SUCCEEDED&quot;,
+ &quot;error&quot;: &quot;&quot;,
+ &quot;background_job_id&quot;: &quot;01e5ac0d-547c-41ea-9a6e-311c725b6e6d&quot;,
+ &quot;bitable_sync_job_id&quot;: &quot;8cfc3ff2-dccd-4f95-b218-5c58f0f80509&quot;,
+ &quot;bitable_sync_background_status&quot;: &quot;DONE&quot;,
+ &quot;other_attachment_count&quot;: 0,
+ &quot;contract_source_label&quot;: &quot;客户合同&quot;,
+ &quot;customer_contract_original_name&quot;: &quot;长安仁采购单.pdf&quot;,
+ &quot;customer_contract_files&quot;: [
+  &quot;客户原始合同-全椒亮克威泽工业涂料有限公司-1786941715552.pdf&quot;
+ ],
+ &quot;contract_draft_files&quot;: [
+  &quot;客户原始合同-全椒亮克威泽工业涂料有限公司-1786941715552.pdf&quot;
+ ],
+ &quot;contract_draft_url&quot;: &quot;客户原始合同-全椒亮克威泽工业涂料有限公司-1786941715552.pdf 预览: https://applink.feishu.cn/client/web_url/open?mode=window&amp;url=https%3A%2F%2Fapproval.renheng.com%2Fexternal-orders%2FORDER-POC-001-20260817044150%2Fcontract%2F%25E5%25AE%25A2%25E6%2588%25B7%25E5%258E%259F%25E5%25A7%258B%25E5%2590%2588%25E5%2590%258C-%25E5%2585%25A8%25E6%25A4%2592%25E4%25BA%25AE%25E5%2585%258B%25E5%25A8%2581%25E6%25B3%25BD%25E5%25B7%25A5%25E4%25B8%259A%25E6%25B6%2582%25E6%2596%2599%25E6%259C%2589%25E9%2599%2590%25E5%2585%25AC%25E5%258F%25B8-1786941715552.pdf%2Fpreview&amp;width=1200&amp;height=800 下载: https://applink.feishu.cn/client/web_url/open?mode=window&amp;url=https%3A%2F%2Fapproval.renheng.com%2Fexternal-orders%2FORDER-POC-001-20260817044150%2Fcontract%2F%25E5%25AE%25A2%25E6%2588%25B7%25E5%258E%259F%25E5%25A7%258B%25E5%2590%2588%25E5%2590%258C-%25E5%2585%25A8%25E6%25A4%2592%25E4%25BA%25AE%25E5%2585%258B%25E5%25A8%2581%25E6%25B3%25BD%25E5%25B7%25A5%25E4%25B8%259A%25E6%25B6%2582%25E6%2596%2599%25E6%259C%2589%25E9%2599%2590%25E5%2585%25AC%25E5%258F%25B8-1786941715552.pdf&amp;width=1200&amp;height=800&quot;,
+ &quot;contract_draft_warnings&quot;: [],
+ &quot;external_instance_sync_succeeded&quot;: true,
+ &quot;bitable_sync_error&quot;: &quot;&quot;,
+ &quot;current_task_id&quot;: &quot;ORDER-POC-001-20260817044150-supervisor-task&quot;,
+ &quot;approval_reason&quot;: &quot;&quot;,
+ &quot;last_action&quot;: &quot;APPROVE&quot;,
+ &quot;last_task_id&quot;: &quot;ORDER-POC-001-20260817044150-supervisor-task&quot;,
+ &quot;contract_final_error&quot;: &quot;&quot;,
+ &quot;contract_final_failed_at&quot;: &quot;&quot;,
+ &quot;contract_final_files&quot;: [
+  &quot;全椒亮克威泽工业涂料有限公司-20260817-正式合同.pdf&quot;
+ ],
+ &quot;contract_finalized_at&quot;: &quot;2026-08-17T05:32:19.073Z&quot;,
+ &quot;contract_final_trigger_stage&quot;: &quot;SUPERVISOR&quot;,
+ &quot;contract_final_warnings&quot;: []
+}</pre></details>
+</section>
+<section class="tblcard">
+  <div class="tbl-head">
+    <code class="tbl-name">order_events</code>
+    <span class="pill g">同步</span>
+    <span class="tbl-meta">11,567 行 · 5.5 MB · 更新 08-17 13:16</span>
+    <span class="tbl-keys">11 键</span>
+  </div>
+  <div class="chips"><span class="chip">event_id</span><span class="chip">occurred_at</span><span class="chip">order_id</span><span class="chip">instance_id</span><span class="chip">task_id</span><span class="chip">flow_id</span><span class="chip">stage_id</span><span class="chip">stage_code</span><span class="chip">stage_seq</span><span class="chip">status</span><span class="chip obj">detail</span></div>
+  <details class="samples"><summary><span class="sum-tt">抽样记录</span><span class="sum-meta">4 行 · 头+尾 · 敏感键已脱敏</span><span class="sum-ic">▸</span></summary><pre class="json"><span class="c"># sample 1/4</span>
+{
+ &quot;event_id&quot;: &quot;0f60127b-32e9-442f-891a-e2660dfed363&quot;,
+ &quot;occurred_at&quot;: &quot;2026-05-26T02:42:05.412Z&quot;,
+ &quot;order_id&quot;: &quot;ORDER-POC-001&quot;,
+ &quot;instance_id&quot;: &quot;ORDER-POC-001-20260526024205&quot;,
+ &quot;task_id&quot;: &quot;ORDER-POC-001-20260526024205-manager-task&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260526-0004&quot;,
+ &quot;stage_id&quot;: &quot;SO-20260526-0004-ORD-01&quot;,
+ &quot;stage_code&quot;: &quot;ORD&quot;,
+ &quot;stage_seq&quot;: &quot;01&quot;,
+ &quot;status&quot;: &quot;ORDER_SUBMIT_ACCEPTED&quot;,
+ &quot;detail&quot;: {
+  &quot;message&quot;: &quot;订单提交已受理，后台生成合同并发起审批&quot;
+ }
+}</pre><pre class="json"><span class="c"># sample 2/4</span>
+{
+ &quot;event_id&quot;: &quot;cbef8a6f-68d1-4cd7-952e-763ef7800785&quot;,
+ &quot;occurred_at&quot;: &quot;2026-05-26T02:42:05.412Z&quot;,
+ &quot;order_id&quot;: &quot;ORDER-POC-001&quot;,
+ &quot;instance_id&quot;: &quot;ORDER-POC-001-20260526024205&quot;,
+ &quot;task_id&quot;: &quot;ORDER-POC-001-20260526024205-manager-task&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260526-0004&quot;,
+ &quot;stage_id&quot;: &quot;SO-20260526-0004-ORD-01&quot;,
+ &quot;stage_code&quot;: &quot;ORD&quot;,
+ &quot;stage_seq&quot;: &quot;01&quot;,
+ &quot;status&quot;: &quot;TEST_ORDER_CREATED&quot;,
+ &quot;detail&quot;: {
+  &quot;source&quot;: &quot;external-orders-create-form&quot;
+ }
+}</pre><pre class="json"><span class="c"># sample 3/4</span>
+{
+ &quot;event_id&quot;: &quot;c22288ca-33a6-464d-83e2-1734f9d44f26&quot;,
+ &quot;occurred_at&quot;: &quot;2026-08-17T05:16:15.824Z&quot;,
+ &quot;order_id&quot;: &quot;ORDER-POC-001&quot;,
+ &quot;instance_id&quot;: &quot;ORDER-POC-001-20260817051508&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260817-0020&quot;,
+ &quot;task_id&quot;: &quot;ORDER-POC-001-20260817051508-supervisor-task&quot;,
+ &quot;status&quot;: &quot;STOCK_PREPARE_TRIGGER_REQUESTED&quot;,
+ &quot;detail&quot;: {
+  &quot;trigger&quot;: &quot;background-job&quot;,
+  &quot;final_contract_created&quot;: true,
+  &quot;final_contract_message&quot;: &quot;&quot;
+ },
+ &quot;evidence_path&quot;: &quot;C:\\feishu-approval-poc\\tmp\\evidence\\external_orders_last_decision_parsed.json&quot;
+}</pre><pre class="json"><span class="c"># sample 4/4</span>
+{
+ &quot;event_id&quot;: &quot;3a57ee34-f4c8-46a8-bc6b-bdcc479f7fb1&quot;,
+ &quot;occurred_at&quot;: &quot;2026-08-17T05:32:19.073Z&quot;,
+ &quot;order_id&quot;: &quot;ORDER-POC-001&quot;,
+ &quot;instance_id&quot;: &quot;ORDER-POC-001-20260817044150&quot;,
+ &quot;task_id&quot;: &quot;ORDER-POC-001-20260817044150-manager-task&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260817-0019&quot;,
+ &quot;stage_id&quot;: &quot;SO-20260817-0019-ORD-01&quot;,
+ &quot;stage_code&quot;: &quot;ORD&quot;,
+ &quot;stage_seq&quot;: &quot;01&quot;,
+ &quot;status&quot;: &quot;CONTRACT_FINALIZED&quot;,
+ &quot;detail&quot;: {
+  &quot;trigger&quot;: &quot;manual-repair-contract-stamp-sign-label&quot;,
+  &quot;trigger_stage&quot;: &quot;SUPERVISOR&quot;,
+  &quot;files&quot;: [
+   &quot;全椒亮克威泽工业涂料有限公司-20260817-正式合同.pdf&quot;
+  ],
+  &quot;warnings&quot;: [],
+  &quot;evidence_path&quot;: &quot;tmp/evidence/finalize_order_contract_error.ORDER-POC-001-20260817044150.json&quot;
+ }
+}</pre></details>
+</section>
+<section class="tblcard">
+  <div class="tbl-head">
+    <code class="tbl-name">stock_prepares</code>
+    <span class="pill g">核心同步</span>
+    <span class="tbl-meta">4,250 行 · 12.4 MB · 更新 08-17 13:28</span>
+    <span class="tbl-keys">59 键</span>
+  </div>
+  <div class="chips"><span class="chip">stock_prepare_id</span><span class="chip">instance_id</span><span class="chip">task_id</span><span class="chip">current_task_id</span><span class="chip">reservation_task_id</span><span class="chip">finance_task_id</span><span class="chip">business_task_id</span><span class="chip">order_instance_id</span><span class="chip">order_id</span><span class="chip">flow_id</span><span class="chip">stage_id</span><span class="chip">stage_code</span><span class="chip">stage_seq</span><span class="chip">batch_seq</span><span class="chip">batch_type</span><span class="chip">order_total_quantity</span><span class="chip">shipped_quantity_before</span><span class="chip">shipped_quantity_total</span><span class="chip">remaining_quantity</span><span class="chip">customer_name</span><span class="chip">customer_contract_no</span><span class="chip">supplier</span><span class="chip">sales_name</span><span class="chip">approval_profile</span><span class="chip">agent_name</span><span class="chip obj">other_attachment_files</span><span class="chip">submitter_name</span><span class="chip">submitter_user_id</span><span class="chip">is_self_pickup</span><span class="chip">settlement_method</span><span class="chip">payment_condition</span><span class="chip">special_spec_requirements</span><span class="chip">amount</span><span class="chip">currency</span><span class="chip">unit_price</span><span class="chip obj">delivery_info</span><span class="chip obj">stock_items</span><span class="chip">stock_status</span><span class="chip">stock_status_code</span><span class="chip">workflow_node</span><span class="chip">next_node</span><span class="chip">approver_name</span><span class="chip obj">approver_names</span><span class="chip">created_at</span><span class="chip">updated_at</span><span class="chip">source</span><span class="chip">approved_at</span><span class="chip">business_submitted_at</span><span class="chip obj">warehouse_allocation</span><span class="chip">batch_quantity</span><span class="chip">split_flag</span><span class="chip">business_reason</span><span class="chip">outbound_order_status</span><span class="chip">outbound_order_id</span><span class="chip">outbound_order_file_name</span><span class="chip">outbound_order_file_path</span><span class="chip">outbound_order_url</span><span class="chip">outbound_generated_at</span><span class="chip">outbound_order_error</span></div>
+  <details class="samples"><summary><span class="sum-tt">抽样记录</span><span class="sum-meta">4 行 · 头+尾 · 敏感键已脱敏</span><span class="sum-ic">▸</span></summary><pre class="json"><span class="c"># sample 1/4</span>
+{
+ &quot;stock_prepare_id&quot;: &quot;SO-20260526-0004-STK-01&quot;,
+ &quot;instance_id&quot;: &quot;SO-20260526-0004-STK-01&quot;,
+ &quot;task_id&quot;: &quot;SO-20260526-0004-STK-01-reservation-task&quot;,
+ &quot;current_task_id&quot;: &quot;SO-20260526-0004-STK-01-reservation-task&quot;,
+ &quot;reservation_task_id&quot;: &quot;SO-20260526-0004-STK-01-reservation-task&quot;,
+ &quot;finance_task_id&quot;: &quot;SO-20260526-0004-STK-01-finance-task&quot;,
+ &quot;business_task_id&quot;: &quot;SO-20260526-0004-STK-01-business-task&quot;,
+ &quot;order_instance_id&quot;: &quot;ORDER-POC-001-20260526024205&quot;,
+ &quot;order_id&quot;: &quot;ORDER-POC-001&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260526-0004&quot;,
+ &quot;stage_id&quot;: &quot;SO-20260526-0004-STK-01&quot;,
+ &quot;stage_code&quot;: &quot;STK&quot;,
+ &quot;stage_seq&quot;: &quot;01&quot;,
+ &quot;batch_seq&quot;: &quot;01&quot;,
+ &quot;batch_type&quot;: &quot;INITIAL&quot;,
+ &quot;order_total_quantity&quot;: 500,
+ &quot;shipped_quantity_before&quot;: 0,
+ &quot;shipped_quantity_total&quot;: 0,
+ &quot;remaining_quantity&quot;: 500,
+ &quot;customer_name&quot;: &quot;山东涵悦诚新材料有限公司&quot;,
+ &quot;customer_contract_no&quot;: &quot;&quot;,
+ &quot;supplier&quot;: &quot;浙江长安仁恒科技股份有限公司&quot;,
+ &quot;sales_name&quot;: &quot;鞠炜&quot;,
+ &quot;agent_name&quot;: &quot;&quot;,
+ &quot;is_self_pickup&quot;: &quot;否&quot;,
+ &quot;settlement_method&quot;: &quot;款到发货&quot;,
+ &quot;payment_condition&quot;: &quot;款到发货&quot;,
+ &quot;amount&quot;: 10150,
+ &quot;currency&quot;: &quot;CNY&quot;,
+ &quot;unit_price&quot;: 20.3,
+ &quot;delivery_info&quot;: {
+  &quot;address&quot;: &quot;天津东丽区金钟街道欢坨村津亚物流北永信路5号天津杨昇仓库长扬乐器院内&quot;,
+  &quot;receiver&quot;: &quot;魏丽&quot;,
+  &quot;phone&quot;: &quot;15620789139&quot;
+ },
+ &quot;stock_items&quot;: [
+  {
+   &quot;product_name&quot;: &quot;Clayminton LB&quot;,
+   &quot;quantity&quot;: 500,
+   &quot;unit&quot;: &quot;kg&quot;,
+   &quot;unit_price&quot;: 20.3,
+   &quot;total&quot;: 10150
+  }
+ ],
+ &quot;stock_status&quot;: &quot;待备货预定&quot;,
+ &quot;stock_status_code&quot;: &quot;RESERVATION_PENDING&quot;,
+ &quot;workflow_node&quot;: &quot;STOCK_RESERVATION&quot;,
+ &quot;next_node&quot;: &quot;备货预定&quot;,
+ &quot;approver_name&quot;: &quot;王杰 / 陈虹励&quot;,
+ &quot;approver_names&quot;: [
+  &quot;王杰&quot;,
+  &quot;陈虹励&quot;
+ ],
+ &quot;created_at&quot;: &quot;2026-05-26T03:06:24.286Z&quot;,
+ &quot;updated_at&quot;: &quot;2026-05-26T03:06:24.286Z&quot;,
+ &quot;source&quot;: &quot;order_approval_completed&quot;
+}</pre><pre class="json"><span class="c"># sample 2/4</span>
+{
+ &quot;stock_prepare_id&quot;: &quot;SO-20260526-0005-STK-01&quot;,
+ &quot;instance_id&quot;: &quot;SO-20260526-0005-STK-01&quot;,
+ &quot;task_id&quot;: &quot;SO-20260526-0005-STK-01-business-task&quot;,
+ &quot;current_task_id&quot;: &quot;SO-20260526-0005-STK-01-business-task&quot;,
+ &quot;reservation_task_id&quot;: &quot;SO-20260526-0005-STK-01-reservation-task&quot;,
+ &quot;finance_task_id&quot;: &quot;SO-20260526-0005-STK-01-finance-task&quot;,
+ &quot;business_task_id&quot;: &quot;SO-20260526-0005-STK-01-business-task&quot;,
+ &quot;order_instance_id&quot;: &quot;ORDER-POC-001-20260526043327&quot;,
+ &quot;order_id&quot;: &quot;ORDER-POC-001&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260526-0005&quot;,
+ &quot;stage_id&quot;: &quot;SO-20260526-0005-STK-01&quot;,
+ &quot;stage_code&quot;: &quot;STK&quot;,
+ &quot;stage_seq&quot;: &quot;01&quot;,
+ &quot;batch_seq&quot;: &quot;01&quot;,
+ &quot;batch_type&quot;: &quot;INITIAL&quot;,
+ &quot;order_total_quantity&quot;: 5000,
+ &quot;shipped_quantity_before&quot;: 0,
+ &quot;shipped_quantity_total&quot;: 0,
+ &quot;remaining_quantity&quot;: 5000,
+ &quot;customer_name&quot;: &quot;中胜涂料(宁波)有限公司&quot;,
+ &quot;customer_contract_no&quot;: &quot;&quot;,
+ &quot;supplier&quot;: &quot;浙江长安仁恒科技股份有限公司&quot;,
+ &quot;sales_name&quot;: &quot;张伟明&quot;,
+ &quot;agent_name&quot;: &quot;&quot;,
+ &quot;is_self_pickup&quot;: &quot;否&quot;,
+ &quot;settlement_method&quot;: &quot;月结45天&quot;,
+ &quot;payment_condition&quot;: &quot;非款到发货&quot;,
+ &quot;amount&quot;: 55500,
+ &quot;currency&quot;: &quot;CNY&quot;,
+ &quot;unit_price&quot;: 11.1,
+ &quot;delivery_info&quot;: {
+  &quot;address&quot;: &quot;广东翁源华彩工业园A-18号广州市五羊油漆(翁源)有限公司，中胜仓管胡翠珍13794689332&quot;,
+  &quot;receiver&quot;: &quot;胡小姐&quot;,
+  &quot;phone&quot;: &quot;13794689332&quot;
+ },
+ &quot;stock_items&quot;: [
+  {
+   &quot;product_name&quot;: &quot;70&quot;,
+   &quot;quantity&quot;: 5000,
+   &quot;unit&quot;: &quot;kg&quot;,
+   &quot;unit_price&quot;: 11.1,
+   &quot;total&quot;: 55500
+  }
+ ],
+ &quot;stock_status&quot;: &quot;待填发货仓&quot;,
+ &quot;stock_status_code&quot;: &quot;WAREHOUSE_PENDING&quot;,
+ &quot;workflow_node&quot;: &quot;BUSINESS_FILL_WAREHOUSE&quot;,
+ &quot;next_node&quot;: &quot;商务填写发货仓&quot;,
+ &quot;approver_name&quot;: &quot;王杰 / 陈虹励&quot;,
+ &quot;approver_names&quot;: [
+  &quot;王杰&quot;,
+  &quot;陈虹励&quot;
+ ],
+ &quot;created_at&quot;: &quot;2026-05-26T04:44:45.182Z&quot;,
+ &quot;updated_at&quot;: &quot;2026-05-26T04:44:45.182Z&quot;,
+ &quot;source&quot;: &quot;order_approval_completed&quot;
+}</pre><pre class="json"><span class="c"># sample 3/4</span>
+{
+ &quot;stock_prepare_id&quot;: &quot;SO-20260817-0012-STK-01&quot;,
+ &quot;instance_id&quot;: &quot;SO-20260817-0012-STK-01&quot;,
+ &quot;task_id&quot;: &quot;SO-20260817-0012-STK-01-business-task&quot;,
+ &quot;current_task_id&quot;: &quot;SO-20260817-0012-STK-01-business-task&quot;,
+ &quot;reservation_task_id&quot;: &quot;SO-20260817-0012-STK-01-reservation-task&quot;,
+ &quot;finance_task_id&quot;: &quot;SO-20260817-0012-STK-01-finance-task&quot;,
+ &quot;business_task_id&quot;: &quot;SO-20260817-0012-STK-01-business-task&quot;,
+ &quot;order_instance_id&quot;: &quot;ORDER-POC-001-20260817031110&quot;,
+ &quot;order_id&quot;: &quot;ORDER-POC-001&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260817-0012&quot;,
+ &quot;stage_id&quot;: &quot;SO-20260817-0012-STK-01&quot;,
+ &quot;stage_code&quot;: &quot;STK&quot;,
+ &quot;stage_seq&quot;: &quot;01&quot;,
+ &quot;batch_seq&quot;: &quot;01&quot;,
+ &quot;batch_type&quot;: &quot;INITIAL&quot;,
+ &quot;order_total_quantity&quot;: 2000,
+ &quot;shipped_quantity_before&quot;: 0,
+ &quot;shipped_quantity_total&quot;: 0,
+ &quot;remaining_quantity&quot;: 2000,
+ &quot;customer_name&quot;: &quot;山东齐鲁漆业有限公司&quot;,
+ &quot;customer_contract_no&quot;: &quot;&quot;,
+ &quot;supplier&quot;: &quot;浙江长安仁恒科技股份有限公司&quot;,
+ &quot;sales_name&quot;: &quot;石少卿&quot;,
+ &quot;approval_profile&quot;: &quot;&quot;,
+ &quot;agent_name&quot;: &quot;&quot;,
+ &quot;other_attachment_files&quot;: [],
+ &quot;submitter_name&quot;: &quot;石少卿&quot;,
+ &quot;submitter_user_id&quot;: &quot;9agecg83&quot;,
+ &quot;is_self_pickup&quot;: &quot;否&quot;,
+ &quot;settlement_method&quot;: &quot;票到30天&quot;,
+ &quot;payment_condition&quot;: &quot;非款到发货&quot;,
+ &quot;special_spec_requirements&quot;: &quot;与之前保持一致！尽快发货&quot;,
+ &quot;amount&quot;: 80000,
+ &quot;currency&quot;: &quot;CNY&quot;,
+ &quot;unit_price&quot;: 40,
+ &quot;delivery_info&quot;: {
+  &quot;address&quot;: &quot;山东省聊城市闫寺工业区1号&quot;,
+  &quot;receiver&quot;: &quot;宿总&quot;,
+  &quot;phone&quot;: &quot;13863529090&quot;
+ },
+ &quot;stock_items&quot;: [
+  {
+   &quot;product_name&quot;: &quot;D-2&quot;,
+   &quot;quantity&quot;: 2000,
+   &quot;unit&quot;: &quot;kg&quot;,
+   &quot;unit_price&quot;: 40,
+   &quot;total&quot;: 80000,
+   &quot;packaging&quot;: &quot;&quot;,
+   &quot;package_spec&quot;: &quot;&quot;,
+   &quot;arrival_date&quot;: &quot;&quot;,
+   &quot;remark&quot;: &quot;&quot;
+  }
+ ],
+ &quot;stock_status&quot;: &quot;已归档&quot;,
+ &quot;stock_status_code&quot;: &quot;ARCHIVED&quot;,
+ &quot;workflow_node&quot;: &quot;SYSTEM_ARCHIVED&quot;,
+ &quot;next_node&quot;: &quot;系统自动发起发货流程&quot;,
+ &quot;approver_name&quot;: &quot;陈虹励 / 王杰 / 宋海斌&quot;,
+ &quot;approver_names&quot;: [
+  &quot;陈虹励&quot;,
+  &quot;王杰&quot;,
+  &quot;宋海斌&quot;
+ ],
+ &quot;created_at&quot;: &quot;2026-08-17T03:26:12.326Z&quot;,
+ &quot;updated_at&quot;: &quot;2026-08-17T05:28:17.876Z&quot;,
+ &quot;source&quot;: &quot;order_approval_completed&quot;,
+ &quot;approved_at&quot;: &quot;2026-08-17T05:28:17.876Z&quot;,
+ &quot;business_submitted_at&quot;: &quot;2026-08-17T05:28:17.876Z&quot;,
+ &quot;warehouse_allocation&quot;: {
+  &quot;warehouse&quot;: &quot;阳原&quot;,
+  &quot;planned_delivery_date&quot;: &quot;&quot;,
+  &quot;receiver_name&quot;: &quot;宿总&quot;,
+  &quot;phone&quot;: &quot;13863529090&quot;,
+  &quot;address&quot;: &quot;山东省聊城市闫寺工业区1号&quot;
+ },
+ &quot;batch_quantity&quot;: 2000,
+ &quot;split_flag&quot;: &quot;&quot;,
+ &quot;business_reason&quot;: &quot;&quot;,
+ &quot;outbound_order_status&quot;: &quot;GENERATING&quot;,
+ &quot;outbound_order_id&quot;: &quot;&quot;,
+ &quot;outbound_order_file_name&quot;: &quot;&quot;,
+ &quot;outbound_order_file_path&quot;: &quot;&quot;,
+ &quot;outbound_order_url&quot;: &quot;&quot;,
+ &quot;outbound_generated_at&quot;: &quot;2026-08-17T05:28:17.876Z&quot;,
+ &quot;outbound_order_error&quot;: &quot;&quot;
+}</pre><pre class="json"><span class="c"># sample 4/4</span>
+{
+ &quot;stock_prepare_id&quot;: &quot;SO-20260817-0012-STK-01&quot;,
+ &quot;instance_id&quot;: &quot;SO-20260817-0012-STK-01&quot;,
+ &quot;task_id&quot;: &quot;SO-20260817-0012-STK-01-business-task&quot;,
+ &quot;current_task_id&quot;: &quot;SO-20260817-0012-STK-01-business-task&quot;,
+ &quot;reservation_task_id&quot;: &quot;SO-20260817-0012-STK-01-reservation-task&quot;,
+ &quot;finance_task_id&quot;: &quot;SO-20260817-0012-STK-01-finance-task&quot;,
+ &quot;business_task_id&quot;: &quot;SO-20260817-0012-STK-01-business-task&quot;,
+ &quot;order_instance_id&quot;: &quot;ORDER-POC-001-20260817031110&quot;,
+ &quot;order_id&quot;: &quot;ORDER-POC-001&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260817-0012&quot;,
+ &quot;stage_id&quot;: &quot;SO-20260817-0012-STK-01&quot;,
+ &quot;stage_code&quot;: &quot;STK&quot;,
+ &quot;stage_seq&quot;: &quot;01&quot;,
+ &quot;batch_seq&quot;: &quot;01&quot;,
+ &quot;batch_type&quot;: &quot;INITIAL&quot;,
+ &quot;order_total_quantity&quot;: 2000,
+ &quot;shipped_quantity_before&quot;: 0,
+ &quot;shipped_quantity_total&quot;: 0,
+ &quot;remaining_quantity&quot;: 2000,
+ &quot;customer_name&quot;: &quot;山东齐鲁漆业有限公司&quot;,
+ &quot;customer_contract_no&quot;: &quot;&quot;,
+ &quot;supplier&quot;: &quot;浙江长安仁恒科技股份有限公司&quot;,
+ &quot;sales_name&quot;: &quot;石少卿&quot;,
+ &quot;approval_profile&quot;: &quot;&quot;,
+ &quot;agent_name&quot;: &quot;&quot;,
+ &quot;other_attachment_files&quot;: [],
+ &quot;submitter_name&quot;: &quot;石少卿&quot;,
+ &quot;submitter_user_id&quot;: &quot;9agecg83&quot;,
+ &quot;is_self_pickup&quot;: &quot;否&quot;,
+ &quot;settlement_method&quot;: &quot;票到30天&quot;,
+ &quot;payment_condition&quot;: &quot;非款到发货&quot;,
+ &quot;special_spec_requirements&quot;: &quot;与之前保持一致！尽快发货&quot;,
+ &quot;amount&quot;: 80000,
+ &quot;currency&quot;: &quot;CNY&quot;,
+ &quot;unit_price&quot;: 40,
+ &quot;delivery_info&quot;: {
+  &quot;address&quot;: &quot;山东省聊城市闫寺工业区1号&quot;,
+  &quot;receiver&quot;: &quot;宿总&quot;,
+  &quot;phone&quot;: &quot;13863529090&quot;
+ },
+ &quot;stock_items&quot;: [
+  {
+   &quot;product_name&quot;: &quot;D-2&quot;,
+   &quot;quantity&quot;: 2000,
+   &quot;unit&quot;: &quot;kg&quot;,
+   &quot;unit_price&quot;: 40,
+   &quot;total&quot;: 80000,
+   &quot;packaging&quot;: &quot;&quot;,
+   &quot;package_spec&quot;: &quot;&quot;,
+   &quot;arrival_date&quot;: &quot;&quot;,
+   &quot;remark&quot;: &quot;&quot;
+  }
+ ],
+ &quot;stock_status&quot;: &quot;已归档&quot;,
+ &quot;stock_status_code&quot;: &quot;ARCHIVED&quot;,
+ &quot;workflow_node&quot;: &quot;SYSTEM_ARCHIVED&quot;,
+ &quot;next_node&quot;: &quot;系统自动发起发货流程&quot;,
+ &quot;approver_name&quot;: &quot;陈虹励 / 王杰 / 宋海斌&quot;,
+ &quot;approver_names&quot;: [
+  &quot;陈虹励&quot;,
+  &quot;王杰&quot;,
+  &quot;宋海斌&quot;
+ ],
+ &quot;created_at&quot;: &quot;2026-08-17T03:26:12.326Z&quot;,
+ &quot;updated_at&quot;: &quot;2026-08-17T05:28:21.830Z&quot;,
+ &quot;source&quot;: &quot;order_approval_completed&quot;,
+ &quot;approved_at&quot;: &quot;2026-08-17T05:28:17.876Z&quot;,
+ &quot;business_submitted_at&quot;: &quot;2026-08-17T05:28:17.876Z&quot;,
+ &quot;warehouse_allocation&quot;: {
+  &quot;warehouse&quot;: &quot;阳原&quot;,
+  &quot;planned_delivery_date&quot;: &quot;&quot;,
+  &quot;receiver_name&quot;: &quot;宿总&quot;,
+  &quot;phone&quot;: &quot;13863529090&quot;,
+  &quot;address&quot;: &quot;山东省聊城市闫寺工业区1号&quot;
+ },
+ &quot;batch_quantity&quot;: 2000,
+ &quot;split_flag&quot;: &quot;&quot;,
+ &quot;business_reason&quot;: &quot;&quot;,
+ &quot;outbound_order_status&quot;: &quot;GENERATED&quot;,
+ &quot;outbound_order_id&quot;: &quot;CARH-YY000541&quot;,
+ &quot;outbound_order_file_name&quot;: &quot;山东齐鲁漆业有限公司_CARH-YY000541_阳原.xlsx&quot;,
+ &quot;outbound_order_file_path&quot;: &quot;C:\\feishu-approval-poc\\data\\outbound_orders\\山东齐鲁漆业有限公司_CARH-YY000541_阳原.xlsx&quot;,
+ &quot;outbound_order_url&quot;: &quot;/outbound-orders/%E5%B1%B1%E4%B8%9C%E9%BD%90%E9%B2%81%E6%BC%86%E4%B8%9A%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8_CARH-YY000541_%E9%98%B3%E5%8E%9F.xlsx&quot;,
+ &quot;outbound_generated_at&quot;: &quot;2026-08-17T05:28:21.830Z&quot;,
+ &quot;outbound_order_error&quot;: &quot;&quot;
+}</pre></details>
+</section>
+<section class="tblcard">
+  <div class="tbl-head">
+    <code class="tbl-name">stock_prepare_events</code>
+    <span class="pill g">同步</span>
+    <span class="tbl-meta">14,708 行 · 7.5 MB · 更新 08-17 13:28</span>
+    <span class="tbl-keys">8 键</span>
+  </div>
+  <div class="chips"><span class="chip">event_id</span><span class="chip">occurred_at</span><span class="chip">stock_prepare_id</span><span class="chip">order_instance_id</span><span class="chip">flow_id</span><span class="chip">stage_id</span><span class="chip">status</span><span class="chip obj">detail</span></div>
+  <details class="samples"><summary><span class="sum-tt">抽样记录</span><span class="sum-meta">4 行 · 头+尾 · 敏感键已脱敏</span><span class="sum-ic">▸</span></summary><pre class="json"><span class="c"># sample 1/4</span>
+{
+ &quot;event_id&quot;: &quot;6d3a01aa-7d18-464f-8a43-bf8e2c6b979d&quot;,
+ &quot;occurred_at&quot;: &quot;2026-05-26T03:06:24.286Z&quot;,
+ &quot;stock_prepare_id&quot;: &quot;SO-20260526-0004-STK-01&quot;,
+ &quot;order_instance_id&quot;: &quot;ORDER-POC-001-20260526024205&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260526-0004&quot;,
+ &quot;stage_id&quot;: &quot;SO-20260526-0004-STK-01&quot;,
+ &quot;status&quot;: &quot;STOCK_PREPARE_CREATED_WAITING&quot;,
+ &quot;detail&quot;: {
+  &quot;trigger&quot;: &quot;external-orders-web-decision&quot;,
+  &quot;evidence_path&quot;: &quot;C:\\feishu-approval-poc\\tmp\\evidence\\external_orders_last_decision_parsed.json&quot;,
+  &quot;payment_condition&quot;: &quot;款到发货&quot;
+ }
+}</pre><pre class="json"><span class="c"># sample 2/4</span>
+{
+ &quot;event_id&quot;: &quot;42df53a7-7f03-47ac-9b14-ac6731bf8d5c&quot;,
+ &quot;occurred_at&quot;: &quot;2026-05-26T03:06:24.286Z&quot;,
+ &quot;stock_prepare_id&quot;: &quot;SO-20260526-0004-STK-01&quot;,
+ &quot;order_instance_id&quot;: &quot;ORDER-POC-001-20260526024205&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260526-0004&quot;,
+ &quot;stage_id&quot;: &quot;SO-20260526-0004-STK-01&quot;,
+ &quot;task_id&quot;: &quot;SO-20260526-0004-STK-01-reservation-task&quot;,
+ &quot;status&quot;: &quot;STOCK_RESERVATION_PENDING&quot;,
+ &quot;detail&quot;: {
+  &quot;next_node&quot;: &quot;备货预定&quot;
+ }
+}</pre><pre class="json"><span class="c"># sample 3/4</span>
+{
+ &quot;event_id&quot;: &quot;5d1ebbcb-1fd0-4bcf-841a-0df445e1fbdd&quot;,
+ &quot;occurred_at&quot;: &quot;2026-08-17T05:28:21.830Z&quot;,
+ &quot;stock_prepare_id&quot;: &quot;SO-20260817-0012-STK-01&quot;,
+ &quot;order_instance_id&quot;: &quot;ORDER-POC-001-20260817031110&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260817-0012&quot;,
+ &quot;stage_id&quot;: &quot;SO-20260817-0012-STK-01&quot;,
+ &quot;status&quot;: &quot;OUTBOUND_ORDER_GENERATED&quot;,
+ &quot;detail&quot;: {
+  &quot;outbound_order_id&quot;: &quot;CARH-YY000541&quot;,
+  &quot;outbound_order_file_name&quot;: &quot;山东齐鲁漆业有限公司_CARH-YY000541_阳原.xlsx&quot;,
+  &quot;outbound_order_url&quot;: &quot;/outbound-orders/%E5%B1%B1%E4%B8%9C%E9%BD%90%E9%B2%81%E6%BC%86%E4%B8%9A%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8_CARH-YY000541_%E9%98%B3%E5%8E%9F.xlsx&quot;
+ }
+}</pre><pre class="json"><span class="c"># sample 4/4</span>
+{
+ &quot;event_id&quot;: &quot;2432c079-f462-443d-a329-05ca3414456a&quot;,
+ &quot;occurred_at&quot;: &quot;2026-08-17T05:28:21.830Z&quot;,
+ &quot;stock_prepare_id&quot;: &quot;SO-20260817-0012-STK-01&quot;,
+ &quot;order_instance_id&quot;: &quot;ORDER-POC-001-20260817031110&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260817-0012&quot;,
+ &quot;stage_id&quot;: &quot;SO-20260817-0012-STK-01&quot;,
+ &quot;status&quot;: &quot;SHIPMENT_FLOW_CREATED&quot;,
+ &quot;detail&quot;: {
+  &quot;shipment_id&quot;: &quot;SO-20260817-0012-SHP-01&quot;,
+  &quot;message&quot;: &quot;&quot;
+ }
+}</pre></details>
+</section>
+<section class="tblcard">
+  <div class="tbl-head">
+    <code class="tbl-name">shipments</code>
+    <span class="pill g">核心同步</span>
+    <span class="tbl-meta">4,048 行 · 15.6 MB · 更新 08-17 13:28</span>
+    <span class="tbl-keys">65 键</span>
+  </div>
+  <div class="chips"><span class="chip">shipment_id</span><span class="chip">delivery_order_id</span><span class="chip">instance_id</span><span class="chip">task_id</span><span class="chip">current_task_id</span><span class="chip">warehouse_task_id</span><span class="chip">receipt_task_id</span><span class="chip">invoice_info_task_id</span><span class="chip">stock_prepare_id</span><span class="chip">order_instance_id</span><span class="chip">order_id</span><span class="chip">flow_id</span><span class="chip">stage_id</span><span class="chip">stage_code</span><span class="chip">stage_seq</span><span class="chip">batch_seq</span><span class="chip">batch_type</span><span class="chip">order_total_quantity</span><span class="chip">batch_quantity</span><span class="chip">shipped_quantity_before</span><span class="chip">shipped_quantity_total</span><span class="chip">remaining_quantity</span><span class="chip">split_flag</span><span class="chip">customer_name</span><span class="chip">customer_contract_no</span><span class="chip">supplier</span><span class="chip">sales_name</span><span class="chip">approval_profile</span><span class="chip">agent_name</span><span class="chip">submitter_name</span><span class="chip">submitter_user_id</span><span class="chip">is_self_pickup</span><span class="chip">settlement_method</span><span class="chip">special_spec_requirements</span><span class="chip">amount</span><span class="chip">currency</span><span class="chip">unit_price</span><span class="chip">warehouse</span><span class="chip">reservation_warehouse</span><span class="chip">reserved_goods_info</span><span class="chip obj">stock_reservation_data</span><span class="chip">planned_delivery_date</span><span class="chip">delivery_quantity</span><span class="chip">receiver_name</span><span class="chip">phone</span><span class="chip">address</span><span class="chip">package</span><span class="chip">outbound_order_status</span><span class="chip">outbound_order_id</span><span class="chip">outbound_order_file_name</span><span class="chip">outbound_order_file_path</span><span class="chip">outbound_order_url</span><span class="chip">outbound_generated_at</span><span class="chip">outbound_order_error</span><span class="chip obj">other_attachment_files</span><span class="chip obj">shipment_items</span><span class="chip">shipment_status</span><span class="chip">shipment_status_code</span><span class="chip">workflow_node</span><span class="chip">next_node</span><span class="chip">approver_name</span><span class="chip obj">approver_names</span><span class="chip">created_at</span><span class="chip">updated_at</span><span class="chip">source</span></div>
+  <details class="samples"><summary><span class="sum-tt">抽样记录</span><span class="sum-meta">4 行 · 头+尾 · 敏感键已脱敏</span><span class="sum-ic">▸</span></summary><pre class="json"><span class="c"># sample 1/4</span>
+{
+ &quot;shipment_id&quot;: &quot;SO-20260526-0005-SHP-01&quot;,
+ &quot;delivery_order_id&quot;: &quot;SO-20260526-0005-SHP-01&quot;,
+ &quot;instance_id&quot;: &quot;SO-20260526-0005-SHP-01&quot;,
+ &quot;task_id&quot;: &quot;SO-20260526-0005-SHP-01-warehouse-task&quot;,
+ &quot;current_task_id&quot;: &quot;SO-20260526-0005-SHP-01-warehouse-task&quot;,
+ &quot;warehouse_task_id&quot;: &quot;SO-20260526-0005-SHP-01-warehouse-task&quot;,
+ &quot;receipt_task_id&quot;: &quot;SO-20260526-0005-SHP-01-receipt-task&quot;,
+ &quot;invoice_info_task_id&quot;: &quot;SO-20260526-0005-SHP-01-invoice-info-task&quot;,
+ &quot;stock_prepare_id&quot;: &quot;SO-20260526-0005-STK-01&quot;,
+ &quot;order_instance_id&quot;: &quot;ORDER-POC-001-20260526043327&quot;,
+ &quot;order_id&quot;: &quot;ORDER-POC-001&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260526-0005&quot;,
+ &quot;stage_id&quot;: &quot;SO-20260526-0005-SHP-01&quot;,
+ &quot;stage_code&quot;: &quot;SHP&quot;,
+ &quot;stage_seq&quot;: &quot;01&quot;,
+ &quot;batch_seq&quot;: &quot;01&quot;,
+ &quot;batch_type&quot;: &quot;INITIAL&quot;,
+ &quot;order_total_quantity&quot;: 5000,
+ &quot;batch_quantity&quot;: 5000,
+ &quot;shipped_quantity_before&quot;: 0,
+ &quot;shipped_quantity_total&quot;: 0,
+ &quot;remaining_quantity&quot;: 5000,
+ &quot;split_flag&quot;: &quot;&quot;,
+ &quot;customer_name&quot;: &quot;中胜涂料(宁波)有限公司&quot;,
+ &quot;customer_contract_no&quot;: &quot;&quot;,
+ &quot;supplier&quot;: &quot;浙江长安仁恒科技股份有限公司&quot;,
+ &quot;sales_name&quot;: &quot;张伟明&quot;,
+ &quot;agent_name&quot;: &quot;&quot;,
+ &quot;is_self_pickup&quot;: &quot;否&quot;,
+ &quot;settlement_method&quot;: &quot;月结45天&quot;,
+ &quot;amount&quot;: 55500,
+ &quot;currency&quot;: &quot;CNY&quot;,
+ &quot;unit_price&quot;: 11.1,
+ &quot;warehouse&quot;: &quot;东莞&quot;,
+ &quot;reservation_warehouse&quot;: &quot;&quot;,
+ &quot;reserved_goods_info&quot;: &quot;1. 70 / 5000kg&quot;,
+ &quot;stock_reservation_data&quot;: {},
+ &quot;planned_delivery_date&quot;: &quot;&quot;,
+ &quot;delivery_quantity&quot;: &quot;&quot;,
+ &quot;receiver_name&quot;: &quot;胡小姐&quot;,
+ &quot;phone&quot;: &quot;13794689332&quot;,
+ &quot;address&quot;: &quot;广东翁源华彩工业园A-18号广州市五羊油漆(翁源)有限公司，中胜仓管胡翠珍13794689332&quot;,
+ &quot;package&quot;: &quot;&quot;,
+ &quot;outbound_order_status&quot;: &quot;GENERATED&quot;,
+ &quot;outbound_order_id&quot;: &quot;CARH-DG000001&quot;,
+ &quot;outbound_order_file_name&quot;: &quot;中胜涂料(宁波)有限公司_CARH-DG000001.xlsx&quot;,
+ &quot;outbound_order_file_path&quot;: &quot;C:\\feishu-approval-poc\\data\\outbound_orders\\中胜涂料(宁波)有限公司_CARH-DG000001.xlsx&quot;,
+ &quot;outbound_order_url&quot;: &quot;/outbound-orders/%E4%B8%AD%E8%83%9C%E6%B6%82%E6%96%99(%E5%AE%81%E6%B3%A2)%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8_CARH-DG000001.xlsx&quot;,
+ &quot;outbound_generated_at&quot;: &quot;2026-05-26T05:13:00.330Z&quot;,
+ &quot;outbound_order_error&quot;: &quot;&quot;,
+ &quot;shipment_items&quot;: [
+  {
+   &quot;product_name&quot;: &quot;70&quot;,
+   &quot;quantity&quot;: 5000,
+   &quot;unit&quot;: &quot;kg&quot;,
+   &quot;unit_price&quot;: 11.1,
+   &quot;total&quot;: 55500
+  }
+ ],
+ &quot;shipment_status&quot;: &quot;待仓库发货&quot;,
+ &quot;shipment_status_code&quot;: &quot;WAREHOUSE_PENDING&quot;,
+ &quot;workflow_node&quot;: &quot;WAREHOUSE_SHIP&quot;,
+ &quot;next_node&quot;: &quot;仓库按本张发货单发货&quot;,
+ &quot;approver_name&quot;: &quot;王杰&quot;,
+ &quot;approver_names&quot;: [
+  &quot;王杰&quot;
+ ],
+ &quot;created_at&quot;: &quot;2026-05-26T05:13:01.670Z&quot;,
+ &quot;updated_at&quot;: &quot;2026-05-26T05:13:01.670Z&quot;,
+ &quot;source&quot;: &quot;stock_prepare_completed&quot;
+}</pre><pre class="json"><span class="c"># sample 2/4</span>
+{
+ &quot;shipment_id&quot;: &quot;SO-20260526-0005-SHP-01&quot;,
+ &quot;delivery_order_id&quot;: &quot;SO-20260526-0005-SHP-01&quot;,
+ &quot;instance_id&quot;: &quot;SO-20260526-0005-SHP-01&quot;,
+ &quot;task_id&quot;: &quot;SO-20260526-0005-SHP-01-warehouse-task&quot;,
+ &quot;current_task_id&quot;: &quot;SO-20260526-0005-SHP-01-warehouse-task&quot;,
+ &quot;warehouse_task_id&quot;: &quot;SO-20260526-0005-SHP-01-warehouse-task&quot;,
+ &quot;receipt_task_id&quot;: &quot;SO-20260526-0005-SHP-01-receipt-task&quot;,
+ &quot;invoice_info_task_id&quot;: &quot;SO-20260526-0005-SHP-01-invoice-info-task&quot;,
+ &quot;stock_prepare_id&quot;: &quot;SO-20260526-0005-STK-01&quot;,
+ &quot;order_instance_id&quot;: &quot;ORDER-POC-001-20260526043327&quot;,
+ &quot;order_id&quot;: &quot;ORDER-POC-001&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260526-0005&quot;,
+ &quot;stage_id&quot;: &quot;SO-20260526-0005-SHP-01&quot;,
+ &quot;stage_code&quot;: &quot;SHP&quot;,
+ &quot;stage_seq&quot;: &quot;01&quot;,
+ &quot;batch_seq&quot;: &quot;01&quot;,
+ &quot;batch_type&quot;: &quot;INITIAL&quot;,
+ &quot;order_total_quantity&quot;: 5000,
+ &quot;batch_quantity&quot;: 5000,
+ &quot;shipped_quantity_before&quot;: 0,
+ &quot;shipped_quantity_total&quot;: 0,
+ &quot;remaining_quantity&quot;: 5000,
+ &quot;split_flag&quot;: &quot;&quot;,
+ &quot;customer_name&quot;: &quot;中胜涂料(宁波)有限公司&quot;,
+ &quot;customer_contract_no&quot;: &quot;&quot;,
+ &quot;supplier&quot;: &quot;浙江长安仁恒科技股份有限公司&quot;,
+ &quot;sales_name&quot;: &quot;张伟明&quot;,
+ &quot;agent_name&quot;: &quot;&quot;,
+ &quot;is_self_pickup&quot;: &quot;否&quot;,
+ &quot;settlement_method&quot;: &quot;月结45天&quot;,
+ &quot;amount&quot;: 55500,
+ &quot;currency&quot;: &quot;CNY&quot;,
+ &quot;unit_price&quot;: 11.1,
+ &quot;warehouse&quot;: &quot;东莞&quot;,
+ &quot;reservation_warehouse&quot;: &quot;&quot;,
+ &quot;reserved_goods_info&quot;: &quot;1. 70 / 5000kg&quot;,
+ &quot;stock_reservation_data&quot;: {},
+ &quot;planned_delivery_date&quot;: &quot;&quot;,
+ &quot;delivery_quantity&quot;: &quot;&quot;,
+ &quot;receiver_name&quot;: &quot;胡小姐&quot;,
+ &quot;phone&quot;: &quot;13794689332&quot;,
+ &quot;address&quot;: &quot;广东翁源华彩工业园A-18号广州市五羊油漆(翁源)有限公司，中胜仓管胡翠珍13794689332&quot;,
+ &quot;package&quot;: &quot;&quot;,
+ &quot;outbound_order_status&quot;: &quot;GENERATED&quot;,
+ &quot;outbound_order_id&quot;: &quot;CARH-DG000001&quot;,
+ &quot;outbound_order_file_name&quot;: &quot;中胜涂料(宁波)有限公司_CARH-DG000001.xlsx&quot;,
+ &quot;outbound_order_file_path&quot;: &quot;C:\\feishu-approval-poc\\data\\outbound_orders\\中胜涂料(宁波)有限公司_CARH-DG000001.xlsx&quot;,
+ &quot;outbound_order_url&quot;: &quot;/outbound-orders/%E4%B8%AD%E8%83%9C%E6%B6%82%E6%96%99(%E5%AE%81%E6%B3%A2)%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8_CARH-DG000001.xlsx&quot;,
+ &quot;outbound_generated_at&quot;: &quot;2026-05-26T05:13:00.330Z&quot;,
+ &quot;outbound_order_error&quot;: &quot;&quot;,
+ &quot;shipment_items&quot;: [
+  {
+   &quot;product_name&quot;: &quot;70&quot;,
+   &quot;quantity&quot;: 5000,
+   &quot;unit&quot;: &quot;kg&quot;,
+   &quot;unit_price&quot;: 11.1,
+   &quot;total&quot;: 55500
+  }
+ ],
+ &quot;shipment_status&quot;: &quot;待仓库发货&quot;,
+ &quot;shipment_status_code&quot;: &quot;WAREHOUSE_PENDING&quot;,
+ &quot;workflow_node&quot;: &quot;WAREHOUSE_SHIP&quot;,
+ &quot;next_node&quot;: &quot;仓库按本张发货单发货&quot;,
+ &quot;approver_name&quot;: &quot;王杰&quot;,
+ &quot;approver_names&quot;: [
+  &quot;王杰&quot;
+ ],
+ &quot;created_at&quot;: &quot;2026-05-26T05:13:01.670Z&quot;,
+ &quot;updated_at&quot;: &quot;2026-05-26T06:36:12.903Z&quot;,
+ &quot;source&quot;: &quot;stock_prepare_completed&quot;,
+ &quot;submitter_name&quot;: &quot;张伟明&quot;,
+ &quot;submitter_link_backfilled_at&quot;: &quot;2026-05-26T06:36:12.903Z&quot;
+}</pre><pre class="json"><span class="c"># sample 3/4</span>
+{
+ &quot;shipment_id&quot;: &quot;SO-20260817-0014-SHP-01&quot;,
+ &quot;delivery_order_id&quot;: &quot;SO-20260817-0014-SHP-01&quot;,
+ &quot;instance_id&quot;: &quot;SO-20260817-0014-SHP-01&quot;,
+ &quot;task_id&quot;: &quot;SO-20260817-0014-SHP-01-warehouse-task&quot;,
+ &quot;current_task_id&quot;: &quot;SO-20260817-0014-SHP-01-warehouse-task&quot;,
+ &quot;warehouse_task_id&quot;: &quot;SO-20260817-0014-SHP-01-warehouse-task&quot;,
+ &quot;receipt_task_id&quot;: &quot;SO-20260817-0014-SHP-01-receipt-task&quot;,
+ &quot;invoice_info_task_id&quot;: &quot;SO-20260817-0014-SHP-01-invoice-info-task&quot;,
+ &quot;stock_prepare_id&quot;: &quot;SO-20260817-0014-STK-01&quot;,
+ &quot;order_instance_id&quot;: &quot;ORDER-POC-001-20260817035806&quot;,
+ &quot;order_id&quot;: &quot;ORDER-POC-001&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260817-0014&quot;,
+ &quot;stage_id&quot;: &quot;SO-20260817-0014-SHP-01&quot;,
+ &quot;stage_code&quot;: &quot;SHP&quot;,
+ &quot;stage_seq&quot;: &quot;01&quot;,
+ &quot;batch_seq&quot;: &quot;01&quot;,
+ &quot;batch_type&quot;: &quot;INITIAL&quot;,
+ &quot;order_total_quantity&quot;: 1000,
+ &quot;batch_quantity&quot;: 1000,
+ &quot;shipped_quantity_before&quot;: 0,
+ &quot;shipped_quantity_total&quot;: 0,
+ &quot;remaining_quantity&quot;: 1000,
+ &quot;split_flag&quot;: &quot;&quot;,
+ &quot;customer_name&quot;: &quot;江苏海耀化工有限公司&quot;,
+ &quot;customer_contract_no&quot;: &quot;&quot;,
+ &quot;supplier&quot;: &quot;浙江长安仁恒科技股份有限公司上海分公司&quot;,
+ &quot;sales_name&quot;: &quot;蒋惠文&quot;,
+ &quot;approval_profile&quot;: &quot;&quot;,
+ &quot;agent_name&quot;: &quot;&quot;,
+ &quot;submitter_name&quot;: &quot;蒋惠文&quot;,
+ &quot;submitter_user_id&quot;: &quot;c253be28&quot;,
+ &quot;is_self_pickup&quot;: &quot;否&quot;,
+ &quot;settlement_method&quot;: &quot;货到付款&quot;,
+ &quot;special_spec_requirements&quot;: &quot;&quot;,
+ &quot;amount&quot;: 11000,
+ &quot;currency&quot;: &quot;CNY&quot;,
+ &quot;unit_price&quot;: 11,
+ &quot;warehouse&quot;: &quot;长兴&quot;,
+ &quot;reservation_warehouse&quot;: &quot;&quot;,
+ &quot;reserved_goods_info&quot;: &quot;1. Clayminton 68 / 1000kg&quot;,
+ &quot;stock_reservation_data&quot;: {},
+ &quot;planned_delivery_date&quot;: &quot;&quot;,
+ &quot;delivery_quantity&quot;: &quot;&quot;,
+ &quot;receiver_name&quot;: &quot;朱应春&quot;,
+ &quot;phone&quot;: &quot;13515273265&quot;,
+ &quot;address&quot;: &quot;常州市武进区横山桥镇奚巷村江苏海耀化工有限公司&quot;,
+ &quot;package&quot;: &quot;&quot;,
+ &quot;outbound_order_status&quot;: &quot;GENERATED&quot;,
+ &quot;outbound_order_id&quot;: &quot;CARH-CX000424&quot;,
+ &quot;outbound_order_file_name&quot;: &quot;江苏海耀化工有限公司_CARH-CX000424.xlsx&quot;,
+ &quot;outbound_order_file_path&quot;: &quot;C:\\feishu-approval-poc\\data\\outbound_orders\\江苏海耀化工有限公司_CARH-CX000424.xlsx&quot;,
+ &quot;outbound_order_url&quot;: &quot;/outbound-orders/%E6%B1%9F%E8%8B%8F%E6%B5%B7%E8%80%80%E5%8C%96%E5%B7%A5%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8_CARH-CX000424.xlsx&quot;,
+ &quot;outbound_generated_at&quot;: &quot;2026-08-17T05:27:44.878Z&quot;,
+ &quot;outbound_order_error&quot;: &quot;&quot;,
+ &quot;other_attachment_files&quot;: [],
+ &quot;shipment_items&quot;: [
+  {
+   &quot;product_name&quot;: &quot;Clayminton 68&quot;,
+   &quot;quantity&quot;: 1000,
+   &quot;unit&quot;: &quot;kg&quot;,
+   &quot;unit_price&quot;: 11,
+   &quot;total&quot;: 11000,
+   &quot;packaging&quot;: &quot;&quot;,
+   &quot;package_spec&quot;: &quot;&quot;,
+   &quot;arrival_date&quot;: &quot;&quot;,
+   &quot;remark&quot;: &quot;&quot;
+  }
+ ],
+ &quot;shipment_status&quot;: &quot;待仓库发货&quot;,
+ &quot;shipment_status_code&quot;: &quot;WAREHOUSE_PENDING&quot;,
+ &quot;workflow_node&quot;: &quot;WAREHOUSE_SHIP&quot;,
+ &quot;next_node&quot;: &quot;仓库按本张发货单发货&quot;,
+ &quot;approver_name&quot;: &quot;黄翠琴&quot;,
+ &quot;approver_names&quot;: [
+  &quot;黄翠琴&quot;
+ ],
+ &quot;created_at&quot;: &quot;2026-08-17T05:27:45.939Z&quot;,
+ &quot;updated_at&quot;: &quot;2026-08-17T05:27:45.939Z&quot;,
+ &quot;source&quot;: &quot;stock_prepare_completed&quot;
+}</pre><pre class="json"><span class="c"># sample 4/4</span>
+{
+ &quot;shipment_id&quot;: &quot;SO-20260817-0012-SHP-01&quot;,
+ &quot;delivery_order_id&quot;: &quot;SO-20260817-0012-SHP-01&quot;,
+ &quot;instance_id&quot;: &quot;SO-20260817-0012-SHP-01&quot;,
+ &quot;task_id&quot;: &quot;SO-20260817-0012-SHP-01-warehouse-task&quot;,
+ &quot;current_task_id&quot;: &quot;SO-20260817-0012-SHP-01-warehouse-task&quot;,
+ &quot;warehouse_task_id&quot;: &quot;SO-20260817-0012-SHP-01-warehouse-task&quot;,
+ &quot;receipt_task_id&quot;: &quot;SO-20260817-0012-SHP-01-receipt-task&quot;,
+ &quot;invoice_info_task_id&quot;: &quot;SO-20260817-0012-SHP-01-invoice-info-task&quot;,
+ &quot;stock_prepare_id&quot;: &quot;SO-20260817-0012-STK-01&quot;,
+ &quot;order_instance_id&quot;: &quot;ORDER-POC-001-20260817031110&quot;,
+ &quot;order_id&quot;: &quot;ORDER-POC-001&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260817-0012&quot;,
+ &quot;stage_id&quot;: &quot;SO-20260817-0012-SHP-01&quot;,
+ &quot;stage_code&quot;: &quot;SHP&quot;,
+ &quot;stage_seq&quot;: &quot;01&quot;,
+ &quot;batch_seq&quot;: &quot;01&quot;,
+ &quot;batch_type&quot;: &quot;INITIAL&quot;,
+ &quot;order_total_quantity&quot;: 2000,
+ &quot;batch_quantity&quot;: 2000,
+ &quot;shipped_quantity_before&quot;: 0,
+ &quot;shipped_quantity_total&quot;: 0,
+ &quot;remaining_quantity&quot;: 2000,
+ &quot;split_flag&quot;: &quot;&quot;,
+ &quot;customer_name&quot;: &quot;山东齐鲁漆业有限公司&quot;,
+ &quot;customer_contract_no&quot;: &quot;&quot;,
+ &quot;supplier&quot;: &quot;浙江长安仁恒科技股份有限公司&quot;,
+ &quot;sales_name&quot;: &quot;石少卿&quot;,
+ &quot;approval_profile&quot;: &quot;&quot;,
+ &quot;agent_name&quot;: &quot;&quot;,
+ &quot;submitter_name&quot;: &quot;石少卿&quot;,
+ &quot;submitter_user_id&quot;: &quot;9agecg83&quot;,
+ &quot;is_self_pickup&quot;: &quot;否&quot;,
+ &quot;settlement_method&quot;: &quot;票到30天&quot;,
+ &quot;special_spec_requirements&quot;: &quot;与之前保持一致！尽快发货&quot;,
+ &quot;amount&quot;: 80000,
+ &quot;currency&quot;: &quot;CNY&quot;,
+ &quot;unit_price&quot;: 40,
+ &quot;warehouse&quot;: &quot;阳原&quot;,
+ &quot;reservation_warehouse&quot;: &quot;&quot;,
+ &quot;reserved_goods_info&quot;: &quot;1. D-2 / 2000kg&quot;,
+ &quot;stock_reservation_data&quot;: {},
+ &quot;planned_delivery_date&quot;: &quot;&quot;,
+ &quot;delivery_quantity&quot;: &quot;&quot;,
+ &quot;receiver_name&quot;: &quot;宿总&quot;,
+ &quot;phone&quot;: &quot;13863529090&quot;,
+ &quot;address&quot;: &quot;山东省聊城市闫寺工业区1号&quot;,
+ &quot;package&quot;: &quot;&quot;,
+ &quot;outbound_order_status&quot;: &quot;GENERATED&quot;,
+ &quot;outbound_order_id&quot;: &quot;CARH-YY000541&quot;,
+ &quot;outbound_order_file_name&quot;: &quot;山东齐鲁漆业有限公司_CARH-YY000541_阳原.xlsx&quot;,
+ &quot;outbound_order_file_path&quot;: &quot;C:\\feishu-approval-poc\\data\\outbound_orders\\山东齐鲁漆业有限公司_CARH-YY000541_阳原.xlsx&quot;,
+ &quot;outbound_order_url&quot;: &quot;/outbound-orders/%E5%B1%B1%E4%B8%9C%E9%BD%90%E9%B2%81%E6%BC%86%E4%B8%9A%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8_CARH-YY000541_%E9%98%B3%E5%8E%9F.xlsx&quot;,
+ &quot;outbound_generated_at&quot;: &quot;2026-08-17T05:28:21.830Z&quot;,
+ &quot;outbound_order_error&quot;: &quot;&quot;,
+ &quot;other_attachment_files&quot;: [],
+ &quot;shipment_items&quot;: [
+  {
+   &quot;product_name&quot;: &quot;D-2&quot;,
+   &quot;quantity&quot;: 2000,
+   &quot;unit&quot;: &quot;kg&quot;,
+   &quot;unit_price&quot;: 40,
+   &quot;total&quot;: 80000,
+   &quot;packaging&quot;: &quot;&quot;,
+   &quot;package_spec&quot;: &quot;&quot;,
+   &quot;arrival_date&quot;: &quot;&quot;,
+   &quot;remark&quot;: &quot;&quot;
+  }
+ ],
+ &quot;shipment_status&quot;: &quot;待仓库发货&quot;,
+ &quot;shipment_status_code&quot;: &quot;WAREHOUSE_PENDING&quot;,
+ &quot;workflow_node&quot;: &quot;WAREHOUSE_SHIP&quot;,
+ &quot;next_node&quot;: &quot;仓库按本张发货单发货&quot;,
+ &quot;approver_name&quot;: &quot;张帅&quot;,
+ &quot;approver_names&quot;: [
+  &quot;张帅&quot;
+ ],
+ &quot;created_at&quot;: &quot;2026-08-17T05:28:22.405Z&quot;,
+ &quot;updated_at&quot;: &quot;2026-08-17T05:28:22.405Z&quot;,
+ &quot;source&quot;: &quot;stock_prepare_completed&quot;
+}</pre></details>
+</section>
+<section class="tblcard">
+  <div class="tbl-head">
+    <code class="tbl-name">shipment_events</code>
+    <span class="pill g">同步</span>
+    <span class="tbl-meta">15,559 行 · 9.2 MB · 更新 08-17 13:28</span>
+    <span class="tbl-keys">10 键</span>
+  </div>
+  <div class="chips"><span class="chip">event_id</span><span class="chip">occurred_at</span><span class="chip">shipment_id</span><span class="chip">delivery_order_id</span><span class="chip">stock_prepare_id</span><span class="chip">flow_id</span><span class="chip">stage_id</span><span class="chip">task_id</span><span class="chip">status</span><span class="chip obj">detail</span></div>
+  <details class="samples"><summary><span class="sum-tt">抽样记录</span><span class="sum-meta">4 行 · 头+尾 · 敏感键已脱敏</span><span class="sum-ic">▸</span></summary><pre class="json"><span class="c"># sample 1/4</span>
+{
+ &quot;event_id&quot;: &quot;a33e2659-eb2c-4ba2-b3d0-ee785616c187&quot;,
+ &quot;occurred_at&quot;: &quot;2026-05-26T05:13:01.670Z&quot;,
+ &quot;shipment_id&quot;: &quot;SO-20260526-0005-SHP-01&quot;,
+ &quot;delivery_order_id&quot;: &quot;SO-20260526-0005-SHP-01&quot;,
+ &quot;stock_prepare_id&quot;: &quot;SO-20260526-0005-STK-01&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260526-0005&quot;,
+ &quot;stage_id&quot;: &quot;SO-20260526-0005-SHP-01&quot;,
+ &quot;task_id&quot;: &quot;SO-20260526-0005-SHP-01-warehouse-task&quot;,
+ &quot;status&quot;: &quot;SHIPMENT_CREATED_WAITING&quot;,
+ &quot;detail&quot;: {
+  &quot;trigger&quot;: &quot;background-job&quot;,
+  &quot;evidence_path&quot;: &quot;C:\\feishu-approval-poc\\tmp\\evidence\\stock_prepare_web_decision.SO-20260526-0005-STK-01.json&quot;,
+  &quot;source_status&quot;: &quot;已创建/等待中&quot;
+ }
+}</pre><pre class="json"><span class="c"># sample 2/4</span>
+{
+ &quot;event_id&quot;: &quot;199126a7-8006-47d1-9491-36d44c05166a&quot;,
+ &quot;occurred_at&quot;: &quot;2026-05-26T05:13:01.670Z&quot;,
+ &quot;shipment_id&quot;: &quot;SO-20260526-0005-SHP-01&quot;,
+ &quot;delivery_order_id&quot;: &quot;SO-20260526-0005-SHP-01&quot;,
+ &quot;stock_prepare_id&quot;: &quot;SO-20260526-0005-STK-01&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260526-0005&quot;,
+ &quot;stage_id&quot;: &quot;SO-20260526-0005-SHP-01&quot;,
+ &quot;task_id&quot;: &quot;SO-20260526-0005-SHP-01-warehouse-task&quot;,
+ &quot;status&quot;: &quot;WAREHOUSE_SHIP_PENDING&quot;,
+ &quot;detail&quot;: {
+  &quot;next_node&quot;: &quot;仓库按本张发货单发货&quot;
+ }
+}</pre><pre class="json"><span class="c"># sample 3/4</span>
+{
+ &quot;event_id&quot;: &quot;def56811-4502-4b45-a744-bc717fbd7cdc&quot;,
+ &quot;occurred_at&quot;: &quot;2026-08-17T05:28:22.405Z&quot;,
+ &quot;shipment_id&quot;: &quot;SO-20260817-0012-SHP-01&quot;,
+ &quot;delivery_order_id&quot;: &quot;SO-20260817-0012-SHP-01&quot;,
+ &quot;stock_prepare_id&quot;: &quot;SO-20260817-0012-STK-01&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260817-0012&quot;,
+ &quot;stage_id&quot;: &quot;SO-20260817-0012-SHP-01&quot;,
+ &quot;task_id&quot;: &quot;SO-20260817-0012-SHP-01-warehouse-task&quot;,
+ &quot;status&quot;: &quot;SHIPMENT_CREATED_WAITING&quot;,
+ &quot;detail&quot;: {
+  &quot;trigger&quot;: &quot;background-job&quot;,
+  &quot;evidence_path&quot;: &quot;C:\\feishu-approval-poc\\tmp\\evidence\\stock_prepare_web_decision.SO-20260817-0012-STK-01.json&quot;,
+  &quot;source_status&quot;: &quot;已创建/等待中&quot;
+ }
+}</pre><pre class="json"><span class="c"># sample 4/4</span>
+{
+ &quot;event_id&quot;: &quot;db690309-46f7-4b57-82c0-3fc4474b11cc&quot;,
+ &quot;occurred_at&quot;: &quot;2026-08-17T05:28:22.405Z&quot;,
+ &quot;shipment_id&quot;: &quot;SO-20260817-0012-SHP-01&quot;,
+ &quot;delivery_order_id&quot;: &quot;SO-20260817-0012-SHP-01&quot;,
+ &quot;stock_prepare_id&quot;: &quot;SO-20260817-0012-STK-01&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260817-0012&quot;,
+ &quot;stage_id&quot;: &quot;SO-20260817-0012-SHP-01&quot;,
+ &quot;task_id&quot;: &quot;SO-20260817-0012-SHP-01-warehouse-task&quot;,
+ &quot;status&quot;: &quot;WAREHOUSE_SHIP_PENDING&quot;,
+ &quot;detail&quot;: {
+  &quot;next_node&quot;: &quot;仓库按本张发货单发货&quot;
+ }
+}</pre></details>
+</section>
+<section class="tblcard">
+  <div class="tbl-head">
+    <code class="tbl-name">invoices</code>
+    <span class="pill g">核心同步</span>
+    <span class="tbl-meta">1,267 行 · 5.3 MB · 更新 08-17 12:13</span>
+    <span class="tbl-keys">77 键</span>
+  </div>
+  <div class="chips"><span class="chip">invoice_id</span><span class="chip">application_id</span><span class="chip">instance_id</span><span class="chip">task_id</span><span class="chip">current_task_id</span><span class="chip">sales_apply_task_id</span><span class="chip">customer_stamp_return_task_id</span><span class="chip">sales_confirm_task_id</span><span class="chip">finance_issue_task_id</span><span class="chip">finance_upload_task_id</span><span class="chip">sales_receive_task_id</span><span class="chip">sales_collection_task_id</span><span class="chip">shipment_id</span><span class="chip">delivery_order_id</span><span class="chip obj">source_shipment_ids</span><span class="chip obj">source_delivery_order_ids</span><span class="chip obj">source_order_ids</span><span class="chip obj">source_flow_ids</span><span class="chip">combined_invoice_count</span><span class="chip">stock_prepare_id</span><span class="chip">order_instance_id</span><span class="chip">order_id</span><span class="chip">flow_id</span><span class="chip">stage_id</span><span class="chip">stage_code</span><span class="chip">stage_seq</span><span class="chip">batch_seq</span><span class="chip">batch_type</span><span class="chip">order_total_quantity</span><span class="chip">batch_quantity</span><span class="chip">shipped_quantity_before</span><span class="chip">shipped_quantity_total</span><span class="chip">remaining_quantity</span><span class="chip">split_flag</span><span class="chip">customer_name</span><span class="chip">customer_contract_no</span><span class="chip">supplier</span><span class="chip">sales_name</span><span class="chip">approval_profile</span><span class="chip">agent_name</span><span class="chip">submitter_name</span><span class="chip">submitter_user_id</span><span class="chip">is_self_pickup</span><span class="chip">special_spec_requirements</span><span class="chip">outbound_order_status</span><span class="chip">outbound_order_id</span><span class="chip">outbound_order_file_name</span><span class="chip">outbound_order_file_path</span><span class="chip">outbound_order_url</span><span class="chip">outbound_generated_at</span><span class="chip">outbound_order_error</span><span class="chip obj">other_attachment_files</span><span class="chip">available_invoice_qty</span><span class="chip">available_invoice_amount</span><span class="chip obj">invoice_request_data</span><span class="chip">invoice_mode</span><span class="chip">tax_no</span><span class="chip">invoice_type</span><span class="chip">receive_email</span><span class="chip">invoice_remark</span><span class="chip">invoice_status</span><span class="chip">invoice_status_code</span><span class="chip">workflow_node</span><span class="chip">next_node</span><span class="chip">approver_name</span><span class="chip obj">approver_names</span><span class="chip obj">invoice_apply_cc_names</span><span class="chip">created_at</span><span class="chip">updated_at</span><span class="chip">source</span><span class="chip">approval_mode</span><span class="chip">invoice_application_status</span><span class="chip">invoice_application_file_name</span><span class="chip">invoice_application_file_path</span><span class="chip">invoice_application_url</span><span class="chip">invoice_application_generated_at</span><span class="chip obj">invoice_application_warnings</span></div>
+  <details class="samples"><summary><span class="sum-tt">抽样记录</span><span class="sum-meta">4 行 · 头+尾 · 敏感键已脱敏</span><span class="sum-ic">▸</span></summary><pre class="json"><span class="c"># sample 1/4</span>
+{
+ &quot;invoice_id&quot;: &quot;SO-20260526-0005-INV-01&quot;,
+ &quot;application_id&quot;: &quot;SO-20260526-0005-INV-01&quot;,
+ &quot;instance_id&quot;: &quot;SO-20260526-0005-INV-01&quot;,
+ &quot;task_id&quot;: &quot;SO-20260526-0005-INV-01-sales-apply-task&quot;,
+ &quot;current_task_id&quot;: &quot;SO-20260526-0005-INV-01-sales-apply-task&quot;,
+ &quot;sales_apply_task_id&quot;: &quot;SO-20260526-0005-INV-01-sales-apply-task&quot;,
+ &quot;sales_confirm_task_id&quot;: &quot;SO-20260526-0005-INV-01-sales-confirm-task&quot;,
+ &quot;finance_issue_task_id&quot;: &quot;SO-20260526-0005-INV-01-finance-issue-task&quot;,
+ &quot;finance_upload_task_id&quot;: &quot;SO-20260526-0005-INV-01-finance-upload-task&quot;,
+ &quot;sales_receive_task_id&quot;: &quot;SO-20260526-0005-INV-01-sales-receive-task&quot;,
+ &quot;sales_collection_task_id&quot;: &quot;SO-20260526-0005-INV-01-sales-collection-task&quot;,
+ &quot;shipment_id&quot;: &quot;SO-20260526-0005-SHP-01&quot;,
+ &quot;delivery_order_id&quot;: &quot;SO-20260526-0005-SHP-01&quot;,
+ &quot;stock_prepare_id&quot;: &quot;SO-20260526-0005-STK-01&quot;,
+ &quot;order_instance_id&quot;: &quot;ORDER-POC-001-20260526043327&quot;,
+ &quot;order_id&quot;: &quot;ORDER-POC-001&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260526-0005&quot;,
+ &quot;stage_id&quot;: &quot;SO-20260526-0005-INV-01&quot;,
+ &quot;stage_code&quot;: &quot;INV&quot;,
+ &quot;stage_seq&quot;: &quot;01&quot;,
+ &quot;batch_seq&quot;: &quot;01&quot;,
+ &quot;batch_type&quot;: &quot;FINAL&quot;,
+ &quot;order_total_quantity&quot;: 5000,
+ &quot;batch_quantity&quot;: 5000,
+ &quot;shipped_quantity_before&quot;: 0,
+ &quot;shipped_quantity_total&quot;: 5000,
+ &quot;remaining_quantity&quot;: 0,
+ &quot;split_flag&quot;: &quot;否&quot;,
+ &quot;customer_name&quot;: &quot;中胜涂料(宁波)有限公司&quot;,
+ &quot;customer_contract_no&quot;: &quot;&quot;,
+ &quot;supplier&quot;: &quot;浙江长安仁恒科技股份有限公司&quot;,
+ &quot;sales_name&quot;: &quot;张伟明&quot;,
+ &quot;agent_name&quot;: &quot;&quot;,
+ &quot;submitter_name&quot;: &quot;张伟明&quot;,
+ &quot;submitter_user_id&quot;: &quot;&quot;,
+ &quot;is_self_pickup&quot;: &quot;否&quot;,
+ &quot;special_spec_requirements&quot;: &quot;&quot;,
+ &quot;outbound_order_status&quot;: &quot;GENERATED&quot;,
+ &quot;outbound_order_id&quot;: &quot;CARH-DG000001&quot;,
+ &quot;outbound_order_file_name&quot;: &quot;中胜涂料(宁波)有限公司_CARH-DG000001.xlsx&quot;,
+ &quot;outbound_order_file_path&quot;: &quot;C:\\feishu-approval-poc\\data\\outbound_orders\\中胜涂料(宁波)有限公司_CARH-DG000001.xlsx&quot;,
+ &quot;outbound_order_url&quot;: &quot;/outbound-orders/%E4%B8%AD%E8%83%9C%E6%B6%82%E6%96%99(%E5%AE%81%E6%B3%A2)%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8_CARH-DG000001.xlsx&quot;,
+ &quot;outbound_generated_at&quot;: &quot;2026-05-26T05:13:00.330Z&quot;,
+ &quot;outbound_order_error&quot;: &quot;&quot;,
+ &quot;other_attachment_files&quot;: [],
+ &quot;available_invoice_qty&quot;: &quot;5000&quot;,
+ &quot;available_invoice_amount&quot;: &quot;55500&quot;,
+ &quot;invoice_request_data&quot;: {
+  &quot;invoice_customer_name&quot;: &quot;中胜涂料(宁波)有限公司&quot;,
+  &quot;invoice_amount&quot;: &quot;55500&quot;,
+  &quot;invoice_quantity&quot;: &quot;5000&quot;,
+  &quot;need_invoice&quot;: &quot;是&quot;,
+  &quot;invoice_remark&quot;: &quot;&quot;
+ },
+ &quot;tax_no&quot;: &quot;&quot;,
+ &quot;invoice_type&quot;: &quot;&quot;,
+ &quot;receive_email&quot;: &quot;&quot;,
+ &quot;invoice_remark&quot;: &quot;&quot;,
+ &quot;invoice_status&quot;: &quot;待开票申请&quot;,
+ &quot;invoice_status_code&quot;: &quot;SALES_APPLY_PENDING&quot;,
+ &quot;workflow_node&quot;: &quot;SALES_INVOICE_APPLY&quot;,
+ &quot;next_node&quot;: &quot;开票申请&quot;,
+ &quot;approver_name&quot;: &quot;李陈红&quot;,
+ &quot;approver_names&quot;: [
+  &quot;李陈红&quot;
+ ],
+ &quot;created_at&quot;: &quot;2026-05-28T02:14:05.380Z&quot;,
+ &quot;updated_at&quot;: &quot;2026-05-28T02:14:05.380Z&quot;,
+ &quot;source&quot;: &quot;shipment_completed&quot;,
+ &quot;approval_mode&quot;: &quot;OR_SIGN&quot;,
+ &quot;invoice_application_status&quot;: &quot;GENERATED&quot;,
+ &quot;invoice_application_file_name&quot;: &quot;中胜涂料(宁波)有限公司开票申请.xlsx&quot;,
+ &quot;invoice_application_file_path&quot;: &quot;C:\\feishu-approval-poc\\data\\invoice_applications\\SO-20260526-0005-INV-01\\中胜涂料(宁波)有限公司开票申请.xlsx&quot;,
+ &quot;invoice_application_url&quot;: &quot;/invoices/SO-20260526-0005-INV-01/invoice-application/download&quot;,
+ &quot;invoice_application_generated_at&quot;: &quot;2026-05-28T02:14:05.380Z&quot;,
+ &quot;invoice_application_warnings&quot;: [
+  &quot;产品规格查询未找到完全一致产品名称：70，品名使用默认值：膨润土&quot;
+ ]
+}</pre><pre class="json"><span class="c"># sample 2/4</span>
+{
+ &quot;invoice_id&quot;: &quot;SO-20260526-0005-INV-01&quot;,
+ &quot;application_id&quot;: &quot;SO-20260526-0005-INV-01&quot;,
+ &quot;instance_id&quot;: &quot;SO-20260526-0005-INV-01&quot;,
+ &quot;task_id&quot;: &quot;SO-20260526-0005-INV-01-sales-apply-task&quot;,
+ &quot;current_task_id&quot;: &quot;SO-20260526-0005-INV-01-sales-apply-task&quot;,
+ &quot;sales_apply_task_id&quot;: &quot;SO-20260526-0005-INV-01-sales-apply-task&quot;,
+ &quot;sales_confirm_task_id&quot;: &quot;SO-20260526-0005-INV-01-sales-confirm-task&quot;,
+ &quot;finance_issue_task_id&quot;: &quot;SO-20260526-0005-INV-01-finance-issue-task&quot;,
+ &quot;finance_upload_task_id&quot;: &quot;SO-20260526-0005-INV-01-finance-upload-task&quot;,
+ &quot;sales_receive_task_id&quot;: &quot;SO-20260526-0005-INV-01-sales-receive-task&quot;,
+ &quot;sales_collection_task_id&quot;: &quot;SO-20260526-0005-INV-01-sales-collection-task&quot;,
+ &quot;shipment_id&quot;: &quot;SO-20260526-0005-SHP-01&quot;,
+ &quot;delivery_order_id&quot;: &quot;SO-20260526-0005-SHP-01&quot;,
+ &quot;stock_prepare_id&quot;: &quot;SO-20260526-0005-STK-01&quot;,
+ &quot;order_instance_id&quot;: &quot;ORDER-POC-001-20260526043327&quot;,
+ &quot;order_id&quot;: &quot;ORDER-POC-001&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260526-0005&quot;,
+ &quot;stage_id&quot;: &quot;SO-20260526-0005-INV-01&quot;,
+ &quot;stage_code&quot;: &quot;INV&quot;,
+ &quot;stage_seq&quot;: &quot;01&quot;,
+ &quot;batch_seq&quot;: &quot;01&quot;,
+ &quot;batch_type&quot;: &quot;FINAL&quot;,
+ &quot;order_total_quantity&quot;: 5000,
+ &quot;batch_quantity&quot;: 5000,
+ &quot;shipped_quantity_before&quot;: 0,
+ &quot;shipped_quantity_total&quot;: 5000,
+ &quot;remaining_quantity&quot;: 0,
+ &quot;split_flag&quot;: &quot;否&quot;,
+ &quot;customer_name&quot;: &quot;中胜涂料(宁波)有限公司&quot;,
+ &quot;customer_contract_no&quot;: &quot;&quot;,
+ &quot;supplier&quot;: &quot;浙江长安仁恒科技股份有限公司&quot;,
+ &quot;sales_name&quot;: &quot;张伟明&quot;,
+ &quot;agent_name&quot;: &quot;&quot;,
+ &quot;submitter_name&quot;: &quot;张伟明&quot;,
+ &quot;submitter_user_id&quot;: &quot;&quot;,
+ &quot;is_self_pickup&quot;: &quot;否&quot;,
+ &quot;special_spec_requirements&quot;: &quot;&quot;,
+ &quot;outbound_order_status&quot;: &quot;GENERATED&quot;,
+ &quot;outbound_order_id&quot;: &quot;CARH-DG000001&quot;,
+ &quot;outbound_order_file_name&quot;: &quot;中胜涂料(宁波)有限公司_CARH-DG000001.xlsx&quot;,
+ &quot;outbound_order_file_path&quot;: &quot;C:\\feishu-approval-poc\\data\\outbound_orders\\中胜涂料(宁波)有限公司_CARH-DG000001.xlsx&quot;,
+ &quot;outbound_order_url&quot;: &quot;/outbound-orders/%E4%B8%AD%E8%83%9C%E6%B6%82%E6%96%99(%E5%AE%81%E6%B3%A2)%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8_CARH-DG000001.xlsx&quot;,
+ &quot;outbound_generated_at&quot;: &quot;2026-05-26T05:13:00.330Z&quot;,
+ &quot;outbound_order_error&quot;: &quot;&quot;,
+ &quot;other_attachment_files&quot;: [],
+ &quot;available_invoice_qty&quot;: &quot;5000&quot;,
+ &quot;available_invoice_amount&quot;: &quot;55500&quot;,
+ &quot;invoice_request_data&quot;: {
+  &quot;invoice_customer_name&quot;: &quot;中胜涂料(宁波)有限公司&quot;,
+  &quot;invoice_amount&quot;: &quot;55500&quot;,
+  &quot;invoice_quantity&quot;: &quot;5000&quot;,
+  &quot;need_invoice&quot;: &quot;是&quot;,
+  &quot;invoice_remark&quot;: &quot;&quot;
+ },
+ &quot;tax_no&quot;: &quot;&quot;,
+ &quot;invoice_type&quot;: &quot;&quot;,
+ &quot;receive_email&quot;: &quot;&quot;,
+ &quot;invoice_remark&quot;: &quot;&quot;,
+ &quot;invoice_status&quot;: &quot;已归档&quot;,
+ &quot;invoice_status_code&quot;: &quot;ARCHIVED&quot;,
+ &quot;workflow_node&quot;: &quot;SYSTEM_ARCHIVED&quot;,
+ &quot;next_node&quot;: &quot;系统归档&quot;,
+ &quot;approver_name&quot;: &quot;李陈红&quot;,
+ &quot;approver_names&quot;: [
+  &quot;李陈红&quot;
+ ],
+ &quot;created_at&quot;: &quot;2026-05-28T02:14:05.380Z&quot;,
+ &quot;updated_at&quot;: &quot;2026-05-28T03:01:04.443Z&quot;,
+ &quot;source&quot;: &quot;shipment_completed&quot;,
+ &quot;approval_mode&quot;: &quot;OR_SIGN&quot;,
+ &quot;invoice_application_status&quot;: &quot;GENERATED&quot;,
+ &quot;invoice_application_file_name&quot;: &quot;中胜涂料(宁波)有限公司开票申请.xlsx&quot;,
+ &quot;invoice_application_file_path&quot;: &quot;C:\\feishu-approval-poc\\data\\invoice_applications\\SO-20260526-0005-INV-01\\中胜涂料(宁波)有限公司开票申请.xlsx&quot;,
+ &quot;invoice_application_url&quot;: &quot;/invoices/SO-20260526-0005-INV-01/invoice-application/download&quot;,
+ &quot;invoice_application_generated_at&quot;: &quot;2026-05-28T02:14:05.380Z&quot;,
+ &quot;invoice_application_warnings&quot;: [
+  &quot;产品规格查询未找到完全一致产品名称：70，品名使用默认值：膨润土&quot;
+ ],
+ &quot;approved_at&quot;: &quot;2026-05-28T03:01:04.443Z&quot;,
+ &quot;sales_apply_data&quot;: {
+  &quot;invoice_date&quot;: &quot;2026-05-28&quot;
+ },
+ &quot;sales_apply_reason&quot;: &quot;&quot;,
+ &quot;sales_apply_approved_at&quot;: &quot;2026-05-28T03:01:04.443Z&quot;
+}</pre><pre class="json"><span class="c"># sample 3/4</span>
+{
+ &quot;invoice_id&quot;: &quot;SO-20260812-0007-INV-01&quot;,
+ &quot;application_id&quot;: &quot;SO-20260812-0007-INV-01&quot;,
+ &quot;instance_id&quot;: &quot;SO-20260812-0007-INV-01&quot;,
+ &quot;task_id&quot;: &quot;SO-20260812-0007-INV-01-customer-stamp-return-task&quot;,
+ &quot;current_task_id&quot;: &quot;SO-20260812-0007-INV-01-customer-stamp-return-task&quot;,
+ &quot;sales_apply_task_id&quot;: &quot;SO-20260812-0007-INV-01-sales-apply-task&quot;,
+ &quot;customer_stamp_return_task_id&quot;: &quot;SO-20260812-0007-INV-01-customer-stamp-return-task&quot;,
+ &quot;sales_confirm_task_id&quot;: &quot;SO-20260812-0007-INV-01-sales-confirm-task&quot;,
+ &quot;finance_issue_task_id&quot;: &quot;SO-20260812-0007-INV-01-finance-issue-task&quot;,
+ &quot;finance_upload_task_id&quot;: &quot;SO-20260812-0007-INV-01-finance-upload-task&quot;,
+ &quot;sales_receive_task_id&quot;: &quot;SO-20260812-0007-INV-01-sales-receive-task&quot;,
+ &quot;sales_collection_task_id&quot;: &quot;SO-20260812-0007-INV-01-sales-collection-task&quot;,
+ &quot;shipment_id&quot;: &quot;SO-20260812-0007-SHP-01&quot;,
+ &quot;delivery_order_id&quot;: &quot;SO-20260812-0007-SHP-01&quot;,
+ &quot;source_shipment_ids&quot;: [
+  &quot;SO-20260812-0007-SHP-01&quot;
+ ],
+ &quot;source_delivery_order_ids&quot;: [
+  &quot;SO-20260812-0007-SHP-01&quot;
+ ],
+ &quot;source_order_ids&quot;: [
+  &quot;ORDER-POC-001&quot;
+ ],
+ &quot;source_flow_ids&quot;: [
+  &quot;SO-20260812-0007&quot;
+ ],
+ &quot;combined_invoice_count&quot;: 1,
+ &quot;stock_prepare_id&quot;: &quot;SO-20260812-0007-STK-01&quot;,
+ &quot;order_instance_id&quot;: &quot;ORDER-POC-001-20260812042342&quot;,
+ &quot;order_id&quot;: &quot;ORDER-POC-001&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260812-0007&quot;,
+ &quot;stage_id&quot;: &quot;SO-20260812-0007-INV-01&quot;,
+ &quot;stage_code&quot;: &quot;INV&quot;,
+ &quot;stage_seq&quot;: &quot;01&quot;,
+ &quot;batch_seq&quot;: &quot;01&quot;,
+ &quot;batch_type&quot;: &quot;FINAL&quot;,
+ &quot;order_total_quantity&quot;: 200,
+ &quot;batch_quantity&quot;: 200,
+ &quot;shipped_quantity_before&quot;: 0,
+ &quot;shipped_quantity_total&quot;: 200,
+ &quot;remaining_quantity&quot;: 0,
+ &quot;split_flag&quot;: &quot;否&quot;,
+ &quot;customer_name&quot;: &quot;沭阳凤凰美术颜料有限公司&quot;,
+ &quot;customer_contract_no&quot;: &quot;&quot;,
+ &quot;supplier&quot;: &quot;浙江长安仁恒科技股份有限公司上海分公司&quot;,
+ &quot;sales_name&quot;: &quot;蒋惠文&quot;,
+ &quot;approval_profile&quot;: &quot;&quot;,
+ &quot;agent_name&quot;: &quot;&quot;,
+ &quot;submitter_name&quot;: &quot;蒋惠文&quot;,
+ &quot;submitter_user_id&quot;: &quot;c253be28&quot;,
+ &quot;is_self_pickup&quot;: &quot;否&quot;,
+ &quot;special_spec_requirements&quot;: &quot;&quot;,
+ &quot;outbound_order_status&quot;: &quot;GENERATED&quot;,
+ &quot;outbound_order_id&quot;: &quot;CARH-YY000509&quot;,
+ &quot;outbound_order_file_name&quot;: &quot;沭阳凤凰美术颜料有限公司_CARH-YY000509_阳原.xlsx&quot;,
+ &quot;outbound_order_file_path&quot;: &quot;C:\\feishu-approval-poc\\data\\outbound_orders\\沭阳凤凰美术颜料有限公司_CARH-YY000509_阳原.xlsx&quot;,
+ &quot;outbound_order_url&quot;: &quot;/outbound-orders/%E6%B2%AD%E9%98%B3%E5%87%A4%E5%87%B0%E7%BE%8E%E6%9C%AF%E9%A2%9C%E6%96%99%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8_CARH-YY000509_%E9%98%B3%E5%8E%9F.xlsx&quot;,
+ &quot;outbound_generated_at&quot;: &quot;2026-08-12T04:53:48.333Z&quot;,
+ &quot;outbound_order_error&quot;: &quot;&quot;,
+ &quot;other_attachment_files&quot;: [],
+ &quot;available_invoice_qty&quot;: &quot;200&quot;,
+ &quot;available_invoice_amount&quot;: &quot;3400&quot;,
+ &quot;invoice_request_data&quot;: {
+  &quot;invoice_mode&quot;: &quot;单订单开票&quot;,
+  &quot;invoice_customer_name&quot;: &quot;沭阳凤凰美术颜料有限公司&quot;,
+  &quot;invoice_amount&quot;: &quot;3400&quot;,
+  &quot;invoice_quantity&quot;: &quot;200&quot;,
+  &quot;need_invoice&quot;: &quot;是&quot;,
+  &quot;invoice_remark&quot;: &quot;&quot;
+ },
+ &quot;invoice_mode&quot;: &quot;单订单开票&quot;,
+ &quot;tax_no&quot;: &quot;&quot;,
+ &quot;invoice_type&quot;: &quot;&quot;,
+ &quot;receive_email&quot;: &quot;&quot;,
+ &quot;invoice_remark&quot;: &quot;&quot;,
+ &quot;invoice_status&quot;: &quot;已归档&quot;,
+ &quot;invoice_status_code&quot;: &quot;ARCHIVED&quot;,
+ &quot;workflow_node&quot;: &quot;SYSTEM_ARCHIVED&quot;,
+ &quot;next_node&quot;: &quot;系统归档&quot;,
+ &quot;approver_name&quot;: &quot;蒋惠文&quot;,
+ &quot;approver_names&quot;: [
+  &quot;蒋惠文&quot;
+ ],
+ &quot;invoice_apply_cc_names&quot;: [
+  &quot;方倩慧&quot;
+ ],
+ &quot;created_at&quot;: &quot;2026-08-17T02:45:16.545Z&quot;,
+ &quot;updated_at&quot;: &quot;2026-08-17T02:47:45.867Z&quot;,
+ &quot;source&quot;: &quot;shipment_completed&quot;,
+ &quot;approval_mode&quot;: &quot;SINGLE&quot;,
+ &quot;invoice_application_status&quot;: &quot;GENERATED&quot;,
+ &quot;invoice_application_file_name&quot;: &quot;沭阳凤凰美术颜料有限公司开票申请.xlsx&quot;,
+ &quot;invoice_application_file_path&quot;: &quot;C:\\feishu-approval-poc\\data\\invoice_applications\\SO-20260812-0007-INV-01\\沭阳凤凰美术颜料有限公司开票申请.xlsx&quot;,
+ &quot;invoice_application_url&quot;: &quot;/invoices/SO-20260812-0007-INV-01/invoice-application/download&quot;,
+ &quot;invoice_application_generated_at&quot;: &quot;2026-08-17T02:45:16.545Z&quot;,
+ &quot;invoice_application_warnings&quot;: [],
+ &quot;approved_at&quot;: &quot;2026-08-17T02:47:45.867Z&quot;,
+ &quot;customer_stamp_return_data&quot;: {},
+ &quot;customer_stamp_return_reason&quot;: &quot;&quot;,
+ &quot;customer_stamp_return_approved_at&quot;: &quot;2026-08-17T02:47:45.867Z&quot;
+}</pre><pre class="json"><span class="c"># sample 4/4</span>
+{
+ &quot;invoice_id&quot;: &quot;SO-20260811-0008-INV-01&quot;,
+ &quot;application_id&quot;: &quot;SO-20260811-0008-INV-01&quot;,
+ &quot;instance_id&quot;: &quot;SO-20260811-0008-INV-01&quot;,
+ &quot;task_id&quot;: &quot;SO-20260811-0008-INV-01-customer-stamp-return-task&quot;,
+ &quot;current_task_id&quot;: &quot;SO-20260811-0008-INV-01-customer-stamp-return-task&quot;,
+ &quot;sales_apply_task_id&quot;: &quot;SO-20260811-0008-INV-01-sales-apply-task&quot;,
+ &quot;customer_stamp_return_task_id&quot;: &quot;SO-20260811-0008-INV-01-customer-stamp-return-task&quot;,
+ &quot;sales_confirm_task_id&quot;: &quot;SO-20260811-0008-INV-01-sales-confirm-task&quot;,
+ &quot;finance_issue_task_id&quot;: &quot;SO-20260811-0008-INV-01-finance-issue-task&quot;,
+ &quot;finance_upload_task_id&quot;: &quot;SO-20260811-0008-INV-01-finance-upload-task&quot;,
+ &quot;sales_receive_task_id&quot;: &quot;SO-20260811-0008-INV-01-sales-receive-task&quot;,
+ &quot;sales_collection_task_id&quot;: &quot;SO-20260811-0008-INV-01-sales-collection-task&quot;,
+ &quot;shipment_id&quot;: &quot;SO-20260811-0008-SHP-01&quot;,
+ &quot;delivery_order_id&quot;: &quot;SO-20260811-0008-SHP-01&quot;,
+ &quot;source_shipment_ids&quot;: [
+  &quot;SO-20260811-0008-SHP-01&quot;
+ ],
+ &quot;source_delivery_order_ids&quot;: [
+  &quot;SO-20260811-0008-SHP-01&quot;
+ ],
+ &quot;source_order_ids&quot;: [
+  &quot;ORDER-POC-001&quot;
+ ],
+ &quot;source_flow_ids&quot;: [
+  &quot;SO-20260811-0008&quot;
+ ],
+ &quot;combined_invoice_count&quot;: 1,
+ &quot;stock_prepare_id&quot;: &quot;SO-20260811-0008-STK-01&quot;,
+ &quot;order_instance_id&quot;: &quot;ORDER-POC-001-20260811065226&quot;,
+ &quot;order_id&quot;: &quot;ORDER-POC-001&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260811-0008&quot;,
+ &quot;stage_id&quot;: &quot;SO-20260811-0008-INV-01&quot;,
+ &quot;stage_code&quot;: &quot;INV&quot;,
+ &quot;stage_seq&quot;: &quot;01&quot;,
+ &quot;batch_seq&quot;: &quot;01&quot;,
+ &quot;batch_type&quot;: &quot;FINAL&quot;,
+ &quot;order_total_quantity&quot;: 100,
+ &quot;batch_quantity&quot;: 100,
+ &quot;shipped_quantity_before&quot;: 0,
+ &quot;shipped_quantity_total&quot;: 100,
+ &quot;remaining_quantity&quot;: 0,
+ &quot;split_flag&quot;: &quot;否&quot;,
+ &quot;customer_name&quot;: &quot;杭州朗恩新材料有限公司&quot;,
+ &quot;customer_contract_no&quot;: &quot;&quot;,
+ &quot;supplier&quot;: &quot;浙江长安仁恒科技股份有限公司&quot;,
+ &quot;sales_name&quot;: &quot;傅国俭&quot;,
+ &quot;approval_profile&quot;: &quot;&quot;,
+ &quot;agent_name&quot;: &quot;&quot;,
+ &quot;submitter_name&quot;: &quot;傅国俭&quot;,
+ &quot;submitter_user_id&quot;: &quot;24fe1eae&quot;,
+ &quot;is_self_pickup&quot;: &quot;否&quot;,
+ &quot;special_spec_requirements&quot;: &quot;&quot;,
+ &quot;outbound_order_status&quot;: &quot;GENERATED&quot;,
+ &quot;outbound_order_id&quot;: &quot;CARH-YY000507&quot;,
+ &quot;outbound_order_file_name&quot;: &quot;杭州朗恩新材料有限公司_CARH-YY000507_阳原.xlsx&quot;,
+ &quot;outbound_order_file_path&quot;: &quot;C:\\feishu-approval-poc\\data\\outbound_orders\\杭州朗恩新材料有限公司_CARH-YY000507_阳原.xlsx&quot;,
+ &quot;outbound_order_url&quot;: &quot;/outbound-orders/%E6%9D%AD%E5%B7%9E%E6%9C%97%E6%81%A9%E6%96%B0%E6%9D%90%E6%96%99%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8_CARH-YY000507_%E9%98%B3%E5%8E%9F.xlsx&quot;,
+ &quot;outbound_generated_at&quot;: &quot;2026-08-11T08:14:41.038Z&quot;,
+ &quot;outbound_order_error&quot;: &quot;&quot;,
+ &quot;other_attachment_files&quot;: [],
+ &quot;available_invoice_qty&quot;: &quot;100&quot;,
+ &quot;available_invoice_amount&quot;: &quot;3000&quot;,
+ &quot;invoice_request_data&quot;: {
+  &quot;invoice_mode&quot;: &quot;单订单开票&quot;,
+  &quot;invoice_customer_name&quot;: &quot;杭州朗恩新材料有限公司&quot;,
+  &quot;invoice_amount&quot;: &quot;3000&quot;,
+  &quot;invoice_quantity&quot;: &quot;100&quot;,
+  &quot;need_invoice&quot;: &quot;是&quot;,
+  &quot;invoice_remark&quot;: &quot;&quot;
+ },
+ &quot;invoice_mode&quot;: &quot;单订单开票&quot;,
+ &quot;tax_no&quot;: &quot;&quot;,
+ &quot;invoice_type&quot;: &quot;&quot;,
+ &quot;receive_email&quot;: &quot;&quot;,
+ &quot;invoice_remark&quot;: &quot;&quot;,
+ &quot;invoice_status&quot;: &quot;待客户订单盖章回传&quot;,
+ &quot;invoice_status_code&quot;: &quot;STAMP_RETURN_PENDING&quot;,
+ &quot;workflow_node&quot;: &quot;CUSTOMER_ORDER_STAMP_RETURN&quot;,
+ &quot;next_node&quot;: &quot;客户订单盖章回传&quot;,
+ &quot;approver_name&quot;: &quot;傅国俭&quot;,
+ &quot;approver_names&quot;: [
+  &quot;傅国俭&quot;
+ ],
+ &quot;invoice_apply_cc_names&quot;: [
+  &quot;王晶&quot;
+ ],
+ &quot;created_at&quot;: &quot;2026-08-17T04:13:25.022Z&quot;,
+ &quot;updated_at&quot;: &quot;2026-08-17T04:13:25.022Z&quot;,
+ &quot;source&quot;: &quot;shipment_completed&quot;,
+ &quot;approval_mode&quot;: &quot;SINGLE&quot;,
+ &quot;invoice_application_status&quot;: &quot;GENERATED&quot;,
+ &quot;invoice_application_file_name&quot;: &quot;杭州朗恩新材料有限公司开票申请.xlsx&quot;,
+ &quot;invoice_application_file_path&quot;: &quot;C:\\feishu-approval-poc\\data\\invoice_applications\\SO-20260811-0008-INV-01\\杭州朗恩新材料有限公司开票申请.xlsx&quot;,
+ &quot;invoice_application_url&quot;: &quot;/invoices/SO-20260811-0008-INV-01/invoice-application/download&quot;,
+ &quot;invoice_application_generated_at&quot;: &quot;2026-08-17T04:13:25.022Z&quot;,
+ &quot;invoice_application_warnings&quot;: []
+}</pre></details>
+</section>
+<section class="tblcard">
+  <div class="tbl-head">
+    <code class="tbl-name">invoice_events</code>
+    <span class="pill g">同步</span>
+    <span class="tbl-meta">4,051 行 · 2.4 MB · 更新 08-17 12:13</span>
+    <span class="tbl-keys">9 键</span>
+  </div>
+  <div class="chips"><span class="chip">event_id</span><span class="chip">occurred_at</span><span class="chip">invoice_id</span><span class="chip">shipment_id</span><span class="chip">flow_id</span><span class="chip">stage_id</span><span class="chip">task_id</span><span class="chip">status</span><span class="chip obj">detail</span></div>
+  <details class="samples"><summary><span class="sum-tt">抽样记录</span><span class="sum-meta">4 行 · 头+尾 · 敏感键已脱敏</span><span class="sum-ic">▸</span></summary><pre class="json"><span class="c"># sample 1/4</span>
+{
+ &quot;event_id&quot;: &quot;98d1f239-9235-43cb-9ea4-4f4a1a1e9fad&quot;,
+ &quot;occurred_at&quot;: &quot;2026-05-28T02:14:05.380Z&quot;,
+ &quot;invoice_id&quot;: &quot;SO-20260526-0005-INV-01&quot;,
+ &quot;shipment_id&quot;: &quot;SO-20260526-0005-SHP-01&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260526-0005&quot;,
+ &quot;stage_id&quot;: &quot;SO-20260526-0005-INV-01&quot;,
+ &quot;task_id&quot;: &quot;SO-20260526-0005-INV-01-sales-apply-task&quot;,
+ &quot;status&quot;: &quot;INVOICE_CREATED_WAITING&quot;,
+ &quot;detail&quot;: {
+  &quot;trigger&quot;: &quot;background-job&quot;,
+  &quot;evidence_path&quot;: &quot;C:\\feishu-approval-poc\\tmp\\evidence\\shipment_web_decision.SO-20260526-0005-SHP-01.json&quot;,
+  &quot;node&quot;: &quot;INV-00&quot;
+ }
+}</pre><pre class="json"><span class="c"># sample 2/4</span>
+{
+ &quot;event_id&quot;: &quot;78eb369d-0ad7-40d4-bb8b-57234510e173&quot;,
+ &quot;occurred_at&quot;: &quot;2026-05-28T03:01:04.443Z&quot;,
+ &quot;invoice_id&quot;: &quot;SO-20260526-0005-INV-01&quot;,
+ &quot;shipment_id&quot;: &quot;SO-20260526-0005-SHP-01&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260526-0005&quot;,
+ &quot;stage_id&quot;: &quot;SO-20260526-0005-INV-01&quot;,
+ &quot;task_id&quot;: &quot;SO-20260526-0005-INV-01-sales-apply-task&quot;,
+ &quot;status&quot;: &quot;INVOICE_APPLICATION_SUBMITTED&quot;,
+ &quot;detail&quot;: {
+  &quot;data&quot;: {
+   &quot;invoice_date&quot;: &quot;2026-05-28&quot;
+  },
+  &quot;reason&quot;: &quot;&quot;,
+  &quot;operator_open_id&quot;: &quot;(invoice-web-approver)&quot;,
+  &quot;evidence_path&quot;: &quot;C:\\feishu-approval-poc\\tmp\\evidence\\invoice_web_decision.SO-20260526-0005-INV-01.json&quot;
+ }
+}</pre><pre class="json"><span class="c"># sample 3/4</span>
+{
+ &quot;event_id&quot;: &quot;e9aea31f-c5ea-49f1-9646-3528b1a321d6&quot;,
+ &quot;occurred_at&quot;: &quot;2026-08-17T04:13:25.022Z&quot;,
+ &quot;invoice_id&quot;: &quot;SO-20260811-0008-INV-01&quot;,
+ &quot;shipment_id&quot;: &quot;SO-20260811-0008-SHP-01&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260811-0008&quot;,
+ &quot;stage_id&quot;: &quot;SO-20260811-0008-INV-01&quot;,
+ &quot;task_id&quot;: &quot;SO-20260811-0008-INV-01-customer-stamp-return-task&quot;,
+ &quot;status&quot;: &quot;CUSTOMER_ORDER_STAMP_RETURN_PENDING&quot;,
+ &quot;detail&quot;: {
+  &quot;trigger&quot;: &quot;background-job&quot;,
+  &quot;evidence_path&quot;: &quot;C:\\feishu-approval-poc\\tmp\\evidence\\shipment_web_decision.SO-20260811-0008-SHP-01.json&quot;,
+  &quot;node&quot;: &quot;INV-CUSTOMER-STAMP-RETURN&quot;,
+  &quot;invoice_mode&quot;: &quot;单订单开票&quot;,
+  &quot;source_shipment_ids&quot;: [
+   &quot;SO-20260811-0008-SHP-01&quot;
+  ],
+  &quot;source_delivery_order_ids&quot;: [
+   &quot;SO-20260811-0008-SHP-01&quot;
+  ],
+  &quot;invoice_apply_cc_open_ids&quot;: [
+   &quot;ou_e37cce9b0d504516cc1a885aa171e8d7&quot;
+  ]
+ }
+}</pre><pre class="json"><span class="c"># sample 4/4</span>
+{
+ &quot;event_id&quot;: &quot;5be9a9ba-7c92-4927-9a2f-b3efc5d3f476&quot;,
+ &quot;occurred_at&quot;: &quot;2026-08-17T04:13:25.022Z&quot;,
+ &quot;invoice_id&quot;: &quot;SO-20260811-0008-INV-01&quot;,
+ &quot;shipment_id&quot;: &quot;SO-20260811-0008-SHP-01&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260811-0008&quot;,
+ &quot;stage_id&quot;: &quot;SO-20260811-0008-INV-01&quot;,
+ &quot;task_id&quot;: &quot;&quot;,
+ &quot;status&quot;: &quot;INVOICE_APPLY_CC_CREATED&quot;,
+ &quot;detail&quot;: {
+  &quot;recipients&quot;: [
+   &quot;ou_e37cce9b0d504516cc1a885aa171e8d7&quot;
+  ],
+  &quot;next_node&quot;: &quot;客户订单盖章回传&quot;,
+  &quot;invoice_mode&quot;: &quot;单订单开票&quot;,
+  &quot;source_shipment_ids&quot;: [
+   &quot;SO-20260811-0008-SHP-01&quot;
+  ]
+ }
+}</pre></details>
+</section>
+<section class="tblcard">
+  <div class="tbl-head">
+    <code class="tbl-name">approval_comments</code>
+    <span class="pill g">同步</span>
+    <span class="tbl-meta">324 行 · 250 KB · 更新 08-15 16:24</span>
+    <span class="tbl-keys">15 键</span>
+  </div>
+  <div class="chips"><span class="chip">comment_id</span><span class="chip">created_at</span><span class="chip">scope</span><span class="chip">target_id</span><span class="chip">flow_id</span><span class="chip">approval_name</span><span class="chip">customer_name</span><span class="chip">current_node</span><span class="chip">author_name</span><span class="chip">author_user_id</span><span class="chip">content</span><span class="chip obj">attachments</span><span class="chip obj">notify_names</span><span class="chip">notified_count</span><span class="chip">notify_failed_count</span></div>
+  <details class="samples"><summary><span class="sum-tt">抽样记录</span><span class="sum-meta">2 行 · 头+尾 · 敏感键已脱敏</span><span class="sum-ic">▸</span></summary><pre class="json"><span class="c"># sample 1/2</span>
+{
+ &quot;comment_id&quot;: &quot;e494c386-258b-4b78-bc06-7b4dc241c30e&quot;,
+ &quot;created_at&quot;: &quot;2026-06-01T13:19:51.896Z&quot;,
+ &quot;scope&quot;: &quot;SHIPMENT&quot;,
+ &quot;target_id&quot;: &quot;SO-20260529-0003-SHP-01&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260529-0003&quot;,
+ &quot;approval_name&quot;: &quot;发货审批&quot;,
+ &quot;customer_name&quot;: &quot;北新嘉宝莉涂料(上海)有限公司&quot;,
+ &quot;current_node&quot;: &quot;上传回单/完成信息&quot;,
+ &quot;author_name&quot;: &quot;张伟明&quot;,
+ &quot;content&quot;: &quot;仓库同事：上海嘉定莉请告知物流6/2日（明天）因车间检查上午不能送，请安排下午送货。谢谢&quot;,
+ &quot;notified_count&quot;: 0,
+ &quot;notify_failed_count&quot;: 2
+}</pre><pre class="json"><span class="c"># sample 2/2</span>
+{
+ &quot;comment_id&quot;: &quot;2a9a4109-2e5b-4d18-a5e8-5fe5ec82711a&quot;,
+ &quot;created_at&quot;: &quot;2026-08-15T08:24:35.106Z&quot;,
+ &quot;scope&quot;: &quot;SHIPMENT&quot;,
+ &quot;target_id&quot;: &quot;SO-20260815-0009-SHP-01&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260815-0009&quot;,
+ &quot;approval_name&quot;: &quot;发货审批&quot;,
+ &quot;customer_name&quot;: &quot;辽宁宝山生态涂料有限公司&quot;,
+ &quot;current_node&quot;: &quot;上传回单/完成信息&quot;,
+ &quot;author_name&quot;: &quot;张帅&quot;,
+ &quot;author_user_id&quot;: &quot;&quot;,
+ &quot;content&quot;: &quot;运费2000元&quot;,
+ &quot;attachments&quot;: [],
+ &quot;notify_names&quot;: [
+  &quot;俞家俊&quot;,
+  &quot;宋海斌&quot;,
+  &quot;陈虹励&quot;,
+  &quot;王杰&quot;
+ ],
+ &quot;notified_count&quot;: 4,
+ &quot;notify_failed_count&quot;: 0
+}</pre></details>
+</section>
+<section class="tblcard">
+  <div class="tbl-head">
+    <code class="tbl-name">external_instances</code>
+    <span class="pill a">只读归档</span>
+    <span class="tbl-meta">12,165 行 · 66.7 MB · 更新 08-17 13:28</span>
+    <span class="tbl-keys">13 键</span>
+  </div>
+  <div class="chips"><span class="chip">created_at</span><span class="chip">instance_id</span><span class="chip">task_id</span><span class="chip">order_id</span><span class="chip">order_instance_id</span><span class="chip">stock_prepare_id</span><span class="chip">flow_id</span><span class="chip">stage_id</span><span class="chip">stage_code</span><span class="chip">stage_seq</span><span class="chip">source_flow</span><span class="chip">request_evidence_path</span><span class="chip">response_evidence_path</span></div>
+  <details class="samples"><summary><span class="sum-tt">抽样记录</span><span class="sum-meta">2 行 · 头+尾 · 敏感键已脱敏</span><span class="sum-ic">▸</span></summary><pre class="json"><span class="c"># sample 1/2</span>
+{
+ &quot;recorded_at&quot;: &quot;2026-05-26T02:42:15.876Z&quot;,
+ &quot;source&quot;: &quot;external-orders-create-form&quot;,
+ &quot;approval_code&quot;: &quot;FFF2CF67-2C4D-4566-A3B7-59B0E94ECA08&quot;,
+ &quot;order_id&quot;: &quot;ORDER-POC-001&quot;,
+ &quot;instance_id&quot;: &quot;ORDER-POC-001-20260526024205&quot;,
+ &quot;task_id&quot;: &quot;ORDER-POC-001-20260526024205-manager-task&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260526-0004&quot;,
+ &quot;stage_id&quot;: &quot;SO-20260526-0004-ORD-01&quot;,
+ &quot;stage_code&quot;: &quot;ORD&quot;,
+ &quot;stage_seq&quot;: &quot;01&quot;,
+ &quot;request_evidence_path&quot;: &quot;C:\\feishu-approval-poc\\tmp\\evidence\\create_test_external_instance_request.ORDER-POC-001-20260526024205.json&quot;,
+ &quot;response_evidence_path&quot;: &quot;C:\\feishu-approval-poc\\tmp\\evidence\\create_test_external_instance_response.ORDER-POC-001-20260526024205.json&quot;
+}</pre><pre class="json"><span class="c"># sample 2/2</span>
+{
+ &quot;created_at&quot;: &quot;2026-08-17T05:28:22.405Z&quot;,
+ &quot;instance_id&quot;: &quot;SO-20260817-0012-SHP-01&quot;,
+ &quot;task_id&quot;: &quot;SO-20260817-0012-SHP-01-warehouse-task&quot;,
+ &quot;order_id&quot;: &quot;ORDER-POC-001&quot;,
+ &quot;order_instance_id&quot;: &quot;ORDER-POC-001-20260817031110&quot;,
+ &quot;stock_prepare_id&quot;: &quot;SO-20260817-0012-STK-01&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260817-0012&quot;,
+ &quot;stage_id&quot;: &quot;SO-20260817-0012-SHP-01&quot;,
+ &quot;stage_code&quot;: &quot;SHP&quot;,
+ &quot;stage_seq&quot;: &quot;01&quot;,
+ &quot;source_flow&quot;: &quot;SHIPMENT&quot;,
+ &quot;request_evidence_path&quot;: &quot;C:\\feishu-approval-poc\\tmp\\evidence\\create_shipment_external_instance_request.SO-20260817-0012-SHP-01.json&quot;,
+ &quot;response_evidence_path&quot;: &quot;C:\\feishu-approval-poc\\tmp\\evidence\\create_shipment_external_instance_response.SO-20260817-0012-SHP-01.json&quot;
+}</pre></details>
+</section>
+<section class="tblcard">
+  <div class="tbl-head">
+    <code class="tbl-name">background_jobs</code>
+    <span class="pill a">只读归档</span>
+    <span class="tbl-meta">10,995 行 · 14.6 MB · 更新 08-17 13:28</span>
+    <span class="tbl-keys">10 键</span>
+  </div>
+  <div class="chips"><span class="chip">job_id</span><span class="chip">type</span><span class="chip">status</span><span class="chip">attempts</span><span class="chip obj">payload</span><span class="chip">max_attempts</span><span class="chip">created_at</span><span class="chip">updated_at</span><span class="chip">started_at</span><span class="chip">finished_at</span></div>
+  <details class="samples"><summary><span class="sum-tt">抽样记录</span><span class="sum-meta">2 行 · 头+尾 · 敏感键已脱敏</span><span class="sum-ic">▸</span></summary><pre class="json"><span class="c"># sample 1/2</span>
+{
+ &quot;job_id&quot;: &quot;7a0e0ee8-6081-4299-ada1-a3ff913243ff&quot;,
+ &quot;type&quot;: &quot;CREATE_ORDER_APPROVAL&quot;,
+ &quot;status&quot;: &quot;PENDING&quot;,
+ &quot;attempts&quot;: 0,
+ &quot;payload&quot;: {
+  &quot;input&quot;: {
+   &quot;order_id&quot;: &quot;ORDER-POC-001&quot;,
+   &quot;customer_name&quot;: &quot;山东涵悦诚新材料有限公司&quot;,
+   &quot;customer_type&quot;: &quot;老客户&quot;,
+   &quot;product_name&quot;: &quot;Clayminton LB&quot;,
+   &quot;quantity&quot;: 500,
+   &quot;unit_price&quot;: 20.3,
+   &quot;amount&quot;: 10150,
+   &quot;currency&quot;: &quot;CNY&quot;,
+   &quot;items&quot;: [
+    {
+     &quot;product_name&quot;: &quot;Clayminton LB&quot;,
+     &quot;quantity&quot;: 500,
+     &quot;unit_price&quot;: 20.3,
+     &quot;packaging&quot;: &quot;&quot;,
+     &quot;arrival_date&quot;: &quot;&quot;,
+     &quot;remark&quot;: &quot;&quot;
+    }
+   ],
+   &quot;supplier&quot;: &quot;浙江长安仁恒科技股份有限公司&quot;,
+   &quot;customer_level&quot;: &quot;A&quot;,
+   &quot;shipping_address&quot;: &quot;天津东丽区金钟街道欢坨村津亚物流北永信路5号天津杨昇仓库长扬乐器院内&quot;,
+   &quot;pickup_warehouse&quot;: &quot;&quot;,
+   &quot;receiver&quot;: &quot;魏丽&quot;,
+   &quot;phone&quot;: &quot;15620789139&quot;,
+   &quot;tax_no&quot;: &quot;91370112MA3UE4LL27&quot;,
+   &quot;is_self_pickup&quot;: &quot;否&quot;,
+   &quot;payment_terms&quot;: &quot;款到发货&quot;,
+   &quot;order_remark&quot;: &quot;正规包装，到送货地址告知涵悦诚的货即可。&quot;,
+   &quot;customer_contract_no&quot;: &quot;&quot;,
+   &quot;sales_name&quot;: &quot;鞠炜&quot;,
+   &quot;sales_role_key&quot;: &quot;FEISHU_CONTACT&quot;,
+   &quot;agent_name&quot;: &quot;&quot;,
+   &quot;agent_role_key&quot;: &quot;&quot;,
+   &quot;submitter_name&quot;: &quot;鞠炜&quot;,
+   &quot;submitter_role_key&quot;: &quot;FEISHU_CONTACT&quot;
+  },
+  &quot;preallocated&quot;: {
+   &quot;instanceId&quot;: &quot;ORDER-POC-001-20260526024205&quot;,
+   &quot;taskId&quot;: &quot;ORDER-POC-001-20260526024205-manager-task&quot;,
+   &quot;supervisorTaskId&quot;: &quot;ORDER-POC-001-20260526024205-supervisor-task&quot;,
+   &quot;chairmanTaskId&quot;: &quot;ORDER-POC-001-20260526024205-chairman-task&quot;,
+   &quot;approverViewToken&quot;: &quot;[MASKED]&quot;,
+   &quot;submitterViewToken&quot;: &quot;[MASKED]&quot;,
+   &quot;createdAt&quot;: &quot;2026-05-26T02:42:05.412Z&quot;,
+   &quot;flowIds&quot;: {
+    &quot;flow_id&quot;: &quot;SO-20260526-0004&quot;,
+    &quot;stage_id&quot;: &quot;SO-20260526-0004-ORD-01&quot;,
+    &quot;stage_code&quot;: &quot;ORD&quot;,
+    &quot;stage_seq&quot;: &quot;01&quot;
+   }
+  }
+ },
+ &quot;created_at&quot;: &quot;2026-05-26T02:42:05.422Z&quot;,
+ &quot;updated_at&quot;: &quot;2026-05-26T02:42:05.422Z&quot;
+}</pre><pre class="json"><span class="c"># sample 2/2</span>
+{
+ &quot;job_id&quot;: &quot;75eacd68-2dbe-4d3b-b1da-8021fc169863&quot;,
+ &quot;type&quot;: &quot;FINALIZE_STOCK_AFTER_BUSINESS&quot;,
+ &quot;status&quot;: &quot;DONE&quot;,
+ &quot;attempts&quot;: 1,
+ &quot;payload&quot;: {
+  &quot;stockPrepareId&quot;: &quot;SO-20260817-0012-STK-01&quot;,
+  &quot;evidencePath&quot;: &quot;C:\\feishu-approval-poc\\tmp\\evidence\\stock_prepare_web_decision.SO-20260817-0012-STK-01.json&quot;
+ },
+ &quot;max_attempts&quot;: 1,
+ &quot;created_at&quot;: &quot;2026-08-17T05:28:19.040Z&quot;,
+ &quot;updated_at&quot;: &quot;2026-08-17T05:28:24.446Z&quot;,
+ &quot;started_at&quot;: &quot;2026-08-17T05:28:20.314Z&quot;,
+ &quot;finished_at&quot;: &quot;2026-08-17T05:28:24.446Z&quot;
+}</pre></details>
+</section>
+<section class="tblcard">
+  <div class="tbl-head">
+    <code class="tbl-name">bitable_flow_records</code>
+    <span class="pill a">归档+对账</span>
+    <span class="tbl-meta">15,614 行 · 6.0 MB · 更新 08-17 13:28</span>
+    <span class="tbl-keys">8 键</span>
+  </div>
+  <div class="chips"><span class="chip">recorded_at</span><span class="chip">flow_id</span><span class="chip">shipment_id</span><span class="chip">batch_seq</span><span class="chip">record_id</span><span class="chip">table_id</span><span class="chip">created</span><span class="chip">response_evidence_path</span></div>
+  <details class="samples"><summary><span class="sum-tt">抽样记录</span><span class="sum-meta">2 行 · 头+尾 · 敏感键已脱敏</span><span class="sum-ic">▸</span></summary><pre class="json"><span class="c"># sample 1/2</span>
+{
+ &quot;recorded_at&quot;: &quot;2026-05-26T02:42:11.589Z&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260526-0004&quot;,
+ &quot;record_id&quot;: &quot;recvkGRyIdEagV&quot;,
+ &quot;table_id&quot;: &quot;tbllXhLTHwsoWIbG&quot;,
+ &quot;created&quot;: true,
+ &quot;response_evidence_path&quot;: &quot;C:\\feishu-approval-poc\\tmp\\evidence\\bitable_flow_sync_response.SO-20260526-0004.json&quot;
+}</pre><pre class="json"><span class="c"># sample 2/2</span>
+{
+ &quot;recorded_at&quot;: &quot;2026-08-17T05:28:44.314Z&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260817-0012&quot;,
+ &quot;shipment_id&quot;: &quot;SO-20260817-0012-SHP-01&quot;,
+ &quot;batch_seq&quot;: 1,
+ &quot;record_id&quot;: &quot;recvswix3fNAWU&quot;,
+ &quot;table_id&quot;: &quot;tbllXhLTHwsoWIbG&quot;,
+ &quot;created&quot;: false,
+ &quot;response_evidence_path&quot;: &quot;C:\\feishu-approval-poc\\tmp\\evidence\\bitable_flow_sync_response.SO-20260817-0012.SO-20260817-0012-SHP-01.json&quot;
+}</pre></details>
+</section>
+<section class="tblcard">
+  <div class="tbl-head">
+    <code class="tbl-name">callbacks</code>
+    <span class="pill a">只读归档</span>
+    <span class="tbl-meta">139 行 · 72 KB · 更新 08-17 09:47</span>
+    <span class="tbl-keys">6 键</span>
+  </div>
+  <div class="chips"><span class="chip">received_at</span><span class="chip">method</span><span class="chip">path</span><span class="chip obj">headers</span><span class="chip obj">query</span><span class="chip obj">body</span></div>
+  <details class="samples"><summary><span class="sum-tt">抽样记录</span><span class="sum-meta">2 行 · 头+尾 · 敏感键已脱敏</span><span class="sum-ic">▸</span></summary><pre class="json"><span class="c"># sample 1/2</span>
+{
+ &quot;received_at&quot;: &quot;2026-05-28T02:59:06.101Z&quot;,
+ &quot;method&quot;: &quot;POST&quot;,
+ &quot;path&quot;: &quot;/feishu/approval/action-callback&quot;,
+ &quot;headers&quot;: {
+  &quot;host&quot;: &quot;101.37.66.110:3000&quot;,
+  &quot;user-agent&quot;: &quot;Go-http-client/1.1&quot;,
+  &quot;content-length&quot;: &quot;244&quot;,
+  &quot;content-type&quot;: &quot;application/json&quot;,
+  &quot;accept-encoding&quot;: &quot;gzip&quot;
+ },
+ &quot;query&quot;: {},
+ &quot;body&quot;: {
+  &quot;action_type&quot;: &quot;APPROVE&quot;,
+  &quot;user_id&quot;: &quot;e1f231df&quot;,
+  &quot;approval_code&quot;: &quot;FFF2CF67-2C4D-4566-A3B7-59B0E94ECA08&quot;,
+  &quot;instance_id&quot;: &quot;ORDER-POC-001-20260526085001&quot;,
+  &quot;task_id&quot;: &quot;ORDER-POC-001-20260526085001-manager-task&quot;,
+  &quot;token&quot;: &quot;[MASKED]&quot;
+ }
+}</pre><pre class="json"><span class="c"># sample 2/2</span>
+{
+ &quot;received_at&quot;: &quot;2026-08-17T01:47:29.575Z&quot;,
+ &quot;method&quot;: &quot;POST&quot;,
+ &quot;path&quot;: &quot;/feishu/approval/action-callback&quot;,
+ &quot;headers&quot;: {
+  &quot;host&quot;: &quot;101.37.66.110:3000&quot;,
+  &quot;user-agent&quot;: &quot;Go-http-client/1.1&quot;,
+  &quot;content-length&quot;: &quot;244&quot;,
+  &quot;content-type&quot;: &quot;application/json&quot;,
+  &quot;accept-encoding&quot;: &quot;gzip&quot;
+ },
+ &quot;query&quot;: {},
+ &quot;body&quot;: {
+  &quot;action_type&quot;: &quot;APPROVE&quot;,
+  &quot;user_id&quot;: &quot;96g68964&quot;,
+  &quot;approval_code&quot;: &quot;FFF2CF67-2C4D-4566-A3B7-59B0E94ECA08&quot;,
+  &quot;instance_id&quot;: &quot;ORDER-POC-001-20260817012919&quot;,
+  &quot;task_id&quot;: &quot;ORDER-POC-001-20260817012919-manager-task&quot;,
+  &quot;token&quot;: &quot;[MASKED]&quot;
+ }
+}</pre></details>
+</section>
+<section class="tblcard">
+  <div class="tbl-head">
+    <code class="tbl-name">customer_bitable_sync</code>
+    <span class="pill a">归档+对账</span>
+    <span class="tbl-meta">961 行 · 385 KB · 更新 08-17 13:15</span>
+    <span class="tbl-keys">10 键</span>
+  </div>
+  <div class="chips"><span class="chip">recorded_at</span><span class="chip">flow_id</span><span class="chip">instance_id</span><span class="chip">customer_name</span><span class="chip">customer_type</span><span class="chip">ok</span><span class="chip">action</span><span class="chip">record_id</span><span class="chip">message</span><span class="chip">evidence_path</span></div>
+  <details class="samples"><summary><span class="sum-tt">抽样记录</span><span class="sum-meta">2 行 · 头+尾 · 敏感键已脱敏</span><span class="sum-ic">▸</span></summary><pre class="json"><span class="c"># sample 1/2</span>
+{
+ &quot;recorded_at&quot;: &quot;2026-06-10T06:06:21.571Z&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260610-0009&quot;,
+ &quot;instance_id&quot;: &quot;ORDER-POC-001-20260610053803&quot;,
+ &quot;customer_name&quot;: &quot;[乱码-原始数据]&quot;,
+ &quot;customer_type&quot;: &quot;[乱码-原始数据]&quot;,
+ &quot;ok&quot;: true,
+ &quot;action&quot;: &quot;created&quot;,
+ &quot;record_id&quot;: &quot;recvm7oiNizM1W&quot;,
+ &quot;message&quot;: &quot;manual backfill after missing submit hook&quot;,
+ &quot;evidence_path&quot;: &quot;C:\\feishu-approval-poc\\tmp\\evidence\\sync_new_customer_bitable.ORDER-POC-001-20260610053803.json&quot;
+}</pre><pre class="json"><span class="c"># sample 2/2</span>
+{
+ &quot;recorded_at&quot;: &quot;2026-08-17T05:15:25.013Z&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260817-0020&quot;,
+ &quot;instance_id&quot;: &quot;ORDER-POC-001-20260817051508&quot;,
+ &quot;customer_name&quot;: &quot;上海万城化工科技有限公司&quot;,
+ &quot;customer_type&quot;: &quot;老客户&quot;,
+ &quot;ok&quot;: true,
+ &quot;action&quot;: &quot;unchanged&quot;,
+ &quot;record_id&quot;: &quot;recvozZnCk2MHK&quot;,
+ &quot;message&quot;: &quot;&quot;,
+ &quot;evidence_path&quot;: &quot;C:\\feishu-approval-poc\\tmp\\evidence\\sync_existing_customer_delivery_bitable.ORDER-POC-001-20260817051508.json&quot;
+}</pre></details>
+</section>
+<section class="tblcard">
+  <div class="tbl-head">
+    <code class="tbl-name">approval_bot_messages</code>
+    <span class="pill a">只读归档</span>
+    <span class="tbl-meta">12,803 行 · 4.9 MB · 更新 08-17 13:28</span>
+    <span class="tbl-keys">6 键</span>
+  </div>
+  <div class="chips"><span class="chip">created_at</span><span class="chip">instance_id</span><span class="chip">task_id</span><span class="chip">message_id</span><span class="chip">source</span><span class="chip">evidence_path</span></div>
+  <details class="samples"><summary><span class="sum-tt">抽样记录</span><span class="sum-meta">2 行 · 头+尾 · 敏感键已脱敏</span><span class="sum-ic">▸</span></summary><pre class="json"><span class="c"># sample 1/2</span>
+{
+ &quot;created_at&quot;: &quot;2026-05-26T03:06:25.312Z&quot;,
+ &quot;instance_id&quot;: &quot;SO-20260526-0004-STK-01&quot;,
+ &quot;task_id&quot;: &quot;SO-20260526-0004-STK-01-reservation-task&quot;,
+ &quot;message_id&quot;: &quot;7644031546571148254&quot;,
+ &quot;source&quot;: &quot;stock-initial&quot;,
+ &quot;evidence_path&quot;: &quot;C:\\feishu-approval-poc\\tmp\\evidence\\send_stock_prepare_bot_message_response.SO-20260526-0004-STK-01.json&quot;
+}</pre><pre class="json"><span class="c"># sample 2/2</span>
+{
+ &quot;created_at&quot;: &quot;2026-08-17T05:28:24.232Z&quot;,
+ &quot;instance_id&quot;: &quot;SO-20260817-0012-SHP-01&quot;,
+ &quot;task_id&quot;: &quot;SO-20260817-0012-SHP-01-warehouse-task&quot;,
+ &quot;message_id&quot;: &quot;7674868204488903638&quot;,
+ &quot;source&quot;: &quot;shipment-initial&quot;,
+ &quot;evidence_path&quot;: &quot;C:\\feishu-approval-poc\\tmp\\evidence\\send_shipment_bot_message_response.SO-20260817-0012-SHP-01.json&quot;
+}</pre></details>
+</section>
+<section class="tblcard">
+  <div class="tbl-head">
+    <code class="tbl-name">warehouse_notice_cards</code>
+    <span class="pill a">只读归档</span>
+    <span class="tbl-meta">15 行 · 18 KB · 更新 08-15 16:23</span>
+    <span class="tbl-keys">23 键</span>
+  </div>
+  <div class="chips"><span class="chip">recorded_at</span><span class="chip">message_id</span><span class="chip">stage_id</span><span class="chip">flow_id</span><span class="chip">warehouse</span><span class="chip">order_no</span><span class="chip">customer_name</span><span class="chip">detail_markdown</span><span class="chip">shipment_status_text</span><span class="chip">was_shipped</span><span class="chip">planned_delivery_date</span><span class="chip">shipment_id</span><span class="chip">stock_prepare_id</span><span class="chip">task_id</span><span class="chip">confirmed</span><span class="chip">source</span><span class="chip">notice_phase</span><span class="chip">handled</span><span class="chip">confirmed_at</span><span class="chip">card_sync_status</span><span class="chip">card_sync_retry_count</span><span class="chip">card_sync_last_error</span><span class="chip">card_synced_at</span></div>
+  <details class="samples"><summary><span class="sum-tt">抽样记录</span><span class="sum-meta">2 行 · 头+尾 · 敏感键已脱敏</span><span class="sum-ic">▸</span></summary><pre class="json"><span class="c"># sample 1/2</span>
+{
+ &quot;recorded_at&quot;: &quot;2026-07-31T13:43:46.716Z&quot;,
+ &quot;message_id&quot;: &quot;[MASKED]&quot;,
+ &quot;stage_id&quot;: &quot;SO-20260731-0026-SHP-01&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260731-0026&quot;,
+ &quot;warehouse&quot;: &quot;长兴仓库&quot;,
+ &quot;order_no&quot;: &quot;ORDER-POC-001&quot;,
+ &quot;customer_name&quot;: &quot;测试aaa&quot;,
+ &quot;detail_markdown&quot;: &quot;**订单撤回请求已受理…**（撤回原因：提交人整单撤销/作废；撤回申请人：王杰）&quot;,
+ &quot;shipment_status_text&quot;: &quot;未发货&quot;,
+ &quot;was_shipped&quot;: false,
+ &quot;planned_delivery_date&quot;: &quot;2026-07-31&quot;,
+ &quot;shipment_id&quot;: &quot;SO-20260731-0026-SHP-01&quot;,
+ &quot;stock_prepare_id&quot;: &quot;SO-20260731-0026-STK-01&quot;,
+ &quot;task_id&quot;: &quot;SO-20260731-0026-SHP-01-warehouse-task&quot;,
+ &quot;confirmed&quot;: false,
+ &quot;source&quot;: &quot;SHP&quot;,
+ &quot;notice_phase&quot;: &quot;REQUESTED&quot;
+}</pre><pre class="json"><span class="c"># sample 2/2</span>
+{
+ &quot;recorded_at&quot;: &quot;2026-08-15T08:23:23.533Z&quot;,
+ &quot;message_id&quot;: &quot;[MASKED]&quot;,
+ &quot;stage_id&quot;: &quot;SO-20260810-0002-SHP-01&quot;,
+ &quot;flow_id&quot;: &quot;SO-20260810-0002&quot;,
+ &quot;warehouse&quot;: &quot;阳原仓库&quot;,
+ &quot;order_no&quot;: &quot;ORDER-POC-001&quot;,
+ &quot;customer_name&quot;: &quot;陕西林中树新材料科技有限公司&quot;,
+ &quot;detail_markdown&quot;: &quot;**订单撤回请求已受理…**（撤回原因：order_workbench_full_cancel；撤回申请人：唐志江）&quot;,
+ &quot;shipment_status_text&quot;: &quot;未发货&quot;,
+ &quot;was_shipped&quot;: false,
+ &quot;planned_delivery_date&quot;: &quot;2026-08-13&quot;,
+ &quot;shipment_id&quot;: &quot;SO-20260810-0002-SHP-01&quot;,
+ &quot;stock_prepare_id&quot;: &quot;SO-20260810-0002-STK-01&quot;,
+ &quot;task_id&quot;: &quot;SO-20260810-0002-SHP-01-warehouse-task&quot;,
+ &quot;confirmed&quot;: true,
+ &quot;source&quot;: &quot;SHP&quot;,
+ &quot;notice_phase&quot;: &quot;REQUESTED&quot;,
+ &quot;handled&quot;: true,
+ &quot;confirmed_at&quot;: &quot;2026-08-15T08:23:22.832Z&quot;,
+ &quot;card_sync_status&quot;: &quot;CONFIRMED_SYNCED&quot;,
+ &quot;card_sync_retry_count&quot;: 1,
+ &quot;card_sync_last_error&quot;: &quot;&quot;,
+ &quot;card_synced_at&quot;: &quot;2026-08-15T08:23:23.533Z&quot;
+}</pre></details>
+</section>
+
+<h2 id="s4"><span class="no">四</span>敏感字段盘点 <span class="hint">open_id / view_token / 明文 token</span></h2>
+<div style="overflow-x:auto;"><table>
+  <tr><th>表</th><th>敏感字段</th></tr>
+  <tr><td><code>orders</code></td><td>sales_open_id / agent_open_id / submitter_open_id / manager_open_id / supervisor_open_id(s) / chairman_open_id(s) / 5×view_token / create_idempotency_key / sales_role_key / agent_role_key / submitter_role_key</td></tr>
+  <tr><td><code>stock_prepares</code></td><td>sales/agent/submitter/approver_open_id(s) / 2×view_token / operator_open_id</td></tr>
+  <tr><td><code>shipments</code></td><td>sales/agent/submitter/approver_open_id(s) / 2×view_token</td></tr>
+  <tr><td><code>invoices</code></td><td>sales/agent/submitter/approver_open_id(s) / invoice_apply_cc_open_ids / 2×view_token</td></tr>
+  <tr><td><code>approval_comments</code></td><td>author_open_id / notify_open_ids</td></tr>
+  <tr><td><code>background_jobs</code></td><td>idempotency_key · <strong>payload 内含 approverViewToken/submitterViewToken 明文</strong></td></tr>
+  <tr><td><code>bitable_flow_records</code></td><td>row_key / app_token</td></tr>
+  <tr><td><code>approval_bot_messages</code></td><td>open_id</td></tr>
+  <tr><td><code>warehouse_notice_cards</code></td><td>open_id / source_open_id / confirmed_by_open_id</td></tr>
+  <tr><td><code>callbacks</code></td><td><strong>body.token 明文</strong> · headers</td></tr>
+</table></div>
+<div class="note red"><span class="tt">T1.4 处置要点</span>① 5×view_token 迁移时丢弃（审批后失效）；② open_id 系列经映射转内部 user_id（服务器已有 <code>feishu_user_open_id_map.json</code> 可复用）；③ callbacks/background_jobs 的 token 明文只进 legacy_* 加密归档；④ 文件 URL（contract_draft_url 含 applink/approval.renheng.com 链接）路径引用迁入、本体迁对象存储。</div>
+
+<h2 id="s5"><span class="no">五</span>状态枚举 <span class="hint">T1.3 输入</span></h2>
+<div style="overflow-x:auto;"><table>
+  <tr><th>表</th><th>枚举值</th></tr>
+  <tr><td><code>orders</code> status/status_label</td><td>7 种中文态：订单已保存… / 飞书审批已创建，等待信息确认 / 客户信息已同步，系统处理中 / 已撤回 / 已接收订单，正在同步客户信息 / 已受理，系统处理中 / 已受理，系统正在创建飞书审批</td></tr>
+  <tr><td><code>stock_prepares</code></td><td>6 码：RESERVATION_PENDING / PAYMENT_PENDING / WAREHOUSE_PENDING / ARCHIVED / CANCELED / REJECTED</td></tr>
+  <tr><td><code>shipments</code></td><td>6 码：WAREHOUSE_PENDING / RECEIPT_PENDING / INVOICE_INFO_PENDING / ARCHIVED / CANCELED / REJECTED</td></tr>
+  <tr><td><code>invoices</code></td><td>5 码：SALES_APPLY_PENDING / STAMP_RETURN_PENDING / NO_INVOICE_PENDING / ARCHIVED / CANCELED（含不开票路径）</td></tr>
+  <tr><td><code>order_events</code> status</td><td>事件动作码：ORDER_SUBMIT_ACCEPTED / TEST_ORDER_CREATED / STOCK_PREPARE_TRIGGER_REQUESTED / CONTRACT_FINALIZED …</td></tr>
+</table></div>
+<div class="note blue"><span class="tt">T1.3 输入</span>状态枚举已收集，可直接用于状态语义映射（orders 中文态 → 四节点枚举；STK/SHP/INV 已有英文状态码）。</div>
+
+<h2 id="s6"><span class="no">六</span>贯穿键样例 <span class="hint">flow 贯穿四环节</span></h2>
+<pre><span class="k">order_id</span>       = <span class="s">ORDER-POC-001</span>                  <span class="c"># 业务单号，快照链主键</span>
+<span class="k">flow_id</span>       = <span class="s">SO-20260817-0020</span>               <span class="c"># 贯穿 ORD→STK→SHP→INV 主流程号</span>
+<span class="k">stage_id</span>      = <span class="s">SO-20260817-0020-ORD-01</span>        <span class="c"># 环节实例：flow+stage_code+seq</span>
+<span class="k">stage_code</span>    = <span class="s">ORD / STK / SHP / INV</span>          <span class="c"># 四环节枚举</span>
+<span class="k">stage_seq</span>     = <span class="s">01</span>
+<span class="k">instance_id</span>   = <span class="s">ORDER-POC-001-20260817051508</span>   <span class="c"># order+时间戳</span>
+<span class="k">task_id</span>       = <span class="s">ORDER-POC-001-20260817051508-manager-task</span>
+<span class="k">idempotency</span>   = <span class="s">create_idempotency_key / create_fingerprint</span> <span class="c"># sha256</span></pre>
+<div class="note blue"><span class="tt">迁移追溯</span>快照链主键 = order_id；贯穿键 flow_id 串四环节；instance/task 带时间戳与节点后缀，映射时进 <code>legacy_flow_mapping</code>。</div>
+
+<h2 id="s7"><span class="no">七</span>飞书多维表格盘点 <span class="hint">机器人只读 · 对账层确认</span></h2>
+<div class="note blue"><span class="tt">访问</span>机器人 FEISHU_APP_ID 经 tenant_access_token 只读；app_token <code>BWJpbO0eoaGk6AsSSDUcbUJIndd</code> 为仁恒共享多维表格，共 <strong>100 张表</strong>（客户/合同/销售/回款/仓储等多域）。</div>
+<div style="overflow-x:auto;"><table>
+  <tr><th>与 0.1 同步相关表</th><th>table_id</th><th>记录数</th><th>角色</th></tr>
+  <tr><td>三方审批流程表</td><td><code>tbllXhLTHwsoWIbG</code></td><td class="num">1,316</td><td>流程↔多维表记录映射（对账源）</td></tr>
+  <tr><td>三方审批明细表</td><td><code>tblXQ0DcNvKS43VB</code></td><td class="num">1,116</td><td>审批明细（对账参考）</td></tr>
+  <tr><td>仁恒成交客户档案</td><td><code>tbl7paPnZGiTTpSn</code></td><td class="num">2,387</td><td>客户主数据参考（customer_bitable_sync 目标）</td></tr>
+  <tr><td>阳原辅助余额表</td><td><code>tbl2zciLlEPuaxws</code></td><td class="num">64</td><td>财务参考（非同步目标）</td></tr>
+</table></div>
+<div class="note blue"><span class="tt">结论</span>bitable_flow_records 中 <code>table_id=tbllXhLTHwsoWIbG</code> 与多维表「三方审批流程表」一致，确认多维表为<strong>流程同步副本/对账层</strong>；业务本体以 JSONL 为权威源。机器人可见 100 表全量，0.1 仅需对账引用流程表/明细表。</div>
+
+<h2 id="s8"><span class="no">八</span>T1.1 验收 <span class="hint">全绿</span></h2>
+<div style="overflow-x:auto;"><table>
+  <tr><th>验收项</th><th>结果</th></tr>
+  <tr><td>16 表全部可访问</td><td><span class="pill g">通过</span>（SSH 只读 + 流式头尾抽样）</td></tr>
+  <tr><td>每表行数 + 最新记录时间</td><td><span class="pill g">通过</span>（见 §1）</td></tr>
+  <tr><td>抽样 3-5 行/表（脱敏）</td><td><span class="pill g">通过</span>（每表 4 行：头 2 + 尾 2；敏感键已删除）</td></tr>
+  <tr><td>多维表格只读获取</td><td><span class="pill g">通过</span>（机器人 API，单次计数，零写入）</td></tr>
+  <tr><td>零暴力扫描 / 零全盘递归</td><td><span class="pill g">通过</span>（仅流式读取 + 限定目录）</td></tr>
+  <tr><td>敏感字段确认</td><td><span class="pill g">通过</span>（见 §4；callbacks/background_jobs 明文 token 已识别）</td></tr>
+</table></div>
+<div class="fill"><span class="tt">回填（现场确认后冻结）</span>状态枚举归并与虹励确认（T1.3）→ 映射核对（T1.2）→ 本清单随映射表 git 提交冻结。</div>
+
+<footer>
+  <span>B2B Order Fulfillment · v0.1 Release Prep</span>
+  <span>T1.1 · 数据现状清单 · 2026-08-17</span>
+  <span>只读调研 · 零写入</span>
+</footer>
+</div>
+<a class="backtop" href="#" title="回顶部">↑</a>
+
+<script>
+(function(){
+  function hl(txt){
+    return txt.replace(/("(?:\\.|[^"\\])*")(\s*:)?|\b(true|false)\b|\b(null)\b|(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)/g, function(m,k,colon,b,nul,num){
+      if(k){ return '<span class="'+(colon?'k':'s')+'">'+k+'</span>'+(colon||''); }
+      if(b){ return '<span class="b">'+b+'</span>'; }
+      if(nul){ return '<span class="u">'+nul+'</span>'; }
+      return '<span class="n">'+num+'</span>';
+    });
+  }
+  document.querySelectorAll('pre.json').forEach(function(pre){
+    var t = pre.textContent;
+    pre.innerHTML = t.split('\n').map(function(line){
+      var isComment = line.indexOf('# sample') === 0;
+      return isComment ? line : hl(line);
+    }).join('\n');
+  });
+})();
+</script>
+
+</body>
+</html>

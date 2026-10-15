@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Review 2026-08-07 11:54 · B2B 订单履约验证项目</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+SC:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:#f5f4ed; --paper2:#efeee5; --ink:#1f1d18; --ink2:#6b665b;
+    --ink3:#3a382f; --blue:#1B365D; --rule:#d4d1c5;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif; line-height:1.6;}
+  .wrap{max-width:960px; margin:0 auto; padding:48px 40px 80px;}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;}
+  .folio{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--rule); padding-bottom:10px;
+    font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink2);}
+  .folio a{color:var(--ink2); border:none;}
+  .folio a:hover{color:var(--blue);}
+  .kicker{display:flex; align-items:baseline; gap:12px; margin-top:48px;}
+  h1{font-size:clamp(30px,4.5vw,44px); line-height:1.12; font-weight:500; margin-top:14px; letter-spacing:-.01em;}
+  .lede{margin-top:18px; font-size:16.5px; line-height:1.7; color:var(--ink3); max-width:760px;}
+  h2{font-size:22px; font-weight:600; margin:48px 0 14px; color:var(--blue); display:flex; align-items:baseline; gap:12px; border-top:1px solid var(--rule); padding-top:24px;}
+  h2 .no{font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.12em;}
+  h3{font-size:17px; font-weight:600; margin:28px 0 10px; color:var(--ink);}
+  h3 .no{color:var(--blue); font-family:'IBM Plex Mono',monospace; font-size:12px; margin-right:8px;}
+  p{margin:10px 0; color:var(--ink3);}
+  ul,ol{margin:10px 0 10px 26px; color:var(--ink3);}
+  li{margin:5px 0;}
+  a{color:var(--blue); text-decoration:none; border-bottom:1px solid var(--rule);}
+  a:hover{border-bottom-color:var(--blue);}
+  blockquote{border-left:2px solid var(--blue); padding:10px 18px; margin:16px 0; background:var(--paper2); font-style:italic;}
+  table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  .table-wrap{overflow-x:auto; margin:16px 0 24px; border:1px solid var(--rule);}
+  .table-wrap table{margin:0;}
+  th{background:var(--paper2); color:var(--blue); text-align:left; font-weight:600; padding:9px 12px; border-bottom:1.5px solid var(--blue); font-size:12.5px; white-space:nowrap;}
+  td{padding:9px 12px; border-bottom:1px solid var(--rule); vertical-align:top; color:var(--ink3);}
+  .ok{color:#1a7a3a; font-weight:600;}
+  .warn{color:#a15c00; font-weight:600;}
+  .bad{color:#b3261e; font-weight:600;}
+  .foot{margin-top:56px; border-top:1px solid var(--rule); padding-top:14px; font-size:12px; color:var(--ink2);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="folio"><span>B2B Pilot · Review Record</span><span>2026-08-07 11:54 UTC</span></div>
+
+  <div class="kicker"><span class="mono">REVIEW</span></div>
+  <h1>全仓 Review · 测试情况 + 设计修复情况</h1>
+  <p class="lede">本轮 review 覆盖：tests/ L 分层套件（L0-L3）与 internal/ 各包测试的实测状态、覆盖率门禁、最近两轮「设计偏差修复」的落地清单与回归验证、真机冒烟结果，以及剩余发现与风险。验证基线：本机真实 PostgreSQL（55432）+ LocalRunner + StaticChecker，与生产装配一致。</p>
+
+  <h2><span class="no">1 ·</span> 测试情况</h2>
+
+  <h3><span class="no">1.1</span> 全量回归实测（2026-08-07 11:4x 顺序执行）</h3>
+  <div class="table-wrap"><table>
+    <tr><th>套件</th><th>范围</th><th>结果</th><th>耗时</th><th>说明</th></tr>
+    <tr><td class="mono">tests/l0_unit</td><td>黑盒契约：5 FSM / 守恒 / 幂等键 / 回单分流 / 接入层默认值 / StaticChecker 矩阵</td><td class="ok">ok · 6 用例</td><td>0.011s</td><td>零外部依赖</td></tr>
+    <tr><td class="mono">tests/l1_integration</td><td>HTTP × 真实 PG：幂等唯一 / 跨租户 / 事件链 / 凭证只追加 / 校验</td><td class="ok">ok · 5 用例</td><td>18.8s</td><td>-tags integration；每用例重置 schema</td></tr>
+    <tr><td class="mono">tests/l2_e2e</td><td>HTTP 全业务流：款到全链 / 非款到例外 / 董事长 C-D / 部分发货 / 修改 A-E / 拒绝 / 预订单 3 路径 / 凭证链 / 投影 / 幂等重放</td><td class="ok">ok · 19 用例</td><td>102.8s</td><td>LocalRunner 真实工作流执行；连续多轮稳定</td></tr>
+    <tr><td class="mono">tests/l3_system</td><td>seeddata → HTTP 全链 → reconcile / audit / concurrency 脚本驱动</td><td class="ok">ok · 2 用例</td><td>17.6s</td><td>独立 DB（b2b_pilot），与 L1/L2 隔离</td></tr>
+    <tr><td class="mono">internal/…</td><td>domain / api / authz / wecom / integration / config（172 个 func Test）</td><td class="ok">ok</td><td>—</td><td>含于 make cover 全量执行</td></tr>
+    <tr><td class="mono">internal/workflows</td><td>Temporal TestSuite：L2-01..14 + 故障注入（约 150s）</td><td class="ok">ok</td><td>150s</td><td>本次会话内最近一次独立运行确认</td></tr>
+    <tr><td class="mono">internal/repo</td><td>L1-01..16 真库集成（含触发器级故障注入）</td><td class="ok">ok</td><td>176s</td><td>本次会话内最近一次独立运行确认</td></tr>
+  </table></div>
+
+  <h3><span class="no">1.2</span> 覆盖率门禁（make cover）</h3>
+  <div class="table-wrap"><table>
+    <tr><th>包</th><th>实测</th><th>目标</th><th>说明</th></tr>
+    <tr><td class="mono">internal/domain</td><td class="ok">100.0%</td><td>100%（硬门禁）</td><td>FSM/守恒/幂等/回单分流唯一事实源</td></tr>
+    <tr><td class="mono">internal/config</td><td class="ok">100.0%</td><td>—</td><td></td></tr>
+    <tr><td class="mono">internal/integration</td><td class="warn">57.9%</td><td>≥98%</td><td>新增 <span class="mono">demo.go</span>（演示策略）无直接测试；上一轮为 100%</td></tr>
+    <tr><td class="mono">internal/authz</td><td>95.7%</td><td>≥98%</td><td>余量：mustStruct panic 分支、懒连接构造路径</td></tr>
+    <tr><td class="mono">internal/api</td><td class="warn">89.5%</td><td>≥98%</td><td>LocalRunner 新增策略注入/WaitAll 路径未全覆盖；上一轮 93.9%</td></tr>
+    <tr><td class="mono">internal/wecom</td><td>96.2%</td><td>≥98%</td><td>余量：官方通道网络超时/限流分支</td></tr>
+    <tr><td class="mono">internal/workflows</td><td>86.3%</td><td>≥98%</td><td>余量：各闸门决策分支防御性错误返回</td></tr>
+    <tr><td class="mono">internal/repo</td><td>80.9%</td><td>≥98%</td><td>余量：pgx scan error、每句 SQL 失败返回</td></tr>
+    <tr><td class="mono">全仓</td><td class="warn">87.3%</td><td>≥85%（门禁）/ ≥95-98%（目标）</td><td><span class="ok">PASS: total 87.3%</span> · <span class="ok">PASS: domain 100%</span>；差距全部位于防御性错误分支（诚实现值，见 docs/06 §2）</td></tr>
+  </table></div>
+  <p>门禁结论：<span class="ok">PASS</span>（total ≥85% + domain 100% 硬门禁均通过；门禁含 8 包齐全性检查，防残缺 profile 假绿——上轮已修复该漏洞）。</p>
+
+  <h3><span class="no">1.3</span> 测试规模与结构</h3>
+  <ul>
+    <li>测试函数总数：<strong>200</strong>（internal + cmd 172，tests/ 28）；Score Card 47 例（L0×10 + L1×16 + L2×15 + L3×6）全部有对应测试。</li>
+    <li>tests/ 目录为 L 分层黑盒/端到端套件（<span class="mono">tests/README.md</span> 映射 docs/03-testing.html）；internal/ 白盒测试保留原位（覆盖率门禁载体）。</li>
+    <li>测试基础设施：真实 PG（PILOT_TEST_PG_DSN）、LocalRunner 进程内真实工作流、StaticChecker 对照表替身、wecom mock 出站；<span class="mono">make test-tests-l0..l3 / test-tests</span> 目标可用。</li>
+  </ul>
+
+  <h2><span class="no">2 ·</span> 当前设计修复情况</h2>
+
+  <h3><span class="no">2.1</span> 已落地修复（commit 1dfd165 + a35b5c7）</h3>
+  <div class="table-wrap"><table>
+    <tr><th>#</th><th>修复</th><th>类型</th><th>暴露途径</th><th>验证</th></tr>
+    <tr><td>1</td><td>多租户 FK 补齐：<span class="mono">customers.owner_id</span>、<span class="mono">evidence_versions</span> 改租户复合 PK/FK（02 §3.1 总则）</td><td>设计规则违反</td><td>文档逐层比对</td><td>repo 集成全绿；跨租户 L1 用例</td></tr>
+    <tr><td>2</td><td>覆盖率门禁防假绿：8 包齐全性检查 + domain 100% 硬门禁改直读 profile 聚合（原 awk 永不匹配被 <span class="mono">|| true</span> 掩蔽）</td><td>测试基础设施</td><td>profile 缺包仍 PASS 96.0%（真值 88.1%）</td><td>负例验证：缺包/低覆盖正确 FAIL</td></tr>
+    <tr><td>3</td><td>非款到隐式备货 ID <span class="mono">:0 → :1</span>：发货单 FK 引用的备货单此前不存在</td><td>真库功能缺陷</td><td>tests/l2_e2e 非款到用例</td><td>非款到全链 E2E 绿</td></tr>
+    <tr><td>4</td><td>部分发货 <span class="mono">shipment_item</span> 明细 ID 含段序号（第二批 PK 冲突）</td><td>真库功能缺陷</td><td>tests/l2_e2e 部分发货用例</td><td>2 批 40+60 E2E 绿，审计守恒 PASS</td></tr>
+    <tr><td>5</td><td><span class="mono">stock_prepare_items</span> 幂等 INSERT + 明细 ID 含批次号（修改 A/C/E 重入备货 PK 冲突）</td><td>真库功能缺陷</td><td>tests/l2_e2e 修改分类用例</td><td>A-E 全分类 E2E 绿（revision/resubmit 链断言）</td></tr>
+    <tr><td>6</td><td>PreOrderWorkflow 重复升级 <span class="mono">ESCALATED → ESCALATED</span> 自迁移（生产 48h 后同触发）</td><td>工作流缺陷</td><td>真机冒烟（12s 升级循环）</td><td>升级→降级→确认 E2E 绿</td></tr>
+    <tr><td>7</td><td>SHP FSM 增边 <span class="mono">SHIP_ASSIGNING → SHIPPED</span>（实发完成直连）</td><td>设计校准</td><td>scripts/audit 事件链审计</td><td>audit 全绿；01 §2.4 / 05 §3 / L0-03 同步</td></tr>
+    <tr><td>8</td><td><span class="mono">repo.Event</span> 补 JSON 标签（事件链 API 契约 snake_case）</td><td>API 契约</td><td>L1 事件链断言</td><td>L1/L2 事件链用例绿</td></tr>
+    <tr><td>9</td><td>LocalRunner 接入层策略化（08 §5.2）+ <span class="mono">WaitAll</span> 环境隔离 + <span class="mono">integration.NewDemoPolicy</span>（10s 虚拟时长，解决 TestSuite 自动推进烧穿预算）</td><td>基础设施</td><td>交互式冒烟必死复现</td><td>E2E 3× 稳定；真机冒烟 1s 间隔信号全部 200</td></tr>
+    <tr><td>10</td><td>cmd/api 本地模式：StaticChecker 对照表 + demo 策略 + <span class="mono">demoRoleOf</span> 补 <span class="mono">u-contact</span>（场景 D 投影）</td><td>本地模式修复</td><td>真机冒烟（SpiceDB 无关系写入 → 全 403）</td><td>冒烟全链 INV_CLOSED；仓管投影剥价</td></tr>
+  </table></div>
+
+  <h3><span class="no">2.2</span> 真机冒烟（真实二进制 + 真实 PG，本地模式）</h3>
+  <ul>
+    <li>款到订单全链：6 个信号全部 <span class="mono">200</span> → 终态 <span class="mono">INV_CLOSED</span>（事件链 26 条，末事件 OrderClosed）。</li>
+    <li>预订单链：确认 → <span class="mono">PRE_ORDER_REQUESTED</span> + 派生正式订单；含 12s 重复升级循环验证（修复 #6 生效，日志零 workflow 错误）。</li>
+    <li>凭证链：v1/v2 上传 <span class="mono">201</span>、客户联系人 <span class="mono">403</span>、版本回放 [1,2]。</li>
+    <li>BFF 投影：仓管视图 <span class="mono">unit_price_cents=None</span>（价格剥离）；待办检索正常。</li>
+  </ul>
+
+  <h2><span class="no">3 ·</span> 发现与风险</h2>
+
+  <h3><span class="no">3.1</span> 发现（本 review 新增）</h3>
+  <div class="table-wrap"><table>
+    <tr><th>级别</th><th>发现</th><th>建议</th></tr>
+    <tr><td class="warn">中</td><td>覆盖率回退：<span class="mono">internal/integration</span> 100% → 57.9%（新增 <span class="mono">demo.go</span> 无测试）；<span class="mono">internal/api</span> 93.9% → 89.5%（LocalRunner 新路径未覆盖）</td><td>l0_unit 补 demo 策略契约测试（时长/分类委托断言）；api 补 WaitAll/策略注入单测</td></tr>
+    <tr><td class="warn">中</td><td>TestSuite 信号递送竞态：工作流段重启期间入队的信号可能丢失（修改分类/部分发货用例曾偶发卡闸门）；已用「状态轮询 + 300ms 间隔」规避，但属环境层限制</td><td>记录于 tests/README.md；如后续引入真实 Temporal 集成测试可自然消除</td></tr>
+    <tr><td>低</td><td>ApprovalTask 等 API 模型仍输出 Go 字段名（如 <span class="mono">"ID"</span>），与事件链 snake_case 契约不一致</td><td>后续补 JSON 标签（本次仅修 Event，待办/任务端点消费方未定型）</td></tr>
+    <tr><td>低</td><td>Outbox 投影器未在任意进程内运行（cmd/worker 无投影循环）；本地模式用 StaticChecker 替代——生产 SpiceDB 关系写入属阶段二</td><td>与 docs/05 §3、CHANGELOG D4 一致，阶段二接 Temporal 后启动</td></tr>
+    <tr><td>低</td><td>偶发后台任务失败（bash-27/28/30/31）均为冒烟服务端口占用/被 fuser 回收，非代码回归</td><td>无需处理；冒烟服务应避免遗留进程</td></tr>
+  </table></div>
+
+  <h3><span class="no">3.2</span> 风险与边界</h3>
+  <ul>
+    <li>覆盖率 87.3% 与目标 ≥95-98% 的差距（约 320 语句）全部位于防御性错误分支（pgx 扫描错误、SQL 失败返回、物理不可达分支）——docs/03 §3 与 docs/06 §2 有诚实声明。</li>
+    <li>Timer 驱动路径（补回单分流②、精确催办时间点）依赖虚拟时间，E2E 按「自动触发」语义覆盖；精确语义在 internal/workflows TestSuite（L2-07/11/13）。</li>
+    <li>多套件共享测试 PG（b2b_pilot_test）：并行执行会 schema 冲突（本会话已验证），须按 Makefile 顺序目标串行运行。</li>
+  </ul>
+
+  <h2><span class="no">4 ·</span> 结论</h2>
+  <blockquote>全仓 review 通过：测试全绿（L0/L1/L2/L3 + internal 172 用例）、覆盖率门禁 PASS（87.3% + domain 100%）、最近两轮 10 项设计修复全部落地并有回归验证、真机冒烟全业务流零错误。剩余发现为覆盖率回退（integration/api 新代码未覆盖）与已知环境层限制，均已记录并给出建议路径，不阻塞当前交付。</blockquote>
+
+  <div class="foot">
+    <span class="mono">review_202608071154.html</span> · 基线 commit <span class="mono">a35b5c7</span> · 验证环境：本机 PG 55432 + LocalRunner + StaticChecker + wecom mock
+  </div>
+</div>
+</body>
+</html>

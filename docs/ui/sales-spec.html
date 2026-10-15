@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>归属销售 · 角色规约页｜长安仁恒</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+SC:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="wecom-tokens.css" />
+<link rel="stylesheet" href="wecom-pc-frame.css" />
+<style>
+  :root{
+    --paper:#f5f4ed; --paper2:#efeee5; --ink:#1f1d18; --ink2:#6b665b;
+    --ink3:#3a382f; --blue:#1B365D; --rule:#d4d1c5; --red:#c0392b; --green:#1a7f37;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif; line-height:1.6;}
+  .wrap{max-width:960px; margin:0 auto; padding:48px 40px 80px;}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;}
+  .folio{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--rule); padding-bottom:10px;
+    font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink2);}
+  .folio a{color:var(--ink2); border:none;}
+  .folio a:hover{color:var(--blue);}
+  .tag{display:inline-block; padding:3px 10px; font-size:11px; letter-spacing:.16em; background:var(--paper2); color:var(--blue);}
+  .kicker{display:flex; align-items:baseline; gap:12px; margin-top:48px;}
+  h1{font-size:clamp(32px,5vw,50px); line-height:1.12; font-weight:500; margin-top:14px; letter-spacing:-.01em;}
+  .lede{margin-top:18px; font-size:17px; line-height:1.7; color:var(--ink3); max-width:720px;}
+  h2{font-size:23px; font-weight:600; margin:52px 0 14px; color:var(--blue); display:flex; align-items:baseline; gap:12px; border-top:1px solid var(--rule); padding-top:26px;}
+  h2 .no{font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.12em;}
+  h3{font-size:17.5px; font-weight:600; margin:30px 0 10px; color:var(--ink);}
+  h3 .no{color:var(--blue); font-family:'IBM Plex Mono',monospace; font-size:12px; margin-right:8px;}
+  h4{font-size:15.5px; font-weight:600; margin:24px 0 8px; color:var(--ink);}
+  p{margin:10px 0; color:var(--ink3);}
+  ul,ol{margin:10px 0 10px 26px; color:var(--ink3);}
+  li{margin:5px 0;}
+  a{color:var(--blue); text-decoration:none; border-bottom:1px solid var(--rule);}
+  a:hover{border-bottom-color:var(--blue);}
+  blockquote{border-left:2px solid var(--blue); padding:10px 18px; margin:16px 0; background:var(--paper2); font-style:italic;}
+  table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  .table-wrap{overflow-x:auto; margin:16px 0 24px; border:1px solid var(--rule);}
+  .table-wrap table{margin:0;}
+  th{background:var(--paper2); color:var(--blue); text-align:left; font-weight:600; padding:9px 12px; border-bottom:1.5px solid var(--blue); font-size:12.5px; white-space:nowrap;}
+  td{padding:9px 12px; border-bottom:1px solid var(--rule); vertical-align:top; color:var(--ink3);}
+  tr:nth-child(even) td{background:#faf9f3;}
+  .mermaid{background:var(--paper); border:1px solid var(--rule); padding:18px; overflow-x:auto; text-align:center; margin:20px 0;}
+  .mermaid svg{max-width:100%; height:auto;}
+  figcaption{text-align:center; font-size:12px; color:var(--ink2); margin:-10px 0 26px; font-style:italic;}
+  code{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace; font-size:13px; background:var(--paper2); padding:1px 5px;}
+  footer.colophon{margin-top:56px; padding-top:14px; border-top:1px solid var(--rule); display:flex; justify-content:space-between;
+    font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink2); flex-wrap:wrap; gap:8px;}
+  footer.colophon a{color:var(--ink2); border:none;}
+  footer.colophon a:hover{color:var(--blue);}
+  .toc{border:1px solid var(--rule); background:var(--paper2); padding:18px 24px; margin:26px 0;}
+  .toc .tt{font-size:11px; letter-spacing:.2em; color:var(--blue); margin-bottom:8px;}
+  .toc a{display:block; padding:3px 0; color:var(--ink3); border:none;}
+  .toc a:hover{color:var(--blue);}
+  .toc .mono{font-size:12px; color:var(--blue); margin-right:8px;}
+  /* ---- UI 操作图：说明 + 产品稿企微手机屏幕 ---- */
+  .ui-step{margin:18px 0 34px;}
+  .ui-step .desc{flex:1 1 300px; min-width:280px;}
+  .ui-step .desc .stepno{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.14em; color:var(--blue);}
+  .ui-step .desc h4{font-size:15px; margin:4px 0 6px;}
+  .ui-step .desc p{font-size:13.5px; margin:6px 0;}
+  .ui-step .desc .hint{font-size:12px; color:var(--ink2); background:var(--paper2); border-left:2px solid var(--rule); padding:6px 10px; margin-top:8px;}
+  .ui-shot{margin-top:12px; display:flex; justify-content:center; flex-wrap:wrap; gap:22px; align-items:flex-start;}
+  /* PC/移动端对照标签 */
+  .shot-label{flex-basis:100%; text-align:center; font-size:11px; color:var(--ink2); margin-bottom:-14px; letter-spacing:.12em;}
+  .tagline{display:flex; align-items:center; gap:8px; margin-bottom:10px; font-size:11px; color:var(--ink2);}
+  .tagline .badge{background:#07C160; color:#fff; font-size:10px; padding:2px 8px; border-radius:3px; font-weight:600;}
+  .tagline .tabs-badge{display:flex; gap:3px;}
+  .tagline .tabs-badge b{background:#fff; border:1px solid #EFF0F2; color:#86909C; font-size:10px; padding:2px 7px; border-radius:3px; font-weight:500;}
+  .tagline .tabs-badge b.on{background:rgba(7,193,96,.1); color:#07C160; font-weight:600;}
+  @media(max-width:720px){.wrap{padding:28px 18px 60px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="folio">
+    <span><a href="index.html">← Role Specs</a></span>
+    <span>SALES · Role Spec</span>
+    <span>归属销售 · 5 Block</span>
+  </header>
+
+  <div class="kicker">
+    <span class="tag">Role Spec · 归属销售</span>
+    <span class="mono" style="font-size:11px; letter-spacing:.18em; color:var(--ink2);">本人负责客户订单 · 全字段</span>
+  </div>
+
+  <h1>归属销售<span style="font-style:italic; color:var(--blue);">· 角色规约页</span></h1>
+
+  <p class="lede">销售是<strong>唯一</strong>能在 S2 确认自动下单的角色（归属校验 SpiceDB + 本地 StaticChecker）。本页 5 个 Block 覆盖销售在企微的全部业务操作。<strong>UI 操作图严格采用产品稿 <span class="mono">spec/ui/wecom-sidebar</span> 的企微移动端设计语言</strong>：<span class="mono">#F4F5F7</span> 背景 / <span class="mono">#07C160</span> 企微绿 / <span class="mono">#1F2329</span> 文字 / 卡片圆角 6px / 3 Tab 结构（待办·订单·下单）。每个 Block = 用例图 + 流程图 + UI 操作图。</p>
+
+  <nav class="toc">
+    <div class="tt">CONTENTS · 5 BLOCKS</div>
+    <a href="#b1"><span class="mono">B1</span>查订单（S1 侧边栏 · 订单 Tab）</a>
+    <a href="#b2"><span class="mono">B2</span>人工下单（S1 · 下单 Tab 分步表单）</a>
+    <a href="#b3"><span class="mono">B3</span>自动下单确认卡（S2 · 待办 Tab）</a>
+    <a href="#b4"><span class="mono">B4</span>审批/催办/状态（S3 · 待办 Tab）</a>
+    <a href="#b5"><span class="mono">B5</span>工作台待办（S4 · 待办 Tab）</a>
+  </nav>
+
+  <!-- ============ BLOCK 1 ============ -->
+  <h2 id="b1"><span class="no">B1 ·</span> 查订单（S1 侧边栏 · 订单 Tab）</h2>
+
+  <h3><span class="no">①</span> 用例图</h3>
+  <pre class="mermaid">
+flowchart LR
+    subgraph ACT["参与者"]
+        SALES["归属销售<br/>(order.owner)"]
+    end
+    subgraph SYS["企微订单助手（系统边界）"]
+        UC1["(查订单)"]
+        UC3["(查看履约进度)"]
+        UC4["(上传凭证)"]
+    end
+    SALES --> UC1
+    SALES --> UC3
+    SALES --> UC4
+  </pre>
+  <figcaption>用例图 B1：销售经 S1 侧边栏进入，仅见当前客户群关联客户的订单（ReBAC OWNS）</figcaption>
+
+  <h3><span class="no">②</span> 流程图</h3>
+  <pre class="mermaid">
+flowchart TD
+    A["聊天窗口聊天工具栏 → 订单助手<br/>(默认待办 Tab)"] --> B["双票据签名 + OAuth 静默授权"]
+    B --> C["服务端重认证身份与上下文<br/>(X-WeCom-Context)"]
+    C --> D["按角色渲染 Tab 与字段<br/>(销售=全 3 Tab)"]
+    D --> E["切「订单」Tab：当前客户订单列表"]
+    E --> F["点击订单 → 详情页（履约时间线）"]
+    F --> G["上传签收/回单凭证"]
+    G --> I["凭证已登记反馈"]
+  </pre>
+  <figcaption>流程图 B1：进入 → 认证 → 投影渲染 → 订单列表 → 详情 → 凭证</figcaption>
+
+  <h3><span class="no">③</span> UI 操作图（产品稿企微手机屏幕）</h3>
+
+  <div class="ui-step">
+    <div class="desc">
+      <span class="stepno">操作 1.1</span>
+      <h4>客户群聊天窗口 → 打开订单助手</h4>
+      <p>销售在「广西天华 · 供应协同群」聊天窗口输入框上方的<strong>聊天工具栏</strong>点击「订单助手」（企微 5.0 移动端形态：聊天工具栏为一行应用入口，仅外部客户会话显示），全屏 H5 打开，<strong>默认落在「待办」Tab</strong>（产品稿行为）。</p>
+      <div class="hint">聊天工具栏 = 企业配置的应用入口（订单助手/快捷回复/商品图册/对外收款），与「＋」功能面板（相册/拍摄/文件/转账）分离；业务入口打开侧边栏 H5。</div>
+    </div>
+    <div class="ui-shot">
+      <div class="shot-label">PC 端 · 企微客户端四栏（侧边栏应用在最右栏）</div>
+      <div class="wc-pc">
+        <div class="tl"><i class="r"></i><i class="y"></i><i class="g"></i></div>
+        <div class="rail">
+          <div class="av">李</div>
+          <div class="nav on"><span class="ico">💬</span>消息<span class="bdg">2</span></div>
+          <div class="nav"><span class="ico">✉</span>邮件</div>
+          <div class="nav"><span class="ico">📄</span>文档</div>
+          <div class="nav"><span class="ico">📅</span>日程</div>
+          <div class="nav"><span class="ico">✓</span>待办</div>
+          <div class="nav"><span class="ico">🎥</span>会议</div>
+          <div class="nav"><span class="ico">🧩</span>工作台</div>
+          <div class="nav"><span class="ico">👥</span>通讯录</div>
+          <div class="nav"><span class="ico">☁</span>微盘</div>
+        </div>
+        <div class="conv">
+          <div class="search"><span class="box">⌕ 搜索</span><span class="plus">＋</span></div>
+          <div class="conv-item on">
+            <div class="cav">天</div>
+            <div class="meta"><div class="nm">广西天华 · 供应协同群<span class="tm">09:24</span></div><div class="pv">王总：再发5吨膨润土 AB-3…</div></div>
+          </div>
+          <div class="conv-item">
+            <div class="cav">宏</div>
+            <div class="meta"><div class="nm">宏远铸造采购群</div><div class="pv">赵经理：合同盖章版已发</div></div>
+          </div>
+        </div>
+        <div class="chat">
+          <div class="ch-head"><div><div class="nm">广西天华 · 供应协同群（8）</div><div class="sub">外部客户群 · 已开启订单助手（演示）</div></div></div>
+          <div class="ch-body">
+            <div class="msg o"><span class="mav">王</span><div class="mb"><div class="who">王志明｜广西天华采购部</div><div class="bub">李经理，再发5吨膨润土 AB-3，还是发华南仓，老规矩</div></div></div>
+            <div class="msg s"><div class="mb"><div class="bub">收到王总，我看下合同价，马上给您确认</div></div></div>
+          </div>
+          <div class="input-area"><span class="tools">☺ ▧ 📁</span><span class="field">输入消息…</span><span class="send">发送</span></div>
+        </div>
+        <div class="aside">
+          <div class="marker">◈ 订单助手 · 我们的应用（侧边栏）</div>
+          <div class="tabs">
+            <span class="tab on">待办<span class="cnt">2</span></span><span class="tab">订单</span><span class="tab">下单</span>
+          </div>
+          <div class="content">
+            <div class="pc-appr"><span class="ai">⚠</span><div class="am"><div class="at">自动下单确认 · DRAFT-2026-0036</div><div class="as">膨润土 AB-3 5吨 · ¥16,000</div></div><span class="arrow">›</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="wc-phone">
+        <div class="st-bar"><span>9:30</span><span>📶 🔋</span></div>
+        <div class="nav"><span class="back">‹</span><span class="title">王总-铸造厂</span><span class="more">⋯</span></div>
+        <div class="chat-area">
+          <div class="chat-msgs">
+            <div class="wc-msg cust"><span class="av">王</span><span class="bubble">李经理，再发5吨膨润土 AB-3，还是发华南仓，老规矩</span></div>
+            <div class="wc-msg sales"><span class="av">李</span><span class="bubble">收到王总，我看下合同价，马上给您确认</span></div>
+          </div>
+        </div>
+        <div class="wc-chat-tools">
+          <span class="ct-item hot"><span class="ct-ico">✓</span>订单助手</span>
+          <span class="ct-item"><span class="ct-ico">✎</span>快捷回复</span>
+          <span class="ct-item"><span class="ct-ico">▤</span>商品图册</span>
+          <span class="ct-item"><span class="ct-ico">↗</span>对外收款</span>
+        </div>
+        <div class="input-bar"><span class="mic">🎤</span><span class="field">输入消息...</span><span class="face">☺</span><span class="plus">＋</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ui-step">
+    <div class="desc">
+      <span class="stepno">操作 1.2</span>
+      <h4>「订单」Tab：当前客户订单列表</h4>
+      <p>顶部群上下文头（群名 + 客户等级 B 徽标），下方 3 Tab；切到「订单」Tab 展示<strong>该客户</strong>的订单列表（订单卡组件：单号/状态/产品/金额）。</p>
+      <div class="hint">命名依据：产品稿 Tab 即「订单」（非"我的订单"）——客户群上下文里订单属于客户。仓管视角金额列不渲染（剥价）。</div>
+    </div>
+    <div class="ui-shot">
+      <div class="shot-label">PC 端 · 侧边栏应用「订单」Tab</div>
+      <div class="wc-pc">
+        <div class="tl"><i class="r"></i><i class="y"></i><i class="g"></i></div>
+        <div class="rail">
+          <div class="av">李</div>
+          <div class="nav on"><span class="ico">💬</span>消息<span class="bdg">2</span></div>
+          <div class="nav"><span class="ico">✉</span>邮件</div>
+          <div class="nav"><span class="ico">📄</span>文档</div>
+          <div class="nav"><span class="ico">📅</span>日程</div>
+          <div class="nav"><span class="ico">✓</span>待办</div>
+          <div class="nav"><span class="ico">🎥</span>会议</div>
+          <div class="nav"><span class="ico">🧩</span>工作台</div>
+          <div class="nav"><span class="ico">👥</span>通讯录</div>
+          <div class="nav"><span class="ico">☁</span>微盘</div>
+        </div>
+        <div class="conv">
+          <div class="search"><span class="box">⌕ 搜索</span><span class="plus">＋</span></div>
+          <div class="conv-item on">
+            <div class="cav">天</div>
+            <div class="meta"><div class="nm">广西天华 · 供应协同群<span class="tm">09:24</span></div><div class="pv">王总：再发5吨膨润土 AB-3…</div></div>
+          </div>
+        </div>
+        <div class="chat">
+          <div class="ch-head"><div><div class="nm">广西天华 · 供应协同群（8）</div><div class="sub">外部客户群 · 已开启订单助手（演示）</div></div></div>
+          <div class="ch-body">
+            <div class="msg o"><span class="mav">王</span><div class="mb"><div class="who">王志明｜广西天华采购部</div><div class="bub">李经理，再发5吨膨润土 AB-3，还是发华南仓，老规矩</div></div></div>
+          </div>
+          <div class="input-area"><span class="tools">☺ ▧ 📁</span><span class="field">输入消息…</span><span class="send">发送</span></div>
+        </div>
+        <div class="aside">
+          <div class="marker">◈ 订单助手 · 我们的应用（侧边栏）</div>
+          <div class="tabs">
+            <span class="tab">待办<span class="cnt">2</span></span><span class="tab on">订单</span><span class="tab">下单</span>
+          </div>
+          <div class="content">
+            <div class="pc-card">
+              <div class="tt"><span class="d" style="background:#3B82F6;"></span>广西天华 · 订单</div>
+              <div class="pc-row"><span class="k">ORD-2026-0117</span><span class="pc-tag o">待价格审批</span><span class="pc-amount">¥16,000</span></div>
+              <div class="pc-row"><span class="k">ORD-2026-0112</span><span class="pc-tag g">备货中</span><span class="pc-amount">¥6,800</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="wc-phone">
+        <div class="st-bar"><span>9:30</span><span>📶 🔋</span></div>
+        <div class="nav"><span class="back">‹</span><span class="title">订单助手</span><span class="more">⋯</span></div>
+        <div class="wc-full">
+          <div class="aside-tabs">
+            <span class="aside-tab">待办</span><span class="aside-tab on">订单</span><span class="aside-tab">下单</span>
+          </div>
+          <div class="aside-scroll">
+            <div class="wc-group-ctx"><span class="ctx-avatar">天</span><div><div class="ctx-name">广西天华</div><div class="ctx-sub">供应协同群 · 归属销售 张销售<span class="wc-grade b">B 级</span></div></div></div>
+            <div class="wc-order">
+              <div class="r1"><span class="no">ORD-2026-0117</span><span class="state st-approving">待价格审批</span></div>
+              <div class="r2"><span class="prod">膨润土 AB-3 · 5 吨</span><span>华南仓</span></div>
+              <div class="r3"><span class="amount">¥16,000</span><span class="progress">审价中</span></div>
+            </div>
+            <div class="wc-order">
+              <div class="r1"><span class="no">ORD-2026-0112</span><span class="state st-ship">备货中</span></div>
+              <div class="r2"><span class="prod">膨润土 AB-3（袋装）· 2 吨</span><span>华南仓</span></div>
+              <div class="r3"><span class="amount">¥6,800</span><span class="progress">备货中</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ BLOCK 2 ============ -->
+  <h2 id="b2"><span class="no">B2 ·</span> 人工下单（S1 · 下单 Tab 分步表单）</h2>
+
+  <h3><span class="no">①</span> 用例图</h3>
+  <pre class="mermaid">
+flowchart LR
+    subgraph ACT2["参与者"]
+        SALES2["归属销售"]
+    end
+    subgraph SYS2["企微订单助手（系统边界）"]
+        UC21["(人工下单 5 步)"]
+        UC23["(风控审计)"]
+        UC24["(合同校验)"]
+    end
+    SALES2 --> UC21
+    SALES2 --> UC23
+    SALES2 --> UC24
+  </pre>
+  <figcaption>用例图 B2：下单 = 5 步分步表单（客户 → 风控审计 → 合同校验 → 填写明细 → 提交确认），产品稿结构</figcaption>
+
+  <h3><span class="no">②</span> 流程图</h3>
+  <pre class="mermaid">
+flowchart TD
+    A2["「下单」Tab → 步骤1 客户（群上下文预选）"] --> B2["步骤2 风控审计（B级·2项需关注）"]
+    B2 --> C2["步骤3 合同校验（命中框架合同自动填价）"]
+    C2 --> D2["步骤4 填写明细（产品/数量/发货仓/交期）"]
+    D2 --> E2["步骤5 提交前确认 → 确认提交"]
+    E2 -->|"成功"| F2["订单已提交 ORD-…（进入审批流）"]
+    E2 -->|"409 幂等"| G2["提示已提交，勿重复操作"]
+  </pre>
+  <figcaption>流程图 B2：5 步分步表单 → 提交 → 成功/幂等（产品稿 step-indicator）</figcaption>
+
+  <h3><span class="no">③</span> UI 操作图（产品稿企微手机屏幕）</h3>
+
+  <div class="ui-step">
+    <div class="desc">
+      <span class="stepno">操作 2.1</span>
+      <h4>下单表单（步骤指示器 + 表单卡片）</h4>
+      <p>「下单」Tab 内 5 步分步表单：步骤指示器高亮当前步；步骤4「填写订单明细」——产品下拉、数量（吨）、发货仓下拉、交期、特殊标记；系统自动带入客户等级价。</p>
+      <div class="hint">产品稿表单组件：label + input/select 36px 高、focus 绿边；金额额度提示「本次金额 ¥16,000，在额度内」。</div>
+    </div>
+    <div class="ui-shot">
+      <div class="shot-label">PC 端 · 侧边栏应用「下单」Tab（5 步分步表单）</div>
+      <div class="wc-pc">
+        <div class="tl"><i class="r"></i><i class="y"></i><i class="g"></i></div>
+        <div class="rail">
+          <div class="av">李</div>
+          <div class="nav on"><span class="ico">💬</span>消息<span class="bdg">2</span></div>
+          <div class="nav"><span class="ico">✉</span>邮件</div>
+          <div class="nav"><span class="ico">📄</span>文档</div>
+          <div class="nav"><span class="ico">📅</span>日程</div>
+          <div class="nav"><span class="ico">✓</span>待办</div>
+          <div class="nav"><span class="ico">🎥</span>会议</div>
+          <div class="nav"><span class="ico">🧩</span>工作台</div>
+          <div class="nav"><span class="ico">👥</span>通讯录</div>
+          <div class="nav"><span class="ico">☁</span>微盘</div>
+        </div>
+        <div class="conv">
+          <div class="search"><span class="box">⌕ 搜索</span><span class="plus">＋</span></div>
+          <div class="conv-item on">
+            <div class="cav">天</div>
+            <div class="meta"><div class="nm">广西天华 · 供应协同群<span class="tm">09:24</span></div><div class="pv">王总：再发5吨膨润土 AB-3…</div></div>
+          </div>
+        </div>
+        <div class="chat">
+          <div class="ch-head"><div><div class="nm">广西天华 · 供应协同群（8）</div><div class="sub">外部客户群 · 已开启订单助手（演示）</div></div></div>
+          <div class="ch-body">
+            <div class="msg o"><span class="mav">王</span><div class="mb"><div class="who">王志明｜广西天华采购部</div><div class="bub">李经理，再发5吨膨润土 AB-3，还是发华南仓，老规矩</div></div></div>
+          </div>
+          <div class="input-area"><span class="tools">☺ ▧ 📁</span><span class="field">输入消息…</span><span class="send">发送</span></div>
+        </div>
+        <div class="aside">
+          <div class="marker">◈ 订单助手 · 我们的应用（侧边栏）</div>
+          <div class="tabs">
+            <span class="tab">待办<span class="cnt">2</span></span><span class="tab">订单</span><span class="tab on">下单</span>
+          </div>
+          <div class="content">
+            <div class="pc-tl-line"><span class="dot done"></span><span class="bar done"></span><span class="dot done"></span><span class="bar done"></span><span class="dot done"></span><span class="bar done"></span><span class="dot cur"></span><span class="bar"></span><span class="dot"></span></div>
+            <div class="pc-card">
+              <div class="tt"><span class="d" style="background:#07C160;"></span>填写订单明细</div>
+              <div class="pc-form-row"><label>产品</label><div class="inp">膨润土 AB-3</div></div>
+              <div class="pc-form-row"><label>数量（吨）</label><div class="inp">5</div></div>
+              <div class="pc-form-row"><label>发货仓</label><div class="inp">华南仓</div></div>
+              <div class="pc-form-row"><label>交期</label><div class="inp">2026-08-15</div></div>
+              <div class="pc-form-row"><label>特殊标记</label><div class="inp">随货附质检报告</div></div>
+              <div class="pc-form-row"><div class="hint">本次金额 ¥16,000，在额度内</div></div>
+            </div>
+            <div class="pc-btns"><span class="b ok">下一步：提交</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="wc-phone">
+        <div class="st-bar"><span>9:30</span><span>📶 🔋</span></div>
+        <div class="nav"><span class="back">‹</span><span class="title">订单助手</span><span class="more">⋯</span></div>
+        <div class="wc-full">
+          <div class="aside-tabs">
+            <span class="aside-tab">待办</span><span class="aside-tab">订单</span><span class="aside-tab on">下单</span>
+          </div>
+          <div class="aside-scroll">
+            <div class="wc-steps"><span class="pill">客户</span><span class="pill">风控</span><span class="pill">合同</span><span class="pill active">明细</span><span class="pill">提交</span></div>
+            <div class="wc-detail">
+              <div class="od-head"><span class="od-no">填写订单明细</span></div>
+              <div class="wc-form-row"><label>产品</label><input value="膨润土 AB-3" /></div>
+              <div class="wc-form-row"><label>数量（吨）</label><input value="5" /></div>
+              <div class="wc-form-row"><label>发货仓</label><input value="华南仓" /></div>
+              <div class="wc-form-row"><label>交期</label><input value="2026-08-15" /></div>
+              <div class="wc-form-row"><label>特殊标记</label><input value="随货附质检报告" /></div>
+              <div class="wc-form-row"><div class="quota">本次金额 ¥16,000，下单后额度占比 76%，在额度内</div></div>
+            </div>
+            <div class="wc-po-actions"><span class="btn btn-confirm">下一步：提交</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ui-step">
+    <div class="desc">
+      <span class="stepno">操作 2.2</span>
+      <h4>提交成功反馈</h4>
+      <p>「确认提交」→ 成功态：绿色对勾 + 「订单已提交」+ 已进入审批流说明 + 订单号（产品稿 order-success 组件）。</p>
+      <div class="hint">提交后进入审批流：销售主管价格审批 → C/D 级董事长终审 → 合同生成校验。</div>
+    </div>
+    <div class="ui-shot">
+      <div class="shot-label">PC 端 · 侧边栏应用提交成功态</div>
+      <div class="wc-pc">
+        <div class="tl"><i class="r"></i><i class="y"></i><i class="g"></i></div>
+        <div class="rail">
+          <div class="av">李</div>
+          <div class="nav on"><span class="ico">💬</span>消息<span class="bdg">2</span></div>
+          <div class="nav"><span class="ico">✉</span>邮件</div>
+          <div class="nav"><span class="ico">📄</span>文档</div>
+          <div class="nav"><span class="ico">📅</span>日程</div>
+          <div class="nav"><span class="ico">✓</span>待办</div>
+          <div class="nav"><span class="ico">🎥</span>会议</div>
+          <div class="nav"><span class="ico">🧩</span>工作台</div>
+          <div class="nav"><span class="ico">👥</span>通讯录</div>
+          <div class="nav"><span class="ico">☁</span>微盘</div>
+        </div>
+        <div class="conv">
+          <div class="search"><span class="box">⌕ 搜索</span><span class="plus">＋</span></div>
+          <div class="conv-item on">
+            <div class="cav">天</div>
+            <div class="meta"><div class="nm">广西天华 · 供应协同群<span class="tm">09:24</span></div><div class="pv">王总：再发5吨膨润土 AB-3…</div></div>
+          </div>
+        </div>
+        <div class="chat">
+          <div class="ch-head"><div><div class="nm">广西天华 · 供应协同群（8）</div><div class="sub">外部客户群 · 已开启订单助手（演示）</div></div></div>
+          <div class="ch-body">
+            <div class="msg o"><span class="mav">王</span><div class="mb"><div class="who">王志明｜广西天华采购部</div><div class="bub">李经理，再发5吨膨润土 AB-3，还是发华南仓，老规矩</div></div></div>
+          </div>
+          <div class="input-area"><span class="tools">☺ ▧ 📁</span><span class="field">输入消息…</span><span class="send">发送</span></div>
+        </div>
+        <div class="aside">
+          <div class="marker">◈ 订单助手 · 我们的应用（侧边栏）</div>
+          <div class="tabs">
+            <span class="tab">待办<span class="cnt">2</span></span><span class="tab">订单</span><span class="tab on">下单</span>
+          </div>
+          <div class="content">
+            <div class="pc-ok">
+              <div class="ico">✓</div>
+              <h5>订单已提交</h5>
+              <p>已进入审批流，销售主管与董事长（C/D 级）将收到审批卡片</p>
+              <div class="no">ORD-20260811-0109</div>
+              <p style="font-size:7px;color:#6F7378;margin-top:4px;">提交时间 09:32 · 当前节点：待价格审批</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="wc-phone">
+        <div class="st-bar"><span>9:30</span><span>📶 🔋</span></div>
+        <div class="nav"><span class="back">‹</span><span class="title">订单助手</span><span class="more">⋯</span></div>
+        <div class="wc-full">
+          <div class="aside-scroll" style="justify-content:center;">
+            <div class="wc-success">
+              <div class="ok-ico">✓</div>
+              <h4>订单已提交</h4>
+              <p>已进入审批流，销售主管与董事长（C/D 级）将收到审批卡片</p>
+              <div class="no">ORD-20260811-0109</div>
+              <p style="font-size:10px;color:#B5BAC1;margin-top:6px;">提交时间 09:32 · 当前节点：待价格审批</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ BLOCK 3 ============ -->
+  <h2 id="b3"><span class="no">B3 ·</span> 自动下单确认卡（S2 · 待办 Tab）</h2>
+
+  <h3><span class="no">①</span> 用例图</h3>
+  <pre class="mermaid">
+flowchart LR
+    subgraph ACT3["参与者"]
+        SALES3["归属销售"]
+        CUST3["客户（群内提出需求）"]
+    end
+    subgraph SYS3["企微订单助手（系统边界）"]
+        UC31["(生成自动下单候选)"]
+        UC32["(确认自动下单)"]
+        UC33["(修改候选)"]
+        UC34["(忽略自动下单)"]
+    end
+    CUST3 --> UC31
+    SALES3 --> UC32
+    SALES3 --> UC33
+    SALES3 --> UC34
+  </pre>
+  <figcaption>用例图 B3：销售是唯一可确认自动下单的角色（归属校验）</figcaption>
+
+  <h3><span class="no">②</span> 流程图</h3>
+  <pre class="mermaid">
+flowchart TD
+    A3["「待办」Tab 自动下单确认卡<br/>(产品稿 preorder-card)"] --> B3{"三按钮"}
+    B3 -->|"确认"| C3["preorder-confirm 信号"]
+    B3 -->|"修改"| D3["卡片切编辑态（数量可改）"]
+    D3 --> E3["保存并确认"]
+    B3 -->|"忽略"| F3["二次确认弹层"]
+    F3 --> G3["preorder-ignore 信号"]
+    C3 --> H3["派生正式订单 ORD-…(幂等键)"]
+    E3 --> H3
+    G3 --> I3["忽略终态（卡片置灰）"]
+    H3 --> J3["卡片刷新「已生成正式订单」"]
+  </pre>
+  <figcaption>流程图 B3：三按钮三路径，确认前系统内不存在正式订单（AI 安全边界）</figcaption>
+
+  <h3><span class="no">③</span> UI 操作图（产品稿企微手机屏幕）</h3>
+
+  <div class="ui-step">
+    <div class="desc">
+      <span class="stepno">操作 3.1</span>
+      <h4>待办 Tab 的自动下单确认卡（三按钮）</h4>
+      <p>「待办」Tab 顶部自动下单确认卡：AI 识别来源引用原文（产品稿 po-origin 组件）、字段明细（产品/数量/金额）、风险提示、三按钮（忽略=灰 / 修改=绿浅 / 确认=实心绿）。</p>
+      <div class="hint">产品稿组件：preorder-card + po-origin 引用原文 + po-actions 三按钮，确认=主按钮（#07C160 实心）。</div>
+    </div>
+    <div class="ui-shot">
+      <div class="shot-label">PC 端 · 侧边栏应用「待办」Tab（自动下单确认卡）</div>
+      <div class="wc-pc">
+        <div class="tl"><i class="r"></i><i class="y"></i><i class="g"></i></div>
+        <div class="rail">
+          <div class="av">李</div>
+          <div class="nav on"><span class="ico">💬</span>消息<span class="bdg">2</span></div>
+          <div class="nav"><span class="ico">✉</span>邮件</div>
+          <div class="nav"><span class="ico">📄</span>文档</div>
+          <div class="nav"><span class="ico">📅</span>日程</div>
+          <div class="nav"><span class="ico">✓</span>待办</div>
+          <div class="nav"><span class="ico">🎥</span>会议</div>
+          <div class="nav"><span class="ico">🧩</span>工作台</div>
+          <div class="nav"><span class="ico">👥</span>通讯录</div>
+          <div class="nav"><span class="ico">☁</span>微盘</div>
+        </div>
+        <div class="conv">
+          <div class="search"><span class="box">⌕ 搜索</span><span class="plus">＋</span></div>
+          <div class="conv-item on">
+            <div class="cav">天</div>
+            <div class="meta"><div class="nm">广西天华 · 供应协同群<span class="tm">09:24</span></div><div class="pv">王总：再发5吨膨润土 AB-3…</div></div>
+          </div>
+        </div>
+        <div class="chat">
+          <div class="ch-head"><div><div class="nm">广西天华 · 供应协同群（8）</div><div class="sub">外部客户群 · 已开启订单助手（演示）</div></div></div>
+          <div class="ch-body">
+            <div class="msg o"><span class="mav">王</span><div class="mb"><div class="who">王志明｜广西天华采购部</div><div class="bub">再发5吨膨润土 AB-3，还是发华南仓，老规矩，带质检报告</div></div></div>
+          </div>
+          <div class="input-area"><span class="tools">☺ ▧ 📁</span><span class="field">输入消息…</span><span class="send">发送</span></div>
+        </div>
+        <div class="aside">
+          <div class="marker">◈ 订单助手 · 我们的应用（侧边栏）</div>
+          <div class="tabs">
+            <span class="tab on">待办<span class="cnt">2</span></span><span class="tab">订单</span><span class="tab">下单</span>
+          </div>
+          <div class="content">
+            <div class="pc-card">
+              <div class="tt"><span class="d" style="background:#07C160;"></span>AI 识别 · 自动下单待确认</div>
+              <div class="pc-row"><span class="k">原话</span><span class="v">“再发 5 吨膨润土 AB-3，带质检报告”</span></div>
+              <div class="pc-row"><span class="k">产品</span><span class="v">膨润土 AB-3（吨袋）</span></div>
+              <div class="pc-row"><span class="k">数量</span><span class="v">5 吨 · 华南仓</span></div>
+              <div class="pc-row"><span class="k">金额</span><span class="v">¥16,000</span></div>
+              <div class="pc-warn" style="margin-top:6px;">⚠ 客户近 30 天有 1 次质量反馈，建议确认处理情况，不阻断下单</div>
+            </div>
+            <div class="pc-btns"><span class="b gray">忽略</span><span class="b ghost">修改</span><span class="b ok">确认</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="wc-phone">
+        <div class="st-bar"><span>9:30</span><span>📶 🔋</span></div>
+        <div class="nav"><span class="back">‹</span><span class="title">订单助手</span><span class="more">⋯</span></div>
+        <div class="wc-full">
+          <div class="aside-tabs">
+            <span class="aside-tab on">待办<span class="cnt">2</span></span><span class="aside-tab">订单</span><span class="aside-tab">下单</span>
+          </div>
+          <div class="aside-scroll">
+            <div class="wc-group-ctx"><span class="ctx-avatar">天</span><div><div class="ctx-name">广西天华</div><div class="ctx-sub">供应协同群 · 归属销售 张销售<span class="wc-grade b">B 级</span></div></div></div>
+            <div class="wc-sec-title"><span class="dot"></span>自动下单确认 <span class="count">1</span></div>
+            <div class="wc-preorder">
+              <div class="wc-po-head"><span class="ai-chip">AI 识别</span><span class="po-title">自动下单待确认</span><span class="po-status">DRAFT-2026-0036</span></div>
+              <div class="wc-po-body">
+                <div class="wc-po-origin"><div class="label">群内原话</div><div class="quote">“再发 5 吨膨润土 AB-3，还是发华南仓，老规矩，带质检报告”</div><span class="src">广西天华 · 王志明 · 今天 09:24</span></div>
+                <div class="wc-po-fields">
+                  <div class="wc-po-field"><span class="k">产品</span><span class="v">膨润土 AB-3（吨袋）</span></div>
+                  <div class="wc-po-field"><span class="k">数量</span><span class="v">5 吨 · 华南仓</span></div>
+                  <div class="wc-po-field"><span class="k">金额</span><span class="v amount">¥16,000</span></div>
+                  <div class="wc-po-field"><span class="k">合同</span><span class="v">HT-2025-0038（框架）</span></div>
+                </div>
+                <div class="wc-po-hint">⚠ 客户近 30 天有 1 次质量反馈，建议确认处理情况，不阻断下单。</div>
+              </div>
+              <div class="wc-po-actions"><span class="btn btn-ignore">忽略</span><span class="btn btn-edit">修改</span><span class="btn btn-confirm">确认</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ui-step">
+    <div class="desc">
+      <span class="stepno">操作 3.2</span>
+      <h4>确认成功态（卡片原位刷新）</h4>
+      <p>点击「确认」→ 卡片刷新为成功态：绿色对勾 + 「已生成正式订单」+ 订单号（产品稿 preorder-card.done 状态）。</p>
+      <div class="hint">成功反馈必带订单号（可追踪原则）；非待确认态（409）→ 「该自动下单已被处理」。</div>
+    </div>
+    <div class="ui-shot">
+      <div class="shot-label">PC 端 · 侧边栏应用确认成功态</div>
+      <div class="wc-pc">
+        <div class="tl"><i class="r"></i><i class="y"></i><i class="g"></i></div>
+        <div class="rail">
+          <div class="av">李</div>
+          <div class="nav on"><span class="ico">💬</span>消息<span class="bdg">2</span></div>
+          <div class="nav"><span class="ico">✉</span>邮件</div>
+          <div class="nav"><span class="ico">📄</span>文档</div>
+          <div class="nav"><span class="ico">📅</span>日程</div>
+          <div class="nav"><span class="ico">✓</span>待办</div>
+          <div class="nav"><span class="ico">🎥</span>会议</div>
+          <div class="nav"><span class="ico">🧩</span>工作台</div>
+          <div class="nav"><span class="ico">👥</span>通讯录</div>
+          <div class="nav"><span class="ico">☁</span>微盘</div>
+        </div>
+        <div class="conv">
+          <div class="search"><span class="box">⌕ 搜索</span><span class="plus">＋</span></div>
+          <div class="conv-item on">
+            <div class="cav">天</div>
+            <div class="meta"><div class="nm">广西天华 · 供应协同群<span class="tm">09:24</span></div><div class="pv">王总：再发5吨膨润土 AB-3…</div></div>
+          </div>
+        </div>
+        <div class="chat">
+          <div class="ch-head"><div><div class="nm">广西天华 · 供应协同群（8）</div><div class="sub">外部客户群 · 已开启订单助手（演示）</div></div></div>
+          <div class="ch-body">
+            <div class="msg o"><span class="mav">王</span><div class="mb"><div class="who">王志明｜广西天华采购部</div><div class="bub">确认，就按这个安排。</div></div></div>
+          </div>
+          <div class="input-area"><span class="tools">☺ ▧ 📁</span><span class="field">输入消息…</span><span class="send">发送</span></div>
+        </div>
+        <div class="aside">
+          <div class="marker">◈ 订单助手 · 我们的应用（侧边栏）</div>
+          <div class="tabs">
+            <span class="tab on">待办</span><span class="tab">订单</span><span class="tab">下单</span>
+          </div>
+          <div class="content">
+            <div class="pc-ok">
+              <div class="ico">✓</div>
+              <h5>已生成正式订单</h5>
+              <div class="no">ORD-2026-0118</div>
+              <p>当前节点：商务复核 → 财务审批 → 仓库确认</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="wc-phone">
+        <div class="st-bar"><span>9:30</span><span>📶 🔋</span></div>
+        <div class="nav"><span class="back">‹</span><span class="title">订单助手</span><span class="more">⋯</span></div>
+        <div class="wc-full">
+          <div class="aside-tabs">
+            <span class="aside-tab on">待办</span><span class="aside-tab">订单</span><span class="aside-tab">下单</span>
+          </div>
+          <div class="aside-scroll">
+            <div class="wc-preorder done">
+              <div class="wc-po-head"><span class="ai-chip">AI 识别</span><span class="po-title">自动下单已确认</span><span class="po-status">已完成</span></div>
+              <div class="wc-po-result">
+                <div class="ok-ico" style="font-size:38px; color:#07C160;">✓</div>
+                <div class="ok-title">已生成正式订单</div>
+                <div class="ok-no">ORD-2026-0118</div>
+                <div class="ok-sub">当前节点：商务复核 → 财务审批 → 仓库确认</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ BLOCK 4 ============ -->
+  <h2 id="b4"><span class="no">B4 ·</span> 审批/催办/状态（S3 · 待办 Tab）</h2>
+
+  <h3><span class="no">①</span> 用例图</h3>
+  <pre class="mermaid">
+flowchart LR
+    subgraph ACT4["参与者"]
+        SALES4["归属销售"]
+        NOTI4["系统/Notifier（非人）"]
+    end
+    subgraph SYS4["企微订单助手（系统边界）"]
+        UC41["(接收状态通知)"]
+        UC42["(接收催办)"]
+        UC43["(查看回单异常)"]
+    end
+    NOTI4 --> UC41
+    NOTI4 --> UC42
+    NOTI4 --> UC43
+    SALES4 --> UC41
+    SALES4 --> UC42
+    SALES4 --> UC43
+  </pre>
+  <figcaption>用例图 B4：销售是状态/催办/回单异常通知的接收人（待办 Tab 聚合）</figcaption>
+
+  <h3><span class="no">②</span> 流程图</h3>
+  <pre class="mermaid">
+flowchart TD
+    A4["工作流活动触发出站通知"] --> B4["待办 Tab 聚合展示"]
+    B4 --> C4{"通知类型"}
+    C4 -->|"状态"| D4["审批条→详情（只读+跳转）"]
+    C4 -->|"催办"| E4["审批条带橙色 tag「需处理」"]
+    C4 -->|"回单异常"| F4["审批条→例外审核"]
+  </pre>
+  <figcaption>流程图 B4：出站通知 → 待办聚合 → 审批条分流（产品稿 approval-item 组件）</figcaption>
+
+  <h3><span class="no">③</span> UI 操作图（产品稿企微手机屏幕）</h3>
+
+  <div class="ui-step">
+    <div class="desc">
+      <span class="stepno">操作 4.1</span>
+      <h4>待办 Tab 审批条列表</h4>
+      <p>待办 Tab 用「审批条」（产品稿 approval-item）聚合展示：图标 + 标题 + 副标题 + 橙色 tag + 右箭头。点击进入对应详情/卡片。</p>
+      <div class="hint">产品稿组件：approval-item（32px 绿色浅底图标 + 标题 + 副标题 + ap-tag 橙色标签 + 箭头）。</div>
+    </div>
+    <div class="ui-shot">
+      <div class="shot-label">PC 端 · 侧边栏应用「待办」Tab（审批条列表）</div>
+      <div class="wc-pc">
+        <div class="tl"><i class="r"></i><i class="y"></i><i class="g"></i></div>
+        <div class="rail">
+          <div class="av">李</div>
+          <div class="nav on"><span class="ico">💬</span>消息<span class="bdg">2</span></div>
+          <div class="nav"><span class="ico">✉</span>邮件</div>
+          <div class="nav"><span class="ico">📄</span>文档</div>
+          <div class="nav"><span class="ico">📅</span>日程</div>
+          <div class="nav"><span class="ico">✓</span>待办</div>
+          <div class="nav"><span class="ico">🎥</span>会议</div>
+          <div class="nav"><span class="ico">🧩</span>工作台</div>
+          <div class="nav"><span class="ico">👥</span>通讯录</div>
+          <div class="nav"><span class="ico">☁</span>微盘</div>
+        </div>
+        <div class="conv">
+          <div class="search"><span class="box">⌕ 搜索</span><span class="plus">＋</span></div>
+          <div class="conv-item on">
+            <div class="cav">天</div>
+            <div class="meta"><div class="nm">广西天华 · 供应协同群<span class="tm">09:24</span></div><div class="pv">王总：再发5吨膨润土 AB-3…</div></div>
+          </div>
+        </div>
+        <div class="chat">
+          <div class="ch-head"><div><div class="nm">广西天华 · 供应协同群（8）</div><div class="sub">外部客户群 · 已开启订单助手（演示）</div></div></div>
+          <div class="ch-body">
+            <div class="msg o"><span class="mav">王</span><div class="mb"><div class="who">王志明｜广西天华采购部</div><div class="bub">再发5吨膨润土 AB-3，还是发华南仓，老规矩，带质检报告</div></div></div>
+          </div>
+          <div class="input-area"><span class="tools">☺ ▧ 📁</span><span class="field">输入消息…</span><span class="send">发送</span></div>
+        </div>
+        <div class="aside">
+          <div class="marker">◈ 订单助手 · 我们的应用（侧边栏）</div>
+          <div class="tabs">
+            <span class="tab on">待办<span class="cnt">3</span></span><span class="tab">订单</span><span class="tab">下单</span>
+          </div>
+          <div class="content">
+            <div class="pc-appr"><span class="ai">⚠</span><div class="am"><div class="at">自动下单确认 · 已超 24h</div><div class="as">DRAFT-2026-0036 · 抄送主管</div></div><span class="pc-tag o">需处理</span><span class="arrow">›</span></div>
+            <div class="pc-appr"><span class="ai">📄</span><div class="am"><div class="at">回单异常 · 已超期 3 天</div><div class="as">ORD-2026-0102 · 非款到单</div></div><span class="arrow">›</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="wc-phone">
+        <div class="st-bar"><span>9:30</span><span>📶 🔋</span></div>
+        <div class="nav"><span class="back">‹</span><span class="title">订单助手</span><span class="more">⋯</span></div>
+        <div class="wc-full">
+          <div class="aside-tabs">
+            <span class="aside-tab on">待办<span class="cnt">3</span></span><span class="aside-tab">订单</span><span class="aside-tab">下单</span>
+          </div>
+          <div class="aside-scroll">
+            <div class="wc-sec-title"><span class="dot"></span>需要我处理 <span class="count">3</span></div>
+            <div class="wc-approval"><span class="ap-icon">⚠</span><div class="ap-main"><div class="ap-title">自动下单确认 · 已超 24h</div><div class="ap-sub">DRAFT-2026-0036 · 抄送主管</div></div><span class="ap-tag">需处理</span><span class="ap-arrow">›</span></div>
+            <div class="wc-approval"><span class="ap-icon">📄</span><div class="ap-main"><div class="ap-title">回单异常 · 已超期 3 天</div><div class="ap-sub">ORD-2026-0102 · 非款到单</div></div><span class="ap-tag">需关注</span><span class="ap-arrow">›</span></div>
+            <div class="wc-sec-title" style="margin-top:10px;"><span class="dot"></span>动态</div>
+            <div class="wc-approval"><span class="ap-icon">✓</span><div class="ap-main"><div class="ap-title">审价已通过</div><div class="ap-sub">ORD-2026-0117 · 商务已放行</div></div><span class="ap-arrow">›</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ BLOCK 5 ============ -->
+  <h2 id="b5"><span class="no">B5 ·</span> 工作台待办（S4 · 待办 Tab）</h2>
+
+  <h3><span class="no">①</span> 用例图</h3>
+  <pre class="mermaid">
+flowchart LR
+    subgraph ACT5["参与者"]
+        SALES5["归属销售"]
+    end
+    subgraph SYS5["企微订单助手（系统边界）"]
+        UC51["(查看本人待办)"]
+        UC52["(跳转处理界面)"]
+        UC53["(查看消息中心)"]
+    end
+    SALES5 --> UC51
+    SALES5 --> UC52
+    SALES5 --> UC53
+  </pre>
+  <figcaption>用例图 B5：工作台 = 无群上下文的安全降级视图（只聚合与跳转）</figcaption>
+
+  <h3><span class="no">②</span> 流程图</h3>
+  <pre class="mermaid">
+flowchart TD
+    A5["打开工作台应用（normal 入口）"] --> B5["OAuth 授权进入"]
+    B5 --> C5["默认「待办」Tab（本人待办）"]
+    C5 --> D5{"点击条目"}
+    D5 -->|"审批类"| E5["跳转原 S3 卡片"]
+    D5 -->|"自动下单类"| F5["跳转确认卡片"]
+    C5 --> H5["下拉刷新（CQ-05 查询）"]
+  </pre>
+  <figcaption>流程图 B5：待办检索 → 类型分流跳转（不做敏感操作）</figcaption>
+
+  <h3><span class="no">③</span> UI 操作图（产品稿企微手机屏幕）</h3>
+
+  <div class="ui-step">
+    <div class="desc">
+      <span class="stepno">操作 5.1</span>
+      <h4>工作台打开订单助手 → 待办 Tab</h4>
+      <p>从企微「工作台」打开「长安仁恒订单助手」应用：与侧边栏 H5 同一套页面（3 Tab），默认待办 Tab 聚合本人待办；无群上下文时隐藏群上下文头。</p>
+      <div class="hint">产品稿行为：侧边栏 H5 单容器 + 内部 3 Tab 切换，工作台入口与聊天工具栏入口共用同一页面。</div>
+    </div>
+    <div class="ui-shot">
+      <div class="shot-label">PC 端 · 企微工作台打开应用（侧边栏应用「待办」Tab）</div>
+      <div class="wc-pc">
+        <div class="tl"><i class="r"></i><i class="y"></i><i class="g"></i></div>
+        <div class="rail">
+          <div class="av">李</div>
+          <div class="nav"><span class="ico">💬</span>消息<span class="bdg">2</span></div>
+          <div class="nav"><span class="ico">✉</span>邮件</div>
+          <div class="nav"><span class="ico">📄</span>文档</div>
+          <div class="nav"><span class="ico">📅</span>日程</div>
+          <div class="nav"><span class="ico">✓</span>待办</div>
+          <div class="nav"><span class="ico">🎥</span>会议</div>
+          <div class="nav on"><span class="ico">🧩</span>工作台</div>
+          <div class="nav"><span class="ico">👥</span>通讯录</div>
+          <div class="nav"><span class="ico">☁</span>微盘</div>
+        </div>
+        <div class="conv">
+          <div class="search"><span class="box">⌕ 搜索</span><span class="plus">＋</span></div>
+          <div class="conv-item on">
+            <div class="cav">天</div>
+            <div class="meta"><div class="nm">广西天华 · 供应协同群<span class="tm">09:24</span></div><div class="pv">王总：再发5吨膨润土 AB-3…</div></div>
+          </div>
+        </div>
+        <div class="chat">
+          <div class="ch-head"><div><div class="nm">广西天华 · 供应协同群（8）</div><div class="sub">外部客户群 · 已开启订单助手（演示）</div></div></div>
+          <div class="ch-body">
+            <div class="msg o"><span class="mav">王</span><div class="mb"><div class="who">王志明｜广西天华采购部</div><div class="bub">李经理，再发5吨膨润土 AB-3，还是发华南仓，老规矩</div></div></div>
+          </div>
+          <div class="input-area"><span class="tools">☺ ▧ 📁</span><span class="field">输入消息…</span><span class="send">发送</span></div>
+        </div>
+        <div class="aside">
+          <div class="marker">◈ 订单助手 · 我们的应用（侧边栏）</div>
+          <div class="tabs">
+            <span class="tab on">待办<span class="cnt">2</span></span><span class="tab">订单</span><span class="tab">下单</span>
+          </div>
+          <div class="content">
+            <div class="pc-appr"><span class="ai">⚠</span><div class="am"><div class="at">自动下单确认</div><div class="as">DRAFT-2026-0036 · 已超 24h</div></div><span class="pc-tag o">需处理</span><span class="arrow">›</span></div>
+            <div class="pc-appr"><span class="ai">📄</span><div class="am"><div class="at">回单异常</div><div class="as">ORD-2026-0102 · 已超期 3 天</div></div><span class="arrow">›</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="wc-phone">
+        <div class="st-bar"><span>9:30</span><span>📶 🔋</span></div>
+        <div class="nav"><span class="back">‹</span><span class="title">长安仁恒订单助手</span><span class="more">⋯</span></div>
+        <div class="wc-full">
+          <div class="aside-tabs">
+            <span class="aside-tab on">待办<span class="cnt">2</span></span><span class="aside-tab">订单</span><span class="aside-tab">下单</span>
+          </div>
+          <div class="aside-scroll">
+            <div class="wc-sec-title"><span class="dot"></span>需要我处理 <span class="count">2</span></div>
+            <div class="wc-approval"><span class="ap-icon">⚠</span><div class="ap-main"><div class="ap-title">自动下单确认</div><div class="ap-sub">DRAFT-2026-0036 · 已超 24h</div></div><span class="ap-tag">需处理</span><span class="ap-arrow">›</span></div>
+            <div class="wc-approval"><span class="ap-icon">📄</span><div class="ap-main"><div class="ap-title">回单异常</div><div class="ap-sub">ORD-2026-0102 · 已超期 3 天</div></div><span class="ap-arrow">›</span></div>
+            <div class="wc-sec-title" style="margin-top:10px;"><span class="dot"></span>进行中</div>
+            <div class="wc-approval"><span class="ap-icon">✓</span><div class="ap-main"><div class="ap-title">审价通过</div><div class="ap-sub">ORD-2026-0117 · 商务复核中</div></div><span class="ap-arrow">›</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="colophon">
+    <span><a href="index.html">← Role Specs</a></span>
+    <span>SALES · Role Spec · B2B Order Fulfillment</span>
+  </footer>
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad:true, theme:'base',
+    themeVariables:{
+      fontFamily:"'Noto Serif SC','Source Serif Pro',serif",
+      primaryColor:'#efeee5', primaryBorderColor:'#1B365D', primaryTextColor:'#1f1d18',
+      lineColor:'#1B365D', secondaryColor:'#f5f4ed', tertiaryColor:'#f5f4ed',
+      edgeLabelBackground:'#f5f4ed', clusterBkg:'#f5f4ed', clusterBorder:'#d4d1c5'
+    },
+    flowchart:{curve:'basis'}
+  });
+</script>
+</body>
+</html>

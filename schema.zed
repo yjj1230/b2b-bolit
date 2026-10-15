@@ -1,0 +1,106 @@
+// schema.zed —— RBAC/ReBAC 合一 + caveat（条件关系）的图式授权
+// 设计来源：docs/01-core-graph.html §1.4（权威版本）+ spec/rebac_cases_spicedb.html 全景表
+// 三层模型：租户隔离（tenant->member 兜底）→ 资源级关系（ReBAC：account_owner/contact/
+//   owner/warehouse_operator/requester/uploader）→ 条件关系（caveat：expiry_ok 代办时效；
+//   阶段二：within_void_window 作废窗口）
+// 注：SpiceDB v1.39 起权限表达式中的图遍历使用 `->` 箭头；版本固定：spicedb v1.39+，
+// M1 门禁要求 schema 实际编译通过（L1-07 集成测试前置）。
+// 【实施校准（roundtrip）】v1.33+ caveat 语法为「名 类型」空格分隔（冒号形式已移除），
+// 且 CEL 环境不含内置时钟：`now` 是 caveat 参数，判定侧由 authz.Checker 注入（RFC3339）。
+// 【人类架构师决策（2026-08，docs/CHANGELOG-rebac-cases.html §6）】
+//   D1 全量迁移：prestock/shipment/evidence 一等授权对象（order 保留聚合视图）
+//   D2 命名统一：customer.owner → customer.account_owner
+//   D3 权限细化：8 个细粒度 permission（create_prestock/change_quota/request_shipment/
+//      confirm/reject/append_evidence/void/close）
+//   D4 Outbox 投影器落地：业务事务写 outbox_event → 投影器同步 SpiceDB 关系（场景 G/H）
+
+caveat expiry_ok(expires_at timestamp, now timestamp) {
+    expires_at > now
+}
+
+definition user {}
+
+definition tenant {
+    relation member: user
+    relation ops: user          // 商务（全公司）
+    relation accounting: user   // 财务（按供方分流由关系限定）
+    relation admin: user
+    permission manage_all = admin
+}
+
+definition customer {
+    relation account_owner: user            // 客户负责人（场景 A/H；D2：原 owner）
+    relation contact: user                  // 客户联系人（场景 D/H）
+    relation delegate: user with expiry_ok  // 代办授权（caveat：有效期，CQ-13）
+    relation tenant: tenant                 // 层级边
+    permission view            = account_owner + contact + delegate + tenant->ops + tenant->admin
+    permission create_prestock = account_owner + tenant->ops   // 场景 A：客户负责人可开备货单
+}
+
+definition warehouse {
+    relation staff: user                    // 本仓仓管
+    relation tenant: tenant
+    permission manage = staff + tenant->admin
+}
+
+// 备货单（场景 A/B/G）：一等授权对象（01 §1.2 StockPrepare 的授权投影）
+definition prestock {
+    relation owner: user                    // 负责人（创建时由 Outbox 自动绑定，场景 B/G）
+    relation delegate: user with expiry_ok  // 临时代办（场景 G：TTL 到期 Outbox 删除元组）
+    relation customer: customer             // 层级边：经 customer 继承 account_owner/ops
+    relation tenant: tenant
+    permission view             = owner + delegate + customer->account_owner + customer->delegate + tenant->ops + tenant->admin
+    permission change_quota     = owner + delegate + tenant->ops       // 场景 B
+    permission request_shipment = owner + delegate + tenant->ops       // 场景 B
+    permission close            = owner + delegate + tenant->ops       // 场景 B
+}
+
+// 发货单（场景 C/D/F）：一等授权对象（01 §1.2 Shipment 的授权投影）
+definition shipment {
+    relation requester: user                // 发货发起人（场景 B/F；创建时 Outbox 绑定）
+    relation warehouse_operator: user       // 仓管（场景 C；分配时 Outbox 写入）
+    relation customer_contact: user         // 客户联系人（场景 D；物流视图 + 凭证上传）
+    relation tenant: tenant
+    permission view            = requester + warehouse_operator + customer_contact + tenant->ops + tenant->admin
+    permission confirm         = warehouse_operator + tenant->admin    // 场景 C
+    permission reject          = warehouse_operator + tenant->admin    // 场景 C
+    permission append_evidence = requester + warehouse_operator + customer_contact + tenant->accounting + tenant->ops  // 场景 D（AUTH-02：A2 财务主路径 + v0.1 商务承接）
+    permission void            = requester   // 场景 F（阶段二：within_void_window caveat 30min 窗口）
+}
+
+// 凭证（场景 D）：只追加版本（CQ-15）
+definition evidence {
+    relation uploader: user
+    relation tenant: tenant
+    permission view   = uploader + tenant->ops + tenant->admin
+    permission append = uploader + tenant->ops
+}
+
+// order：跨段聚合视图（保留原权限语义；对象级判定以 prestock/shipment 为准）
+definition order {
+    relation owner: user                    // 下单销售（本人）
+    relation delegate: user with expiry_ok  // 代办（caveat）
+    relation reviewer: user                 // 审批链当前节点（主管/董事长/商务/财务）
+    relation customer: customer             // 层级边：经 customer 继承 account_owner/ops
+    relation tenant: tenant
+    relation warehouse: warehouse           // 发货仓（ReBAC 层级边）：仓管经此获得发货权
+
+    // 读权限：销售本人+代办、客户 account_owner、本仓仓管、管理层（联系人见 shipment#customer_contact）
+    permission view            = owner + delegate + customer->account_owner + customer->delegate + warehouse->staff + tenant->ops + tenant->admin
+    // 写权限：仅销售本人/代办/商务（提交、修改）
+    permission edit            = owner + delegate + tenant->ops
+    // 审批权限：审批链节点 + 管理层
+    permission approve         = reviewer + tenant->admin
+    // 场景 A 聚合入口：客户负责人（经 customer 层级边）或商务可开备货单
+    permission create_prestock = customer->create_prestock + tenant->ops
+    // 备货/发货（聚合视图；对象级判定见 prestock/shipment）
+    permission stock           = tenant->ops
+    permission ship            = tenant->ops + warehouse->manage
+    // 财务确认到账：财务角色 + 供方分流关系（关系按 tenant->accounting + reviewer 绑定）
+    permission confirm_payment = reviewer + tenant->accounting + tenant->admin
+}
+
+// 字段级授权（CQ-03）说明：本仓仓管拥有 order.view/shipment.confirm，但不获得价格字段；
+// 客户联系人拥有 shipment.view（物流视图），但不获得价格/内部备注。
+// 字段投影由 BFF 按「授权判定结果 + 角色」执行（验证项目设计：字段投影由 BFF 做），
+// SpiceDB 不感知字段级，但授权判定是唯一前置。

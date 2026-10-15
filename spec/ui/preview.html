@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>企微智能下单助手｜产品演示 Demo</title>
+<style>
+:root{
+  --bg:#eef1f4;--panel:#fff;--text:#17212b;--muted:#7b8794;--line:#e6e9ed;
+  --wechat:#07c160;--wechat-dark:#05a950;--blue:#246bfd;--orange:#f59e0b;
+  --red:#ef4444;--purple:#7956e8;--shadow:0 12px 40px rgba(28,39,49,.12);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%;background:#dfe4e8;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",Arial,sans-serif}
+button,input{font:inherit}button{cursor:pointer}
+body{padding:18px}
+.demo-shell{max-width:1540px;margin:auto;background:var(--panel);border-radius:18px;overflow:hidden;box-shadow:var(--shadow);min-height:870px;display:grid;grid-template-rows:58px minmax(0,1fr)}
+.topbar{background:#1f2329;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-bottom:1px solid #333941}
+.brand{display:flex;align-items:center;gap:11px}.brand-mark{width:34px;height:34px;border-radius:9px;background:var(--wechat);display:grid;place-items:center;font-weight:800}.brand strong{display:block;font-size:15px}.brand small{display:block;color:#aeb5bd;font-size:11px;margin-top:2px}
+.top-actions{display:flex;align-items:center;gap:8px}.top-actions button{border:1px solid #48505a;background:#2a3037;color:#f5f6f7;border-radius:8px;padding:8px 11px;font-size:12px}.top-actions button.primary{background:var(--wechat);border-color:var(--wechat);font-weight:700}.status-pill{display:flex;align-items:center;gap:6px;font-size:12px;color:#c8ced5;margin-right:6px}.status-dot{width:7px;height:7px;border-radius:50%;background:#34d399;box-shadow:0 0 0 3px rgba(52,211,153,.14)}
+.workspace{display:grid;grid-template-columns:74px 250px minmax(530px,1fr) 430px;min-height:812px;background:#f4f5f7}
+.app-rail{background:#242930;color:#afb6be;padding:14px 9px;display:flex;flex-direction:column;align-items:center;gap:14px}.rail-user{width:42px;height:42px;border-radius:12px;background:#dbeafe;color:#2563eb;display:grid;place-items:center;font-weight:800;margin-bottom:6px}.rail-btn{border:0;background:transparent;color:#afb6be;width:54px;padding:8px 2px;border-radius:10px;font-size:10px;display:grid;gap:5px;place-items:center}.rail-btn span{font-size:21px}.rail-btn.active,.rail-btn:hover{background:#323943;color:#fff}.rail-bottom{margin-top:auto}
+.chat-list{background:#f7f8fa;border-right:1px solid var(--line);display:flex;flex-direction:column}.search-wrap{padding:14px 13px;border-bottom:1px solid var(--line)}.search-wrap input{width:100%;border:1px solid #e1e5e9;border-radius:8px;background:#fff;padding:9px 11px;outline:none;font-size:12px}.list-title{font-size:11px;color:#9aa3ad;padding:12px 14px 7px}.contact{display:grid;grid-template-columns:42px 1fr auto;gap:9px;padding:11px 13px;align-items:center}.contact.active{background:#e9edf2}.contact:hover{background:#eef1f4}.avatar{width:42px;height:42px;border-radius:9px;display:grid;place-items:center;font-weight:800;color:#fff}.avatar.group{background:#8b5cf6}.avatar.sales{background:#3b82f6}.avatar.factory{background:#f59e0b}.avatar.finance{background:#10b981}.contact b{font-size:13px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.contact p{font-size:11px;color:#8a949f;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:142px}.contact time{font-size:10px;color:#a8b0b9;align-self:start;margin-top:2px}.unread{background:#f04438;color:#fff;border-radius:99px;min-width:17px;height:17px;padding:0 5px;display:grid;place-items:center;font-size:10px;margin-top:14px}
+.chat-panel{background:#f2f3f5;display:grid;grid-template-rows:58px minmax(0,1fr) auto;border-right:1px solid var(--line);min-width:0}.chat-head{background:#fff;border-bottom:1px solid var(--line);padding:0 18px;display:flex;align-items:center;justify-content:space-between}.chat-head h1{font-size:15px}.chat-head p{font-size:11px;color:#8c96a0;margin-top:3px}.head-icons{display:flex;gap:13px;color:#5f6973;font-size:18px}
+.messages{padding:20px 22px;overflow:auto;scroll-behavior:smooth}.time-sep{text-align:center;color:#a2abb4;font-size:10px;margin:3px 0 18px}.msg-row{display:flex;gap:10px;margin-bottom:16px;align-items:flex-start}.msg-row.me{justify-content:flex-end}.msg-avatar{width:34px;height:34px;border-radius:8px;display:grid;place-items:center;color:#fff;font-size:12px;font-weight:700;flex:0 0 auto}.msg-body{max-width:73%}.msg-name{font-size:10px;color:#8c96a0;margin:0 0 4px 2px}.bubble{padding:10px 12px;border-radius:5px;background:#fff;font-size:13px;line-height:1.65;box-shadow:0 1px 2px rgba(25,35,45,.06);white-space:pre-line}.me .bubble{background:#95ec69}.system-line{text-align:center;margin:14px 0;color:#8c96a0;font-size:11px}.ai-tip{display:inline-flex;gap:6px;align-items:center;background:#ede9fe;color:#6941c6;padding:5px 9px;border-radius:99px;font-size:10px;font-weight:700}.order-card{background:#fff;border-radius:10px;overflow:hidden;border:1px solid #e4e7ec;box-shadow:0 6px 18px rgba(20,30,40,.08);width:365px;max-width:100%}.order-card-top{padding:13px 15px;background:linear-gradient(125deg,#f6fffa,#edfdf4);border-bottom:1px solid #d9f3e3;display:flex;justify-content:space-between;align-items:start}.order-card-top h3{font-size:14px}.order-card-top p{font-size:10px;color:#667085;margin-top:4px}.tag{font-size:10px;padding:4px 7px;border-radius:99px;font-weight:700}.tag.green{background:#dcfae6;color:#067647}.tag.orange{background:#fef0c7;color:#b54708}.tag.blue{background:#e8efff;color:#244eca}.tag.gray{background:#eef1f4;color:#5e6873}.order-card-content{padding:12px 15px}.kv{display:flex;justify-content:space-between;gap:14px;font-size:11px;padding:5px 0}.kv span{color:#7c8793}.kv b{text-align:right;font-weight:650}.risk-box{background:#fffaeb;border:1px solid #fedf89;color:#854a0e;border-radius:7px;padding:8px 9px;font-size:10px;line-height:1.55;margin-top:8px}.card-buttons{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #e8ebee}.card-buttons button{border:0;background:#fff;padding:11px;color:#57616c;font-weight:650}.card-buttons button+button{border-left:1px solid #e8ebee}.card-buttons .confirm{color:var(--wechat-dark)}.card-buttons button:hover{background:#f8fafb}.success-banner{background:#ecfdf3;border:1px solid #abefc6;color:#067647;border-radius:8px;padding:9px 10px;margin-top:10px;font-size:11px;line-height:1.6}
+.composer{background:#fff;border-top:1px solid var(--line);padding:12px 16px}.compose-tools{display:flex;gap:15px;color:#6d7782;font-size:18px;margin-bottom:9px}.compose-line{display:grid;grid-template-columns:1fr auto;gap:9px}.compose-line input{border:0;outline:none;font-size:13px;padding:7px 4px}.send-btn{border:0;background:#e9edf0;color:#6e7882;border-radius:7px;padding:8px 15px;font-size:12px}.send-btn:hover{background:#dfe4e8}
+.ai-panel{background:#fff;display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;min-width:0}.ai-header{padding:15px 17px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.ai-title{display:flex;align-items:center;gap:9px}.ai-logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(145deg,#5b7cff,#7c4dff);color:#fff;display:grid;place-items:center;font-weight:800}.ai-title h2{font-size:14px}.ai-title p{font-size:10px;color:#89939e;margin-top:3px}.demo-badge{font-size:10px;background:#f2f4f7;color:#667085;padding:5px 7px;border-radius:99px}.tabs{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--line);padding:0 13px}.tab{border:0;background:#fff;padding:12px 4px;font-size:11px;color:#7b8590;border-bottom:2px solid transparent}.tab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:700}.panel-scroll{overflow:auto;padding:15px}.section-title{font-size:12px;font-weight:750;margin-bottom:9px;display:flex;align-items:center;justify-content:space-between}.section-title small{color:#8b95a0;font-weight:400}.recognition-card{border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:11px}.source-text{font-size:11px;line-height:1.65;background:#f7f8fa;padding:9px;border-radius:7px;color:#4f5964}.progress{height:7px;border-radius:99px;background:#edf0f3;margin:12px 0 8px;overflow:hidden}.progress-fill{height:100%;width:0;background:linear-gradient(90deg,#526ef5,#8355e9);transition:width .45s ease}.recognition-status{font-size:10px;color:#7a8490;display:flex;justify-content:space-between}.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.data-field{background:#f8fafb;border:1px solid #edf0f2;border-radius:8px;padding:9px}.data-field span{font-size:9px;color:#8a949f;display:block;margin-bottom:4px}.data-field b{font-size:11px}.wide{grid-column:span 2}.check-list{display:grid;gap:7px;margin-top:9px}.check-item{display:grid;grid-template-columns:22px 1fr auto;gap:8px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:9px}.check-icon{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;font-size:10px}.check-icon.ok{background:#dcfae6;color:#067647}.check-icon.warn{background:#fef0c7;color:#b54708}.check-item b{font-size:10px;display:block}.check-item p{font-size:9px;color:#89939e;margin-top:3px}.check-item em{font-style:normal;font-size:9px;color:#6e7883}.empty{padding:65px 18px;text-align:center;color:#9aa3ad}.empty .symbol{font-size:38px;margin-bottom:9px}.empty p{font-size:11px;line-height:1.65}.action-zone{border-top:1px solid var(--line);padding:12px 15px;background:#fbfcfd}.action-hint{font-size:10px;color:#8b95a0;margin-bottom:8px}.action-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.action-row button{border:1px solid #dfe3e7;background:#fff;border-radius:8px;padding:9px;font-size:11px;font-weight:700}.action-row button.primary{background:var(--blue);color:#fff;border-color:var(--blue)}.action-row button.wechat{background:var(--wechat);color:#fff;border-color:var(--wechat)}.action-row button:disabled{opacity:.45;cursor:not-allowed}
+.order-result{border:1px solid #d7e3ff;background:#f7f9ff;border-radius:10px;padding:12px}.result-head{display:flex;justify-content:space-between;gap:10px;align-items:start}.result-head h3{font-size:13px}.result-head p{font-size:9px;color:#7d8791;margin-top:4px}.order-no{font-size:10px;background:#e8efff;color:#3155ba;padding:5px 7px;border-radius:6px;font-weight:700}.timeline{margin-top:13px;display:grid;gap:0}.timeline-item{display:grid;grid-template-columns:20px 1fr;gap:8px;position:relative;padding-bottom:13px}.timeline-item:not(:last-child):before{content:"";position:absolute;left:9px;top:18px;bottom:0;width:1px;background:#d9dee4}.timeline-dot{width:19px;height:19px;border-radius:50%;display:grid;place-items:center;font-size:9px;background:#e8efff;color:#3458bf;z-index:1}.timeline-dot.done{background:#dcfae6;color:#067647}.timeline-item b{font-size:10px}.timeline-item p{font-size:9px;color:#89939e;margin-top:3px}.lookup-card{border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:10px}.lookup-card h3{font-size:12px}.lookup-card p{font-size:10px;color:#87919b;margin-top:4px}.lookup-status{display:flex;justify-content:space-between;align-items:center;margin:12px 0}.lookup-status strong{font-size:18px}.mini-progress{height:7px;background:#edf0f2;border-radius:99px;overflow:hidden}.mini-progress div{height:100%;background:var(--wechat);width:68%}.shipment{margin-top:12px;padding-top:10px;border-top:1px solid var(--line);display:grid;gap:8px}.shipment-row{display:flex;justify-content:space-between;font-size:10px}.shipment-row span{color:#7f8994}.note{font-size:9px;color:#98a1ab;line-height:1.55;margin-top:10px}
+.guide{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:#111827;color:#fff;border-radius:12px;padding:12px 15px;box-shadow:0 12px 32px rgba(0,0,0,.28);display:none;align-items:center;gap:12px;z-index:1000;max-width:640px}.guide.show{display:flex}.guide-step{background:var(--wechat);border-radius:99px;padding:5px 8px;font-size:10px;font-weight:800}.guide-text{font-size:12px;line-height:1.5;flex:1}.guide button{border:0;background:#303744;color:#fff;border-radius:7px;padding:7px 10px;font-size:11px}.pulse{animation:pulse 1.2s infinite}.flash{animation:flash .8s ease}.typing:after{content:"";display:inline-block;width:5px;height:12px;background:#666;margin-left:3px;vertical-align:-2px;animation:blink .8s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(36,107,253,.28)}50%{box-shadow:0 0 0 9px rgba(36,107,253,0)}}@keyframes flash{0%{background:#fff7cf}100%{background:transparent}}@keyframes blink{0%,45%{opacity:1}46%,100%{opacity:0}}
+.recording .chat-list,.recording .app-rail{display:none}.recording .workspace{grid-template-columns:minmax(620px,1.25fr) 470px}.recording .demo-shell{max-width:1240px}.recording .status-pill{display:none}
+.hidden{display:none!important}
+@media(max-width:1200px){body{padding:0}.demo-shell{border-radius:0;min-height:100vh}.workspace{grid-template-columns:64px 210px minmax(500px,1fr) 390px}.chat-list{display:none}.workspace{grid-template-columns:64px minmax(500px,1fr) 390px}}
+</style>
+</head>
+<body>
+<div class="demo-shell" id="shell">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">企</div>
+      <div><strong>企微智能订单助手</strong><small>客户对话直接转订单 · 虚拟演示数据</small></div>
+    </div>
+    <div class="top-actions">
+      <div class="status-pill"><span class="status-dot"></span>演示服务在线</div>
+      <button id="recordMode">◫ 录屏模式</button>
+      <button id="resetDemo">↻ 重置</button>
+      <button class="primary" id="autoDemo">▶ 一键自动演示</button>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <aside class="app-rail">
+      <div class="rail-user">李</div>
+      <button class="rail-btn active"><span>💬</span>消息</button>
+      <button class="rail-btn"><span>👥</span>通讯录</button>
+      <button class="rail-btn"><span>🧩</span>工作台</button>
+      <button class="rail-btn"><span>📋</span>订单</button>
+      <button class="rail-btn rail-bottom"><span>⚙️</span>设置</button>
+    </aside>
+
+    <aside class="chat-list">
+      <div class="search-wrap"><input placeholder="搜索客户、群聊或订单" /></div>
+      <div class="list-title">客户群聊</div>
+      <div class="contact active"><div class="avatar group">宏</div><div><b>宏远铸造 · 供应协同群</b><p id="listPreview">王总：上次那个N320……</p></div><time>10:28</time></div>
+      <div class="contact"><div class="avatar factory">海</div><div><b>海盛新材料采购群</b><p>赵经理：合同盖章版已发</p></div><time>09:46</time></div>
+      <div class="contact"><div class="avatar sales">科</div><div><b>科达陶瓷项目群</b><p>李工：第二批预计哪天到？</p></div><time>昨天</time></div>
+      <div class="list-title">内部协同</div>
+      <div class="contact"><div class="avatar finance">财</div><div><b>财务审批通知</b><p>订单 ORD-20260728-0118 待审</p></div><div class="unread">3</div></div>
+      <div class="contact"><div class="avatar sales">仓</div><div><b>仓库发货协同</b><p>阳原仓今日待发 6 单</p></div><time>08:30</time></div>
+    </aside>
+
+    <section class="chat-panel">
+      <div class="chat-head">
+        <div><h1>宏远铸造 · 供应协同群（8）</h1><p>外部客户群 · 已开启订单意图识别（演示）</p></div>
+        <div class="head-icons">⌕　⋯</div>
+      </div>
+      <div class="messages" id="messages">
+        <div class="time-sep">今天 10:26</div>
+        <div class="msg-row">
+          <div class="msg-avatar" style="background:#f59e0b">王</div>
+          <div class="msg-body"><div class="msg-name">王志明｜宏远铸造采购部</div><div class="bubble">李经理，早上好。上次那个 N320 使用效果可以。</div></div>
+        </div>
+        <div class="msg-row me">
+          <div class="msg-body"><div class="msg-name" style="text-align:right">李瑶｜销售经理</div><div class="bubble">王总早，需要补货您直接在群里说就行。</div></div>
+          <div class="msg-avatar" style="background:#3b82f6">李</div>
+        </div>
+        <div id="dynamicMessages"></div>
+      </div>
+      <div class="composer">
+        <div class="compose-tools">☺　▧　📁　✂</div>
+        <div class="compose-line"><input id="chatInput" placeholder="输入群聊消息，例如：帮我查一下刚才那单" /><button class="send-btn" id="sendManual">发送</button></div>
+      </div>
+    </section>
+
+    <aside class="ai-panel">
+      <div class="ai-header">
+        <div class="ai-title"><div class="ai-logo">AI</div><div><h2>订单智能体</h2><p>对话识别 · 合同匹配 · 订单查询</p></div></div>
+        <span class="demo-badge">功能概念 Demo</span>
+      </div>
+      <div class="tabs">
+        <button class="tab active" data-tab="recognize">识别任务</button>
+        <button class="tab" data-tab="order">预订单</button>
+        <button class="tab" data-tab="lookup">查单履约</button>
+      </div>
+
+      <div class="panel-scroll">
+        <div class="tab-panel" id="panel-recognize">
+          <div class="section-title">本轮客户订单意图 <small id="intentLabel">等待识别</small></div>
+          <div class="recognition-card">
+            <div class="source-text" id="sourceText">等待客户在群内发送产品、数量、交期等信息。</div>
+            <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+            <div class="recognition-status"><span id="recognitionText">尚未开始</span><span id="confidence">—</span></div>
+          </div>
+          <div id="recognizedFields" class="hidden">
+            <div class="section-title">AI结构化提取 <small>可人工修改</small></div>
+            <div class="field-grid">
+              <div class="data-field"><span>客户</span><b>苏州宏远铸造有限公司</b></div>
+              <div class="data-field"><span>联系人</span><b>王志明</b></div>
+              <div class="data-field"><span>产品</span><b>N320 高粘度钠基膨润土</b></div>
+              <div class="data-field"><span>总数量</span><b>5 吨</b></div>
+              <div class="data-field wide"><span>分批计划</span><b>第一批 3 吨：2026-08-03 前；第二批 2 吨：2026-08-20 前</b></div>
+              <div class="data-field wide"><span>特殊要求</span><b>随货附质检报告；沿用历史收货地址</b></div>
+            </div>
+            <div class="section-title" style="margin-top:14px">业务系统自动校验 <small>模拟接口结果</small></div>
+            <div class="check-list">
+              <div class="check-item"><div class="check-icon ok">✓</div><div><b>合同与价格</b><p>命中框架合同 HT-2026-0038，合同价 ¥8.20/公斤</p></div><em>通过</em></div>
+              <div class="check-item"><div class="check-icon ok">✓</div><div><b>库存与交期</b><p>阳原仓可用 18 吨，可按两批履约</p></div><em>通过</em></div>
+              <div class="check-item"><div class="check-icon warn">!</div><div><b>客户风险</b><p>近期有一次质量反馈；无逾期和信用阻断</p></div><em>关注</em></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-panel hidden" id="panel-order">
+          <div id="orderEmpty" class="empty"><div class="symbol">▤</div><p>订单信息识别完成后，系统将在这里生成预订单确认单。</p></div>
+          <div id="orderDraft" class="hidden">
+            <div class="section-title">预订单确认单 <small>草稿 DRAFT-20260728-0036</small></div>
+            <div class="order-result">
+              <div class="result-head"><div><h3>苏州宏远铸造有限公司</h3><p>来源：企业微信客户群订单意图</p></div><span class="tag orange" id="draftStatus">待确认</span></div>
+              <div style="margin-top:10px">
+                <div class="kv"><span>产品</span><b>N320 高粘度钠基膨润土</b></div>
+                <div class="kv"><span>数量</span><b>5 吨</b></div>
+                <div class="kv"><span>合同单价</span><b>¥8.20/公斤</b></div>
+                <div class="kv"><span>预计金额</span><b>¥41,000</b></div>
+                <div class="kv"><span>发货计划</span><b>3吨 + 2吨分批发货</b></div>
+                <div class="kv"><span>发货仓库</span><b>阳原仓</b></div>
+                <div class="kv"><span>客户确认</span><b id="customerConfirmState">尚未确认</b></div>
+              </div>
+              <div class="risk-box">⚠ 风险提示：客户近30天有一次“水分偏高”的质量反馈。系统建议销售确认处理情况，但不阻断下单。</div>
+              <div class="success-banner hidden" id="createdBanner">正式订单已生成：<b>ORD-20260728-0126</b><br>当前节点：商务复核 → 财务审批 → 仓库确认</div>
+            </div>
+            <div class="section-title" style="margin-top:14px">订单流转状态</div>
+            <div class="timeline">
+              <div class="timeline-item"><div class="timeline-dot done">✓</div><div><b>AI生成预订单</b><p>10:28 从客户群消息提取订单信息</p></div></div>
+              <div class="timeline-item"><div class="timeline-dot" id="confirmDot">2</div><div><b>客户 / 销售确认</b><p id="confirmTimeline">等待确认订单内容</p></div></div>
+              <div class="timeline-item"><div class="timeline-dot" id="submitDot">3</div><div><b>提交订单系统</b><p id="submitTimeline">确认后自动创建正式订单</p></div></div>
+              <div class="timeline-item"><div class="timeline-dot">4</div><div><b>进入内部审批</b><p>按合同、金额和风险规则自动路由</p></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-panel hidden" id="panel-lookup">
+          <div id="lookupEmpty" class="empty"><div class="symbol">⌕</div><p>生成正式订单后，可以在客户聊天框内输入“查一下刚才那单”查询订单、审批和物流状态。</p></div>
+          <div id="lookupContent" class="hidden">
+            <div class="section-title">订单履约查询 <small>实时业务数据示意</small></div>
+            <div class="lookup-card">
+              <h3>ORD-20260728-0126</h3><p>苏州宏远铸造有限公司 · N320 · 5吨</p>
+              <div class="lookup-status"><span class="tag blue">备货中</span><strong>68%</strong></div>
+              <div class="mini-progress"><div></div></div>
+              <div class="shipment">
+                <div class="shipment-row"><span>第一批 3吨</span><b>已出库 · 德邦物流</b></div>
+                <div class="shipment-row"><span>物流单号</span><b>DBL2026073000387</b></div>
+                <div class="shipment-row"><span>预计送达</span><b>2026-08-02</b></div>
+                <div class="shipment-row"><span>第二批 2吨</span><b>待排车 · 预计8月16日发</b></div>
+              </div>
+            </div>
+            <div class="lookup-card"><h3>审批与单据</h3><div class="shipment"><div class="shipment-row"><span>商务复核</span><b style="color:#067647">已通过</b></div><div class="shipment-row"><span>财务审批</span><b style="color:#067647">已通过</b></div><div class="shipment-row"><span>质检报告</span><b style="color:#3155ba">已关联批次</b></div><div class="shipment-row"><span>开票状态</span><b>待客户签收后申请</b></div></div></div>
+            <div class="note">演示说明：真实项目中需通过订单系统、ERP、仓储或物流接口获取状态，本页使用虚拟数据展示产品效果。</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-zone">
+        <div class="action-hint" id="actionHint">先模拟客户发送订单需求，再启动 AI 识别。</div>
+        <div class="action-row">
+          <button id="simulateCustomer">1. 客户发送需求</button>
+          <button class="primary" id="recognizeBtn" disabled>2. AI识别订单</button>
+          <button id="sendConfirm" disabled>3. 发送确认单</button>
+          <button class="wechat" id="confirmSubmit" disabled>4. 确认并生成订单</button>
+        </div>
+      </div>
+    </aside>
+  </main>
+</div>
+
+<div class="guide" id="guide"><span class="guide-step" id="guideStep">1/6</span><div class="guide-text" id="guideText">客户在群聊中直接提出订单需求。</div><button id="stopGuide">停止演示</button></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const state = { customer:false, recognized:false, confirmSent:false, confirmed:false, created:false, lookup:false, auto:false, timers:[] };
+const wait = ms => new Promise(r => { const t=setTimeout(r,ms); state.timers.push(t); });
+
+function switchTab(name){
+  $$('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab===name));
+  $$('.tab-panel').forEach(x=>x.classList.add('hidden'));
+  $('#panel-'+name).classList.remove('hidden');
+}
+$$('.tab').forEach(x=>x.addEventListener('click',()=>switchTab(x.dataset.tab)));
+
+function scrollChat(){ const el=$('#messages'); el.scrollTop=el.scrollHeight; }
+function addMessage({who='customer',name,text,card=false}){
+  const row=document.createElement('div'); row.className='msg-row'+(who==='sales'?' me':'');
+  const avatar=document.createElement('div'); avatar.className='msg-avatar';
+  const body=document.createElement('div'); body.className='msg-body';
+  const label=document.createElement('div'); label.className='msg-name'; label.textContent=name;
+  if(who==='sales') label.style.textAlign='right';
+  const bubble=document.createElement('div'); bubble.className='bubble';
+  if(card) bubble.style.cssText='background:transparent;box-shadow:none;padding:0';
+  if(typeof text==='string') bubble.textContent=text; else bubble.appendChild(text);
+  body.append(label,bubble);
+  avatar.textContent=who==='customer'?'王':who==='sales'?'李':'AI';
+  avatar.style.background=who==='customer'?'#f59e0b':who==='sales'?'#3b82f6':'#7956e8';
+  if(who==='sales') row.append(body,avatar); else row.append(avatar,body);
+  $('#dynamicMessages').appendChild(row); scrollChat(); return row;
+}
+function addSystem(text){const d=document.createElement('div');d.className='system-line';d.textContent=text;$('#dynamicMessages').appendChild(d);scrollChat();}
+
+function createConfirmCard(){
+  const c=document.createElement('div'); c.className='order-card';
+  c.innerHTML=`<div class="order-card-top"><div><h3>订单确认单</h3><p>预订单 DRAFT-20260728-0036</p></div><span class="tag orange">待确认</span></div>
+  <div class="order-card-content"><div class="kv"><span>产品</span><b>N320 高粘度钠基膨润土</b></div><div class="kv"><span>数量</span><b>5吨</b></div><div class="kv"><span>金额</span><b>¥41,000</b></div><div class="kv"><span>发货</span><b>3吨 + 2吨分批</b></div><div class="kv"><span>资料</span><b>随货附质检报告</b></div><div class="risk-box">请确认产品、数量与交付计划。确认后将提交企业内部审批。</div></div>
+  <div class="card-buttons"><button class="edit-card">信息有误</button><button class="confirm confirm-card">确认订单</button></div>`;
+  c.querySelector('.confirm-card').addEventListener('click',()=>confirmAndCreate('客户'));
+  c.querySelector('.edit-card').addEventListener('click',()=>addMessage({who:'customer',name:'王志明｜宏远铸造采购部',text:'第二批日期先不用改，按20号之前安排即可。'}));
+  return c;
+}
+
+function simulateCustomer(){
+  if(state.customer) return;
+  state.customer=true;
+  addMessage({who:'customer',name:'王志明｜宏远铸造采购部',text:'那上次那个 N320 再给我发 5 吨。'});
+  setTimeout(()=>addMessage({who:'customer',name:'王志明｜宏远铸造采购部',text:'分两批，下周先发 3 吨，剩下的 20 号之前到。'}),450);
+  setTimeout(()=>addMessage({who:'customer',name:'王志明｜宏远铸造采购部',text:'这次还是要带质检报告，地址不变。'}),900);
+  $('#sourceText').textContent='“上次那个 N320 再发5吨，分两批，下周先发3吨，剩下20号之前到；带质检报告，地址不变。”';
+  $('#intentLabel').textContent='检测到潜在订单'; $('#intentLabel').style.color='#b54708';
+  $('#recognizeBtn').disabled=false; $('#simulateCustomer').disabled=true;
+  $('#actionHint').textContent='已捕捉到订单意图，可以启动 AI 结构化识别。';
+  $('#listPreview').textContent='王总：这次还是要带质检报告';
+}
+
+async function recognizeOrder(){
+  if(state.recognized || !state.customer) return;
+  state.recognized=true; switchTab('recognize');
+  $('#recognizeBtn').disabled=true; $('#recognitionText').textContent='正在识别客户与产品…'; $('#progressFill').style.width='28%';
+  await wait(550); $('#recognitionText').textContent='正在解析数量、交期与分批计划…'; $('#progressFill').style.width='62%';
+  await wait(600); $('#recognitionText').textContent='正在匹配合同、价格、库存与客户风险…'; $('#progressFill').style.width='86%';
+  await wait(650); $('#progressFill').style.width='100%'; $('#recognitionText').textContent='识别完成，已生成预订单草稿'; $('#confidence').textContent='置信度 96%';
+  $('#recognizedFields').classList.remove('hidden'); $('#recognizedFields').classList.add('flash'); $('#intentLabel').textContent='订单意图明确'; $('#intentLabel').style.color='#067647';
+  $('#orderEmpty').classList.add('hidden'); $('#orderDraft').classList.remove('hidden'); $('#sendConfirm').disabled=false;
+  $('#actionHint').textContent='AI已完成业务校验，可将订单确认单发送回当前客户群。';
+  addSystem('订单智能体已识别本轮对话，并生成预订单 DRAFT-20260728-0036');
+}
+
+function sendConfirmation(){
+  if(state.confirmSent || !state.recognized) return;
+  state.confirmSent=true; $('#sendConfirm').disabled=true;
+  addMessage({who:'sales',name:'李瑶｜销售经理',text:createConfirmCard(),card:true});
+  $('#confirmSubmit').disabled=false; switchTab('order');
+  $('#actionHint').textContent='客户可点击确认单；销售也可在右侧代为确认并提交。';
+}
+
+function confirmAndCreate(actor='销售'){
+  if(state.created) return;
+  state.confirmed=true; state.created=true;
+  $('#customerConfirmState').textContent=actor+'已确认'; $('#customerConfirmState').style.color='#067647';
+  $('#draftStatus').textContent='已转正式订单'; $('#draftStatus').className='tag green';
+  $('#createdBanner').classList.remove('hidden');
+  $('#confirmDot').textContent='✓'; $('#confirmDot').classList.add('done'); $('#confirmTimeline').textContent=actor+'于 10:29 确认订单版本 V1';
+  $('#submitDot').textContent='✓'; $('#submitDot').classList.add('done'); $('#submitTimeline').textContent='已创建 ORD-20260728-0126，并进入内部审批';
+  $('#confirmSubmit').disabled=true;
+  addMessage({who:'customer',name:'王志明｜宏远铸造采购部',text:'确认，就按这个安排。'});
+  addSystem('订单已生成：ORD-20260728-0126 · 已进入商务复核');
+  setTimeout(()=>addMessage({who:'sales',name:'李瑶｜销售经理',text:'收到王总，订单已经提交。第一批预计8月2日前送达，有变化我会在群里同步。'}),350);
+  $('#lookupEmpty').classList.add('hidden'); $('#lookupContent').classList.remove('hidden');
+  $('#actionHint').textContent='订单已进入系统。现在可在聊天框输入“查一下刚才那单”演示查单。';
+}
+
+function lookupOrder(){
+  if(!state.created || state.lookup) return;
+  state.lookup=true;
+  addMessage({who:'customer',name:'王志明｜宏远铸造采购部',text:'查一下刚才那单，现在到哪一步了？'});
+  setTimeout(()=>{
+    const c=document.createElement('div'); c.className='order-card'; c.innerHTML=`<div class="order-card-top"><div><h3>订单进度 · ORD-20260728-0126</h3><p>N320 · 5吨 · 阳原仓</p></div><span class="tag blue">备货中</span></div><div class="order-card-content"><div class="kv"><span>第一批 3吨</span><b>已出库</b></div><div class="kv"><span>物流</span><b>德邦 DBL2026073000387</b></div><div class="kv"><span>预计送达</span><b>2026-08-02</b></div><div class="kv"><span>第二批 2吨</span><b>预计8月16日发出</b></div><div class="success-banner">商务、财务审批均已通过；质检报告已关联发货批次。</div></div>`;
+    addMessage({who:'sales',name:'订单智能体｜自动查询结果',text:c,card:true}); switchTab('lookup');
+  },550);
+}
+
+function resetDemo(){
+  state.timers.forEach(clearTimeout); Object.assign(state,{customer:false,recognized:false,confirmSent:false,confirmed:false,created:false,lookup:false,auto:false,timers:[]});
+  $('#dynamicMessages').innerHTML=''; $('#sourceText').textContent='等待客户在群内发送产品、数量、交期等信息。'; $('#progressFill').style.width='0'; $('#recognitionText').textContent='尚未开始'; $('#confidence').textContent='—';
+  $('#recognizedFields').classList.add('hidden'); $('#orderEmpty').classList.remove('hidden'); $('#orderDraft').classList.add('hidden'); $('#createdBanner').classList.add('hidden'); $('#lookupEmpty').classList.remove('hidden'); $('#lookupContent').classList.add('hidden');
+  $('#simulateCustomer').disabled=false; $('#recognizeBtn').disabled=true; $('#sendConfirm').disabled=true; $('#confirmSubmit').disabled=true;
+  $('#intentLabel').textContent='等待识别'; $('#intentLabel').style.color=''; $('#draftStatus').textContent='待确认'; $('#draftStatus').className='tag orange'; $('#customerConfirmState').textContent='尚未确认'; $('#customerConfirmState').style.color='';
+  $('#confirmDot').textContent='2'; $('#confirmDot').classList.remove('done'); $('#submitDot').textContent='3'; $('#submitDot').classList.remove('done'); $('#confirmTimeline').textContent='等待确认订单内容'; $('#submitTimeline').textContent='确认后自动创建正式订单';
+  $('#actionHint').textContent='先模拟客户发送订单需求，再启动 AI 识别。'; $('#listPreview').textContent='王总：上次那个N320……'; switchTab('recognize'); hideGuide();
+}
+
+function showGuide(step,text){ $('#guideStep').textContent=step; $('#guideText').textContent=text; $('#guide').classList.add('show'); }
+function hideGuide(){ $('#guide').classList.remove('show'); }
+async function autoDemo(){
+  if(state.auto) return; resetDemo(); state.auto=true; $('#autoDemo').disabled=true;
+  showGuide('1/6','客户在企业微信外部群里，直接用自然语言提出补货需求。'); await wait(650); simulateCustomer();
+  await wait(2100); showGuide('2/6','AI在后台识别客户、产品、数量、交期、分批计划和特殊要求。'); recognizeOrder();
+  await wait(2650); showGuide('3/6','系统同时匹配框架合同、合同价格、客户风险和仓库库存。');
+  await wait(1700); showGuide('4/6','AI生成确认单，由销售一键发送到当前客户群。'); sendConfirmation();
+  await wait(1800); showGuide('5/6','客户或销售确认后，系统直接生成正式订单并进入内部审批。'); confirmAndCreate('客户');
+  await wait(2200); showGuide('6/6','后续客户在原聊天框内查单，AI返回审批、发货和物流状态。'); lookupOrder();
+  await wait(3100); hideGuide(); state.auto=false; $('#autoDemo').disabled=false;
+}
+
+$('#simulateCustomer').addEventListener('click',simulateCustomer); $('#recognizeBtn').addEventListener('click',recognizeOrder); $('#sendConfirm').addEventListener('click',sendConfirmation); $('#confirmSubmit').addEventListener('click',()=>confirmAndCreate('销售'));
+$('#resetDemo').addEventListener('click',resetDemo); $('#autoDemo').addEventListener('click',autoDemo); $('#stopGuide').addEventListener('click',()=>{state.timers.forEach(clearTimeout);state.auto=false;$('#autoDemo').disabled=false;hideGuide()});
+$('#recordMode').addEventListener('click',()=>{document.body.classList.toggle('recording');$('#recordMode').textContent=document.body.classList.contains('recording')?'▦ 退出录屏模式':'◫ 录屏模式'});
+$('#sendManual').addEventListener('click',()=>{const v=$('#chatInput').value.trim();if(!v)return;if(/查|进度|物流|到哪/.test(v)&&state.created){$('#chatInput').value='';lookupOrder()}else{addMessage({who:'sales',name:'李瑶｜销售经理',text:v});$('#chatInput').value=''}});
+$('#chatInput').addEventListener('keydown',e=>{if(e.key==='Enter')$('#sendManual').click()});
+</script>
+</body>
+</html>

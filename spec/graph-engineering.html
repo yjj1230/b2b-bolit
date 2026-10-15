@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Graph Engineering 调研报告 — 为 AI 智能体设计结构</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<style>
+  :root {
+    --ink: #1c1917;
+    --ink-soft: #57534e;
+    --ink-faint: #a8a29e;
+    --paper: #faf9f7;
+    --card: #ffffff;
+    --line: #e7e5e4;
+    --teal: #0f766e;
+    --teal-soft: #ccfbf1;
+    --amber: #b45309;
+    --amber-soft: #fef3c7;
+    --rose: #be123c;
+    --rose-soft: #ffe4e6;
+    --indigo: #4338ca;
+    --indigo-soft: #e0e7ff;
+    --radius: 14px;
+    --shadow: 0 1px 3px rgba(28,25,23,.06), 0 8px 24px rgba(28,25,23,.05);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  /* ---------- 滚动条美化 ---------- */
+  * { scrollbar-width: thin; scrollbar-color: #cfcbc6 transparent; }
+  ::-webkit-scrollbar { width: 9px; height: 9px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #cfcbc6; border-radius: 9px; border: 2px solid var(--paper); }
+  ::-webkit-scrollbar-thumb:hover { background: #a8a29e; }
+  ::-webkit-scrollbar-corner { background: transparent; }
+  .table-wrap::-webkit-scrollbar, .mermaid-box::-webkit-scrollbar, pre::-webkit-scrollbar, nav.toc::-webkit-scrollbar { width: 6px; height: 6px; }
+  .table-wrap::-webkit-scrollbar-thumb, .mermaid-box::-webkit-scrollbar-thumb, pre::-webkit-scrollbar-thumb, nav.toc::-webkit-scrollbar-thumb { background: #d6d3d1; border-width: 1px; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.75;
+    font-size: 16px;
+  }
+
+  /* ---------- layout ---------- */
+  .shell { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 40px; max-width: 1200px; margin: 0 auto; padding: 0 28px; }
+  main { max-width: 880px; padding: 48px 0 96px; min-width: 0; }
+
+  /* ---------- toc ---------- */
+  nav.toc {
+    position: sticky; top: 0; align-self: start; height: 100vh; overflow-y: auto;
+    padding: 36px 8px 36px 0; font-size: 14px; line-height: 1.5;
+  }
+  nav.toc .toc-title { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-faint); font-weight: 600; margin-bottom: 14px; }
+  nav.toc a { display: block; color: var(--ink-soft); text-decoration: none; padding: 5px 10px; border-left: 2px solid transparent; border-radius: 0 8px 8px 0; }
+  nav.toc a:hover { color: var(--teal); background: var(--teal-soft); border-left-color: var(--teal); }
+  nav.toc a.sub { padding-left: 24px; }
+  nav.toc .tag { font-size: 11px; background: var(--indigo-soft); color: var(--indigo); padding: 1px 7px; border-radius: 20px; margin-left: 6px; }
+
+  /* ---------- hero ---------- */
+  header.hero {
+    padding: 28px 0 8px;
+  }
+  .kicker { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--teal); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 18px; }
+  .kicker::before { content: ""; width: 26px; height: 2px; background: var(--teal); border-radius: 2px; }
+  header.hero h1 { font-size: clamp(30px, 4.6vw, 46px); line-height: 1.15; letter-spacing: -0.02em; font-weight: 800; }
+  header.hero h1 .accent { color: var(--teal); }
+  .lede { font-size: clamp(17px, 2vw, 20px); color: var(--ink-soft); margin: 18px 0 10px; line-height: 1.65; }
+  .lede strong { color: var(--ink); }
+  .meta { font-size: 13.5px; color: var(--ink-faint); margin-top: 14px; }
+  .meta span { margin-right: 16px; }
+  .quote {
+    margin: 26px 0 8px; padding: 18px 22px; background: var(--card); border: 1px solid var(--line);
+    border-left: 4px solid var(--teal); border-radius: 0 var(--radius) var(--radius) 0; box-shadow: var(--shadow);
+    font-size: 15.5px; color: var(--ink-soft);
+  }
+  .quote .src { display: block; margin-top: 8px; font-size: 12.5px; color: var(--ink-faint); }
+
+  /* ---------- headings ---------- */
+  section { margin-top: 64px; scroll-margin-top: 24px; }
+  h2 {
+    font-size: 27px; font-weight: 800; letter-spacing: -0.015em; margin-bottom: 8px;
+    display: flex; align-items: baseline; gap: 12px;
+  }
+  h2 .no { font-size: 14px; font-weight: 700; color: var(--teal); background: var(--teal-soft); padding: 3px 10px; border-radius: 20px; letter-spacing: .04em; flex-shrink: 0; }
+  h3 { font-size: 19px; font-weight: 700; margin: 30px 0 10px; }
+  h4 { font-size: 16px; font-weight: 700; margin: 22px 0 8px; color: var(--ink); }
+  p { margin: 10px 0; }
+  .subtitle { color: var(--ink-soft); font-size: 16px; margin-bottom: 18px; }
+
+  /* ---------- cards ---------- */
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 16px; margin: 18px 0; }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 20px 22px; box-shadow: var(--shadow);
+  }
+  .card h4 { margin: 0 0 8px; }
+  .card p { margin: 6px 0; font-size: 14.5px; color: var(--ink-soft); }
+  .card .chip { display: inline-block; font-size: 12px; font-weight: 700; padding: 2px 10px; border-radius: 20px; margin-bottom: 8px; }
+  .chip.teal { background: var(--teal-soft); color: var(--teal); }
+  .chip.amber { background: var(--amber-soft); color: var(--amber); }
+  .chip.rose { background: var(--rose-soft); color: var(--rose); }
+  .chip.indigo { background: var(--indigo-soft); color: var(--indigo); }
+
+  /* ---------- callout ---------- */
+  .callout { padding: 16px 20px; border-radius: var(--radius); margin: 18px 0; font-size: 14.5px; border: 1px solid; }
+  .callout.info { background: var(--indigo-soft); border-color: #c7d2fe; color: #3730a3; }
+  .callout.warn { background: var(--amber-soft); border-color: #fde68a; color: #92400e; }
+  .callout.tip { background: var(--teal-soft); border-color: #99f6e4; color: #115e59; }
+  .callout strong { display: block; margin-bottom: 2px; }
+
+  /* ---------- tables ---------- */
+  .table-wrap { overflow-x: auto; margin: 18px 0; border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; background: var(--card); }
+  thead th { background: #f5f5f4; color: var(--ink); font-weight: 700; text-align: left; padding: 11px 14px; border-bottom: 2px solid var(--line); white-space: nowrap; font-size: 13px; letter-spacing: .02em; }
+  tbody td { padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; color: var(--ink-soft); }
+  tbody tr:nth-child(even) { background: #fafaf9; }
+  tbody tr:hover { background: #f0fdfa; }
+  tbody tr:last-child td { border-bottom: none; }
+  td.mono, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12.8px; }
+  td b, td strong { color: var(--ink); }
+  .num { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--teal); }
+
+  /* ---------- code ---------- */
+  pre {
+    background: #1c1917; color: #e7e5e4; padding: 18px 20px; border-radius: var(--radius);
+    overflow-x: auto; font-size: 13px; line-height: 1.6; margin: 16px 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  pre code { background: none; padding: 0; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; background: #f5f5f4; padding: 2px 6px; border-radius: 6px; color: var(--rose); }
+  pre code { color: #e7e5e4; }
+  pre .cm { color: #78716c; }
+  pre .kw { color: #5eead4; }
+  pre .st { color: #fcd34d; }
+
+  /* ---------- mermaid ---------- */
+  .mermaid-box { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; margin: 18px 0; box-shadow: var(--shadow); overflow-x: auto; }
+  .mermaid-box .caption { font-size: 12.5px; color: var(--ink-faint); text-align: center; margin-top: 4px; padding-bottom: 6px; }
+  .mermaid { display: flex; justify-content: center; }
+  .mermaid svg { max-width: 100%; height: auto; }
+
+  /* ---------- checklist ---------- */
+  ol.check { list-style: none; counter-reset: chk; margin: 14px 0; }
+  ol.check li { counter-increment: chk; position: relative; padding: 8px 0 8px 42px; font-size: 15px; }
+  ol.check li::before {
+    content: counter(chk); position: absolute; left: 0; top: 9px; width: 28px; height: 28px;
+    background: var(--teal-soft); color: var(--teal); border-radius: 8px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; font-size: 13.5px;
+  }
+  ol.check li b { color: var(--ink); }
+
+  /* ---------- footer ---------- */
+  footer { margin-top: 80px; padding-top: 24px; border-top: 1px solid var(--line); color: var(--ink-faint); font-size: 13px; }
+  footer a { color: var(--teal); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+  .refs { list-style: none; margin-top: 10px; }
+  .refs li { padding: 7px 0; border-bottom: 1px dashed var(--line); font-size: 14px; color: var(--ink-soft); }
+  .refs li:last-child { border-bottom: none; }
+  .refs .idx { color: var(--teal); font-weight: 700; margin-right: 6px; }
+  .refs a { color: var(--indigo); text-decoration: none; }
+  .refs a:hover { text-decoration: underline; }
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 980px) {
+    .shell { grid-template-columns: 1fr; padding: 0 18px; }
+    nav.toc { position: static; height: auto; padding: 18px 0 0; }
+    nav.toc .toc-title { margin-bottom: 8px; }
+    nav.toc a { display: inline-block; margin: 2px 4px 2px 0; border: 1px solid var(--line); border-radius: 20px; padding: 3px 12px; background: var(--card); }
+    nav.toc a:hover { border-color: var(--teal); }
+    nav.toc a.sub { padding-left: 12px; }
+    main { padding: 20px 0 60px; }
+  }
+  @media (max-width: 720px) {
+    .shell { padding: 0 14px; }
+    main { padding: 14px 0 48px; }
+    section { margin-top: 48px; }
+    header.hero h1 { font-size: 28px; }
+    .lede { font-size: 16px; }
+    .quote, .callout { padding: 14px 16px; }
+    .mermaid-box { padding: 8px 6px; }
+    h2 { font-size: 22px; }
+    h3 { font-size: 18px; }
+    table { font-size: 13px; }
+    thead th { padding: 9px 10px; font-size: 12px; }
+    tbody td { padding: 8px 10px; }
+    pre { padding: 14px; font-size: 12px; }
+    .meta span { display: block; margin: 3px 0; }
+  }
+  @media (max-width: 480px) {
+    header.hero h1 { font-size: 23px; }
+    .lede { font-size: 15.5px; }
+    h2 { font-size: 19px; }
+    h2 .no { font-size: 12px; }
+    .card { padding: 15px 16px; }
+    ol.check li { padding-left: 36px; font-size: 14px; }
+    ol.check li::before { width: 25px; height: 25px; font-size: 12.5px; }
+    nav.toc a { font-size: 12.5px; padding: 2px 10px; }
+    .quote { font-size: 14px; }
+    .table-wrap, .mermaid-box { border-radius: 10px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="toc">
+    <div class="toc-title">目录 · Contents</div>
+    <a href="#intro">01 · 什么是 Graph Engineering</a>
+    <a href="#history" class="sub">01.1 · 发展历史</a>
+    <a href="#pipeline" class="sub">01.2 · 9 阶段知识图谱流水线</a>
+    <a href="#task-graphs" class="sub">01.3 · 任务图：另一半</a>
+    <a href="#start">02 · 快速入门</a>
+    <a href="#compare">03 · Graph vs Loop Engineering</a>
+    <a href="#practices">04 · 最佳实践</a>
+    <a href="#cases">05 · 实例使用案例</a>
+    <a href="#extras">06 · 扩展资料</a>
+    <a href="#refs" class="sub">06.1 · 参考与致谢</a>
+  </nav>
+
+  <main>
+    <header class="hero">
+      <div class="kicker">Research Report · 调研报告</div>
+      <h1>Graph Engineering <span class="accent">图谱工程</span></h1>
+      <p class="lede">为 AI 智能体设计 <strong>结构</strong> 的学科——而不是设计提示词。它分两半：<strong>知识图谱</strong>（智能体“记住”什么）与 <strong>任务图</strong>（智能体“如何工作”）。</p>
+      <div class="quote">
+        “Prompt engineers steered the model's <b>words</b>. Loop engineers steered its <b>iterations</b>. Graph engineers steer its <b>topology</b>.”
+        <span class="src">— codejunkie99/graph-engineering（转引自东南大学《知识图谱》研究生课程与 Google DeepMind × MIT 智能体扩展研究）</span>
+      </div>
+      <div class="meta">
+        <span>📅 2025 年</span>
+        <span>📚 基于东南大学研究生课程（2019 年至今，4.4K★）</span>
+        <span>🔬 含 DeepMind × MIT 180 组实验证据</span>
+      </div>
+      <div class="mermaid-box">
+        <div class="mermaid">
+flowchart LR
+  P["🎯 Prompt Engineering<br/>操控模型的<em>语言</em>"] -->|steered the words| L["🔁 Loop Engineering<br/>操控智能体的<em>迭代</em>"]
+  L -->|steered the iterations| G["🕸️ Graph Engineering<br/>操控智能体的<em>拓扑</em>"]
+        </div>
+        <div class="caption">图 1 · 三层传承：从词的工程师 → 迭代的工程师 → 拓扑的工程师</div>
+      </div>
+    </header>
+
+    <!-- ============ 01 INTRO ============ -->
+    <section id="intro">
+      <h2><span class="no">01</span> 什么是 Graph Engineering</h2>
+      <p class="subtitle">一句话定义：设计 AI 智能体穿越的结构，而非其提示词。</p>
+
+      <p>传统上，我们通过<strong>提示词工程</strong>（Prompt Engineering）影响模型“说什么”，通过<strong>循环工程</strong>（Loop Engineering）控制智能体“如何反复尝试”。而 <strong>Graph Engineering（图谱工程）</strong> 把设计对象再提高一层：智能体所<em>穿越</em>的<strong>拓扑结构</strong>——它记住什么、任务如何被拆分与汇合、谁验证谁。</p>
+
+      <div class="grid2">
+        <div class="card">
+          <span class="chip teal">半边 1 · 记忆</span>
+          <h4>知识图谱 Knowledge Graphs</h4>
+          <p><b>智能体记住什么。</b>节点是实体与事实，边是带<strong>时间</strong>与<strong>溯源</strong>的关系。流水线：本体建模 → 抽取 → 融合 → 服务给 LLM。</p>
+        </div>
+        <div class="card">
+          <span class="chip amber">半边 2 · 工作</span>
+          <h4>任务图 Task Graphs</h4>
+          <p><b>智能体如何工作。</b>节点是任务，边是执行依赖。模式：并行扇出（fan-out）、独立验证者、停止规则（stop rule）、人类闸门（human gate）。</p>
+        </div>
+      </div>
+
+      <div class="mermaid-box">
+        <div class="mermaid">
+flowchart TB
+  GE["🕸️ Graph Engineering<br/><b>设计智能体穿越的结构</b>"] --> KG & TG
+  KG["🧠 知识图谱<br/>what agents <i>remember</i><br/>本体 → 抽取 → 融合 → 服务"]
+  TG["⚙️ 任务图<br/>how agents <i>work</i><br/>并行扇出 · 独立验证 · 停止规则 · 人类闸门"]
+        </div>
+        <div class="caption">图 2 · Graph Engineering 的两个半边</div>
+      </div>
+
+      <h3>核心心智模型</h3>
+      <div class="callout tip">
+        <strong>💡 知识图谱是有 schema 的产品，不是一堆三元组的堆砌。</strong>
+        A knowledge graph is a product with a schema, not a pile of triples.——先建模后抽取（Model before extracting）、先融合后存储（Fuse before storing）、每个阶段都验证（Verify at every stage）。
+      </div>
+
+      <h3>本报告的来源</h3>
+      <p>本调研基于以下一手材料：<strong>codejunkie99/graph-engineering</strong>（GitHub 264★）——它把<strong>东南大学《知识图谱》研究生课程</strong>（王鹏教授，<a href="https://github.com/npubird/KnowledgeGraphCourse" target="_blank">npubird/KnowledgeGraphCourse</a>，4.4K★，2019 年开课、逐年更新）翻译为可执行的 9 阶段流水线，并融合了 <strong>Google DeepMind × MIT</strong> 的 <em>“Towards a Science of Scaling Agent Systems”</em>（180 组受控配置）与 Anthropic 的多智能体工程实践。</p>
+    </section>
+
+    <!-- ============ 01.1 HISTORY ============ -->
+    <section id="history">
+      <h2><span class="no">01.1</span> 发展历史</h2>
+      <p class="subtitle">从 1960 年代的语义网络，到 2025 年成为一门被命名的工程学科。</p>
+
+      <div class="mermaid-box">
+        <div class="mermaid">
+timeline
+  title 知识图谱的演变之路
+  1960s : 语义网络 Semantic Networks：最早的图式知识表示
+  1970s–80s : 专家系统：产生式规则、框架系统落地商用
+  1990s : 描述逻辑与本体：形式化语义（OWL 前身）
+  1998–2004 : 语义网 Semantic Web：RDF / RDFS / OWL 标准
+  2012 : Google Knowledge Graph 发布，“知识图谱”进入大众视野
+  2019 : 东南大学《知识图谱》研究生课程开课，逐年更新
+  2023–24 : LLM 时代：GraphRAG、KG×LLM 双向赋能
+  2025 : “Graph Engineering”成为被命名的工程学科
+        </div>
+        <div class="caption">图 3 · 知识图谱 → 图谱工程的时间线</div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>时代</th><th>里程碑</th><th>对 Graph Engineering 的贡献</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><b>1960s</b></td><td>语义网络（Semantic Networks）</td><td>最早的“节点=概念、边=关系”图式表示，奠定了图作为知识载体的直觉。</td></tr>
+            <tr><td><b>1970s–80s</b></td><td>专家系统、产生式规则、框架系统</td><td>规则与框架让“结构化的知识”可被机器推理，第一次大规模商业化。</td></tr>
+            <tr><td><b>1990s</b></td><td>描述逻辑（Description Logic）、本体</td><td>给知识图加上形式语义：子类推理、一致性检查，Ontology 成为规范。</td></tr>
+            <tr><td><b>1998–2004</b></td><td>语义网：RDF / RDFS / OWL</td><td>W3C 标准让知识图可互操作；RDF 三元组成为知识交换的事实格式。</td></tr>
+            <tr><td><b>2012</b></td><td>Google Knowledge Graph</td><td>“知识图谱”成为大众词汇；证明“图驱动的问答”在亿级规模可行。</td></tr>
+            <tr><td><b>2019</b></td><td>东南大学《知识图谱》研究生课程</td><td>把散落的学术成果整理成完整课程体系：表示 → 抽取 → 融合 → 推理 → 存储。</td></tr>
+            <tr><td><b>2023–24</b></td><td>LLM 时代：GraphRAG、KG×LLM</td><td>图谱给 LLM 提供可溯源的事实（防幻觉），LLM 反过来驱动抽取与融合（自动化）。</td></tr>
+            <tr><td><b>2025</b></td><td>Graph Engineering 作为命名学科</td><td>课程蒸馏为 9 阶段流水线 + 任务图编排规则，成为智能体工程师的“施工手册”。</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout info">
+        <strong>🧭 从“数据”到“结构”的范式跃迁</strong>
+        早期工作解决“如何把知识存进图里”；LLM 时代解决“如何让智能体<em>穿越</em>图来工作”。Graph Engineering 正是这一跃迁的产物：结构本身成为工程对象。
+      </div>
+    </section>
+
+    <!-- ============ 01.2 PIPELINE ============ -->
+    <section id="pipeline">
+      <h2><span class="no">01.2</span> 9 阶段知识图谱流水线</h2>
+      <p class="subtitle">从领域范围到服务 LLM：一条可执行的完整施工链路（对应课程 9 讲）。</p>
+
+      <div class="mermaid-box">
+        <div class="mermaid">
+flowchart LR
+  A["① Scope<br/>范围与价值"] --> B["② Representation<br/>表示选择"]
+  B --> C["③ Ontology<br/>本体建模"]
+  C --> D["④ Entities<br/>实体抽取"]
+  D --> E["⑤ Relations<br/>关系抽取"]
+  E --> F["⑥ Events<br/>事件抽取"]
+  F --> G["⑦ Quality Gate<br/>质量闸门"]
+  G --> H["⑧ Fusion<br/>知识融合"]
+  H --> I["⑨ Serve to LLMs<br/>服务大模型"]
+  style C fill:#ccfbf1,stroke:#0f766e,stroke-width:2px
+  style H fill:#fef3c7,stroke:#b45309,stroke-width:2px
+        </div>
+        <div class="caption">图 4 · 9 阶段流水线（③本体 与 ⑧融合 是真实项目最容易失败的地方，高亮标记）</div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>#</th><th>阶段</th><th>一句话目的</th><th>关键规则</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="num">1</td><td><b>Scope 范围</b></td><td>定义领域与要回答的问题，判断是否真的需要图</td><td>问题需要“聚合”而非“遍历”→ 那是数据库，不是图</td></tr>
+            <tr><td class="num">2</td><td><b>Representation 表示</b></td><td>选择知识载体（属性图 / RDF-OWL / JSON-SQLite）</td><td>现在就决定每个事实如何携带时间与溯源——事后补几乎不可能</td></tr>
+            <tr><td class="num">3</td><td><b>Ontology 本体</b></td><td>设计 schema：实体类型、关系类型、domain/range</td><td>最难、最持久；用 10–20 个能力问题（competency questions）当规格与测试</td></tr>
+            <tr><td class="num">4</td><td><b>Entities 实体</b></td><td>按源类型抽取实体</td><td>结构化数据用确定性映射（不烧 LLM）；开放域才用 LLM；每条带证据句</td></tr>
+            <tr><td class="num">5</td><td><b>Relations 关系</b></td><td>在“已通过 4 的实体”之间抽取关系</td><td>关系抽取永远不许发明新实体；代码校验 domain/range；共现 ≠ 断言</td></tr>
+            <tr><td class="num">6</td><td><b>Events 事件</b></td><td>抽取“发生了什么”（触发器 + 类型化参数）</td><td>事件是头等节点；绝不把 4 参数事件压平成 6 条成对边</td></tr>
+            <tr><td class="num">7</td><td><b>Quality Gate 质量闸门</b></td><td>每类源独立验收：精度/召回率 + 置信区间</td><td>“假设我的数字是虚高的，直到抽样证明不是”</td></tr>
+            <tr><td class="num">8</td><td><b>Fusion 融合</b></td><td>去重、对齐、合并（blocking → matching → merge）</td><td>成败关键；错误合并远比漏合并更伤；合并必须可回滚</td></tr>
+            <tr><td class="num">9</td><td><b>Serve to LLMs 服务</b></td><td>把图接进智能体（GraphRAG 检索）并证明胜过向量检索</td><td>多跳问题必须赢，否则图谱不配它的维护成本</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>本体的最小示例：从“能力问题”出发</h3>
+      <p>课程强调：先写能力问题，再设计 schema，最后才是抽取。一个只含 <code>Person / Service / Incident</code> 三种实体、两条关系、一种事件的最小本体，就能完整回答下面的问题——克制添加，直到某个能力问题要求为止。</p>
+      <div class="mermaid-box">
+        <div class="mermaid">
+flowchart LR
+  P["Person 工程师"] -->|CONTRIBUTED_TO| S["Service 服务"]
+  I["Incident 事故"] -->|AFFECTED<br/>severity 严重度| S
+        </div>
+        <div class="caption">图 5 · 能力问题：“哪些工程师贡献过上个季度出事故的服务？”</div>
+      </div>
+<pre><code><span class="cm"># ontology.yaml —— 项目单一事实源，抽取 prompt 逐字嵌入</span>
+<span class="kw">entities</span>:
+  Person:   { desc: 工程师或经理,        ex: [Jane Doe] }
+  Service:  { desc: 可部署的软件单元,     ex: [payments-api] }
+  Incident: { desc: 生产故障事件,        ex: [INC-4012] }
+<span class="kw">relations</span>:
+  CONTRIBUTED_TO: { domain: Person,  range: Service }
+  AFFECTED:       { domain: Incident, range: Service, attrs: [severity] }
+<span class="kw">events</span>:
+  Incident: { trigger: outage/alert,
+              args: [service, start_time, resolved_time, severity] }</code></pre>
+
+      <div class="callout warn">
+        <strong>⚠️ 三个最常见的死因（课程原话的现代转译）</strong>
+        ① 没有本体就开抽 → 满图 <code>Concept/Thing</code> 节点；② 跳过融合 → 多跳查询<em>自信地答错</em>（路径在重复实体边界断裂）；③ 跳过质量闸门 → 精度随规模崩塌而无人知晓。课程明确：<strong>不许跳过 03 本体与 08 融合</strong>。
+      </div>
+    </section>
+
+    <!-- ============ 01.3 TASK GRAPHS ============ -->
+    <section id="task-graphs">
+      <h2><span class="no">01.3</span> 任务图：另一半</h2>
+      <p class="subtitle">知识图谱管“记住什么”，任务图管“怎么干”。节点=任务，边=执行依赖。</p>
+
+      <p>任务图是 <strong>DAG</strong>（有向无环图）——同一模式在数据基础设施上运行了几十年（Airflow、Prefect、Temporal），如今被应用到智能体（LangGraph、CrewAI、AutoGen）。<em>模式的“老”是优点：放心把业务交给有数十年生产历史的机器。</em></p>
+
+      <h3>四条规则</h3>
+      <div class="mermaid-box">
+        <div class="mermaid">
+flowchart LR
+  PL["📋 Plan<br/>拆分任务"] --> W1["👷 Worker 1<br/>独立角度"]
+  PL --> W2["👷 Worker 2<br/>独立角度"]
+  PL --> W3["👷 Worker 3<br/>独立角度"]
+  W1 --> V["🔍 Verify<br/><b>独立验证上下文</b>"]
+  W2 --> V
+  W3 --> V
+  V --> M["🧩 Merge<br/>单一负责人合并"]
+  M --> R["✅ Result"]
+        </div>
+        <div class="caption">图 6 · 菱形模式（diamond pattern）——正经系统最终收敛的形状</div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>规则</th><th>内容</th><th>要点</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><b>① 删除假边</b></td><td>只有当工作真的流过，箭头才是真的</td><td>“摘要这个文件，然后查我的日历”——日历从不读摘要，边是假的。删掉它俩就能并行。手工流水线通常藏有 2–3 条假边，这是零成本的第一个优化。</td></tr>
+            <tr><td><b>② 菱形模式</b></td><td>拆分 → 并行工人 → <b>独立</b>验证 → 单一负责人合并</td><td>验证节点不可谈判：模型在自己上下文里给自己打分，会漏掉大部分自己的错误。给每个验证者<em>不同</em>的问题（对吗？新吗？源是真的吗？）——多样化的怀疑者能抓住相同怀疑者抓不到的错。</td></tr>
+            <tr><td><b>③ 停止规则</b></td><td>只在“能拆成互不读对方结果的任务”上多智能体并行</td><td>DeepMind × MIT 180 组受控配置：可拆分工作上团队胜率约 <span class="num">80%</span>；而<em>每一个</em>多智能体配置在顺序任务上都输（退化 <span class="num">39–70%</span>）。无协调的智能体把彼此的错误放大 <span class="num">17.2×</span>；单一协调者把合并握在手里，降到 <span class="num">4.4×</span>。<b>更多智能体不是策略，工作的形状才是。</b></td></tr>
+            <tr><td><b>④ 人类闸门</b></td><td>人类是一个节点，不是旁观者</td><td>把审批放在<em>错误代价昂贵的边</em>上（发送、发布、退款、删除、部署），而不是每步都设闸。处处设闸 → 人成瓶颈；处处不设 → 没人看。用不可争辩的数字（跑过的测试、到账的钱）评判系统，别信它自报。</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>停止规则的决策程序</h3>
+      <ol class="check">
+        <li>问：<b>我的工作在哪里能拆成“永不互读对方结果”的碎片？</b></li>
+        <li><b>只拆那里。</b>其余顺序的部分留给单个智能体。</li>
+        <li><b>绝不让发现物在没有单一合并负责人的情况下汇合。</b></li>
+      </ol>
+
+      <h3>四条护栏（Guardrails）</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>护栏</th><th>防止什么</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><b>每个循环设最大轮数上限</b></td><td>防止“永远重试”的失控循环烧穿上下文与预算</td></tr>
+            <tr><td><b>每个文件只有一位写者</b></td><td>防止两个任务同时改动同一工件导致合并冲突与互相覆盖</td></tr>
+            <tr><td><b>路由写在书面步骤里</b></td><td>模型填充<em>任务内容</em>，而不是规划<em>结构</em>——拓扑由人设计，内容由智能体生成</td></tr>
+            <tr><td><b>可派生智能体的数量硬上限</b></td><td>防止“智能体再派智能体”的指数爆炸</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ 02 GETTING STARTED ============ -->
+    <section id="start">
+      <h2><span class="no">02</span> 快速入门</h2>
+      <p class="subtitle">两条命令装上，然后选择“建图”或“学课”两种模式。</p>
+
+      <h3>安装（两条命令）</h3>
+<pre><code><span class="cm"># 1. 克隆仓库</span>
+git clone https://github.com/codejunkie99/graph-engineering.git
+<span class="cm"># 2. 把 skill 装进 Claude Code（或其他 skill 兼容 harness）</span>
+cp -r graph-engineering/graph-engineering ~/.claude/skills/</code></pre>
+
+      <p>之后对智能体说 <code>“用我的文档建一个知识图谱”</code>（build）或 <code>“教我 graph engineering”</code>（teach）——教学模式会用<strong>你自己的项目</strong>当活例子，一个模块一个模块地走完全部 9 阶段。</p>
+
+      <h3>九个可粘贴工作流：一个老师 + 八个工具</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>命令</th><th>用途</th><th>产出</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="mono"><b>/kg-tutor</b></td><td>教学模式（锚）：把整个课程教给你，用你的领域当例子</td><td>分模块课程 + 每模块一个构建任务 + 续课口令</td></tr>
+            <tr><td class="mono">/kg-scope</td><td>领域建模：写 2 句领域描述 + 3 个真实问题</td><td>8–12 种实体、5–8 种关系、问题改写成遍历</td></tr>
+            <tr><td class="mono">/kg-schema</td><td>把草稿 schema 升级为正式本体</td><td>类层次、属性 domain/range、可直接载入 Protégé 的 Turtle</td></tr>
+            <tr><td class="mono">/kg-extract</td><td>按源类型设计抽取流水线</td><td>结构化/半结构化/非结构化分流 + 50 文档人工检查协议</td></tr>
+            <tr><td class="mono">/kg-relations</td><td>关系抽取工程</td><td>只发类型化三元组的 prompt + 置信度 + 逐字证据跨度</td></tr>
+            <tr><td class="mono">/kg-events</td><td>事件抽取：图里存“发生过的事”</td><td>事件类型 schema（触发器/参数/时间锚）+ 事件间因果/时序边</td></tr>
+            <tr><td class="mono">/kg-fuse</td><td>实体消解：图里有重复</td><td>blocking 策略、匹配函数、人类复核带、可回滚合并策略</td></tr>
+            <tr><td class="mono">/kg-eval</td><td>持怀疑态度的审稿人</td><td>三元组级精度/召回率抽样、测试集泄漏检查、评审先攻的三个主张</td></tr>
+            <tr><td class="mono">/kg-rag</td><td>把图接进智能体，并证明它胜过向量检索</td><td>按问题类型的检索策略、子图序列化方案、30 问评估集</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>首次构建检查清单（first build checklist）</h3>
+      <ol class="check">
+        <li><b>Scope：</b>2 句领域描述 + 3 个真实问题 → <code>/kg-scope</code></li>
+        <li><b>Schema：</b>草稿升级为本体 → <code>/kg-schema</code>，载入 Protégé 检查</li>
+        <li><b>Extract：</b>按源类型设计流水线，先跑 50 文档人工检查协议 → <code>/kg-extract</code></li>
+        <li><b>抽取：</b>实体 → 关系 → 事件，逐阶段 prompt（<code>/kg-relations</code>、<code>/kg-events</code>）</li>
+        <li><b>Fuse：</b>处理重复实体，策略可回滚 → <code>/kg-fuse</code></li>
+        <li><b>Eval：</b>用自己的数字挑战自己 → <code>/kg-eval</code></li>
+        <li><b>Serve：</b>GraphRAG 接进智能体，打败向量基线 → <code>/kg-rag</code></li>
+      </ol>
+    </section>
+
+    <!-- ============ 03 COMPARE ============ -->
+    <section id="compare">
+      <h2><span class="no">03</span> Graph Engineering vs Loop Engineering</h2>
+      <p class="subtitle">两者常常被混为一谈，但设计对象完全不同。</p>
+
+      <p><strong>Loop Engineering（循环工程）</strong>治理智能体的<strong>迭代周期</strong>——经典的 PDCA / act-observe-plan 循环：计划 → 执行 → 检查 → 调整 → 再循环，关注的是“每一轮如何变得更好、如何收敛”。<strong>Graph Engineering（图谱工程）</strong>治理<strong>结构</strong>——记忆与工作的<em>拓扑</em>，关注的是“智能体穿越什么样的图”。</p>
+
+      <div class="mermaid-box">
+        <div class="mermaid">
+flowchart TB
+  subgraph LOOP["Loop Engineering —— 循环（cyclic）"]
+    direction LR
+    A1["Plan 计划"] --> B1["Do 执行"]
+    B1 --> C1["Check 检查"]
+    C1 --> D1["Act 调整"]
+    D1 --> A1
+  end
+  subgraph GRAPH["Graph Engineering —— 有向无环拓扑（acyclic DAG）"]
+    direction LR
+    S["split 拆分"] --> W["workers 并行"]
+    W --> V["verify 独立验证"]
+    V --> M["merge 单一合并"]
+    M --> E["end 交付"]
+  end
+        </div>
+        <div class="caption">图 7 · 循环（反馈回路）vs 拓扑（单向流水线）——同一批智能体，两种设计对象</div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>维度</th><th>Graph Engineering 图谱工程</th><th>Loop Engineering 循环工程 <span class="tag">推断*</span></th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>操控对象</b></td>
+              <td>智能体的<strong>拓扑</strong>（记忆结构 + 任务结构）</td>
+              <td>智能体的<strong>迭代</strong>（循环节奏）</td>
+            </tr>
+            <tr>
+              <td><b>设计单元</b></td>
+              <td>图 / DAG：节点=实体或任务，边=关系或依赖</td>
+              <td>循环：计划 → 执行 → 检查 → 调整</td>
+            </tr>
+            <tr>
+              <td><b>核心问题</b></td>
+              <td>“智能体穿越什么结构？哪里拆、哪里并、谁验证？”</td>
+              <td>“每一轮如何改进？循环会不会收敛？”</td>
+            </tr>
+            <tr>
+              <td><b>时间形态</b></td>
+              <td>一次设计、反复执行的结构（acyclic）</td>
+              <td>反复绕圈、逐轮逼近（cyclic）</td>
+            </tr>
+            <tr>
+              <td><b>典型失败</b></td>
+              <td>拓扑错误：并行浪费、记忆断裂、错误放大 17.2×</td>
+              <td>循环卡死：不收敛、空转重试、把失败当进步</td>
+            </tr>
+            <tr>
+              <td><b>何时使用</b></td>
+              <td>任务可拆分 / 多智能体编排 / 跨会话长期记忆</td>
+              <td>单智能体持续打磨 / 迭代式改进 / 反思自省</td>
+            </tr>
+            <tr>
+              <td><b>代表工具</b></td>
+              <td>Neo4j、Kùzu（记忆）；LangGraph、CrewAI、Airflow（任务）</td>
+              <td>PDCA 循环、act-observe-plan、反射（reflection）、retry 策略</td>
+            </tr>
+            <tr>
+              <td><b>二者的关系</b></td>
+              <td colspan="2">不是二选一：<b>图谱决定结构，循环决定结构内每个节点的运转</b>——菱形模式里的每个 worker 内部，就是一个 loop。</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout warn">
+        <strong>* 诚实标注</strong>
+        本文未能获取 Loop Engineering 的独立权威定义（检索源超时）。对比表中的循环工程一侧，系依据 graph-engineering 源材料的对照框架（“Loop engineers steered its iterations”）与标准 PDCA / act-observe-plan 概念推断而来，非独立权威来源。图谱工程一侧则完全来自已核实的原始材料。
+      </div>
+    </section>
+
+    <!-- ============ 04 PRACTICES ============ -->
+    <section id="practices">
+      <h2><span class="no">04</span> 最佳实践</h2>
+      <p class="subtitle">从 SKILL.md 工作规则与全部参考文件蒸馏出的可执行准则。</p>
+
+      <h3>十二条铁律</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>#</th><th>准则</th><th>为什么</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="num">1</td><td><b>Schema 先行（先建模后抽取）</b></td><td>无本体抽取是头号死因——满图 <code>Concept/Thing</code> 节点，重抽成本翻倍。</td></tr>
+            <tr><td class="num">2</td><td><b>每条事实带溯源</b></td><td>没有证据跨度的三元组 = “带额外步骤的幻觉”。溯源在融合后补 = 几乎不可能。</td></tr>
+            <tr><td class="num">3</td><td><b>先融合后存储</b></td><td>存储前消解重复；否则多跳查询在重复实体边界<em>自信地答错</em>。</td></tr>
+            <tr><td class="num">4</td><td><b>每个阶段都验证</b></td><td>质量闸门按源类型独立设卡，精度/召回率带置信区间，不靠感觉。</td></tr>
+            <tr><td class="num">5</td><td><b>增量优于一次性大爆炸</b></td><td>图即记忆循环：每会话后小步抽取+融合；定期做全图清理与置信度重评。</td></tr>
+            <tr><td class="num">6</td><td><b>关系动词要精确</b></td><td><code>ACQUIRED / CITES / DEPENDS_ON</code>，绝不 <code>RELATED_TO / HAS_LINK</code>——模糊动词让每个下游查询都含糊。</td></tr>
+            <tr><td class="num">7</td><td><b>常一起查的类型就合并</b></td><td>反之：一个类型要靠限定属性区分用法（role: author/editor）就拆成两条关系。</td></tr>
+            <tr><td class="num">8</td><td><b>本体文件是单一事实源</b></td><td><code>ontology.yaml</code> 随项目保存，每个抽取 prompt 逐字嵌入它。</td></tr>
+            <tr><td class="num">9</td><td><b>结构化数据用确定性代码</b></td><td>数据库/CSV/API 直接列映射（D2R 思路），用 NLP/LLM 处理已经结构化的数据是经典浪费。</td></tr>
+            <tr><td class="num">10</td><td><b>LLM 是流水线里的组件，不是流水线</b></td><td>LLM 嵌入各阶段内部，外围包上验证（domain/range 校验、证据引用、人工复核带）。</td></tr>
+            <tr><td class="num">11</td><td><b>合并要可回滚，宁缺毋滥</b></td><td>只在置信度极高时自动合并；错误合并静默融合两个实体的全部边集，比漏合并伤得多。记录 <code>merged_from</code>。</td></tr>
+            <tr><td class="num">12</td><td><b>矛盾事实两条都留</b></td><td>冲突时保留双方 + 时间 + 溯源，检索时优先新者——事实会变（“在某公司任职”会过期），图应记录变化而非对抗变化。</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>失败模式速查表（来自 extraction.md）</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>症状</th><th>原因</th><th>修复</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>满图 <code>Concept</code>/<code>Thing</code> 节点</td><td>没建模就抽取</td><td>先做阶段 3 本体，再重抽</td></tr>
+            <tr><td>同一个人是 4 个节点</td><td>跳过了规范化命名规则</td><td>在本体中定义规则；跑融合</td></tr>
+            <tr><td>自信的错误关系</td><td>把“共现”当“断言”</td><td>证据引用要求 + domain/range 校验</td></tr>
+            <tr><td>事件被压平成“边的汤”</td><td>没有事件 schema</td><td>头等事件节点 + 参数 schema</td></tr>
+            <tr><td>规模一大精度就崩</td><td>跨文档类型的 prompt 漂移</td><td>按源类型独立 prompt；每源独立闸门</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ 05 CASES ============ -->
+    <section id="cases">
+      <h2><span class="no">05</span> 实例使用案例</h2>
+      <p class="subtitle">四个真实场景：两个管“记忆”，一个管“因果”，一个管“编排”。</p>
+
+      <h3>案例 A · GraphRAG 多跳问答（知识图谱 → LLM）</h3>
+      <p>问题：<em>“哪些工程师在上季度出过事故的服务上贡献过？”</em>——这需要跨 <code>Person → Service → Incident</code> 的<strong>多跳路径</strong>，纯向量检索答不了。GraphRAG 的做法：实体链接查询 → 扩展 k 跳子图（k=1–2，超过 2 跳不加排序就是噪音）→ 把路径序列化为紧凑三元组（按头实体分组、去重、带溯源）→ 交给 LLM 叙述。答案引用图谱事实，而不是“氛围”。</p>
+      <div class="mermaid-box">
+        <div class="mermaid">
+flowchart LR
+  Q["❓ 多跳问题"] --> EL["🔗 实体链接"]
+  EL --> EX["🕸️ k-hop 子图扩展<br/>k=1–2"]
+  EX --> SE["📄 序列化三元组<br/>带时间+溯源"]
+  SE --> LLM["🤖 LLM 叙述答案<br/>引用图内事实"]
+        </div>
+        <div class="caption">图 8 · GraphRAG 检索链路</div>
+      </div>
+
+      <h3>案例 B · 图即记忆循环（跨会话智能体）</h3>
+      <p>智能体要跨会话积累知识，但上下文窗口有限。模式：每会话/任务结束后，用同一本体对新信息做抽取（阶段 4–6）→ 增量融合进既有图（阶段 8）→ 会话开始时按需 GraphRAG 检索，而不是把整图倒进上下文。矛盾事实两条都留，检索时优先新的；定期做清理。</p>
+      <div class="mermaid-box">
+        <div class="mermaid">
+flowchart LR
+  S["📝 会话结束"] --> E["🧠 抽取新知识<br/>同一本体"]
+  E --> F["🧩 增量融合进图谱"]
+  F --> G[("🗄️ 知识图谱<br/>时间+溯源")]
+  G --> R["🔍 GraphRAG 按需检索"]
+  R --> S
+        </div>
+        <div class="caption">图 9 · 跨会话记忆的闭环</div>
+      </div>
+
+      <h3>案例 C · 事理图谱：回答“什么导致什么”</h3>
+      <p>普通知识图谱回答“什么与什么相关”；<strong>事件逻辑图（事理图谱）</strong>回答“什么导致什么”——节点是<em>事件</em>，边是因果/时序/条件关系。典型：金融领域“加息 → 债市抛售 → 收益率上升 → 股市回调”。查询可以沿因果链从结果反向走回去。</p>
+      <div class="mermaid-box">
+        <div class="mermaid">
+flowchart LR
+  A["📈 利率上调"] -->|causes| B["📉 债市抛售"]
+  B -->|causes| C["📊 收益率上升"]
+  C -->|causes| D["📉 股市回调"]
+  D -->|causes| E["🏢 企业融资成本上升"]
+        </div>
+        <div class="caption">图 10 · 事理图谱：因果链（区分“被报道为原因”与“仅仅共现”）</div>
+      </div>
+
+      <h3>案例 D · 多智能体任务图编排（研究 / 草稿 / 验证）</h3>
+      <p>把“写一份竞品调研报告”按菱形模式编排：拆分出三个独立研究角度并行 → 独立审稿人验证（正确性、时效性、来源真实性，各问各的）→ 单一主笔整合。DeepMind × MIT 的证据支持这一形态：可拆分工作约 80% 胜率，顺序工作则全军覆没——所以<em>只</em>拆能拆的。</p>
+      <div class="mermaid-box">
+        <div class="mermaid">
+flowchart LR
+  P["📋 研究主题拆分"] --> R1["🔍 角度 A 研究"]
+  P --> R2["🔍 角度 B 研究"]
+  P --> R3["🔍 角度 C 研究"]
+  R1 --> V["🧐 独立审稿<br/>正确性/时效性/来源"]
+  R2 --> V
+  R3 --> V
+  V --> M["✍️ 主笔整合"]
+  M --> O["📄 调研报告"]
+        </div>
+        <div class="caption">图 11 · 菱形模式落地：研究类任务</div>
+      </div>
+    </section>
+
+    <!-- ============ 06 EXTRAS ============ -->
+    <section id="extras">
+      <h2><span class="no">06</span> 扩展资料</h2>
+
+      <h3>知识表示选型对照</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>表示</th><th>何时选择</th><th>代价</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><b>属性图 Property Graph</b><br><span class="mono">Neo4j / Kùzu / NetworkX</span></td><td>产品与智能体记忆的默认选择；节点/边带任意键值属性</td><td>没有形式语义，一致性靠你自己维护</td></tr>
+            <tr><td><b>RDF/OWL 三元组</b></td><td>需要与既有本体互操作、合规要求、需要描述逻辑推理（子类、一致性检查）</td><td>冗长；边属性要 reification；工具链更陡</td></tr>
+            <tr><td><b>JSON/SQLite 中的类型化边</b></td><td>&lt;5 万节点、单一应用、智能体本地记忆</td><td>查询能力封顶；多跳查询变慢/变频繁时再迁移</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>知识图谱 × 大模型：双向赋能</h3>
+      <div class="grid2">
+        <div class="card">
+          <span class="chip teal">KG → LLM</span>
+          <h4>图给模型“事实地基”</h4>
+          <p>· GraphRAG：实体链接 → k 跳扩展 → 子图序列化进上下文</p>
+          <p>· 多跳问题检索<em>路径</em>而非邻域——路径就是答案骨架</p>
+          <p>· 社区摘要：离线聚类概括，回答“大主题是什么”</p>
+          <p>· 答案可引用图内事实，降低幻觉</p>
+        </div>
+        <div class="card">
+          <span class="chip indigo">LLM → KG</span>
+          <h4>模型给图“施工队”</h4>
+          <p>· 本体归纳：3–5 份代表文档 → 提议类型 → 人工修剪（绝不自动接受，会过拟合样本）</p>
+          <p>· 抽取：带本体约束 + 证据引用的 LLM prompt</p>
+          <p>· 融合仲裁：只处理中等置信区间的模糊对</p>
+          <p>· 关键框架：LLM 是流水线内的组件，带验证包裹——不是流水线的替代品</p>
+        </div>
+      </div>
+
+      <h3>工具全景</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>层</th><th>工具</th><th>用途</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><b>图数据库</b></td><td>Neo4j、Kùzu、NetworkX</td><td>属性图存储、遍历查询、图算法</td></tr>
+            <tr><td><b>本体编辑</b></td><td>Protégé</td><td>OWL 本体建模、推理检查（/kg-schema 的 Turtle 直接载入）</td></tr>
+            <tr><td><b>智能体编排</b></td><td>LangGraph、CrewAI、AutoGen</td><td>把任务图跑起来：并行、条件路由、状态传递</td></tr>
+            <tr><td><b>数据流水线</b></td><td>Airflow、Prefect、Temporal</td><td>DAG 模式的数十年生产验证；任务图模式的“老前辈”</td></tr>
+            <tr><td><b>评估</b></td><td>自定义抽样协议（/kg-eval）</td><td>三元组级精度/召回率、测试集泄漏检查</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>一句话总结</h3>
+      <div class="quote">
+        Graph Engineering = 知识图谱（<b>记忆的拓扑</b>）× 任务图（<b>工作的拓扑</b>），在 LLM 时代把“结构设计”本身变成了一门可教授、可执行、有实验证据的工程学科。
+        <span class="src">—— 本报告</span>
+      </div>
+    </section>
+
+    <!-- ============ REFS ============ -->
+    <section id="refs">
+      <h2><span class="no">06.1</span> 参考与致谢</h2>
+      <ul class="refs">
+        <li><span class="idx">[1]</span> <a href="https://github.com/codejunkie99/graph-engineering" target="_blank">codejunkie99/graph-engineering</a> — 本报告的主要一手来源：9 阶段流水线、任务图四规则、9 个可粘贴工作流（MIT License）</li>
+        <li><span class="idx">[2]</span> <a href="https://github.com/npubird/KnowledgeGraphCourse" target="_blank">npubird/KnowledgeGraphCourse</a> — 东南大学《知识图谱》研究生课程（王鹏教授，4.4K★，2019 年至今）</li>
+        <li><span class="idx">[3]</span> <a href="https://research.google/blog/towards-a-science-of-scaling-agent-systems-when-and-why-agent-systems-work/" target="_blank">Towards a Science of Scaling Agent Systems</a> — Google DeepMind × MIT：180 组受控配置，停止规则的数据基础</li>
+        <li><span class="idx">[4]</span> Anthropic — 已发布的多智能体工程实践（任务图护栏的参考来源）</li>
+        <li><span class="idx">[5]</span> W3C — RDF / RDFS / OWL 语义网标准（1998–2004）</li>
+        <li><span class="idx">[6]</span> Google — Knowledge Graph（2012 年发布）</li>
+      </ul>
+      <p style="margin-top:14px;font-size:13px;color:var(--ink-faint);">注：对比章节中“Loop Engineering”一侧的表述系基于源材料的对照框架与标准 PDCA 概念推断，已在正文标注。报告为单文件自包含 HTML，Mermaid 图通过 CDN 渲染。</p>
+    </section>
+
+    <footer>
+      <p>Graph Engineering 调研报告 · 生成于 2025 年 · 仅供学习研究使用</p>
+    </footer>
+  </main>
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      fontFamily: '-apple-system, "PingFang SC", "Microsoft YaHei", sans-serif',
+      fontSize: '14px',
+      primaryColor: '#f0fdfa',
+      primaryBorderColor: '#0f766e',
+      primaryTextColor: '#1c1917',
+      lineColor: '#a8a29e',
+      secondaryColor: '#fffbeb',
+      tertiaryColor: '#faf5ff',
+      clusterBkg: '#fafaf9',
+      clusterBorder: '#d6d3d1',
+      edgeLabelBackground: '#ffffff',
+      nodeBorder: '#0f766e'
+    },
+    securityLevel: 'loose'
+  });
+</script>
+</body>
+</html>

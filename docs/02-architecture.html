@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>02 · 架构设计 · B2B 订单履约验证项目</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+SC:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:#f5f4ed; --paper2:#efeee5; --ink:#1f1d18; --ink2:#6b665b;
+    --ink3:#3a382f; --blue:#1B365D; --rule:#d4d1c5;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif; line-height:1.6;}
+  .wrap{max-width:960px; margin:0 auto; padding:48px 40px 80px;}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;}
+  .folio{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--rule); padding-bottom:10px;
+    font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink2);}
+  .folio a{color:var(--ink2); border:none;}
+  .folio a:hover{color:var(--blue);}
+  .tag{display:inline-block; padding:3px 10px; font-size:11px; letter-spacing:.16em; background:var(--paper2); color:var(--blue);}
+  .kicker{display:flex; align-items:baseline; gap:12px; margin-top:48px;}
+  h1{font-size:clamp(32px,5vw,50px); line-height:1.12; font-weight:500; margin-top:14px; letter-spacing:-.01em;}
+  .lede{margin-top:18px; font-size:17px; line-height:1.7; color:var(--ink3); max-width:720px;}
+  h2{font-size:23px; font-weight:600; margin:52px 0 14px; color:var(--blue); display:flex; align-items:baseline; gap:12px; border-top:1px solid var(--rule); padding-top:26px;}
+  h2 .no{font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.12em;}
+  h3{font-size:17.5px; font-weight:600; margin:30px 0 10px; color:var(--ink);}
+  h3 .no{color:var(--blue); font-family:'IBM Plex Mono',monospace; font-size:12px; margin-right:8px;}
+  p{margin:10px 0; color:var(--ink3);}
+  ul,ol{margin:10px 0 10px 26px; color:var(--ink3);}
+  li{margin:5px 0;}
+  a{color:var(--blue); text-decoration:none; border-bottom:1px solid var(--rule);}
+  a:hover{border-bottom-color:var(--blue);}
+  blockquote{border-left:2px solid var(--blue); padding:10px 18px; margin:16px 0; background:var(--paper2); font-style:italic;}
+  table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  .table-wrap{overflow-x:auto; margin:16px 0 24px; border:1px solid var(--rule);}
+  .table-wrap table{margin:0;}
+  th{background:var(--paper2); color:var(--blue); text-align:left; font-weight:600; padding:9px 12px; border-bottom:1.5px solid var(--blue); font-size:12.5px; white-space:nowrap;}
+  td{padding:9px 12px; border-bottom:1px solid var(--rule); vertical-align:top; color:var(--ink3);}
+  tr:nth-child(even) td{background:#faf9f3;}
+  tr:hover td{background:#f0ede0;}
+  .mermaid{background:var(--paper); border:1px solid var(--rule); padding:18px; overflow-x:auto; text-align:center; margin:20px 0;}
+  .mermaid svg{max-width:100%; height:auto;}
+  .mermaid svg.statediagram span,.mermaid svg.statediagram div{color:#1f1d18 !important;}
+  .mermaid svg.statediagram text{fill:#1f1d18 !important;}
+  figcaption{text-align:center; font-size:12px; color:var(--ink2); margin:-10px 0 26px; font-style:italic;}
+  code{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace; font-size:13px; background:var(--paper2); padding:1px 5px;}
+  pre{background:var(--paper2); border:1px solid var(--rule); padding:16px 18px; overflow-x:auto; font-size:12.8px; line-height:1.55; margin:14px 0;}
+  pre code{background:none; padding:0;}
+  footer.colophon{margin-top:56px; padding-top:14px; border-top:1px solid var(--rule); display:flex; justify-content:space-between;
+    font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink2); flex-wrap:wrap; gap:8px;}
+  footer.colophon a{color:var(--ink2); border:none;}
+  footer.colophon a:hover{color:var(--blue);}
+  .toc{border:1px solid var(--rule); background:var(--paper2); padding:18px 24px; margin:26px 0;}
+  .toc .tt{font-size:11px; letter-spacing:.2em; color:var(--blue); margin-bottom:8px;}
+  .toc a{display:block; padding:3px 0; color:var(--ink3); border:none;}
+  .toc a:hover{color:var(--blue);}
+  .toc .mono{font-size:12px; color:var(--blue); margin-right:8px;}
+  @media(max-width:720px){.wrap{padding:28px 18px 60px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="folio">
+    <span><a href="index.html">← Docs</a> · B2B Order Fulfillment</span>
+    <span>02 · Architecture</span>
+    <span>Temporal × SpiceDB × PG × WeCom</span>
+  </header>
+
+  <div class="kicker">
+    <span class="tag">Architecture · 架构设计</span>
+    <span class="mono" style="font-size:11px; letter-spacing:.18em; color:var(--ink2);">派生自核心图谱</span>
+  </div>
+
+  <h1>架构设计<br/><span style="font-style:italic; color:var(--blue);">业务守恒 · 人工闸门 · 图式授权</span></h1>
+
+  <p class="lede">派生自核心图谱（<span class="mono">01-core-graph.html</span>）：架构中的每个组件、每张表、每条约束都能回溯到图谱中的 CQ 与状态机。结构范式来源：<span class="mono">pilot_app/docs/02-architecture.md</span>。</p>
+
+  <nav class="toc">
+    <div class="tt">CONTENTS · 目录</div>
+    <a href="#s1"><span class="mono">1</span>总体架构（图 · 数据流 · 设计原则）</a>
+    <a href="#s2"><span class="mono">2</span>组件设计（服务 · Temporal 编排 · SpiceDB · 企微）</a>
+    <a href="#s3"><span class="mono">3</span>数据库设计（表清单 · 迁移规划）</a>
+    <a href="#s4"><span class="mono">4</span>一致性防线（业务守恒 · 层层兜底）</a>
+    <a href="#s5"><span class="mono">5</span>幂等机制（三层叠加）</a>
+    <a href="#s6"><span class="mono">6</span>部署（docker compose）</a>
+    <a href="#s7"><span class="mono">7</span>ADR（架构决策记录）</a>
+    <a href="#s8"><span class="mono">8</span>数据迁移布局（JSONL → PG · 为既有数据迁移提前布局）</a>
+  </nav>
+
+  <h2 id="s1"><span class="no">1 ·</span> 总体架构</h2>
+  <pre class="mermaid">
+flowchart TB
+    subgraph client["客户端层"]
+        WECOM["企业微信&lt;br/&gt;S1 侧边栏 / S2 群消息 / S3 应用消息卡片 / S4 工作台"]
+        HTTP["HTTP 客户端 / CLI"]
+    end
+    subgraph app["应用层 (Go)"]
+        API["cmd/api&lt;br/&gt;HTTP API 服务"]
+        WE["cmd/wecom&lt;br/&gt;企微接入服务&lt;br/&gt;(存档拉取/回调/出站)"]
+        WK["cmd/worker&lt;br/&gt;Temporal Worker"]
+    end
+    subgraph domain["领域层 (internal/domain)"]
+        FSM["4×FSM 状态机&lt;br/&gt;ORD/STK/SHP/INV + PreOrder"]
+        VO["值对象: 数量/金额/幂等键"]
+        CONS["守恒断言: 备货/发货/库存/开票"]
+    end
+    subgraph intg["接入层 (internal/integration)"]
+        CFG["BusinessConfigProvider&lt;br/&gt;StaticConfigProvider"]
+        SRC["DynamicSource + Registry"]
+    end
+    subgraph infra["基础设施"]
+        PG[("PostgreSQL 16&lt;br/&gt;事实 + 事件链 + 幂等映射")]
+        SZ[("SpiceDB&lt;br/&gt;RBAC/ReBAC + caveat")]
+        TP[("Temporal&lt;br/&gt;主流程/子流程/Signal/Timer")]
+    end
+
+    WECOM --> WE
+    HTTP --> API
+    API --> WK
+    WE --> WK
+    WK --> FSM
+    WK --> PG
+    WK --> SZ
+    API --> PG
+    API --> SZ
+    WE --> PG
+    WE --> WECOM
+    WE -.-> SRC
+    API -.-> CFG
+    WK -.-> CFG
+  </pre>
+  <figcaption>图 1 · 总体架构 —— 应用层 / 接入层 / 领域层 / 基础设施四层</figcaption>
+
+  <p><strong>数据流</strong>（对应图谱 §1.5 事件图）：</p>
+  <div class="table-wrap">
+  <table>
+    <tr><th>路径</th><th>说明</th></tr>
+    <tr><td>企微 → 预订单</td><td>会话存档拉取（<span class="mono">cmd/wecom</span>）→ 消息幂等落库 → 意图识别 → 预订单 → 销售确认卡片 → Signal → 正式订单（幂等键）</td></tr>
+    <tr><td>HTTP → 订单</td><td>API 授权预检 → 幂等启动（<span class="mono">WorkflowID = "order-" + tenant_id + "-" + idempotency_key</span>）→ Temporal 主流程</td></tr>
+    <tr><td>Temporal → PG</td><td>Activity 以「事务 + 行锁 + CHECK 约束 + 守恒校验」写事实表与事件链（append-only）</td></tr>
+    <tr><td>Temporal → SpiceDB</td><td>授权判定（独立 Activity，每次业务副作用前重复验证）；授权关系变更 = 图拓扑变更</td></tr>
+    <tr><td>查询路径</td><td>订单状态/事件链/守恒视图直接读 PG；数据范围与字段投影经 SpiceDB 判定后在 BFF 执行</td></tr>
+  </table>
+  </div>
+
+  <p><strong>设计原则</strong>（沿用 pilot_app 并扩展）：</p>
+  <ol>
+    <li><strong>状态机显式化</strong>：四个流程 + 预订单的状态迁移全部由图谱定义，代码用同一 FSM 表驱动（单一事实源）。</li>
+    <li><strong>副作用与决策分离</strong>：Workflow 只做确定性决策（状态迁移、Signal 等待、Timer 编排）；PG/SpiceDB/企微副作用全在 Activity。</li>
+    <li><strong>授权纵深防御</strong>：API 预检 + 每个业务副作用 Activity 内再次 CheckPermission；企微出站与入站分别验签。</li>
+    <li><strong>幂等优先</strong>：预订单（msgid）、订单、发货单、开票全部带幂等键，DB 唯一约束兜底。</li>
+    <li><strong>可对账</strong>：数量守恒（备货 ≤ 订单、发货 ≤ 备货、开票 ≤ 发货、库存 ≥ 0）任何时刻可聚合校验。</li>
+    <li><strong>人工闸门为核心</strong>：三方审批是业务主体（Signal 等待 + Timer 催办升级），AI 路径不得绕过（安全边界）。</li>
+  </ol>
+
+  <h2 id="s2"><span class="no">2 ·</span> 组件设计</h2>
+
+  <h3><span class="no">2.1</span> 服务组件</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>组件</th><th>职责</th><th>关键行为</th></tr>
+    <tr><td class="mono">cmd/api</td><td>HTTP API 服务</td><td>授权预检 → 幂等启动 Workflow → 审批动作（Signal）→ 查询（订单/事件链/守恒视图/待办）；<span class="mono">GET /healthz</span> 探针</td></tr>
+    <tr><td class="mono">cmd/wecom</td><td>企微接入服务</td><td>S2：会话存档拉取循环（seq checkpoint / 5 天窗口 / 两段解密）→ 消息幂等 → 触发意图识别；S3：出站卡片（template_card 确认/催办/通知，response_url 或应用消息）；S1/S4：侧边栏/工作台 H5 路由与鉴权</td></tr>
+    <tr><td class="mono">cmd/worker</td><td>Temporal Worker</td><td>注册 <span class="mono">OrderWorkflow</span> + 子流程（<span class="mono">ShipmentWorkflow</span> / <span class="mono">TransferWorkflow</span> / <span class="mono">ExceptionInvoiceWorkflow</span>）+ <span class="mono">PreOrderWorkflow</span> 与 Activity 池</td></tr>
+    <tr><td class="mono">internal/domain</td><td>领域层（纯 Go 零依赖）</td><td>4 个业务 FSM + 预订单 FSM、数量/金额/幂等值对象、守恒断言函数</td></tr>
+    <tr><td class="mono">internal/authz</td><td>授权层</td><td>SpiceDB 客户端（FullyConsistent 读）、<span class="mono">Checker</span> 接口 + <span class="mono">StaticChecker</span>（测试替身）</td></tr>
+    <tr><td class="mono">internal/repo</td><td>持久层</td><td>pgx 访问、事务/行锁/幂等写入/守恒事务</td></tr>
+    <tr><td class="mono">internal/workflows</td><td>流程层</td><td>Workflow/Activity 定义、Signal/Timer 编排、重试与超时策略</td></tr>
+    <tr><td class="mono">internal/wecom</td><td>企微客户端</td><td>存档 SDK 封装、解密、出站消息、验签（详见 07）；<strong>归位为接入层的动态数据源实现</strong></td></tr>
+    <tr><td class="mono">internal/integration</td><td><strong>接入层（外部依赖唯一接入面）</strong></td><td>业务配置数据接口（<span class="mono">BusinessConfigProvider</span>：催办/回单超期/修改分类/自动审批）+ 动态数据源（<span class="mono">DynamicSource</span> + <span class="mono">Registry</span>）；基线实现 <span class="mono">StaticConfigProvider</span>（值=历史硬编码，行为不变）。详细设计见 08</td></tr>
+  </table>
+  </div>
+
+  <h3><span class="no">2.2</span> Temporal 编排设计</h3>
+  <pre class="mermaid">
+flowchart LR
+    subgraph main["OrderWorkflow（主流程，按段推进）"]
+        ORD["ORD 段&lt;br/&gt;Signal: 主管审价 / 董事长"]
+        STK["STK 段&lt;br/&gt;Signal: 仓管确认 / 财务到账"]
+        SHP["SHP 段&lt;br/&gt;Signal: 仓管实发"]
+        INV["INV 段&lt;br/&gt;Signal: 例外审核 / 开票完成"]
+    end
+    subgraph child["子流程（ChildWorkflow）"]
+        SW["ShipmentWorkflow&lt;br/&gt;单次发货"]
+        TW["TransferWorkflow&lt;br/&gt;转仓/退回"]
+        EW["ExceptionInvoiceWorkflow&lt;br/&gt;回单异常审核"]
+    end
+    subgraph pre["PreOrderWorkflow（独立入口）"]
+        PW["预订单&lt;br/&gt;Signal: 销售确认卡片"]
+    end
+
+    pre -->|确认后 Signal| ORD
+    ORD --> STK --> SHP --> INV
+    SHP --> SW
+    SHP --> TW
+    INV --> EW
+  </pre>
+
+  <div class="table-wrap">
+  <table>
+    <tr><th>编排机制</th><th>用法</th><th>对应图谱</th></tr>
+    <tr><td>主流程 <span class="mono">OrderWorkflow</span></td><td>四段顺序推进，段内状态机表驱动；人工节点 <span class="mono">Signal</span> 等待，<span class="mono">Timer</span> 催办（24h 提醒 / 48h 升级）</td><td>§2.1 任务图模板</td></tr>
+    <tr><td>子流程 <span class="mono">ShipmentWorkflow</span></td><td>一次发货（分配 → 实发 → 库存联动单事务）；一张发货单只发一次</td><td>§2.4 SHP</td></tr>
+    <tr><td>子流程 <span class="mono">TransferWorkflow</span></td><td>转仓/退回（可复用 STK 段转仓审核）</td><td>§2.3 STK</td></tr>
+    <tr><td>子流程 <span class="mono">ExceptionInvoiceWorkflow</span></td><td>无回单超 5 天（Timer 触发）/ 提前申请 → 例外审核</td><td>§2.5 INV</td></tr>
+    <tr><td><span class="mono">PreOrderWorkflow</span></td><td>企微消息 → 预订单 → 确认 → 派生正式订单（Signal + Timer 24h 升级）</td><td>§2.6 预订单</td></tr>
+    <tr><td>SearchAttributes</td><td>待办检索（<span class="mono">order_id</span> / <span class="mono">task_kind</span> / <span class="mono">assignee</span>）</td><td>CQ-05 审批链</td></tr>
+  </table>
+  </div>
+
+  <p><strong>Activity 池</strong>（与 pilot_app 同构）：<span class="mono">AuthCheck</span> / <span class="mono">ValidateOrder</span> / <span class="mono">CreateOrder</span> / <span class="mono">UpdateContract</span> / <span class="mono">ReserveStock</span> / <span class="mono">ConfirmWarehouse</span> / <span class="mono">ConfirmPayment</span> / <span class="mono">IssueShipOrder</span> / <span class="mono">ApplyShipment</span>（发货+库存扣减单事务）/ <span class="mono">ApplyInvoice</span>（开票守恒校验）/ <span class="mono">TrackPayment</span> / <span class="mono">ArchiveOrder</span> / <span class="mono">Compensate</span> / <span class="mono">NotifyWecom</span> / <span class="mono">SendConfirmCard</span>。</p>
+
+  <h3><span class="no">2.3</span> SpiceDB 授权整合</h3>
+  <blockquote><strong>2026-08 升级</strong>（人类架构师决策 D1-D4，见 <span class="mono">docs/CHANGELOG-rebac-cases.html</span> §6）：授权对象从 order 级粗粒度升级为 <strong>prestock/shipment/evidence 一等授权对象</strong>（spec/rebac_cases_spicedb.html 全景表）；关系元组由 <strong>Outbox 投影器</strong>自动同步。</blockquote>
+  <ul>
+    <li><strong>唯一授权判定点</strong>：所有权限判定走 <span class="mono">authz.Checker</span> → SpiceDB <span class="mono">CheckPermission</span>（FullyConsistent，撤销即时生效，CQ-13）；应用代码零硬编码授权。</li>
+    <li><strong>三层模型</strong>：租户隔离（<span class="mono">tenant-&gt;member</span> 兜底，场景 E）∩ 资源级关系（ReBAC：<span class="mono">customer.account_owner</span> / <span class="mono">customer.contact</span> / <span class="mono">prestock.owner</span> / <span class="mono">shipment.warehouse_operator</span> / <span class="mono">shipment.requester</span> / <span class="mono">shipment.customer_contact</span> / <span class="mono">evidence.uploader</span>）∩ 条件关系（caveat <span class="mono">expiry_ok</span> 代办时效；阶段二 <span class="mono">within_void_window</span> 作废窗口）。</li>
+    <li><strong>对象级授权</strong>：备货单/发货单/凭证各自独立 SpiceDB definition（场景 A/B/C/D 的精确隔离）；<span class="mono">order</span> 保留为跨段聚合视图（create_prestock 聚合入口 = <span class="mono">customer-&gt;create_prestock + tenant-&gt;ops</span>）。</li>
+    <li><strong>字段级投影</strong>（CQ-03，BFF 执行）：
+      <ul>
+        <li>仓管视图（<span class="mono">shipment#warehouse_operator</span> 判定通过）：剥离 <span class="mono">unit_price_cents</span> / 金额字段 / 销售内部备注</li>
+        <li>客户联系人视图（<span class="mono">shipment#customer_contact</span> 判定通过）：只暴露物流状态 / 凭证，剥离价格 / 内部备注 / 审批链</li>
+        <li>双保障：SpiceDB 资源范围判定 + BFF 字段投影</li>
+      </ul>
+    </li>
+    <li><strong>Outbox 投影器</strong>（D4 落地，场景 G/H 前提）：
+      <ul>
+        <li>业务事务内写入业务数据 + <span class="mono">outbox_events</span> 表（Transactional Outbox 模式）</li>
+        <li>Go 投影器异步消费 → SpiceDB <span class="mono">WriteRelationships / DeleteRelationships</span>，幂等可重放</li>
+        <li>投影规则：备货单创建 → 写 <span class="mono">prestock#owner</span>；发货单创建/分配 → 写 <span class="mono">shipment#requester</span> / <span class="mono">shipment#warehouse_operator</span>；客户联系人变更 → Delete 旧 + Write 新（场景 H）；代办 TTL 到期 → Delete <span class="mono">delegate</span> 元组（场景 G）</li>
+        <li>保证「业务库关系 = SpiceDB 判定关系」</li>
+      </ul>
+    </li>
+    <li><strong>授权关系变更</strong>：<span class="mono">WriteRelationship / Touch / Delete</span>（离职交接 = 删 account_owner 边 + 加新边；代办授权 = 带 caveat 的 delegate 边），不影响进行中流程。</li>
+    <li><strong>测试替身</strong>：<span class="mono">StaticChecker</span>（checker.go 模式）使 API/Workflow 单测零 SpiceDB 依赖；L1 集成用 spicedb testserver 覆盖权限矩阵（8 场景）。</li>
+  </ul>
+
+  <h3><span class="no">2.4</span> 企微整合（概要）</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>通道</th><th>技术</th><th>文档</th></tr>
+    <tr><td>S2 群消息捕捉（主路径）</td><td>会话内容存档：主动拉取（seq 游标 / 5 天窗口 / 4000 次/分钟 / 每批 1000 条 / RSA+AES 两段解密），原子 checkpoint 持久化</td><td><span class="mono">07-wecom-integration.html</span> §2</td></tr>
+    <tr><td>S2 出站确认</td><td>应用消息 <span class="mono">template_card</span>（确认/修改/忽略按钮），response_url 1 小时一次性；客户群消息按租户核验</td><td><span class="mono">07</span> §4</td></tr>
+    <tr><td>S1 侧边栏 H5</td><td>聊天工具栏入口，OAuth 静默授权 + <span class="mono">ww.register</span>/<span class="mono">ww.agentConfig</span> 双票据</td><td><span class="mono">07</span> §5</td></tr>
+    <tr><td>S3 应用消息推送</td><td>审批/催办/状态通知卡片，点击回调验签</td><td><span class="mono">07</span> §4</td></tr>
+    <tr><td>S4 工作台 H5</td><td>无上下文安全降级视图</td><td><span class="mono">07</span> §5</td></tr>
+  </table>
+  </div>
+  <p><strong>合规决策门</strong>（Phase 0）：企业认证 + 付费开通会话存档 + 员工知情同意 + 外部联系人同意；不同意则 S2 降级为半自动（S1 侧边栏 + 人工确认）——验收口径 <strong>可行 / 有条件可行 / 不可行</strong> 三分法。</p>
+
+  <h2 id="s3"><span class="no">3 ·</span> 数据库设计</h2>
+
+  <h3><span class="no">3.1</span> 表清单与关键约束</h3>
+  <blockquote><strong>多租户隔离总则</strong>：所有业务资源表均携带 <span class="mono">tenant_id</span>，业务唯一性一律按 <span class="mono">(tenant_id, 业务键)</span> 复合约束；所有资源间 FK 也必须包含租户维度，例如 <span class="mono">(tenant_id, order_id) REFERENCES orders(tenant_id, id)</span>，禁止只凭全局 <span class="mono">id</span> 关联。跨租户同键互不影响，任何未带租户维度的唯一键或 FK 都是缺陷。原系统 <span class="mono">flow_id</span> 为跨环节主键，迁移对齐见 §8 数据迁移布局。</blockquote>
+  <div class="table-wrap">
+  <table>
+    <tr><th>表</th><th>关键字段</th><th>约束/索引</th><th>服务 CQ</th></tr>
+    <tr><td class="mono">tenants</td><td>id PK, name</td><td>—</td><td>多租户根</td></tr>
+    <tr><td class="mono">users</td><td>id PK, tenant_id FK, name, role, wecom_user_id</td><td><span class="mono">role IN (SALES/SUPERVISOR/CHAIRMAN/OP/ACCOUNTING/WAREHOUSE/ADMIN)</span></td><td>CQ-01/02</td></tr>
+    <tr><td class="mono">customers</td><td>id PK, tenant_id FK, name, grade, owner_id FK</td><td><span class="mono">grade IN (A,B,C,D)</span>（C/D 触发董事长审批）</td><td>CQ-01/05</td></tr>
+    <tr><td class="mono">products</td><td>id PK, tenant_id FK, sku UK, name</td><td><span class="mono">UNIQUE(tenant_id, sku)</span></td><td>CQ-11</td></tr>
+    <tr><td class="mono">warehouses</td><td>id PK, tenant_id FK, name</td><td>—</td><td>CQ-02</td></tr>
+    <tr><td class="mono">inventory_items</td><td>tenant_id, warehouse_id FK, product_id FK, qty BIGINT, version</td><td><span class="mono">UNIQUE(tenant_id, warehouse_id, product_id)</span>、<span class="mono">CHECK (qty &gt;= 0)</span>（防线 1）</td><td>CQ-08</td></tr>
+    <tr><td class="mono">orders</td><td>id PK, tenant_id, customer_id FK, state, payment_term, supplier_channel, contract_no, idempotency_key, payload_hash, payload JSONB, legacy_flow_id, submission_mode, resubmit_from_order_id, resubmit_root_order_id, resubmit_revision, created_at, updated_at</td><td><span class="mono">state</span> 四分支枚举、<span class="mono">UNIQUE(tenant_id, idempotency_key)</span>（防线 3）、<span class="mono">UNIQUE(tenant_id, legacy_flow_id)</span>（可空）、resubmit 自引用复合 FK、idx_orders_tenant_state</td><td>CQ-04/05/11/12</td></tr>
+    <tr><td class="mono">order_items</td><td>id PK, tenant_id, order_id FK, product_id FK, warehouse_id FK, quantity, unit_price_cents</td><td><span class="mono">CHECK (quantity &gt; 0)</span>、<span class="mono">CHECK (unit_price_cents &gt;= 0)</span>（防线 1）</td><td>CQ-06/09</td></tr>
+    <tr><td class="mono">stock_prepares</td><td>id PK, tenant_id, order_id FK, warehouse_id FK, state, planned_qty, remaining_qty, batch_seq, split_flag, previous_stock_prepare_id, outbound_order_ref, idempotency_key</td><td><span class="mono">CHECK (planned_qty &gt; 0)</span>、<span class="mono">CHECK (remaining_qty &gt;= 0)</span>、<span class="mono">UNIQUE(tenant_id, idempotency_key)</span>；保留备货审批/到款/仓库分配与出库单边界</td><td>CQ-05/06/12</td></tr>
+    <tr><td class="mono">stock_prepare_items</td><td>id PK, tenant_id, stock_prepare_id FK, order_item_id FK, product_id FK, qty</td><td><span class="mono">CHECK (qty &gt; 0)</span>、<span class="mono">UNIQUE(tenant_id, stock_prepare_id, order_item_id)</span></td><td>CQ-06</td></tr>
+    <tr><td class="mono">shipments</td><td>id PK, tenant_id, order_id FK, stock_prepare_id FK, warehouse_id FK, state (OPEN/SHIPPED/CLOSED), planned_qty, shipped_qty, batch_seq, split_flag, previous_shipment_id, remaining_quantity, idempotency_key</td><td><span class="mono">CHECK (shipped_qty &lt;= planned_qty)</span>（防线 1）、<span class="mono">UNIQUE(tenant_id, idempotency_key)</span>（防线 3）；<span class="mono">stock_prepare_id</span> 保留 STK→SHP 关系</td><td>CQ-07/12</td></tr>
+    <tr><td class="mono">shipment_items</td><td>id PK, tenant_id, shipment_id FK, order_item_id FK, product_id FK, qty</td><td><span class="mono">CHECK (qty &gt; 0)</span></td><td>CQ-07/08</td></tr>
+    <tr><td class="mono">invoices</td><td>id PK, tenant_id, order_id FK, state (PENDING/PROCESSING/ISSUED/FAILED/NONE), amount_cents, idempotency_key</td><td><span class="mono">CHECK (amount_cents &gt;= 0)</span>、<span class="mono">UNIQUE(tenant_id, idempotency_key)</span></td><td>CQ-09</td></tr>
+    <tr><td class="mono">invoice_items</td><td>id PK, tenant_id, invoice_id FK, order_item_id FK, product_id FK, qty, amount_cents, idempotency_key</td><td><span class="mono">CHECK (qty &gt; 0)</span>、<span class="mono">CHECK (amount_cents &gt; 0)</span>、<span class="mono">UNIQUE(tenant_id, invoice_id, order_item_id)</span>（防重复分配）；开票守恒校验基准（金额+数量双维度）</td><td>CQ-09</td></tr>
+    <tr><td class="mono">pre_orders</td><td>id PK, tenant_id FK, group_id, msg_id, state, candidates JSONB, idempotency_key</td><td><span class="mono">UNIQUE(tenant_id, group_id, msg_id)</span>（消息幂等，防线 3）、<span class="mono">UNIQUE(tenant_id, idempotency_key)</span>（订单幂等）</td><td>CQ-11</td></tr>
+    <tr><td class="mono">approval_tasks</td><td>id PK, tenant_id, order_id FK, stage_code, kind, state, assignee_id FK, legacy_task_id, deadline, verdict, decided_by, decided_at</td><td><span class="mono">stage_code IN (ORD/STK/SHP/INV)</span>；<span class="mono">kind</span> 覆盖 PRICE/CHAIRMAN/STOCK_RESERVATION/STOCK_PAYMENT/STOCK_WAREHOUSE/WAREHOUSE/PAYMENT/RECEIPT_EX 及 <span class="mono">INVOICE_SALES_APPLY</span>、<span class="mono">INVOICE_CUSTOMER_STAMP_RETURN</span>、<span class="mono">INVOICE_SALES_CONFIRM</span>、<span class="mono">INVOICE_FINANCE_ISSUE</span>、<span class="mono">INVOICE_FINANCE_UPLOAD</span>、<span class="mono">INVOICE_SALES_RECEIVE</span>、<span class="mono">INVOICE_SALES_COLLECTION</span>；idx_approval_tenant_assignee</td><td>CQ-05/10</td></tr>
+    <tr><td class="mono">order_events</td><td>id BIGSERIAL PK, tenant_id, order_id FK, stage_code, task_id, action, from_state, to_state, reason, detail JSONB, error, operator_id, occurred_at</td><td>append-only（防线 6）；idx_events_tenant_order</td><td>CQ-12</td></tr>
+    <tr><td class="mono">stock_prepare_events</td><td>id BIGSERIAL PK, tenant_id, stock_prepare_id FK, order_id FK, stage_code, task_id, action, from_state, to_state, reason, detail JSONB, error, operator_id, occurred_at</td><td>append-only；idx_events_tenant_stock</td><td>CQ-06/12</td></tr>
+    <tr><td class="mono">shipment_events</td><td>id BIGSERIAL PK, tenant_id, shipment_id FK, stock_prepare_id FK, order_id FK, stage_code, task_id, action, from_state, to_state, reason, detail JSONB, error, operator_id, occurred_at</td><td>append-only；idx_events_tenant_shipment</td><td>CQ-07/12</td></tr>
+    <tr><td class="mono">invoice_events</td><td>id BIGSERIAL PK, tenant_id, invoice_id FK, shipment_id FK, stock_prepare_id FK, order_id FK, stage_code, task_id, action, from_state, to_state, reason, detail JSONB, error, operator_id, occurred_at</td><td>append-only；idx_events_tenant_invoice</td><td>CQ-09/10/12</td></tr>
+    <tr><td class="mono">pre_order_events</td><td>id BIGSERIAL PK, tenant_id, pre_order_id FK, from_state, to_state, reason, detail JSONB, error, operator_id, occurred_at</td><td>append-only（防线 6）；idx_pre_events_tenant_pre</td><td>CQ-11/12</td></tr>
+    <tr><td class="mono">approval_comments</td><td>id PK, tenant_id, order_id FK, scope, target_id, author_id, content, attachments JSONB, notify_user_ids JSONB, created_at</td><td><span class="mono">scope IN (ORD/STK/SHP/INV)</span>；目标通过 <span class="mono">(tenant_id, scope, target_id)</span> 校验</td><td>CQ-05/12</td></tr>
+    <tr><td class="mono">legacy_flow_mapping</td><td>tenant_id, legacy_flow_id, legacy_stage_id, stage_code, stage_seq, legacy_instance_id, legacy_task_id, target_type, target_id, target_order_id FK, target_revision, imported_at</td><td><span class="mono">PRIMARY KEY(tenant_id, stage_code, legacy_instance_id)</span>、idx <span class="mono">(tenant_id, legacy_flow_id)</span>；允许一个 flow 下 ORD/STK/SHP/INV 多个阶段实例及 resubmit revision</td><td>迁移追溯</td></tr>
+    <tr><td class="mono">migration_batches</td><td>id PK, tenant_id, source, checksum, state, started_at, finished_at, error</td><td><span class="mono">UNIQUE(tenant_id, source, checksum)</span>，迁移工具幂等锚点</td><td>迁移验证</td></tr>
+    <tr><td class="mono">wecom_context_bindings</td><td>tenant_id, external_user_id/group_id, binding</td><td>详见 07</td><td>CQ-11</td></tr>
+    <tr><td class="mono">wecom_archive_cursor</td><td>tenant_id PK, seq, updated_at</td><td>原子 checkpoint（5 天窗口防线）</td><td>CQ-11</td></tr>
+  </table>
+  </div>
+
+  <h3><span class="no">3.2</span> 迁移规划</h3>
+  <ul>
+    <li><span class="mono">001_init.sql</span>：租户/用户/客户/产品/仓库/库存/订单/明细/ORD 事件链/迁移映射（核心骨架）。</li>
+    <li><span class="mono">002_fulfillment.sql</span>：备货/发货/开票/审批任务/评论及 STK/SHP/INV 分域事件链。</li>
+    <li><span class="mono">003_preorder.sql</span>：预订单/预订单事件链/企微上下文/存档游标（企微域，可随 07 独立演进）。</li>
+    <li>迁移幂等可重跑（pilot_app 已验证模式）；L1-06 迁移校验测试兜底 schema 漂移。</li>
+  </ul>
+
+  <h2 id="s4"><span class="no">4 ·</span> 一致性防线（业务守恒 · 层层兜底）</h2>
+  <blockquote>pilot_app 的「7 层一致性防线」针对资金守恒；本项目针对<strong>数量守恒与状态可信</strong>（业务原则：订单提交 ≠ 已履约），防线同构、语义替换：</blockquote>
+  <div class="table-wrap">
+  <table>
+    <tr><th>#</th><th>防线</th><th>位置</th><th>防什么</th><th>对应 CQ</th></tr>
+    <tr><td>1</td><td>CHECK 约束</td><td>DB</td><td>负库存 / 负数量 / 超量发货（<span class="mono">qty&gt;=0</span>、<span class="mono">quantity&gt;0</span>、<span class="mono">shipped_qty&lt;=planned_qty</span>）</td><td>CQ-06/07/08</td></tr>
+    <tr><td>2</td><td>行锁 <span class="mono">SELECT ... FOR UPDATE</span></td><td>库存扣减 / 守恒校验 Activity</td><td>并发发货超卖、并发确认竞态</td><td>CQ-08/14</td></tr>
+    <tr><td>3</td><td><span class="mono">UNIQUE(tenant_id, idempotency_key)</span></td><td>DB 约束</td><td>重复下单 / 重复发货 / 重复开票 / 重复建预订单（Temporal 重放安全）；<strong>跨租户同键互不影响</strong></td><td>CQ-11/14</td></tr>
+    <tr><td>4</td><td>单事务多写</td><td>发货 + 库存扣减；开票 + 守恒校验；状态 + 事件链</td><td>部分生效（发货了库存没扣 / 开票超发货量）</td><td>CQ-07/08/09</td></tr>
+    <tr><td>5</td><td>守恒聚合校验</td><td>事务内聚合 + L3 脚本</td><td><span class="mono">∑发货 ≤ 订单量</span>、<span class="mono">∑开票金额 ≤ ∑可开票金额</span>、<span class="mono">∑开票数量 ≤ ∑有效发货数量</span>、<span class="mono">库存恒 ≥ 0</span>（对账根基）</td><td>CQ-06/07/08/09</td></tr>
+    <tr><td>6</td><td>FSM 表驱动</td><td>领域层</td><td>非法状态迁移（如开票量超可开票量、未备货就发货；「开票独立于发货」见 §7 ADR 与 01 §2.5 开放问题）</td><td>CQ-04</td></tr>
+    <tr><td>7</td><td>补偿/回退路径幂等</td><td>Saga / 退回 / 转仓</td><td>部分失败后订单状态与事实一致（退回重提、转仓换仓、开票失败重试）</td><td>CQ-04/09/14</td></tr>
+  </table>
+  </div>
+  <p><strong>双重表述</strong>：PG <span class="mono">orders.state</span> + <span class="mono">order_events</span>（事实与审计）⇄ Temporal History（执行轨迹）；两者都不可变可回放，任一缺失可从另一侧重建（验证项目设计既定）。</p>
+
+  <h2 id="s5"><span class="no">5 ·</span> 幂等机制（三层叠加）</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>层</th><th>机制</th><th>示例</th></tr>
+    <tr><td>1 API/DB</td><td><span class="mono">(tenant_id, idempotency_key)</span> 复合唯一 + <span class="mono">payload_hash</span> 指纹；同键同 payload 返回既有资源，同键异 payload → 409；跨租户同键互不影响</td><td>快速下单、发货、开票</td></tr>
+    <tr><td>2 Temporal</td><td><span class="mono">WorkflowID = "order-" + tenant_id + "-" + idempotency_key</span>；重复 StartWorkflow → 回查返回同一流程（租户维度天然隔离）</td><td>预订单确认派生订单</td></tr>
+    <tr><td>3 业务域</td><td>消息幂等：<span class="mono">(tenant_id, group_id, msg_id)</span> 唯一 → 同一消息只建一个预订单；分录级幂等（发货/开票键带段后缀 <span class="mono">:ship</span> / <span class="mono">:inv</span>，补偿带 <span class="mono">:revert</span>）</td><td>企微重发、重放</td></tr>
+  </table>
+  </div>
+  <blockquote>幂等键规范：预订单 <span class="mono">pre:&lt;tenant&gt;:&lt;group&gt;:&lt;msg_id&gt;:&lt;intent_version&gt;</span>；订单 <span class="mono">order:&lt;tenant&gt;:&lt;source&gt;:&lt;uuid&gt;</span>（source = pre | quick）；发货/开票以订单幂等键派生加段后缀。</blockquote>
+  <blockquote><strong>跨租户隔离测试断言</strong>：L1-02 幂等用例增加「租户 A 与租户 B 同 idempotency_key 各自生效、互不返回对方资源」的断言；L1-07 权限矩阵含跨租户访问拒绝用例；L3-01 并发脚本按租户维度运行。</blockquote>
+
+  <h2 id="s6"><span class="no">6 ·</span> 部署（docker compose）</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>服务</th><th>说明</th><th>端口</th></tr>
+    <tr><td class="mono">postgres</td><td>postgres:16-alpine（事实 + 事件链 + 存档游标）</td><td>15432</td></tr>
+    <tr><td class="mono">migrate</td><td>应用 001-003 迁移（幂等）</td><td>—</td></tr>
+    <tr><td class="mono">spicedb</td><td>authzed/spicedb（RBAC/ReBAC + caveat）</td><td>15051</td></tr>
+    <tr><td class="mono">spicedb-init / spicedb-schema</td><td>datastore migrate + 应用 schema.zed + demo 授权关系</td><td>—</td></tr>
+    <tr><td class="mono">temporal</td><td>temporalio/auto-setup（PG 后端）</td><td>17233</td></tr>
+    <tr><td class="mono">wecom</td><td>企微接入服务（会话存档拉取 / 回调 / 出站）</td><td>18081</td></tr>
+    <tr><td class="mono">worker</td><td>Temporal Worker</td><td>—</td></tr>
+    <tr><td class="mono">api</td><td>HTTP API，healthcheck <span class="mono">GET /healthz</span></td><td>18080</td></tr>
+  </table>
+  </div>
+  <blockquote>企微回调需<strong>公网 HTTPS + ICP 备案域名</strong>（本地联调用 HTTPS 反向代理）；多备案切换的配置化设计见 <span class="mono">07-wecom-integration.html</span> §7。</blockquote>
+
+  <h2 id="s7"><span class="no">7 ·</span> ADR（架构决策记录）</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>决策</th><th>选择</th><th>理由</th></tr>
+    <tr><td>流程编排</td><td>单 <span class="mono">OrderWorkflow</span> 主流程 + 子流程（Shipment/Transfer/ExceptionInvoice）+ Signal/Timer</td><td>四段强顺序 + 三段可独立重试/升级；人工节点 Signal 等待天然表达人类闸门</td></tr>
+    <tr><td>人工审批实现</td><td>Signal + 定时器催办（24h/48h）+ <span class="mono">approval_tasks</span> 表承载待办</td><td>审批是业务主体，状态可查询（CQ-05）、可催办（Timer）、可审计</td></tr>
+    <tr><td>库存粒度</td><td>仓库 × 产品（数量），不做批号/包装</td><td>范围裁剪（验证项目设计 §2.2）；成都仓批号数据缺失风险回避</td></tr>
+    <tr><td>授权模型</td><td>SpiceDB RBAC + ReBAC + caveat；字段投影由 BFF</td><td>验证项目设计既定；仓管不见价格 = 授权判定 + 投影双保障</td></tr>
+    <tr><td>开票守恒载体</td><td><span class="mono">invoice_items(order_item_id, product_id, qty, amount_cents)</span> 分配式，事务内关联有效 <span class="mono">shipment_items</span> 聚合</td><td>同时校验数量与金额；支持部分发货、分次/合并开票，并避免把发货单 ID 当成唯一守恒粒度</td></tr>
+    <tr><td>开票与发货关系</td><td><strong>订单合同完成即可申请开票，开票量在开票时按有效发货核验</strong>（<span class="mono">available_invoice_amount/qty</span> 随发货推进更新）</td><td>业务注记 #17/#24「开票独立于发货」+ 原系统 <span class="mono">available_invoice_qty</span> 语义；<strong>待业务确认（决策门：选项 A 当前默认 / 选项 B 须先发货；改动点清单见 01 §2.5）</strong></td></tr>
+    <tr><td>企微关系写入</td><td>直接写（演示场景）；事务性 Outbox 投影 SpiceDB 留后续</td><td>适度：基线验证授权正确性，不验证投递可靠性</td></tr>
+    <tr><td>预订单 AI 边界</td><td>LLM 只产候选 + 确定性代码校验 + 人工确认 Signal</td><td>AI 安全红线：Agent 不得独立签约/承诺/报价</td></tr>
+    <tr><td>测试策略</td><td>L0 纯 Go / L1 真 PG + spicedb testserver / L2 Temporal TestSuite / L3 脚本 + 覆盖率门禁</td><td>沿用 pilot_app 已验证分层（含其复盘修正：L1 直连、L2 TestSuite）</td></tr>
+    <tr><td>事件链</td><td>ORD/STK/SHP/INV/PreOrder 五类事件表 append-only，与各聚合状态同事务写入</td><td>CQ-12 审计回放；保留原系统分阶段事件证据，与 Temporal History 双重表述</td></tr>
+  </table>
+  </div>
+
+  <h2 id="s8"><span class="no">8 ·</span> 数据迁移布局（为既有数据迁移提前布局）</h2>
+  <blockquote>设计意图（meta.md + 用户确认）：理解原三方系统（<span class="mono">spec/biz/飞书三方审批系统存储表及字段说明.md</span>）的存储 schema，是为<strong>后续迁移既有数据</strong>提前布局。本 baseline <strong>不实施迁移</strong>，但以下布局必须在建表/编码时预留，否则迁移成本随数据量线性膨胀。</blockquote>
+
+  <h3><span class="no">8.1</span> 原系统存储模型（迁移源）</h3>
+  <ul>
+    <li><strong>非关系型</strong>：JSONL 追加式数据文件——一行一条 JSON 记录，业务状态变化即追加新记录；「同一业务编号多条记录 = 不同时间的状态快照」。</li>
+    <li><strong>16 张逻辑表</strong>：四审批环节主表+事件表成对（<span class="mono">orders</span>/<span class="mono">order_events</span>、<span class="mono">stock_prepares</span>/<span class="mono">stock_prepare_events</span>、<span class="mono">shipments</span>/<span class="mono">shipment_events</span>、<span class="mono">invoices</span>/<span class="mono">invoice_events</span>）+ 8 张横切表（<span class="mono">approval_comments</span>、<span class="mono">external_instances</span>、<span class="mono">background_jobs</span>、<span class="mono">bitable_flow_records</span>、<span class="mono">callbacks</span>、<span class="mono">customer_bitable_sync</span>、<span class="mono">approval_bot_messages</span>、<span class="mono">warehouse_notice_cards</span>）。</li>
+    <li><strong>贯穿键</strong>：<span class="mono">flow_id</span> 贯穿一笔订单的 ORD→STK→SHP→INV 四环节；每环节 <span class="mono">stage_id</span>（审批实例）+ <span class="mono">stage_code</span>（ORD/STK/SHP/INV）+ <span class="mono">stage_seq</span>（环节/分批序号）；审批任务 <span class="mono">instance_id</span> / <span class="mono">task_id</span> / <span class="mono">current_task_id</span>。</li>
+  </ul>
+
+  <h3><span class="no">8.2</span> 迁移映射（源 → 目标）</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>原系统（JSONL）</th><th>新系统（PG）</th><th>迁移要点</th></tr>
+    <tr><td><span class="mono">orders</span> 状态快照链 + <span class="mono">order_events</span></td><td><span class="mono">orders</span>（当前态）+ <span class="mono">order_events</span>（事件链）</td><td><strong>快照与原始事件分开迁移</strong>：快照按业务主键取最后一条有效记录；事件优先搬运源 <span class="mono">event_id/occurred_at/action/task_id/detail/error</span>，不得仅靠快照差分伪造完整审计链</td></tr>
+    <tr><td><span class="mono">flow_id</span> / <span class="mono">stage_id</span> / <span class="mono">instance_id</span> / <span class="mono">task_id</span></td><td><span class="mono">orders.legacy_flow_id</span>（可空）+ <span class="mono">legacy_flow_mapping</span></td><td>新系统以 <span class="mono">order_id</span> 为主脊；映射表同时保存 <span class="mono">legacy_flow_id</span>、<span class="mono">stage_code/seq</span>、各阶段 <span class="mono">legacy_instance_id/task_id</span> 与目标实体，避免把四阶段实例错误折叠成一个 order 外键</td></tr>
+    <tr><td class="mono">create_idempotency_key</td><td>/ <span class="mono">create_fingerprint</span> → <span class="mono">(tenant_id, idempotency_key)</span> + <span class="mono">payload_hash</span></td><td>迁移时原键直接搬入幂等键（补租户前缀），<span class="mono">create_fingerprint</span> 对应 <span class="mono">payload_hash</span>，同内容不重复审批语义延续</td></tr>
+    <tr><td class="mono">submission_mode</td><td>+ <span class="mono">resubmit_from/root_flow_id</span> + <span class="mono">resubmit_revision</span> → <span class="mono">orders.submission_mode</span> / <span class="mono">resubmit_from_order_id</span> / <span class="mono">resubmit_root_order_id</span> / <span class="mono">resubmit_revision</span></td><td>resubmit 链从「flow 级」映射到「order 级」，A/B/C/D/E 修改分类语义不变（见 01 §2.2）</td></tr>
+    <tr><td><span class="mono">stock_prepares</span> + <span class="mono">stock_prepare_events</span></td><td><span class="mono">stock_prepares</span> + <span class="mono">stock_prepare_items</span> + <span class="mono">stock_prepare_events</span></td><td>保留备货审批、财务到款、仓库分配、出库单和 <span class="mono">previous_stock_prepare_id</span> 分批链；禁止压缩进 <span class="mono">shipments</span>，否则无法区分「已备货未发货」与「已发货」</td></tr>
+    <tr><td><span class="mono">shipments</span> + <span class="mono">shipment_events</span></td><td><span class="mono">shipments</span> + <span class="mono">shipment_items</span> + <span class="mono">shipment_events</span></td><td>按源 <span class="mono">stock_prepare_id</span> 复合 FK 连接 STK→SHP，保留 <span class="mono">batch_seq/split_flag/remaining_quantity</span> 与回单、开票衔接事件</td></tr>
+    <tr><td class="mono">invoice_events</td><td class="mono">invoice_events</td><td>原样保留 invoice_id/shipment_id/stock_prepare_id/order_id/task_id/action/detail/error，并通过 legacy_flow_id 串回主流程</td></tr>
+    <tr><td class="mono">invoices</td><td>七任务节点（<span class="mono">sales_apply</span>/<span class="mono">customer_stamp_return</span>/<span class="mono">sales_confirm</span>/<span class="mono">finance_issue</span>/<span class="mono">finance_upload</span>/<span class="mono">sales_receive</span>/<span class="mono">sales_collection</span>）→ <span class="mono">invoices</span> 状态扩展 + <span class="mono">approval_tasks(kind=INVOICE_*)</span></td><td>INV 段审批链比当前状态机更细：<strong>迁移前确认</strong>是否将七节点完整落地为新状态机（推荐：<span class="mono">approval_tasks</span> 承载节点，<span class="mono">invoices.state</span> 保持聚合态）</td></tr>
+    <tr><td class="mono">available_invoice_amount</td><td>/ <span class="mono">available_invoice_qty</span> → <span class="mono">invoice_items(qty, amount_cents)</span> 守恒校验</td><td>原系统已按金额+数量双维度跟踪可开票量，与 §4 防线 5 完全对齐，迁移无需语义转换</td></tr>
+    <tr><td class="mono">external_instances.response_evidence_path</td><td>独立证据存储（对象存储/加密存档）+ 引用字段</td><td>证据与业务数据分离存储模式沿用（同 07 §8 原始聊天留存策略）；迁移时证据文件路径随记录搬移</td></tr>
+    <tr><td class="mono">approval_comments</td><td><span class="mono">approval_comments</span>（新表）</td><td>四环节评论（scope/target_id/flow_id/附件/通知）整体迁入，<span class="mono">flow_id</span> → <span class="mono">order_id</span> 映射</td></tr>
+    <tr><td class="mono">external_instances</td><td><span class="mono">legacy_external_instances</span>（只读归档）+ 独立证据存储</td><td>保留实例状态、任务列表、表单和请求/响应元数据；response_evidence_path 搬至加密证据存储，正文不进入业务事件表</td></tr>
+    <tr><td><span class="mono">background_jobs</span> / <span class="mono">callbacks</span></td><td><span class="mono">legacy_background_jobs</span> / <span class="mono">legacy_callbacks</span>（只读归档）</td><td>保留重试、幂等和故障排查证据；不恢复执行旧任务，不重放旧回调</td></tr>
+    <tr><td><span class="mono">bitable_flow_records</span> / <span class="mono">customer_bitable_sync</span></td><td><span class="mono">legacy_bitable_mappings</span>（只读归档）</td><td>保留 flow/record/app/table 映射供对账；新系统不以其作为业务事实源</td></tr>
+    <tr><td><span class="mono">approval_bot_messages</span> / <span class="mono">warehouse_notice_cards</span></td><td><span class="mono">legacy_message_deliveries</span>（只读归档）</td><td>合并归档消息 ID、接收人、模板、状态和响应证据；不得因迁移重新发送消息</td></tr>
+    <tr><td class="mono">supervisor_auto_approve</td><td>/ <span class="mono">chairman_auto_approve</span> → 审批规则配置</td><td>原系统已有自动通过机制（如金额阈值），迁移为审批策略配置数据，不硬编码</td></tr>
+  </table>
+  </div>
+
+  <h3><span class="no">8.3</span> 迁移执行策略（后续阶段，非 baseline）</h3>
+  <ol>
+    <li><strong>分阶段</strong>：ORD → STK → SHP → INV 逐环节迁移（与原系统四阶段一致），每阶段验证守恒后再进入下一段。</li>
+    <li><strong>快照优先、事件不伪造</strong>：先迁当前状态（最新有效快照）；源 <span class="mono">*_events</span> 原样进入对应分域事件表或只读归档。仅有快照、没有源事件时可生成带 <span class="mono">source=SNAPSHOT_DIFF</span> 标记的推导事件，不得冒充原始操作证据。</li>
+    <li><strong>双跑窗口</strong>：迁移期间新旧系统并行，<span class="mono">legacy_flow_id</span> 映射支撑追溯与回滚。</li>
+    <li><strong>迁移验证</strong>：复用 L3-02 对账脚本（四守恒全库聚合）在迁移后全量执行 + 抽样比对（原 JSONL 最新快照 vs PG 当前态）。</li>
+    <li><strong>幂等红线</strong>：迁移工具本身幂等（<span class="mono">migration_batches</span> 批次表，可重跑不重复）。</li>
+    <li><strong>租户前缀</strong>：原系统为单租户；迁移时统一补 <span class="mono">tenant_id</span>（多租户隔离总则，§3.1），缺省映射到默认租户并人工核验。</li>
+  </ol>
+  <blockquote><strong>建表预留清单</strong>（编码时即做，避免后补）：§3.1 已将预留项纳入正式表清单，包括 <span class="mono">orders.legacy_flow_id/submission_mode/resubmit_*</span>、<span class="mono">stock_prepares/stock_prepare_items/stock_prepare_events</span>、<span class="mono">shipments.stock_prepare_id/batch_seq/split_flag/previous_shipment_id/remaining_quantity</span>、<span class="mono">shipment_events/invoice_events</span>、<span class="mono">approval_comments</span>、<span class="mono">legacy_flow_mapping</span> 与 <span class="mono">migration_batches</span>。横切过程记录在迁移阶段进入 <span class="mono">legacy_*</span> 只读归档，不参与 baseline 业务写路径。</blockquote>
+
+  <h3><span class="no">8.4</span> 敏感字段 mapping/retention 清单（迁移前必须冻结）</h3>
+  <blockquote>review_202608061321（P2）：源 JSONL 含 Open ID、访问令牌、文件路径、请求/响应体、审批表单、评论正文等敏感信息。迁移前必须为每类字段冻结脱敏规则、加密边界、TTL、访问角色与「迁移后删除证明」，否则合规与安全不可验收。</blockquote>
+  <div class="table-wrap">
+  <table>
+    <tr><th>字段类别</th><th>来源（原系统表字段）</th><th>处置</th><th>加密边界</th><th>访问角色</th><th>TTL</th><th>迁移后删除证明</th></tr>
+    <tr><td>身份标识</td><td class="mono">orders.sales_open_id/user_id</td>、<span class="mono">agent_*</span>、<span class="mono">submitter_*</span>、事件表 <span class="mono">operator_open_id</span></td><td>进 PG 前映射为内部 <span class="mono">user_id</span>；Open ID 仅存加密映射表</td><td>映射表列级加密</td><td>管理员/审计</td><td>随用户记录存续</td><td>迁移后 dump 扫描 <span class="mono">open_id</span> 值特征零命中</td></tr>
+    <tr><td>访问令牌</td><td class="mono">approver_view_token</td><td>等 5 个 view_token</td><td><strong>不迁入 PG</strong>：审批完成后令牌即失效，迁移时丢弃（新系统用 Signal 上下文取代）</td><td>—</td><td>不适用</td><td>审批完成即失效</td><td>业务库无 <span class="mono">view_token</span> 列（DDL 核对）</td></tr>
+    <tr><td>文件路径</td><td class="mono">customer_contract_files</td>、<span class="mono">contract_draft_files</span>、<span class="mono">invoice_files</span>、<span class="mono">customer_order_stamp_return_files</span>、<span class="mono">response_evidence_path</span></td><td>路径引用迁入，文件本体迁入对象存储（租户隔离 + 静态加密）</td><td>对象存储 SSE</td><td>按业务角色</td><td>合同/证据按业务期限留存</td><td>路径可解析 + 文件存在性抽样比对</td></tr>
+    <tr><td>请求/响应体</td><td class="mono">external_instances.request_body/response_body</td>、<span class="mono">callbacks.*</span>、<span class="mono">bitable_flow_records.response_evidence_path</span>、<span class="mono">approval_bot_messages.response_body</span></td><td>只进 <span class="mono">legacy_*</span> 只读归档，加密列存储（含表单 token/签名值）</td><td>归档表列级加密</td><td>审计角色</td><td>归档期限（默认 1 年）后清理</td><td>归档表无明文 token（正则扫描）+ 清理任务日志</td></tr>
+    <tr><td>审批表单</td><td class="mono">orders</td><td>大量 <span class="mono">*_approve*</span> / <span class="mono">approval_profile</span></td><td>结构化字段选择性迁移（审批结果/人员映射）；表单原始 JSON 只进归档</td><td>归档加密</td><td>审批/审计</td><td>随订单留存；原始表单按归档期限</td><td>结构化字段与源表单抽样核对</td></tr>
+    <tr><td>评论正文</td><td class="mono">approval_comments</td><td>（content/attachments/notify 名单）</td><td>进 PG 明文（业务需要）</td><td>字段级权限（BFF 投影）</td><td>订单相关角色</td><td>随订单留存</td><td>无残留（全文迁移 + 数量比对）</td></tr>
+    <tr><td>密钥/签名</td><td>EncodingAESKey、存档私钥等</td><td><strong>绝不迁移</strong>，新系统重新配置（KMS/环境变量）</td><td>KMS</td><td>管理员</td><td>轮换制</td><td>迁移清单明确标注「不迁移」+ 配置核对</td></tr>
+  </table>
+  </div>
+  <p><strong>统一验收证据</strong>（写入迁移阶段 DoD）：</p>
+  <ol>
+    <li>迁移后 PG dump 静态扫描（正则：<span class="mono">open_id</span> / <span class="mono">token</span> / <span class="mono">secret</span> / <span class="mono">private_key</span> 等模式）零命中；</li>
+    <li><span class="mono">legacy_*</span> 归档只读：不参与任何 workflow/通知/重试路径（<span class="mono">background_jobs</span> 迁入归档后不得触发重放）；</li>
+    <li>归档 TTL 清理任务执行日志可审计；</li>
+    <li>随机抽样 N 条源记录 → 目标 PG + 归档，逐字段核对符合上表 mapping。</li>
+  </ol>
+
+  <footer class="colophon">
+    <span><a href="index.html">← Docs Index</a></span>
+    <span>02 · Architecture · B2B Order Fulfillment</span>
+  </footer>
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad:true, theme:'base',
+    themeVariables:{
+      fontFamily:"'Noto Serif SC','Source Serif Pro',serif",
+      primaryColor:'#efeee5', primaryBorderColor:'#1B365D', primaryTextColor:'#1f1d18',
+      lineColor:'#1B365D', secondaryColor:'#f5f4ed', tertiaryColor:'#f5f4ed',
+      edgeLabelBackground:'#f5f4ed', clusterBkg:'#f5f4ed', clusterBorder:'#d4d1c5',
+      stateBkg:'#efeee5', stateBorder:'#1B365D', stateLabel:'#1f1d18',
+      stateLabelColor:'#1f1d18', labelTextColor:'#1f1d18', transitionLabelColor:'#1f1d18',
+      actorBkg:'#efeee5', actorBorder:'#1B365D', actorTextColor:'#1f1d18', actorLineColor:'#1B365D',
+      noteBkg:'#efeee5', noteBorder:'#d4d1c5'
+    },
+    flowchart:{curve:'basis'}, er:{useMaxWidth:true}
+  });
+</script>
+</body>
+</html>

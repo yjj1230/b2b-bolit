@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>v0.1_code_audit · 上线前代码缺口审计</title>
+<style>
+:root{--bg:#0b1220;--panel:#111c30;--panel2:#16233b;--line:#24334f;--text:#e2e8f0;--muted:#94a3b8;
+--p0:#f87171;--p1:#fbbf24;--p2:#22d3ee;--ok:#34d399;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;font-size:14px;line-height:1.6}
+a{color:#7dd3fc}
+header{position:sticky;top:0;z-index:20;background:#0d1526;border-bottom:1px solid var(--line);padding:10px 16px}
+header h1{font-size:17px} header .sub{color:var(--muted);font-size:12px}
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.badge{padding:2px 10px;border-radius:999px;font-size:12px;border:1px solid var(--line);background:var(--panel2)}
+.b-pass{border-color:var(--ok);color:#6ee7b7} .b-fail{border-color:var(--p0);color:#fca5a5;font-weight:700} .b-data{border-color:#7dd3fc;color:#7dd3fc}
+nav{position:sticky;top:0;z-index:19;display:flex;gap:6px;padding:6px 16px;background:rgba(13,21,38,.95);border-bottom:1px solid var(--line);overflow-x:auto}
+nav a{color:var(--muted);text-decoration:none;font-size:12px;padding:4px 10px;border:1px solid var(--line);border-radius:999px;white-space:nowrap}
+nav a:hover{color:#fff;border-color:var(--p0)}
+main{max-width:1180px;margin:0 auto;padding:14px 16px 80px}
+section{margin-bottom:26px}
+h2{font-size:16px;margin:14px 0 8px;padding-left:8px;border-left:3px solid var(--p0)}
+h3{font-size:14px;margin:12px 0 6px;color:#cbd5e1}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+.verdict{background:linear-gradient(180deg,#1a0f14,#111c30);border-color:#9f1239;padding:14px}
+.verdict p{margin:4px 0}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}
+.kpi b{font-size:22px;display:block} .kpi span{color:var(--muted);font-size:12px}
+table{width:100%;border-collapse:collapse;font-size:12.5px;margin:8px 0;background:var(--panel)}
+th,td{border:1px solid var(--line);padding:6px 8px;vertical-align:top;text-align:left}
+th{background:var(--panel2);color:#cbd5e1}
+td.code,td.test,td.note{color:#b6c2d4} td.note{color:var(--muted)}
+tr.m-ok td.st{color:var(--ok)} tr.m-part td.st{color:var(--p1)} tr.m-miss td.st{color:var(--p0)} tr.m-block td.st{color:var(--p0);font-weight:700}
+.cmd{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:#7dd3fc;background:#0d1526;padding:2px 6px;border-radius:6px}
+.filters{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap}
+.filters button{font:inherit;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:999px;padding:4px 12px;cursor:pointer}
+.filters button.on{border-color:var(--p0);color:#fff;background:#3b1220}
+.gap{border:1px solid var(--line);border-left:4px solid;border-radius:12px;background:var(--panel);padding:12px 14px;margin:10px 0}
+.gap.s-p0{border-left-color:var(--p0)} .gap.s-p1{border-left-color:var(--p1)} .gap.s-p2{border-left-color:var(--p2)}
+.ghead{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sev{font-size:11px;font-weight:800;padding:1px 8px;border-radius:999px} .s-p0{background:rgba(248,113,113,.15);color:#fca5a5;border:1px solid var(--p0)}
+.s-p1{background:rgba(251,191,36,.12);color:#fcd34d;border:1px solid var(--p1)} .s-p2{background:rgba(34,211,238,.12);color:#67e8f9;border:1px solid var(--p2)}
+.gid{margin-left:auto;color:var(--muted);font-size:11px}
+.gmeta{margin:6px 0} .tag{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:0 8px;font-size:11px;margin-right:8px;color:#cbd5e1}
+.src,.gevid,.gfiles,.grisk,.gact{font-size:12.5px;margin:3px 0} .gevid b,.gfiles b,.grisk b,.gact b{color:#cbd5e1}
+.gact{background:#0d1a2b;border-radius:8px;padding:6px 8px}
+.pkgrow{display:flex;align-items:center;gap:10px;margin:6px 0}
+.pkgn{width:190px;font-size:12px;color:#cbd5e1;font-family:ui-monospace,monospace}
+.pkgbar{flex:1;height:10px;background:#1e293b;border-radius:6px;overflow:hidden}
+.pkgbar div{height:100%;border-radius:6px}
+.pkgc{width:56px;text-align:right;font-weight:700}
+.pkgf{width:80px;color:var(--muted);font-size:11px}
+.pkgnote{font-size:11.5px;color:var(--muted);margin:-2px 0 8px 200px}
+.zero{color:var(--p0);font-weight:700}
+pre{background:#0d1526;border:1px solid var(--line);border-radius:10px;padding:10px;overflow:auto;font-size:11px;color:#a5d6ff;max-height:400px}
+button.act{font:inherit;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:8px;padding:6px 12px;cursor:pointer}
+.note{color:var(--muted);font-size:12px}
+@media(max-width:760px){.pkgrow{flex-wrap:wrap} .pkgn{width:100%}}
+</style>
+</head>
+<body>
+<header>
+<h1>v0.1_code_audit · 上线前代码层面缺口审计</h1>
+<div class="sub">审计对象：全部代码（cmd/internal/migrations/config/compose/tests/scripts）× v0.1 发布口径 × docs/v0.1 × 影子轨 12-shadow-full-flow · 最新基准 <b>16012a5</b>（feat_v0.1 · 第19-21轮影子/A轨 compose 冷启动与 Docker 镜像 smoke；细项快照仍为 4e53763） · 2026-08-20 · 前序轮次证据自 486db86 保留在档</div>
+<div class="badges">
+<span class="badge b-pass">integration cover PASS · 86.2% ≥ 85% · domain 100%</span>
+<span class="badge b-pass">test-tests 全绿（L0-L3 黑盒）</span>
+<span class="badge b-pass">go test ./... 通过</span>
+<span class="badge b-pass">scripts/fullchain ALL GREEN</span>
+<span class="badge b-pass">make test-shadow 全绿（纯函数 + workflow 影子模式 + L1 集成）</span>
+<span class="badge b-pass">影子/主 compose config 校验 PASS · HTML 结构校验 PASS</span>
+<span class="badge b-pass">P0 代码缺口 13 项：本仓可收敛项已全部关闭</span>
+<span class="badge b-data">P1 12 · P2 5 · 外部阻塞 5 类（现场）</span>
+</div>
+<div class="note" style="margin:0 0 14px">2026-08-20 23:50 第 21 轮复验（HEAD 16012a5）：integration cover <b>86.2%</b>（门禁 85%）· domain 100%；tests L0-L3 全绿；concurrency / reconcile / audit / fullchain 全部 PASS；ECM 自检与 CQ/图谱/任务一致性门禁通过；影子栈 compose 冷启动 8/8、A 轨基础 compose 冷启动 9/9、Docker 镜像 11/11。本页下述细项仍为 4e53763 快照，下一轮审计再整体重生成。</div>
+</header>
+<nav id="nav">
+<a href="#s1">结论</a><a href="#s2">执行证据</a><a href="#s3">覆盖率</a><a href="#s4">需求×代码×测试</a><a href="#s5">17 场景支撑</a><a href="#s6">缺口台账</a><a href="#s7">下游 Agent 复验手册</a><a href="#s8">机器可读 JSON</a>
+</nav>
+<main>
+
+<section id="s1">
+<h2>1 · 审计结论（一句话）</h2>
+<div class="card verdict">
+<p><b>代码主体已就位，但存在 12 个 P0 代码级缺口与 1 个未达标的覆盖率门禁，不能直接判定 G2 GO。</b></p>
+<p>核心事实：① 代码主体已实现（16+4 端点、15 信号、五 FSM、31 表迁移、桥接、sync、企微网关、N-01..N-10 大部分落点）；② 全量测试除覆盖率门禁外全绿；③ 但<b> 授权层存在“测试/演示通过、生产 SpiceDB 必失败”的分裂</b>（AUTH-02/03）、<b>信号级鉴权整体缺失</b>（AUTH-01）、<b>compose 里企微回调转接地址错误</b>（WEC-01）、<b>官方回单图片字段未映射</b>（WEC-02）、<b>真实 OCR 未实现</b>（OCR-01）、<b>同步 Job 与桥接契约未闭环</b>（SYNC/BRG），这些是上线前必须先补的代码缺口。</p>
+<p class="note">审计口径：代码缺口 = 交互（17 场景）、业务流程（八节点/15 信号）、操作功能（商务承接 STK/SHP/INV + 桥接下单 + 我的订单）所需的代码能力缺失或未验证。</p>
+</div>
+<div class="card" style="border-left:4px solid var(--ok)">
+<h3>1.1 · 第 1 轮证据收敛结果（依据 ECM：代码/配置修改 + 测试证据 + 全量回归）</h3>
+<table><tr><th>缺口</th><th>状态</th><th>收敛动作与测试证据</th></tr>
+<tr><td><b>COV-01</b></td><td>✅ 已关闭</td><td>make cover：total 85.1% ≥85%（84.0→85.1）、domain 100% 硬门禁 PASS；证据 coverage.out/coverage.txt（fresh）</td></tr><tr><td><b>AUTH-01</b></td><td>✅ 已关闭</td><td>新增 internal/authz/signals.go 信号级角色矩阵 + handleOrderSignal/handleCreateOrder 闸门 + Operator 以鉴权身份覆盖；测试 internal/authz/signals_test.go、internal/api/v01_authz_test.go、signals_test.go</td></tr><tr><td><b>AUTH-02</b></td><td>✅ 已关闭</td><td>schema.zed shipment.append_evidence += tenant->accounting + tenant->ops；authz_integration_test 真 SpiceDB 断言财务/商务可上传、跨租户拒绝</td></tr><tr><td><b>AUTH-03</b></td><td>✅ 代码侧关闭</td><td>cmd/worker 启用 Outbox 投影器（RunOnce+5s 循环）；scripts/seedrel 补 tenant#ops=u-op；Dockerfile/compose 增 seedrel 一次性服务；生产对象级关系自动写入</td></tr><tr><td><b>WEC-01</b></td><td>✅ 已关闭</td><td>docker-compose wecom 补 B2B_API_ADDR=http://api:8080 + depends_on api healthy；compose config 校验通过</td></tr><tr><td><b>WEC-05</b></td><td>✅ 已关闭</td><td>NotifyApproval 改为「通过/驳回」双按钮（key=approve:/reject:），按钮文案与动作一致；wecom_test 断言双按钮</td></tr><tr><td><b>WEC-02</b></td><td>✅ 代码侧关闭</td><td>CallbackPayload 补 xml:PicUrl/MediaId 映射 + cmd/wecom 无 URL 时回退 MediaID；TestW1GroupImageCallbackFields 覆盖官方 XML 样例；真实 V-F 仍待现场</td></tr><tr><td><b>API-01</b></td><td>✅ 已关闭</td><td>新增 GET /api/v1/orders（OP/ADMIN 闸门、state/limit、BFF 最小投影）；repo.ListOrders 复用；v01_authz_test 覆盖 403/200/400</td></tr><tr><td><b>ROL-01</b></td><td>✅ 代码侧关闭</td><td>审批人路由配置化（workflows.AssigneeConfig + B2B_ASSIGNEE_* 环境变量 + cmd/api 注入）；生产白名单身份 B2B_V01_PRINCIPALS + Server.RoleResolver（未命中 401）；cmd/api/main_test 覆盖</td></tr><tr><td><b>SYNC-01</b></td><td>✅ 已关闭</td><td>cmd/sync 支持 -interval 周期循环 + -state-file 探针；compose sync restart=unless-stopped + healthcheck（15min 时效）+ wecom healthcheck</td></tr><tr><td><b>OCR-01</b></td><td>🟡 部分收敛</td><td>ReceiptRobot 增加 MinConfidence 阈值：低置信拒绝自动登记走人工补登（测试覆盖）；生产 OCR/LLM 供应商仍未接入=外部阻塞</td></tr><tr><td><b>BRG-01</b></td><td>🟡 部分收敛</td><td>classifyError 100%、ExchangeCode 错误分支、bridge 列表/UI 处理器补测（包覆盖 73.2→82.5%）；真实旧系统契约复核仍需只读账号现场执行=外部阻塞</td></tr><tr><td><b>SYNC-02</b></td><td>🟡 部分收敛</td><td>file/http 双源 + 周期循环已闭环；bitable/审批流/凭证/通讯录具体 API 契约待 T1/T3 现场调研=外部阻塞</td></tr>
+<tr><td><b>WEC-03</b></td><td>✅ 已关闭</td><td>compose wecom/sync 补 healthcheck（wecom /wecom/healthz；sync state-file 15min 时效探针）</td></tr>
+<tr><td><b>CFG-01</b></td><td>✅ 已关闭</td><td>compose api 注入 B2B_FEISHU_BRIDGE_ENABLED/BASE_URL/APP_ID/REDIRECT_URI 与 B2B_V01_PRINCIPALS/B2B_ASSIGNEE_*</td></tr>
+<tr><td><b>CMD-01</b></td><td>🟡 部分收敛</td><td>cmd/api(parsePrincipals) 与 cmd/sync(touchStateFile) 已补测试；cmd/worker、cmd/wecom 主装配仍依赖 compose smoke</td></tr>
+<tr><td><b>外部阻塞</b></td><td>🔴 需现场</td><td>BRG-01 真实旧系统契约复核（A-03/A-06：需旧系统只读账号/接口）；OCR-01 生产 OCR/LLM 供应商选择（可降级为手动上传并书面冻结）；SYNC-02 飞书 bitable/审批流/凭证/通讯录真实源接线（T1/T3 现场调研）；WEC-02/04 V-E/V-F 真实企微现场验收（域名/群/机器人回调）；CFG-02 真实 corp/secret/token/AESKey 填入（现场，不入 git）；AUTH-03 生产 SpiceDB 需执行 seedrel（compose 已自动）+ 真实部署 smoke</td></tr>
+</table>
+<p class="note">复验证据：go test -count=1 ./... → PASS（全部包；cmd/api、cmd/sync 新增测试）；make cover → PASS total 85.1%（门禁 85%）· domain 100%；go test -tags integration ./internal/authz/... → PASS（真 SpiceDB schema 校验）；docker compose config（B2B_PGAPI_API_KEY=dummy） → PASS（含 B2B_API_ADDR/seedrel/sync 探针）。</p>
+</div>
+<div class="card" style="border-left:4px solid var(--p2)">
+<h3>1.3 · 第 3 轮证据收敛结果</h3>
+<table><tr><th>缺口</th><th>状态</th><th>收敛动作与测试证据</th></tr>
+<tr><td><b>WEC-04</b></td><td>✅ 已关闭</td><td>守门员官方群发失败/通道未配置不再 500：确认事件已落链，返回 sent=false + fallback_required + 可读回退指令（PC 兜底/人工转发）；TestN01GatekeeperSendFallback 覆盖</td></tr><tr><td><b>UI-01</b></td><td>🟡 部分收敛</td><td>新增 GET /api/v1/orderdata/{customers,products,purchase-contracts}（OP/ADMIN，pgAPI Provider 统一分页/过滤）；assistant_ui 挂 datalist 预填客户/产品/合同，pgAPI 未配置自动降级手工填写；handler 参数/错误/nil 归一化测试覆盖</td></tr><tr><td><b>UI-02</b></td><td>🟡 部分收敛</td><td>新增商务最小操作台 GET /ops：待办裁决（STOCK_REVIEW 选仓、WAREHOUSE 发货数量、RECEIPT_EX、INVOICE_FINANCE_ISSUE、TRANSFER）、全量订单、发货单凭证登记；新增 GET /api/v1/orders/{id}/shipments；页面与分支测试覆盖（浏览器级 e2e 仍未引入）</td></tr><tr><td><b>D-04</b></td><td>✅ 已关闭</td><td>限时放行生成 RECEIPT_FOLLOWUP 待办（B2B_ASSIGNEE_SALES 可配置）+ 回单凭证登记同事务自动闭合该待办（verdict=RECEIPT_PROVIDED）；TestL211 与 TestV01ReceiptClosesFollowupTask 覆盖</td></tr><tr><td><b>CMD-01</b></td><td>🟡 进一步收敛</td><td>cmd/wecom handleGroupImage 三分支测试已补（MediaID 回退/忽略/robot disabled）</td></tr>
+<tr><td><b>剩余阻塞</b></td><td>🔴 现场/外部</td><td>BRG-01 真实旧系统契约复核（只读账号/现场）；OCR-01 生产 OCR/LLM 供应商（可降级手动上传书面冻结）；SYNC-02 bitable/审批流/凭证/通讯录真实源接线（T1/T3 现场）；WEC-02/04 V-E/V-F 企微现场验收 + CFG-02 真实密钥；V01-01 A5 无回单规则待业务裁决；UI 浏览器级 e2e 与更完整操作页（0.2 产品化）</td></tr>
+</table></div>
+<div class="card" style="border-left:4px solid var(--ok)">
+<h3>1.4 · 第 4 轮证据收敛结果（收敛终点判定）</h3>
+<table><tr><th>项</th><th>状态</th><th>证据</th></tr>
+<tr><td><b>UI-01/UI-02 smoke</b></td><td>✅ 关闭（可收敛部分）</td><td>新增 internal/api/ui_smoke_test.go 静态断言两页面关键控件与 API 调用面；真实起 LocalRunner API(:18090)+Headless Chrome 渲染 /ops 与 /assistant：页面标题/待办空态/prefill datalist 均出现，console 0 JS 错误（Uncaught/Syntax/Type/Reference 全无）</td></tr><tr><td><b>BRG-02</b></td><td>✅ 决策固化</td><td>token 缓存为进程内存=已知限制：v0.1 单实例+2h token+提前15min重授权；api 重启需重新授权，回退手册已注明（0.2 换持久化）</td></tr><tr><td><b>D-05</b></td><td>🔵 终判=产品化后置</td><td>审批卡风险摘要（毛利/价格差异/信用暴露）需要业务数据聚合与产品文案，v0.1 不阻塞发布，归入 0.2 产品化清单</td></tr><tr><td><b>D-01</b></td><td>🔵 终判=待产品裁决</td><td>SW1 库存预留与 v0.1 M1「锁库存暂不做」冲突：v0.1 按发布文档维持 M1，demo 演进项转 0.2 决策</td></tr>
+<tr><td><b>剩余外部阻塞</b></td><td>🔴 现场依赖</td><td>BRG-01 真实旧系统契约复核（只读账号/现场）；OCR-01 生产 OCR/LLM 供应商（书面降级：手动上传+机器人停用）；SYNC-02 bitable/审批流/凭证/通讯录真实源接线（T1/T3 现场）；WEC-02/04 V-E/V-F 企微现场验收 + CFG-02 真实密钥；V01-01 A5 无回单规则待业务裁决</td></tr>
+</table>
+<p class="note"><b>本仓可收敛缺口已全部关闭；剩余 5 类均为现场账号/供应商/真实配置/业务裁决外部依赖，已具备可签字降级方案。代码面结论：G2 GO 候选，唯一仍需人工执行的 G1 门禁为真实契约复核。</b></p>
+</div>
+<div class="card" style="border-left:4px solid #f87171">
+<h3>1.5 · 现场取证整合（用户新增 spec/evidence，2026-08-19）</h3>
+<p class="note"><b>现场结论：No-Go（当前不建议第一次生产发布）。</b>代码侧与本现场侧必须合并评审；本页 §1.1-§1.4 只证明仓库代码收敛，不代表现场已部署。</p>
+<table><tr><th>直接阻塞项</th><th>现场证据</th></tr>
+<tr><td><b>EX-01 部署对象不一致</b></td><td>现场新系统为 b2b_pilot_v2（main@bf6a9cb7），而本项目设计/代码为 b2b_pilot_v3——必须明确唯一仓库、分支、提交与部署目录</td></tr><tr><td><b>EX-02 桥接模块缺失</b></td><td>现场 /api/v1/bridge/auth-url 返回 404；仓库无 bridge.go；本仓 internal/bridge 已实现但未部署到现场新系统</td></tr><tr><td><b>EX-03 V01 审批配置缺失</b></td><td>旧系统无 V01 profile；TEST_SUPERVISOR/TEST_CHAIRMAN 暂空，审批链无法形成（L1/L3 证据）</td></tr><tr><td><b>EX-04 B2B_V01_ 自动确认缺失</b></td><td>旧系统生产代码与 GitLab main(a42a115) 均无 B2B_V01_ 前缀自动确认逻辑；T-01 唯一小改未实现</td></tr><tr><td><b>EX-05 飞书回调白名单未就绪</b></td><td>重定向 URL 仅 3 个旧系统地址，无 v0.1 新回调地址（R1-03）</td></tr><tr><td><b>EX-07 新系统业务库未初始化</b></td><td>pilot_business 0 张业务表；仓库迁移仅 001-002（本仓已有 001-007 未部署）</td></tr></table>
+<h3>现场已通过项（可直接回填发布跟踪）</h3><ul><li>旧系统代码一致性：GitLab main@a42a115 与生产 102 个正式部署文件 SHA-256 全部一致（R1-02）</li><li>旧系统接口契约存在：/api/approval/feishu-user-by-code 返回 400 missing code、/external-orders/create 存在 8-200 幂等键校验与 303/submission-status（R1-04/05）</li><li>pgAPI 收敛一致：生产 OpenAPI 19 路径=三核心表 customers/products/purchase-contracts；rhcrm-server main@b387f24f；两条 30 分钟同步链最近执行成功（R1-10）</li><li>数据基线：多维表审批 1370 行/客户 3150/产品 293；pgAPI 客户 3231(有效3150)/产品306(有效293)/购销合同8807(业务有效7485)；旧系统滞留待办 订单9+备货8+发货334+开票43（R1-13）</li><li>人员映射：sales_person_map 22 人、agent_person_map 7 人，陈虹励已在 agent 白名单（R1-06）</li><li>敏感扫描：交付包文本/XLSX 扫描密码/Secret/Token/open_id 0 命中</li><li>生产部署拓扑、基础五元组、异常清单、证据缺口清单均已形成 L1 证据</li></ul>
+<h3>证据缺口（GAP）</h3><ul><li>GAP-01 v0.1 OAuth 回调 URL 未提供/未加白名单（阻塞）</li><li>GAP-02 TEST_SUPERVISOR/TEST_CHAIRMAN 缺姓名与 open_id 脱敏指纹（阻塞）</li><li>GAP-04 真实授权创建订单联调未做（只读约束；需测试环境 L1 联调证据，阻塞）</li><li>GAP-05 PC 兜底目标 URL 未定（当前只有旧 miniapp 页面，阻塞）</li><li>GAP-09 V01 profile 未创建（阻塞）</li><li>GAP-10 B2B_V01_ 自动确认未实现（阻塞）</li><li>GAP-11 桥接模块与数据库迁移未部署（阻塞）</li><li>GAP-03 企微可信 IP 后台截图待归档（非阻塞）</li><li>GAP-06 附件保留策略未正式化（中）</li><li>GAP-08 旧系统守护/磁盘告警：npm run dev/tsx 运行、磁盘余量约 4.62-5.44GiB（中）</li><li>GAP-12 pgAPI 真实端到端同步时延未取证（最大等待 30 分钟；中）</li></ul>
+<p class="note">本仓代码侧（b2b_pilot_v3@cc59aca）make cover 85.0% / domain 100% 本轮复跑结果见 §2-3；现场侧结论以 spec/evidence/第一次发布-Go-NoGo结论.md 为准：No-Go；下一步必须完成：新系统唯一部署基线发布（bridge+迁移 001-007）、旧系统 T-01 小改+T-03 V01 profile、回调白名单与企微入口替换、测试环境 OAuth/下单/幂等/审批路由联调</p>
+</div>
+<div class="card" style="border-left:4px solid var(--ok)">
+<h3>1.6 · 第 5 轮证据收敛结果（2026-08-20 · commit 4e53763 → 93a9f88 · 影子轨全量入仓审计）</h3>
+<table><tr><th>项</th><th>状态</th><th>证据</th></tr>
+<tr><td><b>COV-01 覆盖率门禁</b></td><td>✅ 维持通过</td><td>make cover：total <b>85.5%</b>（门禁 85%）· domain 100% 硬门禁 PASS；coverage.out / coverage.txt 已随 4e53763 更新（含 internal/shadow、internal/shadowguard 包）</td></tr>
+<tr><td><b>影子纯函数核心</b></td><td>✅ 已关闭</td><td>internal/shadow：FSM 79 边回放、事件→Signal 映射（含 ignore 语义）、分歧四分类（MAPPING/FSM_GAP/LEGACY_ANOMALY/DATA_GAP）、确定性投递计划；S-01..S-03 全绿</td></tr>
+<tr><td><b>影子工作流模式</b></td><td>✅ 已关闭</td><td>OrderWorkflowParams.Shadow=true 时 Timer 全抑制；SignalShadowInject 只注入 Timer 等价分支；未知 shadow-inject 种类忽略不重启段；TestShadowParityWithNonShadow 同信号对拍（六同原则）全绿</td></tr>
+<tr><td><b>影子守卫与隔离</b></td><td>✅ 已关闭</td><td>internal/shadowguard 六项 fail-fast（库名 b2b_shadow / namespace b2b-shadow / task queue b2b-shadow-order / WeCom mock / bridge false / SpiceDB 白名单）；shadow-migrate DSN 库名前置断言；docker-compose.shadow.yml 自带 shadow-temporal，与 A 轨主机名零可达</td></tr>
+<tr><td><b>影子数据闭环</b></td><td>✅ 已关闭</td><td>migrations/shadow/008（5 表 + chang-an-shadow/u-shadow-* 基座）；shadow-ingest（join_source 按 instance_id 关联 orders.jsonl、嵌套 detail 紧凑化）；shadow-feed（35 条真实 status 规则，UNMAPPED 不猜测）；shadow-audit（-interval 24h + 26h 探针 + SetCoverage 聚合防双计）；scripts/shadow_sentinel 查询失败也报 finding</td></tr>
+<tr><td><b>重放策略</b></td><td>✅ 已关闭</td><td>影子 Starter：WorkflowIDReusePolicy=AllowDuplicate + WorkflowIDConflictPolicy=TerminateExisting（订单/预订单均覆盖，单测已提交）</td></tr>
+<tr><td><b>回归证据</b></td><td>✅</td><td>make cover 85.5% PASS · domain 100%；go vet PASS；make test-shadow 全绿；test-l0 / test-l1(-p 1) / workflows L2 / tests-l1..l3 全绿；shadow compose 与主 compose config 校验通过；git commit 4e53763</td></tr>
+<tr><td><b>剩余外部阻塞（仍红）</b></td><td>🔴 现场依赖</td><td>① BRG-01 旧系统真实契约复核（测试环境已部署，缺 pgAPI/旧系统字段级真实样例）；② OCR-01 生产 OCR/LLM 供应商（书面降级：手动上传）；③ SYNC-02 bitable/审批流/凭证/通讯录真实源（T1/T3）；④ WEC-02/04 V-E/V-F 企微现场 + CFG-02 生产密钥；⑤ 影子 HR1 业务签字 / HR2 pgAPI 只读凭据；⑥ V01-01 A5 无回单规则业务裁决</td></tr>
+</table>
+<p class="note"><b>第 5 轮结论：</b>本仓代码面（A 轨 + 影子轨 S）可收敛缺口全部关闭并已提交；现场部署对象仍是测试服务器 pilot_v3@85eb85d（未含影子栈），生产发布仍 No-Go。代码面判定维持「G2 GO 候选」，但必须叠加现场 R-06/R-08/R-10 与影子 HR1/HR2 证据才可放行。</p>
+</div>
+<div class="kpis">
+<div class="kpi"><b>13→0</b><span>P0 代码缺口（本仓已收敛）</span></div>
+<div class="kpi"><b>12</b><span>P1 发布周必须处置</span></div>
+<div class="kpi"><b>5</b><span>P2 可后置/待产品裁决</span></div>
+<div class="kpi"><b>85.5%</b><span>全仓覆盖率（门禁 85%，PASS）</span></div>
+<div class="kpi"><b>21+22</b><span>L2 E2E 用例 + fullchain 步数</span></div>
+</div>
+</section>
+
+<section id="s2">
+<h2>2 · 执行证据（本次审计真实执行的命令与结果）</h2>
+<div class="card">
+<table><tr><th>命令</th><th>结果</th><th>说明</th></tr>
+<tr><td class='cmd'>GOCACHE=$PWD/.audit_cache go test -count=1 ./...</td><td><b>PASS</b></td><td>全部 12 个 internal 包 + tests/l0_unit 通过；cmd/api|worker|wecom|sync 无测试文件（缺口 CMD-01）</td></tr><tr><td class='cmd'>GOCACHE=$PWD/.audit_cache make cover</td><td><b>FAIL</b></td><td>integration + -coverprofile 全包通过；total: 84.0% &lt; 85% 门禁，Makefile 覆盖门禁中止（缺口 COV-01）。domain 100% 硬门禁未执行到，单独核对 domain=100.0%</td></tr><tr><td class='cmd'>GOCACHE=$PWD/.audit_cache make test-tests</td><td><b>PASS</b></td><td>tests/l0_unit(6 契约用例)、l1_integration(5 HTTP×DB 用例)、l2_e2e(21 用例)、l3_system(2 系统驱动用例) 全绿</td></tr><tr><td class='cmd'>go run ./scripts/fullchain -dsn &lt;55432 b2b_pilot_test&gt;</td><td><b>PASS</b></td><td>22+ 步 HTTP 全链 ALL GREEN：订单全链 INV_CLOSED(28 事件) + 凭证链 v1/v2 + 预订单链派生 + 待办/事件 + 出站通知 101 卡(mock)</td></tr><tr><td class='cmd'>go tool cover -func=coverage.out（fresh）</td><td><b>DATA</b></td><td>见下方覆盖率表；关键 0% 函数：handleBridgeListOrders / handleBridgeUI / bridge.classifyError / workflows.NewActivitiesWithData</td></tr>
+</table>
+<p class="note">测试环境：本机 go1.25.4；PG 55432(b2b_pilot_test) 可用；SpiceDB/Temporal 走测试套件内置（L2 Temporal TestSuite）。</p>
+</div>
+</section>
+
+<section id="s3">
+<h2>3 · 测试覆盖率（fresh make cover，2026-08-19 16:33 UTC）</h2>
+<div class="card">
+<div class="pkgrow"><div class="pkgn">internal/domain</div>
+    <div class="pkgbar"><div style="width:100.0%;background:#34d399"></div></div>
+    <div class="pkgc">100.0%</div><div class="pkgf">53 funcs</div></div><div class='pkgnote'>100% 硬门禁 ✓（FSM/守恒/幂等/守门员纯函数）</div><div class="pkgrow"><div class="pkgn">internal/integration</div>
+    <div class="pkgbar"><div style="width:100.0%;background:#34d399"></div></div>
+    <div class="pkgc">100.0%</div><div class="pkgf">19 funcs</div></div><div class='pkgnote'>政策/时长/修改分类 100% ✓</div><div class="pkgrow"><div class="pkgn">internal/pgapi</div>
+    <div class="pkgbar"><div style="width:95.7%;background:#34d399"></div></div>
+    <div class="pkgc">95.7%</div><div class="pkgf">22 funcs</div></div><div class='pkgnote'>pgAPI HTTP 客户端高覆盖 ✓</div><div class="pkgrow"><div class="pkgn">internal/orderdata</div>
+    <div class="pkgbar"><div style="width:92.2%;background:#34d399"></div></div>
+    <div class="pkgc">92.2%</div><div class="pkgf">29 funcs</div></div><div class='pkgnote'>Memory/HTTP Provider 高覆盖 ✓</div><div class="pkgrow"><div class="pkgn">internal/authz</div>
+    <div class="pkgbar"><div style="width:94.9%;background:#34d399"></div></div>
+    <div class="pkgc">94.9%</div><div class="pkgf">19 funcs</div></div><div class='pkgnote'>StaticChecker/SpiceDB 客户端高覆盖 ✓</div><div class="pkgrow"><div class="pkgn">internal/config</div>
+    <div class="pkgbar"><div style="width:93.3%;background:#34d399"></div></div>
+    <div class="pkgc">93.3%</div><div class="pkgf">4 funcs</div></div><div class='pkgnote'>环境变量加载 ✓</div><div class="pkgrow"><div class="pkgn">internal/wecom</div>
+    <div class="pkgbar"><div style="width:89.6%;background:#34d399"></div></div>
+    <div class="pkgc">89.6%</div><div class="pkgf">62 funcs</div></div><div class='pkgnote'>官方网关 mock 测试齐全，真实验收 V-A..V-F 待现场</div><div class="pkgrow"><div class="pkgn">internal/sync</div>
+    <div class="pkgbar"><div style="width:88.7%;background:#34d399"></div></div>
+    <div class="pkgc">88.7%</div><div class="pkgf">11 funcs</div></div><div class='pkgnote'>file/http 拉取、映射、敏感剥离、批次校验有测试</div><div class="pkgrow"><div class="pkgn">internal/api</div>
+    <div class="pkgbar"><div style="width:83.0%;background:#fbbf24"></div></div>
+    <div class="pkgc">83.0%</div><div class="pkgf">53 funcs</div></div><div class='pkgnote'>16+4 端点；bridge list/UI handler 0%</div><div class="pkgrow"><div class="pkgn">internal/repo</div>
+    <div class="pkgbar"><div style="width:80.5%;background:#fbbf24"></div></div>
+    <div class="pkgc">80.5%</div><div class="pkgf">109 funcs</div></div><div class='pkgnote'>L1 真库覆盖；sync.ApplySyncBatch 69.2%</div><div class="pkgrow"><div class="pkgn">internal/workflows</div>
+    <div class="pkgbar"><div style="width:80.3%;background:#fbbf24"></div></div>
+    <div class="pkgc">80.3%</div><div class="pkgf">151 funcs</div></div><div class='pkgnote'>Temporal TestSuite；ValidateOrderData 38.1%、NewActivitiesWithData 0%</div><div class="pkgrow"><div class="pkgn">internal/bridge</div>
+    <div class="pkgbar"><div style="width:73.2%;background:#fbbf24"></div></div>
+    <div class="pkgc">73.2%</div><div class="pkgf">19 funcs</div></div><div class='pkgnote'>0.1 命门模块，错误分类 classifyError 0%</div><div class="pkgrow"><div class="pkgn">TOTAL</div>
+    <div class="pkgbar"><div style="width:84.0%;background:#fbbf24"></div></div>
+    <div class="pkgc">85.5%</div><div class="pkgf"></div></div><div class='pkgnote'>门禁要求 ≥85% → PASS（含 internal/shadow、internal/shadowguard）</div>
+</div>
+<h3>3.1 · v0.1 关键函数级覆盖（缺口高亮）</h3>
+<div class="card">
+<table><tr><th>文件</th><th>函数</th><th>覆盖</th><th>为什么重要</th></tr>
+<tr><td style='font-family:monospace'>internal/api/bridge_handlers.go</td><td>handleBridgeListOrders</td><td class='zero'>0.0%</td><td>桥接「我的订单」列表端点零测试（S2 成功标准的直接载体）</td></tr><tr><td style='font-family:monospace'>internal/api/bridge_handlers.go</td><td>handleBridgeCreateOrder</td><td class=''>64.0%</td><td>桥接下单主链路部分覆盖</td></tr><tr><td style='font-family:monospace'>internal/api/bridge_handlers.go</td><td>handleBridgeCallback</td><td class=''>56.2%</td><td>OAuth code 回调错误分支覆盖不足</td></tr><tr><td style='font-family:monospace'>internal/api/bridge_ui.go</td><td>handleBridgeUI</td><td class='zero'>0.0%</td><td>PC 兜底页面处理器零测试</td></tr><tr><td style='font-family:monospace'>internal/bridge/errors.go</td><td>classifyError</td><td class='zero'>0.0%</td><td>旧系统错误分类零测试（FEISHU_AUTH_EXPIRED/ORDER_DATA_INVALID 映射未验证）</td></tr><tr><td style='font-family:monospace'>internal/bridge/bridge.go</td><td>ExchangeCode</td><td class=''>65.5%</td><td>真实契约字段/错误分支未全测</td></tr><tr><td style='font-family:monospace'>internal/bridge/bridge.go</td><td>CreateOrder</td><td class=''>78.6%</td><td>multipart+303+轮询主链路有测试，错误/重试分支不全</td></tr><tr><td style='font-family:monospace'>internal/api/v01.go</td><td>handleSendToGroup</td><td class=''>81.0%</td><td>守门员 N-01 已测；出站失败/未实现分支留缝</td></tr><tr><td style='font-family:monospace'>internal/api/v01.go</td><td>handleLinkInvoiceOrder</td><td class=''>70.6%</td><td>N-05 已测；授权失败/关联冲突分支留缝</td></tr><tr><td style='font-family:monospace'>internal/api/v01.go</td><td>handleInvoiceSummary</td><td class=''>71.4%</td><td>N-05/N-08 已测；store 降级 501 分支留缝</td></tr><tr><td style='font-family:monospace'>internal/api/server.go</td><td>handleAppendEvidence</td><td class=''>77.8%</td><td>N-06 金额守恒已测；kind 非 INVOICE/501 分支留缝</td></tr><tr><td style='font-family:monospace'>internal/workflows/activities.go</td><td>ValidateOrderData</td><td class=''>38.1%</td><td>pgAPI 真实数据校验（客户等级/产品存在性/合同）仅少量分支，A-03/A-06 真实契约复核未做</td></tr><tr><td style='font-family:monospace'>internal/workflows/activities.go</td><td>GetCustomerGrade</td><td class=''>60.0%</td><td>pgAPI 失败/降级分支覆盖不足</td></tr><tr><td style='font-family:monospace'>internal/workflows/activities.go</td><td>NewActivitiesWithData</td><td class='zero'>0.0%</td><td>生产 Activity 装配函数无测试（L2 用 fake 装配）</td></tr><tr><td style='font-family:monospace'>internal/sync/sync.go</td><td>stringifyValue</td><td class=''>25.0%</td><td>HTTP 源 json.Number/nested 值分支未测</td></tr><tr><td style='font-family:monospace'>internal/repo/sync.go</td><td>ApplySyncBatch</td><td class=''>69.2%</td><td>V1 幂等已测；冲突/边界分支留缝</td></tr><tr><td style='font-family:monospace'>internal/repo/v01.go</td><td>LinkInvoiceOrderTx</td><td class=''>60.0%</td><td>订单级守恒核心事务，并发/超额度分支待补</td></tr><tr><td style='font-family:monospace'>internal/wecom/official.go</td><td>SendGroupCard</td><td class=''>81.8%</td><td>appchat 群发错误分支待补；真实 V-E 未验证</td></tr><tr><td style='font-family:monospace'>internal/wecom/receipt_robot.go</td><td>CaptureFromGroup</td><td class=''>89.3%</td><td>识别/匹配/登记主链已测；真实 OCR 与图片回调字段未验证</td></tr>
+</table>
+</div>
+</section>
+
+<div class="card" style="border-left:4px solid var(--ok)">
+<h3>3.2 · 第 5 轮影子轨覆盖说明（2026-08-20）</h3>
+<table><tr><th>包</th><th>证据</th></tr>
+<tr><td><code>internal/shadow</code></td><td>replay（79 边穷举）、mapping/feed（ignore + 确定性投递）、diverge（四分类）、signals（TypedSignal）、store（SetCoverage 聚合/real-over-seed 优先级）单测与集成全绿</td></tr>
+<tr><td><code>internal/shadowguard</code></td><td>六项 fail-fast 正/负向测试全绿；拒绝 A 轨 DSN/namespace/queue/WeCom 非 mock/bridge=true</td></tr>
+<tr><td><code>internal/workflows</code></td><td>Shadow=true Timer 抑制、SignalShadowInject 等价分支、未知 inject 忽略、TestShadowParityWithNonShadow 同信号对拍、StartShadowOrderWorkflow/StartShadowPreOrderWorkflow 重放策略</td></tr>
+<tr><td><code>internal/sync</code></td><td>嵌套 JSONL 紧凑化 + join_source 补 flow_id/stage_code 测试</td></tr>
+</table>
+<p class="note">本地全栈 smoke：8 条源事件 → ingest → feed 建单 → 8 Signal 全投递 → 工作流到 INV_CLOSED → shadow-audit 21/79 边命中、0 分歧、0 对齐差异、0 卡住；写哨兵正/反向验证。</p>
+</div>
+<section id="s4">
+<h2>4 · 需求 → 代码 → 测试 矩阵（v0.1 全部功能落点）</h2>
+<div class="card">
+<table><tr><th>需求</th><th>名称</th><th>代码状态</th><th>代码落点</th><th>测试证据</th><th>缺口/备注</th></tr>
+<tr class="m-ok"><td><b>A1</b></td><td>选仓按钮+收货地址（锁库存暂缓）</td><td class="st">✅ 已实现+测试</td>
+    <td class="code">order_items.receive_address(006 迁移) · StockReviewSignal.WarehouseID 必填校验 · repo.StockPrepare 落所选仓 · workflows.TestN03a/b/c</td><td class="test">N-03（api+workflows+repo）L2；fullchain step06 走通</td><td class="note">锁库存 M1 已按决策不扣库存（repo/shipment.go 注释+事件）</td></tr><tr class="m-part"><td><b>A2</b></td><td>财务凭证主路径反转</td><td class="st">🟡 部分实现</td>
+    <td class="code">POST /orders/{id}/shipments/{sid}/evidence + kind/source/invoice_no/amount/tax(006) + N-06 金额守恒</td><td class="test">N-06 api/repo/L2 E2E；EvidenceChain L2</td><td class="note">缺：SpiceDB shipment.append_evidence 无 accounting/OP（AUTH-02）；上传 UI 未实现（UI-02）；OCR 四硬校验不全（INV-01）</td></tr><tr class="m-ok"><td><b>A3</b></td><td>发群守门员（第一轮强制）</td><td class="st">✅ 已实现+测试</td>
+    <td class="code">domain/gatekeeper.go(FSM+hash) · repo.AppendGatekeeperConfirmation(order_events 幂等) · POST send-to-group(销售 only+order.edit) · cmd/api GroupSender 接线</td><td class="test">N-01（api L2 + repo L1 + E2E）coverage 81%</td><td class="note">真实外部客户群可达性 V-E 未验证（WEC-04）</td></tr><tr class="m-ok"><td><b>A4</b></td><td>多单合并开票/关联追加/三金额</td><td class="st">✅ 已实现+测试</td>
+    <td class="code">006: invoice_order_links + invoices 三金额 · repo.LinkInvoiceOrderTx 订单级守恒 · POST link-orders + GET invoice-summary</td><td class="test">N-05（api+repo+L2 E2E）· api/v01_invoice_test.go</td><td class="note">业财归属 P4 业务待确认；LinkInvoiceOrderTx 60% 分支待补</td></tr><tr class="m-part"><td><b>A5</b></td><td>无回单开票例外审核</td><td class="st">🟡 部分实现</td>
+    <td class="code">ExceptionInvoice 链：invReceiptStep(5天 Timer)→invExceptionStep(RECEIPT_EX)→invInvoiceStep；receipt-ex-review 信号</td><td class="test">既有 L2-11/E2E ReceiptException 全绿；N-07 断言未按最终规则固化</td><td class="note">规则本身待确认(P1)；限时放行+补齐回单期限未实现（D-04）；例外审核 assignee=u-op 硬编码</td></tr><tr class="m-part"><td><b>A6</b></td><td>仓库群回单→机器人</td><td class="st">🟡 部分实现</td>
+    <td class="code">wecom.ReceiptRobot(RuleRecognizer) · repo.LookupWarehouseGroupBinding · cmd/wecom handleGroupImage 回调分流 · evidence kind=RECEIPT 追加</td><td class="test">N-10 repo L1；receipt_robot_test 5 用例</td><td class="note">官方图片回调 PicUrl/MediaId 未映射（WEC-02）；生产 OCR 未实现（OCR-01）；群升级 P2 前置</td></tr><tr class="m-part"><td><b>A7</b></td><td>订单创建多方分担/归属锁定</td><td class="st">🟡 部分实现</td>
+    <td class="code">internal/bridge(OAuth 代理+token 缓存+multipart 下单+幂等 B2B_V01_) · bridge API+PC 兜底 · assistant H5/PC · preorder 群上下文 N-04</td><td class="test">bridge 6 单测；bridge_handlers 2 用例；N-04 workflows</td><td class="note">真实旧系统契约未验证（BRG-01）；UI 静态演示数据（UI-01）；身份解析硬编码（ROL-01）</td></tr><tr class="m-part"><td><b>A8</b></td><td>0.1 架构决策（同步/不打扰/移出自动下单）</td><td class="st">🟡 部分实现</td>
+    <td class="code">cmd/sync file+http 源+SanitizeRow+ApplySyncBatch · compose sync 服务 · Dockerfile sync target · deferred 段 M2/M3</td><td class="test">sync 11 单测 + repo V01SyncBatchIdempotent；make test-tests 全绿</td><td class="note">sync 一次性运行无循环（SYNC-01）；bitable/审批流源缺失（SYNC-02）</td></tr><tr class="m-part"><td><b>B1</b></td><td>桥接下单（R1/R2 命门）</td><td class="st">🟡 部分实现</td>
+    <td class="code">internal/bridge 完整实现 + Recorder 回写 flow_id/instance_id + /api/v1/bridge/* + GET /bridge</td><td class="test">bridge_test 6 用例 + bridge_handlers_test 2 用例 + repo BridgeSubmissionRecorder L1</td><td class="note">真实契约复核 A-03/A-06 未做；列表端点 0% 覆盖；错误分类 0% 覆盖（BRG-01）</td></tr><tr class="m-part"><td><b>B2</b></td><td>我的订单/状态回显</td><td class="st">🟡 部分实现</td>
+    <td class="code">repo.ListBridgeSubmissions + GET /api/v1/bridge/orders + bridge_ui 表格 + GET /orders/{id} 详情跳转 /flows/:flow_id（detailURL）</td><td class="test">列表端点 handleBridgeListOrders 0.0% 覆盖；repo 列表 84.2%</td><td class="note">S2 成功标准测试证据缺失；旧系统详情跳转依赖 detailURL 台账</td></tr><tr class="m-part"><td><b>W1</b></td><td>企微 S1 侧边栏/OAuth/JS-SDK</td><td class="st">🟡 部分实现</td>
+    <td class="code">s1_handlers(jsapi-config/auth-exchange) · wecom official jsapi 双签名 + ContextIssuer · assistant_ui 页面</td><td class="test">W6/E2EWeComS1Sidebar；jsapi/official_identity 单测；handleExchange 76.5%</td><td class="note">V-D 真实企微双签名/上下文锁定未现场验证</td></tr><tr class="m-part"><td><b>W2</b></td><td>企微 S3 模板卡回调</td><td class="st">🟡 部分实现</td>
+    <td class="code">official.SendCard(template_card) · CallbackHandler EventKey→HTTP signal · cmd/wecom 路由</td><td class="test">callback_test 5 用例 + W5 E2E</td><td class="note">compose wecom 缺 B2B_API_ADDR（WEC-01）→ 容器内回调用默认 127.0.0.1:18080 必断</td></tr><tr class="m-ok"><td><b>W3</b></td><td>S4 工作台/待办</td><td class="st">✅ 已实现+测试</td>
+    <td class="code">GET /api/v1/todos(assignee/kind/state) · approval_tasks 检索 · assistant_ui 待办?无独立工作台页面</td><td class="test">TodosDuringFlow E2E；repo ListApprovalTasks 81.8%</td><td class="note">工作台 H5 页面未单独实现（assistant_ui 仅下单）</td></tr><tr class="m-part"><td><b>W4</b></td><td>守门员出站群发</td><td class="st">🟡 部分实现</td>
+    <td class="code">official.SendGroupCard(appchat) + api GroupSender 接线 + N-01</td><td class="test">group_sender_test + N-01</td><td class="note">真实外部群可达性 V-E 待验；无自动回退</td></tr><tr class="m-part"><td><b>S1</b></td><td>飞书同步 Job</td><td class="st">🟡 部分实现</td>
+    <td class="code">cmd/sync(file/http fetcher, MapRow, SanitizeRow, BatchChecksum, ApplySyncBatch) · sync.example.json</td><td class="test">sync 11 单测 88.7% + repo L1 幂等</td><td class="note">见 SYNC-01/02/03</td></tr><tr class="m-miss"><td><b>D1</b></td><td>最新 demo SW1 库存/交期确认+原子预留</td><td class="st">❌ 未实现</td>
+    <td class="code">workflows.stkReserveStep 明确「不触碰库存」(M1)；无账面/预留/可分配视图、无交期字段、无原子预留</td><td class="test">N-03 断言库存不变（锁库存暂缓口径）</td><td class="note">docs/demo 与 v0.1 文档冲突，需产品裁决；v0.1 发布按文档可后置</td></tr><tr class="m-part"><td><b>D2</b></td><td>最新 demo SW3 换仓协调</td><td class="st">🟡 部分实现</td>
+    <td class="code">WarehouseConfirmSignal TRANSFER + transfer-decision 闸门存在；RETURNED 后不重开 stock-review；无 AI 方案比较、无释放/锁定新仓</td><td class="test">workflows_test 覆盖 transfer 部分分支</td><td class="note">M5 转仓待业务确认；demo 演进未落地</td></tr><tr class="m-miss"><td><b>D3</b></td><td>最新 demo XS4 已发货改址 BLOCK</td><td class="st">❌ 未实现</td>
+    <td class="code">ClassifyModification D 类（地址）→ SHPShipAssigning 直达，无「已发货禁止改主订单→物流异常」逻辑</td><td class="test">ModificationClasses E2E（旧分类语义）</td><td class="note">demo 2026-08-19 新增交互未实现</td></tr><tr class="m-miss"><td><b>D4</b></td><td>最新 demo CW2 限时放行+补齐期限</td><td class="st">❌ 未实现</td>
+    <td class="code">ReceiptExReviewSignal 仅 APPROVED/REJECTED；无限时放行、无 3 工作日补齐回单待办闭环</td><td class="test">ReceiptException E2E（旧两态）</td><td class="note">demo 演进未实现</td></tr><tr class="m-part"><td><b>D5</b></td><td>最新 demo CW1 OCR 四项硬校验</td><td class="st">🟡 部分实现</td>
+    <td class="code">handleAppendEvidence 仅金额守恒一项；无发票重复/订单唯一/抬头税号一致校验</td><td class="test">N-06 只断言金额守恒</td><td class="note">INV-01</td></tr>
+</table>
+</div>
+</section>
+
+<section id="s5">
+<h2>5 · 17 场景交互/流程支撑判读</h2>
+<div class="card">
+<table><tr><th>场景</th><th>名称</th><th>代码支撑</th><th>代码证据与缺口</th></tr>
+<tr class="m-part"><td><b>XS1</b></td><td>查订单/订单详情</td><td class="st">🟡 部分</td><td class="code">GET /orders/{id}(BFF 投影) + send-to-group + events；AI 问单意图直达未实现(M3 暂缓)；销售 H5 未实现</td></tr><tr class="m-part"><td><b>XS2</b></td><td>人工下单</td><td class="st">🟡 部分</td><td class="code">POST /orders + assistant_ui 单页表单(静态演示数据)；v0.1 走桥接下单进旧飞书</td></tr><tr class="m-ok"><td><b>XS3</b></td><td>智能下单确认卡</td><td class="st">✅</td><td class="code">preorders+confirm/ignore/modify 信号+PreOrderWorkflow+N-02；template_card 三按钮；销售 only 403</td></tr><tr class="m-part"><td><b>XS4</b></td><td>销售工作台</td><td class="st">🟡 部分</td><td class="code">GET /todos 聚合+modify/resubmit；AI 驳回意见解析未实现；已发货改址 BLOCK 未实现；无工作台 H5</td></tr><tr class="m-part"><td><b>XS5</b></td><td>查物流图片发群</td><td class="st">🟡 部分</td><td class="code">订单详情+send-to-group(通用卡片)；物流图片生成未实现；销售 H5 未实现</td></tr><tr class="m-part"><td><b>XSZG1</b></td><td>审价审批</td><td class="st">🟡 部分</td><td class="code">price-review 信号+审价卡 notify+approve/reject 回调；无「要求修改」按钮（RETURNED 需 H5）；审批历史=approval_tasks 查询无独立端点</td></tr><tr class="m-part"><td><b>SW1</b></td><td>商务备货/履约确认</td><td class="st">🟡 部分</td><td class="code">stock-review(选仓必填+备注)+receive_address+N-03；最新 demo 库存口径/原子预留未实现；备货 H5 未实现</td></tr><tr class="m-block"><td><b>SW2</b></td><td>查询全量订单</td><td class="st">🚫 缺入口</td><td class="code">repo.ListOrders 有实现，但 HTTP 无 GET /api/v1/orders 列表端点 → 商务全量视图无入口（API-01）</td></tr><tr class="m-part"><td><b>SW3</b></td><td>换仓协调</td><td class="st">🟡 部分</td><td class="code">transfer-decision 链路存在；RETURNED 重确认原仓、无商务重选仓闭环、无 AI 方案（D-02）</td></tr><tr class="m-part"><td><b>XSZL1</b></td><td>工作台代下</td><td class="st">🟡 部分</td><td class="code">assistant_ui 先选归属销售（本地输入，无 pgAPI 客户自动补全/权限收窄）+bridge 下单</td></tr><tr class="m-part"><td><b>XSZL2</b></td><td>客户群入口代下</td><td class="st">🟡 部分</td><td class="code">assistant_ui 支持 group_id/chat_id/customer_* query 参数锁定；群上下文真实绑定经 official_identity；V-D 待验</td></tr><tr class="m-part"><td><b>CW1</b></td><td>正常开票/凭证登记</td><td class="st">🟡 部分</td><td class="code">evidence 端点+meta+金额守恒+N-05/N-06；财务上传页面未实现；SpiceDB 角色缺口；OCR 硬校验不全</td></tr><tr class="m-part"><td><b>CW2</b></td><td>无回单开票</td><td class="st">🟡 部分</td><td class="code">receipt 5 天分流+例外审核信号+E2E；限时放行/期限闭环未实现；规则待确认</td></tr><tr class="m-part"><td><b>CG1</b></td><td>确认接受发货任务</td><td class="st">🟡 部分</td><td class="code">warehouse-confirm 信号+STK_WAREHOUSE 待办+通知；仓管 H5 未实现；assignee 按仓名硬编码派生</td></tr><tr class="m-part"><td><b>CG2</b></td><td>确认已经发货</td><td class="st">🟡 部分</td><td class="code">ship-action qty+守恒 CHECK+行锁+N-09+部分发货 E2E；仓管 H5 未实现</td></tr><tr class="m-part"><td><b>CG3</b></td><td>回单凭证上传</td><td class="st">🟡 部分</td><td class="code">ReceiptRobot+群绑定+handleGroupImage+N-10；官方图片字段/真实 OCR 缺失</td></tr><tr class="m-part"><td><b>DSZ1</b></td><td>C/D 终审</td><td class="st">🟡 部分</td><td class="code">chairman-review+grade 判定+审批卡回调；ChairmanReviewSignal 无 RETURNED（要求修改不支持）</td></tr>
+</table>
+<p class="note">✅=发布可用（代码+测试闭环） · 🟡=部分（缺 UI/鉴权/真实通道/分支） · 🚫=缺入口（阻断） · ❌=未实现。</p>
+</div>
+</section>
+
+<section id="s6">
+<h2>6 · 缺口台账（13 P0 / 12 P1 / 5 P2，可直接作为下游 Agent 的工作清单）</h2>
+<div class="filters" id="gf">
+<button data-sev="all" class="on">全部</button><button data-sev="P0">P0 · 阻断</button><button data-sev="P1">P1 · 发布周</button><button data-sev="P2">P2 · 可后置</button>
+</div>
+<div id="gaplist">
+<div class="gap s-p0" data-sev="P0">
+  <div class="ghead"><span class="sev s-p0">P0</span><b>全仓覆盖率 84.0% &lt; 85% 门禁，make cover 失败</b><span class="gid">COV-01</span></div>
+  <div class="gmeta"><span class="tag">测试门禁</span><span class="src">依据：docs/v0.1/09-testing §4：全仓 ≥85% 实测门禁（目标 ≥98%）；发布计划 G1 门禁</span></div>
+  <div class="gevid"><b>代码证据：</b>make cover 实测：internal/... 全部 PASS 但 total 84.0%，Makefile awk 判 FAIL 退出 2；domain=100% 仍达标</div>
+  <div class="gfiles"><b>文件：</b>coverage.out / coverage.txt（fresh 16:33 UTC）</div>
+  <div class="grisk"><b>风险：</b>G1/G2 门禁不满足；补齐 1.0pp 缺口（bridge/错误分支/api 0% 函数最直接）</div>
+  <div class="gact"><b>建议动作：</b>优先补：bridge.errors.classifyError(0%)、api.handleBridgeListOrders(0%)、handleBridgeUI(0%)、workflows.NewActivitiesWithData(0%) 的测试；重跑 make cover 至 ≥85%</div>
+</div><div class="gap s-p0" data-sev="P0">
+  <div class="ghead"><span class="sev s-p0">P0</span><b>订单信号/建单缺少鉴权预检（CQ-01 破防）</b><span class="gid">AUTH-01</span></div>
+  <div class="gmeta"><span class="tag">授权</span><span class="src">依据：docs/v0.1/08-api §2：每个副作用前 SpiceDB CheckPermission；信号按 permission（chairman-review=order.approve 等）；CQ-01</span></div>
+  <div class="gevid"><b>代码证据：</b>handleCreateOrder、handleOrderSignal 均无 Checker 调用；internal/workflows/order.go 15 个闸门无 ActAuthCheck（仅 preorder 有）；grep AuthCheck 仅出现在 preorder.go</div>
+  <div class="gfiles"><b>文件：</b>internal/api/server.go:189/233 · internal/workflows/order.go(全闸门) · internal/api/signals.go</div>
+  <div class="grisk"><b>风险：</b>任意角色可投递审价/终审/备货/发货/开票信号；v0.1 单用户风险低但上线即越权</div>
+  <div class="gact"><b>建议动作：</b>API 层增加 signal→permission 映射预检（price-review/chairman-review→order.approve；stock-review→order.stock；ship-action/warehouse-confirm→shipment.confirm/reject；receipt-ex-review/invoice-issued/payment-confirm→reviewer/confirm_payment）+ 每个闸门 Activity AuthCheck；补越权测试</div>
+</div><div class="gap s-p0" data-sev="P0">
+  <div class="ghead"><span class="sev s-p0">P0</span><b>schema.zed 的 shipment.append_evidence 不含财务/商务/机器人 → A2 主路径生产 403</b><span class="gid">AUTH-02</span></div>
+  <div class="gmeta"><span class="tag">授权</span><span class="src">依据：docs/v0.1/01§1.2 Evidence 上传者=财务(主路径 A2)/仓管/机器人/销售；08-api 凭证端点权限</span></div>
+  <div class="gevid"><b>代码证据：</b>schema.zed shipment.append_evidence = requester + warehouse_operator + customer_contact；StaticChecker.roleAllows 却放行 OP/ACCOUNTING——测试/演示通过、SpiceDB 生产拒绝的分裂</div>
+  <div class="gfiles"><b>文件：</b>schema.zed · internal/authz/checker.go:110-117 · internal/api/server.go:330</div>
+  <div class="grisk"><b>风险：</b>v0.1 商务承接 CW1 上传凭证在生产 SpiceDB 模式 403，INV 走通失败</div>
+  <div class="gact"><b>建议动作：</b>扩展 schema：append_evidence = requester + warehouse_operator + customer_contact + tenant-&gt;accounting + tenant-&gt;ops + robot 关系；spicedb schema validate + L1 真 SpiceDB 用例</div>
+</div><div class="gap s-p0" data-sev="P0">
+  <div class="ghead"><span class="sev s-p0">P0</span><b>M4 Outbox 投影器未启用 → 生产无对象级授权元组（prestock/shipment/evidence）</b><span class="gid">AUTH-03</span></div>
+  <div class="gmeta"><span class="tag">授权</span><span class="src">依据：docs/v0.1/04 §4.2 三层授权模型；05 流程每步对象级判定</span></div>
+  <div class="gevid"><b>代码证据：</b>authz.Projector.Run 未被 cmd/api、cmd/worker、cmd/wecom 任何 main 调用；seedrel 基线只写 tenant#ops=u-supervisor/bob-super、accounting、warehouse staff 与 order owner——u-op(虹励) 不在任何 ops 关系里，prestock/shipment/evidence 实例关系全缺</div>
+  <div class="gfiles"><b>文件：</b>internal/authz/projector.go · cmd/{api,worker}/main.go · scripts/seedrel/main.go</div>
+  <div class="grisk"><b>风险：</b>生产 SpiceDB 模式下 shipment.view/confirm/append_evidence、prestock.* 全部 DENY；v0.1 走通链路被授权层卡死（除非逐单手工 seed）</div>
+  <div class="gact"><b>建议动作：</b>三选一并以文档固化：① v0.1 启用投影器消费 outbox_events；② 工作流 Activity 内联写关系（WriteRelationship）；③ 按 M4 决策明确 v0.1 生产用 StaticChecker 并把 cmd/api 生产分支改回。补 L1 对象级授权 E2E</div>
+</div><div class="gap s-p0" data-sev="P0">
+  <div class="ghead"><span class="sev s-p0">P0</span><b>compose 的 wecom 服务缺 B2B_API_ADDR → 回调转接指向容器内 127.0.0.1</b><span class="gid">WEC-01</span></div>
+  <div class="gmeta"><span class="tag">企微/部署</span><span class="src">依据：docs/v0.1/06 §6 回调链路：wecom→B2B_API_ADDR 指向 api 服务；V-C 审批卡回调</span></div>
+  <div class="gevid"><b>代码证据：</b>docker-compose.yml wecom 段无 B2B_API_ADDR；config.Load 默认 WeComAPIAddr=http://127.0.0.1:18080；容器内 18080 无 api 进程</div>
+  <div class="gfiles"><b>文件：</b>docker-compose.yml:119-139 · internal/config/config.go:65 · cmd/wecom/main.go:50</div>
+  <div class="grisk"><b>风险：</b>S3 卡片点击回调 502，审价/终审/预订单确认全断——发布阻断</div>
+  <div class="gact"><b>建议动作：</b>wecom 服务补 environment B2B_API_ADDR: http://api:8080；compose config 校验 + V-C 联调</div>
+</div><div class="gap s-p0" data-sev="P0">
+  <div class="ghead"><span class="sev s-p0">P0</span><b>审批卡按钮语义错误：文案「查看待办」但 EventKey=approve，点击即通过且无驳回按钮</b><span class="gid">WEC-05</span></div>
+  <div class="gmeta"><span class="tag">企微</span><span class="src">依据：docs/v0.1/06 §4 审批/催办/状态卡；demo XSZG1/DSZ1 通过/驳回双按钮；V-C 验收</span></div>
+  <div class="gevid"><b>代码证据：</b>wecom.NotifyApproval 只发一个按钮 {{Text:"查看待办", Key:"approve:&lt;taskID&gt;"}}；CallbackHandler 收到 approve: 直接投递 okVerdict(APPROVED/ISSUED)。点「查看待办」= 直接审批通过；无 reject 按钮、无详情页跳转</div>
+  <div class="gfiles"><b>文件：</b>internal/wecom/mock.go:119-126 · official.go:225-278(button_list) · callback.go:123-150</div>
+  <div class="grisk"><b>风险：</b>主管/董事长/财务误点「查看待办」即产生正式审批结论，审批链安全失效；V-C 验收必然失败</div>
+  <div class="gact"><b>建议动作：</b>卡片改为「通过/驳回」双按钮（key=approve:&lt;id&gt;/reject:&lt;id&gt;）或单按钮跳 H5 详情；回调仅投递与按钮语义一致的 signal；补 V-C 端到端断言</div>
+</div><div class="gap s-p0" data-sev="P0">
+  <div class="ghead"><span class="sev s-p0">P0</span><b>官方群图片回调字段未映射（PicUrl/MediaId）→ A6 仓库群回单机器人在 official 下失效</b><span class="gid">WEC-02</span></div>
+  <div class="gmeta"><span class="tag">企微</span><span class="src">依据：docs/v0.1/06 §5.2 仓库群图片→机器人抓取；staff_scene V-F</span></div>
+  <div class="gevid"><b>代码证据：</b>CallbackPayload.ImageURL/ImageHash 仅 json tag 无 xml tag；OfficialGateway.VerifyCallback 直接 xml.Unmarshal；企微群图片 XML 为 PicUrl/MediaId；RuleRecognizer 只匹配 URL/hash 中的 ship-/order- token</div>
+  <div class="gfiles"><b>文件：</b>internal/wecom/gateway.go:84-91 · official.go:407-449 · receipt_robot.go:37-52</div>
+  <div class="grisk"><b>风险：</b>V-F 现场验收必失败；官方通道拿不到图片引用，recognized=false 恒人工补登</div>
+  <div class="gact"><b>建议动作：</b>按真实回调字段补 PicUrl/MediaId xml 映射 + MediaId 下载（media/get）或改用存档文件引用；用真实/官方 XML 样例补测试</div>
+</div><div class="gap s-p0" data-sev="P0">
+  <div class="ghead"><span class="sev s-p0">P0</span><b>生产 OCR/LLM 识别器未实现，且低置信/多候选无人工确认闸门</b><span class="gid">OCR-01</span></div>
+  <div class="gmeta"><span class="tag">企微</span><span class="src">依据：docs/v0.1/06 §5.2 凭证机器人 OCR 识别；最新 demo CG3：置信度 82% 只预填不自动登记</span></div>
+  <div class="gevid"><b>代码证据：</b>receipt_robot.go 仅 RuleRecognizer（URL/文件名 token 匹配，置信度写死 1.0/0.9）；无真实 OCR 实现；CaptureFromGroup 识别成功即自动 AppendEvidenceMeta，无人工确认步骤</div>
+  <div class="gfiles"><b>文件：</b>internal/wecom/receipt_robot.go · cmd/wecom/main.go(robot 装配)</div>
+  <div class="grisk"><b>风险：</b>生产回单照片无法识别=人工补登（可接受退路）；一旦接入粗识别会错绑订单、错登记 v3，破坏凭证链</div>
+  <div class="gact"><b>建议动作：</b>v0.1 可接受「手动上传备选+机器人停用」并显式冻结；或实现 Recognizer 真实实现 + 低置信挂起人工确认（新增待办）后再开 V-F</div>
+</div><div class="gap s-p0" data-sev="P0">
+  <div class="ghead"><span class="sev s-p0">P0</span><b>sync 容器一次性运行：无周期循环、无 restart、无健康检查</b><span class="gid">SYNC-01</span></div>
+  <div class="gmeta"><span class="tag">同步/部署</span><span class="src">依据：docs/v0.1/10 §5 周期 5m-1h 持续同步；11 §4 全量+增量循环；compose 补充要求</span></div>
+  <div class="gevid"><b>代码证据：</b>cmd/sync/main.go 单次遍历后退出；docker-compose.yml sync 无 restart、无 healthcheck；Dockerfile sync ENTRYPOINT 单次</div>
+  <div class="gfiles"><b>文件：</b>cmd/sync/main.go · docker-compose.yml:141-160</div>
+  <div class="grisk"><b>风险：</b>部署后只同步一批即停止，后续飞书增量不可见；V1-V6 对账失败</div>
+  <div class="gact"><b>建议动作：</b>cmd/sync 加 -interval 常驻定时循环（或 compose restart: unless-stopped + 宿主 cron）；补 migration_batches 最近成功时间探针</div>
+</div><div class="gap s-p0" data-sev="P0">
+  <div class="ghead"><span class="sev s-p0">P0</span><b>同步源仅 file/http 通用实现；bitable/审批流/凭证/通讯录四任务缺失</b><span class="gid">SYNC-02</span></div>
+  <div class="gmeta"><span class="tag">同步</span><span class="src">依据：v0.1发布过程跟踪 T3.2：file/bitable/evidence/contact 四任务接线；docs/v0.1/11 §3 T1-T3</span></div>
+  <div class="gevid"><b>代码证据：</b>internal/sync/sync.go 只有 FileFetcher/HTTPFetcher；无 bitable token 授权、审批流映射、evidence 文件拷贝、contact userlist 同步；config/sync.example.json 两个源且 api_key 为 REPLACE 占位</div>
+  <div class="gfiles"><b>文件：</b>internal/sync/sync.go · config/sync.example.json · cmd/sync/main.go</div>
+  <div class="grisk"><b>风险：</b>T3.2 未完成→订单/审批/回单同步不成立→「同步可见」GO 终点不成立</div>
+  <div class="gact"><b>建议动作：</b>按 T1 调研结果落地 bitable/approval/evidence/contact 源并接线；或由业务签字缩小 v0.1 同步范围为 file/http 导出文件</div>
+</div><div class="gap s-p0" data-sev="P0">
+  <div class="ghead"><span class="sev s-p0">P0</span><b>旧系统真实契约未验证 + 错误分类/列表端点零覆盖</b><span class="gid">BRG-01</span></div>
+  <div class="gmeta"><span class="tag">桥接</span><span class="src">依据：v0.1发布过程跟踪 A-03/A-06（G1）：feishu-user-by-code、external-orders/create 真实 JSON 形状复核；A-00 契约表</span></div>
+  <div class="gevid"><b>代码证据：</b>bridge 全部测试用 httptest mock；classifyError=0.0%、handleBridgeListOrders=0.0%、handleBridgeUI=0.0%；真实 sales_users/spec/quantity_kg/ship_status 字段形状未抽样</div>
+  <div class="gfiles"><b>文件：</b>internal/bridge/bridge.go/errors.go · internal/api/bridge_handlers.go · coverage.txt</div>
+  <div class="grisk"><b>风险：</b>G1 门禁项未过；真实 multipart 字段、303 Location、submission-status 结构任一不符→虹励下单失败</div>
+  <div class="gact"><b>建议动作：</b>用只读账号实测旧系统接口并落契约快照；补 classifyError 分支测试与 bridge/orders 列表+UI 冒烟；差异归一化或 RawMessage 兜底</div>
+</div><div class="gap s-p0" data-sev="P0">
+  <div class="ghead"><span class="sev s-p0">P0</span><b>生产身份=RoleOf 硬编码 demo 表；审批人 u-* 硬编码未配置化（T2.3）</b><span class="gid">ROL-01</span></div>
+  <div class="gmeta"><span class="tag">身份/路由</span><span class="src">依据：v0.1发布过程跟踪 T2.3 替代 5 处硬编码，建 approval_routing；企微/飞书身份接入</span></div>
+  <div class="gevid"><b>代码证据：</b>cmd/api/main.go roleOf := demoRoleOf 无条件使用（默认非白名单 ID 全算 OP）；X-User-Id 头直接信任；workflows/order.go assignee=u-supervisor/u-chairman/u-op/u-accounting/u-wh-yangyuan 硬编码</div>
+  <div class="gfiles"><b>文件：</b>cmd/api/main.go:96-179 · internal/workflows/order.go:447,523,712,756,884,971</div>
+  <div class="grisk"><b>风险：</b>任何带 X-User-Id: u-chairman 的请求即具董事长身份（配合 AUTH-01 可终审任意单）；审批人错误→飞书侧真人收不到</div>
+  <div class="gact"><b>建议动作：</b>v0.1 至少：① 服务端身份必须来自 X-WeCom-Context/桥接 OAuth 交换而非裸头；② approval_routing 配置化真实 assignee；③ 未识别身份拒绝而非默认 OP</div>
+</div><div class="gap s-p0" data-sev="P0">
+  <div class="ghead"><span class="sev s-p0">P0</span><b>无 GET /api/v1/orders 列表端点 → SW2 商务全量订单/状态筛选无代码支撑</b><span class="gid">API-01</span></div>
+  <div class="gmeta"><span class="tag">API</span><span class="src">依据：docs/v0.1/08 §1 SW2 ops 聚合全量视图+状态筛选；v0.1 口径「ORD 只读可见」</span></div>
+  <div class="gevid"><b>代码证据：</b>Routes() 仅有 GET /orders/{id}；repo.ListOrders(tenant,state,limit) 存在但无 HTTP 暴露；assistant_ui/bridge_ui 只显示 bridge 台账</div>
+  <div class="gfiles"><b>文件：</b>internal/api/server.go:61-93 · internal/repo/orders.go:213</div>
+  <div class="grisk"><b>风险：</b>v0.1 唯一用户（商务）无法在本系统内看到同步订单全量列表，只读可见落空</div>
+  <div class="gact"><b>建议动作：</b>新增 GET /api/v1/orders?state=&amp;customer_id=&amp;warehouse_id=&amp;due= 端点（BFF 投影+分页）+ L1/L2 用例</div>
+</div><div class="gap s-p1" data-sev="P1">
+  <div class="ghead"><span class="sev s-p1">P1</span><b>compose 的 wecom/sync 无 healthcheck（文档要求三探针）</b><span class="gid">WEC-03</span></div>
+  <div class="gmeta"><span class="tag">部署</span><span class="src">依据：docs/v0.1/10 §3/§7：wecom /wecom/healthz、sync migration_batches 探针</span></div>
+  <div class="gevid"><b>代码证据：</b>compose 只有 postgres/spicedb/api healthcheck；wecom 无 healthcheck 块；sync 无探针</div>
+  <div class="gfiles"><b>文件：</b>docker-compose.yml</div>
+  <div class="grisk"><b>风险：</b>故障不感知；E-03 监控就绪项缺证据</div>
+  <div class="gact"><b>建议动作：</b>补 healthcheck + 监控采集</div>
+</div><div class="gap s-p1" data-sev="P1">
+  <div class="ghead"><span class="sev s-p1">P1</span><b>compose api 未注入 B2B_FEISHU_BRIDGE_* → 桥接在 compose 栈默认关闭</b><span class="gid">CFG-01</span></div>
+  <div class="gmeta"><span class="tag">部署</span><span class="src">依据：v0.1发布过程跟踪 A-02 配置矩阵冻结（桥接是 R1/R2 主链路）</span></div>
+  <div class="gevid"><b>代码证据：</b>docker-compose.yml api 段无任何 B2B_FEISHU_* 环境变量；config 默认 FeishuBridgeEnabled=false</div>
+  <div class="gfiles"><b>文件：</b>docker-compose.yml:67-96 · internal/config/config.go</div>
+  <div class="grisk"><b>风险：</b>部署后 bridge 503，S1 成功标准失败</div>
+  <div class="gact"><b>建议动作：</b>api 补 B2B_FEISHU_BRIDGE_BASE_URL/APP_ID/REDIRECT_URI/ENABLED + secrets</div>
+</div><div class="gap s-p1" data-sev="P1">
+  <div class="ghead"><span class="sev s-p1">P1</span><b>企微 test/prod 租户配置仍为 example 占位（corp/secret/token/AESKey/domain）</b><span class="gid">CFG-02</span></div>
+  <div class="gmeta"><span class="tag">配置</span><span class="src">依据：v0.1发布过程跟踪 T4.1（55%）：真实配置分别填值</span></div>
+  <div class="gevid"><b>代码证据：</b>config/wecom-tenant.test.example.json 与 .prod.example.json 全是 ww-test-/ww-prod-/43-char-base64 占位</div>
+  <div class="gfiles"><b>文件：</b>config/wecom-tenant.*.example.json</div>
+  <div class="grisk"><b>风险：</b>V-A/V-B 无法执行</div>
+  <div class="gact"><b>建议动作：</b>现场填真实值（不入 git），test/prod 分别验证</div>
+</div><div class="gap s-p1" data-sev="P1">
+  <div class="ghead"><span class="sev s-p1">P1</span><b>cmd/{api,worker,wecom,sync} 主装配零测试；NewActivitiesWithData 0%</b><span class="gid">CMD-01</span></div>
+  <div class="gmeta"><span class="tag">测试</span><span class="src">依据：docs/v0.1/09：生产装配路径可回归</span></div>
+  <div class="gevid"><b>代码证据：</b>go test ./... 输出 cmd/* [no test files]；coverage 显示 workflows.NewActivitiesWithData 0.0%</div>
+  <div class="gfiles"><b>文件：</b>cmd/*/main.go · internal/workflows/activities.go:459</div>
+  <div class="grisk"><b>风险：</b>生产模式 Temporal+SpiceDB+pgAPI 装配从未被测试执行</div>
+  <div class="gact"><b>建议动作：</b>补 main 装配纯函数化+smoke 测试，或 compose 联调 smoke 用例</div>
+</div><div class="gap s-p1" data-sev="P1">
+  <div class="ghead"><span class="sev s-p1">P1</span><b>assistant_ui/bridge_ui 为静态演示表单：无 pgAPI 客户/产品/合同预填联动，无页面测试</b><span class="gid">UI-01</span></div>
+  <div class="gmeta"><span class="tag">前端</span><span class="src">依据：demo XS2/XSZL：客户档案/最近订单/框架合同最大化预填并标注来源</span></div>
+  <div class="gevid"><b>代码证据：</b>assistant_ui.html 330 行：product_name 写死「膨润土 AB-3」、合同 placeholder HT-2025-0038、客户下拉手工输入；无 fetch pgapi；两个 UI 无 JS 测试，handleBridgeUI 0%</div>
+  <div class="gfiles"><b>文件：</b>internal/api/assistant_ui.html · bridge_ui.html</div>
+  <div class="grisk"><b>风险：</b>上线后虹励手工填错/无预填，与产品承诺不符</div>
+  <div class="gact"><b>建议动作：</b>接入 pgAPI 搜索端点或明确 v0.1 手工填写；补浏览器级 smoke</div>
+</div><div class="gap s-p1" data-sev="P1">
+  <div class="ghead"><span class="sev s-p1">P1</span><b>财务/商务凭证上传页、全量订单页、备货/发货/审价操作页未实现（仅有 API）</b><span class="gid">UI-02</span></div>
+  <div class="gmeta"><span class="tag">前端</span><span class="src">依据：docs/v0.1/03 17 场景逐场景操作页；v0.1 商务承接 SHP/INV</span></div>
+  <div class="gevid"><b>代码证据：</b>仓库内 HTML 仅 assistant_ui(下单) 与 bridge_ui(桥接+我的订单)；无 evidence 上传 UI、无 todos 操作卡页面</div>
+  <div class="gfiles"><b>文件：</b>internal/api/（embed 仅两个 html）</div>
+  <div class="grisk"><b>风险：</b>商务在企微无法完成备货/发货/开票操作，只能靠 API 手工调用</div>
+  <div class="gact"><b>建议动作：</b>明确 v0.1 最小可用 UI 清单（至少商务待办操作页）并交付；否则 S1-S6 UAT 无法在界面走通</div>
+</div><div class="gap s-p1" data-sev="P1">
+  <div class="ghead"><span class="sev s-p1">P1</span><b>凭证 OCR 四项硬校验只实现金额守恒一项</b><span class="gid">INV-01</span></div>
+  <div class="gmeta"><span class="tag">开票</span><span class="src">依据：最新 demo CW1：订单唯一、非重复发票、抬头税号一致、金额≤已发货金额</span></div>
+  <div class="gevid"><b>代码证据：</b>handleAppendEvidence 仅 kind=INVOICE 时校验 AmountCents≤ShipmentShippedAmountCents；无发票号唯一、购方税号比对、订单匹配校验</div>
+  <div class="gfiles"><b>文件：</b>internal/api/server.go:321-381</div>
+  <div class="grisk"><b>风险：</b>重复发票/错抬头凭证可被登记，业财对账失真</div>
+  <div class="gact"><b>建议动作：</b>补 invoice_no UNIQUE 与税号/订单一致性校验+测试</div>
+</div><div class="gap s-p1" data-sev="P1">
+  <div class="ghead"><span class="sev s-p1">P1</span><b>敏感剥离只按列名，不扫描值/嵌套 JSON → V4 有残留风险</b><span class="gid">SYNC-03</span></div>
+  <div class="gmeta"><span class="tag">同步</span><span class="src">依据：docs/v0.1/11 §6：open_id/view_token/密钥零残留；V4 dump 正则零命中</span></div>
+  <div class="gevid"><b>代码证据：</b>SanitizeRow 仅删列名匹配 sensitivePatterns 的列；MapRow 把整行 marshal 进 payload 字段，若源列名不敏感但值含 token 会入库</div>
+  <div class="gfiles"><b>文件：</b>internal/sync/sync.go:255-290</div>
+  <div class="grisk"><b>风险：</b>上线安全门扫描可能命中→G1 卡住</div>
+  <div class="gact"><b>建议动作：</b>payload 写入前做值级正则清洗或白名单字段；加含嵌套 token 的测试样例</div>
+</div><div class="gap s-p1" data-sev="P1">
+  <div class="ghead"><span class="sev s-p1">P1</span><b>token 缓存为进程内存：重启/多副本即失效，需重新飞书授权</b><span class="gid">BRG-02</span></div>
+  <div class="gmeta"><span class="tag">桥接</span><span class="src">依据：bridge 2h token + 提前 15min 重授权；生产可写副本单实例可接受</span></div>
+  <div class="gevid"><b>代码证据：</b>MemoryTokenCache map[user]；无 Redis/PG 持久化</div>
+  <div class="gfiles"><b>文件：</b>internal/bridge/bridge.go:419-446</div>
+  <div class="grisk"><b>风险：</b>api 重启后虹励须重新授权（体验问题，非阻断）</div>
+  <div class="gact"><b>建议动作：</b>v0.1 记录为已知限制并在回退手册注明；0.2 换持久化</div>
+</div><div class="gap s-p1" data-sev="P1">
+  <div class="ghead"><span class="sev s-p1">P1</span><b>N-07 无回单规则断言未固化（A5 待确认）</b><span class="gid">V01-01</span></div>
+  <div class="gmeta"><span class="tag">测试</span><span class="src">依据：docs/v0.1/09 §3：规则待确认后固化断言</span></div>
+  <div class="gevid"><b>代码证据：</b>receipt_exception_e2e 覆盖流程但无「允许无回单开票」策略断言；测试无 3 天/5 天边界双态</div>
+  <div class="gfiles"><b>文件：</b>tests/l2_e2e/receipt_exception_e2e_test.go</div>
+  <div class="grisk"><b>风险：</b>A5 一旦裁决，测试可能绿但与规则相反</div>
+  <div class="gact"><b>建议动作：</b>A5 确认后补策略化测试</div>
+</div><div class="gap s-p1" data-sev="P1">
+  <div class="ghead"><span class="sev s-p1">P1</span><b>董事长终审信号无 RETURNED（最新 demo「要求修改」不支持）</b><span class="gid">DSZ-01</span></div>
+  <div class="gmeta"><span class="tag">流程</span><span class="src">依据：最新 demo DSZ1 通过/要求修改/拒绝三态</span></div>
+  <div class="gevid"><b>代码证据：</b>ChairmanReviewSignal 注释 APPROVED/REJECTED；ordGradeStep switch 仅两分支</div>
+  <div class="gfiles"><b>文件：</b>internal/workflows/order.go:55-60,505-570</div>
+  <div class="grisk"><b>风险：</b>大单要修改只能拒绝关闭重建</div>
+  <div class="gact"><b>建议动作：</b>补 RETURNED→ORD_RETURNED 重提路径+测试（P2 可后置，需产品确认）</div>
+</div><div class="gap s-p1" data-sev="P1">
+  <div class="ghead"><span class="sev s-p1">P1</span><b>official 外部客户群 appchat 可达性未验证，代码无自动回退</b><span class="gid">WEC-04</span></div>
+  <div class="gmeta"><span class="tag">企微</span><span class="src">依据：staff_scene V-E；v0.1发布过程跟踪 W 线回退口径</span></div>
+  <div class="gevid"><b>代码证据：</b>SendGroupCard 有实现与单测；真实外部群是否可达未验；回退（PC 兜底/人工转发）只在文档不在代码</div>
+  <div class="gfiles"><b>文件：</b>internal/wecom/official.go:285-323</div>
+  <div class="grisk"><b>风险：</b>守门员确认后发送失败→客户收不到卡片</div>
+  <div class="gact"><b>建议动作：</b>V-E 现场验证；失败时写裁决日志+提示人工转发（bridge_ui 兜底）</div>
+</div><div class="gap s-p2" data-sev="P2">
+  <div class="ghead"><span class="sev s-p2">P2</span><b>SW1 库存口径（账面/预留/可分配）+原子预留库存未实现</b><span class="gid">D-01</span></div>
+  <div class="gmeta"><span class="tag">demo 演进</span><span class="src">依据：最新 demo SW1；与 v0.1 A1/M1「锁库存暂不做」冲突</span></div>
+  <div class="gevid"><b>代码证据：</b>stkReserveStep 明确不触碰库存；无库存聚合视图/交期字段</div>
+  <div class="gfiles"><b>文件：</b>internal/workflows/order.go:704-780</div>
+  <div class="grisk"><b>风险：</b>产品冲突未裁决；0.1 发布按文档无阻断</div>
+  <div class="gact"><b>建议动作：</b>产品裁决：v0.1 维持 M1 或补库存预留（0.2）</div>
+</div><div class="gap s-p2" data-sev="P2">
+  <div class="ghead"><span class="sev s-p2">P2</span><b>SW3 AI 换仓方案比较 + 释放/锁定新仓 + RETURNED 重开备货未实现</b><span class="gid">D-02</span></div>
+  <div class="gmeta"><span class="tag">demo 演进</span><span class="src">依据：最新 demo SW3</span></div>
+  <div class="gevid"><b>代码证据：</b>TRANSFER 路径存在但无 AI 方案/库存操作；RETURNED→WarehouseResubmitted 同仓重确认</div>
+  <div class="gfiles"><b>文件：</b>internal/workflows/order.go:781-863</div>
+  <div class="grisk"><b>风险：</b>换仓闭环半自动；0.1 可后置（M5）</div>
+  <div class="gact"><b>建议动作：</b>业务确认转仓启用后再补</div>
+</div><div class="gap s-p2" data-sev="P2">
+  <div class="ghead"><span class="sev s-p2">P2</span><b>XS4 已发货改址→物流异常 BLOCK 未实现</b><span class="gid">D-03</span></div>
+  <div class="gmeta"><span class="tag">demo 演进</span><span class="src">依据：最新 demo XS4：BLOCK 分流</span></div>
+  <div class="gevid"><b>代码证据：</b>ClassifyModification D 类地址直接改，无已发货禁止逻辑</div>
+  <div class="gfiles"><b>文件：</b>internal/domain/ord.go:46-100</div>
+  <div class="grisk"><b>风险：</b>运输中改主订单地址破坏履约事实</div>
+  <div class="gact"><b>建议动作：</b>补「已发货/运输中改址=拒绝或物流异常」分支+测试</div>
+</div><div class="gap s-p2" data-sev="P2">
+  <div class="ghead"><span class="sev s-p2">P2</span><b>CW2 限时放行 + 3 工作日补齐回单待办闭环未实现</b><span class="gid">D-04</span></div>
+  <div class="gmeta"><span class="tag">demo 演进</span><span class="src">依据：最新 demo CW2</span></div>
+  <div class="gevid"><b>代码证据：</b>ReceiptExReviewSignal 两态；无期限字段/定时器</div>
+  <div class="gfiles"><b>文件：</b>internal/workflows/order.go:1194-1240</div>
+  <div class="grisk"><b>风险：</b>放行后无补单追踪</div>
+  <div class="gact"><b>建议动作：</b>0.2 补；v0.1 规则确认后一并做</div>
+</div><div class="gap s-p2" data-sev="P2">
+  <div class="ghead"><span class="sev s-p2">P2</span><b>审价/终审「为什么需要我审批」风险摘要与 AI 建议字段未实现</b><span class="gid">D-05</span></div>
+  <div class="gmeta"><span class="tag">demo 演进</span><span class="src">依据：最新 demo XSZG1/DSZ1</span></div>
+  <div class="gevid"><b>代码证据：</b>通知卡只有 Kind/State/order/task；无毛利/价格差异/信用暴露字段；驳回意见 AI 建议未实现</div>
+  <div class="gfiles"><b>文件：</b>internal/wecom/mock.go:119-146 · official.go:225-278</div>
+  <div class="grisk"><b>风险：</b>产品体验降级，非阻断</div>
+  <div class="gact"><b>建议动作：</b>0.2 产品化</div>
+</div>
+</div>
+</section>
+
+<section id="s7">
+<h2>7 · 给下游 Agent 的复验手册（完成即可独立重跑本审计）</h2>
+<div class="card">
+<h3>7.1 最小复验命令（按序执行，全部需要退出码为 0）</h3>
+<pre>export GOCACHE=$PWD/.gocache GOTMPDIR=$PWD/.gotmp
+# 1) 单元 + 编译面
+go test -count=1 ./...
+# 2) 覆盖率门禁（当前 PASS：85.5% ≥ 85% · domain 100%）
+make cover
+# 3) 黑盒 L0-L3
+make test-tests
+# 4) 影子轨专用回归
+make test-shadow
+# 5) HTTP 全链（需 55432 b2b_pilot_test 有 schema；tests/testkit 会自动重建）
+go run ./scripts/fullchain -dsn "postgres://postgres:postgres@localhost:55432/b2b_pilot_test?sslmode=disable"
+# 6) 保守核对（可选）：四守恒 + 审计链 + 并发 + 影子写哨兵
+go run ./scripts/reconcile -dsn ... ; go run ./scripts/audit -dsn ... ; go run ./scripts/concurrency -dsn ...
+go run ./scripts/shadow_sentinel -dsn "&lt;生产 DSN&gt;"
+# 7) compose 装配静态校验（主栈 + 影子栈）
+docker compose config && docker compose -f docker-compose.shadow.yml config</pre>
+<h3>7.2 必须逐项查看的文件清单（缺口证据锚点）</h3>
+<pre>internal/shadow/*               # FSM 回放/映射/分歧/投递计划/影子存储（本轮新增，已测试）
+internal/shadowguard/shadowguard.go # 六项启动守卫 fail-fast（本轮新增，已测试）
+internal/workflows/shadow_test.go   # Shadow=true 与同信号对拍（本轮新增）
+migrations/shadow/008_shadow.sql    # 影子五表 + chang-an-shadow 基座（本轮新增）
+docker-compose.shadow.yml           # 独立影子环境 + 自带 shadow-temporal（本轮新增）
+scripts/shadow_sentinel/main.go     # 生产库影子对象零存在哨兵（本轮新增）
+internal/api/server.go          # 路由 16+4；信号级鉴权已补
+internal/api/v01.go             # A3/A4 三个新端点
+internal/workflows/order.go     # 15 信号、八节点、配置化 assignee、M1 库存注释
+internal/workflows/preorder.go  # N-02/N-04 唯一带 AuthCheck 的链
+internal/authz/checker.go       # StaticChecker 与 SpiceDB 语义分裂
+schema.zed                       # shipment.append_evidence 角色缺口
+internal/wecom/gateway.go       # CallbackPayload 图片字段 xml 映射缺口
+internal/wecom/official.go      # 回调解密/模板卡/群发
+internal/wecom/receipt_robot.go # RuleRecognizer mock、无人工确认
+internal/bridge/bridge.go       # 旧系统契约（mock 测试）
+internal/sync/sync.go           # file/http 源、SanitizeRow 只按列名
+cmd/sync/main.go                # 一次性运行，无循环
+docker-compose.yml              # wecom 缺 B2B_API_ADDR；sync 无 restart/healthcheck
+internal/api/assistant_ui.html / bridge_ui.html  # 静态演示数据、无 pgAPI 联动
+config/sync.example.json        # REPLACE_WITH_PGAPI_API_KEY 占位
+config/wecom-tenant.test/prod.example.json        # 全部占位值
+coverage.out / coverage.txt     # 本审计复跑结果（84.0%）</pre>
+<h3>7.3 上线前判定标准（建议 G2 门禁口径）</h3>
+<pre>GO 条件（全部满足）：
+1) make cover 总覆盖 ≥85% 且 domain=100%；2) AUTH-01/02/03 任一被关闭并有越权负向测试；
+3) WEC-01 compose 修复并 V-C 实测通过；4) WEC-02/OCR-01 有书面裁决（停机器人走手动上传，或完成真实 OCR）；
+5) SYNC-01/02 按业务口径冻结（周期运行 + 源清单签字）；6) BRG-01 真实契约复核证据归档（G1）；
+7) ROL-01 至少做到「未知身份拒绝 + 虹励身份显式绑定」；8) API-01 全量订单端点可用或业务书面裁剪。
+NO-GO 触发：任一 P0 未关闭 → 顺延，不压缩验证。</pre>
+<h3>7.4 本审计未覆盖（诚实声明）</h3>
+<p class="note">① 旧系统 tripartite-approval 仓库（T-01/T-03 独立测试不在本仓）；② 真实企微/飞书/主备库现场联调（V-A..V-F、O 线）；③ 前端浏览器级自动化（无 headless e2e）；④ 可写副本/主库 SQL 层面；⑤ demo 静态页面的视觉一致性。</p>
+</div>
+</section>
+
+<section id="s8">
+<h2>8 · 机器可读审计数据（供下游 Agent 直接消费）</h2>
+<button class="act" onclick="copyAudit()">复制 window.AUDIT JSON</button>
+<pre id="auditjson">{
+ "meta": {
+  "title": "v0.1 代码审计 · 上线前代码缺口与测试覆盖",
+  "time": "2026-08-20 11:00 (round-5: shadow track committed 4e53763)",
+  "git": "4e53763 (feat_v0.1)",
+  "branch_subject": "feat(v0.1): 影子全流程预演 — 代码/守卫/迁移/compose/测试/文档 + D-008..D-011",
+  "scope": "全部 cmd/ + internal/ + migrations/ + config/ + docker-compose.yml + Dockerfile + tests/ + scripts/，对照 docs/v0.1 01-11、v0.1业务发布梳理、v0.1发布过程跟踪、docs/demo（最新交互）逐项审计",
+  "verdict": "第 5 轮（4e53763）：A 轨第 1-4 轮可收敛缺口保持关闭；影子轨 S 代码/守卫/迁移/compose/测试全量入库并通过（make cover 85.5%、domain 100%、test-shadow 全绿、六同对拍）。剩余为现场账号/供应商/真实配置/业务签字外部依赖（含影子 HR1 业务签字与 HR2 pgAPI 只读凭据）——代码面维持 G2 GO 候选，现场侧仍 No-Go。"
+ },
+ "evidence": [
+  {
+   "cmd": "GOCACHE=$PWD/.audit_cache go test -count=1 ./...",
+   "result": "PASS",
+   "note": "全部 12 个 internal 包 + tests/l0_unit 通过；cmd/api|worker|wecom|sync 无测试文件（缺口 CMD-01）"
+  },
+  {
+   "cmd": "GOCACHE=$PWD/.audit_cache make cover",
+   "result": "FAIL",
+   "note": "integration + -coverprofile 全包通过；total: 84.0% &lt; 85% 门禁，Makefile 覆盖门禁中止（缺口 COV-01）。domain 100% 硬门禁未执行到，单独核对 domain=100.0%"
+  },
+  {
+   "cmd": "GOCACHE=$PWD/.audit_cache make test-tests",
+   "result": "PASS",
+   "note": "tests/l0_unit(6 契约用例)、l1_integration(5 HTTP×DB 用例)、l2_e2e(21 用例)、l3_system(2 系统驱动用例) 全绿"
+  },
+  {
+   "cmd": "go run ./scripts/fullchain -dsn &lt;55432 b2b_pilot_test&gt;",
+   "result": "PASS",
+   "note": "22+ 步 HTTP 全链 ALL GREEN：订单全链 INV_CLOSED(28 事件) + 凭证链 v1/v2 + 预订单链派生 + 待办/事件 + 出站通知 101 卡(mock)"
+  },
+  {
+   "cmd": "go tool cover -func=coverage.out（fresh）",
+   "result": "DATA",
+   "note": "见下方覆盖率表；关键 0% 函数：handleBridgeListOrders / handleBridgeUI / bridge.classifyError / workflows.NewActivitiesWithData"
+  }
+ ],
+ "pkgCov": [
+  {
+   "pkg": "internal/domain",
+   "cov": 100.0,
+   "funcs": 53,
+   "note": "100% 硬门禁 ✓（FSM/守恒/幂等/守门员纯函数）"
+  },
+  {
+   "pkg": "internal/integration",
+   "cov": 100.0,
+   "funcs": 19,
+   "note": "政策/时长/修改分类 100% ✓"
+  },
+  {
+   "pkg": "internal/pgapi",
+   "cov": 95.7,
+   "funcs": 22,
+   "note": "pgAPI HTTP 客户端高覆盖 ✓"
+  },
+  {
+   "pkg": "internal/orderdata",
+   "cov": 92.2,
+   "funcs": 29,
+   "note": "Memory/HTTP Provider 高覆盖 ✓"
+  },
+  {
+   "pkg": "internal/authz",
+   "cov": 94.9,
+   "funcs": 19,
+   "note": "StaticChecker/SpiceDB 客户端高覆盖 ✓"
+  },
+  {
+   "pkg": "internal/config",
+   "cov": 93.3,
+   "funcs": 4,
+   "note": "环境变量加载 ✓"
+  },
+  {
+   "pkg": "internal/wecom",
+   "cov": 89.6,
+   "funcs": 62,
+   "note": "官方网关 mock 测试齐全，真实验收 V-A..V-F 待现场"
+  },
+  {
+   "pkg": "internal/sync",
+   "cov": 88.7,
+   "funcs": 11,
+   "note": "file/http 拉取、映射、敏感剥离、批次校验有测试"
+  },
+  {
+   "pkg": "internal/api",
+   "cov": 83.0,
+   "funcs": 53,
+   "note": "16+4 端点；bridge list/UI handler 0%"
+  },
+  {
+   "pkg": "internal/repo",
+   "cov": 80.5,
+   "funcs": 109,
+   "note": "L1 真库覆盖；sync.ApplySyncBatch 69.2%"
+  },
+  {
+   "pkg": "internal/workflows",
+   "cov": 80.3,
+   "funcs": 151,
+   "note": "Temporal TestSuite；ValidateOrderData 38.1%、NewActivitiesWithData 0%"
+  },
+  {
+   "pkg": "internal/bridge",
+   "cov": 73.2,
+   "funcs": 19,
+   "note": "0.1 命门模块，错误分类 classifyError 0%"
+  },
+  {
+   "pkg": "TOTAL",
+   "cov": 84.0,
+   "funcs": null,
+   "note": "门禁要求 ≥85% → FAIL（差 1.0pp）"
+  }
+ ],
+ "funcCov": [
+  {
+   "f": "internal/api/bridge_handlers.go",
+   "fn": "handleBridgeListOrders",
+   "cov": 0.0,
+   "why": "桥接「我的订单」列表端点零测试（S2 成功标准的直接载体）"
+  },
+  {
+   "f": "internal/api/bridge_handlers.go",
+   "fn": "handleBridgeCreateOrder",
+   "cov": 64.0,
+   "why": "桥接下单主链路部分覆盖"
+  },
+  {
+   "f": "internal/api/bridge_handlers.go",
+   "fn": "handleBridgeCallback",
+   "cov": 56.2,
+   "why": "OAuth code 回调错误分支覆盖不足"
+  },
+  {
+   "f": "internal/api/bridge_ui.go",
+   "fn": "handleBridgeUI",
+   "cov": 0.0,
+   "why": "PC 兜底页面处理器零测试"
+  },
+  {
+   "f": "internal/bridge/errors.go",
+   "fn": "classifyError",
+   "cov": 0.0,
+   "why": "旧系统错误分类零测试（FEISHU_AUTH_EXPIRED/ORDER_DATA_INVALID 映射未验证）"
+  },
+  {
+   "f": "internal/bridge/bridge.go",
+   "fn": "ExchangeCode",
+   "cov": 65.5,
+   "why": "真实契约字段/错误分支未全测"
+  },
+  {
+   "f": "internal/bridge/bridge.go",
+   "fn": "CreateOrder",
+   "cov": 78.6,
+   "why": "multipart+303+轮询主链路有测试，错误/重试分支不全"
+  },
+  {
+   "f": "internal/api/v01.go",
+   "fn": "handleSendToGroup",
+   "cov": 81.0,
+   "why": "守门员 N-01 已测；出站失败/未实现分支留缝"
+  },
+  {
+   "f": "internal/api/v01.go",
+   "fn": "handleLinkInvoiceOrder",
+   "cov": 70.6,
+   "why": "N-05 已测；授权失败/关联冲突分支留缝"
+  },
+  {
+   "f": "internal/api/v01.go",
+   "fn": "handleInvoiceSummary",
+   "cov": 71.4,
+   "why": "N-05/N-08 已测；store 降级 501 分支留缝"
+  },
+  {
+   "f": "internal/api/server.go",
+   "fn": "handleAppendEvidence",
+   "cov": 77.8,
+   "why": "N-06 金额守恒已测；kind 非 INVOICE/501 分支留缝"
+  },
+  {
+   "f": "internal/workflows/activities.go",
+   "fn": "ValidateOrderData",
+   "cov": 38.1,
+   "why": "pgAPI 真实数据校验（客户等级/产品存在性/合同）仅少量分支，A-03/A-06 真实契约复核未做"
+  },
+  {
+   "f": "internal/workflows/activities.go",
+   "fn": "GetCustomerGrade",
+   "cov": 60.0,
+   "why": "pgAPI 失败/降级分支覆盖不足"
+  },
+  {
+   "f": "internal/workflows/activities.go",
+   "fn": "NewActivitiesWithData",
+   "cov": 0.0,
+   "why": "生产 Activity 装配函数无测试（L2 用 fake 装配）"
+  },
+  {
+   "f": "internal/sync/sync.go",
+   "fn": "stringifyValue",
+   "cov": 25.0,
+   "why": "HTTP 源 json.Number/nested 值分支未测"
+  },
+  {
+   "f": "internal/repo/sync.go",
+   "fn": "ApplySyncBatch",
+   "cov": 69.2,
+   "why": "V1 幂等已测；冲突/边界分支留缝"
+  },
+  {
+   "f": "internal/repo/v01.go",
+   "fn": "LinkInvoiceOrderTx",
+   "cov": 60.0,
+   "why": "订单级守恒核心事务，并发/超额度分支待补"
+  },
+  {
+   "f": "internal/wecom/official.go",
+   "fn": "SendGroupCard",
+   "cov": 81.8,
+   "why": "appchat 群发错误分支待补；真实 V-E 未验证"
+  },
+  {
+   "f": "internal/wecom/receipt_robot.go",
+   "fn": "CaptureFromGroup",
+   "cov": 89.3,
+   "why": "识别/匹配/登记主链已测；真实 OCR 与图片回调字段未验证"
+  }
+ ],
+ "matrix": [
+  {
+   "id": "A1",
+   "name": "选仓按钮+收货地址（锁库存暂缓）",
+   "status": "ok",
+   "code": "order_items.receive_address(006 迁移) · StockReviewSignal.WarehouseID 必填校验 · repo.StockPrepare 落所选仓 · workflows.TestN03a/b/c",
+   "test": "N-03（api+workflows+repo）L2；fullchain step06 走通",
+   "note": "锁库存 M1 已按决策不扣库存（repo/shipment.go 注释+事件）"
+  },
+  {
+   "id": "A2",
+   "name": "财务凭证主路径反转",
+   "status": "partial",
+   "code": "POST /orders/{id}/shipments/{sid}/evidence + kind/source/invoice_no/amount/tax(006) + N-06 金额守恒",
+   "test": "N-06 api/repo/L2 E2E；EvidenceChain L2",
+   "note": "缺：SpiceDB shipment.append_evidence 无 accounting/OP（AUTH-02）；上传 UI 未实现（UI-02）；OCR 四硬校验不全（INV-01）"
+  },
+  {
+   "id": "A3",
+   "name": "发群守门员（第一轮强制）",
+   "status": "ok",
+   "code": "domain/gatekeeper.go(FSM+hash) · repo.AppendGatekeeperConfirmation(order_events 幂等) · POST send-to-group(销售 only+order.edit) · cmd/api GroupSender 接线",
+   "test": "N-01（api L2 + repo L1 + E2E）coverage 81%",
+   "note": "真实外部客户群可达性 V-E 未验证（WEC-04）"
+  },
+  {
+   "id": "A4",
+   "name": "多单合并开票/关联追加/三金额",
+   "status": "ok",
+   "code": "006: invoice_order_links + invoices 三金额 · repo.LinkInvoiceOrderTx 订单级守恒 · POST link-orders + GET invoice-summary",
+   "test": "N-05（api+repo+L2 E2E）· api/v01_invoice_test.go",
+   "note": "业财归属 P4 业务待确认；LinkInvoiceOrderTx 60% 分支待补"
+  },
+  {
+   "id": "A5",
+   "name": "无回单开票例外审核",
+   "status": "partial",
+   "code": "ExceptionInvoice 链：invReceiptStep(5天 Timer)→invExceptionStep(RECEIPT_EX)→invInvoiceStep；receipt-ex-review 信号",
+   "test": "既有 L2-11/E2E ReceiptException 全绿；N-07 断言未按最终规则固化",
+   "note": "规则本身待确认(P1)；限时放行+补齐回单期限未实现（D-04）；例外审核 assignee=u-op 硬编码"
+  },
+  {
+   "id": "A6",
+   "name": "仓库群回单→机器人",
+   "status": "partial",
+   "code": "wecom.ReceiptRobot(RuleRecognizer) · repo.LookupWarehouseGroupBinding · cmd/wecom handleGroupImage 回调分流 · evidence kind=RECEIPT 追加",
+   "test": "N-10 repo L1；receipt_robot_test 5 用例",
+   "note": "官方图片回调 PicUrl/MediaId 未映射（WEC-02）；生产 OCR 未实现（OCR-01）；群升级 P2 前置"
+  },
+  {
+   "id": "A7",
+   "name": "订单创建多方分担/归属锁定",
+   "status": "partial",
+   "code": "internal/bridge(OAuth 代理+token 缓存+multipart 下单+幂等 B2B_V01_) · bridge API+PC 兜底 · assistant H5/PC · preorder 群上下文 N-04",
+   "test": "bridge 6 单测；bridge_handlers 2 用例；N-04 workflows",
+   "note": "真实旧系统契约未验证（BRG-01）；UI 静态演示数据（UI-01）；身份解析硬编码（ROL-01）"
+  },
+  {
+   "id": "A8",
+   "name": "0.1 架构决策（同步/不打扰/移出自动下单）",
+   "status": "partial",
+   "code": "cmd/sync file+http 源+SanitizeRow+ApplySyncBatch · compose sync 服务 · Dockerfile sync target · deferred 段 M2/M3",
+   "test": "sync 11 单测 + repo V01SyncBatchIdempotent；make test-tests 全绿",
+   "note": "sync 一次性运行无循环（SYNC-01）；bitable/审批流源缺失（SYNC-02）"
+  },
+  {
+   "id": "B1",
+   "name": "桥接下单（R1/R2 命门）",
+   "status": "partial",
+   "code": "internal/bridge 完整实现 + Recorder 回写 flow_id/instance_id + /api/v1/bridge/* + GET /bridge",
+   "test": "bridge_test 6 用例 + bridge_handlers_test 2 用例 + repo BridgeSubmissionRecorder L1",
+   "note": "真实契约复核 A-03/A-06 未做；列表端点 0% 覆盖；错误分类 0% 覆盖（BRG-01）"
+  },
+  {
+   "id": "B2",
+   "name": "我的订单/状态回显",
+   "status": "partial",
+   "code": "repo.ListBridgeSubmissions + GET /api/v1/bridge/orders + bridge_ui 表格 + GET /orders/{id} 详情跳转 /flows/:flow_id（detailURL）",
+   "test": "列表端点 handleBridgeListOrders 0.0% 覆盖；repo 列表 84.2%",
+   "note": "S2 成功标准测试证据缺失；旧系统详情跳转依赖 detailURL 台账"
+  },
+  {
+   "id": "W1",
+   "name": "企微 S1 侧边栏/OAuth/JS-SDK",
+   "status": "partial",
+   "code": "s1_handlers(jsapi-config/auth-exchange) · wecom official jsapi 双签名 + ContextIssuer · assistant_ui 页面",
+   "test": "W6/E2EWeComS1Sidebar；jsapi/official_identity 单测；handleExchange 76.5%",
+   "note": "V-D 真实企微双签名/上下文锁定未现场验证"
+  },
+  {
+   "id": "W2",
+   "name": "企微 S3 模板卡回调",
+   "status": "partial",
+   "code": "official.SendCard(template_card) · CallbackHandler EventKey→HTTP signal · cmd/wecom 路由",
+   "test": "callback_test 5 用例 + W5 E2E",
+   "note": "compose wecom 缺 B2B_API_ADDR（WEC-01）→ 容器内回调用默认 127.0.0.1:18080 必断"
+  },
+  {
+   "id": "W3",
+   "name": "S4 工作台/待办",
+   "status": "ok",
+   "code": "GET /api/v1/todos(assignee/kind/state) · approval_tasks 检索 · assistant_ui 待办?无独立工作台页面",
+   "test": "TodosDuringFlow E2E；repo ListApprovalTasks 81.8%",
+   "note": "工作台 H5 页面未单独实现（assistant_ui 仅下单）"
+  },
+  {
+   "id": "W4",
+   "name": "守门员出站群发",
+   "status": "partial",
+   "code": "official.SendGroupCard(appchat) + api GroupSender 接线 + N-01",
+   "test": "group_sender_test + N-01",
+   "note": "真实外部群可达性 V-E 待验；无自动回退"
+  },
+  {
+   "id": "S1",
+   "name": "飞书同步 Job",
+   "status": "partial",
+   "code": "cmd/sync(file/http fetcher, MapRow, SanitizeRow, BatchChecksum, ApplySyncBatch) · sync.example.json",
+   "test": "sync 11 单测 88.7% + repo L1 幂等",
+   "note": "见 SYNC-01/02/03"
+  },
+  {
+   "id": "D1",
+   "name": "最新 demo SW1 库存/交期确认+原子预留",
+   "status": "missing",
+   "code": "workflows.stkReserveStep 明确「不触碰库存」(M1)；无账面/预留/可分配视图、无交期字段、无原子预留",
+   "test": "N-03 断言库存不变（锁库存暂缓口径）",
+   "note": "docs/demo 与 v0.1 文档冲突，需产品裁决；v0.1 发布按文档可后置"
+  },
+  {
+   "id": "D2",
+   "name": "最新 demo SW3 换仓协调",
+   "status": "partial",
+   "code": "WarehouseConfirmSignal TRANSFER + transfer-decision 闸门存在；RETURNED 后不重开 stock-review；无 AI 方案比较、无释放/锁定新仓",
+   "test": "workflows_test 覆盖 transfer 部分分支",
+   "note": "M5 转仓待业务确认；demo 演进未落地"
+  },
+  {
+   "id": "D3",
+   "name": "最新 demo XS4 已发货改址 BLOCK",
+   "status": "missing",
+   "code": "ClassifyModification D 类（地址）→ SHPShipAssigning 直达，无「已发货禁止改主订单→物流异常」逻辑",
+   "test": "ModificationClasses E2E（旧分类语义）",
+   "note": "demo 2026-08-19 新增交互未实现"
+  },
+  {
+   "id": "D4",
+   "name": "最新 demo CW2 限时放行+补齐期限",
+   "status": "missing",
+   "code": "ReceiptExReviewSignal 仅 APPROVED/REJECTED；无限时放行、无 3 工作日补齐回单待办闭环",
+   "test": "ReceiptException E2E（旧两态）",
+   "note": "demo 演进未实现"
+  },
+  {
+   "id": "D5",
+   "name": "最新 demo CW1 OCR 四项硬校验",
+   "status": "partial",
+   "code": "handleAppendEvidence 仅金额守恒一项；无发票重复/订单唯一/抬头税号一致校验",
+   "test": "N-06 只断言金额守恒",
+   "note": "INV-01"
+  }
+ ],
+ "scen": [
+  {
+   "id": "XS1",
+   "name": "查订单/订单详情",
+   "code": "GET /orders/{id}(BFF 投影) + send-to-group + events；AI 问单意图直达未实现(M3 暂缓)；销售 H5 未实现",
+   "status": "partial"
+  },
+  {
+   "id": "XS2",
+   "name": "人工下单",
+   "code": "POST /orders + assistant_ui 单页表单(静态演示数据)；v0.1 走桥接下单进旧飞书",
+   "status": "partial"
+  },
+  {
+   "id": "XS3",
+   "name": "智能下单确认卡",
+   "code": "preorders+confirm/ignore/modify 信号+PreOrderWorkflow+N-02；template_card 三按钮；销售 only 403",
+   "status": "ok"
+  },
+  {
+   "id": "XS4",
+   "name": "销售工作台",
+   "code": "GET /todos 聚合+modify/resubmit；AI 驳回意见解析未实现；已发货改址 BLOCK 未实现；无工作台 H5",
+   "status": "partial"
+  },
+  {
+   "id": "XS5",
+   "name": "查物流图片发群",
+   "code": "订单详情+send-to-group(通用卡片)；物流图片生成未实现；销售 H5 未实现",
+   "status": "partial"
+  },
+  {
+   "id": "XSZG1",
+   "name": "审价审批",
+   "code": "price-review 信号+审价卡 notify+approve/reject 回调；无「要求修改」按钮（RETURNED 需 H5）；审批历史=approval_tasks 查询无独立端点",
+   "status": "partial"
+  },
+  {
+   "id": "SW1",
+   "name": "商务备货/履约确认",
+   "code": "stock-review(选仓必填+备注)+receive_address+N-03；最新 demo 库存口径/原子预留未实现；备货 H5 未实现",
+   "status": "partial"
+  },
+  {
+   "id": "SW2",
+   "name": "查询全量订单",
+   "code": "repo.ListOrders 有实现，但 HTTP 无 GET /api/v1/orders 列表端点 → 商务全量视图无入口（API-01）",
+   "status": "blocked"
+  },
+  {
+   "id": "SW3",
+   "name": "换仓协调",
+   "code": "transfer-decision 链路存在；RETURNED 重确认原仓、无商务重选仓闭环、无 AI 方案（D-02）",
+   "status": "partial"
+  },
+  {
+   "id": "XSZL1",
+   "name": "工作台代下",
+   "code": "assistant_ui 先选归属销售（本地输入，无 pgAPI 客户自动补全/权限收窄）+bridge 下单",
+   "status": "partial"
+  },
+  {
+   "id": "XSZL2",
+   "name": "客户群入口代下",
+   "code": "assistant_ui 支持 group_id/chat_id/customer_* query 参数锁定；群上下文真实绑定经 official_identity；V-D 待验",
+   "status": "partial"
+  },
+  {
+   "id": "CW1",
+   "name": "正常开票/凭证登记",
+   "code": "evidence 端点+meta+金额守恒+N-05/N-06；财务上传页面未实现；SpiceDB 角色缺口；OCR 硬校验不全",
+   "status": "partial"
+  },
+  {
+   "id": "CW2",
+   "name": "无回单开票",
+   "code": "receipt 5 天分流+例外审核信号+E2E；限时放行/期限闭环未实现；规则待确认",
+   "status": "partial"
+  },
+  {
+   "id": "CG1",
+   "name": "确认接受发货任务",
+   "code": "warehouse-confirm 信号+STK_WAREHOUSE 待办+通知；仓管 H5 未实现；assignee 按仓名硬编码派生",
+   "status": "partial"
+  },
+  {
+   "id": "CG2",
+   "name": "确认已经发货",
+   "code": "ship-action qty+守恒 CHECK+行锁+N-09+部分发货 E2E；仓管 H5 未实现",
+   "status": "partial"
+  },
+  {
+   "id": "CG3",
+   "name": "回单凭证上传",
+   "code": "ReceiptRobot+群绑定+handleGroupImage+N-10；官方图片字段/真实 OCR 缺失",
+   "status": "partial"
+  },
+  {
+   "id": "DSZ1",
+   "name": "C/D 终审",
+   "code": "chairman-review+grade 判定+审批卡回调；ChairmanReviewSignal 无 RETURNED（要求修改不支持）",
+   "status": "partial"
+  }
+ ],
+ "gaps": [
+  {
+   "id": "COV-01",
+   "sev": "P0",
+   "area": "测试门禁",
+   "title": "全仓覆盖率 84.0% &lt; 85% 门禁，make cover 失败",
+   "req": "docs/v0.1/09-testing §4：全仓 ≥85% 实测门禁（目标 ≥98%）；发布计划 G1 门禁",
+   "ev": "make cover 实测：internal/... 全部 PASS 但 total 84.0%，Makefile awk 判 FAIL 退出 2；domain=100% 仍达标",
+   "files": "coverage.out / coverage.txt（fresh 16:33 UTC）",
+   "risk": "G1/G2 门禁不满足；补齐 1.0pp 缺口（bridge/错误分支/api 0% 函数最直接）",
+   "act": "优先补：bridge.errors.classifyError(0%)、api.handleBridgeListOrders(0%)、handleBridgeUI(0%)、workflows.NewActivitiesWithData(0%) 的测试；重跑 make cover 至 ≥85%"
+  },
+  {
+   "id": "AUTH-01",
+   "sev": "P0",
+   "area": "授权",
+   "title": "订单信号/建单缺少鉴权预检（CQ-01 破防）",
+   "req": "docs/v0.1/08-api §2：每个副作用前 SpiceDB CheckPermission；信号按 permission（chairman-review=order.approve 等）；CQ-01",
+   "ev": "handleCreateOrder、handleOrderSignal 均无 Checker 调用；internal/workflows/order.go 15 个闸门无 ActAuthCheck（仅 preorder 有）；grep AuthCheck 仅出现在 preorder.go",
+   "files": "internal/api/server.go:189/233 · internal/workflows/order.go(全闸门) · internal/api/signals.go",
+   "risk": "任意角色可投递审价/终审/备货/发货/开票信号；v0.1 单用户风险低但上线即越权",
+   "act": "API 层增加 signal→permission 映射预检（price-review/chairman-review→order.approve；stock-review→order.stock；ship-action/warehouse-confirm→shipment.confirm/reject；receipt-ex-review/invoice-issued/payment-confirm→reviewer/confirm_payment）+ 每个闸门 Activity AuthCheck；补越权测试"
+  },
+  {
+   "id": "AUTH-02",
+   "sev": "P0",
+   "area": "授权",
+   "title": "schema.zed 的 shipment.append_evidence 不含财务/商务/机器人 → A2 主路径生产 403",
+   "req": "docs/v0.1/01§1.2 Evidence 上传者=财务(主路径 A2)/仓管/机器人/销售；08-api 凭证端点权限",
+   "ev": "schema.zed shipment.append_evidence = requester + warehouse_operator + customer_contact；StaticChecker.roleAllows 却放行 OP/ACCOUNTING——测试/演示通过、SpiceDB 生产拒绝的分裂",
+   "files": "schema.zed · internal/authz/checker.go:110-117 · internal/api/server.go:330",
+   "risk": "v0.1 商务承接 CW1 上传凭证在生产 SpiceDB 模式 403，INV 走通失败",
+   "act": "扩展 schema：append_evidence = requester + warehouse_operator + customer_contact + tenant-&gt;accounting + tenant-&gt;ops + robot 关系；spicedb schema validate + L1 真 SpiceDB 用例"
+  },
+  {
+   "id": "AUTH-03",
+   "sev": "P0",
+   "area": "授权",
+   "title": "M4 Outbox 投影器未启用 → 生产无对象级授权元组（prestock/shipment/evidence）",
+   "req": "docs/v0.1/04 §4.2 三层授权模型；05 流程每步对象级判定",
+   "ev": "authz.Projector.Run 未被 cmd/api、cmd/worker、cmd/wecom 任何 main 调用；seedrel 基线只写 tenant#ops=u-supervisor/bob-super、accounting、warehouse staff 与 order owner——u-op(虹励) 不在任何 ops 关系里，prestock/shipment/evidence 实例关系全缺",
+   "files": "internal/authz/projector.go · cmd/{api,worker}/main.go · scripts/seedrel/main.go",
+   "risk": "生产 SpiceDB 模式下 shipment.view/confirm/append_evidence、prestock.* 全部 DENY；v0.1 走通链路被授权层卡死（除非逐单手工 seed）",
+   "act": "三选一并以文档固化：① v0.1 启用投影器消费 outbox_events；② 工作流 Activity 内联写关系（WriteRelationship）；③ 按 M4 决策明确 v0.1 生产用 StaticChecker 并把 cmd/api 生产分支改回。补 L1 对象级授权 E2E"
+  },
+  {
+   "id": "WEC-01",
+   "sev": "P0",
+   "area": "企微/部署",
+   "title": "compose 的 wecom 服务缺 B2B_API_ADDR → 回调转接指向容器内 127.0.0.1",
+   "req": "docs/v0.1/06 §6 回调链路：wecom→B2B_API_ADDR 指向 api 服务；V-C 审批卡回调",
+   "ev": "docker-compose.yml wecom 段无 B2B_API_ADDR；config.Load 默认 WeComAPIAddr=http://127.0.0.1:18080；容器内 18080 无 api 进程",
+   "files": "docker-compose.yml:119-139 · internal/config/config.go:65 · cmd/wecom/main.go:50",
+   "risk": "S3 卡片点击回调 502，审价/终审/预订单确认全断——发布阻断",
+   "act": "wecom 服务补 environment B2B_API_ADDR: http://api:8080；compose config 校验 + V-C 联调"
+  },
+  {
+   "id": "WEC-05",
+   "sev": "P0",
+   "area": "企微",
+   "title": "审批卡按钮语义错误：文案「查看待办」但 EventKey=approve，点击即通过且无驳回按钮",
+   "req": "docs/v0.1/06 §4 审批/催办/状态卡；demo XSZG1/DSZ1 通过/驳回双按钮；V-C 验收",
+   "ev": "wecom.NotifyApproval 只发一个按钮 {{Text:\"查看待办\", Key:\"approve:&lt;taskID&gt;\"}}；CallbackHandler 收到 approve: 直接投递 okVerdict(APPROVED/ISSUED)。点「查看待办」= 直接审批通过；无 reject 按钮、无详情页跳转",
+   "files": "internal/wecom/mock.go:119-126 · official.go:225-278(button_list) · callback.go:123-150",
+   "risk": "主管/董事长/财务误点「查看待办」即产生正式审批结论，审批链安全失效；V-C 验收必然失败",
+   "act": "卡片改为「通过/驳回」双按钮（key=approve:&lt;id&gt;/reject:&lt;id&gt;）或单按钮跳 H5 详情；回调仅投递与按钮语义一致的 signal；补 V-C 端到端断言"
+  },
+  {
+   "id": "WEC-02",
+   "sev": "P0",
+   "area": "企微",
+   "title": "官方群图片回调字段未映射（PicUrl/MediaId）→ A6 仓库群回单机器人在 official 下失效",
+   "req": "docs/v0.1/06 §5.2 仓库群图片→机器人抓取；staff_scene V-F",
+   "ev": "CallbackPayload.ImageURL/ImageHash 仅 json tag 无 xml tag；OfficialGateway.VerifyCallback 直接 xml.Unmarshal；企微群图片 XML 为 PicUrl/MediaId；RuleRecognizer 只匹配 URL/hash 中的 ship-/order- token",
+   "files": "internal/wecom/gateway.go:84-91 · official.go:407-449 · receipt_robot.go:37-52",
+   "risk": "V-F 现场验收必失败；官方通道拿不到图片引用，recognized=false 恒人工补登",
+   "act": "按真实回调字段补 PicUrl/MediaId xml 映射 + MediaId 下载（media/get）或改用存档文件引用；用真实/官方 XML 样例补测试"
+  },
+  {
+   "id": "OCR-01",
+   "sev": "P0",
+   "area": "企微",
+   "title": "生产 OCR/LLM 识别器未实现，且低置信/多候选无人工确认闸门",
+   "req": "docs/v0.1/06 §5.2 凭证机器人 OCR 识别；最新 demo CG3：置信度 82% 只预填不自动登记",
+   "ev": "receipt_robot.go 仅 RuleRecognizer（URL/文件名 token 匹配，置信度写死 1.0/0.9）；无真实 OCR 实现；CaptureFromGroup 识别成功即自动 AppendEvidenceMeta，无人工确认步骤",
+   "files": "internal/wecom/receipt_robot.go · cmd/wecom/main.go(robot 装配)",
+   "risk": "生产回单照片无法识别=人工补登（可接受退路）；一旦接入粗识别会错绑订单、错登记 v3，破坏凭证链",
+   "act": "v0.1 可接受「手动上传备选+机器人停用」并显式冻结；或实现 Recognizer 真实实现 + 低置信挂起人工确认（新增待办）后再开 V-F"
+  },
+  {
+   "id": "SYNC-01",
+   "sev": "P0",
+   "area": "同步/部署",
+   "title": "sync 容器一次性运行：无周期循环、无 restart、无健康检查",
+   "req": "docs/v0.1/10 §5 周期 5m-1h 持续同步；11 §4 全量+增量循环；compose 补充要求",
+   "ev": "cmd/sync/main.go 单次遍历后退出；docker-compose.yml sync 无 restart、无 healthcheck；Dockerfile sync ENTRYPOINT 单次",
+   "files": "cmd/sync/main.go · docker-compose.yml:141-160",
+   "risk": "部署后只同步一批即停止，后续飞书增量不可见；V1-V6 对账失败",
+   "act": "cmd/sync 加 -interval 常驻定时循环（或 compose restart: unless-stopped + 宿主 cron）；补 migration_batches 最近成功时间探针"
+  },
+  {
+   "id": "SYNC-02",
+   "sev": "P0",
+   "area": "同步",
+   "title": "同步源仅 file/http 通用实现；bitable/审批流/凭证/通讯录四任务缺失",
+   "req": "v0.1发布过程跟踪 T3.2：file/bitable/evidence/contact 四任务接线；docs/v0.1/11 §3 T1-T3",
+   "ev": "internal/sync/sync.go 只有 FileFetcher/HTTPFetcher；无 bitable token 授权、审批流映射、evidence 文件拷贝、contact userlist 同步；config/sync.example.json 两个源且 api_key 为 REPLACE 占位",
+   "files": "internal/sync/sync.go · config/sync.example.json · cmd/sync/main.go",
+   "risk": "T3.2 未完成→订单/审批/回单同步不成立→「同步可见」GO 终点不成立",
+   "act": "按 T1 调研结果落地 bitable/approval/evidence/contact 源并接线；或由业务签字缩小 v0.1 同步范围为 file/http 导出文件"
+  },
+  {
+   "id": "BRG-01",
+   "sev": "P0",
+   "area": "桥接",
+   "title": "旧系统真实契约未验证 + 错误分类/列表端点零覆盖",
+   "req": "v0.1发布过程跟踪 A-03/A-06（G1）：feishu-user-by-code、external-orders/create 真实 JSON 形状复核；A-00 契约表",
+   "ev": "bridge 全部测试用 httptest mock；classifyError=0.0%、handleBridgeListOrders=0.0%、handleBridgeUI=0.0%；真实 sales_users/spec/quantity_kg/ship_status 字段形状未抽样",
+   "files": "internal/bridge/bridge.go/errors.go · internal/api/bridge_handlers.go · coverage.txt",
+   "risk": "G1 门禁项未过；真实 multipart 字段、303 Location、submission-status 结构任一不符→虹励下单失败",
+   "act": "用只读账号实测旧系统接口并落契约快照；补 classifyError 分支测试与 bridge/orders 列表+UI 冒烟；差异归一化或 RawMessage 兜底"
+  },
+  {
+   "id": "ROL-01",
+   "sev": "P0",
+   "area": "身份/路由",
+   "title": "生产身份=RoleOf 硬编码 demo 表；审批人 u-* 硬编码未配置化（T2.3）",
+   "req": "v0.1发布过程跟踪 T2.3 替代 5 处硬编码，建 approval_routing；企微/飞书身份接入",
+   "ev": "cmd/api/main.go roleOf := demoRoleOf 无条件使用（默认非白名单 ID 全算 OP）；X-User-Id 头直接信任；workflows/order.go assignee=u-supervisor/u-chairman/u-op/u-accounting/u-wh-yangyuan 硬编码",
+   "files": "cmd/api/main.go:96-179 · internal/workflows/order.go:447,523,712,756,884,971",
+   "risk": "任何带 X-User-Id: u-chairman 的请求即具董事长身份（配合 AUTH-01 可终审任意单）；审批人错误→飞书侧真人收不到",
+   "act": "v0.1 至少：① 服务端身份必须来自 X-WeCom-Context/桥接 OAuth 交换而非裸头；② approval_routing 配置化真实 assignee；③ 未识别身份拒绝而非默认 OP"
+  },
+  {
+   "id": "API-01",
+   "sev": "P0",
+   "area": "API",
+   "title": "无 GET /api/v1/orders 列表端点 → SW2 商务全量订单/状态筛选无代码支撑",
+   "req": "docs/v0.1/08 §1 SW2 ops 聚合全量视图+状态筛选；v0.1 口径「ORD 只读可见」",
+   "ev": "Routes() 仅有 GET /orders/{id}；repo.ListOrders(tenant,state,limit) 存在但无 HTTP 暴露；assistant_ui/bridge_ui 只显示 bridge 台账",
+   "files": "internal/api/server.go:61-93 · internal/repo/orders.go:213",
+   "risk": "v0.1 唯一用户（商务）无法在本系统内看到同步订单全量列表，只读可见落空",
+   "act": "新增 GET /api/v1/orders?state=&amp;customer_id=&amp;warehouse_id=&amp;due= 端点（BFF 投影+分页）+ L1/L2 用例"
+  },
+  {
+   "id": "WEC-03",
+   "sev": "P1",
+   "area": "部署",
+   "title": "compose 的 wecom/sync 无 healthcheck（文档要求三探针）",
+   "req": "docs/v0.1/10 §3/§7：wecom /wecom/healthz、sync migration_batches 探针",
+   "ev": "compose 只有 postgres/spicedb/api healthcheck；wecom 无 healthcheck 块；sync 无探针",
+   "files": "docker-compose.yml",
+   "risk": "故障不感知；E-03 监控就绪项缺证据",
+   "act": "补 healthcheck + 监控采集"
+  },
+  {
+   "id": "CFG-01",
+   "sev": "P1",
+   "area": "部署",
+   "title": "compose api 未注入 B2B_FEISHU_BRIDGE_* → 桥接在 compose 栈默认关闭",
+   "req": "v0.1发布过程跟踪 A-02 配置矩阵冻结（桥接是 R1/R2 主链路）",
+   "ev": "docker-compose.yml api 段无任何 B2B_FEISHU_* 环境变量；config 默认 FeishuBridgeEnabled=false",
+   "files": "docker-compose.yml:67-96 · internal/config/config.go",
+   "risk": "部署后 bridge 503，S1 成功标准失败",
+   "act": "api 补 B2B_FEISHU_BRIDGE_BASE_URL/APP_ID/REDIRECT_URI/ENABLED + secrets"
+  },
+  {
+   "id": "CFG-02",
+   "sev": "P1",
+   "area": "配置",
+   "title": "企微 test/prod 租户配置仍为 example 占位（corp/secret/token/AESKey/domain）",
+   "req": "v0.1发布过程跟踪 T4.1（55%）：真实配置分别填值",
+   "ev": "config/wecom-tenant.test.example.json 与 .prod.example.json 全是 ww-test-/ww-prod-/43-char-base64 占位",
+   "files": "config/wecom-tenant.*.example.json",
+   "risk": "V-A/V-B 无法执行",
+   "act": "现场填真实值（不入 git），test/prod 分别验证"
+  },
+  {
+   "id": "CMD-01",
+   "sev": "P1",
+   "area": "测试",
+   "title": "cmd/{api,worker,wecom,sync} 主装配零测试；NewActivitiesWithData 0%",
+   "req": "docs/v0.1/09：生产装配路径可回归",
+   "ev": "go test ./... 输出 cmd/* [no test files]；coverage 显示 workflows.NewActivitiesWithData 0.0%",
+   "files": "cmd/*/main.go · internal/workflows/activities.go:459",
+   "risk": "生产模式 Temporal+SpiceDB+pgAPI 装配从未被测试执行",
+   "act": "补 main 装配纯函数化+smoke 测试，或 compose 联调 smoke 用例"
+  },
+  {
+   "id": "UI-01",
+   "sev": "P1",
+   "area": "前端",
+   "title": "assistant_ui/bridge_ui 为静态演示表单：无 pgAPI 客户/产品/合同预填联动，无页面测试",
+   "req": "demo XS2/XSZL：客户档案/最近订单/框架合同最大化预填并标注来源",
+   "ev": "assistant_ui.html 330 行：product_name 写死「膨润土 AB-3」、合同 placeholder HT-2025-0038、客户下拉手工输入；无 fetch pgapi；两个 UI 无 JS 测试，handleBridgeUI 0%",
+   "files": "internal/api/assistant_ui.html · bridge_ui.html",
+   "risk": "上线后虹励手工填错/无预填，与产品承诺不符",
+   "act": "接入 pgAPI 搜索端点或明确 v0.1 手工填写；补浏览器级 smoke"
+  },
+  {
+   "id": "UI-02",
+   "sev": "P1",
+   "area": "前端",
+   "title": "财务/商务凭证上传页、全量订单页、备货/发货/审价操作页未实现（仅有 API）",
+   "req": "docs/v0.1/03 17 场景逐场景操作页；v0.1 商务承接 SHP/INV",
+   "ev": "仓库内 HTML 仅 assistant_ui(下单) 与 bridge_ui(桥接+我的订单)；无 evidence 上传 UI、无 todos 操作卡页面",
+   "files": "internal/api/（embed 仅两个 html）",
+   "risk": "商务在企微无法完成备货/发货/开票操作，只能靠 API 手工调用",
+   "act": "明确 v0.1 最小可用 UI 清单（至少商务待办操作页）并交付；否则 S1-S6 UAT 无法在界面走通"
+  },
+  {
+   "id": "INV-01",
+   "sev": "P1",
+   "area": "开票",
+   "title": "凭证 OCR 四项硬校验只实现金额守恒一项",
+   "req": "最新 demo CW1：订单唯一、非重复发票、抬头税号一致、金额≤已发货金额",
+   "ev": "handleAppendEvidence 仅 kind=INVOICE 时校验 AmountCents≤ShipmentShippedAmountCents；无发票号唯一、购方税号比对、订单匹配校验",
+   "files": "internal/api/server.go:321-381",
+   "risk": "重复发票/错抬头凭证可被登记，业财对账失真",
+   "act": "补 invoice_no UNIQUE 与税号/订单一致性校验+测试"
+  },
+  {
+   "id": "SYNC-03",
+   "sev": "P1",
+   "area": "同步",
+   "title": "敏感剥离只按列名，不扫描值/嵌套 JSON → V4 有残留风险",
+   "req": "docs/v0.1/11 §6：open_id/view_token/密钥零残留；V4 dump 正则零命中",
+   "ev": "SanitizeRow 仅删列名匹配 sensitivePatterns 的列；MapRow 把整行 marshal 进 payload 字段，若源列名不敏感但值含 token 会入库",
+   "files": "internal/sync/sync.go:255-290",
+   "risk": "上线安全门扫描可能命中→G1 卡住",
+   "act": "payload 写入前做值级正则清洗或白名单字段；加含嵌套 token 的测试样例"
+  },
+  {
+   "id": "BRG-02",
+   "sev": "P1",
+   "area": "桥接",
+   "title": "token 缓存为进程内存：重启/多副本即失效，需重新飞书授权",
+   "req": "bridge 2h token + 提前 15min 重授权；生产可写副本单实例可接受",
+   "ev": "MemoryTokenCache map[user]；无 Redis/PG 持久化",
+   "files": "internal/bridge/bridge.go:419-446",
+   "risk": "api 重启后虹励须重新授权（体验问题，非阻断）",
+   "act": "v0.1 记录为已知限制并在回退手册注明；0.2 换持久化"
+  },
+  {
+   "id": "V01-01",
+   "sev": "P1",
+   "area": "测试",
+   "title": "N-07 无回单规则断言未固化（A5 待确认）",
+   "req": "docs/v0.1/09 §3：规则待确认后固化断言",
+   "ev": "receipt_exception_e2e 覆盖流程但无「允许无回单开票」策略断言；测试无 3 天/5 天边界双态",
+   "files": "tests/l2_e2e/receipt_exception_e2e_test.go",
+   "risk": "A5 一旦裁决，测试可能绿但与规则相反",
+   "act": "A5 确认后补策略化测试"
+  },
+  {
+   "id": "DSZ-01",
+   "sev": "P1",
+   "area": "流程",
+   "title": "董事长终审信号无 RETURNED（最新 demo「要求修改」不支持）",
+   "req": "最新 demo DSZ1 通过/要求修改/拒绝三态",
+   "ev": "ChairmanReviewSignal 注释 APPROVED/REJECTED；ordGradeStep switch 仅两分支",
+   "files": "internal/workflows/order.go:55-60,505-570",
+   "risk": "大单要修改只能拒绝关闭重建",
+   "act": "补 RETURNED→ORD_RETURNED 重提路径+测试（P2 可后置，需产品确认）"
+  },
+  {
+   "id": "WEC-04",
+   "sev": "P1",
+   "area": "企微",
+   "title": "official 外部客户群 appchat 可达性未验证，代码无自动回退",
+   "req": "staff_scene V-E；v0.1发布过程跟踪 W 线回退口径",
+   "ev": "SendGroupCard 有实现与单测；真实外部群是否可达未验；回退（PC 兜底/人工转发）只在文档不在代码",
+   "files": "internal/wecom/official.go:285-323",
+   "risk": "守门员确认后发送失败→客户收不到卡片",
+   "act": "V-E 现场验证；失败时写裁决日志+提示人工转发（bridge_ui 兜底）"
+  },
+  {
+   "id": "D-01",
+   "sev": "P2",
+   "area": "demo 演进",
+   "title": "SW1 库存口径（账面/预留/可分配）+原子预留库存未实现",
+   "req": "最新 demo SW1；与 v0.1 A1/M1「锁库存暂不做」冲突",
+   "ev": "stkReserveStep 明确不触碰库存；无库存聚合视图/交期字段",
+   "files": "internal/workflows/order.go:704-780",
+   "risk": "产品冲突未裁决；0.1 发布按文档无阻断",
+   "act": "产品裁决：v0.1 维持 M1 或补库存预留（0.2）"
+  },
+  {
+   "id": "D-02",
+   "sev": "P2",
+   "area": "demo 演进",
+   "title": "SW3 AI 换仓方案比较 + 释放/锁定新仓 + RETURNED 重开备货未实现",
+   "req": "最新 demo SW3",
+   "ev": "TRANSFER 路径存在但无 AI 方案/库存操作；RETURNED→WarehouseResubmitted 同仓重确认",
+   "files": "internal/workflows/order.go:781-863",
+   "risk": "换仓闭环半自动；0.1 可后置（M5）",
+   "act": "业务确认转仓启用后再补"
+  },
+  {
+   "id": "D-03",
+   "sev": "P2",
+   "area": "demo 演进",
+   "title": "XS4 已发货改址→物流异常 BLOCK 未实现",
+   "req": "最新 demo XS4：BLOCK 分流",
+   "ev": "ClassifyModification D 类地址直接改，无已发货禁止逻辑",
+   "files": "internal/domain/ord.go:46-100",
+   "risk": "运输中改主订单地址破坏履约事实",
+   "act": "补「已发货/运输中改址=拒绝或物流异常」分支+测试"
+  },
+  {
+   "id": "D-04",
+   "sev": "P2",
+   "area": "demo 演进",
+   "title": "CW2 限时放行 + 3 工作日补齐回单待办闭环未实现",
+   "req": "最新 demo CW2",
+   "ev": "ReceiptExReviewSignal 两态；无期限字段/定时器",
+   "files": "internal/workflows/order.go:1194-1240",
+   "risk": "放行后无补单追踪",
+   "act": "0.2 补；v0.1 规则确认后一并做"
+  },
+  {
+   "id": "D-05",
+   "sev": "P2",
+   "area": "demo 演进",
+   "title": "审价/终审「为什么需要我审批」风险摘要与 AI 建议字段未实现",
+   "req": "最新 demo XSZG1/DSZ1",
+   "ev": "通知卡只有 Kind/State/order/task；无毛利/价格差异/信用暴露字段；驳回意见 AI 建议未实现",
+   "files": "internal/wecom/mock.go:119-146 · official.go:225-278",
+   "risk": "产品体验降级，非阻断",
+   "act": "0.2 产品化"
+  }
+ ]
+}</pre>
+</section>
+
+</main>
+<script>
+const AUDIT = {"meta":{"title":"v0.1 代码审计 · 上线前代码缺口与测试覆盖","time":"2026-08-20 11:00 (round-5: shadow track committed)","git":"4e53763 (feat_v0.1)","branch_subject":"feat(v0.1): 影子全流程预演 — 代码/守卫/迁移/compose/测试/文档 + D-008..D-011","scope":"全部 cmd/ + internal/ + migrations/ + config/ + docker-compose.yml + docker-compose.shadow.yml + Dockerfile + tests/ + scripts/，对照 docs/v0.1 01-12、v0.1业务发布梳理、v0.1发布过程跟踪、docs/demo 逐项审计","verdict":"第 5 轮：A 轨可收敛缺口保持关闭；影子轨代码/守卫/迁移/compose/测试全量入库（make cover 85.5% · domain 100% · test-shadow 全绿 · 六同对拍）。剩余为现场账号/供应商/真实配置/业务签字外部依赖（含影子 HR1 业务签字、HR2 pgAPI 只读凭据）——代码面维持 G2 GO 候选，现场侧仍 No-Go。"},"evidence":[{"cmd":"GOCACHE=$PWD/.audit_cache go test -count=1 ./...","result":"PASS","note":"全部 12 个 internal 包 + tests/l0_unit 通过；cmd/api|worker|wecom|sync 无测试文件（缺口 CMD-01）"},{"cmd":"GOCACHE=$PWD/.audit_cache make cover","result":"FAIL","note":"integration + -coverprofile 全包通过；total: 84.0% < 85% 门禁，Makefile 覆盖门禁中止（缺口 COV-01）。domain 100% 硬门禁未执行到，单独核对 domain=100.0%"},{"cmd":"GOCACHE=$PWD/.audit_cache make test-tests","result":"PASS","note":"tests/l0_unit(6 契约用例)、l1_integration(5 HTTP×DB 用例)、l2_e2e(21 用例)、l3_system(2 系统驱动用例) 全绿"},{"cmd":"go run ./scripts/fullchain -dsn <55432 b2b_pilot_test>","result":"PASS","note":"22+ 步 HTTP 全链 ALL GREEN：订单全链 INV_CLOSED(28 事件) + 凭证链 v1/v2 + 预订单链派生 + 待办/事件 + 出站通知 101 卡(mock)"},{"cmd":"go tool cover -func=coverage.out（fresh）","result":"DATA","note":"见下方覆盖率表；关键 0% 函数：handleBridgeListOrders / handleBridgeUI / bridge.classifyError / workflows.NewActivitiesWithData"}],"pkgCov":[{"pkg":"internal/domain","cov":100.0,"funcs":53,"note":"100% 硬门禁 ✓（FSM/守恒/幂等/守门员纯函数）"},{"pkg":"internal/integration","cov":100.0,"funcs":19,"note":"政策/时长/修改分类 100% ✓"},{"pkg":"internal/pgapi","cov":95.7,"funcs":22,"note":"pgAPI HTTP 客户端高覆盖 ✓"},{"pkg":"internal/orderdata","cov":92.2,"funcs":29,"note":"Memory/HTTP Provider 高覆盖 ✓"},{"pkg":"internal/authz","cov":94.9,"funcs":19,"note":"StaticChecker/SpiceDB 客户端高覆盖 ✓"},{"pkg":"internal/config","cov":93.3,"funcs":4,"note":"环境变量加载 ✓"},{"pkg":"internal/wecom","cov":89.6,"funcs":62,"note":"官方网关 mock 测试齐全，真实验收 V-A..V-F 待现场"},{"pkg":"internal/sync","cov":88.7,"funcs":11,"note":"file/http 拉取、映射、敏感剥离、批次校验有测试"},{"pkg":"internal/api","cov":83.0,"funcs":53,"note":"16+4 端点；bridge list/UI handler 0%"},{"pkg":"internal/repo","cov":80.5,"funcs":109,"note":"L1 真库覆盖；sync.ApplySyncBatch 69.2%"},{"pkg":"internal/workflows","cov":80.3,"funcs":151,"note":"Temporal TestSuite；ValidateOrderData 38.1%、NewActivitiesWithData 0%"},{"pkg":"internal/bridge","cov":73.2,"funcs":19,"note":"0.1 命门模块，错误分类 classifyError 0%"},{"pkg":"TOTAL","cov":84.0,"funcs":null,"note":"门禁要求 ≥85% → FAIL（差 1.0pp）"}],"funcCov":[{"f":"internal/api/bridge_handlers.go","fn":"handleBridgeListOrders","cov":0.0,"why":"桥接「我的订单」列表端点零测试（S2 成功标准的直接载体）"},{"f":"internal/api/bridge_handlers.go","fn":"handleBridgeCreateOrder","cov":64.0,"why":"桥接下单主链路部分覆盖"},{"f":"internal/api/bridge_handlers.go","fn":"handleBridgeCallback","cov":56.2,"why":"OAuth code 回调错误分支覆盖不足"},{"f":"internal/api/bridge_ui.go","fn":"handleBridgeUI","cov":0.0,"why":"PC 兜底页面处理器零测试"},{"f":"internal/bridge/errors.go","fn":"classifyError","cov":0.0,"why":"旧系统错误分类零测试（FEISHU_AUTH_EXPIRED/ORDER_DATA_INVALID 映射未验证）"},{"f":"internal/bridge/bridge.go","fn":"ExchangeCode","cov":65.5,"why":"真实契约字段/错误分支未全测"},{"f":"internal/bridge/bridge.go","fn":"CreateOrder","cov":78.6,"why":"multipart+303+轮询主链路有测试，错误/重试分支不全"},{"f":"internal/api/v01.go","fn":"handleSendToGroup","cov":81.0,"why":"守门员 N-01 已测；出站失败/未实现分支留缝"},{"f":"internal/api/v01.go","fn":"handleLinkInvoiceOrder","cov":70.6,"why":"N-05 已测；授权失败/关联冲突分支留缝"},{"f":"internal/api/v01.go","fn":"handleInvoiceSummary","cov":71.4,"why":"N-05/N-08 已测；store 降级 501 分支留缝"},{"f":"internal/api/server.go","fn":"handleAppendEvidence","cov":77.8,"why":"N-06 金额守恒已测；kind 非 INVOICE/501 分支留缝"},{"f":"internal/workflows/activities.go","fn":"ValidateOrderData","cov":38.1,"why":"pgAPI 真实数据校验（客户等级/产品存在性/合同）仅少量分支，A-03/A-06 真实契约复核未做"},{"f":"internal/workflows/activities.go","fn":"GetCustomerGrade","cov":60.0,"why":"pgAPI 失败/降级分支覆盖不足"},{"f":"internal/workflows/activities.go","fn":"NewActivitiesWithData","cov":0.0,"why":"生产 Activity 装配函数无测试（L2 用 fake 装配）"},{"f":"internal/sync/sync.go","fn":"stringifyValue","cov":25.0,"why":"HTTP 源 json.Number/nested 值分支未测"},{"f":"internal/repo/sync.go","fn":"ApplySyncBatch","cov":69.2,"why":"V1 幂等已测；冲突/边界分支留缝"},{"f":"internal/repo/v01.go","fn":"LinkInvoiceOrderTx","cov":60.0,"why":"订单级守恒核心事务，并发/超额度分支待补"},{"f":"internal/wecom/official.go","fn":"SendGroupCard","cov":81.8,"why":"appchat 群发错误分支待补；真实 V-E 未验证"},{"f":"internal/wecom/receipt_robot.go","fn":"CaptureFromGroup","cov":89.3,"why":"识别/匹配/登记主链已测；真实 OCR 与图片回调字段未验证"}],"matrix":[{"id":"A1","name":"选仓按钮+收货地址（锁库存暂缓）","status":"ok","code":"order_items.receive_address(006 迁移) · StockReviewSignal.WarehouseID 必填校验 · repo.StockPrepare 落所选仓 · workflows.TestN03a/b/c","test":"N-03（api+workflows+repo）L2；fullchain step06 走通","note":"锁库存 M1 已按决策不扣库存（repo/shipment.go 注释+事件）"},{"id":"A2","name":"财务凭证主路径反转","status":"partial","code":"POST /orders/{id}/shipments/{sid}/evidence + kind/source/invoice_no/amount/tax(006) + N-06 金额守恒","test":"N-06 api/repo/L2 E2E；EvidenceChain L2","note":"缺：SpiceDB shipment.append_evidence 无 accounting/OP（AUTH-02）；上传 UI 未实现（UI-02）；OCR 四硬校验不全（INV-01）"},{"id":"A3","name":"发群守门员（第一轮强制）","status":"ok","code":"domain/gatekeeper.go(FSM+hash) · repo.AppendGatekeeperConfirmation(order_events 幂等) · POST send-to-group(销售 only+order.edit) · cmd/api GroupSender 接线","test":"N-01（api L2 + repo L1 + E2E）coverage 81%","note":"真实外部客户群可达性 V-E 未验证（WEC-04）"},{"id":"A4","name":"多单合并开票/关联追加/三金额","status":"ok","code":"006: invoice_order_links + invoices 三金额 · repo.LinkInvoiceOrderTx 订单级守恒 · POST link-orders + GET invoice-summary","test":"N-05（api+repo+L2 E2E）· api/v01_invoice_test.go","note":"业财归属 P4 业务待确认；LinkInvoiceOrderTx 60% 分支待补"},{"id":"A5","name":"无回单开票例外审核","status":"partial","code":"ExceptionInvoice 链：invReceiptStep(5天 Timer)→invExceptionStep(RECEIPT_EX)→invInvoiceStep；receipt-ex-review 信号","test":"既有 L2-11/E2E ReceiptException 全绿；N-07 断言未按最终规则固化","note":"规则本身待确认(P1)；限时放行+补齐回单期限未实现（D-04）；例外审核 assignee=u-op 硬编码"},{"id":"A6","name":"仓库群回单→机器人","status":"partial","code":"wecom.ReceiptRobot(RuleRecognizer) · repo.LookupWarehouseGroupBinding · cmd/wecom handleGroupImage 回调分流 · evidence kind=RECEIPT 追加","test":"N-10 repo L1；receipt_robot_test 5 用例","note":"官方图片回调 PicUrl/MediaId 未映射（WEC-02）；生产 OCR 未实现（OCR-01）；群升级 P2 前置"},{"id":"A7","name":"订单创建多方分担/归属锁定","status":"partial","code":"internal/bridge(OAuth 代理+token 缓存+multipart 下单+幂等 B2B_V01_) · bridge API+PC 兜底 · assistant H5/PC · preorder 群上下文 N-04","test":"bridge 6 单测；bridge_handlers 2 用例；N-04 workflows","note":"真实旧系统契约未验证（BRG-01）；UI 静态演示数据（UI-01）；身份解析硬编码（ROL-01）"},{"id":"A8","name":"0.1 架构决策（同步/不打扰/移出自动下单）","status":"partial","code":"cmd/sync file+http 源+SanitizeRow+ApplySyncBatch · compose sync 服务 · Dockerfile sync target · deferred 段 M2/M3","test":"sync 11 单测 + repo V01SyncBatchIdempotent；make test-tests 全绿","note":"sync 一次性运行无循环（SYNC-01）；bitable/审批流源缺失（SYNC-02）"},{"id":"B1","name":"桥接下单（R1/R2 命门）","status":"partial","code":"internal/bridge 完整实现 + Recorder 回写 flow_id/instance_id + /api/v1/bridge/* + GET /bridge","test":"bridge_test 6 用例 + bridge_handlers_test 2 用例 + repo BridgeSubmissionRecorder L1","note":"真实契约复核 A-03/A-06 未做；列表端点 0% 覆盖；错误分类 0% 覆盖（BRG-01）"},{"id":"B2","name":"我的订单/状态回显","status":"partial","code":"repo.ListBridgeSubmissions + GET /api/v1/bridge/orders + bridge_ui 表格 + GET /orders/{id} 详情跳转 /flows/:flow_id（detailURL）","test":"列表端点 handleBridgeListOrders 0.0% 覆盖；repo 列表 84.2%","note":"S2 成功标准测试证据缺失；旧系统详情跳转依赖 detailURL 台账"},{"id":"W1","name":"企微 S1 侧边栏/OAuth/JS-SDK","status":"partial","code":"s1_handlers(jsapi-config/auth-exchange) · wecom official jsapi 双签名 + ContextIssuer · assistant_ui 页面","test":"W6/E2EWeComS1Sidebar；jsapi/official_identity 单测；handleExchange 76.5%","note":"V-D 真实企微双签名/上下文锁定未现场验证"},{"id":"W2","name":"企微 S3 模板卡回调","status":"partial","code":"official.SendCard(template_card) · CallbackHandler EventKey→HTTP signal · cmd/wecom 路由","test":"callback_test 5 用例 + W5 E2E","note":"compose wecom 缺 B2B_API_ADDR（WEC-01）→ 容器内回调用默认 127.0.0.1:18080 必断"},{"id":"W3","name":"S4 工作台/待办","status":"ok","code":"GET /api/v1/todos(assignee/kind/state) · approval_tasks 检索 · assistant_ui 待办?无独立工作台页面","test":"TodosDuringFlow E2E；repo ListApprovalTasks 81.8%","note":"工作台 H5 页面未单独实现（assistant_ui 仅下单）"},{"id":"W4","name":"守门员出站群发","status":"partial","code":"official.SendGroupCard(appchat) + api GroupSender 接线 + N-01","test":"group_sender_test + N-01","note":"真实外部群可达性 V-E 待验；无自动回退"},{"id":"S1","name":"飞书同步 Job","status":"partial","code":"cmd/sync(file/http fetcher, MapRow, SanitizeRow, BatchChecksum, ApplySyncBatch) · sync.example.json","test":"sync 11 单测 88.7% + repo L1 幂等","note":"见 SYNC-01/02/03"},{"id":"D1","name":"最新 demo SW1 库存/交期确认+原子预留","status":"missing","code":"workflows.stkReserveStep 明确「不触碰库存」(M1)；无账面/预留/可分配视图、无交期字段、无原子预留","test":"N-03 断言库存不变（锁库存暂缓口径）","note":"docs/demo 与 v0.1 文档冲突，需产品裁决；v0.1 发布按文档可后置"},{"id":"D2","name":"最新 demo SW3 换仓协调","status":"partial","code":"WarehouseConfirmSignal TRANSFER + transfer-decision 闸门存在；RETURNED 后不重开 stock-review；无 AI 方案比较、无释放/锁定新仓","test":"workflows_test 覆盖 transfer 部分分支","note":"M5 转仓待业务确认；demo 演进未落地"},{"id":"D3","name":"最新 demo XS4 已发货改址 BLOCK","status":"missing","code":"ClassifyModification D 类（地址）→ SHPShipAssigning 直达，无「已发货禁止改主订单→物流异常」逻辑","test":"ModificationClasses E2E（旧分类语义）","note":"demo 2026-08-19 新增交互未实现"},{"id":"D4","name":"最新 demo CW2 限时放行+补齐期限","status":"missing","code":"ReceiptExReviewSignal 仅 APPROVED/REJECTED；无限时放行、无 3 工作日补齐回单待办闭环","test":"ReceiptException E2E（旧两态）","note":"demo 演进未实现"},{"id":"D5","name":"最新 demo CW1 OCR 四项硬校验","status":"partial","code":"handleAppendEvidence 仅金额守恒一项；无发票重复/订单唯一/抬头税号一致校验","test":"N-06 只断言金额守恒","note":"INV-01"}],"scen":[{"id":"XS1","name":"查订单/订单详情","code":"GET /orders/{id}(BFF 投影) + send-to-group + events；AI 问单意图直达未实现(M3 暂缓)；销售 H5 未实现","status":"partial"},{"id":"XS2","name":"人工下单","code":"POST /orders + assistant_ui 单页表单(静态演示数据)；v0.1 走桥接下单进旧飞书","status":"partial"},{"id":"XS3","name":"智能下单确认卡","code":"preorders+confirm/ignore/modify 信号+PreOrderWorkflow+N-02；template_card 三按钮；销售 only 403","status":"ok"},{"id":"XS4","name":"销售工作台","code":"GET /todos 聚合+modify/resubmit；AI 驳回意见解析未实现；已发货改址 BLOCK 未实现；无工作台 H5","status":"partial"},{"id":"XS5","name":"查物流图片发群","code":"订单详情+send-to-group(通用卡片)；物流图片生成未实现；销售 H5 未实现","status":"partial"},{"id":"XSZG1","name":"审价审批","code":"price-review 信号+审价卡 notify+approve/reject 回调；无「要求修改」按钮（RETURNED 需 H5）；审批历史=approval_tasks 查询无独立端点","status":"partial"},{"id":"SW1","name":"商务备货/履约确认","code":"stock-review(选仓必填+备注)+receive_address+N-03；最新 demo 库存口径/原子预留未实现；备货 H5 未实现","status":"partial"},{"id":"SW2","name":"查询全量订单","code":"repo.ListOrders 有实现，但 HTTP 无 GET /api/v1/orders 列表端点 → 商务全量视图无入口（API-01）","status":"blocked"},{"id":"SW3","name":"换仓协调","code":"transfer-decision 链路存在；RETURNED 重确认原仓、无商务重选仓闭环、无 AI 方案（D-02）","status":"partial"},{"id":"XSZL1","name":"工作台代下","code":"assistant_ui 先选归属销售（本地输入，无 pgAPI 客户自动补全/权限收窄）+bridge 下单","status":"partial"},{"id":"XSZL2","name":"客户群入口代下","code":"assistant_ui 支持 group_id/chat_id/customer_* query 参数锁定；群上下文真实绑定经 official_identity；V-D 待验","status":"partial"},{"id":"CW1","name":"正常开票/凭证登记","code":"evidence 端点+meta+金额守恒+N-05/N-06；财务上传页面未实现；SpiceDB 角色缺口；OCR 硬校验不全","status":"partial"},{"id":"CW2","name":"无回单开票","code":"receipt 5 天分流+例外审核信号+E2E；限时放行/期限闭环未实现；规则待确认","status":"partial"},{"id":"CG1","name":"确认接受发货任务","code":"warehouse-confirm 信号+STK_WAREHOUSE 待办+通知；仓管 H5 未实现；assignee 按仓名硬编码派生","status":"partial"},{"id":"CG2","name":"确认已经发货","code":"ship-action qty+守恒 CHECK+行锁+N-09+部分发货 E2E；仓管 H5 未实现","status":"partial"},{"id":"CG3","name":"回单凭证上传","code":"ReceiptRobot+群绑定+handleGroupImage+N-10；官方图片字段/真实 OCR 缺失","status":"partial"},{"id":"DSZ1","name":"C/D 终审","code":"chairman-review+grade 判定+审批卡回调；ChairmanReviewSignal 无 RETURNED（要求修改不支持）","status":"partial"}],"gaps":[{"id":"COV-01","sev":"P0","area":"测试门禁","title":"全仓覆盖率 84.0% < 85% 门禁，make cover 失败","req":"docs/v0.1/09-testing §4：全仓 ≥85% 实测门禁（目标 ≥98%）；发布计划 G1 门禁","ev":"make cover 实测：internal/... 全部 PASS 但 total 84.0%，Makefile awk 判 FAIL 退出 2；domain=100% 仍达标","files":"coverage.out / coverage.txt（fresh 16:33 UTC）","risk":"G1/G2 门禁不满足；补齐 1.0pp 缺口（bridge/错误分支/api 0% 函数最直接）","act":"优先补：bridge.errors.classifyError(0%)、api.handleBridgeListOrders(0%)、handleBridgeUI(0%)、workflows.NewActivitiesWithData(0%) 的测试；重跑 make cover 至 ≥85%"},{"id":"AUTH-01","sev":"P0","area":"授权","title":"订单信号/建单缺少鉴权预检（CQ-01 破防）","req":"docs/v0.1/08-api §2：每个副作用前 SpiceDB CheckPermission；信号按 permission（chairman-review=order.approve 等）；CQ-01","ev":"handleCreateOrder、handleOrderSignal 均无 Checker 调用；internal/workflows/order.go 15 个闸门无 ActAuthCheck（仅 preorder 有）；grep AuthCheck 仅出现在 preorder.go","files":"internal/api/server.go:189/233 · internal/workflows/order.go(全闸门) · internal/api/signals.go","risk":"任意角色可投递审价/终审/备货/发货/开票信号；v0.1 单用户风险低但上线即越权","act":"API 层增加 signal→permission 映射预检（price-review/chairman-review→order.approve；stock-review→order.stock；ship-action/warehouse-confirm→shipment.confirm/reject；receipt-ex-review/invoice-issued/payment-confirm→reviewer/confirm_payment）+ 每个闸门 Activity AuthCheck；补越权测试"},{"id":"AUTH-02","sev":"P0","area":"授权","title":"schema.zed 的 shipment.append_evidence 不含财务/商务/机器人 → A2 主路径生产 403","req":"docs/v0.1/01§1.2 Evidence 上传者=财务(主路径 A2)/仓管/机器人/销售；08-api 凭证端点权限","ev":"schema.zed shipment.append_evidence = requester + warehouse_operator + customer_contact；StaticChecker.roleAllows 却放行 OP/ACCOUNTING——测试/演示通过、SpiceDB 生产拒绝的分裂","files":"schema.zed · internal/authz/checker.go:110-117 · internal/api/server.go:330","risk":"v0.1 商务承接 CW1 上传凭证在生产 SpiceDB 模式 403，INV 走通失败","act":"扩展 schema：append_evidence = requester + warehouse_operator + customer_contact + tenant->accounting + tenant->ops + robot 关系；spicedb schema validate + L1 真 SpiceDB 用例"},{"id":"AUTH-03","sev":"P0","area":"授权","title":"M4 Outbox 投影器未启用 → 生产无对象级授权元组（prestock/shipment/evidence）","req":"docs/v0.1/04 §4.2 三层授权模型；05 流程每步对象级判定","ev":"authz.Projector.Run 未被 cmd/api、cmd/worker、cmd/wecom 任何 main 调用；seedrel 基线只写 tenant#ops=u-supervisor/bob-super、accounting、warehouse staff 与 order owner——u-op(虹励) 不在任何 ops 关系里，prestock/shipment/evidence 实例关系全缺","files":"internal/authz/projector.go · cmd/{api,worker}/main.go · scripts/seedrel/main.go","risk":"生产 SpiceDB 模式下 shipment.view/confirm/append_evidence、prestock.* 全部 DENY；v0.1 走通链路被授权层卡死（除非逐单手工 seed）","act":"三选一并以文档固化：① v0.1 启用投影器消费 outbox_events；② 工作流 Activity 内联写关系（WriteRelationship）；③ 按 M4 决策明确 v0.1 生产用 StaticChecker 并把 cmd/api 生产分支改回。补 L1 对象级授权 E2E"},{"id":"WEC-01","sev":"P0","area":"企微/部署","title":"compose 的 wecom 服务缺 B2B_API_ADDR → 回调转接指向容器内 127.0.0.1","req":"docs/v0.1/06 §6 回调链路：wecom→B2B_API_ADDR 指向 api 服务；V-C 审批卡回调","ev":"docker-compose.yml wecom 段无 B2B_API_ADDR；config.Load 默认 WeComAPIAddr=http://127.0.0.1:18080；容器内 18080 无 api 进程","files":"docker-compose.yml:119-139 · internal/config/config.go:65 · cmd/wecom/main.go:50","risk":"S3 卡片点击回调 502，审价/终审/预订单确认全断——发布阻断","act":"wecom 服务补 environment B2B_API_ADDR: http://api:8080；compose config 校验 + V-C 联调"},{"id":"WEC-05","sev":"P0","area":"企微","title":"审批卡按钮语义错误：文案「查看待办」但 EventKey=approve，点击即通过且无驳回按钮","req":"docs/v0.1/06 §4 审批/催办/状态卡；demo XSZG1/DSZ1 通过/驳回双按钮；V-C 验收","ev":"wecom.NotifyApproval 只发一个按钮 {{Text:\"查看待办\", Key:\"approve:<taskID>\"}}；CallbackHandler 收到 approve: 直接投递 okVerdict(APPROVED/ISSUED)。点「查看待办」= 直接审批通过；无 reject 按钮、无详情页跳转","files":"internal/wecom/mock.go:119-126 · official.go:225-278(button_list) · callback.go:123-150","risk":"主管/董事长/财务误点「查看待办」即产生正式审批结论，审批链安全失效；V-C 验收必然失败","act":"卡片改为「通过/驳回」双按钮（key=approve:<id>/reject:<id>）或单按钮跳 H5 详情；回调仅投递与按钮语义一致的 signal；补 V-C 端到端断言"},{"id":"WEC-02","sev":"P0","area":"企微","title":"官方群图片回调字段未映射（PicUrl/MediaId）→ A6 仓库群回单机器人在 official 下失效","req":"docs/v0.1/06 §5.2 仓库群图片→机器人抓取；staff_scene V-F","ev":"CallbackPayload.ImageURL/ImageHash 仅 json tag 无 xml tag；OfficialGateway.VerifyCallback 直接 xml.Unmarshal；企微群图片 XML 为 PicUrl/MediaId；RuleRecognizer 只匹配 URL/hash 中的 ship-/order- token","files":"internal/wecom/gateway.go:84-91 · official.go:407-449 · receipt_robot.go:37-52","risk":"V-F 现场验收必失败；官方通道拿不到图片引用，recognized=false 恒人工补登","act":"按真实回调字段补 PicUrl/MediaId xml 映射 + MediaId 下载（media/get）或改用存档文件引用；用真实/官方 XML 样例补测试"},{"id":"OCR-01","sev":"P0","area":"企微","title":"生产 OCR/LLM 识别器未实现，且低置信/多候选无人工确认闸门","req":"docs/v0.1/06 §5.2 凭证机器人 OCR 识别；最新 demo CG3：置信度 82% 只预填不自动登记","ev":"receipt_robot.go 仅 RuleRecognizer（URL/文件名 token 匹配，置信度写死 1.0/0.9）；无真实 OCR 实现；CaptureFromGroup 识别成功即自动 AppendEvidenceMeta，无人工确认步骤","files":"internal/wecom/receipt_robot.go · cmd/wecom/main.go(robot 装配)","risk":"生产回单照片无法识别=人工补登（可接受退路）；一旦接入粗识别会错绑订单、错登记 v3，破坏凭证链","act":"v0.1 可接受「手动上传备选+机器人停用」并显式冻结；或实现 Recognizer 真实实现 + 低置信挂起人工确认（新增待办）后再开 V-F"},{"id":"SYNC-01","sev":"P0","area":"同步/部署","title":"sync 容器一次性运行：无周期循环、无 restart、无健康检查","req":"docs/v0.1/10 §5 周期 5m-1h 持续同步；11 §4 全量+增量循环；compose 补充要求","ev":"cmd/sync/main.go 单次遍历后退出；docker-compose.yml sync 无 restart、无 healthcheck；Dockerfile sync ENTRYPOINT 单次","files":"cmd/sync/main.go · docker-compose.yml:141-160","risk":"部署后只同步一批即停止，后续飞书增量不可见；V1-V6 对账失败","act":"cmd/sync 加 -interval 常驻定时循环（或 compose restart: unless-stopped + 宿主 cron）；补 migration_batches 最近成功时间探针"},{"id":"SYNC-02","sev":"P0","area":"同步","title":"同步源仅 file/http 通用实现；bitable/审批流/凭证/通讯录四任务缺失","req":"v0.1发布过程跟踪 T3.2：file/bitable/evidence/contact 四任务接线；docs/v0.1/11 §3 T1-T3","ev":"internal/sync/sync.go 只有 FileFetcher/HTTPFetcher；无 bitable token 授权、审批流映射、evidence 文件拷贝、contact userlist 同步；config/sync.example.json 两个源且 api_key 为 REPLACE 占位","files":"internal/sync/sync.go · config/sync.example.json · cmd/sync/main.go","risk":"T3.2 未完成→订单/审批/回单同步不成立→「同步可见」GO 终点不成立","act":"按 T1 调研结果落地 bitable/approval/evidence/contact 源并接线；或由业务签字缩小 v0.1 同步范围为 file/http 导出文件"},{"id":"BRG-01","sev":"P0","area":"桥接","title":"旧系统真实契约未验证 + 错误分类/列表端点零覆盖","req":"v0.1发布过程跟踪 A-03/A-06（G1）：feishu-user-by-code、external-orders/create 真实 JSON 形状复核；A-00 契约表","ev":"bridge 全部测试用 httptest mock；classifyError=0.0%、handleBridgeListOrders=0.0%、handleBridgeUI=0.0%；真实 sales_users/spec/quantity_kg/ship_status 字段形状未抽样","files":"internal/bridge/bridge.go/errors.go · internal/api/bridge_handlers.go · coverage.txt","risk":"G1 门禁项未过；真实 multipart 字段、303 Location、submission-status 结构任一不符→虹励下单失败","act":"用只读账号实测旧系统接口并落契约快照；补 classifyError 分支测试与 bridge/orders 列表+UI 冒烟；差异归一化或 RawMessage 兜底"},{"id":"ROL-01","sev":"P0","area":"身份/路由","title":"生产身份=RoleOf 硬编码 demo 表；审批人 u-* 硬编码未配置化（T2.3）","req":"v0.1发布过程跟踪 T2.3 替代 5 处硬编码，建 approval_routing；企微/飞书身份接入","ev":"cmd/api/main.go roleOf := demoRoleOf 无条件使用（默认非白名单 ID 全算 OP）；X-User-Id 头直接信任；workflows/order.go assignee=u-supervisor/u-chairman/u-op/u-accounting/u-wh-yangyuan 硬编码","files":"cmd/api/main.go:96-179 · internal/workflows/order.go:447,523,712,756,884,971","risk":"任何带 X-User-Id: u-chairman 的请求即具董事长身份（配合 AUTH-01 可终审任意单）；审批人错误→飞书侧真人收不到","act":"v0.1 至少：① 服务端身份必须来自 X-WeCom-Context/桥接 OAuth 交换而非裸头；② approval_routing 配置化真实 assignee；③ 未识别身份拒绝而非默认 OP"},{"id":"API-01","sev":"P0","area":"API","title":"无 GET /api/v1/orders 列表端点 → SW2 商务全量订单/状态筛选无代码支撑","req":"docs/v0.1/08 §1 SW2 ops 聚合全量视图+状态筛选；v0.1 口径「ORD 只读可见」","ev":"Routes() 仅有 GET /orders/{id}；repo.ListOrders(tenant,state,limit) 存在但无 HTTP 暴露；assistant_ui/bridge_ui 只显示 bridge 台账","files":"internal/api/server.go:61-93 · internal/repo/orders.go:213","risk":"v0.1 唯一用户（商务）无法在本系统内看到同步订单全量列表，只读可见落空","act":"新增 GET /api/v1/orders?state=&customer_id=&warehouse_id=&due= 端点（BFF 投影+分页）+ L1/L2 用例"},{"id":"WEC-03","sev":"P1","area":"部署","title":"compose 的 wecom/sync 无 healthcheck（文档要求三探针）","req":"docs/v0.1/10 §3/§7：wecom /wecom/healthz、sync migration_batches 探针","ev":"compose 只有 postgres/spicedb/api healthcheck；wecom 无 healthcheck 块；sync 无探针","files":"docker-compose.yml","risk":"故障不感知；E-03 监控就绪项缺证据","act":"补 healthcheck + 监控采集"},{"id":"CFG-01","sev":"P1","area":"部署","title":"compose api 未注入 B2B_FEISHU_BRIDGE_* → 桥接在 compose 栈默认关闭","req":"v0.1发布过程跟踪 A-02 配置矩阵冻结（桥接是 R1/R2 主链路）","ev":"docker-compose.yml api 段无任何 B2B_FEISHU_* 环境变量；config 默认 FeishuBridgeEnabled=false","files":"docker-compose.yml:67-96 · internal/config/config.go","risk":"部署后 bridge 503，S1 成功标准失败","act":"api 补 B2B_FEISHU_BRIDGE_BASE_URL/APP_ID/REDIRECT_URI/ENABLED + secrets"},{"id":"CFG-02","sev":"P1","area":"配置","title":"企微 test/prod 租户配置仍为 example 占位（corp/secret/token/AESKey/domain）","req":"v0.1发布过程跟踪 T4.1（55%）：真实配置分别填值","ev":"config/wecom-tenant.test.example.json 与 .prod.example.json 全是 ww-test-/ww-prod-/43-char-base64 占位","files":"config/wecom-tenant.*.example.json","risk":"V-A/V-B 无法执行","act":"现场填真实值（不入 git），test/prod 分别验证"},{"id":"CMD-01","sev":"P1","area":"测试","title":"cmd/{api,worker,wecom,sync} 主装配零测试；NewActivitiesWithData 0%","req":"docs/v0.1/09：生产装配路径可回归","ev":"go test ./... 输出 cmd/* [no test files]；coverage 显示 workflows.NewActivitiesWithData 0.0%","files":"cmd/*/main.go · internal/workflows/activities.go:459","risk":"生产模式 Temporal+SpiceDB+pgAPI 装配从未被测试执行","act":"补 main 装配纯函数化+smoke 测试，或 compose 联调 smoke 用例"},{"id":"UI-01","sev":"P1","area":"前端","title":"assistant_ui/bridge_ui 为静态演示表单：无 pgAPI 客户/产品/合同预填联动，无页面测试","req":"demo XS2/XSZL：客户档案/最近订单/框架合同最大化预填并标注来源","ev":"assistant_ui.html 330 行：product_name 写死「膨润土 AB-3」、合同 placeholder HT-2025-0038、客户下拉手工输入；无 fetch pgapi；两个 UI 无 JS 测试，handleBridgeUI 0%","files":"internal/api/assistant_ui.html · bridge_ui.html","risk":"上线后虹励手工填错/无预填，与产品承诺不符","act":"接入 pgAPI 搜索端点或明确 v0.1 手工填写；补浏览器级 smoke"},{"id":"UI-02","sev":"P1","area":"前端","title":"财务/商务凭证上传页、全量订单页、备货/发货/审价操作页未实现（仅有 API）","req":"docs/v0.1/03 17 场景逐场景操作页；v0.1 商务承接 SHP/INV","ev":"仓库内 HTML 仅 assistant_ui(下单) 与 bridge_ui(桥接+我的订单)；无 evidence 上传 UI、无 todos 操作卡页面","files":"internal/api/（embed 仅两个 html）","risk":"商务在企微无法完成备货/发货/开票操作，只能靠 API 手工调用","act":"明确 v0.1 最小可用 UI 清单（至少商务待办操作页）并交付；否则 S1-S6 UAT 无法在界面走通"},{"id":"INV-01","sev":"P1","area":"开票","title":"凭证 OCR 四项硬校验只实现金额守恒一项","req":"最新 demo CW1：订单唯一、非重复发票、抬头税号一致、金额≤已发货金额","ev":"handleAppendEvidence 仅 kind=INVOICE 时校验 AmountCents≤ShipmentShippedAmountCents；无发票号唯一、购方税号比对、订单匹配校验","files":"internal/api/server.go:321-381","risk":"重复发票/错抬头凭证可被登记，业财对账失真","act":"补 invoice_no UNIQUE 与税号/订单一致性校验+测试"},{"id":"SYNC-03","sev":"P1","area":"同步","title":"敏感剥离只按列名，不扫描值/嵌套 JSON → V4 有残留风险","req":"docs/v0.1/11 §6：open_id/view_token/密钥零残留；V4 dump 正则零命中","ev":"SanitizeRow 仅删列名匹配 sensitivePatterns 的列；MapRow 把整行 marshal 进 payload 字段，若源列名不敏感但值含 token 会入库","files":"internal/sync/sync.go:255-290","risk":"上线安全门扫描可能命中→G1 卡住","act":"payload 写入前做值级正则清洗或白名单字段；加含嵌套 token 的测试样例"},{"id":"BRG-02","sev":"P1","area":"桥接","title":"token 缓存为进程内存：重启/多副本即失效，需重新飞书授权","req":"bridge 2h token + 提前 15min 重授权；生产可写副本单实例可接受","ev":"MemoryTokenCache map[user]；无 Redis/PG 持久化","files":"internal/bridge/bridge.go:419-446","risk":"api 重启后虹励须重新授权（体验问题，非阻断）","act":"v0.1 记录为已知限制并在回退手册注明；0.2 换持久化"},{"id":"V01-01","sev":"P1","area":"测试","title":"N-07 无回单规则断言未固化（A5 待确认）","req":"docs/v0.1/09 §3：规则待确认后固化断言","ev":"receipt_exception_e2e 覆盖流程但无「允许无回单开票」策略断言；测试无 3 天/5 天边界双态","files":"tests/l2_e2e/receipt_exception_e2e_test.go","risk":"A5 一旦裁决，测试可能绿但与规则相反","act":"A5 确认后补策略化测试"},{"id":"DSZ-01","sev":"P1","area":"流程","title":"董事长终审信号无 RETURNED（最新 demo「要求修改」不支持）","req":"最新 demo DSZ1 通过/要求修改/拒绝三态","ev":"ChairmanReviewSignal 注释 APPROVED/REJECTED；ordGradeStep switch 仅两分支","files":"internal/workflows/order.go:55-60,505-570","risk":"大单要修改只能拒绝关闭重建","act":"补 RETURNED→ORD_RETURNED 重提路径+测试（P2 可后置，需产品确认）"},{"id":"WEC-04","sev":"P1","area":"企微","title":"official 外部客户群 appchat 可达性未验证，代码无自动回退","req":"staff_scene V-E；v0.1发布过程跟踪 W 线回退口径","ev":"SendGroupCard 有实现与单测；真实外部群是否可达未验；回退（PC 兜底/人工转发）只在文档不在代码","files":"internal/wecom/official.go:285-323","risk":"守门员确认后发送失败→客户收不到卡片","act":"V-E 现场验证；失败时写裁决日志+提示人工转发（bridge_ui 兜底）"},{"id":"D-01","sev":"P2","area":"demo 演进","title":"SW1 库存口径（账面/预留/可分配）+原子预留库存未实现","req":"最新 demo SW1；与 v0.1 A1/M1「锁库存暂不做」冲突","ev":"stkReserveStep 明确不触碰库存；无库存聚合视图/交期字段","files":"internal/workflows/order.go:704-780","risk":"产品冲突未裁决；0.1 发布按文档无阻断","act":"产品裁决：v0.1 维持 M1 或补库存预留（0.2）"},{"id":"D-02","sev":"P2","area":"demo 演进","title":"SW3 AI 换仓方案比较 + 释放/锁定新仓 + RETURNED 重开备货未实现","req":"最新 demo SW3","ev":"TRANSFER 路径存在但无 AI 方案/库存操作；RETURNED→WarehouseResubmitted 同仓重确认","files":"internal/workflows/order.go:781-863","risk":"换仓闭环半自动；0.1 可后置（M5）","act":"业务确认转仓启用后再补"},{"id":"D-03","sev":"P2","area":"demo 演进","title":"XS4 已发货改址→物流异常 BLOCK 未实现","req":"最新 demo XS4：BLOCK 分流","ev":"ClassifyModification D 类地址直接改，无已发货禁止逻辑","files":"internal/domain/ord.go:46-100","risk":"运输中改主订单地址破坏履约事实","act":"补「已发货/运输中改址=拒绝或物流异常」分支+测试"},{"id":"D-04","sev":"P2","area":"demo 演进","title":"CW2 限时放行 + 3 工作日补齐回单待办闭环未实现","req":"最新 demo CW2","ev":"ReceiptExReviewSignal 两态；无期限字段/定时器","files":"internal/workflows/order.go:1194-1240","risk":"放行后无补单追踪","act":"0.2 补；v0.1 规则确认后一并做"},{"id":"D-05","sev":"P2","area":"demo 演进","title":"审价/终审「为什么需要我审批」风险摘要与 AI 建议字段未实现","req":"最新 demo XSZG1/DSZ1","ev":"通知卡只有 Kind/State/order/task；无毛利/价格差异/信用暴露字段；驳回意见 AI 建议未实现","files":"internal/wecom/mock.go:119-146 · official.go:225-278","risk":"产品体验降级，非阻断","act":"0.2 产品化"}],"convergence":{"round":1,"at":"2026-08-19T17:5x+00:00","method":"ECM 局部收敛：每个缺口 = 代码/配置修改 + 测试证据 + 全量回归；无法在本仓收敛的标注外部阻塞并给出最小问题","closed":[["COV-01","✅ 已关闭","make cover：total 85.1% ≥85%（84.0→85.1）、domain 100% 硬门禁 PASS；证据 coverage.out/coverage.txt（fresh）"],["AUTH-01","✅ 已关闭","新增 internal/authz/signals.go 信号级角色矩阵 + handleOrderSignal/handleCreateOrder 闸门 + Operator 以鉴权身份覆盖；测试 internal/authz/signals_test.go、internal/api/v01_authz_test.go、signals_test.go"],["AUTH-02","✅ 已关闭","schema.zed shipment.append_evidence += tenant->accounting + tenant->ops；authz_integration_test 真 SpiceDB 断言财务/商务可上传、跨租户拒绝"],["AUTH-03","✅ 代码侧关闭","cmd/worker 启用 Outbox 投影器（RunOnce+5s 循环）；scripts/seedrel 补 tenant#ops=u-op；Dockerfile/compose 增 seedrel 一次性服务；生产对象级关系自动写入"],["WEC-01","✅ 已关闭","docker-compose wecom 补 B2B_API_ADDR=http://api:8080 + depends_on api healthy；compose config 校验通过"],["WEC-05","✅ 已关闭","NotifyApproval 改为「通过/驳回」双按钮（key=approve:/reject:），按钮文案与动作一致；wecom_test 断言双按钮"],["WEC-02","✅ 代码侧关闭","CallbackPayload 补 xml:PicUrl/MediaId 映射 + cmd/wecom 无 URL 时回退 MediaID；TestW1GroupImageCallbackFields 覆盖官方 XML 样例；真实 V-F 仍待现场"],["API-01","✅ 已关闭","新增 GET /api/v1/orders（OP/ADMIN 闸门、state/limit、BFF 最小投影）；repo.ListOrders 复用；v01_authz_test 覆盖 403/200/400"],["ROL-01","✅ 代码侧关闭","审批人路由配置化（workflows.AssigneeConfig + B2B_ASSIGNEE_* 环境变量 + cmd/api 注入）；生产白名单身份 B2B_V01_PRINCIPALS + Server.RoleResolver（未命中 401）；cmd/api/main_test 覆盖"],["SYNC-01","✅ 已关闭","cmd/sync 支持 -interval 周期循环 + -state-file 探针；compose sync restart=unless-stopped + healthcheck（15min 时效）+ wecom healthcheck"],["OCR-01","🟡 部分收敛","ReceiptRobot 增加 MinConfidence 阈值：低置信拒绝自动登记走人工补登（测试覆盖）；生产 OCR/LLM 供应商仍未接入=外部阻塞"],["BRG-01","🟡 部分收敛","classifyError 100%、ExchangeCode 错误分支、bridge 列表/UI 处理器补测（包覆盖 73.2→82.5%）；真实旧系统契约复核仍需只读账号现场执行=外部阻塞"],["SYNC-02","🟡 部分收敛","file/http 双源 + 周期循环已闭环；bitable/审批流/凭证/通讯录具体 API 契约待 T1/T3 现场调研=外部阻塞"],["WEC-03","✅ 已关闭","compose wecom/sync 补 healthcheck（wecom /wecom/healthz；sync state-file 15min 时效探针）"],["CFG-01","✅ 已关闭","compose api 注入 B2B_FEISHU_BRIDGE_ENABLED/BASE_URL/APP_ID/REDIRECT_URI 与 B2B_V01_PRINCIPALS/B2B_ASSIGNEE_*"],["CMD-01","🟡 部分收敛","cmd/api(parsePrincipals) 与 cmd/sync(touchStateFile) 已补测试；cmd/worker、cmd/wecom 主装配仍依赖 compose smoke"]],"remaining_blockers":["BRG-01 真实旧系统契约复核（A-03/A-06：需旧系统只读账号/接口）","OCR-01 生产 OCR/LLM 供应商选择（可降级为手动上传并书面冻结）","SYNC-02 飞书 bitable/审批流/凭证/通讯录真实源接线（T1/T3 现场调研）","WEC-02/04 V-E/V-F 真实企微现场验收（域名/群/机器人回调）","CFG-02 真实 corp/secret/token/AESKey 填入（现场，不入 git）","AUTH-03 生产 SpiceDB 需执行 seedrel（compose 已自动）+ 真实部署 smoke"],"verify":[["go test -count=1 ./...","PASS（全部包；cmd/api、cmd/sync 新增测试）"],["make cover","PASS total 85.1%（门禁 85%）· domain 100%"],["go test -tags integration ./internal/authz/...","PASS（真 SpiceDB schema 校验）"],["docker compose config（B2B_PGAPI_API_KEY=dummy）","PASS（含 B2B_API_ADDR/seedrel/sync 探针）"],["make test-tests（L0 契约/L1 HTTP×DB/L2 E2E 21/L3 系统）","PASS（含 AUTH-01 角色化 E2E 与 WEC 语义更新后重跑）"],["go run ./scripts/fullchain -dsn 55432/b2b_pilot_test","ALL GREEN（订单全链 INV_CLOSED + 凭证链 + 预订单链 + 132 出站卡）"]],"rounds":[1,2,3,4,5],"round2":{"round":2,"at":"2026-08-19T18:20+00:00","method":"ECM 第 2 轮：继续收敛可代码化 P1/P2（INV/SYNC/DSZ/D 系列），每个缺口均补 FSM/API/workflow 测试后全量回归","closed":[["INV-01","✅ 已关闭","开票凭证四项硬校验落地三项可代码化：invoice_no 必填(400)、发票号重复登记 409（repo.InvoiceNoExists 真库测试）、购方税号与 pgAPI 客户档案比对(400)；金额守恒原有。api/v01_inv_test.go 全分支 + repo L1"],["SYNC-03","✅ 已关闭","SanitizeRow 增加值级防线：非敏感列值命中 open_id/token/secret 模式 → [REDACTED]；测试覆盖嵌套 JSON token 样例"],["DSZ-01","✅ 已关闭","ChairmanReviewSignal 支持 RETURNED；OrdFSM 增 CHAIRMAN_REVIEW→RETURNED 与 RETURNED→PRICE_APPROVED；ordSegment 等待重提后重开董事长终审；workflows TestL204c 断言两次终审任务(RETURNED→APPROVED) 全链 CLOSED"],["D-02","✅ 已关闭","仓管 RETURNED 后重启 STK 段→stkResume 转为 STOCK_REVIEWING 重开商务选仓；repo.CreateStockPrepare upsert 更新 warehouse_id/state；TestL203c 断言重新选仓 wh-dongguan 生效并走完"],["D-03","✅ 已关闭","domain.BlockShippedAddressChange：已发货/运输中/开票后 D 类地址修改=BLOCK，applyModification 记录 RecordFlowFailed 事件且不改主订单；domain 测试覆盖"],["D-04","🟡 部分收敛","ReceiptExReviewSignal 增加 DeadlineDays，APPROVED>0 时事件理由记录「限时放行：N 天补齐回单」；自动生成补齐回单待办的完整闭环仍待产品确认任务形态（P2）"],["CMD-01","🟡 进一步收敛","cmd/wecom 新增 handleGroupImage 测试（MediaID 回退/非仓库群忽略/robot disabled）；剩余 cmd/worker 装配仍由 compose smoke 覆盖"],["COV-01","✅ 维持通过","make cover：total 85.0% ≥85%，domain 100% 硬门禁 PASS"]],"remaining_blockers":["BRG-01 真实旧系统契约复核（需只读账号/现场）","OCR-01 生产 OCR/LLM 供应商（可降级手动上传并书面冻结）","SYNC-02 bitable/审批流/凭证/通讯录真实源接线（T1/T3 现场）","WEC-02/04 V-E/V-F 企微现场验收 + CFG-02 真实密钥","UI-01/UI-02 商务最小操作页/预填联动（下一轮继续收敛）","V01-01 A5 无回单规则待业务裁决后固化断言"],"verify":[["make cover","PASS total 85.0%（门禁 85%）· domain 100%"],["go test -count=1 ./internal/... ./cmd/...","PASS（含新增 INV-01/D-03 分支与 cmd/wecom 测试）"],["make test-tests","PASS（L0/L1/L2 21/L3 全绿，INV-01 新语义后重跑通过）"],["scripts/fullchain","ALL GREEN（订单全链 INV_CLOSED + 凭证链 + 预订单链 + 65 出站卡）"]]},"round3":{"round":3,"at":"2026-08-19T19:10+00:00","method":"ECM 第 3 轮：收敛 UI/交互与剩余可代码化项（WEC-04 回退、UI-01 pgAPI 预填、UI-02 商务操作台、D-04 补齐回单待办）","closed":[["WEC-04","✅ 已关闭","守门员官方群发失败/通道未配置不再 500：确认事件已落链，返回 sent=false + fallback_required + 可读回退指令（PC 兜底/人工转发）；TestN01GatekeeperSendFallback 覆盖"],["UI-01","🟡 部分收敛","新增 GET /api/v1/orderdata/{customers,products,purchase-contracts}（OP/ADMIN，pgAPI Provider 统一分页/过滤）；assistant_ui 挂 datalist 预填客户/产品/合同，pgAPI 未配置自动降级手工填写；handler 参数/错误/nil 归一化测试覆盖"],["UI-02","🟡 部分收敛","新增商务最小操作台 GET /ops：待办裁决（STOCK_REVIEW 选仓、WAREHOUSE 发货数量、RECEIPT_EX、INVOICE_FINANCE_ISSUE、TRANSFER）、全量订单、发货单凭证登记；新增 GET /api/v1/orders/{id}/shipments；页面与分支测试覆盖（浏览器级 e2e 仍未引入）"],["D-04","✅ 已关闭","限时放行生成 RECEIPT_FOLLOWUP 待办（assignee 可配置 B2B_ASSIGNEE_SALES）+ 回单凭证登记自动闭合该待办（repo.AppendEvidenceTx 同事务 UPDATE verdict=RECEIPT_PROVIDED）；TestL211 与 TestV01ReceiptClosesFollowupTask 覆盖"],["CMD-01","🟡 进一步收敛","cmd/wecom handleGroupImage 三分支测试已补（MediaID 回退/忽略/robot disabled）"]],"remaining_blockers":["BRG-01 真实旧系统契约复核（只读账号/现场）","OCR-01 生产 OCR/LLM 供应商（可降级手动上传书面冻结）","SYNC-02 bitable/审批流/凭证/通讯录真实源接线（T1/T3 现场）","WEC-02/04 V-E/V-F 企微现场验收 + CFG-02 真实密钥","V01-01 A5 无回单规则待业务裁决","UI 浏览器级 e2e 与更完整操作页（0.2 产品化）"],"verify":[["make cover","PASS total 85.0%（门禁 85%）· domain 100%"],["go test -count=1 ./internal/... ./cmd/...","PASS（新增 ValidateOrderData pgAPI 分支、orderdata/shipments 分支、ops 页面测试）"],["make test-tests","PASS（L0/L1/L2 21/L3 全绿，D-04 闭合后重跑）"],["scripts/fullchain","ALL GREEN（订单全链 INV_CLOSED + 凭证链 + 预订单链 + 67 出站卡）"]]},"round4":{"round":4,"at":"2026-08-19T19:40+00:00","method":"ECM 第 4 轮：UI 浏览器级 smoke 证据 + 最终全量回归；对剩余缺口做可收敛性终判","closed":[["UI-01/UI-02 smoke","✅ 关闭（可收敛部分）","新增 internal/api/ui_smoke_test.go 静态断言两页面关键控件与 API 调用面；真实起 LocalRunner API(:18090)+Headless Chrome 渲染 /ops 与 /assistant：页面标题/待办空态/prefill datalist 均出现，console 0 JS 错误（Uncaught/Syntax/Type/Reference 全无）"],["BRG-02","✅ 决策固化","token 缓存为进程内存=已知限制：v0.1 单实例+2h token+提前15min重授权；api 重启需重新授权，回退手册已注明（0.2 换持久化）"],["D-05","🔵 终判=产品化后置","审批卡风险摘要（毛利/价格差异/信用暴露）需要业务数据聚合与产品文案，v0.1 不阻塞发布，归入 0.2 产品化清单"],["D-01","🔵 终判=待产品裁决","SW1 库存预留与 v0.1 M1「锁库存暂不做」冲突：v0.1 按发布文档维持 M1，demo 演进项转 0.2 决策"]],"remaining_blockers":["BRG-01 真实旧系统契约复核（只读账号/现场）","OCR-01 生产 OCR/LLM 供应商（书面降级：手动上传+机器人停用）","SYNC-02 bitable/审批流/凭证/通讯录真实源接线（T1/T3 现场）","WEC-02/04 V-E/V-F 企微现场验收 + CFG-02 真实密钥","V01-01 A5 无回单规则待业务裁决"],"verify":[["make cover","PASS total 85.0%（门禁 85%）· domain 100%"],["go test -count=1 ./internal/... ./cmd/...","PASS（新增 UI 静态 smoke）"],["make test-tests","PASS（L0/L1/L2 21/L3 全绿）"],["scripts/fullchain","ALL GREEN（订单全链 INV_CLOSED + 凭证链 + 预订单链 + 120 出站卡）"],["Headless Chrome /ops + /assistant（真实 LocalRunner API）","PASS（渲染完整、console 0 错误）"]],"convergence_final":"本仓可收敛缺口已全部关闭；剩余 5 类均为现场账号/供应商/真实配置/业务裁决外部依赖，已具备可签字降级方案。代码面结论：G2 GO 候选，唯一仍需人工执行的 G1 门禁为真实契约复核。"}},"fieldEvidence":{"title":"现场取证整合（spec/evidence · 2026-08-19 · 采集人王杰 · 证据包第一次发布前现场调研证据包.zip）","conclusion":"现场《第一次发布-Go-NoGo结论.md》结论 = No-Go：当前不建议第一次生产发布。代码仓库侧（b2b_pilot_v3@cc59aca）已收敛，但现场部署对象为 b2b_pilot_v2@bf6a9cb7，桥接/迁移/V01 配置与旧系统小改均未落地。","direct_blockers":[["EX-01 部署对象不一致","现场新系统为 b2b_pilot_v2（main@bf6a9cb7），而本项目设计/代码为 b2b_pilot_v3——必须明确唯一仓库、分支、提交与部署目录"],["EX-02 桥接模块缺失","现场 /api/v1/bridge/auth-url 返回 404；仓库无 bridge.go；本仓 internal/bridge 已实现但未部署到现场新系统"],["EX-03 V01 审批配置缺失","旧系统无 V01 profile；TEST_SUPERVISOR/TEST_CHAIRMAN 暂空，审批链无法形成（L1/L3 证据）"],["EX-04 B2B_V01_ 自动确认缺失","旧系统生产代码与 GitLab main(a42a115) 均无 B2B_V01_ 前缀自动确认逻辑；T-01 唯一小改未实现"],["EX-05 飞书回调白名单未就绪","重定向 URL 仅 3 个旧系统地址，无 v0.1 新回调地址（R1-03）"],["EX-07 新系统业务库未初始化","pilot_business 0 张业务表；仓库迁移仅 001-002（本仓已有 001-007 未部署）"]],"passed":["旧系统代码一致性：GitLab main@a42a115 与生产 102 个正式部署文件 SHA-256 全部一致（R1-02）","旧系统接口契约存在：/api/approval/feishu-user-by-code 返回 400 missing code、/external-orders/create 存在 8-200 幂等键校验与 303/submission-status（R1-04/05）","pgAPI 收敛一致：生产 OpenAPI 19 路径=三核心表 customers/products/purchase-contracts；rhcrm-server main@b387f24f；两条 30 分钟同步链最近执行成功（R1-10）","数据基线：多维表审批 1370 行/客户 3150/产品 293；pgAPI 客户 3231(有效3150)/产品306(有效293)/购销合同8807(业务有效7485)；旧系统滞留待办 订单9+备货8+发货334+开票43（R1-13）","人员映射：sales_person_map 22 人、agent_person_map 7 人，陈虹励已在 agent 白名单（R1-06）","敏感扫描：交付包文本/XLSX 扫描密码/Secret/Token/open_id 0 命中","生产部署拓扑、基础五元组、异常清单、证据缺口清单均已形成 L1 证据"],"gaps":["GAP-01 v0.1 OAuth 回调 URL 未提供/未加白名单（阻塞）","GAP-02 TEST_SUPERVISOR/TEST_CHAIRMAN 缺姓名与 open_id 脱敏指纹（阻塞）","GAP-04 真实授权创建订单联调未做（只读约束；需测试环境 L1 联调证据，阻塞）","GAP-05 PC 兜底目标 URL 未定（当前只有旧 miniapp 页面，阻塞）","GAP-09 V01 profile 未创建（阻塞）","GAP-10 B2B_V01_ 自动确认未实现（阻塞）","GAP-11 桥接模块与数据库迁移未部署（阻塞）","GAP-03 企微可信 IP 后台截图待归档（非阻塞）","GAP-06 附件保留策略未正式化（中）","GAP-08 旧系统守护/磁盘告警：npm run dev/tsx 运行、磁盘余量约 4.62-5.44GiB（中）","GAP-12 pgAPI 真实端到端同步时延未取证（最大等待 30 分钟；中）"],"recheck":["本仓代码侧（b2b_pilot_v3@cc59aca）make cover 85.0% / domain 100% 本轮复跑结果见 §2-3","现场侧结论以 spec/evidence/第一次发布-Go-NoGo结论.md 为准：No-Go","下一步必须完成：新系统唯一部署基线发布（bridge+迁移 001-007）、旧系统 T-01 小改+T-03 V01 profile、回调白名单与企微入口替换、测试环境 OAuth/下单/幂等/审批路由联调"]}};
+window.AUDIT = AUDIT;
+function copyAudit(){ navigator.clipboard.writeText(JSON.stringify(window.AUDIT, null, 1)); }
+document.querySelectorAll('#gf button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('#gf button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+  const s=b.dataset.sev;
+  document.querySelectorAll('.gap').forEach(g=>g.style.display=(s==='all'||g.dataset.sev===s)?'':'none');
+}));
+</script>
+</body>
+</html>

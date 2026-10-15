@@ -1,0 +1,2779 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="testcase-set" content="case_202608062147">
+<meta name="description" content="双Graph测试用例集：50 切入点 × 6 用例 = 300 例，覆盖世界知识图谱 + 任务图谱">
+<title>双Graph测试用例集 · case_202608062147</title>
+<style>
+  :root{
+    --ink:#1c2733; --ink-soft:#5b6b7b; --paper:#faf8f4; --card:#ffffff;
+    --line:#e4ded2; --gold:#b58a2e; --gold-soft:#f5ead2;
+    --blue:#1f4e79; --blue-soft:#e8f0f8; --teal:#0f766e;
+    --green:#15803d; --green-bg:#eaf6ee; --green-line:#bfe3cc;
+    --red:#b91c1c; --red-bg:#fdecec; --red-line:#f2c4c4;
+    --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font-family:"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",system-ui,sans-serif;
+    line-height:1.7;font-size:15px}
+  .wrap{max-width:1200px;margin:0 auto;padding:0 24px 80px}
+
+  /* ── hero ── */
+  header.hero{background:linear-gradient(135deg,#16293c 0%,#1f4e79 55%,#2a6b8f 100%);
+    color:#f5f7fa;padding:56px 24px 44px;border-bottom:4px solid var(--gold)}
+  .hero .wrap{padding-bottom:0}
+  .kicker{display:inline-block;letter-spacing:.35em;font-size:12px;color:var(--gold-soft);
+    border:1px solid rgba(245,234,210,.5);padding:4px 14px;border-radius:999px;margin-bottom:18px}
+  h1{margin:0 0 10px;font-size:34px;letter-spacing:.02em}
+  .sub{color:#cfe0ee;max-width:820px;font-size:15px}
+  .badges{display:flex;flex-wrap:wrap;gap:12px;margin-top:24px}
+  .badge{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);
+    border-radius:12px;padding:10px 18px;backdrop-filter:blur(4px)}
+  .badge b{display:block;font-size:24px;line-height:1.2;color:#fff}
+  .badge span{font-size:12px;color:#cfe0ee}
+
+  /* ── 结构 ── */
+  h2.sec{font-size:24px;margin:56px 0 6px;color:var(--blue);border-left:5px solid var(--gold);padding-left:14px}
+  h2.sec small{font-size:13px;color:var(--ink-soft);font-weight:400;margin-left:10px}
+  p.lead{color:var(--ink-soft);margin:6px 0 20px}
+
+  /* ── 表 ── */
+  .tbl-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px;
+    background:var(--card);box-shadow:0 1px 3px rgba(28,39,51,.06)}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:640px}
+  caption{caption-side:top;text-align:left;font-weight:700;font-size:15px;
+    padding:14px 18px;color:var(--ink);border-bottom:1px solid var(--line);background:#fff}
+  thead th{position:sticky;top:0;background:#f0ece2;color:#44505c;font-weight:700;
+    text-align:left;padding:10px 12px;font-size:12.5px;letter-spacing:.03em;border-bottom:2px solid var(--line);z-index:1}
+  tbody td{padding:9px 12px;border-bottom:1px solid #efeae0;vertical-align:top}
+  tbody tr:nth-child(even){background:#fbf9f4}
+  tbody tr:hover{background:#f2efe6}
+  tbody tr:last-child td{border-bottom:none}
+  td.mono,code{font-family:var(--mono);font-size:12.5px}
+  code{background:#eef1f4;border:1px solid #dde3e8;border-radius:4px;padding:1px 5px;color:#0f3d5c}
+
+  /* 正确 / 错误 行 */
+  tr.ok{border-left:4px solid var(--green)}
+  tr.ok td:first-child{color:var(--green)}
+  tr.bad{border-left:4px solid var(--red)}
+  tr.bad td:first-child{color:var(--red)}
+  .tag{display:inline-block;border-radius:6px;padding:1px 8px;font-size:12px;font-weight:700}
+  .tag.ok{background:var(--green-bg);color:var(--green);border:1px solid var(--green-line)}
+  .tag.bad{background:var(--red-bg);color:var(--red);border:1px solid var(--red-line)}
+  .tag.cq{background:var(--blue-soft);color:var(--blue);border:1px solid #c3d8ea;font-family:var(--mono);font-size:11.5px}
+
+  /* ── 切入点 section ── */
+  section.ep{margin:30px 0 8px;border:1px solid var(--line);border-radius:14px;overflow:hidden;
+    background:var(--card);box-shadow:0 2px 6px rgba(28,39,51,.05)}
+  section.ep > summary{cursor:pointer;padding:16px 20px;display:flex;align-items:baseline;gap:14px;
+    background:linear-gradient(90deg,#ffffff,#f7f3e9);list-style:none}
+  section.ep > summary::-webkit-details-marker{display:none}
+  section.ep > summary::before{content:"▸";color:var(--gold);font-size:16px;transition:transform .15s}
+  section.ep[open] > summary::before{transform:rotate(90deg)}
+  section.ep > summary .epno{font-family:var(--mono);font-weight:700;color:var(--blue);
+    background:var(--blue-soft);border:1px solid #c3d8ea;border-radius:8px;padding:2px 10px;font-size:13px;white-space:nowrap}
+  section.ep > summary .eptitle{font-weight:700;font-size:16px}
+  section.ep > summary .epmeta{color:var(--ink-soft);font-size:12.5px;margin-left:auto;white-space:nowrap}
+  .ep-body{padding:0 20px 20px}
+  .ep-body .meta-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin:14px 0}
+  .meta-item{background:#fbf9f4;border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+  .meta-item dt{font-size:11.5px;color:var(--ink-soft);letter-spacing:.08em;margin:0 0 4px}
+  .meta-item dd{margin:0;font-size:13px;line-height:1.6}
+  .meta-item dd code{background:none;border:none;padding:0;color:inherit}
+
+  /* mermaid */
+  .diagram{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;margin:16px 0}
+  .diagram pre{overflow-x:auto;background:#f4f6f8;border-radius:8px;padding:12px;font-size:12px}
+
+  /* 图例 / 提示 */
+  .legend{display:flex;flex-wrap:wrap;gap:18px;margin:14px 0 4px;font-size:13px;color:var(--ink-soft)}
+  .legend .sw{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+
+  /* 汇总 */
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:16px 0}
+  .stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center}
+  .stat b{display:block;font-size:26px;color:var(--blue)}
+  .stat span{font-size:12.5px;color:var(--ink-soft)}
+
+  footer{margin-top:64px;padding-top:20px;border-top:1px solid var(--line);color:var(--ink-soft);font-size:12.5px}
+  a{color:var(--blue)}
+  @media (max-width:720px){
+    h1{font-size:26px}
+    section.ep > summary{flex-wrap:wrap}
+    section.ep > summary .epmeta{display:none}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="kicker">DUAL GRAPH · TEST CASE SUITE</span>
+    <h1>双 Graph 测试用例集 · 50 切入点 × 6 用例 = 300 例</h1>
+    <p class="sub">从 <code>docs/</code> 文档家族（核心图谱 / 测试设计 / 企微接入 / ReBAC 变更矩阵）随机抽取 50 个业务切入点，
+    逐一标定其在「世界知识图谱 + 任务图谱」上的坐标，并为每个切入点生成 3 个标准正确用例 + 3 个不正确不合理用例。
+    每个用例仅覆盖一小段业务流程：<b>2 个图结点 + 1 条边</b>。</p>
+    <div class="badges">
+      <div class="badge"><b>50</b><span>切入点 EP-01..EP-50</span></div>
+      <div class="badge"><b>300</b><span>测试用例（150 正确 + 150 错误）</span></div>
+      <div class="badge"><b>7 段</b><span>ORD / STK / SHP / INV / ReBAC / 企微 / 审计</span></div>
+      <div class="badge"><b>14+1</b><span>覆盖能力问题 CQ-01..CQ-15</span></div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <h2 class="sec" id="overview">0 · 用例集概述 <small>如何阅读本文件</small></h2>
+  <p class="lead">本文件是<b>测试规格文档</b>（非可执行代码）：每一条用例用自然语言描述一段最小业务场景，
+  并显式标注其在双 Graph 上的坐标。表格采用语义化标签与数据属性，Agent 可直接解析。</p>
+
+  <div class="tbl-scroll">
+    <table>
+      <caption>用例结构说明</caption>
+      <thead><tr><th>列</th><th>含义</th><th>示例</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">用例ID</td><td>EP-<i>切入编号</i>-<i>序号</i>，序号 P1/P2/P3 为正确用例，N1/N2/N3 为错误用例</td><td class="mono">EP-13-P1</td></tr>
+        <tr><td>类型</td><td>✅ 标准正确（业务应按此路径成功） / ❌ 不正确不合理（系统应拒绝或纠正）</td><td><span class="tag ok">✅ 正确</span> / <span class="tag bad">❌ 错误</span></td></tr>
+        <tr><td>场景描述</td><td>1–2 句话的最小业务流程（不超过 2 结点 1 边）</td><td>仓管对已分配发货单点击「确认可执行」</td></tr>
+        <tr class="ok"><td class="mono">双Graph位置 · World</td><td>世界知识图谱坐标：<code>结点A --边--> 结点B</code> 或实体/关系/事件</td><td class="mono">Shipment --ASSIGNED_TO--> User(仓管)</td></tr>
+        <tr class="ok"><td class="mono">双Graph位置 · Task</td><td>任务图谱坐标：状态机迁移 <code>状态A → 状态B</code> 或所处状态</td><td class="mono">WAREHOUSE_CONFIRMING → WAREHOUSE_CONFIRMED</td></tr>
+        <tr><td>预期结果</td><td>正确用例：系统按业务路径成功；错误用例：系统拒绝 / 报错 / 状态不变 / 事务回滚</td><td>状态迁移成功，事件落链</td></tr>
+        <tr><td>涉及 CQ</td><td>该用例背书的能力问题编号（docs/01-core-graph.html §1.1）</td><td><span class="tag cq">CQ-01</span></td></tr>
+        <tr class="bad"><td>不合理原因</td><td>仅错误用例：说明该场景违反哪条业务规则 / 守恒约束 / 状态机 / 授权边界</td><td>违反「发货单只发一次」纪律</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="sec" id="dual-graph">1 · 双 Graph 总览 <small>测试坐标基准</small></h2>
+  <p class="lead">两份图谱是全部用例的坐标系：<b>世界知识图谱</b>回答「系统记住什么」（实体、关系、事件、约束），
+  <b>任务图谱</b>回答「系统如何工作」（ORD/STK/SHP/INV/PreOrder 五个状态机）。每个用例同时标定两份图谱上的位置。</p>
+
+  <div class="diagram">
+    <pre class="mermaid">
+flowchart LR
+    subgraph W["🌍 世界知识图谱（记住什么）"]
+        CQ["能力问题 CQ-01..CQ-15"]
+        ONT["本体：15 实体 + 17 关系<br/>Order/StockPrepare/Shipment/Invoice/PreOrder<br/>Event/Evidence/Permission…"]
+        EVT["事件链 append-only<br/>PreOrderCaptured → … → OrderClosed"]
+        AUTH["授权图谱 schema.zed<br/>tenant/customer/prestock/shipment/evidence + expiry_ok"]
+        CQ --> ONT
+        ONT --> AUTH
+        ONT --> EVT
+    end
+    subgraph T["⚙️ 任务图谱（如何工作）"]
+        ORD["ORD 状态机<br/>REQUESTED → … → READY_FOR_STOCK"]
+        STK["STK 状态机<br/>READY_FOR_STOCK → … → READY_FOR_SHIPMENT"]
+        SHP["SHP 状态机<br/>READY_FOR_SHIPMENT → … → READY_FOR_INVOICE"]
+        INV["INV 状态机<br/>READY_FOR_INVOICE → … → CLOSED"]
+        PRE["PreOrder 状态机<br/>CAPTURED → … → ORDER_REQUESTED"]
+        ORD --> STK --> SHP --> INV
+        PRE -.->|DERIVES| ORD
+    end
+    ONT -.->|roundtrip 验证| T
+    EVT -.->|迁移同事务| T
+    AUTH -.->|每副作用前验证| T
+    </pre>
+  </div>
+
+  <h2 class="sec" id="nav">2 · 切入点索引 <small>EP-01 .. EP-50</small></h2>
+  <div class="tbl-scroll">
+    <table>
+      <caption>50 个切入点分布（来源：docs/ 文档家族）</caption>
+      <thead><tr><th>段</th><th>切入编号</th><th>主题</th><th>主要来源文档</th></tr></thead>
+      <tbody>
+        <tr><td rowspan="10"><b>① ORD 订单创建</b></td>
+          <td class="mono">EP-01..EP-10</td><td>预订单派生 / 主管审价(通过·退回) / 董事长审批 / A/B 跳过 / 合同生成 / A 类修改回审价 / B 类直达发货 / E 类静默修改 / 校验失败拒绝</td><td class="mono">docs/01-core-graph.html §2.2</td></tr>
+        <tr><td rowspan="8"><b>② STK 备货审批</b></td>
+          <td class="mono">EP-11..EP-18</td><td>款到备货 / 非款到跳过 / 仓管确认·退回·转仓 / 财务到账 / 备货守恒 / 发货命令</td><td class="mono">docs/01-core-graph.html §2.3</td></tr>
+        <tr><td rowspan="8"><b>③ SHP 发货出库</b></td>
+          <td class="mono">EP-19..EP-26</td><td>选仓发货量 / 实际发货 / 部分·全部发货 / 发货守恒 / 库存守恒 / 少发退回 / 发货单只发一次</td><td class="mono">docs/01-core-graph.html §2.4</td></tr>
+        <tr><td rowspan="10"><b>④ INV 开票回单</b></td>
+          <td class="mono">EP-27..EP-36</td><td>回单四分流①-④ / 例外审核 / 开票申请·完成·失败重试 / 回款跟踪 / 订单关闭</td><td class="mono">docs/01-core-graph.html §2.5</td></tr>
+        <tr><td rowspan="8"><b>⑤ ReBAC 授权</b></td>
+          <td class="mono">EP-37..EP-44</td><td>场景 A 开备货单 / B 改额度 / C 仓管确认 / D 客户联系人 / E 跨租户 / G 代办 TTL / 仓管不见价格 / 销售只看本人</td><td class="mono">docs/CHANGELOG-rebac-cases.html</td></tr>
+        <tr><td rowspan="4"><b>⑥ 企微预订单</b></td>
+          <td class="mono">EP-45..EP-48</td><td>消息幂等 / 意图识别 AI 安全边界 / 人工确认 / 24h 升级</td><td class="mono">docs/07-wecom-integration.html §3</td></tr>
+        <tr><td rowspan="2"><b>⑦ 事件与审计</b></td>
+          <td class="mono">EP-49..EP-50</td><td>事件链 append-only / 凭证只追加版本</td><td class="mono">docs/01-core-graph.html §1.2</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="sec" id="ord">3 · ORD 段 · 订单创建流程 <small>EP-01 .. EP-10</small></h2>
+
+  <section class="ep" id="ep-01" data-ep="EP-01">
+    <summary>
+      <span class="epno">EP-01</span>
+      <span class="eptitle">预订单确认 → 正式订单派生</span>
+      <span class="epmeta">来源：docs/01-core-graph.html §2.6 + §1.2 DERIVES</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>PreOrder --DERIVES--> Order</code>（1:1 派生；<code>Order.idempotency_key</code> 幂等锚点）</dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd><code>PENDING_CONFIRM → CONFIRMED → ORDER_REQUESTED</code>（§2.6 预订单状态机）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：PreOrder、Order；边：DERIVES（含事件链 <code>PreOrderConfirmed → OrderRequested</code>）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-01 · 预订单派生正式订单（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-01-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>销售在企微卡片确认预订单，系统生成正式订单 ORD-2026-0001</td>
+              <td class="mono">PreOrder --DERIVES--> Order</td><td class="mono">CONFIRMED → ORDER_REQUESTED</td>
+              <td>正式订单创建成功，PreOrder 状态 CONFIRMED，事件落链</td><td><span class="tag cq">CQ-11</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-01-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>销售修改数量后确认预订单（100 → 80 件），生成正式订单</td>
+              <td class="mono">PreOrder --DERIVES--> Order</td><td class="mono">MODIFIED → ORDER_REQUESTED</td>
+              <td>订单以修改后参数生成，幂等键唯一生效一次</td><td><span class="tag cq">CQ-11</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-01-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>同一 idempotency_key 的确认请求被重复投递（重放）</td>
+              <td class="mono">Order --PRODUCES--> Event(OrderRequested)</td><td class="mono">CONFIRMED（已终态，不重复迁移）</td>
+              <td>重放返回既有订单，不产生第二张订单</td><td><span class="tag cq">CQ-11</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-01-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>预订单尚在 PENDING_CONFIRM，系统自动生成正式订单（无人工确认）</td>
+              <td class="mono">PreOrder --DERIVES--> Order</td><td class="mono">PENDING_CONFIRM → ORDER_REQUESTED（跳过确认）</td>
+              <td>拒绝：状态机非法迁移，正式订单不存在</td><td><span class="tag cq">CQ-11</span></td>
+              <td>违反 AI 安全边界红线：任何生成结果必须人工确认才生效</td></tr>
+            <tr class="bad"><td class="mono">EP-01-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>同一 msgid 的企微消息被拉取两次，生成两个预订单</td>
+              <td class="mono">PreOrder --TRIGGERS--> Event</td><td class="mono">CAPTURED（msgid 幂等去重）</td>
+              <td>第二个预订单被唯一约束拒绝，仅一个生效</td><td><span class="tag cq">CQ-11</span></td>
+              <td>违反「同一 (tenant, group, msgid) 只生成一个 PreOrder」幂等约束</td></tr>
+            <tr class="bad"><td class="mono">EP-01-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>非归属销售（无代办授权）尝试确认他人客户的预订单</td>
+              <td class="mono">User --OWNS--> Customer；PreOrder --DERIVES--> Order</td><td class="mono">PENDING_CONFIRM → CONFIRMED</td>
+              <td>SpiceDB 授权检查拒绝（403），状态不变</td><td><span class="tag cq">CQ-01</span></td>
+              <td>违反「销售只看本人客户」+ 独立验证者原则（授权检查前置）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-02" data-ep="EP-02">
+    <summary>
+      <span class="epno">EP-02</span>
+      <span class="eptitle">销售主管审价通过</span>
+      <span class="epmeta">来源：docs/01-core-graph.html §2.2 + §1.2 PriceReviewed</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>ApprovalTask --ASSIGNED_TO--> User(主管)</code>；<code>Order --PRODUCES--> Event(PriceReviewed APPROVED)</code></dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd><code>PRICE_REVIEWING → PRICE_APPROVED</code>（Signal 人类闸门）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：ApprovalTask、Event；边：Order --PRODUCES--（审价事件）＋ 状态迁移边</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-02 · 主管审价通过（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-02-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>销售主管对 PRICE_REVIEWING 的订单点击「审价通过」</td>
+              <td class="mono">Order --PRODUCES--> Event(PriceReviewed:APPROVED)</td><td class="mono">PRICE_REVIEWING → PRICE_APPROVED</td>
+              <td>迁移成功，事件带 verdict=APPROVED 落链</td><td><span class="tag cq">CQ-05</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-02-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>C 级客户订单主管通过后，系统自动进入董事长审批</td>
+              <td class="mono">Customer{grade:C} --COVERS--> Order</td><td class="mono">PRICE_APPROVED → CHAIRMAN_REVIEWING</td>
+              <td>进入 CHAIRMAN_REVIEWING，创建董事长审批任务</td><td><span class="tag cq">CQ-05</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-02-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>主管重复点击「通过」（网络重试导致重复 Signal）</td>
+              <td class="mono">Order --PRODUCES--> Event(PriceReviewed)</td><td class="mono">PRICE_APPROVED（已终态）</td>
+              <td>幂等：第二次 Signal 被忽略，不产生重复迁移</td><td><span class="tag cq">CQ-04</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-02-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>仓管（非审价角色）对订单执行「审价通过」</td>
+              <td class="mono">ApprovalTask --ASSIGNED_TO--> User</td><td class="mono">PRICE_REVIEWING → PRICE_APPROVED</td>
+              <td>授权拒绝 403，状态不变</td><td><span class="tag cq">CQ-01</span></td>
+              <td>角色×动作矩阵不授权该操作（RBAC 边界）</td></tr>
+            <tr class="bad"><td class="mono">EP-02-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>订单处于 REQUESTED（尚未进入审价），主管直接审批通过</td>
+              <td class="mono">Order --PRODUCES--> Event(PriceReviewed)</td><td class="mono">REQUESTED → PRICE_APPROVED（跳过 PRICE_REVIEWING）</td>
+              <td>FSM 非法迁移被拒，状态保持 REQUESTED</td><td><span class="tag cq">CQ-04</span></td>
+              <td>违反 ORD 状态机：审价必须发生在 PRICE_REVIEWING</td></tr>
+            <tr class="bad"><td class="mono">EP-02-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>主管「通过」时订单明细单价与提交时不一致（被篡改）</td>
+              <td class="mono">Order --CONTAINS--> OrderItem(unit_price)</td><td class="mono">PRICE_REVIEWING → PRICE_APPROVED</td>
+              <td>校验失败拒绝，提示重新核对价格</td><td><span class="tag cq">CQ-05</span></td>
+              <td>审价对象必须与提交内容一致，防止审批内容漂移</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-03" data-ep="EP-03">
+    <summary>
+      <span class="epno">EP-03</span>
+      <span class="eptitle">主管审价退回</span>
+      <span class="epmeta">来源：docs/01-core-graph.html §2.2 PriceReviewed RETURNED</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>Order --PRODUCES--> Event(PriceReviewed:RETURNED)</code>；<code>ApprovalTask</code> 记录 verdict</dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd><code>PRICE_REVIEWING → RETURNED</code>（退回修改）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：Order、Event；边：PRODUCES（退回事件）＋ 迁移边 RETURNED</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-03 · 主管审价退回（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-03-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>主管发现单价错误，退回订单并要求修改</td>
+              <td class="mono">Order --PRODUCES--> Event(PriceReviewed:RETURNED)</td><td class="mono">PRICE_REVIEWING → RETURNED</td>
+              <td>状态进入 RETURNED，退回原因随事件记录</td><td><span class="tag cq">CQ-05</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-03-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>销售修改内容后重新提交被退回的订单</td>
+              <td class="mono">Order --PRODUCES--> Event(OrderRequested 重提)</td><td class="mono">RETURNED → PRICE_REVIEWING</td>
+              <td>重新进入审价，create_fingerprint 记录内容指纹</td><td><span class="tag cq">CQ-04</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-03-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>退回后销售「同内容不重复审批」判定（指纹相同）</td>
+              <td class="mono">Order --PRODUCES--> Event</td><td class="mono">RETURNED → PRICE_REVIEWING</td>
+              <td>指纹相同则拦截重复提交，要求至少修改一处</td><td><span class="tag cq">CQ-12</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-03-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>订单已 PRICE_APPROVED，主管再执行退回</td>
+              <td class="mono">Order --PRODUCES--> Event(PriceReviewed:RETURNED)</td><td class="mono">PRICE_APPROVED → RETURNED</td>
+              <td>FSM 非法迁移被拒</td><td><span class="tag cq">CQ-04</span></td>
+              <td>已通过即终态，不可回退（除非走修改分类流程）</td></tr>
+            <tr class="bad"><td class="mono">EP-03-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>主管退回但不填写退回原因</td>
+              <td class="mono">ApprovalTask(verdict, comment)</td><td class="mono">PRICE_REVIEWING → RETURNED</td>
+              <td>校验拒绝：退回必须携带原因</td><td><span class="tag cq">CQ-12</span></td>
+              <td>审计链要求「谁、何时、何因」，原因缺失破坏可回溯性</td></tr>
+            <tr class="bad"><td class="mono">EP-03-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>普通商务（非主管）对他人管辖订单执行退回</td>
+              <td class="mono">User --OWNS--> Customer --COVERS--> Order</td><td class="mono">PRICE_REVIEWING → RETURNED</td>
+              <td>授权拒绝 403</td><td><span class="tag cq">CQ-01</span></td>
+              <td>审价动作仅限指派主管（ApprovalTask.assignee）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-04" data-ep="EP-04">
+    <summary>
+      <span class="epno">EP-04</span>
+      <span class="eptitle">C/D 级客户董事长审批</span>
+      <span class="epmeta">来源：docs/01-core-graph.html §2.2 ChairmanReviewed</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>Customer{grade:C|D} --COVERS--> Order</code>；<code>Order --PRODUCES--> Event(ChairmanReviewed)</code></dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd><code>PRICE_APPROVED → CHAIRMAN_REVIEWING → CONTRACT_GENERATING / REJECTED</code></dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：Customer、Order；边：COVERS（等级驱动审批链）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-04 · C/D 级董事长审批（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-04-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>C 级客户订单主管通过后自动进入董事长审批</td>
+              <td class="mono">Customer{grade:C} --COVERS--> Order</td><td class="mono">PRICE_APPROVED → CHAIRMAN_REVIEWING</td>
+              <td>董事长审批任务被创建并推送卡片</td><td><span class="tag cq">CQ-05</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-04-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>董事长对 D 级客户订单审批通过</td>
+              <td class="mono">Order --PRODUCES--> Event(ChairmanReviewed:APPROVED)</td><td class="mono">CHAIRMAN_REVIEWING → CONTRACT_GENERATING</td>
+              <td>进入合同生成阶段</td><td><span class="tag cq">CQ-05</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-04-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>董事长对 C 级客户订单审批拒绝</td>
+              <td class="mono">Order --PRODUCES--> Event(ChairmanReviewed:REJECTED)</td><td class="mono">CHAIRMAN_REVIEWING → REJECTED</td>
+              <td>订单进入 REJECTED 终态，事件链记录</td><td><span class="tag cq">CQ-04</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-04-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>A 级客户订单被系统错误创建董事长审批任务</td>
+              <td class="mono">Customer{grade:A} --COVERS--> Order</td><td class="mono">PRICE_APPROVED → CHAIRMAN_REVIEWING</td>
+              <td>等级校验拒绝：A 级不应进入董事长审批</td><td><span class="tag cq">CQ-05</span></td>
+              <td>违反客户等级分流规则（仅 C/D 触发董事长）</td></tr>
+            <tr class="bad"><td class="mono">EP-04-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>董事长在主管审价前直接审批通过</td>
+              <td class="mono">ApprovalTask --ASSIGNED_TO--> User(董事长)</td><td class="mono">PRICE_REVIEWING → CHAIRMAN_REVIEWING（跳过主管）</td>
+              <td>FSM 非法迁移被拒</td><td><span class="tag cq">CQ-04</span></td>
+              <td>审批链顺序强制：主管审价 → 董事长</td></tr>
+            <tr class="bad"><td class="mono">EP-04-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>销售使用董事长账号凭据提交审批（身份冒用）</td>
+              <td class="mono">User --BELONGS_TO--> Tenant</td><td class="mono">CHAIRMAN_REVIEWING → CONTRACT_GENERATING</td>
+              <td>身份与任务指派不符，授权拒绝</td><td><span class="tag cq">CQ-01</span></td>
+              <td>审批任务 assignee 与操作者必须一致（防冒用）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-05" data-ep="EP-05">
+    <summary>
+      <span class="epno">EP-05</span>
+      <span class="eptitle">A/B 级客户跳过董事长审批</span>
+      <span class="epmeta">来源：docs/01-core-graph.html §2.2</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>Customer{grade:A|B} --COVERS--> Order</code>（不创建董事长任务）</dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd><code>PRICE_APPROVED → CONTRACT_GENERATING</code>（跳过 CHAIRMAN_REVIEWING）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：Customer、Order；边：COVERS（等级决定跳过分流）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-05 · A/B 级跳过董事长（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-05-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>A 级客户订单主管通过后直接进入合同生成</td>
+              <td class="mono">Customer{grade:A} --COVERS--> Order</td><td class="mono">PRICE_APPROVED → CONTRACT_GENERATING</td>
+              <td>不创建董事长任务，直接推进</td><td><span class="tag cq">CQ-05</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-05-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>B 级客户订单同样跳过董事长审批</td>
+              <td class="mono">Customer{grade:B} --COVERS--> Order</td><td class="mono">PRICE_APPROVED → CONTRACT_GENERATING</td>
+              <td>跳过逻辑按等级表驱动，B 级命中</td><td><span class="tag cq">CQ-05</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-05-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>跳过时事件链记录 skip 原因（等级判定）</td>
+              <td class="mono">Order --PRODUCES--> Event</td><td class="mono">PRICE_APPROVED → CONTRACT_GENERATING</td>
+              <td>事件含 skip_reason=grade_A/B，审计可查</td><td><span class="tag cq">CQ-12</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-05-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>C 级客户订单因等级配置错误被跳过董事长审批</td>
+              <td class="mono">Customer{grade:C} --COVERS--> Order</td><td class="mono">PRICE_APPROVED → CONTRACT_GENERATING</td>
+              <td>等级校验拦截，强制进入 CHAIRMAN_REVIEWING</td><td><span class="tag cq">CQ-05</span></td>
+              <td>C/D 级必须董事长审批，跳过即越权成交</td></tr>
+            <tr class="bad"><td class="mono">EP-05-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>客户等级字段缺失，系统默认走跳过路径</td>
+              <td class="mono">Customer(grade=NULL)</td><td class="mono">PRICE_APPROVED → CONTRACT_GENERATING</td>
+              <td>校验拒绝：等级缺失不可判分流</td><td><span class="tag cq">CQ-05</span></td>
+              <td>等级缺失时应 fail-closed（拒绝）而非默认跳过</td></tr>
+            <tr class="bad"><td class="mono">EP-05-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>主管尚未通过（PRICE_REVIEWING），订单直接进合同生成</td>
+              <td class="mono">Order --PRODUCES--> Event(ContractGenerated)</td><td class="mono">PRICE_REVIEWING → CONTRACT_GENERATING</td>
+              <td>FSM 非法迁移被拒</td><td><span class="tag cq">CQ-04</span></td>
+              <td>任何跳过只发生在 PRICE_APPROVED 之后</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-06" data-ep="EP-06">
+    <summary>
+      <span class="epno">EP-06</span>
+      <span class="eptitle">合同生成与校验</span>
+      <span class="epmeta">来源：docs/01-core-graph.html §2.2 ContractGenerated</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>Order --PRODUCES--> Event(ContractGenerated)</code>（contract_no 编号）</dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd><code>CONTRACT_GENERATING → CONTRACTED</code>（校验通过）；<code>CONTRACT_GENERATING → CONTRACT_GENERATING</code>（要素不全补全重校验）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：Order、Event；边：PRODUCES（合同生成事件）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-06 · 合同生成校验（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-06-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>合同模板、要素、编号全部校验通过</td>
+              <td class="mono">Order --PRODUCES--> Event(ContractGenerated)</td><td class="mono">CONTRACT_GENERATING → CONTRACTED</td>
+              <td>合同生成成功，contract_no 落库</td><td><span class="tag cq">CQ-04</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-06-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>要素不全（缺税号），系统停留在生成态等待补全</td>
+              <td class="mono">Order --CONTAINS--> OrderItem</td><td class="mono">CONTRACT_GENERATING → CONTRACT_GENERATING（自环）</td>
+              <td>补全后重校验，状态不丢失</td><td><span class="tag cq">CQ-04</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-06-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>合同生成后进入备货段（CONTRACTED → READY_FOR_STOCK）</td>
+              <td class="mono">Order --PREPARES--> StockPrepare</td><td class="mono">CONTRACTED → READY_FOR_STOCK</td>
+              <td>主流程推进至 STK 段入口</td><td><span class="tag cq">CQ-04</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-06-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>合同编号重复（与既有合同冲突）</td>
+              <td class="mono">Event(ContractGenerated).contract_no</td><td class="mono">CONTRACT_GENERATING → CONTRACTED</td>
+              <td>唯一约束拒绝，合同不生成</td><td><span class="tag cq">CQ-14</span></td>
+              <td>合同编号唯一性是履约凭据的根基</td></tr>
+            <tr class="bad"><td class="mono">EP-06-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>缺失客户税号仍强制生成合同并推进</td>
+              <td class="mono">Order --CONTAINS--> OrderItem</td><td class="mono">CONTRACT_GENERATING → CONTRACTED</td>
+              <td>校验拒绝，要求补全要素</td><td><span class="tag cq">CQ-04</span></td>
+              <td>合同要素不全是业务红线（履约无据）</td></tr>
+            <tr class="bad"><td class="mono">EP-06-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>CONTRACTED 后再次触发合同生成</td>
+              <td class="mono">Order --PRODUCES--> Event(ContractGenerated)</td><td class="mono">CONTRACTED → CONTRACTED（重复生成）</td>
+              <td>FSM 拒绝重复迁移</td><td><span class="tag cq">CQ-04</span></td>
+              <td>合同只生成一次，修改需走 MODIFYING 分类</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-07" data-ep="EP-07">
+    <summary>
+      <span class="epno">EP-07</span>
+      <span class="eptitle">A 类修改：回到价格审批</span>
+      <span class="epmeta">来源：docs/01-core-graph.html §2.2 修改分类表</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>Order --PRODUCES--> Event(OrderModified class:A)</code>；resubmit 链（revision++）</dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd><code>CONTRACTED → MODIFYING → PRICE_REVIEWING</code>（A 类回审价）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：Order、Event；边：PRODUCES（修改分类事件）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-07 · A 类修改回审价（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-07-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>客户名称变更（A 类）→ 订单回到价格审批重审</td>
+              <td class="mono">Order --PRODUCES--> Event(OrderModified:A)</td><td class="mono">MODIFYING → PRICE_REVIEWING</td>
+              <td>回到审价，修改内容高亮显示</td><td><span class="tag cq">CQ-04</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-07-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>产品单价变更（A 类）重新生成 revision</td>
+              <td class="mono">Order(resubmit_revision++)</td><td class="mono">MODIFYING → PRICE_REVIEWING</td>
+              <td>resubmit 链新增 revision，指纹更新</td><td><span class="tag cq">CQ-12</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-07-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>客户等级变更（A 类）重新进入董事长判定</td>
+              <td class="mono">Customer{grade} --COVERS--> Order</td><td class="mono">PRICE_REVIEWING → (C/D) CHAIRMAN_REVIEWING</td>
+              <td>重审后按新等级分流</td><td><span class="tag cq">CQ-05</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-07-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>A 类修改（改单价）被静默处理，未回审价</td>
+              <td class="mono">Order --PRODUCES--> Event(OrderModified:A)</td><td class="mono">MODIFYING → CONTRACTED（E 类路径）</td>
+              <td>分类判定拒绝，强制走 A 类回审价</td><td><span class="tag cq">CQ-04</span></td>
+              <td>修改分类规则是配置数据，价格变更必须重新审核</td></tr>
+            <tr class="bad"><td class="mono">EP-07-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>A 类修改未生成新 revision（覆盖旧记录）</td>
+              <td class="mono">Order(resubmit_revision)</td><td class="mono">MODIFYING → PRICE_REVIEWING</td>
+              <td>拒绝：修改必须产生新 revision</td><td><span class="tag cq">CQ-12</span></td>
+              <td>修改即新 revision 的 resubmit 链纪律，防覆盖</td></tr>
+            <tr class="bad"><td class="mono">EP-07-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>非订单归属人发起 A 类修改</td>
+              <td class="mono">User --OWNS--> Customer --COVERS--> Order</td><td class="mono">CONTRACTED → MODIFYING</td>
+              <td>授权拒绝 403</td><td><span class="tag cq">CQ-01</span></td>
+              <td>修改权同创建权：销售只看/只改本人客户</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-08" data-ep="EP-08">
+    <summary>
+      <span class="epno">EP-08</span>
+      <span class="eptitle">B/D 类修改：直达发货阶段</span>
+      <span class="epmeta">来源：docs/01-core-graph.html §2.2 修改分类表</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>Order --PRODUCES--> Event(OrderModified:B|D)</code>；<code>OrderItem.payment_term</code> 变更</dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd><code>MODIFYING → READY_FOR_SHIPMENT</code>（B 类：账期改非款到；D 类：重生成合同+跳过备货财务）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：Order、OrderItem；边：CONTAINS（账期/数量变更触发分流）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-08 · B/D 类修改直达发货（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-08-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>账期改为非款到（B 类），订单直达发货阶段</td>
+              <td class="mono">Order --CONTAINS--> OrderItem(payment_term→非款到)</td><td class="mono">MODIFYING → READY_FOR_SHIPMENT</td>
+              <td>跳过 STK 备货与财务确认，进入发货分配</td><td><span class="tag cq">CQ-04</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-08-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>收货地址变更（D 类）重新生成合同后直达发货</td>
+              <td class="mono">Order --PRODUCES--> Event(OrderModified:D)</td><td class="mono">MODIFYING → CONTRACT_GENERATING → READY_FOR_SHIPMENT</td>
+              <td>合同重生成成功，跳过备货/财务直达发货</td><td><span class="tag cq">CQ-04</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-08-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>B 类修改后事件链记录跳过原因</td>
+              <td class="mono">Order --PRODUCES--> Event(OrderModified:B)</td><td class="mono">MODIFYING → READY_FOR_SHIPMENT</td>
+              <td>事件含 skip_reason，审计可查</td><td><span class="tag cq">CQ-12</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-08-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>B 类修改（非款到）仍强制走备货审批</td>
+              <td class="mono">Order --PREPARES--> StockPrepare</td><td class="mono">MODIFYING → READY_FOR_STOCK（重复备货）</td>
+              <td>分类路由拒绝，纠正为直达发货</td><td><span class="tag cq">CQ-04</span></td>
+              <td>非款到不应有备货/财务确认环节</td></tr>
+            <tr class="bad"><td class="mono">EP-08-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>款到发货订单在未确认到账时走 B 类直达</td>
+              <td class="mono">OrderItem(payment_term=款到)</td><td class="mono">MODIFYING → READY_FOR_SHIPMENT</td>
+              <td>拒绝：款到订单不可跳过财务确认</td><td><span class="tag cq">CQ-05</span></td>
+              <td>B 类仅适用于非款到，款到必须财务确认（资金风险）</td></tr>
+            <tr class="bad"><td class="mono">EP-08-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>D 类修改（数量变更）被误判为 B 类直达</td>
+              <td class="mono">Order --CONTAINS--> OrderItem(qty)</td><td class="mono">MODIFYING → READY_FOR_SHIPMENT</td>
+              <td>分类判定拒绝，按 D 类重生成合同</td><td><span class="tag cq">CQ-04</span></td>
+              <td>分类规则互斥，数量变更属 D 类（含合同重生成）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-09" data-ep="EP-09">
+    <summary>
+      <span class="epno">EP-09</span>
+      <span class="eptitle">E 类修改：静默修改</span>
+      <span class="epmeta">来源：docs/01-core-graph.html §2.2 修改分类表</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>Order --PRODUCES--> Event(OrderModified:E)</code>（仅更新 payload + 事件）</dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd><code>MODIFYING → CONTRACTED</code>（E 类静默修改，状态回 CONTRACTED）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：Order、Event；边：PRODUCES（静默修改事件）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-09 · E 类静默修改（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-09-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>订单备注变更（E 类）静默更新 payload</td>
+              <td class="mono">Order --PRODUCES--> Event(OrderModified:E)</td><td class="mono">MODIFYING → CONTRACTED</td>
+              <td>payload 更新，状态回 CONTRACTED，无审批</td><td><span class="tag cq">CQ-04</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-09-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>E 类修改不创建任何审批任务</td>
+              <td class="mono">ApprovalTask（不创建）</td><td class="mono">MODIFYING → CONTRACTED</td>
+              <td>无审批节点，流程不中断</td><td><span class="tag cq">CQ-05</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-09-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>E 类修改仍产生事件与版本记录</td>
+              <td class="mono">Order --PRODUCES--> Event</td><td class="mono">MODIFYING → CONTRACTED</td>
+              <td>revision++ 且事件落链，可回溯</td><td><span class="tag cq">CQ-12</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-09-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>E 类修改实际包含单价变更（应属 A 类）</td>
+              <td class="mono">Order --CONTAINS--> OrderItem(unit_price)</td><td class="mono">MODIFYING → CONTRACTED</td>
+              <td>分类判定拒绝，纠正为 A 类回审价</td><td><span class="tag cq">CQ-04</span></td>
+              <td>静默修改仅限非 A/B/C/D 内容，价格变更绝不可静默</td></tr>
+            <tr class="bad"><td class="mono">EP-09-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>E 类修改不产生事件（绕过审计）</td>
+              <td class="mono">Order --PRODUCES--> Event（缺失）</td><td class="mono">MODIFYING → CONTRACTED</td>
+              <td>拒绝：状态变更必须与事件同事务</td><td><span class="tag cq">CQ-12</span></td>
+              <td>事件链纪律：任何修改都要 append-only 留痕</td></tr>
+            <tr class="bad"><td class="mono">EP-09-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>订单处于 REQUESTED（未生效）时执行 E 类修改</td>
+              <td class="mono">Order(state=REQUESTED)</td><td class="mono">REQUESTED → MODIFYING</td>
+              <td>FSM 非法迁移被拒</td><td><span class="tag cq">CQ-04</span></td>
+              <td>修改仅针对已生效订单（CONTRACTED 后）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-10" data-ep="EP-10">
+    <summary>
+      <span class="epno">EP-10</span>
+      <span class="eptitle">基础校验失败 → REJECTED</span>
+      <span class="epmeta">来源：docs/01-core-graph.html §2.2</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>Order --CONTAINS--> OrderItem</code>（数量/价格值对象校验）；<code>Event(FlowFailed)</code></dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd><code>REQUESTED → REJECTED</code>（校验失败终态）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：Order、OrderItem；边：CONTAINS（明细合法性校验）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-10 · 校验失败拒绝（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-10-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>订单明细数量为负，基础校验拒绝</td>
+              <td class="mono">Order --CONTAINS--> OrderItem(qty<0)</td><td class="mono">REQUESTED → REJECTED</td>
+              <td>订单 REJECTED，无资金副作用</td><td><span class="tag cq">CQ-06</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-10-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>客户等级缺失，校验拒绝</td>
+              <td class="mono">Customer(grade=NULL) --COVERS--> Order</td><td class="mono">REQUESTED → REJECTED</td>
+              <td>订单 REJECTED 并记录原因</td><td><span class="tag cq">CQ-05</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-10-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>重复 idempotency_key 的请求返回既有订单而非新拒绝</td>
+              <td class="mono">Order(idempotency_key)</td><td class="mono">REQUESTED（幂等命中）</td>
+              <td>返回首次结果，不重复处理</td><td><span class="tag cq">CQ-11</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-10-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>校验失败的订单仍被推进到 PRICE_REVIEWING</td>
+              <td class="mono">Order --CONTAINS--> OrderItem(qty=0)</td><td class="mono">REQUESTED → PRICE_REVIEWING</td>
+              <td>FSM 拦截：校验失败不可进入审价</td><td><span class="tag cq">CQ-04</span></td>
+              <td>非法明细进入审批 = 审批无效功 + 状态失真</td></tr>
+            <tr class="bad"><td class="mono">EP-10-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>REJECTED 终态订单仍可被审批操作</td>
+              <td class="mono">Order --PRODUCES--> Event(PriceReviewed)</td><td class="mono">REJECTED → PRICE_REVIEWING（反向）</td>
+              <td>拒绝：终态只读，不可回退</td><td><span class="tag cq">CQ-04</span></td>
+              <td>REJECTED 是事件链终态，无出口迁移</td></tr>
+            <tr class="bad"><td class="mono">EP-10-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>明细数量超过 int64 溢出边界仍接受</td>
+              <td class="mono">Order --CONTAINS--> OrderItem(qty=overflow)</td><td class="mono">REQUESTED → REJECTED</td>
+              <td>值对象拒绝溢出值</td><td><span class="tag cq">CQ-06</span></td>
+              <td>数量值对象规范：零/负/溢出一律拒绝</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <h2 class="sec" id="stk">4 · STK 段 · 备货审批流程 <small>EP-11 .. EP-18</small></h2>
+
+  <section class="ep" id="ep-11" data-ep="EP-11">
+    <summary>
+      <span class="epno">EP-11</span>
+      <span class="eptitle">款到发货 · 商务备货</span>
+      <span class="epmeta">来源：docs/01-core-graph.html §2.3 StockAssigned</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>Order --PREPARES--> StockPrepare</code>（可分批）；<code>Event(StockAssigned)</code></dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd><code>READY_FOR_STOCK → STOCK_REVIEWING</code>（款到发货：商务选仓+发货量）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：Order、StockPrepare；边：PREPARES（订单产生备货审批）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-11 · 款到发货商务备货（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-11-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>商务对款到订单选仓（东莞）并填报备货量</td>
+              <td class="mono">Order --PREPARES--> StockPrepare(STK-0001)</td><td class="mono">READY_FOR_STOCK → STOCK_REVIEWING</td>
+              <td>备货单创建，提交仓管确认</td><td><span class="tag cq">CQ-06</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-11-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>分两批备货（先 60 后 40），各建一张备货单</td>
+              <td class="mono">Order --PREPARES--> StockPrepare(previous_id 链)</td><td class="mono">STOCK_REVIEWING（分批）</td>
+              <td>remaining_qty 递减，previous_id 串联</td><td><span class="tag cq">CQ-06</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-11-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>备货单幂等键重复提交（重放）</td>
+              <td class="mono">StockPrepare(idempotency_key UK)</td><td class="mono">STOCK_REVIEWING</td>
+              <td>返回既有备货单，不重复创建</td><td><span class="tag cq">CQ-11</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-11-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>备货量 80 件但订单剩余仅 50 件（超量备货）</td>
+              <td class="mono">Order --PREPARES--> StockPrepare(planned_qty=80)</td><td class="mono">READY_FOR_STOCK → STOCK_REVIEWING</td>
+              <td>守恒校验拒绝，备货不创建</td><td><span class="tag cq">CQ-06</span></td>
+              <td>违反备货守恒：∑备货 ≤ 订单数量</td></tr>
+            <tr class="bad"><td class="mono">EP-11-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>非款到订单被商务创建备货单</td>
+              <td class="mono">OrderItem(payment_term=非款到)</td><td class="mono">READY_FOR_STOCK → STOCK_REVIEWING</td>
+              <td>分流校验拒绝：非款到应直达发货分配</td><td><span class="tag cq">CQ-04</span></td>
+              <td>非款到跳过备货审批（§2.3 分流）</td></tr>
+            <tr class="bad"><td class="mono">EP-11-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>无备货权限的销售对他人客户订单创建备货单</td>
+              <td class="mono">User --OWNS--> Customer --COVERS--> Order</td><td class="mono">READY_FOR_STOCK → STOCK_REVIEWING</td>
+              <td>SpiceDB 授权拒绝（order#create_prestock 不满足）</td><td><span class="tag cq">CQ-01</span></td>
+              <td>场景 A：create_prestock 仅授权 account_owner / 订单创建人</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-12" data-ep="EP-12">
+    <summary>
+      <span class="epno">EP-12</span>
+      <span class="eptitle">非款到发货 · 跳过备货</span>
+      <span class="epmeta">来源：docs/01-core-graph.html §2.3</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>Order(payment_term=非款到) --PRODUCES--> Event</code>（skip_reason 记录）</dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd><code>READY_FOR_STOCK → SHIP_ASSIGNING</code>（跳过备货与财务确认）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：Order、StockPrepare（不创建）；边：分流判定（payment_term）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-12 · 非款到跳过备货（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-12-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>非款到订单合同完成后直接进入发货分配</td>
+              <td class="mono">Order(payment_term=非款到)</td><td class="mono">READY_FOR_STOCK → SHIP_ASSIGNING</td>
+              <td>跳过备货审批，直接选仓分配</td><td><span class="tag cq">CQ-04</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-12-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>非款到订单不创建 StockPrepare 且事件记录原因</td>
+              <td class="mono">Order --PRODUCES--> Event(skip_stock=true)</td><td class="mono">READY_FOR_STOCK → SHIP_ASSIGNING</td>
+              <td>事件含 skip 原因，审计可查</td><td><span class="tag cq">CQ-12</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-12-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>非款到订单跳过财务确认直达 SHIP_ORDER_ISSUED</td>
+              <td class="mono">Order(payment_term=非款到)</td><td class="mono">SHIP_ASSIGNING → … → SHIP_ORDER_ISSUED</td>
+              <td>全程无 PAYMENT_CONFIRMING 节点</td><td><span class="tag cq">CQ-05</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-12-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>款到订单被误标非款到而跳过备货</td>
+              <td class="mono">OrderItem(payment_term=款到)</td><td class="mono">READY_FOR_STOCK → SHIP_ASSIGNING</td>
+              <td>分流校验拒绝，强制走备货审批</td><td><span class="tag cq">CQ-04</span></td>
+              <td>payment_term 与供方配置一致性校验（款到必须备货+财务）</td></tr>
+            <tr class="bad"><td class="mono">EP-12-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>非款到订单被错误创建备货单并进入 STOCK_REVIEWING</td>
+              <td class="mono">Order --PREPARES--> StockPrepare</td><td class="mono">READY_FOR_STOCK → STOCK_REVIEWING</td>
+              <td>拒绝：非款到不建备货单</td><td><span class="tag cq">CQ-06</span></td>
+              <td>违反分流规则，造成冗余审批与状态失真</td></tr>
+            <tr class="bad"><td class="mono">EP-12-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>财务对非款到订单做「确认到账」操作</td>
+              <td class="mono">ApprovalTask(PaymentConfirmed)</td><td class="mono">SHIP_ASSIGNING → PAYMENT_CONFIRMING（反向）</td>
+              <td>拒绝：非款到无财务确认节点</td><td><span class="tag cq">CQ-05</span></td>
+              <td>财务确认仅存在于款到分支状态机</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-13" data-ep="EP-13">
+    <summary>
+      <span class="epno">EP-13</span>
+      <span class="eptitle">仓管确认可执行</span>
+      <span class="epmeta">来源：docs/01-core-graph.html §2.3 WarehouseConfirmed</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>ApprovalTask --ASSIGNED_TO--> User(仓管)</code>；<code>Order --PRODUCES--> Event(WarehouseConfirmed)</code></dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd><code>WAREHOUSE_CONFIRMING → WAREHOUSE_CONFIRMED</code>（Signal 人工节点）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：ApprovalTask、Event；边：Order --PRODUCES--（仓管确认事件）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-13 · 仓管确认可执行（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-13-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>东莞仓管对分配本仓的备货单确认「可执行」</td>
+              <td class="mono">ApprovalTask --ASSIGNED_TO--> User(wh-dongguan)</td><td class="mono">WAREHOUSE_CONFIRMING → WAREHOUSE_CONFIRMED</td>
+              <td>确认成功，事件记录仓管身份</td><td><span class="tag cq">CQ-05</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-13-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>确认后款到订单进入财务确认阶段</td>
+              <td class="mono">StockPrepare(warehouse_id=东莞)</td><td class="mono">WAREHOUSE_CONFIRMED → PAYMENT_CONFIRMING</td>
+              <td>创建财务到账确认任务</td><td><span class="tag cq">CQ-05</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-13-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>确认后非款到订单直接发发货命令</td>
+              <td class="mono">StockPrepare(warehouse_id)</td><td class="mono">WAREHOUSE_CONFIRMED → SHIP_ORDER_ISSUED</td>
+              <td>跳过财务，直接进入发货命令</td><td><span class="tag cq">CQ-04</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-13-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>阳原仓管对东莞仓备货单确认（跨仓操作）</td>
+              <td class="mono">Warehouse --STORES--> Product</td><td class="mono">WAREHOUSE_CONFIRMING → WAREHOUSE_CONFIRMED</td>
+              <td>授权拒绝：仓管仅限本仓</td><td><span class="tag cq">CQ-02</span></td>
+              <td>场景 C：warehouse_operator 按分配仓授权，跨仓拒绝</td></tr>
+            <tr class="bad"><td class="mono">EP-13-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>仓管确认时可查看订单价格字段（投影未剥离）</td>
+              <td class="mono">OrderItem(unit_price_cents)</td><td class="mono">WAREHOUSE_CONFIRMING</td>
+              <td>BFF 投影强制剥离价格字段</td><td><span class="tag cq">CQ-03</span></td>
+              <td>业务红线：仓管不可见价格/金额（字段级投影）</td></tr>
+            <tr class="bad"><td class="mono">EP-13-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>已 WAREHOUSE_CONFIRMED 的备货单再次确认</td>
+              <td class="mono">StockPrepare(state=WAREHOUSE_CONFIRMED)</td><td class="mono">WAREHOUSE_CONFIRMED（重复确认）</td>
+              <td>幂等拒绝，状态不变</td><td><span class="tag cq">CQ-04</span></td>
+              <td>确认只发生一次，防重复 Signal 推进</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-14" data-ep="EP-14">
+    <summary>
+      <span class="epno">EP-14</span>
+      <span class="eptitle">仓管退回</span>
+      <span class="epmeta">来源：docs/01-core-graph.html §2.3 WAREHOUSE_RETURNED</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>Order --PRODUCES--> Event(WarehouseConfirmed:RETURNED)</code>；<code>ApprovalTask</code> verdict</dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd><code>WAREHOUSE_CONFIRMING → WAREHOUSE_RETURNED</code> → 商务修改重提</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：Order、Event；边：PRODUCES（退回事件）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-14 · 仓管退回（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-14-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>仓管因缺货退回备货单，注明原因</td>
+              <td class="mono">Order --PRODUCES--> Event(WarehouseConfirmed:RETURNED)</td><td class="mono">WAREHOUSE_CONFIRMING → WAREHOUSE_RETURNED</td>
+              <td>退回成功，原因随事件记录</td><td><span class="tag cq">CQ-05</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-14-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>商务修改备货方案后重新提交</td>
+              <td class="mono">StockPrepare(warehouse_id 变更)</td><td class="mono">WAREHOUSE_RETURNED → STOCK_REVIEWING</td>
+              <td>重新进入备货审批（RETURNED → STOCK_REVIEWING）</td><td><span class="tag cq">CQ-04</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-14-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>退回后剩余待备货量回补，可重新分配</td>
+              <td class="mono">StockPrepare(remaining_qty 回补)</td><td class="mono">STOCK_REVIEWING</td>
+              <td>守恒基准恢复，不重复计量</td><td><span class="tag cq">CQ-06</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-14-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>已 WAREHOUSE_CONFIRMED 的备货单被退回</td>
+              <td class="mono">StockPrepare(state=WAREHOUSE_CONFIRMED)</td><td class="mono">WAREHOUSE_CONFIRMED → WAREHOUSE_RETURNED</td>
+              <td>FSM 非法迁移被拒</td><td><span class="tag cq">CQ-04</span></td>
+              <td>确认后已推进财务/发货命令，不可直接退回</td></tr>
+            <tr class="bad"><td class="mono">EP-14-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>仓管退回但不填原因</td>
+              <td class="mono">ApprovalTask(comment=NULL)</td><td class="mono">WAREHOUSE_CONFIRMING → WAREHOUSE_RETURNED</td>
+              <td>校验拒绝，必须注明退回原因</td><td><span class="tag cq">CQ-12</span></td>
+              <td>三方审批的退回必须可审计（何因）</td></tr>
+            <tr class="bad"><td class="mono">EP-14-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>非分配仓管（未 ASSIGNED_TO）执行退回</td>
+              <td class="mono">User --ASSIGNED_TO-- Shipment（未分配）</td><td class="mono">WAREHOUSE_CONFIRMING → WAREHOUSE_RETURNED</td>
+              <td>授权拒绝 403</td><td><span class="tag cq">CQ-01</span></td>
+              <td>仓管退回权与分配关系绑定（场景 C warehouse_operator）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-15" data-ep="EP-15">
+    <summary>
+      <span class="epno">EP-15</span>
+      <span class="eptitle">仓管申请转仓</span>
+      <span class="epmeta">来源：docs/01-core-graph.html §2.3 TRANSFER_REQUESTED</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>StockPrepare.warehouse_id 变更</code>；<code>Warehouse --STORES--> Product</code>（目标仓库存校验）</dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd><code>WAREHOUSE_CONFIRMING → TRANSFER_REQUESTED → WAREHOUSE_CONFIRMING/WAREHOUSE_CONFIRMED/RETURNED</code></dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：StockPrepare、Warehouse；边：EXECUTES（明细执行仓库变更）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-15 · 仓管申请转仓（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-15-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>东莞仓库存不足，仓管申请转仓至成都仓</td>
+              <td class="mono">StockPrepare(warehouse_id 东莞→成都)</td><td class="mono">WAREHOUSE_CONFIRMING → TRANSFER_REQUESTED</td>
+              <td>进入转仓待审，等待商务审核</td><td><span class="tag cq">CQ-06</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-15-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>商务审核同意转仓，换仓重新确认</td>
+              <td class="mono">StockPrepare(warehouse_id=成都)</td><td class="mono">TRANSFER_REQUESTED → WAREHOUSE_CONFIRMING</td>
+              <td>目标仓仓管重新确认（换仓重确认）</td><td><span class="tag cq">CQ-04</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-15-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>商务审核驳回转仓，退回修改</td>
+              <td class="mono">StockPrepare(warehouse_id 不变)</td><td class="mono">TRANSFER_REQUESTED → RETURNED</td>
+              <td>退回商务重新制定方案</td><td><span class="tag cq">CQ-05</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-15-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>转仓至目标仓，但目标仓无该产品库存</td>
+              <td class="mono">Warehouse --STORES--> Product(0)</td><td class="mono">TRANSFER_REQUESTED → WAREHOUSE_CONFIRMING</td>
+              <td>库存校验拒绝转仓申请</td><td><span class="tag cq">CQ-08</span></td>
+              <td>转仓目的必须是可执行仓库（库存可承诺）</td></tr>
+            <tr class="bad"><td class="mono">EP-15-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>转仓不经商务审核直接确认可执行</td>
+              <td class="mono">StockPrepare(warehouse_id 变更)</td><td class="mono">TRANSFER_REQUESTED → WAREHOUSE_CONFIRMED（跳过审核）</td>
+              <td>FSM 非法迁移被拒</td><td><span class="tag cq">CQ-04</span></td>
+              <td>转仓必须经商务审核（人类闸门），不可直达确认</td></tr>
+            <tr class="bad"><td class="mono">EP-15-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>转仓申请数量超过原备货确认量</td>
+              <td class="mono">StockPrepare(planned_qty 超量)</td><td class="mono">TRANSFER_REQUESTED</td>
+              <td>守恒校验拒绝</td><td><span class="tag cq">CQ-06</span></td>
+              <td>转仓只换执行仓，不改备货量守恒</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-16" data-ep="EP-16">
+    <summary>
+      <span class="epno">EP-16</span>
+      <span class="eptitle">财务确认到账（按供方分流）</span>
+      <span class="epmeta">来源：docs/01-core-graph.html §2.3 PaymentConfirmed</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>ApprovalTask --ASSIGNED_TO--> User(财务)</code>；<code>Event(PaymentConfirmed, ledger_ref)</code></dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd><code>PAYMENT_CONFIRMING → PAYMENT_CONFIRMED</code>（款到分支）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：ApprovalTask、Event；边：Order --PRODUCES--（到账事件）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-16 · 财务确认到账（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-16-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>财务核对流水后确认订单到账</td>
+              <td class="mono">Order --PRODUCES--> Event(PaymentConfirmed)</td><td class="mono">PAYMENT_CONFIRMING → PAYMENT_CONFIRMED</td>
+              <td>迁移成功，ledger_ref 关联流水</td><td><span class="tag cq">CQ-05</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-16-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>财务确认后商务发出发货命令</td>
+              <td class="mono">Order --PRODUCES--> Event(ShipOrderIssued)</td><td class="mono">PAYMENT_CONFIRMED → SHIP_ORDER_ISSUED</td>
+              <td>发货命令发出，进入 SHP 段</td><td><span class="tag cq">CQ-04</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-16-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>财务确认未到账，退回商务</td>
+              <td class="mono">Order --PRODUCES--> Event(PaymentConfirmed:NOT_RECEIVED)</td><td class="mono">PAYMENT_CONFIRMING → RETURNED</td>
+              <td>退回商务，等待后续处理</td><td><span class="tag cq">CQ-05</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-16-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>非本供方分流的财务确认其他供方订单到账</td>
+              <td class="mono">User --BELONGS_TO--> Tenant(supplier_channel)</td><td class="mono">PAYMENT_CONFIRMING → PAYMENT_CONFIRMED</td>
+              <td>分流校验拒绝</td><td><span class="tag cq">CQ-02</span></td>
+              <td>财务按供方分流，越供方即越权（CQ-02 数据范围）</td></tr>
+            <tr class="bad"><td class="mono">EP-16-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>未确认到账即发出发货命令</td>
+              <td class="mono">Order --PRODUCES--> Event(ShipOrderIssued)</td><td class="mono">PAYMENT_CONFIRMING → SHIP_ORDER_ISSUED（跳过）</td>
+              <td>FSM 拒绝：款到必须 PAYMENT_CONFIRMED</td><td><span class="tag cq">CQ-05</span></td>
+              <td>款到发货资金风险：未到账不可发货（L2-06 场景）</td></tr>
+            <tr class="bad"><td class="mono">EP-16-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>到账金额小于订单金额仍确认「已到账」</td>
+              <td class="mono">OrderItem(amount_cents) vs ledger_ref</td><td class="mono">PAYMENT_CONFIRMING → PAYMENT_CONFIRMED</td>
+              <td>金额核对拒绝</td><td><span class="tag cq">CQ-05</span></td>
+              <td>到账金额必须 ≥ 订单应到金额（部分到账≠确认）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-17" data-ep="EP-17">
+    <summary>
+      <span class="epno">EP-17</span>
+      <span class="eptitle">备货守恒约束</span>
+      <span class="epmeta">来源：docs/01-core-graph.html §1.2 constraints + CQ-06</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>Order --PREPARES--> StockPrepare</code>（∑planned_qty ≤ order_items.quantity）</dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd>STK 段全状态（守恒校验贯穿备货/退回/转仓）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：Order、StockPrepare；边：PREPARES（聚合守恒载体）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-17 · 备货守恒（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-17-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>订单 100 件分两批备货 60 + 40，总量守恒</td>
+              <td class="mono">Order --PREPARES--> StockPrepare(60/40)</td><td class="mono">STOCK_REVIEWING（分批）</td>
+              <td>两批均通过守恒校验</td><td><span class="tag cq">CQ-06</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-17-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>一批退回后回补 remaining_qty，再次备货不重复计量</td>
+              <td class="mono">StockPrepare(remaining_qty 回补)</td><td class="mono">WAREHOUSE_RETURNED → STOCK_REVIEWING</td>
+              <td>退回量释放回守恒池</td><td><span class="tag cq">CQ-06</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-17-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>转仓不改变备货总量</td>
+              <td class="mono">StockPrepare(warehouse_id 变更)</td><td class="mono">TRANSFER_REQUESTED</td>
+              <td>守恒判定只看数量不看仓库</td><td><span class="tag cq">CQ-06</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-17-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>订单 50 件剩余，第二批备货 60 件</td>
+              <td class="mono">Order --PREPARES--> StockPrepare(planned_qty=60)</td><td class="mono">STOCK_REVIEWING</td>
+              <td>守恒断言拒绝（60 &gt; 50）</td><td><span class="tag cq">CQ-06</span></td>
+              <td>∑备货 ≤ 订单数量，超量即违约</td></tr>
+            <tr class="bad"><td class="mono">EP-17-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>并发两批备货合计超量（竞态）</td>
+              <td class="mono">Order --PREPARES--> StockPrepare×2</td><td class="mono">STOCK_REVIEWING（并发）</td>
+              <td>行锁/唯一约束拦截，至少一批拒绝</td><td><span class="tag cq">CQ-14</span></td>
+              <td>并发守恒由 PG 行锁保障（防线 2）</td></tr>
+            <tr class="bad"><td class="mono">EP-17-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>备货量为负值</td>
+              <td class="mono">Order --PREPARES--> StockPrepare(planned_qty=-10)</td><td class="mono">STOCK_REVIEWING</td>
+              <td>值对象拒绝负值</td><td><span class="tag cq">CQ-06</span></td>
+              <td>数量值对象规范：零/负拒绝（L0-06）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-18" data-ep="EP-18">
+    <summary>
+      <span class="epno">EP-18</span>
+      <span class="eptitle">发货命令发出</span>
+      <span class="epmeta">来源：docs/01-core-graph.html §2.3 ShipOrderIssued</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>Order --PRODUCES--> Event(ShipOrderIssued)</code>；<code>Order --GENERATES--> Shipment</code></dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd><code>SHIP_ORDER_ISSUED → READY_FOR_SHIPMENT</code>（进入发货段）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：Order、Shipment；边：GENERATES（订单产生发货单）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-18 · 发货命令发出（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-18-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>商务发出发货命令，订单进入发货段</td>
+              <td class="mono">Order --PRODUCES--> Event(ShipOrderIssued)</td><td class="mono">SHIP_ORDER_ISSUED → READY_FOR_SHIPMENT</td>
+              <td>进入 SHP 段，等待商务选仓</td><td><span class="tag cq">CQ-04</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-18-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>款到订单在 PAYMENT_CONFIRMED 后发出发货命令</td>
+              <td class="mono">Order --PRODUCES--> Event(ShipOrderIssued)</td><td class="mono">PAYMENT_CONFIRMED → SHIP_ORDER_ISSUED</td>
+              <td>命令合法发出</td><td><span class="tag cq">CQ-05</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-18-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>发货命令重复投递（重试）</td>
+              <td class="mono">Event(ShipOrderIssued) 幂等</td><td class="mono">READY_FOR_SHIPMENT（已终态）</td>
+              <td>幂等返回，不重复迁移</td><td><span class="tag cq">CQ-11</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-18-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>款到订单财务未确认即发发货命令</td>
+              <td class="mono">Order --PRODUCES--> Event(ShipOrderIssued)</td><td class="mono">PAYMENT_CONFIRMING → SHIP_ORDER_ISSUED</td>
+              <td>FSM 拒绝，命令不发出</td><td><span class="tag cq">CQ-05</span></td>
+              <td>款到未确认到账=资金风险（CQ-05 审批链完整性）</td></tr>
+            <tr class="bad"><td class="mono">EP-18-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>无发货权限角色（如财务）发出发货命令</td>
+              <td class="mono">User(role=ACCOUNTING)</td><td class="mono">SHIP_ORDER_ISSUED</td>
+              <td>授权拒绝 403</td><td><span class="tag cq">CQ-01</span></td>
+              <td>发货命令是商务动作（ship 权限），角色矩阵拦截</td></tr>
+            <tr class="bad"><td class="mono">EP-18-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>备货尚未确认（WAREHOUSE_CONFIRMING）即发命令</td>
+              <td class="mono">StockPrepare(state=WAREHOUSE_CONFIRMING)</td><td class="mono">WAREHOUSE_CONFIRMING → SHIP_ORDER_ISSUED</td>
+              <td>FSM 拒绝：备货确认是前置条件</td><td><span class="tag cq">CQ-04</span></td>
+              <td>发货命令必须发生在备货确认之后（顺序强制）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <h2 class="sec" id="shp">5 · SHP 段 · 发货分配及出库 <small>EP-19 .. EP-26</small></h2>
+
+  <section class="ep" id="ep-19" data-ep="EP-19">
+    <summary>
+      <span class="epno">EP-19</span>
+      <span class="eptitle">商务选仓 + 发货量分配</span>
+      <span class="epmeta">来源：docs/01-core-graph.html §2.4</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>StockPrepare --FULFILLS--> Shipment</code>（一张备货单可产生多张发货单）</dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd><code>READY_FOR_SHIPMENT → SHIP_ASSIGNING</code>（商务选仓+发货量）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：StockPrepare、Shipment；边：FULFILLS（备货产生发货）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-19 · 商务选仓发货量（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-19-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>商务对备货单分配 40 件发货量并创建发货单</td>
+              <td class="mono">StockPrepare --FULFILLS--> Shipment(SHP-0001)</td><td class="mono">READY_FOR_SHIPMENT → SHIP_ASSIGNING</td>
+              <td>发货单创建，planned_qty=40</td><td><span class="tag cq">CQ-07</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-19-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>剩余 60 件分两批发货（30+30）</td>
+              <td class="mono">StockPrepare --FULFILLS--> Shipment×2</td><td class="mono">SHIP_ASSIGNING（分批）</td>
+              <td>多张发货单，累计 ≤ 备货量</td><td><span class="tag cq">CQ-07</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-19-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>发货单幂等键重复提交</td>
+              <td class="mono">Shipment(idempotency_key UK)</td><td class="mono">SHIP_ASSIGNING</td>
+              <td>返回既有发货单，不重复创建</td><td><span class="tag cq">CQ-11</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-19-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>发货量 50 件超过备货确认量 40 件</td>
+              <td class="mono">StockPrepare --FULFILLS--> Shipment(planned_qty=50)</td><td class="mono">READY_FOR_SHIPMENT → SHIP_ASSIGNING</td>
+              <td>守恒校验拒绝（50 &gt; 40）</td><td><span class="tag cq">CQ-07</span></td>
+              <td>发货守恒：∑发货 ≤ ∑备货（FULFILLS 边界）</td></tr>
+            <tr class="bad"><td class="mono">EP-19-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>对已 CLOSED 的发货单再次分配发货量</td>
+              <td class="mono">Shipment(state=CLOSED)</td><td class="mono">SHIP_ASSIGNING →（重复分配）</td>
+              <td>拒绝：关闭后不再自动创建/分配</td><td><span class="tag cq">CQ-07</span></td>
+              <td>发货单纪律：一张发货单只发一次</td></tr>
+            <tr class="bad"><td class="mono">EP-19-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>无 request_shipment 权限的销售分配发货量</td>
+              <td class="mono">User --REQUESTS-- Shipment（无关系）</td><td class="mono">SHIP_ASSIGNING</td>
+              <td>SpiceDB 授权拒绝（shipment#requester 权限）</td><td><span class="tag cq">CQ-01</span></td>
+              <td>场景 B：发货需 requester/owner 授权（prestock#owner）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-20" data-ep="EP-20">
+    <summary>
+      <span class="epno">EP-20</span>
+      <span class="eptitle">仓管实际发货（库存联动事务）</span>
+      <span class="epmeta">来源：docs/01-core-graph.html §2.4 GoodsShipped + CQ-08</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>Shipment --PRODUCES--> Event(GoodsShipped)</code>；<code>Warehouse --STORES--> Product</code>（扣减同事务）</dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd><code>WAREHOUSE_SHIPPING → SHIPPED</code>（实际发货完成）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：Shipment、Warehouse；边：STORES（库存扣减联动）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-20 · 仓管实际发货（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-20-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>仓管填实际发货 40 件，发货与库存扣减原子提交</td>
+              <td class="mono">Shipment --PRODUCES--> Event(GoodsShipped)；Warehouse --STORES--> Product(-40)</td><td class="mono">WAREHOUSE_SHIPPING → SHIPPED</td>
+              <td>发货成功且库存同步扣减，同一事务</td><td><span class="tag cq">CQ-08</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-20-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>库存充足（≥40），发货成功</td>
+              <td class="mono">Warehouse --STORES--> Product(80)</td><td class="mono">WAREHOUSE_SHIPPING → SHIPPED</td>
+              <td>扣减后库存 40，≥0</td><td><span class="tag cq">CQ-08</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-20-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>发货事件记录实际数量与办理人</td>
+              <td class="mono">Event(GoodsShipped, qty=40, operator)</td><td class="mono">SHIPPED</td>
+              <td>事件链完整可回放</td><td><span class="tag cq">CQ-12</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-20-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>实际发货 40 件但库存仅 20 件</td>
+              <td class="mono">Warehouse --STORES--> Product(20)</td><td class="mono">WAREHOUSE_SHIPPING → SHIPPED</td>
+              <td>事务回滚：库存不足，发货失败</td><td><span class="tag cq">CQ-08</span></td>
+              <td>库存非负约束（CHECK），超卖即违约（L1-01/03）</td></tr>
+            <tr class="bad"><td class="mono">EP-20-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>实际发货量超过 planned_qty（40 → 45）</td>
+              <td class="mono">Shipment(shipped_qty=45 &gt; planned_qty=40)</td><td class="mono">WAREHOUSE_SHIPPING → SHIPPED</td>
+              <td>校验拒绝：超计划发货</td><td><span class="tag cq">CQ-07</span></td>
+              <td>实际发货 ≤ 计划发货（发货单纪律）</td></tr>
+            <tr class="bad"><td class="mono">EP-20-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>发货记录已提交但库存扣减失败（半生效）</td>
+              <td class="mono">Shipment(shipped) + Warehouse(未扣)</td><td class="mono">WAREHOUSE_SHIPPING → SHIPPED</td>
+              <td>整体回滚：不允许发货与扣库存分离</td><td><span class="tag cq">CQ-08</span></td>
+              <td>库存联动=单事务（防线 4：原子提交/回滚）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-21" data-ep="EP-21">
+    <summary>
+      <span class="epno">EP-21</span>
+      <span class="eptitle">部分发货</span>
+      <span class="epmeta">来源：docs/01-core-graph.html §2.4 PARTIAL_SHIPPED</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>Order --GENERATES--> Shipment</code>（多批）；累计发货 &lt; 订单量</dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd><code>SHIPPED → PARTIAL_SHIPPED</code>（累计发货 &lt; 订单总量）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：Order、Shipment；边：GENERATES（分批发货）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-21 · 部分发货（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-21-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>订单 100 件，首批发 40 件 → 部分发货</td>
+              <td class="mono">Order --GENERATES--> Shipment(40)</td><td class="mono">SHIPPED → PARTIAL_SHIPPED</td>
+              <td>进入部分发货态，按计划继续</td><td><span class="tag cq">CQ-07</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-21-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>部分发货后按原分批计划继续分配</td>
+              <td class="mono">Order --GENERATES--> Shipment(下一批)</td><td class="mono">PARTIAL_SHIPPED → SHIP_ASSIGNING</td>
+              <td>第二批发货正常推进</td><td><span class="tag cq">CQ-07</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-21-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>部分发货后可对已发部分申请开票</td>
+              <td class="mono">Order --GENERATES_INV--> Invoice</td><td class="mono">PARTIAL_SHIPPED → READY_FOR_INVOICE</td>
+              <td>可开票量按有效发货计算</td><td><span class="tag cq">CQ-09</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-21-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>累计发货已达 100 件仍标为部分发货</td>
+              <td class="mono">Order --GENERATES--> Shipment(∑=100)</td><td class="mono">SHIPPED → PARTIAL_SHIPPED</td>
+              <td>完成条件判定纠正为 FULLY_SHIPPED</td><td><span class="tag cq">CQ-07</span></td>
+              <td>全部发货 ⇔ ∑发货 = 订单数量（完成条件）</td></tr>
+            <tr class="bad"><td class="mono">EP-21-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>部分发货后创建超出剩余量的新发货单</td>
+              <td class="mono">Order --GENERATES--> Shipment(剩余 60 发 70)</td><td class="mono">PARTIAL_SHIPPED → SHIP_ASSIGNING</td>
+              <td>守恒校验拒绝</td><td><span class="tag cq">CQ-07</span></td>
+              <td>任意时刻 ∑发货 ≤ 订单量</td></tr>
+            <tr class="bad"><td class="mono">EP-21-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>部分发货后直接关闭订单（未发完）</td>
+              <td class="mono">Order(state=PARTIAL_SHIPPED)</td><td class="mono">PARTIAL_SHIPPED → CLOSED</td>
+              <td>FSM 拒绝：未履约完不可关闭</td><td><span class="tag cq">CQ-04</span></td>
+              <td>订单提交≠已履约，关闭仅在全链终态</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-22" data-ep="EP-22">
+    <summary>
+      <span class="epno">EP-22</span>
+      <span class="eptitle">全部发货（完成条件）</span>
+      <span class="epmeta">来源：docs/01-core-graph.html §2.4 FULLY_SHIPPED + CQ-07</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>Order --GENERATES--> Shipment</code>（∑shipped = order_items.quantity）</dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd><code>SHIPPED → FULLY_SHIPPED</code>（完成条件成立）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：Order、Shipment；边：GENERATES（完成判定）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-22 · 全部发货（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-22-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>两批发货 40+60 累计 100 = 订单量 → 全部发货</td>
+              <td class="mono">Order --GENERATES--> Shipment(40/60)</td><td class="mono">SHIPPED → FULLY_SHIPPED</td>
+              <td>完成条件成立，进入全部发货态</td><td><span class="tag cq">CQ-07</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-22-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>全部发货后进入开票段</td>
+              <td class="mono">Order --GENERATES_INV--> Invoice</td><td class="mono">FULLY_SHIPPED → READY_FOR_INVOICE</td>
+              <td>进入 INV 段入口</td><td><span class="tag cq">CQ-04</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-22-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>全部发货判定由聚合函数校验（∑ 与 order_items 对比）</td>
+              <td class="mono">repo/consistency.go 聚合</td><td class="mono">SHIPPED → FULLY_SHIPPED</td>
+              <td>判定结果与聚合一致（L1-13/L3-02）</td><td><span class="tag cq">CQ-07</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-22-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>累计仅 90 件却标记全部发货</td>
+              <td class="mono">Order --GENERATES--> Shipment(∑=90)</td><td class="mono">SHIPPED → FULLY_SHIPPED</td>
+              <td>完成条件不成立，拒绝迁移</td><td><span class="tag cq">CQ-07</span></td>
+              <td>∑发货 = 订单数量才可 FULLY（防虚假完成）</td></tr>
+            <tr class="bad"><td class="mono">EP-22-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>FULLY_SHIPPED 后再创建新发货单（超发）</td>
+              <td class="mono">Order --GENERATES--> Shipment（追加）</td><td class="mono">FULLY_SHIPPED → SHIP_ASSIGNING</td>
+              <td>FSM 拒绝追加发货</td><td><span class="tag cq">CQ-07</span></td>
+              <td>全部发货后不可再发（超出守恒上界）</td></tr>
+            <tr class="bad"><td class="mono">EP-22-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>FULLY_SHIPPED 状态重复确认发货完成</td>
+              <td class="mono">Event(GoodsShipped) 重复</td><td class="mono">FULLY_SHIPPED（重复）</td>
+              <td>幂等拒绝，状态不变</td><td><span class="tag cq">CQ-11</span></td>
+              <td>发货确认幂等（防重复扣库存）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-23" data-ep="EP-23">
+    <summary>
+      <span class="epno">EP-23</span>
+      <span class="eptitle">发货守恒</span>
+      <span class="epmeta">来源：docs/01-core-graph.html §1.2 constraints + CQ-07</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>StockPrepare --FULFILLS--> Shipment</code>（∑发货 ≤ ∑备货）；<code>Order --GENERATES--> Shipment</code></dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd>SHP 段全状态（每次发货/分配均校验）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：StockPrepare、Shipment；边：FULFILLS（守恒上界）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-23 · 发货守恒（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-23-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>备货 100，分批发货 40+60 累计 ≤ 100</td>
+              <td class="mono">StockPrepare --FULFILLS--> Shipment(40/60)</td><td class="mono">SHP 段分批</td>
+              <td>每批通过守恒校验</td><td><span class="tag cq">CQ-07</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-23-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>全部发货 ⇔ ∑发货 = 订单数量 成立</td>
+              <td class="mono">Order --GENERATES--> Shipment(∑=100)</td><td class="mono">SHIPPED → FULLY_SHIPPED</td>
+              <td>完成条件判定通过</td><td><span class="tag cq">CQ-07</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-23-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>多批发货聚合对账一致（SQL 聚合）</td>
+              <td class="mono">repo/consistency.go</td><td class="mono">SHP 段终态</td>
+              <td>聚合结果 = 守恒断言结果</td><td><span class="tag cq">CQ-07</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-23-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>发货 110 件超过备货 100 件</td>
+              <td class="mono">StockPrepare --FULFILLS--> Shipment(110)</td><td class="mono">WAREHOUSE_SHIPPING → SHIPPED</td>
+              <td>守恒断言拒绝（超发）</td><td><span class="tag cq">CQ-07</span></td>
+              <td>∑发货 ≤ ∑备货（超发违约）</td></tr>
+            <tr class="bad"><td class="mono">EP-23-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>并发两批发货合计超量</td>
+              <td class="mono">Shipment×2（并发）</td><td class="mono">SHP 段并发</td>
+              <td>行锁拦截，至少一批拒绝</td><td><span class="tag cq">CQ-14</span></td>
+              <td>并发守恒靠行锁（防线 2，L1-03）</td></tr>
+            <tr class="bad"><td class="mono">EP-23-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>发货量为负值</td>
+              <td class="mono">Shipment(shipped_qty=-5)</td><td class="mono">WAREHOUSE_SHIPPING → SHIPPED</td>
+              <td>值对象拒绝负值</td><td><span class="tag cq">CQ-07</span></td>
+              <td>数量值对象规范（L0-06）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-24" data-ep="EP-24">
+    <summary>
+      <span class="epno">EP-24</span>
+      <span class="eptitle">库存守恒（非负 + 同事务）</span>
+      <span class="epmeta">来源：docs/01-core-graph.html §1.2 constraints + CQ-08</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>Warehouse --STORES--> Product</code>（库存 = 初始 + 入 - 出，恒 ≥ 0）</dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd>WAREHOUSE_SHIPPING → SHIPPED（出库同事务）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：Warehouse、Product；边：STORES（数量守恒载体）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-24 · 库存守恒（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-24-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>库存 100 出库 40，剩余 60 ≥ 0</td>
+              <td class="mono">Warehouse --STORES--> Product(60)</td><td class="mono">WAREHOUSE_SHIPPING → SHIPPED</td>
+              <td>扣减后库存非负，守恒成立</td><td><span class="tag cq">CQ-08</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-24-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>入库操作（转仓/采购）正向增加库存</td>
+              <td class="mono">Warehouse --STORES--> Product(+40)</td><td class="mono">TRANSFER_REQUESTED → 入库</td>
+              <td>库存 = 初始 + 入 - 出 守恒</td><td><span class="tag cq">CQ-08</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-24-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>发货扣库存与发货状态更新同事务提交</td>
+              <td class="mono">Warehouse --STORES--> Product + Shipment</td><td class="mono">WAREHOUSE_SHIPPING → SHIPPED</td>
+              <td>两写原子提交（防线 4）</td><td><span class="tag cq">CQ-08</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-24-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>库存 20 出库 40 → 库存为负</td>
+              <td class="mono">Warehouse --STORES--> Product(-20)</td><td class="mono">WAREHOUSE_SHIPPING → SHIPPED</td>
+              <td>CHECK 约束拒绝，事务回滚</td><td><span class="tag cq">CQ-08</span></td>
+              <td>库存恒 ≥ 0（L1-01 CHECK 约束）</td></tr>
+            <tr class="bad"><td class="mono">EP-24-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>未实际发货先扣库存（预扣）</td>
+              <td class="mono">Warehouse --STORES--> Product(-40)</td><td class="mono">SHIP_ASSIGNING（未发货）</td>
+              <td>拒绝：扣减必须与发货同事务</td><td><span class="tag cq">CQ-08</span></td>
+              <td>库存变化只能随业务事件（同事务纪律）</td></tr>
+            <tr class="bad"><td class="mono">EP-24-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>并发两单各扣 30，库存 50 → 竞态超卖</td>
+              <td class="mono">Warehouse --STORES--> Product（并发）</td><td class="mono">WAREHOUSE_SHIPPING（并发）</td>
+              <td>行锁串行化，后到者库存不足拒绝</td><td><span class="tag cq">CQ-14</span></td>
+              <td>并发扣减必须行锁（L1-03）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-25" data-ep="EP-25">
+    <summary>
+      <span class="epno">EP-25</span>
+      <span class="eptitle">少发退回备货层</span>
+      <span class="epmeta">来源：docs/01-core-graph.html §2.4</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>StockPrepare.remaining_qty 回补</code>；<code>Order --GENERATES--> Shipment</code>（退回重分配）</dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd><code>WAREHOUSE_SHIPPING → SHIP_ASSIGNING</code>（仓管退回，少发回退备货层）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：StockPrepare、Shipment；边：FULFILLS（退回释放）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-25 · 少发退回备货（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-25-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>仓管少发（计划 40 实发 20），退回备货层重分配</td>
+              <td class="mono">StockPrepare(remaining_qty 回补 20)</td><td class="mono">WAREHOUSE_SHIPPING → SHIP_ASSIGNING</td>
+              <td>退回成功，剩余量重新分配</td><td><span class="tag cq">CQ-07</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-25-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>退回后按剩余量创建新的发货分配</td>
+              <td class="mono">StockPrepare --FULFILLS--> Shipment(新)</td><td class="mono">SHIP_ASSIGNING</td>
+              <td>新发货单不超过剩余量</td><td><span class="tag cq">CQ-07</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-25-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>退回事件记录少发原因与数量</td>
+              <td class="mono">Event(退回, reason, qty)</td><td class="mono">SHIP_ASSIGNING</td>
+              <td>事件链完整可审计</td><td><span class="tag cq">CQ-12</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-25-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>退回后重分配数量超过原备货确认量</td>
+              <td class="mono">StockPrepare --FULFILLS--> Shipment(超量)</td><td class="mono">SHIP_ASSIGNING</td>
+              <td>守恒校验拒绝</td><td><span class="tag cq">CQ-07</span></td>
+              <td>退回只释放已退回量，不放大守恒上界</td></tr>
+            <tr class="bad"><td class="mono">EP-25-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>少发退回但不更新 remaining_qty（数据不一致）</td>
+              <td class="mono">StockPrepare(remaining_qty 未回补)</td><td class="mono">WAREHOUSE_SHIPPING → SHIP_ASSIGNING</td>
+              <td>对账校验拒绝</td><td><span class="tag cq">CQ-06</span></td>
+              <td>退回必须同步守恒池，否则对账失败（L3-02）</td></tr>
+            <tr class="bad"><td class="mono">EP-25-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>少发退回后直接标记全部发货</td>
+              <td class="mono">Order(state 判定)</td><td class="mono">SHIP_ASSIGNING → FULLY_SHIPPED</td>
+              <td>完成条件不成立，拒绝</td><td><span class="tag cq">CQ-07</span></td>
+              <td>少发未补足则 ∑发货 ≠ 订单量，不可 FULLY</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-26" data-ep="EP-26">
+    <summary>
+      <span class="epno">EP-26</span>
+      <span class="eptitle">发货单只发一次</span>
+      <span class="epmeta">来源：docs/01-core-graph.html §2.4 发货单纪律</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>Shipment.state: OPEN → SHIPPED → CLOSED</code>（实体级状态机）</dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd>SHP 段：一张发货单只对应一次实际发货</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：Shipment(state)、Event(GoodsShipped)；边：PRODUCES（一次发货事件）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-26 · 发货单只发一次（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-26-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>发货单 OPEN → SHIPPED → CLOSED 正常流转</td>
+              <td class="mono">Shipment(state: OPEN→SHIPPED→CLOSED)</td><td class="mono">WAREHOUSE_SHIPPING → SHIPPED</td>
+              <td>发货完成，单据关闭</td><td><span class="tag cq">CQ-07</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-26-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>CLOSED 后系统不自动创建下一张发货单</td>
+              <td class="mono">Shipment(state=CLOSED)</td><td class="mono">SHIP_ASSIGNING（不触发）</td>
+              <td>等待人工/计划触发下一批</td><td><span class="tag cq">CQ-07</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-26-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>一张发货单对应一次 GoodsShipped 事件</td>
+              <td class="mono">Shipment --PRODUCES--> Event(GoodsShipped)</td><td class="mono">SHIPPED</td>
+              <td>事件与发货 1:1，可回放</td><td><span class="tag cq">CQ-12</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-26-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>CLOSED 发货单再次执行发货</td>
+              <td class="mono">Shipment(state=CLOSED)</td><td class="mono">CLOSED → SHIPPED（反向）</td>
+              <td>拒绝：单据已关闭</td><td><span class="tag cq">CQ-07</span></td>
+              <td>发货单只发一次纪律（关闭后不再发）</td></tr>
+            <tr class="bad"><td class="mono">EP-26-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>发货单 OPEN 直接跳 CLOSED（未实际发货）</td>
+              <td class="mono">Shipment(state: OPEN→CLOSED)</td><td class="mono">OPEN → CLOSED（跳过 SHIPPED）</td>
+              <td>FSM 非法迁移被拒</td><td><span class="tag cq">CQ-07</span></td>
+              <td>单据状态必须经过 SHIPPED 才能关闭</td></tr>
+            <tr class="bad"><td class="mono">EP-26-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>同一发货单两次发货确认（重复扣库存）</td>
+              <td class="mono">Shipment --PRODUCES--> Event×2</td><td class="mono">SHIPPED（重复）</td>
+              <td>幂等拒绝，第二次不生效</td><td><span class="tag cq">CQ-11</span></td>
+              <td>发货幂等防重复扣减（L0-08 幂等键）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <h2 class="sec" id="inv">6 · INV 段 · 开票回单审批 <small>EP-27 .. EP-36</small></h2>
+
+  <section class="ep" id="ep-27" data-ep="EP-27">
+    <summary>
+      <span class="epno">EP-27</span>
+      <span class="eptitle">回单四分流 ①：款到发货直接进入</span>
+      <span class="epmeta">来源：docs/01-core-graph.html §2.5</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>Order --GENERATES_INV--> Invoice</code>（订单产生开票）；<code>OrderItem.payment_term</code></dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd><code>READY_FOR_INVOICE → INVOICE_APPLYING</code>（分流①：款到发货直接进入）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：Order、Invoice；边：GENERATES_INV（开票派生）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-27 · 分流①款到发货（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-27-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>款到发货订单进入开票段后直接进入开票申请</td>
+              <td class="mono">Order(payment_term=款到) --GENERATES_INV--> Invoice</td><td class="mono">READY_FOR_INVOICE → INVOICE_APPLYING</td>
+              <td>无需等回单，直接申请开票</td><td><span class="tag cq">CQ-10</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-27-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>合同完成即可申请开票（申请早，核验严）</td>
+              <td class="mono">Order --GENERATES_INV--> Invoice(申请)</td><td class="mono">READY_FOR_INVOICE → INVOICE_APPLYING</td>
+              <td>入口放行，实际开票时按有效发货核验</td><td><span class="tag cq">CQ-09</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-27-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>开票申请创建 Invoice 记录（PENDING）</td>
+              <td class="mono">Invoice(state=PENDING)</td><td class="mono">INVOICE_APPLYING</td>
+              <td>Invoice 实体建立，等待提交</td><td><span class="tag cq">CQ-04</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-27-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>款到订单仍被回单状态卡住（等回单才能开票）</td>
+              <td class="mono">Invoice(等待 Evidence)</td><td class="mono">READY_FOR_INVOICE（滞留）</td>
+              <td>分流判定纠正：款到直接进入申请</td><td><span class="tag cq">CQ-10</span></td>
+              <td>回单不卡开票（业务原则 ②）</td></tr>
+            <tr class="bad"><td class="mono">EP-27-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>订单尚未进入 INV 段（FULLY_SHIPPED 前）提前开票申请</td>
+              <td class="mono">Order --GENERATES_INV--> Invoice</td><td class="mono">SHIPPED → INVOICE_APPLYING（越段）</td>
+              <td>FSM 拒绝：必须先进入开票段</td><td><span class="tag cq">CQ-04</span></td>
+              <td>流程顺序强制：发货段结束才进开票段</td></tr>
+            <tr class="bad"><td class="mono">EP-27-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>仓管（无开票权限）提交开票申请</td>
+              <td class="mono">User(role=WAREHOUSE)</td><td class="mono">INVOICE_APPLYING</td>
+              <td>授权拒绝 403</td><td><span class="tag cq">CQ-01</span></td>
+              <td>开票动作是财务/商务权限，仓管不可见金额更不可开票</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-28" data-ep="EP-28">
+    <summary>
+      <span class="epno">EP-28</span>
+      <span class="eptitle">回单四分流 ②：有回单直接进入</span>
+      <span class="epmeta">来源：docs/01-core-graph.html §2.5</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>User --UPLOADS--> Evidence</code>（回单凭证）；<code>Order --GENERATES_INV--> Invoice</code></dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd><code>READY_FOR_INVOICE → INVOICE_APPLYING</code>（分流②：有回单）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：Evidence、Invoice；边：GENERATES_INV（回单放行开票）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-28 · 分流②有回单（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-28-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>客户签收回单已上传，订单直接进入开票申请</td>
+              <td class="mono">Evidence --(回单齐)--> Invoice</td><td class="mono">READY_FOR_INVOICE → INVOICE_APPLYING</td>
+              <td>回单齐全放行开票</td><td><span class="tag cq">CQ-10</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-28-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>按发货批次汇总回单，全部回单齐 → 直接进入</td>
+              <td class="mono">Shipment --PRODUCES--> Evidence(汇总)</td><td class="mono">READY_FOR_INVOICE → INVOICE_APPLYING</td>
+              <td>回单状态 CQ-10 汇总正确</td><td><span class="tag cq">CQ-10</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-28-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>部分回单未齐时进入例外或等待路径</td>
+              <td class="mono">Evidence(部分)</td><td class="mono">READY_FOR_INVOICE（等待/例外）</td>
+              <td>不进入②，走③④分流判定</td><td><span class="tag cq">CQ-10</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-28-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>回单未上传但系统误判「有回单」进入开票</td>
+              <td class="mono">Evidence（缺失）</td><td class="mono">READY_FOR_INVOICE → INVOICE_APPLYING</td>
+              <td>回单校验拒绝：无凭证不可走②</td><td><span class="tag cq">CQ-10</span></td>
+              <td>回单状态必须按实际凭证汇总（防伪造）</td></tr>
+            <tr class="bad"><td class="mono">EP-28-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>有回单订单被错误走例外审核路径</td>
+              <td class="mono">Evidence（齐全）</td><td class="mono">READY_FOR_INVOICE → RECEIPT_EXCEPTION_REVIEWING</td>
+              <td>分流判定纠正为②</td><td><span class="tag cq">CQ-10</span></td>
+              <td>有回单即直进，例外仅限无回单场景</td></tr>
+            <tr class="bad"><td class="mono">EP-28-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>回单凭证状态被篡改为「已回」（证据链破坏）</td>
+              <td class="mono">Evidence(state 被改)</td><td class="mono">READY_FOR_INVOICE → INVOICE_APPLYING</td>
+              <td>审计校验拒绝，凭证只追加不可改</td><td><span class="tag cq">CQ-15</span></td>
+              <td>凭证只追加不覆盖，状态由版本推导</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-29" data-ep="EP-29">
+    <summary>
+      <span class="epno">EP-29</span>
+      <span class="eptitle">回单四分流 ③：无回单超 5 天（Timer）</span>
+      <span class="epmeta">来源：docs/01-core-graph.html §2.5 + §1.2 ReceiptException</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>Order --PRODUCES--> Event(ReceiptException)</code>（Timer 触发）；<code>Evidence</code>（无回单）</dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd><code>READY_FOR_INVOICE → RECEIPT_EXCEPTION_REVIEWING</code>（超 5 天自动进入）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：Order、Event；边：PRODUCES（超时例外事件）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-29 · 分流③无回单超 5 天（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-29-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>无回单超 5 天，Timer 自动触发例外审核</td>
+              <td class="mono">Order --PRODUCES--> Event(ReceiptException)</td><td class="mono">READY_FOR_INVOICE → RECEIPT_EXCEPTION_REVIEWING</td>
+              <td>自动进入例外审核，不阻断开票</td><td><span class="tag cq">CQ-10</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-29-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>例外审核通过后进入开票申请</td>
+              <td class="mono">Event(ReceiptException:APPROVED)</td><td class="mono">RECEIPT_EXCEPTION_REVIEWING → INVOICE_APPLYING</td>
+              <td>放行开票，回单后续补</td><td><span class="tag cq">CQ-10</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-29-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>例外审核拒绝 → 待补回单</td>
+              <td class="mono">Event(ReceiptException:REJECTED)</td><td class="mono">RECEIPT_EXCEPTION_REVIEWING → WAITING_RECEIPT</td>
+              <td>进入待回单状态，补后放行</td><td><span class="tag cq">CQ-10</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-29-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>未满 5 天 Timer 提前触发例外</td>
+              <td class="mono">Event(ReceiptException) 提前</td><td class="mono">READY_FOR_INVOICE → RECEIPT_EXCEPTION_REVIEWING</td>
+              <td>时间条件校验拒绝（未到 5 天）</td><td><span class="tag cq">CQ-10</span></td>
+              <td>Timer 必须精确 5 天（L2-11 场景）</td></tr>
+            <tr class="bad"><td class="mono">EP-29-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>例外审核通过但绕过开票守恒（超量开票）</td>
+              <td class="mono">Invoice(qty 超限)</td><td class="mono">RECEIPT_EXCEPTION_REVIEWING → INVOICED</td>
+              <td>守恒校验在 INVOICING→INVOICED 拦截</td><td><span class="tag cq">CQ-09</span></td>
+              <td>例外只豁免回单，不豁免开票守恒</td></tr>
+            <tr class="bad"><td class="mono">EP-29-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>Timer 触发事件不落链（无审计痕迹）</td>
+              <td class="mono">Event(ReceiptException) 缺失</td><td class="mono">RECEIPT_EXCEPTION_REVIEWING</td>
+              <td>审计校验拒绝：事件必须 append-only</td><td><span class="tag cq">CQ-12</span></td>
+              <td>异常触发也要可回溯（防线 6）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-30" data-ep="EP-30">
+    <summary>
+      <span class="epno">EP-30</span>
+      <span class="eptitle">回单四分流 ④：5 天内提前申请</span>
+      <span class="epmeta">来源：docs/01-core-graph.html §2.5</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>User --REQUESTS--> Shipment</code>（提交人）；<code>Order --PRODUCES--> Event(ReceiptException)</code></dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd><code>READY_FOR_INVOICE → RECEIPT_EXCEPTION_REVIEWING</code>（分流④：提交人提前申请）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：User、Shipment；边：REQUESTS（提前申请权）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-30 · 分流④提前申请（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-30-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>5 天内提交人提前申请例外开票</td>
+              <td class="mono">User --REQUESTS--> Shipment</td><td class="mono">READY_FOR_INVOICE → RECEIPT_EXCEPTION_REVIEWING</td>
+              <td>进入例外审核，等待审批</td><td><span class="tag cq">CQ-10</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-30-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>提交人申请携带 shipment_ids 与原因</td>
+              <td class="mono">Event(ReceiptException, shipment_ids)</td><td class="mono">RECEIPT_EXCEPTION_REVIEWING</td>
+              <td>申请信息完整进入审核队列</td><td><span class="tag cq">CQ-12</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-30-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>提前申请通过后正常开票</td>
+              <td class="mono">Invoice(state=PENDING)</td><td class="mono">RECEIPT_EXCEPTION_REVIEWING → INVOICE_APPLYING</td>
+              <td>放行开票流程</td><td><span class="tag cq">CQ-10</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-30-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>非提交人（无 REQUESTS 关系）发起提前申请</td>
+              <td class="mono">User --REQUESTS-- Shipment（无关系）</td><td class="mono">READY_FOR_INVOICE → RECEIPT_EXCEPTION_REVIEWING</td>
+              <td>授权拒绝 403</td><td><span class="tag cq">CQ-01</span></td>
+              <td>提前申请权绑定提交人（场景 B requester）</td></tr>
+            <tr class="bad"><td class="mono">EP-30-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>已超 5 天（Timer 已触发）仍走「提前申请」分流</td>
+              <td class="mono">Event(ReceiptException) 已存在</td><td class="mono">READY_FOR_INVOICE → RECEIPT_EXCEPTION_REVIEWING</td>
+              <td>去重：返回既有例外单</td><td><span class="tag cq">CQ-10</span></td>
+              <td>同一订单不可重复进入例外（幂等）</td></tr>
+            <tr class="bad"><td class="mono">EP-30-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>提前申请不填原因被受理</td>
+              <td class="mono">Event(ReceiptException, reason=NULL)</td><td class="mono">RECEIPT_EXCEPTION_REVIEWING</td>
+              <td>校验拒绝：必须说明原因</td><td><span class="tag cq">CQ-12</span></td>
+              <td>例外申请需可审计（何因）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-31" data-ep="EP-31">
+    <summary>
+      <span class="epno">EP-31</span>
+      <span class="eptitle">回单例外审核通过</span>
+      <span class="epmeta">来源：docs/01-core-graph.html §2.5</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>ApprovalTask(RECEIPT_EXCEPTION)</code>；<code>Order --PRODUCES--> Event</code>（审核结果）</dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd><code>RECEIPT_EXCEPTION_REVIEWING → INVOICE_APPLYING / WAITING_RECEIPT</code></dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：ApprovalTask、Event；边：Order --PRODUCES--（审核事件）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-31 · 例外审核通过（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-31-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>审核人批准例外申请，进入开票申请</td>
+              <td class="mono">ApprovalTask --PRODUCES--> Event(APPROVED)</td><td class="mono">RECEIPT_EXCEPTION_REVIEWING → INVOICE_APPLYING</td>
+              <td>放行开票流程</td><td><span class="tag cq">CQ-10</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-31-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>审核拒绝 → 待补回单状态</td>
+              <td class="mono">Event(ReceiptException:REJECTED)</td><td class="mono">RECEIPT_EXCEPTION_REVIEWING → WAITING_RECEIPT</td>
+              <td>等待客户补回单</td><td><span class="tag cq">CQ-10</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-31-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>补回单后从 WAITING_RECEIPT 进入开票</td>
+              <td class="mono">Evidence --UPLOADS--> User</td><td class="mono">WAITING_RECEIPT → INVOICE_APPLYING</td>
+              <td>凭证补齐后放行</td><td><span class="tag cq">CQ-10</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-31-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>例外通过后仍强制要求回单才开票</td>
+              <td class="mono">Invoice(等待回单)</td><td class="mono">INVOICE_APPLYING（滞留）</td>
+              <td>逻辑纠正：例外通过即放行</td><td><span class="tag cq">CQ-10</span></td>
+              <td>回单不卡开票（例外通过=已豁免回单）</td></tr>
+            <tr class="bad"><td class="mono">EP-31-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>非指定审核角色审批例外申请</td>
+              <td class="mono">User(role=WAREHOUSE)</td><td class="mono">RECEIPT_EXCEPTION_REVIEWING</td>
+              <td>授权拒绝 403</td><td><span class="tag cq">CQ-01</span></td>
+              <td>例外审核是财务/管理层动作</td></tr>
+            <tr class="bad"><td class="mono">EP-31-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>例外通过后开票量超过可开票余额</td>
+              <td class="mono">Invoice(amount 超限)</td><td class="mono">INVOICE_APPLYING → INVOICING</td>
+              <td>守恒校验在开票事务拦截</td><td><span class="tag cq">CQ-09</span></td>
+              <td>例外豁免回单而非守恒（防线 5）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-32" data-ep="EP-32">
+    <summary>
+      <span class="epno">EP-32</span>
+      <span class="eptitle">开票申请提交</span>
+      <span class="epmeta">来源：docs/01-core-graph.html §2.5 InvoiceApplied</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>Order --GENERATES_INV--> Invoice</code>（开票申请）；<code>Event(InvoiceApplied)</code></dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd><code>INVOICE_APPLYING → INVOICING</code>（提交开票申请→推送财务）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：Order、Invoice；边：GENERATES_INV（开票派生）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-32 · 开票申请提交（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-32-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>提交开票申请并推送财务</td>
+              <td class="mono">Order --GENERATES_INV--> Invoice</td><td class="mono">INVOICE_APPLYING → INVOICING</td>
+              <td>财务待办生成，进入开票处理</td><td><span class="tag cq">CQ-09</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-32-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>开票申请量 ≤ 可开票量（预检通过）</td>
+              <td class="mono">Invoice(qty ≤ available_invoice_qty)</td><td class="mono">INVOICE_APPLYING → INVOICING</td>
+              <td>预检放行，待开票核验</td><td><span class="tag cq">CQ-09</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-32-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>开票申请幂等键重复提交</td>
+              <td class="mono">Invoice(idempotency_key UK)</td><td class="mono">INVOICE_APPLYING → INVOICING</td>
+              <td>返回既有申请，不重复推送</td><td><span class="tag cq">CQ-11</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-32-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>开票数量 120 件但可开票量仅 100 件</td>
+              <td class="mono">Invoice(qty=120 &gt; available=100)</td><td class="mono">INVOICE_APPLYING → INVOICING</td>
+              <td>守恒预检拒绝</td><td><span class="tag cq">CQ-09</span></td>
+              <td>开票不超发货（available 随发货更新）</td></tr>
+            <tr class="bad"><td class="mono">EP-32-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>订单尚未进入开票段直接提交开票申请</td>
+              <td class="mono">Order --GENERATES_INV--> Invoice</td><td class="mono">FULLY_SHIPPED → INVOICING（越段）</td>
+              <td>FSM 拒绝</td><td><span class="tag cq">CQ-04</span></td>
+              <td>开票申请仅在 INV 段内合法</td></tr>
+            <tr class="bad"><td class="mono">EP-32-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>无开票权限角色提交申请</td>
+              <td class="mono">User(role=WAREHOUSE)</td><td class="mono">INVOICE_APPLYING → INVOICING</td>
+              <td>授权拒绝 403</td><td><span class="tag cq">CQ-01</span></td>
+              <td>开票申请是商务/财务动作</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-33" data-ep="EP-33">
+    <summary>
+      <span class="epno">EP-33</span>
+      <span class="eptitle">开票完成（双维守恒核验）</span>
+      <span class="epmeta">来源：docs/01-core-graph.html §2.5 + CQ-09</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>Invoice --CONTAINS--> InvoiceItem</code>；<code>Event(InvoiceIssued, tax_no)</code>；available_invoice_amount/qty</dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd><code>INVOICING → INVOICED</code>（财务确认开票完成，守恒校验）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：Invoice、InvoiceItem；边：CONTAINS（金额+数量双维守恒）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-33 · 开票完成（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-33-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>财务确认开票完成，金额与数量双维守恒通过</td>
+              <td class="mono">Invoice --CONTAINS--> InvoiceItem(amount/qty)</td><td class="mono">INVOICING → INVOICED</td>
+              <td>开票成功，tax_no 落库</td><td><span class="tag cq">CQ-09</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-33-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>可开票余额随发货推进更新后开票</td>
+              <td class="mono">Invoice(available_invoice_qty 更新)</td><td class="mono">INVOICING → INVOICED</td>
+              <td>余额扣减，双维守恒成立</td><td><span class="tag cq">CQ-09</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-33-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>按有效发货合并开票（多批合并一张发票）</td>
+              <td class="mono">Shipment --(有效发货)--> Invoice</td><td class="mono">INVOICING → INVOICED</td>
+              <td>合并开票守恒仍成立</td><td><span class="tag cq">CQ-09</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-33-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>开票金额超可开票金额</td>
+              <td class="mono">Invoice(amount &gt; available_amount)</td><td class="mono">INVOICING → INVOICED</td>
+              <td>金额维守恒拒绝，事务回滚</td><td><span class="tag cq">CQ-09</span></td>
+              <td>金额+数量双维任超即拒（L1-05）</td></tr>
+            <tr class="bad"><td class="mono">EP-33-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>开票数量超有效发货数量</td>
+              <td class="mono">Invoice(qty &gt; 有效发货 qty)</td><td class="mono">INVOICING → INVOICED</td>
+              <td>数量维守恒拒绝</td><td><span class="tag cq">CQ-09</span></td>
+              <td>开票不超发货（按有效发货核验）</td></tr>
+            <tr class="bad"><td class="mono">EP-33-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>开票完成但 available 余额未扣减（数据不一致）</td>
+              <td class="mono">Invoice(available 未更新)</td><td class="mono">INVOICING → INVOICED</td>
+              <td>对账校验拒绝（L3-02）</td><td><span class="tag cq">CQ-09</span></td>
+              <td>守恒基准单事务更新（防线 4/5）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-34" data-ep="EP-34">
+    <summary>
+      <span class="epno">EP-34</span>
+      <span class="eptitle">开票失败重试</span>
+      <span class="epmeta">来源：docs/01-core-graph.html §2.5 INVOICE_FAILED</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>Invoice(state=FAILED)</code>；<code>Event(InvoiceIssued:FAILED)</code>；补偿逻辑</dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd><code>INVOICING → INVOICE_FAILED → INVOICING</code>（可重试）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：Invoice、Event；边：PRODUCES（失败事件）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-34 · 开票失败重试（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-34-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>税控接口异常导致开票失败 → INVOICE_FAILED</td>
+              <td class="mono">Invoice(state=FAILED)</td><td class="mono">INVOICING → INVOICE_FAILED</td>
+              <td>失败状态记录，可重试</td><td><span class="tag cq">CQ-09</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-34-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>网络恢复后重试开票成功</td>
+              <td class="mono">Invoice(state=FAILED)</td><td class="mono">INVOICE_FAILED → INVOICING → INVOICED</td>
+              <td>重试成功，守恒复检通过</td><td><span class="tag cq">CQ-09</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-34-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>无需开票的业务判定 → NO_INVOICE_NEEDED</td>
+              <td class="mono">Invoice(state=NONE)</td><td class="mono">INVOICING → NO_INVOICE_NEEDED</td>
+              <td>直接进入回款跟踪</td><td><span class="tag cq">CQ-04</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-34-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>开票失败原因不记录</td>
+              <td class="mono">Event(FAILED, reason=NULL)</td><td class="mono">INVOICING → INVOICE_FAILED</td>
+              <td>校验拒绝：失败必须留因</td><td><span class="tag cq">CQ-12</span></td>
+              <td>失败审计是补偿与追责的根基</td></tr>
+            <tr class="bad"><td class="mono">EP-34-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>重试超过上限仍无限重试</td>
+              <td class="mono">Invoice(重试计数)</td><td class="mono">INVOICE_FAILED → INVOICING</td>
+              <td>达到上限进入补偿流程（FlowFailed）</td><td><span class="tag cq">CQ-14</span></td>
+              <td>Activity 重试上限 + 全局超时（停止规则）</td></tr>
+            <tr class="bad"><td class="mono">EP-34-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>重试时绕过开票守恒（直接 INVOICED）</td>
+              <td class="mono">Invoice(守恒未检)</td><td class="mono">INVOICE_FAILED → INVOICED</td>
+              <td>FSM 拒绝：重试必经 INVOICING 复检</td><td><span class="tag cq">CQ-09</span></td>
+              <td>重试不是豁免校验的通道</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-35" data-ep="EP-35">
+    <summary>
+      <span class="epno">EP-35</span>
+      <span class="eptitle">回款跟踪</span>
+      <span class="epmeta">来源：docs/01-core-graph.html §2.5 PaymentTracked</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>Order --PRODUCES--> Event(PaymentTracked)</code>（回款登记）</dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd><code>INVOICED / NO_INVOICE_NEEDED → PAYMENT_TRACKING</code></dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：Order、Event；边：PRODUCES（回款事件）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-35 · 回款跟踪（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-35-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>开票完成后进入回款跟踪</td>
+              <td class="mono">Order --PRODUCES--> Event(PaymentTracked)</td><td class="mono">INVOICED → PAYMENT_TRACKING</td>
+              <td>回款登记流程开启</td><td><span class="tag cq">CQ-04</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-35-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>无需开票订单直接进入回款跟踪</td>
+              <td class="mono">Invoice(state=NONE)</td><td class="mono">NO_INVOICE_NEEDED → PAYMENT_TRACKING</td>
+              <td>跳过开票环节直进跟踪</td><td><span class="tag cq">CQ-04</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-35-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>回款金额与发票金额核对一致</td>
+              <td class="mono">Invoice(amount) vs PaymentTracked(amount)</td><td class="mono">PAYMENT_TRACKING</td>
+              <td>登记成功，进入归档</td><td><span class="tag cq">CQ-09</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-35-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>回款金额超过发票应收金额</td>
+              <td class="mono">PaymentTracked(amount &gt; invoice)</td><td class="mono">PAYMENT_TRACKING</td>
+              <td>校验拒绝，要求核对</td><td><span class="tag cq">CQ-09</span></td>
+              <td>回款登记超应收=数据异常</td></tr>
+            <tr class="bad"><td class="mono">EP-35-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>未开票（INVOICING 中）直接回款登记</td>
+              <td class="mono">Invoice(state=PROCESSING)</td><td class="mono">INVOICING → PAYMENT_TRACKING（越段）</td>
+              <td>FSM 拒绝</td><td><span class="tag cq">CQ-04</span></td>
+              <td>回款跟踪在开票完成之后</td></tr>
+            <tr class="bad"><td class="mono">EP-35-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>非财务角色登记回款</td>
+              <td class="mono">User(role=SALES)</td><td class="mono">PAYMENT_TRACKING</td>
+              <td>授权拒绝 403</td><td><span class="tag cq">CQ-01</span></td>
+              <td>回款登记是财务动作</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-36" data-ep="EP-36">
+    <summary>
+      <span class="epno">EP-36</span>
+      <span class="eptitle">订单关闭（终态）</span>
+      <span class="epmeta">来源：docs/01-core-graph.html §2.5 OrderClosed</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>Order --PRODUCES--> Event(OrderClosed)</code>；<code>Order(state=CLOSED)</code> 只读终态</dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd><code>CONTRACT_ARCHIVED → CLOSED</code>（合同归档完成 → 订单关闭）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：Order、Event；边：PRODUCES（关闭事件）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-36 · 订单关闭（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-36-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>合同归档完成后关闭订单</td>
+              <td class="mono">Order --PRODUCES--> Event(OrderClosed)</td><td class="mono">CONTRACT_ARCHIVED → CLOSED</td>
+              <td>订单 CLOSED，全链完成</td><td><span class="tag cq">CQ-04</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-36-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>关闭后订单只读，可查询不可改</td>
+              <td class="mono">Order(state=CLOSED)</td><td class="mono">CLOSED（只读）</td>
+              <td>只读保护生效</td><td><span class="tag cq">CQ-12</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-36-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>关闭事件带归档引用（合同档案位置）</td>
+              <td class="mono">Event(OrderClosed, archive_ref)</td><td class="mono">CLOSED</td>
+              <td>事件链完整，档案可追溯</td><td><span class="tag cq">CQ-12</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-36-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>合同未归档直接关闭订单</td>
+              <td class="mono">Event(OrderClosed) 缺归档</td><td class="mono">PAYMENT_TRACKING → CLOSED（跳过归档）</td>
+              <td>FSM 拒绝：必经 CONTRACT_ARCHIVED</td><td><span class="tag cq">CQ-04</span></td>
+              <td>归档是关闭的前置条件（合同资料完整）</td></tr>
+            <tr class="bad"><td class="mono">EP-36-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>仍有未完成发货/开票的订单被关闭</td>
+              <td class="mono">Shipment/Invoice 未终态</td><td class="mono">PARTIAL_SHIPPED → CLOSED</td>
+              <td>完整性校验拒绝</td><td><span class="tag cq">CQ-07</span></td>
+              <td>关闭要求全链完成（订单提交≠已履约）</td></tr>
+            <tr class="bad"><td class="mono">EP-36-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>CLOSED 后修改订单内容</td>
+              <td class="mono">Order(payload 变更)</td><td class="mono">CLOSED → MODIFYING（反向）</td>
+              <td>拒绝：终态只读</td><td><span class="tag cq">CQ-04</span></td>
+              <td>CLOSED 无出口迁移（事件链终态）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <h2 class="sec" id="rebac">7 · ReBAC 授权场景 <small>EP-37 .. EP-44</small></h2>
+
+  <section class="ep" id="ep-37" data-ep="EP-37">
+    <summary>
+      <span class="epno">EP-37</span>
+      <span class="eptitle">场景 A · 商务开备货单（order#create_prestock）</span>
+      <span class="epmeta">来源：docs/CHANGELOG-rebac-cases.html §2</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>Customer --OWNS(account_owner)--> User</code>；<code>Order#create_prestock via customer-&gt;account_owner</code></dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd><code>READY_FOR_STOCK → STOCK_REVIEWING</code>（创建备货单入口）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：User、Customer；边：OWNS（account_owner 关系）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-37 · 场景 A 商务开备货单（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-37-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>account_owner 商务对归属客户订单创建备货单</td>
+              <td class="mono">Customer --OWNS(account_owner)--> User</td><td class="mono">READY_FOR_STOCK → STOCK_REVIEWING</td>
+              <td>create_prestock 权限满足，备货单创建</td><td><span class="tag cq">CQ-01</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-37-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>订单创建人（REQUESTS 关系）同样可开备货单</td>
+              <td class="mono">User --(订单创建人)--> Order</td><td class="mono">READY_FOR_STOCK → STOCK_REVIEWING</td>
+              <td>创建人权限放行</td><td><span class="tag cq">CQ-01</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-37-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>授权关系变更（换 account_owner）后新 owner 可开</td>
+              <td class="mono">Customer --OWNS--> User(新)</td><td class="mono">STOCK_REVIEWING</td>
+              <td>新 owner 立即获得权限（ReBAC 图更新）</td><td><span class="tag cq">CQ-02</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-37-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>非 account_owner 的销售对客户订单开备货单</td>
+              <td class="mono">User --OWNS-- Customer（无关系）</td><td class="mono">READY_FOR_STOCK → STOCK_REVIEWING</td>
+              <td>SpiceDB 拒绝：create_prestock 不满足</td><td><span class="tag cq">CQ-01</span></td>
+              <td>场景 A 权限绑定 account_owner 传播链</td></tr>
+            <tr class="bad"><td class="mono">EP-37-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>商务为跨客户订单开备货单（关系不符）</td>
+              <td class="mono">CustomerA --OWNS--> User；Order(客户B)</td><td class="mono">READY_FOR_STOCK → STOCK_REVIEWING</td>
+              <td>授权拒绝：订单客户与 owner 不匹配</td><td><span class="tag cq">CQ-02</span></td>
+              <td>对象级授权：customer-&gt;order 传播需匹配</td></tr>
+            <tr class="bad"><td class="mono">EP-37-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>跨租户用户对租户 A 订单开备货单</td>
+              <td class="mono">User --BELONGS_TO--> TenantB；Order(tenantA)</td><td class="mono">STOCK_REVIEWING</td>
+              <td>&amp; tenant-&gt;member 兜底拒绝</td><td><span class="tag cq">CQ-02</span></td>
+              <td>跨租户由 tenant-&gt;member 交集兜底（场景 E）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-38" data-ep="EP-38">
+    <summary>
+      <span class="epno">EP-38</span>
+      <span class="eptitle">场景 B · 改额度与多次发货（prestock#owner）</span>
+      <span class="epmeta">来源：docs/CHANGELOG-rebac-cases.html §2</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>prestock#owner → change_quota / request_shipment</code>；<code>User --REQUESTS--> Shipment</code></dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd><code>STOCK_REVIEWING / SHIP_ASSIGNING</code>（额度变更与发货分配）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：StockPrepare、User；边：owner（prestock 对象级授权）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-38 · 场景 B 改额度多次发货（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-38-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>prestock owner 调整备货额度（change_quota）</td>
+              <td class="mono">StockPrepare --owner--> User</td><td class="mono">STOCK_REVIEWING</td>
+              <td>额度变更成功（守恒内）</td><td><span class="tag cq">CQ-01</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-38-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>owner 发起多次发货请求（request_shipment）</td>
+              <td class="mono">User --REQUESTS--> Shipment</td><td class="mono">SHIP_ASSIGNING（分批）</td>
+              <td>多批请求均在守恒内放行</td><td><span class="tag cq">CQ-07</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-38-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>owner 关闭备货单（close）</td>
+              <td class="mono">StockPrepare --owner--> User</td><td class="mono">STK 段终态</td>
+              <td>关闭成功，额度释放</td><td><span class="tag cq">CQ-01</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-38-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>非 owner 用户改备货单额度</td>
+              <td class="mono">StockPrepare --owner-- User（无关系）</td><td class="mono">STOCK_REVIEWING</td>
+              <td>SpiceDB 拒绝 change_quota</td><td><span class="tag cq">CQ-01</span></td>
+              <td>场景 B 权限粒度：prestock 对象级 owner</td></tr>
+            <tr class="bad"><td class="mono">EP-38-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>改额度后超过订单数量上限</td>
+              <td class="mono">StockPrepare(planned_qty &gt; order qty)</td><td class="mono">STOCK_REVIEWING</td>
+              <td>业务守恒拒绝（授权通过也无效）</td><td><span class="tag cq">CQ-06</span></td>
+              <td>两道门：SpiceDB 管授权，Workflow 管额度</td></tr>
+            <tr class="bad"><td class="mono">EP-38-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>额度变更不产生审计事件</td>
+              <td class="mono">Event 缺失</td><td class="mono">STOCK_REVIEWING</td>
+              <td>审计校验拒绝</td><td><span class="tag cq">CQ-12</span></td>
+              <td>授权数据变更也要可回溯（Outbox 幂等）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-39" data-ep="EP-39">
+    <summary>
+      <span class="epno">EP-39</span>
+      <span class="eptitle">场景 C · 仓管确认/驳回（shipment#warehouse_operator）</span>
+      <span class="epmeta">来源：docs/CHANGELOG-rebac-cases.html §2</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>Shipment#warehouse_operator --ASSIGNED_TO--> User</code>；<code>User --BELONGS_TO--> Warehouse</code></dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd><code>WAREHOUSE_CONFIRMING → WAREHOUSE_CONFIRMED / WAREHOUSE_RETURNED</code></dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：Shipment、User；边：ASSIGNED_TO（仓管分配关系）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-39 · 场景 C 仓管确认驳回（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-39-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>被分配仓管对发货单 confirm</td>
+              <td class="mono">Shipment --ASSIGNED_TO--> User</td><td class="mono">WAREHOUSE_CONFIRMING → WAREHOUSE_CONFIRMED</td>
+              <td>确认成功</td><td><span class="tag cq">CQ-01</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-39-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>被分配仓管对发货单 reject（缺货）</td>
+              <td class="mono">Shipment --ASSIGNED_TO--> User</td><td class="mono">WAREHOUSE_CONFIRMING → WAREHOUSE_RETURNED</td>
+              <td>驳回成功，原因记录</td><td><span class="tag cq">CQ-01</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-39-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>仓管视图字段裁剪（无价格/无销售备注）</td>
+              <td class="mono">BFF 投影：OrderItem.price 剥离</td><td class="mono">WAREHOUSE_CONFIRMING</td>
+              <td>仓管只见业务字段，不见价格</td><td><span class="tag cq">CQ-03</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-39-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>未分配仓管（无 warehouse_operator 关系）确认发货单</td>
+              <td class="mono">Shipment --ASSIGNED_TO-- User（无）</td><td class="mono">WAREHOUSE_CONFIRMING → WAREHOUSE_CONFIRMED</td>
+              <td>授权拒绝 403</td><td><span class="tag cq">CQ-01</span></td>
+              <td>场景 C：确认权绑定对象级 warehouse_operator</td></tr>
+            <tr class="bad"><td class="mono">EP-39-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>仓管在响应中看到价格字段（投影失效）</td>
+              <td class="mono">OrderItem(unit_price_cents 泄漏)</td><td class="mono">WAREHOUSE_CONFIRMING</td>
+              <td>投影防御拦截，字段剥离</td><td><span class="tag cq">CQ-03</span></td>
+              <td>仓管不可见价格是业务红线（CQ-03）</td></tr>
+            <tr class="bad"><td class="mono">EP-39-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>跨仓仓管确认其他仓发货单</td>
+              <td class="mono">User(wh-yangyuan) vs Shipment(wh-dongguan)</td><td class="mono">WAREHOUSE_CONFIRMING</td>
+              <td>授权拒绝（仓级不匹配）</td><td><span class="tag cq">CQ-02</span></td>
+              <td>仓管数据范围=本仓（CQ-02）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-40" data-ep="EP-40">
+    <summary>
+      <span class="epno">EP-40</span>
+      <span class="eptitle">场景 D · 客户联系人看物流/上传凭证</span>
+      <span class="epmeta">来源：docs/CHANGELOG-rebac-cases.html §2</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>Customer --CONTACT_OF--> User</code>（customer#contact）；<code>shipment#customer_contact → view/append_evidence</code></dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd>SHP 物流视图 + INV 凭证上传（跨流程）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：User、Customer；边：CONTACT_OF（客户联系人关系）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-40 · 场景 D 客户联系人（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-40-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>客户联系人查看本客户发货物流视图</td>
+              <td class="mono">Customer --CONTACT_OF--> User</td><td class="mono">SHP 物流视图</td>
+              <td>允许查看，字段裁剪（无价格/内部备注）</td><td><span class="tag cq">CQ-02</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-40-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>客户联系人上传签收凭证（append_evidence）</td>
+              <td class="mono">User --UPLOADS--> Evidence</td><td class="mono">INV 回单收集</td>
+              <td>凭证上传成功（追加新版本）</td><td><span class="tag cq">CQ-15</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-40-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>联系人查看凭证版本历史</td>
+              <td class="mono">Evidence(版本链)</td><td class="mono">INV 回单查看</td>
+              <td>可回放全部版本</td><td><span class="tag cq">CQ-15</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-40-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>客户联系人视图包含价格字段</td>
+              <td class="mono">投影(price 泄漏)</td><td class="mono">SHP 物流视图</td>
+              <td>投影拒绝：仅物流视图字段</td><td><span class="tag cq">CQ-03</span></td>
+              <td>客户视图裁剪价格/internal_note（场景 D）</td></tr>
+            <tr class="bad"><td class="mono">EP-40-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>非联系人用户查看客户物流（无 contact 关系）</td>
+              <td class="mono">User --CONTACT_OF-- Customer（无）</td><td class="mono">SHP 物流视图</td>
+              <td>授权拒绝</td><td><span class="tag cq">CQ-02</span></td>
+              <td>customer#contact 传播缺失即拒绝</td></tr>
+            <tr class="bad"><td class="mono">EP-40-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>联系人覆盖旧凭证版本（非追加）</td>
+              <td class="mono">Evidence(v1 被覆盖)</td><td class="mono">INV 凭证</td>
+              <td>拒绝：凭证只追加不覆盖</td><td><span class="tag cq">CQ-15</span></td>
+              <td>凭证链 append-only（CQ-15）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-41" data-ep="EP-41">
+    <summary>
+      <span class="epno">EP-41</span>
+      <span class="eptitle">场景 E · 跨租户拒绝</span>
+      <span class="epmeta">来源：docs/CHANGELOG-rebac-cases.html §2 + schema.zed</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>User --BELONGS_TO--> Tenant</code>；所有 permission 末尾 <code>&amp; tenant-&gt;member</code></dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd>全流程（任意操作入口）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：User、Tenant；边：BELONGS_TO（租户隔离）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-41 · 场景 E 跨租户拒绝（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-41-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>同租户用户正常操作本租户订单</td>
+              <td class="mono">User --BELONGS_TO--> Tenant(chang-an)</td><td class="mono">任意流程</td>
+              <td>tenant-&gt;member 交集满足，操作放行</td><td><span class="tag cq">CQ-02</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-41-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>租户 B 用户操作租户 B 订单（隔离正常）</td>
+              <td class="mono">User --BELONGS_TO--> Tenant(zhichu)</td><td class="mono">任意流程</td>
+              <td>各自租户内正常</td><td><span class="tag cq">CQ-02</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-41-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>同一 idempotency_key 跨租户各自生效</td>
+              <td class="mono">Order(idempotency_key) × Tenant A/B</td><td class="mono">REQUESTED</td>
+              <td>两租户各自生成订单（不互撞）</td><td><span class="tag cq">CQ-11</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-41-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>租户 B 用户查看租户 A 订单</td>
+              <td class="mono">User(TenantB) vs Order(TenantA)</td><td class="mono">查询入口</td>
+              <td>&amp; tenant-&gt;member 拒绝</td><td><span class="tag cq">CQ-02</span></td>
+              <td>跨租户隔离是 permission 的交集兜底（场景 E）</td></tr>
+            <tr class="bad"><td class="mono">EP-41-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>租户 A 用户查询租户 B 备货单</td>
+              <td class="mono">User(TenantA) vs StockPrepare(TenantB)</td><td class="mono">STK 查询</td>
+              <td>拒绝（交集为空）</td><td><span class="tag cq">CQ-02</span></td>
+              <td>所有对象都带 tenant 上下文（多租户根）</td></tr>
+            <tr class="bad"><td class="mono">EP-41-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>租户 A 用户修改租户 B 客户资料</td>
+              <td class="mono">User(TenantA) vs Customer(TenantB)</td><td class="mono">客户维护</td>
+              <td>授权拒绝</td><td><span class="tag cq">CQ-02</span></td>
+              <td>客户数据租户隔离（多租户边界）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-42" data-ep="EP-42">
+    <summary>
+      <span class="epno">EP-42</span>
+      <span class="eptitle">场景 G · 临时代办 TTL（expiry_ok caveat）</span>
+      <span class="epmeta">来源：docs/CHANGELOG-rebac-cases.html §2 + CQ-13</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>User --DELEGATED_TO--> User</code>（caveat: expiry_ok）；<code>prestock#owner@user:li_na</code>（TTL 3 天）</dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd>代办执行审批/下单（跨流程）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：User(委托人)、User(代办人)；边：DELEGATED_TO（caveat 时效）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-42 · 场景 G 临时代办 TTL（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-42-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>代办人在授权有效期内执行审批</td>
+              <td class="mono">User --DELEGATED_TO(有效)--> User(代办)</td><td class="mono">审批 Signal</td>
+              <td>expiry_ok caveat 通过，操作放行</td><td><span class="tag cq">CQ-13</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-42-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>授权续期后代办继续有效</td>
+              <td class="mono">DELEGATED_TO(续期)</td><td class="mono">审批 Signal</td>
+              <td>caveat 参数更新，重新放行</td><td><span class="tag cq">CQ-13</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-42-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>TTL 到期后 Outbox 自动删除授权元组</td>
+              <td class="mono">Outbox 投影：DeleteRelationships</td><td class="mono">代办失效</td>
+              <td>到期即删除，权限即时失效</td><td><span class="tag cq">CQ-13</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-42-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>代办授权已过期仍执行操作</td>
+              <td class="mono">DELEGATED_TO(已过期)</td><td class="mono">审批 Signal</td>
+              <td>expiry_ok caveat 不满足，拒绝</td><td><span class="tag cq">CQ-13</span></td>
+              <td>caveat 时效：到期即失效（FullyConsistent 读）</td></tr>
+            <tr class="bad"><td class="mono">EP-42-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>代办授权创建时不带有效期（永久授权）</td>
+              <td class="mono">DELEGATED_TO(无 expiry)</td><td class="mono">代办创建</td>
+              <td>校验拒绝：代办必须设置 TTL</td><td><span class="tag cq">CQ-13</span></td>
+              <td>临时代办语义要求有效期（默认短 TTL）</td></tr>
+            <tr class="bad"><td class="mono">EP-42-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>代办人操作未授权资源（超范围代办）</td>
+              <td class="mono">DELEGATED_TO(scope 不足)</td><td class="mono">跨资源操作</td>
+              <td>授权拒绝</td><td><span class="tag cq">CQ-01</span></td>
+              <td>代办仅继承委托人的可见范围，不放大</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-43" data-ep="EP-43">
+    <summary>
+      <span class="epno">EP-43</span>
+      <span class="eptitle">仓管不可见价格（字段级授权投影）</span>
+      <span class="epmeta">来源：docs/01-core-graph.html CQ-03 + 03-testing.html L1-10</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>Order --CONTAINS--> OrderItem(unit_price_cents)</code>；BFF 投影（api/projection.go）</dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd>STK/SHP 仓管视图（确认/发货）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：Order、OrderItem；边：CONTAINS（价格字段载体）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-43 · 仓管不可见价格（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-43-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>仓管查询订单，价格/金额字段被剥离</td>
+              <td class="mono">BFF 投影(price 剥离)</td><td class="mono">仓管视图</td>
+              <td>响应无价格字段，可见业务字段</td><td><span class="tag cq">CQ-03</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-43-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>商务/财务查询同一订单可见价格</td>
+              <td class="mono">BFF 投影(role=OP/ACCOUNTING)</td><td class="mono">商务/财务视图</td>
+              <td>价格字段正常返回</td><td><span class="tag cq">CQ-03</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-43-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>仓管发货操作所需数量/产品字段完整可见</td>
+              <td class="mono">OrderItem(qty, product 可见)</td><td class="mono">WAREHOUSE_SHIPPING</td>
+              <td>业务字段不因投影缺失</td><td><span class="tag cq">CQ-03</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-43-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>仓管响应中泄漏价格字段（投影失效）</td>
+              <td class="mono">OrderItem(unit_price_cents 泄漏)</td><td class="mono">仓管视图</td>
+              <td>投影防御拦截并告警</td><td><span class="tag cq">CQ-03</span></td>
+              <td>字段级投影是 CQ-03 的防线（L1-10）</td></tr>
+            <tr class="bad"><td class="mono">EP-43-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>仓管绕过 BFF 直连数据库读取价格</td>
+              <td class="mono">repo 直查（无授权判定）</td><td class="mono">任意</td>
+              <td>网络层/API 层拒绝，数据访问必须经授权判定</td><td><span class="tag cq">CQ-03</span></td>
+              <td>授权是图不是表：一切访问经 SpiceDB 判定</td></tr>
+            <tr class="bad"><td class="mono">EP-43-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>价格字段泄漏到仓管可见的事件/日志</td>
+              <td class="mono">Event(payload 含价格)</td><td class="mono">仓管视图</td>
+              <td>事件序列化剥离价格字段</td><td><span class="tag cq">CQ-03</span></td>
+              <td>事件链同样遵守字段投影红线</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-44" data-ep="EP-44">
+    <summary>
+      <span class="epno">EP-44</span>
+      <span class="eptitle">销售只看本人客户（OWNS）</span>
+      <span class="epmeta">来源：docs/01-core-graph.html CQ-02 + §1.4</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>User --OWNS--> Customer</code>（ReBAC 直接关系）；销售列表 = OWNS 传播</dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd>订单创建/查询/审批入口（销售侧）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：User、Customer；边：OWNS（数据可见范围）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-44 · 销售只看本人客户（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-44-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>销售查看本人 OWNS 客户的全部订单</td>
+              <td class="mono">User --OWNS--> Customer --COVERS--> Order</td><td class="mono">查询</td>
+              <td>传播链命中，订单可见</td><td><span class="tag cq">CQ-02</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-44-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>代办人查看被授权（DELEGATED_TO）客户的订单</td>
+              <td class="mono">User --DELEGATED_TO--> User --OWNS--> Customer</td><td class="mono">查询</td>
+              <td>代办继承可见范围</td><td><span class="tag cq">CQ-13</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-44-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>销售列表仅含本人客户（全量列表过滤）</td>
+              <td class="mono">BFF 列表过滤(OWNS)</td><td class="mono">列表查询</td>
+              <td>列表不含他人客户</td><td><span class="tag cq">CQ-02</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-44-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>销售查看他人客户订单</td>
+              <td class="mono">User --OWNS-- Customer（无关系）</td><td class="mono">查询</td>
+              <td>授权拒绝，订单不可见</td><td><span class="tag cq">CQ-02</span></td>
+              <td>销售只看本人客户（CQ-02 数据范围）</td></tr>
+            <tr class="bad"><td class="mono">EP-44-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>销售对他人客户订单执行提交/审批</td>
+              <td class="mono">User --OWNS-- Customer（无）</td><td class="mono">审批 Signal</td>
+              <td>授权拒绝 403</td><td><span class="tag cq">CQ-01</span></td>
+              <td>操作权限同样受 OWNS 传播约束</td></tr>
+            <tr class="bad"><td class="mono">EP-44-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>跨租户销售查看另一租户客户</td>
+              <td class="mono">User(TenantA) vs Customer(TenantB)</td><td class="mono">查询</td>
+              <td>拒绝（BELONGS_TO 隔离）</td><td><span class="tag cq">CQ-02</span></td>
+              <td>OWNS 之上还有 tenant 交集兜底</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <h2 class="sec" id="wecom">8 · 企微预订单流程 <small>EP-45 .. EP-48</small></h2>
+
+  <section class="ep" id="ep-45" data-ep="EP-45">
+    <summary>
+      <span class="epno">EP-45</span>
+      <span class="eptitle">消息幂等（msgid 唯一）</span>
+      <span class="epmeta">来源：docs/07-wecom-integration.html §2.3 + CQ-11</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>PreOrder --TRIGGERS--> Event(PreOrderCaptured)</code>；<code>(tenant, group, msgid)</code> 唯一约束</dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd><code>CAPTURED</code>（会话存档拉到消息，msgid 幂等去重）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：PreOrder、Event；边：TRIGGERS（消息事件）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-45 · 消息幂等（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-45-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>同一 msgid 消息被存档拉取两次，只建一个预订单</td>
+              <td class="mono">PreOrder --TRIGGERS--> Event(msgid)</td><td class="mono">CAPTURED（去重）</td>
+              <td>第二个被 UK 拒绝，返回既有预订单</td><td><span class="tag cq">CQ-11</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-45-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>不同租户同 msgid 各自生成预订单</td>
+              <td class="mono">(tenant, group, msgid) 复合唯一</td><td class="mono">CAPTURED</td>
+              <td>租户隔离下各自生效</td><td><span class="tag cq">CQ-11</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-45-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>重放同键同 payload 返回既有预订单</td>
+              <td class="mono">PreOrder(idempotency_key)</td><td class="mono">CAPTURED</td>
+              <td>幂等命中，不重复处理</td><td><span class="tag cq">CQ-11</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-45-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>同 msgid 不同 payload 被静默覆盖</td>
+              <td class="mono">PreOrder(payload 冲突)</td><td class="mono">CAPTURED</td>
+              <td>冲突拒绝，提示人工核查</td><td><span class="tag cq">CQ-11</span></td>
+              <td>幂等键冲突不可静默覆盖（防篡改）</td></tr>
+            <tr class="bad"><td class="mono">EP-45-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>消息无 msgid 仍被捕获建预订单</td>
+              <td class="mono">Event(PreOrderCaptured, msgid=NULL)</td><td class="mono">CAPTURED</td>
+              <td>校验拒绝：msgid 必填</td><td><span class="tag cq">CQ-11</span></td>
+              <td>幂等锚点缺失即拒绝（无法去重）</td></tr>
+            <tr class="bad"><td class="mono">EP-45-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>游标 checkpoint 未持久化导致消息漏拉</td>
+              <td class="mono">wecom_archive_cursor(seq)</td><td class="mono">拉取循环</td>
+              <td>游标原子持久化保证不丢（L1-14）</td><td><span class="tag cq">CQ-11</span></td>
+              <td>5 天窗口内漏拉=消息永久丢失</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-46" data-ep="EP-46">
+    <summary>
+      <span class="epno">EP-46</span>
+      <span class="eptitle">意图识别 AI 安全边界</span>
+      <span class="epmeta">来源：docs/07-wecom-integration.html §3 + §2.6</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>PreOrder --TRIGGERS--> Event(IntentParsed)</code>（LLM 只产候选 + 确定性校验）</dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd><code>INTENT_PARSING → PENDING_CONFIRM / AMBIGUOUS</code>（置信度分流）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：PreOrder、Event；边：TRIGGERS（意图解析事件）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-46 · 意图识别 AI 安全边界（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-46-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>高置信且 SKU/数量/价格/库存/权限校验通过</td>
+              <td class="mono">PreOrder --TRIGGERS--> Event(IntentParsed:high)</td><td class="mono">INTENT_PARSING → PENDING_CONFIRM</td>
+              <td>推送销售确认卡片</td><td><span class="tag cq">CQ-11</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-46-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>低置信/多候选/高金额 → 轻提醒不自动建单</td>
+              <td class="mono">Event(IntentParsed:low)</td><td class="mono">INTENT_PARSING → AMBIGUOUS</td>
+              <td>仅轻提醒，销售修正确认</td><td><span class="tag cq">CQ-11</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-46-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>LLM 产出结构化候选，SKU 由确定性映射归一化</td>
+              <td class="mono">resolve_sku(标准型号映射)</td><td class="mono">INTENT_PARSING</td>
+              <td>候选映射为标准 SKU</td><td><span class="tag cq">CQ-11</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-46-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>LLM 输出直接生成正式订单（跳过人工确认）</td>
+              <td class="mono">PreOrder --DERIVES--> Order（AI 触发）</td><td class="mono">INTENT_PARSING → ORDER_REQUESTED（跳确认）</td>
+              <td>红线拦截：任何生成结果需人工确认</td><td><span class="tag cq">CQ-11</span></td>
+              <td>AI 安全边界：LLM 只产候选，人工确认硬闸门</td></tr>
+            <tr class="bad"><td class="mono">EP-46-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>LLM 输出报价（价格不由 AI 决定）</td>
+              <td class="mono">LLM 候选(price)</td><td class="mono">INTENT_PARSING</td>
+              <td>候选被忽略，价格以价格表为准</td><td><span class="tag cq">CQ-11</span></td>
+              <td>价格=客户等级价格表，LLM 不报价</td></tr>
+            <tr class="bad"><td class="mono">EP-46-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>SKU 无法解析仍直接进入 PENDING_CONFIRM</td>
+              <td class="mono">resolve_sku(多候选)</td><td class="mono">INTENT_PARSING → PENDING_CONFIRM</td>
+              <td>确定性校验失败 → AMBIGUOUS</td><td><span class="tag cq">CQ-11</span></td>
+              <td>SKU 归一化失败必须歧义处理（安全边界）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-47" data-ep="EP-47">
+    <summary>
+      <span class="epno">EP-47</span>
+      <span class="eptitle">预订单人工确认</span>
+      <span class="epmeta">来源：docs/07-wecom-integration.html §3.3 + §2.6</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>PreOrder --DERIVES--> Order</code>（确认后 1:1 派生）；<code>PreOrderConfirmed</code> 事件</dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd><code>PENDING_CONFIRM → CONFIRMED → ORDER_REQUESTED</code></dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：PreOrder、Order；边：DERIVES（确认派生）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-47 · 预订单人工确认（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-47-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>销售在确认卡片点「确认」→ 生成正式订单</td>
+              <td class="mono">PreOrder --DERIVES--> Order</td><td class="mono">PENDING_CONFIRM → CONFIRMED → ORDER_REQUESTED</td>
+              <td>正式订单生成，幂等键生效</td><td><span class="tag cq">CQ-11</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-47-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>销售修改数量后确认（MODIFIED 路径）</td>
+              <td class="mono">PreOrder --DERIVES--> Order(修改参数)</td><td class="mono">PENDING_CONFIRM → MODIFIED → ORDER_REQUESTED</td>
+              <td>以修改后参数生成订单</td><td><span class="tag cq">CQ-11</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-47-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>确认回调验签通过（企微签名+加密 body）</td>
+              <td class="mono">wecom 回调验签</td><td class="mono">PENDING_CONFIRM → CONFIRMED</td>
+              <td>Signal 合法触发</td><td><span class="tag cq">CQ-11</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-47-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>系统自动确认（无人工 Signal）生成正式订单</td>
+              <td class="mono">PreOrder --DERIVES--> Order（自动）</td><td class="mono">PENDING_CONFIRM → CONFIRMED（无 Signal）</td>
+              <td>红线拦截：必须人工确认</td><td><span class="tag cq">CQ-11</span></td>
+              <td>人工闸门不可绕过（方法论规则）</td></tr>
+            <tr class="bad"><td class="mono">EP-47-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>非归属销售确认他人预订单</td>
+              <td class="mono">User --OWNS-- Customer（无关系）</td><td class="mono">PENDING_CONFIRM → CONFIRMED</td>
+              <td>授权拒绝（含发送者权限校验）</td><td><span class="tag cq">CQ-01</span></td>
+              <td>确认人=归属销售/代办（SpiceDB 校验）</td></tr>
+            <tr class="bad"><td class="mono">EP-47-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>确认时商品已下架（SKU 失效）仍建单</td>
+              <td class="mono">Product(下架)</td><td class="mono">PENDING_CONFIRM → CONFIRMED</td>
+              <td>确认前复检拒绝</td><td><span class="tag cq">CQ-11</span></td>
+              <td>确认生效前需复检商品可售性（AI 边界）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-48" data-ep="EP-48">
+    <summary>
+      <span class="epno">EP-48</span>
+      <span class="eptitle">24h 未确认 → 升级（Timer）</span>
+      <span class="epmeta">来源：docs/07-wecom-integration.html §3.3 + §2.6</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>PreOrder --TRIGGERS--> Event(升级)</code>（Timer 触发）；ESCALATED 状态</dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd><code>PENDING_CONFIRM → ESCALATED</code>（24h 未处理）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：PreOrder、Event；边：TRIGGERS（升级事件）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-48 · 24h 升级（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-48-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>预订单 24h 未确认，Timer 升级并抄送主管</td>
+              <td class="mono">PreOrder --TRIGGERS--> Event(ESCALATED)</td><td class="mono">PENDING_CONFIRM → ESCALATED</td>
+              <td>升级推送重新触达</td><td><span class="tag cq">CQ-11</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-48-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>升级后销售仍可确认（ESCALATED → PENDING_CONFIRM）</td>
+              <td class="mono">PreOrder(state=ESCALATED)</td><td class="mono">ESCALATED → PENDING_CONFIRM → CONFIRMED</td>
+              <td>继续等待确认，不丢失订单</td><td><span class="tag cq">CQ-11</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-48-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>48h 仍未处理 → 人工兜底（业务链接）</td>
+              <td class="mono">Event(人工兜底)</td><td class="mono">ESCALATED（持续）</td>
+              <td>转人工界面兜底处理</td><td><span class="tag cq">CQ-11</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-48-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>未满 24h 提前触发升级</td>
+              <td class="mono">Timer(提前)</td><td class="mono">PENDING_CONFIRM → ESCALATED</td>
+              <td>时间校验拒绝</td><td><span class="tag cq">CQ-11</span></td>
+              <td>升级 Timer 必须精确 24h（L2-13）</td></tr>
+            <tr class="bad"><td class="mono">EP-48-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>升级后不重推/不抄送（升级动作无效）</td>
+              <td class="mono">Event(ESCALATED) 无推送</td><td class="mono">ESCALATED</td>
+              <td>升级事件必须伴随推送动作</td><td><span class="tag cq">CQ-11</span></td>
+              <td>升级的语义是重新触达+抄送主管</td></tr>
+            <tr class="bad"><td class="mono">EP-48-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>升级事件不落链（无审计痕迹）</td>
+              <td class="mono">Event 缺失</td><td class="mono">ESCALATED</td>
+              <td>事件链校验拒绝</td><td><span class="tag cq">CQ-12</span></td>
+              <td>预订单事件链完整（审计回放）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <h2 class="sec" id="audit">9 · 事件链与审计 <small>EP-49 .. EP-50</small></h2>
+
+  <section class="ep" id="ep-49" data-ep="EP-49">
+    <summary>
+      <span class="epno">EP-49</span>
+      <span class="eptitle">事件链 append-only</span>
+      <span class="epmeta">来源：docs/01-core-graph.html §1.2 + CQ-12</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>Order --PRODUCES--> Event</code>（append-only，无 UPDATE/DELETE）</dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd>全流程（每个状态迁移同事务产生事件）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：Order、Event；边：PRODUCES（事件产生）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-49 · 事件链 append-only（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-49-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>订单状态迁移与事件写入同事务</td>
+              <td class="mono">Order --PRODUCES--> Event</td><td class="mono">任意迁移</td>
+              <td>事件与状态原子提交（防线 6）</td><td><span class="tag cq">CQ-12</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-49-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>事件按订单合并时间线可回放</td>
+              <td class="mono">Event(时间线)</td><td class="mono">全链</td>
+              <td>审计脚本可回放（L3-05）</td><td><span class="tag cq">CQ-12</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-49-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>事件含「谁、何时、何因、结果」四要素</td>
+              <td class="mono">Event(operator, ts, reason, result)</td><td class="mono">全链</td>
+              <td>审计四要素完整</td><td><span class="tag cq">CQ-12</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-49-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>修改已写入的历史事件（UPDATE）</td>
+              <td class="mono">Event(UPDATE 尝试)</td><td class="mono">全链</td>
+              <td>数据库拒绝（append-only 约束）</td><td><span class="tag cq">CQ-12</span></td>
+              <td>事件不可变：无 UPDATE/DELETE（CQ-12）</td></tr>
+            <tr class="bad"><td class="mono">EP-49-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>删除历史事件（DELETE）</td>
+              <td class="mono">Event(DELETE 尝试)</td><td class="mono">全链</td>
+              <td>拒绝删除</td><td><span class="tag cq">CQ-12</span></td>
+              <td>审计链断链=不可回放（防线 6）</td></tr>
+            <tr class="bad"><td class="mono">EP-49-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>状态迁移发生但不产生事件</td>
+              <td class="mono">Order(state 变更，Event 缺失)</td><td class="mono">任意迁移</td>
+              <td>事务约束拒绝提交</td><td><span class="tag cq">CQ-12</span></td>
+              <td>状态与事件必须同事务（审计完整性）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="ep" id="ep-50" data-ep="EP-50">
+    <summary>
+      <span class="epno">EP-50</span>
+      <span class="eptitle">凭证只追加版本（Evidence）</span>
+      <span class="epmeta">来源：docs/01-core-graph.html §1.2 + CQ-15</span>
+    </summary>
+    <div class="ep-body">
+      <dl class="meta-grid">
+        <div class="meta-item"><dt>双Graph位置 · World</dt><dd><code>User --UPLOADS--> Evidence</code>（上传者界定）；版本链只追加</dd></div>
+        <div class="meta-item"><dt>双Graph位置 · Task</dt><dd>INV 回单收集 / SHP 签收（凭证流转）</dd></div>
+        <div class="meta-item"><dt>覆盖 2 结点 1 边</dt><dd>结点：User、Evidence；边：UPLOADS（上传关系）</dd></div>
+      </dl>
+      <div class="tbl-scroll">
+        <table>
+          <caption>EP-50 · 凭证只追加版本（3 正确 + 3 错误）</caption>
+          <thead><tr><th>用例ID</th><th>类型</th><th>场景描述</th><th>World 位置</th><th>Task 位置</th><th>预期结果</th><th>涉及CQ</th><th>不合理原因</th></tr></thead>
+          <tbody>
+            <tr class="ok"><td class="mono">EP-50-P1</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>上传新版本签收单（追加 v2）</td>
+              <td class="mono">User --UPLOADS--> Evidence(v2)</td><td class="mono">INV 回单</td>
+              <td>v1 保留，v2 追加</td><td><span class="tag cq">CQ-15</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-50-P2</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>回放任一版本凭证（历史可追溯）</td>
+              <td class="mono">Evidence(版本链回放)</td><td class="mono">审计</td>
+              <td>各版本可独立回放</td><td><span class="tag cq">CQ-15</span></td><td>—</td></tr>
+            <tr class="ok"><td class="mono">EP-50-P3</td><td><span class="tag ok">✅ 正确</span></td>
+              <td>上传者权限界定（uploader 可传本人凭证）</td>
+              <td class="mono">User --UPLOADS--> Evidence</td><td class="mono">凭证上传</td>
+              <td>上传成功并留痕</td><td><span class="tag cq">CQ-15</span></td><td>—</td></tr>
+            <tr class="bad"><td class="mono">EP-50-N1</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>覆盖旧版本凭证（v1 被覆写）</td>
+              <td class="mono">Evidence(v1 覆盖)</td><td class="mono">凭证上传</td>
+              <td>拒绝：只追加不覆盖</td><td><span class="tag cq">CQ-15</span></td>
+              <td>凭证链 append-only（CQ-15）</td></tr>
+            <tr class="bad"><td class="mono">EP-50-N2</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>非上传者修改凭证版本</td>
+              <td class="mono">User --UPLOADS-- Evidence（无关系）</td><td class="mono">凭证修改</td>
+              <td>授权拒绝（evidence#uploader）</td><td><span class="tag cq">CQ-15</span></td>
+              <td>上传者权限界定（场景 D uploader）</td></tr>
+            <tr class="bad"><td class="mono">EP-50-N3</td><td><span class="tag bad">❌ 错误</span></td>
+              <td>凭证无版本号上传（无法回放）</td>
+              <td class="mono">Evidence(version=NULL)</td><td class="mono">凭证上传</td>
+              <td>校验拒绝：版本号必填</td><td><span class="tag cq">CQ-15</span></td>
+              <td>版本化是回放的前提（CQ-15）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <h2 class="sec" id="summary">10 · 汇总统计 <small>用例覆盖矩阵</small></h2>
+  <p class="lead">全部 300 例中，150 例标准正确、150 例不正确不合理。下表按段统计覆盖的能力问题分布。</p>
+
+  <div class="stat-grid">
+    <div class="stat"><b>50</b><span>切入点（EP-01..EP-50）</span></div>
+    <div class="stat"><b>300</b><span>测试用例总数</span></div>
+    <div class="stat"><b>150/150</b><span>正确 / 错误</span></div>
+    <div class="stat"><b>14+1</b><span>能力问题覆盖 CQ-01..CQ-15</span></div>
+  </div>
+
+  <div class="tbl-scroll">
+    <table>
+      <caption>按流程段的切入点与用例分布</caption>
+      <thead><tr><th>流程段</th><th>切入编号</th><th>用例数</th><th>覆盖 CQ</th><th>覆盖双 Graph 位置</th></tr></thead>
+      <tbody>
+        <tr><td>① ORD 订单创建</td><td class="mono">EP-01..EP-10</td><td>60</td><td class="mono">CQ-01/04/05/06/11/12</td><td>World: PreOrder→Order / Order--PRODUCES--&gt;Event；Task: ORD FSM</td></tr>
+        <tr><td>② STK 备货审批</td><td class="mono">EP-11..EP-18</td><td>48</td><td class="mono">CQ-01/02/03/04/05/06/08/11/12/14</td><td>World: Order--PREPARES--&gt;StockPrepare；Task: STK FSM</td></tr>
+        <tr><td>③ SHP 发货出库</td><td class="mono">EP-19..EP-26</td><td>48</td><td class="mono">CQ-01/04/06/07/08/11/12/14</td><td>World: StockPrepare--FULFILLS--&gt;Shipment / Warehouse--STORES--&gt;Product；Task: SHP FSM</td></tr>
+        <tr><td>④ INV 开票回单</td><td class="mono">EP-27..EP-36</td><td>60</td><td class="mono">CQ-01/04/07/09/10/11/12/14/15</td><td>World: Order--GENERATES_INV--&gt;Invoice / Evidence；Task: INV FSM</td></tr>
+        <tr><td>⑤ ReBAC 授权</td><td class="mono">EP-37..EP-44</td><td>48</td><td class="mono">CQ-01/02/03/06/07/11/12/13/15</td><td>World: OWNS/DELEGATED_TO/CONTACT_OF/ASSIGNED_TO/REQUESTS/UPLOADS + schema.zed；Task: 跨段授权入口</td></tr>
+        <tr><td>⑥ 企微预订单</td><td class="mono">EP-45..EP-48</td><td>24</td><td class="mono">CQ-01/11/12</td><td>World: PreOrder--TRIGGERS/DERIVES--&gt;Event/Order；Task: PreOrder FSM</td></tr>
+        <tr><td>⑦ 事件与审计</td><td class="mono">EP-49..EP-50</td><td>12</td><td class="mono">CQ-12/15</td><td>World: Order--PRODUCES--&gt;Event / User--UPLOADS--&gt;Evidence；Task: 全链横切</td></tr>
+        <tr><td colspan="2"><b>合计</b></td><td><b>300</b></td><td colspan="2">14+1 能力问题全覆盖（CQ-01..CQ-15）</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tbl-scroll">
+    <table>
+      <caption>能力问题 CQ 覆盖对照（每个用例标注涉及 CQ，下列 CQ 全部被至少一条用例背书）</caption>
+      <thead><tr><th>CQ</th><th>能力问题</th><th>代表用例</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">CQ-01</td><td>订单操作权限</td><td class="mono">EP-37-P1 / EP-39-N1 / EP-44-N2</td></tr>
+        <tr><td class="mono">CQ-02</td><td>数据可见范围</td><td class="mono">EP-41-N1 / EP-44-P1 / EP-40-N2</td></tr>
+        <tr><td class="mono">CQ-03</td><td>仓管字段投影</td><td class="mono">EP-43-P1 / EP-43-N1 / EP-13-N2</td></tr>
+        <tr><td class="mono">CQ-04</td><td>状态与合法迁移</td><td class="mono">EP-02-N2 / EP-06-P1 / EP-36-N1</td></tr>
+        <tr><td class="mono">CQ-05</td><td>审批链状态</td><td class="mono">EP-04-P1 / EP-16-P1 / EP-05-N1</td></tr>
+        <tr><td class="mono">CQ-06</td><td>备货守恒</td><td class="mono">EP-17-P1 / EP-11-N1 / EP-15-N3</td></tr>
+        <tr><td class="mono">CQ-07</td><td>发货守恒/完成条件</td><td class="mono">EP-22-P1 / EP-23-N1 / EP-21-N1</td></tr>
+        <tr><td class="mono">CQ-08</td><td>库存联动/非负</td><td class="mono">EP-20-P1 / EP-24-N1 / EP-24-N3</td></tr>
+        <tr><td class="mono">CQ-09</td><td>开票守恒</td><td class="mono">EP-33-P1 / EP-33-N1 / EP-34-N3</td></tr>
+        <tr><td class="mono">CQ-10</td><td>回单状态/四分流</td><td class="mono">EP-29-P1 / EP-28-N1 / EP-30-N1</td></tr>
+        <tr><td class="mono">CQ-11</td><td>预订单/消息幂等</td><td class="mono">EP-45-P1 / EP-46-N1 / EP-47-P1</td></tr>
+        <tr><td class="mono">CQ-12</td><td>事件链回放</td><td class="mono">EP-49-P1 / EP-49-N1 / EP-03-N2</td></tr>
+        <tr><td class="mono">CQ-13</td><td>代办有效期</td><td class="mono">EP-42-P1 / EP-42-N1 / EP-44-P2</td></tr>
+        <tr><td class="mono">CQ-14</td><td>并发风险面</td><td class="mono">EP-17-N2 / EP-24-N3 / EP-34-N2</td></tr>
+        <tr><td class="mono">CQ-15</td><td>凭证只追加版本</td><td class="mono">EP-50-P1 / EP-50-N1 / EP-40-N3</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer>
+    <p><b>双 Graph 测试用例集 · case_202608062147</b> —— 由 docs/ 文档家族（01-core-graph.html / 03-testing.html / 07-wecom-integration.html / CHANGELOG-rebac-cases.html）推导生成。
+    每个用例覆盖双 Graph 的 2 结点 1 边，构成一段最小可验证业务流。本文件为测试规格文档，供后续 L0-L3 自动化用例设计做场景来源参考。</p>
+  </footer>
+
+</div>
+</body>
+</html>

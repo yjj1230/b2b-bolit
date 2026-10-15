@@ -1,0 +1,74 @@
+# project/claims/wecom-interaction.yaml — 企微交互域原子声明（ECM §04 Claim 模型）
+# M2 首批落库（2026-08-13）：企微交互/边界簇（§09 DELIVERY 面板相关 + 交互约定）
+# demo/生产边界三态标注表见 project/views/demo-boundary.yaml（本簇的 DELIVERY 投影）。
+# 来源引用：SRC-REVIEW-20260812 = spec/review/202608121845_修改意见.html；
+#           SRC-USECASE-V2 = docs/用例总表.html；SRC-DEMO = docs/demo/index.html
+
+claims:
+  - claim_id: CLM-WECOM-DELIVERY-001
+    statement: {subject: 发群订单/物流图, predicate: is, object: 普通图片（无「订单助手」角标、无 AI 字样，像销售自己贴的图；物流图仍以图片形态发群）}
+    scope: {product: wecom-order-assistant, phase: pilot-v0, domain: wecom-interaction}
+    authority: {basis: 用例总表 v2 通用约定 + 原始需求第 2 项（按钮语义不暴露内部术语）, sources: [SRC-USECASE-V2#conventions, SRC-ADVICE#send-customer, SRC-DEMO#XS5]}
+    semantic_status: ACCEPTED
+    implementation: {demo: IMPLEMENTED, backend: NOT_APPLICABLE, production_ui: UNPLANNED}
+    verification: {demo_smoke: PASS, business_uat: UNVERIFIED}
+    risk: R1
+    owner: product-wecom
+    acceptance: {oracle: demo 复评：截图无产品化标识；物流图按钮语义与“发给客户”统一口径}
+    relations: {related_to: [CLM-GROUP-ACL-001, CLM-WECOM-SEND-CUSTOMER-001]}
+  - claim_id: CLM-WECOM-SEND-CUSTOMER-001
+    statement: {subject: 订单详情主按钮, predicate: is, object: “发给客户”（后台生成客户可见卡片/图片发到当前企微群；不暴露”截图生成“内部实现术语）}
+    scope: {product: wecom-order-assistant, role: sales, scenario: XS1, phase: pilot-v0}
+    authority: {basis: 原始需求第 2 项（P0）, sources: [SRC-ADVICE#send-customer, SRC-DEMO#XS1]}
+    semantic_status: ACCEPTED
+    implementation: {demo: IMPLEMENTED, backend: UNPLANNED, production_ui: UNPLANNED}
+    verification: {demo_smoke: PASS, business_uat: UNVERIFIED}
+    risk: R1
+    owner: product-wecom
+    acceptance: {oracle: 验收：主按钮文案统一“发给客户”；系统消息/执行记录/推荐动作无”生成截图“残留；已发货含预计送达}
+    relations: {related_to: [CLM-ORDER-CUSTOMER-VIEW-001, CLM-WECOM-DELIVERY-001], note: 已出库订单客户图优先展示物流公司/单号/运输进度与预计到货}
+  - claim_id: CLM-WECOM-MINIPROGRAM-001
+    statement: {subject: 物流查询/订单卡片/凭证类信息承载, predicate: planned_as, object: 小程序卡片（客户点入查看，权限可控；一期保留截图，后续升级）}
+    scope: {product: wecom-order-assistant, phase: vnext, domain: wecom-interaction}
+    authority: {basis: 评审共识·分期 XS1-06/XS5-01, sources: [SRC-REVIEW-20260812#XS1-06, SRC-REVIEW-20260812#XS5-01]}
+    semantic_status: DEFERRED
+    implementation: {demo: UNPLANNED, backend: UNPLANNED, production_ui: UNPLANNED}
+    verification: {demo_smoke: NOT_APPLICABLE, business_uat: UNVERIFIED}
+    risk: R2   # 涉及客户授权/点击/停留时长采集与权限承载
+    owner: product-wecom
+    acceptance: {oracle: 小程序排期结论（评审纪要：接受分段，先把需求全部对焦）}
+    relations: {supersedes: CLM-WECOM-DELIVERY-001(迁移目标), related_to: CLM-GROUP-ACL-001}
+    open_note: 与 OBS-02（demo 物流小程序方向 vs 图片发群现状）关联；vNext 声明不得污染 v0 baseline（SIM-03）
+  - claim_id: CLM-WECOM-NOTIFY-001
+    statement: {subject: 下单后回群通知, predicate: triggered_by, object: 销售主动点击通知客户（自动化遵循降级做、不整体替换）}
+    scope: {product: wecom-order-assistant, role: sales, scenario: XS2, phase: pilot-v0}
+    authority: {basis: 评审共识 XS2-08, sources: [SRC-REVIEW-20260812#XS2-08]}
+    semantic_status: ACCEPTED
+    implementation: {demo: IMPLEMENTED, backend: UNPLANNED, production_ui: UNPLANNED}
+    verification: {demo_smoke: PASS, business_uat: UNVERIFIED}
+    risk: R1
+    owner: product-wecom
+    acceptance: {oracle: demo 复评：通知由销售触发}
+    relations: {related_to: CLM-WECOM-NOTIFY-002}
+  - claim_id: CLM-WECOM-NOTIFY-002
+    statement: {subject: 通知内容与时机, predicate: separated_by, object: 角色关注点（销售=合同是否生成；客户=何时发货/何时到）}
+    scope: {product: wecom-order-assistant, phase: pilot-v0, domain: wecom-interaction}
+    authority: {basis: 评审共识 XS2-09, sources: [SRC-REVIEW-20260812#XS2-09]}
+    semantic_status: ACCEPTED
+    implementation: {demo: IMPLEMENTED, backend: UNPLANNED, production_ui: UNPLANNED}
+    verification: {demo_smoke: PASS, business_uat: UNVERIFIED}
+    risk: R1
+    owner: product-wecom
+    acceptance: {oracle: demo 复评：销售与客户消息内容区分}
+    relations: {refines: CLM-WECOM-NOTIFY-001}
+  - claim_id: CLM-WECOM-NOTIFY-003
+    statement: {subject: 智能下单确认提醒, predicate: delivered_via, object: 双通道（待办 + 订单机器人私信推送）}
+    scope: {product: wecom-order-assistant, role: sales, scenario: XS3, phase: pilot-v0}
+    authority: {basis: 评审共识·必改 XS3-01, sources: [SRC-REVIEW-20260812#XS3-01]}
+    semantic_status: ACCEPTED
+    implementation: {demo: IMPLEMENTED, backend: UNPLANNED, production_ui: UNPLANNED}
+    verification: {demo_smoke: PASS, business_uat: UNVERIFIED}
+    risk: R1
+    owner: product-wecom
+    acceptance: {oracle: demo 复评：私信提醒存在}
+    relations: {depends_on: 订单机器人}

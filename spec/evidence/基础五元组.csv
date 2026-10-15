@@ -1,0 +1,16 @@
+﻿系统,维度,现场值,状态,证据等级,对应证据,采集时间
+旧系统,主机,Windows Server 2025 Datacenter 10.0.26100；阿里云 ECS；2 逻辑 CPU；内存约 3.86GB；C 盘约 39.9GB/剩余约 4.62GiB,已采集,L1,R1-01,2026-08-19 18:26 +08:00
+旧系统,进程/服务,Node v24.15.0；3000 端口；FeishuApprovalPocWatchdog 运行；管理员 PowerShell/计划任务启动；npm run dev / tsx src/server.ts,已采集,L1,R1-01,2026-08-19 17:58 +08:00
+旧系统,网络,监听 3000；公网入口 https://approval.renheng.com；HTTPS 证书至 2026-10-16,已采集,L1,R1-01/R1-03,2026-08-19 17:58 +08:00
+旧系统,存储,C:\feishu-approval-poc\data；24 个顶层 JSONL；7 个指定业务附件目录；磁盘余量约 4.62GiB,已采集,L1,R1-01/R1-13,2026-08-19 18:26 +08:00
+旧系统,版本,GitLab main@a42a115；正式部署范围 102 个文件逐项 SHA-256 一致；历史备份源码 server.before-wecombridge.ts 不纳入部署清单,已采集,L1,R1-02,2026-08-19 20:08 +08:00
+新系统,主机,CentOS Linux 8；2 CPU；内存约 3.55GB；根盘 40GB/剩余约 21GB,已采集,L1,R1-11,2026-08-19 17:58 +08:00
+新系统,进程/服务,Podman 3.3.1；PostgreSQL 16、Temporal 1.29.7、SpiceDB、MinIO、BFF 8080；容器 restart=unless-stopped,已采集,L1,R1-11,2026-08-19 17:58 +08:00
+新系统,网络,公网网关 80/443，systemd Restart=always；域名 wecom-test.renheng.com；证书至 2026-10-15,已采集,L1,R1-11/R1-12,2026-08-19 17:58 +08:00
+新系统,存储,PG 卷 /home/admin/.local/share/containers/storage/volumes/b2b_pilot_v2_pgdata/_data；MinIO 容器运行,已采集,L1,R1-11,2026-08-19 17:58 +08:00
+新系统,版本,/home/admin/b2b_pilot_v2；main@bf6a9cb7d8b2dec6d6187de810a435826fca6514；工作区干净,已采集,L1,R1-11,2026-08-19 17:58 +08:00
+pgAPI,主机,Ubuntu 22.04.5；与 RHCRM PostgreSQL 同机；12 CPU；内存约 15.7GB；根盘约 234GB/剩余约 203GB,已采集,L1,R1-10,2026-08-19 17:58 +08:00
+pgAPI,进程/服务,Python 3.10.12；pgapi.service 生产 8000；pgapi-test.service 8002；systemd Restart=always,已采集,L1,R1-10,2026-08-19 17:58 +08:00
+pgAPI,网络,生产 8000、测试 8002；公网经 api.renheng.com:443 网关转发；无 API Key 返回 401；证书至 2026-11-13,已采集,L1,R1-10,2026-08-19 17:58 +08:00
+pgAPI,存储,PostgreSQL 数据库 carh；rhcrm 三张核心表：客户、产品、购销合同,已采集,L1,R1-10,2026-08-19 18:20 +08:00
+pgAPI,版本,生产 /opt/pgAPI；现场 Git master@e94de1c9…；对应 rhcrm-server main@b387f24f；同步服务与 webhook 存在,已采集,L1,R1-10,2026-08-19 17:58 +08:00

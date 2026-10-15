@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>04 · 架构 · 0.1 订单助手（分层与依赖）</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+SC:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:#f5f4ed; --paper2:#efeee5; --ink:#1f1d18; --ink2:#6b665b;
+    --ink3:#3a382f; --blue:#1B365D; --rule:#d4d1c5; --amber:#8a6d3b; --red:#9b3b3b; --green:#3b6d3b;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif; line-height:1.6;}
+  .wrap{max-width:980px; margin:0 auto; padding:48px 40px 80px;}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;}
+  .folio{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--rule); padding-bottom:10px;
+    font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink2);}
+  .folio a{color:var(--ink2); border:none;}
+  .folio a:hover{color:var(--blue);}
+  .tag{display:inline-block; padding:3px 10px; font-size:11px; letter-spacing:.16em; background:var(--paper2); color:var(--blue);}
+  .tag.red{background:#f3e3e3; color:var(--red);}
+  .tag.amber{background:#f3ecdc; color:var(--amber);}
+  .tag.green{background:#e3f0e3; color:var(--green);}
+  .kicker{display:flex; align-items:baseline; gap:12px; margin-top:48px; flex-wrap:wrap;}
+  h1{font-size:clamp(30px,4.6vw,46px); line-height:1.14; font-weight:500; margin-top:14px; letter-spacing:-.01em;}
+  .lede{margin-top:18px; font-size:16.5px; line-height:1.7; color:var(--ink3); max-width:760px;}
+  h2{font-size:23px; font-weight:600; margin:52px 0 14px; color:var(--blue); display:flex; align-items:baseline; gap:12px; border-top:1px solid var(--rule); padding-top:26px;}
+  h2 .no{font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.12em;}
+  h3{font-size:17.5px; font-weight:600; margin:30px 0 10px; color:var(--ink);}
+  h3 .no{color:var(--blue); font-family:'IBM Plex Mono',monospace; font-size:12px; margin-right:8px;}
+  p{margin:10px 0; color:var(--ink3);}
+  ul,ol{margin:10px 0 10px 26px; color:var(--ink3);}
+  li{margin:5px 0;}
+  a{color:var(--blue); text-decoration:none; border-bottom:1px solid var(--rule);}
+  a:hover{border-bottom-color:var(--blue);}
+  blockquote{border-left:2px solid var(--blue); padding:10px 18px; margin:16px 0; background:var(--paper2); font-style:italic;}
+  blockquote.amber{border-left-color:var(--amber);}
+  table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  .table-wrap{overflow-x:auto; margin:16px 0 24px; border:1px solid var(--rule);}
+  .table-wrap table{margin:0;}
+  th{background:var(--paper2); color:var(--blue); text-align:left; font-weight:600; padding:9px 12px; border-bottom:1.5px solid var(--blue); font-size:12.5px; white-space:nowrap;}
+  td{padding:9px 12px; border-bottom:1px solid var(--rule); vertical-align:top; color:var(--ink3);}
+  tr:nth-child(even) td{background:#faf9f3;}
+  tr:hover td{background:#f0ede0;}
+  td .tag{font-size:10.5px; padding:1px 7px;}
+  .mermaid{background:var(--paper); border:1px solid var(--rule); padding:18px; overflow-x:auto; text-align:center; margin:20px 0;}
+  .mermaid svg{max-width:100%; height:auto;}
+  figcaption{text-align:center; font-size:12px; color:var(--ink2); margin:-10px 0 26px; font-style:italic;}
+  code{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace; font-size:13px; background:var(--paper2); padding:1px 5px;}
+  pre{background:var(--paper2); border:1px solid var(--rule); padding:16px 18px; overflow-x:auto; font-size:12.8px; line-height:1.55; margin:14px 0;}
+  pre code{background:none; padding:0;}
+  footer.colophon{margin-top:56px; padding-top:14px; border-top:1px solid var(--rule); display:flex; justify-content:space-between;
+    font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink2); flex-wrap:wrap; gap:8px;}
+  footer.colophon a{color:var(--ink2); border:none;}
+  footer.colophon a:hover{color:var(--blue);}
+  .toc{border:1px solid var(--rule); background:var(--paper2); padding:18px 24px; margin:26px 0;}
+  .toc .tt{font-size:11px; letter-spacing:.2em; color:var(--blue); margin-bottom:8px;}
+  .toc a{display:block; padding:3px 0; color:var(--ink3); border:none;}
+  .toc a:hover{color:var(--blue);}
+  .toc .mono{font-size:12px; color:var(--blue); margin-right:8px;}
+  .note{background:#f3ecdc; border:1px solid #d8c9a3; padding:12px 16px; margin:16px 0; font-size:13.5px; color:var(--ink3);}
+  .note .tt{font-size:10.5px; letter-spacing:.18em; color:var(--amber); font-family:'IBM Plex Mono',monospace;}
+  .dep{font-size:13px; color:var(--ink3);}
+  .dep .svc{display:inline-block; background:var(--paper2); border:1px solid var(--rule); padding:1px 8px; margin:1px; border-radius:3px; color:var(--blue); font-family:'IBM Plex Mono',monospace; font-size:12px;}
+  @media(max-width:720px){.wrap{padding:28px 18px 60px;}}
+</style>
+<script>
+  mermaid.initialize({startOnLoad:true, theme:'neutral', themeVariables:{primaryColor:'#efeee5', primaryBorderColor:'#1B365D', primaryTextColor:'#1f1d18', lineColor:'#6b665b', secondaryColor:'#f3ecdc', tertiaryColor:'#f5f4ed'}});
+</script>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="folio">
+    <span><a href="index.html">← Docs</a> · B2B Order Fulfillment · <a href="index.html">v0.1</a></span>
+    <span>04 · Architecture</span>
+    <span>分层 · 依赖 · 0.1 裁剪</span>
+  </header>
+
+  <div class="kicker">
+    <span class="tag">架构 · 0.1 版本</span>
+    <span class="tag red">裁决源：ord_fulfill demo</span>
+    <span class="mono" style="font-size:11px; letter-spacing:.18em; color:var(--ink2);">把现有已经做的用好 · 多余部分列给你先放着</span>
+  </div>
+
+  <h1>架构设计 · 0.1<br/><span style="font-style:italic; color:var(--blue);">分层 · 依赖 · 裁剪</span></h1>
+
+  <p class="lede">0.1 架构原则：<strong>尽可能把现有已经做的用好</strong>；稍微多余没用上的部分列出来标注（不删除）。本文档在既有 <span class="mono">docs/02-architecture.html</span> 基础上重构：描述服务依赖关系、架构分层、Temporal/SpiceDB/防线/幂等沿用与 0.1 适用范围，并新增<strong>飞书数据同步 Job</strong> 组件（0.1 上线方式：不打扰现有飞书流程，数据同步进本系统流里可见可操作）。D-008 后发布为<strong>双轨</strong>：对外轨 A 不变，另增内部影子轨 S。D-009 定无托底与「全节点覆盖 + 差异映射可接受」；D-010 定影子栈<strong>独立环境</strong>（compose 自带 shadow-temporal，与 A 轨零共享面）并运行到 v0.3 后撤销；D-011 定影子系统可多次发布、以六同原则保持与真实系统近乎等效，详见 <a href="12-shadow-full-flow.html">12-shadow-full-flow.html</a>。</p>
+
+  <nav class="toc">
+    <div class="tt">CONTENTS · 目录</div>
+    <a href="#s1"><span class="mono">1</span>总体架构（0.1 版 · 含飞书同步 Job）</a>
+    <a href="#s2"><span class="mono">2</span>架构分层（API / Domain / Repo / Workflow / Integration）</a>
+    <a href="#s3"><span class="mono">3</span>服务依赖关系</a>
+    <a href="#s4"><span class="mono">4</span>关键机制沿用（Temporal · SpiceDB · 防线 · 幂等）</a>
+    <a href="#s5"><span class="mono">5</span>0.1 多余部分清单（标记 · 不删除）</a>
+    <a href="#s6"><span class="mono">6</span>0.1 新增组件（飞书同步 Job）</a>
+    <a href="#s7"><span class="mono">7</span>ADR 摘要</a>
+    <a href="#s8"><span class="mono">8</span>影子轨 S（内部 · 12-shadow-full-flow）</a>
+  </nav>
+
+  <h2 id="s1"><span class="no">1 ·</span> 总体架构（0.1 版）</h2>
+  <div class="mermaid">
+flowchart TB
+  subgraph client["客户端层"]
+    WECOM["企业微信<br/>S1 侧边栏 H5 / S3 应用卡片 / S4 工作台<br/>+ 仓库群（回单发群）"]
+    HTTP["HTTP 客户端 / 订单后台（财务凭证主路径）"]
+  end
+  subgraph app["应用层 (Go)"]
+    API["cmd/api<br/>HTTP API 服务"]
+    WE["cmd/wecom<br/>企微接入服务<br/>（回调/出站/凭证机器人）"]
+    WK["cmd/worker<br/>Temporal Worker"]
+    SYNC["cmd/sync<br/>飞书数据同步 Job（0.1 新增）"]
+  end
+  subgraph domain["领域层 (internal/domain)"]
+    FSM["4×FSM 状态机<br/>ORD/STK/SHP/INV + PreOrder"]
+    VO["值对象: 数量/金额/幂等键"]
+    CONS["守恒断言: 备货/发货/库存/开票"]
+  end
+  subgraph intg["接入层 (internal/integration)"]
+    CFG["BusinessConfigProvider<br/>StaticConfigProvider"]
+    SRC["DynamicSource + Registry"]
+  end
+  subgraph infra["基础设施"]
+    PG[("PostgreSQL 16<br/>事实 + 事件链 + 幂等映射")]
+      PGAPI["pgAPI HTTP<br/>products/customers/purchase-contracts"]
+    SZ[("SpiceDB<br/>RBAC/ReBAC + caveat")]
+    TP[("Temporal<br/>主流程/子流程/Signal/Timer")]
+  end
+  subgraph ext["外部系统（0.1 数据同步）"]
+    FSDB[("飞书数据库<br/>原订单/审批数据")]
+    BITABLE[("飞书多维表<br/>bitable_flow_records")]
+    APPROVAL[("飞书三方审批流<br/>（原审批流不停）")]
+  end
+  WECOM --> WE
+  HTTP --> API
+  API --> WK
+  WE --> WK
+  WK --> FSM
+  WK --> PG
+  WK --> SZ
+    WK --> PGAPI
+  API --> PG
+  API --> SZ
+  WE --> PG
+  WE --> WECOM
+  SYNC --> FSDB
+  SYNC --> BITABLE
+  SYNC --> APPROVAL
+  SYNC --> PG
+  API -.-> CFG
+  WK -.-> CFG
+  WE -.-> SRC
+  WE -.-> PG
+  </div>
+  <figcaption>图 1 · 0.1 总体架构 —— 在既有四层（客户端/应用/领域/接入/基础设施）之上新增 cmd/sync 飞书同步 Job；数据流单向：飞书 → 本系统 PG → 派生视图</figcaption>
+
+  <div class="note"><span class="tt">0.1 数据流要点</span><br/>
+    ① 飞书侧（数据库/多维表/三方审批流）是<strong>既有事实源</strong>，原审批流<strong>不停</strong>；② <span class="mono">cmd/sync</span> 周期性把飞书数据<strong>单向只读同步</strong>进本系统 PG（映射为订单/审批/回单视图），商务在本系统流里可见可操作；③ 本系统的写操作（商务侧流程）不会反向写回飞书——0.1 是「平行流」，不是「替换流」；④ 凭证机器人从仓库群抓取回单后登记进本系统，回单状态由最新凭证版本推导。</div>
+
+  <h2 id="s2"><span class="no">2 ·</span> 架构分层</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>层</th><th>包/服务</th><th>职责</th><th>0.1 状态</th></tr>
+    <tr><td><strong>API 层</strong></td><td><span class="mono">cmd/api</span> + <span class="mono">internal/api</span></td><td>HTTP 端点（13 个）、授权预检、幂等启动 Workflow、审批动作（Signal）、查询/投影/待办、BFF 字段投影</td><td>全量启用（0.1 全部端点）</td></tr>
+    <tr><td><strong>Domain 层</strong></td><td><span class="mono">internal/domain</span></td><td>纯 Go 零依赖：4 业务 FSM + 预订单 FSM、数量/金额/幂等值对象、守恒断言（备货/发货/库存/开票）</td><td>全量启用（FSM 为事实源）</td></tr>
+    <tr><td><strong>Repo 层</strong></td><td><span class="mono">internal/repo</span></td><td>仅流程引擎数据 pgx 访问：事务/行锁/幂等写入/守恒事务、事件链 append-only、待办检索、存档游标、Outbox 写入；不再访问本地 customers/products 业务主数据</td><td>全量启用（Outbox 消费侧见 §5 标记）</td></tr>
+      <tr><td><strong>OrderData 层（D-006 新增）</strong></td><td><span class="mono">internal/orderdata</span> + <span class="mono">internal/pgapi</span></td><td>订单数据实体访问边界：products/customers 查/增/改、purchase-contracts 只读；统一鉴权与分页，不直连 PG 主数据表</td><td>启用（生产=HTTP，本地演示/测试=Memory）</td></tr>
+    <tr><td><strong>Workflow 层</strong></td><td><span class="mono">internal/workflows</span> + <span class="mono">cmd/worker</span></td><td>OrderWorkflow 主流程 + 子流程（Shipment/Transfer/ExceptionInvoice）+ PreOrderWorkflow、Signal/Timer 编排、Activity 池</td><td>全量启用（Transfer 转仓子流程标注可用性待确认）</td></tr>
+    <tr><td><strong>Integration 层</strong></td><td><span class="mono">internal/integration</span> + <span class="mono">internal/wecom</span></td><td>外部依赖唯一接入面：BusinessConfigProvider（Static 基线）、DynamicSource + Registry；企微 Gateway（入站验签/出站卡片/凭证机器人）</td><td>启用；会话存档拉取/意图自动建单暂缓（§5）</td></tr>
+    <tr><td><strong>同步层（0.1 新增）</strong></td><td><span class="mono">cmd/sync</span></td><td>飞书数据库/多维表/三方审批流 → 本系统 PG 的单向只读同步（周期性 Job）</td><td><span class="tag green">0.1 新增</span>（设计见 §6 与 11-migration）</td></tr>
+    <tr><td><strong>授权层</strong></td><td><span class="mono">internal/authz</span></td><td>SpiceDB 客户端（FullyConsistent）、Checker 接口 + StaticChecker（测试替身）、Outbox 投影器</td><td>启用（投影器阶段二标记 §5）</td></tr>
+    <tr><td><strong>企微接入层</strong></td><td><span class="mono">cmd/wecom</span></td><td>回调验签与路由、出站卡片（template_card）、jsapi 双签名、OAuth exchange、凭证机器人抓取</td><td>启用；会话存档自动拉取暂缓（§5）</td></tr>
+  </table>
+  </div>
+
+  <h2 id="s3"><span class="no">3 ·</span> 服务依赖关系</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>依赖方 → 被依赖方</th><th>关系</th><th>用途</th></tr>
+    <tr><td><span class="dep"><span class="svc">api</span> → <span class="svc">PG</span></span></td><td>直连</td><td>查询（订单/事件链/守恒视图/待办）、凭证列表</td></tr>
+    <tr><td><span class="dep"><span class="svc">api</span> → <span class="svc">SpiceDB</span></span></td><td>gRPC</td><td>授权预检（FullyConsistent 读）</td></tr>
+    <tr><td><span class="dep"><span class="svc">api</span> → <span class="svc">Temporal</span></span></td><td>gRPC</td><td>幂等启动 Workflow、审批 Signal</td></tr>
+    <tr><td><span class="dep"><span class="svc">worker</span> → <span class="svc">PG</span> / <span class="svc">SpiceDB</span></span></td><td>Activity</td><td>业务副作用（写事实/事件链/授权判定）</td></tr>
+      <tr><td><span class="dep"><span class="svc">worker</span> → <span class="svc">pgAPI</span></span></td><td>HTTP（X-API-Key）</td><td>订单数据实体：客户等级/客户名/产品存在性校验、购销合同查询、产品与客户写接口</td></tr>
+    <tr><td><span class="dep"><span class="svc">wecom</span> → <span class="svc">PG</span></span></td><td>直连</td><td>企微上下文绑定、出站消息留痕、凭证登记</td></tr>
+    <tr><td><span class="dep"><span class="svc">wecom</span> → <span class="svc">api</span></span></td><td>HTTP（转接层）</td><td>企微回调 → HTTP 动作转接（EventKey → 信号/查询），企微不承载业务逻辑</td></tr>
+    <tr><td><span class="dep"><span class="svc">sync</span> → <span class="svc">飞书 DB/多维表/审批流</span></span></td><td>外部 API / 只读</td><td>周期性拉取 → 映射 → 写入本系统 PG</td></tr>
+    <tr><td><span class="dep"><span class="svc">sync</span> → <span class="svc">PG</span></span></td><td>直连</td><td>写入同步数据（幂等批次，migration_batches 锚点）</td></tr>
+    <tr><td><span class="dep"><span class="svc">worker</span> → <span class="svc">wecom</span>（出站）</span></td><td>NotifyWecom Activity</td><td>审批/催办/状态卡片推送（S3）</td></tr>
+    <tr><td><span class="dep"><span class="svc">wecom</span> → <span class="svc">仓库群</span></span></td><td>企微群消息</td><td>凭证机器人抓取回单（入站方向）</td></tr>
+  </table>
+  </div>
+  <p><strong>依赖方向纪律</strong>（沿用既有设计）：integration → domain（复用纯类型，domain 不感知 integration）；workflows/api → integration（只依赖接口契约）；禁止反向依赖。</p>
+
+  <h2 id="s4"><span class="no">4 ·</span> 关键机制沿用（0.1 适用范围）</h2>
+
+  <h3><span class="no">4.1</span> Temporal 编排</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>机制</th><th>用法</th><th>0.1 适用范围</th></tr>
+    <tr><td>主流程 OrderWorkflow</td><td>四段强顺序推进（ORD→STK→SHP→INV），段内状态机表驱动</td><td>全量启用（0.1 全部订单走此链）</td></tr>
+    <tr><td>人工闸门 Signal</td><td>审价/终审/备货/发货/开票/例外审核全部 Signal 等待；AI 路径不得绕过</td><td>全量启用（含守门员确认）</td></tr>
+    <tr><td>Timer 催办</td><td>24h 提醒 / 48h 升级；无回单 5 天例外；预订单 24h 升级</td><td>启用（参数经接入层策略读取）</td></tr>
+    <tr><td>子流程 ShipmentWorkflow</td><td>一次发货（分配→实发→库存联动单事务）；一张发货单只发一次</td><td>启用</td></tr>
+    <tr><td>子流程 TransferWorkflow</td><td>转仓/退回（回 STK 段）</td><td><span class="tag amber">保留，0.1 可用性待确认</span>（demo 未演示转仓）</td></tr>
+    <tr><td>子流程 ExceptionInvoiceWorkflow</td><td>无回单超期/提前申请 → 例外审核</td><td>启用（CW2 无回单开票）</td></tr>
+    <tr><td>PreOrderWorkflow</td><td>智能下单：消息 → 预订单 → 销售确认 Signal → 派生正式订单</td><td>启用<strong>人工段</strong>（智能下单确认卡）；自动捕捉段暂缓</td></tr>
+  </table>
+  </div>
+
+  <h3><span class="no">4.2</span> SpiceDB 授权</h3>
+  <ul>
+    <li>唯一授权判定点：authz.Checker → CheckPermission（FullyConsistent，撤销即时生效）；应用代码零硬编码授权；</li>
+    <li>三层模型：租户隔离 ∩ 资源级关系（prestock/shipment/evidence 一等对象）∩ caveat（expiry_ok 代办时效）；</li>
+    <li>字段级投影（BFF）：仓管剥价（CQ-03）、客户联系人剥金额/内部备注——demo 中「金额对仓管不可见」即此机制；</li>
+    <li>0.1 角色矩阵：销售（本人）/商务（ops 全量）/销售主管（审价闸门）/财务（到账+开票+例外）/仓管（本仓剥价）/董事长（C/D 终审）/销售助理（代办语义）。</li>
+  </ul>
+
+  <h3><span class="no">4.3</span> 一致性防线（7 层 · 0.1 启用标注）</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>#</th><th>防线</th><th>防什么</th><th>0.1 状态</th></tr>
+    <tr><td class="mono">1</td><td>CHECK 约束</td><td>负库存/负数量/超量发货（qty>=0、quantity>0、shipped_qty<=planned_qty）</td><td>启用（CG2 超发拦截）</td></tr>
+    <tr><td class="mono">2</td><td>行锁 FOR UPDATE</td><td>并发发货超卖、并发确认竞态</td><td>启用（库存扣减侧见 #4 标注）</td></tr>
+    <tr><td class="mono">3</td><td>UNIQUE(tenant_id, idempotency_key)</td><td>重复下单/发货/开票/建预订单</td><td>启用（XS3 确认只发生一次）</td></tr>
+    <tr><td class="mono">4</td><td>单事务多写</td><td>发货+库存扣减；开票+守恒校验；状态+事件链</td><td>启用（0.1 库存扣减暂缓，守恒与事件链保留）</td></tr>
+    <tr><td class="mono">5</td><td>守恒聚合校验</td><td>∑发货≤订单、∑开票≤∑发货、库存≥0（对账根基）</td><td>启用（L3 脚本）</td></tr>
+    <tr><td class="mono">6</td><td>FSM 表驱动</td><td>非法状态迁移</td><td>启用</td></tr>
+    <tr><td class="mono">7</td><td>补偿/回退路径</td><td>退回重提、转仓换仓、开票失败重试</td><td>启用（驳回/重提在 demo XS4）</td></tr>
+  </table>
+  </div>
+
+  <h3><span class="no">4.4</span> 幂等机制（三层叠加）</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>层</th><th>机制</th><th>0.1 落点</th></tr>
+    <tr><td class="mono">1</td><td>API/DB：(tenant_id, idempotency_key) 复合唯一 + payload_hash 指纹</td><td>下单/发货/开票幂等；同键异 payload → 409</td></tr>
+    <tr><td class="mono">2</td><td>Temporal：WorkflowID = "order-" + tenant + "-" + key；重复 Start → 回查同一流程</td><td>智能下单确认派生订单</td></tr>
+    <tr><td class="mono">3</td><td>业务域消息幂等：(tenant_id, group_id, msg_id) 唯一；分录级幂等（:ship/:inv 段后缀）</td><td>企微重发/重放防重复建单</td></tr>
+  </table>
+  </div>
+
+  <h2 id="s5"><span class="no">5 ·</span> 0.1 多余部分清单（标记 · 不删除）</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>#</th><th>组件/能力</th><th>0.1 状态</th><th>说明</th><th>保留原因</th></tr>
+    <tr><td class="mono">M1</td><td><strong>库存扣减链路</strong>（inventory_items 扣减 + CQ-08 库存联动事务）</td><td><span class="tag amber">0.1 暂缓（已执行：发货不扣库存）</span></td><td>锁库存暂不做（A1：先补缺货业务数据，等产品到岗再议库存管理需求）；表与 CHECK 约束保留，发货守恒校验照常（∑发货 ≤ ∑备货）；扣减函数保留待 0.2 恢复</td><td>0.2 库存管理需求已列入计划</td></tr>
+    <tr><td class="mono">M2</td><td><strong>会话存档自动拉取</strong>（cmd/wecom 拉取循环 + wecom_archive_cursor 消费）</td><td><span class="tag amber">0.1 暂缓</span></td><td>自动下单移出一期（A8：同城企微备案未完成，API 有风险）；游标基础设施保留（L1-14）</td><td>备案完成后恢复自动捕捉</td></tr>
+    <tr><td class="mono">M3</td><td><strong>意图解析自动建单</strong>（parse_intent / resolve_sku 自动生成预订单）</td><td><span class="tag amber">0.1 暂缓</span></td><td>智能下单<strong>人工确认段</strong>保留（XS3 确认卡）；自动捕捉段 -tags deferred</td><td>LLM 供应商/评测集就绪后恢复</td></tr>
+    <tr><td class="mono">M4</td><td><strong>Outbox 投影器消费侧</strong>（异步同步 SpiceDB 关系）</td><td><span class="tag amber">0.1 不启用</span></td><td>0.1 用 StaticChecker/直接判定；outbox_events 表保留，写入侧保留</td><td>阶段二（场景 G/H 代办 TTL/联系人变更）</td></tr>
+    <tr><td class="mono">M5</td><td><strong>转仓子流程 TransferWorkflow</strong>（STK 段转仓审核）</td><td><span class="tag amber">保留待确认</span></td><td>demo 未演示转仓；仓管退回/少发回退保留</td><td>业务确认后启用</td></tr>
+    <tr><td class="mono">M6</td><td><strong>客户联系人（contact）角色视图</strong>（shipment#customer_contact 物流视图）</td><td><span class="tag amber">0.1 不启用</span></td><td>0.1 客户侧通过企微群沟通，无独立联系人登录；customer_contacts 表保留</td><td>阶段二（客户自助物流查询）</td></tr>
+    <tr><td class="mono">M7</td><td><strong>作废发货 void</strong>（30min 窗口 caveat）</td><td><span class="tag amber">保留待确认</span></td><td>demo 未演示；设计保留</td><td>发货纠错场景</td></tr>
+    <tr><td class="mono">M8</td><td><strong>多租户扩展</strong>（智厨等租户配置）</td><td><span class="tag amber">0.1 不启用</span></td><td>0.1 单租户（长安仁恒/虹励商务）；多备案配置模型保留</td><td>0.2+ 客户扩展</td></tr>
+  </table>
+  </div>
+
+  <h2 id="s6"><span class="no">6 ·</span> 0.1 新增组件：飞书数据同步 Job（cmd/sync）</h2>
+  <div class="mermaid">
+flowchart LR
+  subgraph FS["飞书侧（既有事实源 · 原流程不停）"]
+    DB["飞书数据库<br/>orders/stock_prepares/shipments/invoices 等"]
+    BT["飞书多维表<br/>bitable_flow_records"]
+    AP["三方审批流<br/>审批实例/任务"]
+  end
+  subgraph SYNC["cmd/sync 同步 Job（周期性）"]
+    PULL["拉取（增量游标）"]
+    MAP["映射（flow_id → order_id 链路）"]
+    WRITE["写入 PG（幂等批次）"]
+  end
+  subgraph OUR["本系统 PG"]
+    O["orders + 分域事件链"]
+    M["legacy_flow_mapping<br/>迁移追溯"]
+    B["migration_batches<br/>幂等锚点"]
+  end
+  DB --> PULL
+  BT --> PULL
+  AP --> PULL
+  PULL --> MAP --> WRITE
+  WRITE --> O
+  WRITE --> M
+  WRITE --> B
+  </div>
+  <figcaption>图 6 · 飞书同步 Job —— 单向只读同步；原审批流不停；商务在本系统流里看到飞书侧数据并可操作（操作结果留在本系统，0.1 不回写飞书）</figcaption>
+  <ul>
+    <li><strong>职责</strong>：周期性（建议每日多次或实时增量）从飞书侧读取订单/审批/回单数据，映射为本系统订单视图；</li>
+    <li><strong>幂等</strong>：migration_batches 批次表锚点（UNIQUE(tenant_id, source, checksum)），可重跑不重复；</li>
+    <li><strong>映射</strong>：复用 02 §8 的 legacy_flow_mapping 设计——flow_id/stage_code/instance_id 串回订单主脊，避免四阶段实例错误折叠；</li>
+    <li><strong>只读单向</strong>：0.1 不回写飞书；「数据在我们的流里面可见，进而可以操作」= 本系统内操作（如商务看到飞书审批状态后可继续本系统的备货/开票流）；</li>
+    <li><strong>边界</strong>：原始聊天/敏感字段不迁移（沿用 02 §8.4 敏感字段 mapping/retention 冻结）；</li>
+    <li><strong>部署</strong>：作为独立容器/定时任务随 compose 部署（详见 10-deployment.html §5 与 11-migration.html）。</li>
+  </ul>
+
+  <h2 id="s7"><span class="no">7 ·</span> ADR 摘要（0.1 决策）</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>决策</th><th>选择</th><th>理由</th></tr>
+    <tr><td>0.1 流程编排</td><td>沿用既有 OrderWorkflow + 子流程 + Signal/Timer</td><td>把现有已经做的用好；人工闸门 Signal 等待天然表达人类闸门</td></tr>
+    <tr><td>凭证主路径</td><td>订单后台（财务）为主，凭证机器人兜底</td><td>demo A2 裁决：财务每天对电脑最稳；机器人只服务无电脑场景；销售合同回传仍走机器人</td></tr>
+    <tr><td>守门员</td><td>第一轮全部强制，先收紧后放行</td><td>demo A3 裁决；放行规则表 P5 待确认后迭代</td></tr>
+    <tr><td>发群通知</td><td>自动化降级：销售主动发送</td><td>避免让销售 surprise（demo XS2 帧）</td></tr>
+    <tr><td>飞书侧</td><td>只读同步，不回写；原审批流不停</td><td>A8：不打扰现有流程；仅开放部分流程给商务</td></tr>
+    <tr><td>库存</td><td>0.1 暂缓（表保留）</td><td>A1：先补业务数据，等产品到岗再议</td></tr>
+    <tr><td>自动下单</td><td>移出一期（人工确认段保留）</td><td>A8：同城企微备案未完成，API 有风险</td></tr>
+    <tr><td>仓库</td><td>主数据以真实外租仓为准（demo 华南仓为演示）</td><td>demo 为演示数据；0.1 仓库清单需真实调研（11-migration P 项）</td></tr>
+  </table>
+  </div>
+
+  <h2 id="s8"><span class="no">8 ·</span> 影子轨 S（内部 · 12-shadow-full-flow §4/§7）</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>组件</th><th>实现物</th><th>隔离点</th></tr>
+    <tr><td>shadow-ingest</td><td>cmd/shadow-ingest（复用 internal/sync 配置驱动只读摄入）</td><td rowspan="3">DSN 库名 = b2b_shadow（shadowguard）；影子自带 shadow-temporal（namespace b2b-shadow + queue b2b-shadow-order + WorkflowID shadow- 前缀）；WeCom=mock、bridge=false；独立 SpiceDB；影子租户 chang-an-shadow</td></tr>
+    <tr><td>shadow-feed</td><td>cmd/shadow-feed（internal/shadow 映射/计划 + Temporal Signal 幂等投递）</td></tr>
+    <tr><td>shadow-worker / shadow-api / shadow-audit</td><td>worker（ShadowMode 守卫 + 队列注入）、api（白名单收紧）、cmd/shadow-audit（四张数 + -interval 周期与 state-file 探针）</td></tr>
+    <tr><td>影子模式工作流</td><td>OrderWorkflowParams.Shadow + SignalShadowInject（Timer 全抑制）</td><td>S-06 确定性重放；A 轨 Shadow=false 行为不变；TestShadowParityWithNonShadow 同信号对拍</td></tr>
+    <tr><td>部署</td><td>docker-compose.shadow.yml（-p b2b-shadow 独立项目/网络，自带 shadow-temporal）+ Makefile shadow-*（含 shadow-reset-skipped）</td><td>端口仅回环；与 A 轨共享面为零（D-010），唯一出网面是只读源与运维通道</td></tr>
+  </table>
+  </div>
+
+  <footer class="colophon">
+    <span><a href="index.html">← v0.1 Docs</a></span>
+    <span>04 · Architecture · 架构章节</span>
+    <span>裁决源 ord_fulfill demo · 2026-08-16</span>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,43 @@
+# project/views/demo-boundary.yaml — demo/生产边界标注表（§09 DELIVERY 面板）
+# M2 首批标注（2026-08-13）+ 修订（2026-08-14：原始需求落地后，XS6 销售侧签收场景已删除，
+#   场景 17→16；XS1 新增客户订单 Home；XSZL1 改单页长表单；SW2 更名 ops 视角）
+# 证据等级说明（诚实标注，防"演示可点=系统已交付"误读，ECM-INFER-003）：
+#   demo: 以 docs/demo/index.html 场景存在为据（yes；removed=已删除并保留审计）
+#   backend_api: 以 cmd/internal 路由与领域代码为据（API 路由存在 = route-level；
+#                场景级实现/正确性未逐一核对，M3 建追踪边时升级）
+#   real_wecom: 一律 UNKNOWN —— 需真实企微环境验证（v3 已有 jsapi-config/auth/exchange/
+#               context token 服务端能力，但未做端到端真实链路验证）
+# 本表是 views（半自动生成视图），与 claims 的关系在 M3 通过 VERIFIES/IMPLEMENTS 边连接。
+
+schema: ECM-DEMO-BOUNDARY/v1
+generated_at: 2026-08-20T19:28:00+00:00
+generated_by: assistant (第 12 轮 route-level 证据复核，基于 HEAD 5362c78)
+verification_depth: route-level（backend_api 为 API 路由证据，非场景级验收）
+
+scenes:
+  - {id: XS1,   name: 查订单/订单详情（含客户订单 Home+筛选）, role: sales,      demo: "yes", backend_api: "yes", real_wecom: UNKNOWN, claims: [CLM-ORDER-QUERY-HOME-001, CLM-ORDER-DETAIL-001, CLM-ORDER-CUSTOMER-VIEW-001, CLM-WECOM-SEND-CUSTOMER-001]}
+  - {id: XS2,   name: 人工下单（单页长表单·五组字段）,          role: sales,      demo: "yes", backend_api: "yes", real_wecom: UNKNOWN, claims: [CLM-ORDER-ENTRY-UI-001, CLM-ORDER-FORM-FIELDS-001, CLM-ORDER-ENTRY-PRICE-001]}
+  - {id: XS3,   name: 智能下单确认卡（确认只一次+审批链时间线）, role: sales,      demo: "yes", backend_api: "yes", real_wecom: UNKNOWN, claims: [CLM-SMART-ORDER-CONFIRM-001, CLM-ORDER-APPROVAL-CHAIN-001, CLM-WECOM-NOTIFY-003]}
+  - {id: XS4,   name: 工作台（全量·驳回建议字段）,              role: sales,      demo: "yes", backend_api: "yes", real_wecom: UNKNOWN, claims: [CLM-ORDER-REJECT-001]}
+  - {id: XS5,   name: 查物流（图片发群）,                       role: customer,   demo: "yes", backend_api: UNKNOWN, real_wecom: UNKNOWN, claims: [CLM-WECOM-DELIVERY-001, CLM-WECOM-MINIPROGRAM-001]}
+  - {id: XSZG1, name: 审价审批（审批即审价·补齐业务字段）,      role: sales-mgr,  demo: "yes", backend_api: "yes", real_wecom: UNKNOWN, claims: [CLM-GROUP-ACL-006, CLM-PRICE-REVIEW-FIELDS-001]}
+  - {id: XSZL1, name: 代销售下单（单页长表单·先选归属销售）,    role: assistant,  demo: "yes", backend_api: "yes", real_wecom: UNKNOWN, claims: [CLM-ORDER-ENTRY-ASSISTANT-001, CLM-ORDER-DETAIL-001]}
+  - {id: XSZL2, name: 客户群入口代下单（归属销售自动带出锁定）, role: assistant,  demo: "yes", backend_api: "yes", real_wecom: UNKNOWN, claims: [CLM-ORDER-ENTRY-ASSISTANT-002, CLM-ORDER-DETAIL-001]}
+  - {id: SW1,   name: 备货/发货/开票,                           role: commerce,   demo: "yes", backend_api: "yes", real_wecom: UNKNOWN, claims: [CLM-GROUP-ACL-006]}
+  - {id: SW2,   name: 查全量订单（ops 视角·群外）,              role: commerce,   demo: "yes", backend_api: "yes", real_wecom: UNKNOWN, claims: [CLM-GROUP-ACL-001, CLM-ORDER-DETAIL-001]}
+  - {id: SW3,   name: 工作台全量待办,                           role: commerce,   demo: "yes", backend_api: "yes", real_wecom: UNKNOWN, claims: []}
+  - {id: CW1,   name: 上传开票凭证（机器人优先）,               role: finance,    demo: "yes", backend_api: "yes", real_wecom: UNKNOWN, claims: [CLM-RECEIPT-CHAIN-004, CLM-ORDER-DETAIL-001]}
+  - {id: CW2,   name: 审批无回单开票,                           role: finance,    demo: "yes", backend_api: "yes", real_wecom: UNKNOWN, claims: [CLM-RECEIPT-CHAIN-006]}
+  - {id: CG1,   name: 确认接受发货任务,                         role: warehouse,  demo: "yes", backend_api: "yes", real_wecom: UNKNOWN, claims: [CLM-GROUP-ACL-001, CLM-ORDER-DETAIL-001]}
+  - {id: CG2,   name: 确认已经发货（守恒拦截）,                 role: warehouse,  demo: "yes", backend_api: "yes", real_wecom: UNKNOWN, claims: []}
+  - {id: CG3,   name: 回单凭证上传（司机→仓管→凭证机器人）,    role: warehouse,  demo: "yes", backend_api: "yes", real_wecom: UNKNOWN, claims: [CLM-RECEIPT-CHAIN-011, CLM-RECEIPT-CHAIN-004]}
+  - {id: DSZ1,  name: C/D 级订单终审,                           role: chairman,   demo: "yes", backend_api: "yes", real_wecom: UNKNOWN, claims: [CLM-GROUP-ACL-005, CLM-GROUP-ACL-001, CLM-ORDER-APPROVAL-CHAIN-001, CLM-ORDER-DETAIL-001]}
+
+removed_scenes:   # 保留审计（SIM-01 校准输入）
+  - {id: XS6, name: 签收凭证自动识别（客户发签收照片→销售转发，已证伪）, removed_at: 2026-08-14, reason: 原始需求第 6 项明确删除；业务前提不成立（客户无感签收），claim CLM-RECEIPT-CHAIN-010 -> SUPERSEDED}
+
+summary:
+  demo_covered: 17/17
+  backend_api_route_evidence: 16 场景（除 XS5 物流图片生成外均有对应 API/信号路由证据；路由存在≠场景级正确，M3 仍须建追踪边）
+  real_wecom_verified: 0/17（全部 UNKNOWN，待真实企微链路验证）
+  open_item: M3 建追踪边时逐场景核对 backend 实现深度并更新本表

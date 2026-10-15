@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>04 · 开发计划 · B2B 订单履约验证项目</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+SC:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:#f5f4ed; --paper2:#efeee5; --ink:#1f1d18; --ink2:#6b665b;
+    --ink3:#3a382f; --blue:#1B365D; --rule:#d4d1c5;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif; line-height:1.6;}
+  .wrap{max-width:960px; margin:0 auto; padding:48px 40px 80px;}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;}
+  .folio{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--rule); padding-bottom:10px;
+    font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink2);}
+  .folio a{color:var(--ink2); border:none;}
+  .folio a:hover{color:var(--blue);}
+  .tag{display:inline-block; padding:3px 10px; font-size:11px; letter-spacing:.16em; background:var(--paper2); color:var(--blue);}
+  .kicker{display:flex; align-items:baseline; gap:12px; margin-top:48px;}
+  h1{font-size:clamp(32px,5vw,50px); line-height:1.12; font-weight:500; margin-top:14px; letter-spacing:-.01em;}
+  .lede{margin-top:18px; font-size:17px; line-height:1.7; color:var(--ink3); max-width:720px;}
+  h2{font-size:23px; font-weight:600; margin:52px 0 14px; color:var(--blue); display:flex; align-items:baseline; gap:12px; border-top:1px solid var(--rule); padding-top:26px;}
+  h2 .no{font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.12em;}
+  h3{font-size:17.5px; font-weight:600; margin:30px 0 10px; color:var(--ink);}
+  h3 .no{color:var(--blue); font-family:'IBM Plex Mono',monospace; font-size:12px; margin-right:8px;}
+  p{margin:10px 0; color:var(--ink3);}
+  ul,ol{margin:10px 0 10px 26px; color:var(--ink3);}
+  li{margin:5px 0;}
+  a{color:var(--blue); text-decoration:none; border-bottom:1px solid var(--rule);}
+  a:hover{border-bottom-color:var(--blue);}
+  blockquote{border-left:2px solid var(--blue); padding:10px 18px; margin:16px 0; background:var(--paper2); font-style:italic;}
+  table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  .table-wrap{overflow-x:auto; margin:16px 0 24px; border:1px solid var(--rule);}
+  .table-wrap table{margin:0;}
+  th{background:var(--paper2); color:var(--blue); text-align:left; font-weight:600; padding:9px 12px; border-bottom:1.5px solid var(--blue); font-size:12.5px; white-space:nowrap;}
+  td{padding:9px 12px; border-bottom:1px solid var(--rule); vertical-align:top; color:var(--ink3);}
+  tr:nth-child(even) td{background:#faf9f3;}
+  tr:hover td{background:#f0ede0;}
+  .mermaid{background:var(--paper); border:1px solid var(--rule); padding:18px; overflow-x:auto; text-align:center; margin:20px 0;}
+  .mermaid svg{max-width:100%; height:auto;}
+  .mermaid svg.statediagram span,.mermaid svg.statediagram div{color:#1f1d18 !important;}
+  .mermaid svg.statediagram text{fill:#1f1d18 !important;}
+  figcaption{text-align:center; font-size:12px; color:var(--ink2); margin:-10px 0 26px; font-style:italic;}
+  code{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace; font-size:13px; background:var(--paper2); padding:1px 5px;}
+  pre{background:var(--paper2); border:1px solid var(--rule); padding:16px 18px; overflow-x:auto; font-size:12.8px; line-height:1.55; margin:14px 0;}
+  pre code{background:none; padding:0;}
+  footer.colophon{margin-top:56px; padding-top:14px; border-top:1px solid var(--rule); display:flex; justify-content:space-between;
+    font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink2); flex-wrap:wrap; gap:8px;}
+  footer.colophon a{color:var(--ink2); border:none;}
+  footer.colophon a:hover{color:var(--blue);}
+  .toc{border:1px solid var(--rule); background:var(--paper2); padding:18px 24px; margin:26px 0;}
+  .toc .tt{font-size:11px; letter-spacing:.2em; color:var(--blue); margin-bottom:8px;}
+  .toc a{display:block; padding:3px 0; color:var(--ink3); border:none;}
+  .toc a:hover{color:var(--blue);}
+  .toc .mono{font-size:12px; color:var(--blue); margin-right:8px;}
+  @media(max-width:720px){.wrap{padding:28px 18px 60px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="folio">
+    <span><a href="index.html">← Docs</a> · B2B Order Fulfillment</span>
+    <span>04 · Development Plan</span>
+    <span>M0-M8 · ~16 人日</span>
+  </header>
+
+  <div class="kicker">
+    <span class="tag">Development Plan · 开发计划</span>
+    <span class="mono" style="font-size:11px; letter-spacing:.18em; color:var(--ink2);">行动计划</span>
+  </div>
+
+  <h1>开发计划<br/><span style="font-style:italic; color:var(--blue);">M0-M8 · 里程碑 × DoD</span></h1>
+
+  <p class="lede">由核心图谱（01）、架构（02）、测试（03）派生出的行动计划。结构范式来源：<span class="mono">pilot_app/docs/04-development-plan.md</span>；阶段划分融合 <span class="mono">spec/验证项目设计.html</span> 的五阶段计划。</p>
+
+  <nav class="toc">
+    <div class="tt">CONTENTS · 目录</div>
+    <a href="#s0"><span class="mono">0</span>前置决策门（Phase 0）</a>
+    <a href="#s1"><span class="mono">1</span>里程碑总览（M0-M8）</a>
+    <a href="#s2"><span class="mono">2</span>行动清单（关键交付物）</a>
+    <a href="#s3"><span class="mono">3</span>完成定义（DoD）</a>
+    <a href="#s4"><span class="mono">4</span>关键路径与风险</a>
+    <a href="#s5"><span class="mono">5</span>验收口径</a>
+  </nav>
+
+  <h2 id="s0"><span class="no">0 ·</span> 前置决策门（Phase 0，里程碑外）</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>决策项</th><th>内容</th><th>退出条件</th></tr>
+    <tr><td>企微合规（P0）</td><td>企业认证、自建应用、开通<strong>会话存档最小账号集</strong>、员工知情同意、外部联系人同意</td><td>存档可拉取 <strong>或</strong> 明确降级为半自动（S1 侧边栏 + 人工确认）</td></tr>
+    <tr><td>业务规则确认</td><td>客户等级 C/D 判定、合同要素清单、供方分流财务名单、回单 5 天阈值、产品型号对应表维护人、<strong>开票入口规则（决策门，见 01 §2.5）</strong>（13+1 条待确认规则）</td><td>形成书面确认清单</td></tr>
+    <tr><td>演示口径</td><td>演示叙事（三个记忆点：「客户说一句，订单就有一半了」「回单不卡开票」「仓管看不到价格」）</td><td>COO 版脚本定稿</td></tr>
+  </table>
+  </div>
+  <blockquote>决策门输出三分法：<strong>可行 / 有条件可行（S2 半自动）/ 不可行</strong>。若「有条件可行」，S2 相关里程碑按降级路径执行，其余不变。</blockquote>
+
+  <h2 id="s1"><span class="no">1 ·</span> 里程碑总览（M0-M8）</h2>
+  <pre class="mermaid">
+flowchart LR
+    M0 --> M1 --> M2 --> M3 --> M5 --> M6 --> M8
+    M4 -.->|并行| M3
+    M7 -.->|并行| M5
+  </pre>
+  <div class="table-wrap">
+  <table>
+    <tr><th>里程碑</th><th>做什么</th><th>验收门禁</th></tr>
+    <tr><td><strong>M0 文档基座</strong> (1d) ✅</td><td>docs/ 01-04 + 07 文档家族定稿、CQ/Score Card 评审</td><td>文档引用完整、15 CQ 全覆盖、49 Score Card 可回溯</td></tr>
+    <tr><td><strong>M1 脚手架</strong> (0.5d) ✅</td><td>go.mod、目录骨架、migrations 001-003、schema.zed（含 caveat）、Makefile、docker-compose、企微配置骨架</td><td><span class="mono">docker compose up</span> 全绿、L1-06 迁移校验；<strong>schema.zed 真实提交 + 固定 SpiceDB 镜像（v1.39+）并执行 <span class="mono">spicedb validate</span> 编译门禁（review 202608061321 P1）</strong></td></tr>
+    <tr><td><strong>M2 领域层</strong> (2d) ✅</td><td>5 个 FSM（ORD/STK/SHP/INV/PreOrder）、数量/金额值对象、守恒断言、幂等键、回单分流判定</td><td><strong>L0-01..10 全绿，domain 覆盖 100%</strong></td></tr>
+    <tr><td><strong>M3 持久层</strong> (2d) ✅</td><td>repo：事务/行锁/幂等/守恒事务/事件链 append-only/待办检索/存档游标</td><td><strong>L1-01..06、L1-11..14 全绿</strong></td></tr>
+    <tr><td><strong>M4 授权层</strong> (1.5d，并行) ✅ + <strong>M4-RBAC 升级</strong>（rebac_cases_spicedb.html，决策 D1-D4）</td><td>schema.zed 8 类场景（prestock/shipment/evidence 一等对象 + account_owner + 8 细粒度权限）、ReBAC 层级、caveat 代办时效、Outbox 投影器（outbox_events + 消费循环 + 幂等）、BFF 双视图投影（仓管/客户联系人）</td><td><strong>L1-07..10 + L1-15 全绿</strong>（授权唯一判定点）；<strong>L1 四类断言必绿：本仓可读但无价格、跨仓拒绝、跨租户拒绝、同键不同租户互不冲突</strong></td></tr>
+    <tr><td><strong>M5 流程层</strong> (3d) ✅</td><td>OrderWorkflow 主流程 + 内联 Shipment/Transfer/ExceptionInvoice 段 + Signal/Timer + PreOrderWorkflow（子流程形态为基线裁剪，见 05 §3）</td><td><strong>L2-01..14 全绿</strong></td></tr>
+    <tr><td><strong>M6 API 层</strong> (1.5d) ✅</td><td>HTTP 端点、幂等启动、审批动作（Signal）、查询/投影/待办、错误映射（Temporal 客户端 + LocalRunner 双模式）</td><td>L2 全链路经 HTTP 入口复跑全绿</td></tr>
+    <tr><td><strong>M7 企微接入层</strong> (3d，并行) ✅</td><td>通道隔离：mock（测试默认）/ official（官方 API 封装）/ thirdparty（预留分支）；会话存档拉取、意图识别（规则 mock + LLM 钩子）、出站卡片、回调验签（W1 往返测试）</td><td>S2 全链 Mock 通过：消息→卡片→确认→订单；L1-14 全绿</td></tr>
+    <tr><td><strong>M8 系统验证</strong> (1.5d) ✅</td><td>并发/对账/审计脚本（真库全绿）、覆盖率 88.1%（domain 100%）、roundtrip 15/15、种子幂等、复盘回填（06）；企微 W1/W2 门禁以 mock+官方封装覆盖（真实环境 W3/W4 待接入）</td><td><strong>L3-01..06 全绿，全仓 ≥98%，05/06 报告回填；W1/W2 企微门禁全绿（07 §9.1），W3/W4 真实环境清单与证据就绪（07 §9.2）</strong></td></tr>
+  </table>
+  </div>
+  <blockquote><strong>投入预估</strong>：M0 1 + M1 0.5 + M2 2 + M3 2 + M4 1.5(并行) + M5 3 + M6 1.5 + M7 3(并行) + M8 1.5 = <strong>约 16 人日</strong>（关键路径约 11.5 人日：M0→M1→M2→M3→M5→M6→M8；企微合规决策门、LLM 评测集另计）。</blockquote>
+
+  <h2 id="s2"><span class="no">2 ·</span> 行动清单（关键交付物）</h2>
+
+  <h3><span class="no">M0 ·</span> 文档基座</h3>
+  <ul>
+    <li>☐ <span class="mono">docs/01-core-graph.html</span> 评审：15 CQ 业务方确认（是否有遗漏的能力问题）</li>
+    <li>☐ <span class="mono">docs/03-testing.html</span> Score Card 评审：49 例与业务环节一一对应</li>
+    <li>☐ <span class="mono">docs/07-wecom-integration.html</span>：S1-S4 场景 + 多备案切换配置模型定稿</li>
+    <li>☐ 业务规则确认清单（13+1 条待确认项，含<strong>开票入口决策门</strong>）提交业务方</li>
+  </ul>
+
+  <h3><span class="no">M1 ·</span> 脚手架</h3>
+  <ul>
+    <li>☐ <span class="mono">go mod init</span>、目录骨架（cmd/api、cmd/worker、cmd/wecom、internal/*）</li>
+    <li>☐ migrations 001-003（表 + CHECK + UNIQUE + 租户复合 FK + 索引；<strong>按 02 §3.1/§8.3 正式清单建表</strong>：legacy/resubmit 字段、独立 stock_prepares、五类事件表、approval_comments、legacy_flow_mapping、migration_batches）</li>
+    <li>☐ <span class="mono">schema.zed</span>：tenant/customer/warehouse/order + caveat <span class="mono">expiry_ok</span></li>
+    <li>☐ Makefile（test-l0..l3、cover、up/down、l3-seed）+ docker-compose.yml</li>
+    <li>☐ 企微配置骨架（租户 × 域名/应用/密钥配置项，为多备案切换预留）</li>
+  </ul>
+
+  <h3><span class="no">M2 ·</span> 领域层</h3>
+  <ul>
+    <li>☐ <span class="mono">domain/ord.go</span> / <span class="mono">stk.go</span> / <span class="mono">shp.go</span> / <span class="mono">inv.go</span>：四 FSM 表驱动（单一事实源）</li>
+    <li>☐ <span class="mono">domain/preorder.go</span>：预订单 FSM（CAPTURED→…→CONFIRMED/IGNORED/ESCALATED）</li>
+    <li>☐ <span class="mono">domain/qty.go</span> / <span class="mono">amount.go</span>：值对象（零/负/溢出拒绝）</li>
+    <li>☐ <span class="mono">domain/consistency.go</span>：守恒断言（备货≤订单、发货≤备货、开票≤发货）</li>
+    <li>☐ <span class="mono">domain/idem.go</span>：幂等键规范；<span class="mono">domain/receipt.go</span>：回单四分流判定</li>
+    <li>☐ L0-01..10 表驱动测试</li>
+  </ul>
+
+  <h3><span class="no">M3 ·</span> 持久层</h3>
+  <ul>
+    <li>☐ repo：订单/明细/发货/开票/预订单 CRUD（全部幂等键唯一约束兜底）</li>
+    <li>☐ 库存扣减 <span class="mono">SELECT ... FOR UPDATE</span>（行锁）+ 发货单事务（防线 4）</li>
+    <li>☐ 开票守恒校验事务（防线 4/5）</li>
+    <li>☐ ORD/STK/SHP/INV/PreOrder 分域事件链 append-only（与各聚合状态迁移同事务）</li>
+    <li>☐ <span class="mono">approval_tasks</span> 全节点枚举（含 INV 七节点）待办检索；<span class="mono">wecom_archive_cursor</span> 原子 checkpoint</li>
+    <li>☐ L1-01..06、L1-11..14 集成测试 + 错误注入（删表/触发器/唯一冲突）</li>
+  </ul>
+
+  <h3><span class="no">M4 ·</span> 授权层（并行）</h3>
+  <ul>
+    <li>☐ <span class="mono">authz</span> 包：SpiceDB 客户端（FullyConsistent）+ Checker 接口 + StaticChecker</li>
+    <li>☐ 9 类授权场景用例接入（销售本人/商务全量/仓管本仓/代办/离职交接/转交/多租户/例外审批/双门禁）</li>
+    <li>☐ BFF 字段投影（仓管视图剥离价格）</li>
+    <li>☐ L1-07..10 集成测试（spicedb testserver）</li>
+  </ul>
+
+  <h3><span class="no">M5 ·</span> 流程层</h3>
+  <ul>
+    <li>☐ <span class="mono">OrderWorkflow</span>：四段推进 + Signal 等待（审价/董事长/仓管/财务/实发/开票）+ Timer（24h/48h 催办）</li>
+    <li>☐ 子流程：<span class="mono">ShipmentWorkflow</span>（一次发货）、<span class="mono">TransferWorkflow</span>（转仓/退回）、<span class="mono">ExceptionInvoiceWorkflow</span>（回单异常）</li>
+    <li>☐ <span class="mono">PreOrderWorkflow</span>：消息→预订单→确认 Signal→派生订单（双幂等）</li>
+    <li>☐ Activity 池（AuthCheck 独立验证者 + 业务 Activity + NotifyWecom）+ 重试/超时策略</li>
+    <li>☐ L2-01..14（Temporal TestSuite + fakeStore 故障钩子）</li>
+  </ul>
+
+  <h3><span class="no">M6 ·</span> API 层</h3>
+  <ul>
+    <li>☐ HTTP 端点：订单提交/审批动作（Signal）/发货/开票/查询（状态/事件链/守恒视图/待办）</li>
+    <li>☐ 幂等启动（<span class="mono">WorkflowID = "order-" + tenant_id + "-" + idempotency_key</span>）+ 同键异 payload → 409</li>
+    <li>☐ 字段投影中间件 + 错误映射</li>
+    <li>☐ L2 经 HTTP 入口复跑</li>
+  </ul>
+
+  <h3><span class="no">M7 ·</span> 企微接入层（并行，详见 07）</h3>
+  <ul>
+    <li>☐ 会话存档拉取循环（seq checkpoint / 两段解密 / 5 天窗口守护）</li>
+    <li>☐ 意图识别接线：LLM 候选 + 确定性校验（SKU/数量/价格/库存/权限）</li>
+    <li>☐ 出站 <span class="mono">template_card</span>（确认/修改/忽略）+ response_url + 客户群消息核验</li>
+    <li>☐ S1 侧边栏 / S4 工作台 H5 + OAuth + 双票据</li>
+    <li>☐ 回调验签、消息幂等去重；多备案配置加载（按租户）</li>
+  </ul>
+
+  <h3><span class="no">M8 ·</span> 系统验证</h3>
+  <ul>
+    <li>☐ scripts：concurrency / reconcile / audit / seeddata（runID 可重复）</li>
+    <li>☐ <span class="mono">make cover</span> 门禁（domain 100%、全仓 ≥98%，数值比较）</li>
+    <li>☐ code-review-graph roundtrip：15 CQ 逐条代码图回答（回填 <span class="mono">docs/05</span>）</li>
+    <li>☐ 复盘回填 <span class="mono">docs/06</span>（风险 R1-Rn、倒推影响面）</li>
+    <li>☐ 演示脚本走查（COO 版 / 智厨版）与 UAT 验收</li>
+  </ul>
+
+  <h2 id="s3"><span class="no">3 ·</span> 完成定义（DoD，通用）</h2>
+  <ol>
+    <li>该阶段全部 score card 测试绿（含新增回归），零静默 Skip、零假绿、零空测试。</li>
+    <li>覆盖率不倒退（M2 起 domain=100%；M8 全仓 ≥98%）。</li>
+    <li>文档同步：代码行为偏离图谱/架构 → <strong>先改文档再改代码</strong>（roundtrip 纪律）。</li>
+    <li>提交历史干净：每阶段一个 commit，可逐里程碑回滚。</li>
+    <li>人工闸门纪律：任何自动化路径未过人工确认 Signal，不得生成正式订单/推进关键审批。</li>
+  </ol>
+
+  <h2 id="s4"><span class="no">4 ·</span> 关键路径与风险</h2>
+  <p><strong>关键路径</strong>：<span class="mono">M0 → M1 → M2 → M3 → M5 → M6 → M8</span>；<strong>M4 与 M3 并行、M7 与 M5/M6 并行</strong>（依赖：M7 的预订单接线依赖 M5 的 PreOrderWorkflow 契约，先定契约后并行）。</p>
+  <div class="table-wrap">
+  <table>
+    <tr><th>风险</th><th>影响/概率</th><th>缓解</th></tr>
+    <tr><td>企微会话存档合规不通过（员工/外部联系人不同意）</td><td>高/中</td><td>Phase 0 决策门先行；降级路径 = S1 侧边栏 + 人工确认（半自动），验收口径改为「有条件可行」</td></tr>
+    <tr><td>企微 5 天窗口丢消息 / 限流（45009、4000 次/分）</td><td>高/中</td><td>原子 checkpoint + 持续拉取 + 重试退避；L1-14 专项测试</td></tr>
+    <tr><td>LLM 意图识别不确定性（SKU 归一化/多义表达）</td><td>高/中</td><td>LLM 只产候选 + 确定性校验 + 人工确认兜底；评测集 ≥50 条、直接确认率 ≥80%、延迟 ≤2 分钟</td></tr>
+    <tr><td>ReBAC caveat 语法/版本兼容（SpiceDB 升级）</td><td>中/低</td><td>spicedb testserver 先行验证（pilot_app 复盘 R2 教训）；固定镜像版本</td></tr>
+    <tr><td>覆盖率门禁后期补成本高</td><td>中/高</td><td>每阶段即时门禁（M2 起），不做期末总攻</td></tr>
+    <tr><td>审批链复杂导致 Signal/Timer 编排 bug</td><td>中/中</td><td>TestSuite 确定性测 Timer/重放（L2-11/13）；子流程隔离</td></tr>
+    <tr><td>13 条业务规则未确认（回单阈值/供方分流名单等）</td><td>中/中</td><td>M0 提交确认清单，未确认项取默认值（5 天/按文档）并在文档标注待确认</td></tr>
+  </table>
+  </div>
+
+  <h2 id="s5"><span class="no">5 ·</span> 验收口径（与验证项目设计 §9 对齐）</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>指标</th><th>目标</th></tr>
+    <tr><td>S2 端到端延迟（群里发言 → 确认卡片）</td><td>≤ 2 分钟</td></tr>
+    <tr><td>预订单直接确认率（评测集 ≥50 条）</td><td>≥ 80%</td></tr>
+    <tr><td>授权 9 类用例</td><td>全绿、零越权</td></tr>
+    <tr><td>企微门禁 W1/W2（回调验签 + 多租户配置隔离）</td><td>全绿（正式验收门禁）</td></tr>
+    <tr><td>企微真实 E2E W3/W4（Phase 3）</td><td>Fake 前置全绿 + 真实环境验收证据记录</td></tr>
+    <tr><td>ORD→STK→SHP→INV 全链路（Mock）</td><td>全通</td></tr>
+    <tr><td>合规检查（知情同意/存档留痕）</td><td>通过</td></tr>
+    <tr><td>决策门输出</td><td>可行 / 有条件可行 / 不可行</td></tr>
+  </table>
+  </div>
+
+  <footer class="colophon">
+    <span><a href="index.html">← Docs Index</a></span>
+    <span>04 · Development Plan · B2B Order Fulfillment</span>
+  </footer>
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad:true, theme:'base',
+    themeVariables:{
+      fontFamily:"'Noto Serif SC','Source Serif Pro',serif",
+      primaryColor:'#efeee5', primaryBorderColor:'#1B365D', primaryTextColor:'#1f1d18',
+      lineColor:'#1B365D', secondaryColor:'#f5f4ed', tertiaryColor:'#f5f4ed',
+      edgeLabelBackground:'#f5f4ed', clusterBkg:'#f5f4ed', clusterBorder:'#d4d1c5',
+      stateBkg:'#efeee5', stateBorder:'#1B365D', stateLabel:'#1f1d18',
+      stateLabelColor:'#1f1d18', labelTextColor:'#1f1d18', transitionLabelColor:'#1f1d18',
+      actorBkg:'#efeee5', actorBorder:'#1B365D', actorTextColor:'#1f1d18', actorLineColor:'#1B365D',
+      noteBkg:'#efeee5', noteBorder:'#d4d1c5'
+    },
+    flowchart:{curve:'basis'}, er:{useMaxWidth:true}
+  });
+</script>
+</body>
+</html>

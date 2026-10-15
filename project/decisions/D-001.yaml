@@ -1,0 +1,13 @@
+# D-001 采用 ECM 1.0.0 作为项目迭代机制（bootstrap）
+decision_id: D-001
+choice: 采用"证据收敛式项目迭代机制"（ECM）1.0.0 作为本项目后续迭代机制，先落库控制面结构（§09 M0/M1）
+rationale: 项目已积累大量 spec/docs/demo/代码/测试，但缺少可机械判定的差异发现、冲突裁决与交接契约；
+          文档给出 M0-M5 迁移路线与附录 A 符合性协议，可按 bootstrap 方式启动后续迭代
+premises:
+  - 根 HTML 自述 ECM 1.0.0 PROPOSED，非 ACTIVE 指针（附录 A.4/A.12）
+  - 机制激活需 ECM-ACT-001 四件套与人工批准，本次仅交付结构
+objections: []
+decider: project-governance（bootstrap 执行者 reasonix-executor）
+effective_interval: {from: "2026-08-13T00:00:00+00:00", to: null}
+supersedes: []
+review_condition: 每次机制激活评估时复核

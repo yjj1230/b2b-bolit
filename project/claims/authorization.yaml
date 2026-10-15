@@ -1,0 +1,86 @@
+# project/claims/authorization.yaml — 权限域原子声明（ECM §04 Claim 模型）
+# M2 首批落库（2026-08-13）：群成员权限交集簇（§09 SECURITY 面板，R2/R3 横切声明）
+# 覆盖：群内金额不可见（ALL-03）、技术参数明文禁止（ALL-04）、权限最小交集（ALL-02）、
+#       CRM 群成员定义（ALL-01/05）、客户等级可见性（XS1-08）、审价归属（用例总表 v2）。
+# 来源引用：SRC-REVIEW-20260812 = spec/review/202608121845_修改意见.html；
+#           SRC-USECASE-V2 = docs/用例总表.html
+
+claims:
+  - claim_id: CLM-GROUP-ACL-001
+    statement: {subject: 群内资金类信息（单价/金额/账期）, predicate: must_not_appear, object: 明文（客户在群里问也不发；仅小程序内按授权展示）}
+    scope: {product: wecom-order-assistant, phase: pilot-v0, domain: group-acl, applies_to: [群消息, 订单卡片, 截图, 机器人通知]}
+    authority: {basis: 评审共识·强制规则 ALL-03 + 原始需求第 2 项（客户图不含金额，主叙事统一）, sources: [SRC-REVIEW-20260812#ALL-03, SRC-ADVICE#send-customer]}
+    semantic_status: ACCEPTED
+    implementation: {demo: IMPLEMENTED, backend: UNPLANNED, production_ui: UNPLANNED}
+    verification: {demo_smoke: PASS, business_uat: UNVERIFIED}
+    risk: R3   # 资金信息泄露风险
+    owner: security-owner
+    acceptance: {oracle: 群内所有消息/截图/卡片的资金字段投影校验（SIM-04 活案例：接口字段投影收紧）；全场景无“含金额/不含金额”矛盾描述}
+    relations: {constrains: CLM-ORDER-ENTRY-PRICE-001, refined_by: CLM-ORDER-CUSTOMER-VIEW-001, reflected_by: [internal 群内接口投影, 测试]}
+    open_note: 与代码侧字段投影实现（群内接口不返回金额）互证；需建立 VERIFIES 边（M3）
+  - claim_id: CLM-ORDER-CUSTOMER-VIEW-001
+    statement: {subject: 发客户的订单信息图, predicate: excludes, object: 内部审批意见/合同信息/内部备注（金额按权限原则，当前主叙事=不含金额）}
+    scope: {product: wecom-order-assistant, role: customer, scenario: XS1, phase: pilot-v0}
+    authority: {basis: 原始需求第 2 项（P0）, sources: [SRC-ADVICE#send-customer, SRC-DEMO#XS1]}
+    semantic_status: ACCEPTED
+    implementation: {demo: IMPLEMENTED, backend: UNPLANNED, production_ui: UNPLANNED}
+    verification: {demo_smoke: PASS, business_uat: UNVERIFIED}
+    risk: R3   # 内部信息越权外泄
+    owner: security-owner
+    acceptance: {oracle: 验收：客户可见卡片不含审批意见/合同/备注；金额描述全局一致}
+    relations: {refines: CLM-GROUP-ACL-001, related_to: CLM-WECOM-SEND-CUSTOMER-001}
+  - claim_id: CLM-GROUP-ACL-002
+    statement: {subject: 技术参数/配方类信息, predicate: must_not_appear, object: 明文（仅小程序授权查看）}
+    scope: {product: wecom-order-assistant, phase: pilot-v0, domain: group-acl}
+    authority: {basis: 评审共识·强制规则 ALL-04, sources: [SRC-REVIEW-20260812#ALL-04]}
+    semantic_status: ACCEPTED
+    implementation: {demo: IMPLEMENTED, backend: UNPLANNED, production_ui: UNPLANNED}
+    verification: {demo_smoke: PASS, business_uat: UNVERIFIED}
+    risk: R3
+    owner: security-owner
+    acceptance: {oracle: 群内消息含技术参数时的脱敏校验}
+    relations: {related_to: CLM-GROUP-ACL-001}
+  - claim_id: CLM-GROUP-ACL-003
+    statement: {subject: 群内发出的信息, predicate: clipped_to, object: 所有群成员可见权限的最小交集}
+    scope: {product: wecom-order-assistant, phase: pilot-v0, domain: group-acl}
+    authority: {basis: 评审共识·必改 ALL-02, sources: [SRC-REVIEW-20260812#ALL-02]}
+    semantic_status: ACCEPTED
+    implementation: {demo: IMPLEMENTED, backend: UNPLANNED, production_ui: UNPLANNED}
+    verification: {demo_smoke: PASS, business_uat: UNVERIFIED}
+    risk: R3   # 权限交集裁剪错误可致资金/技术信息越权可见
+    owner: security-owner
+    acceptance: {oracle: 多角色群（客户+销售+商务）裁剪矩阵用例（含客户等级 C/D 群）}
+    relations: {depends_on: CLM-GROUP-ACL-004}
+  - claim_id: CLM-GROUP-ACL-004
+    statement: {subject: 每个群成员（我方/客户方、企微/个微）, predicate: has_defined_in, object: CRM（身份/角色/可见范围；客户=客户下具体角色如采购/库管/收货人）}
+    scope: {product: wecom-order-assistant, phase: pilot-v0, domain: group-acl}
+    authority: {basis: 评审共识·必改 ALL-01/ALL-05, sources: [SRC-REVIEW-20260812#ALL-01, SRC-REVIEW-20260812#ALL-05]}
+    semantic_status: ACCEPTED
+    implementation: {demo: IMPLEMENTED, backend: UNPLANNED, production_ui: UNPLANNED}
+    verification: {demo_smoke: PASS, business_uat: UNVERIFIED}
+    risk: R3
+    owner: security-owner
+    acceptance: {oracle: CRM 身份映射表 + 拉群时销售/商务共同定义角色}
+    relations: {foundation_for: [CLM-GROUP-ACL-001, CLM-GROUP-ACL-003]}
+  - claim_id: CLM-GROUP-ACL-005
+    statement: {subject: 客户等级（A/B/C/D）, predicate: visible_to, object: 仅销售（客户侧不可见；评级规则后续调整不再由销售自评）}
+    scope: {product: wecom-order-assistant, role: sales, scenario: XS1, phase: pilot-v0}
+    authority: {basis: 评审共识 XS1-08, sources: [SRC-REVIEW-20260812#XS1-08, SRC-DEMO#XS1]}
+    semantic_status: ACCEPTED
+    implementation: {demo: IMPLEMENTED, backend: UNPLANNED, production_ui: UNPLANNED}
+    verification: {demo_smoke: PASS, business_uat: UNVERIFIED}
+    risk: R2
+    owner: product-crm
+    acceptance: {oracle: demo 复评：客户视角不可见等级字段}
+    relations: {refines: CLM-GROUP-ACL-003}
+  - claim_id: CLM-GROUP-ACL-006
+    statement: {subject: 审价职能, predicate: assigned_to, object: 销售主管（审批即审价，同一动作；非商务职能）}
+    scope: {product: wecom-order-assistant, role: [sales-mgr, commerce], scenario: [XSZG1, SW1], phase: pilot-v0}
+    authority: {basis: 用例总表 v2 差异（v1→v2 变更点：审价归属）, sources: [SRC-USECASE-V2#deltas, SRC-USECASE-V2#XSZG1]}
+    semantic_status: ACCEPTED
+    implementation: {demo: IMPLEMENTED, backend: UNPLANNED, production_ui: UNPLANNED}
+    verification: {demo_smoke: PASS, business_uat: UNVERIFIED}
+    risk: R2   # 职能边界影响审批流权限
+    owner: product-org
+    acceptance: {oracle: demo 复评：商务侧无审价入口}
+    relations: {constrains: CLM-GROUP-ACL-001, note: 商务 SW1 备货详情含审价结论（主管已通过）}

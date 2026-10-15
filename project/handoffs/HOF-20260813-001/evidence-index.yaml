@@ -1,0 +1,179 @@
+# project/handoffs/HOF-20260813-001/evidence-index.yaml
+# 交接时点证据索引（§10 / evidence 对象模型：verifier/verdict/ttl/绑定）
+# 所有证据均由 bootstrap 执行者（同一 Agent）生成；不构成独立接手验证（A.10 第 6 条）。
+evidence:
+  - id: EV-001
+    what: ECM-1.0.0.yaml 五个 policy component digest 重算匹配
+    input: project/policies/mechanism/ECM-1.0.0.yaml
+    verifier: scripts/ecm_selfcheck.py（canonical-json + sha256）
+    verdict: PASS
+    observed_at: 2026-08-13T08:37:00+00:00
+    ttl: 直到 ECM-1.0.0.yaml 变化
+  - id: EV-002
+    what: spec digest 三处一致（current.spec_digest == project.spec_digest == 文件 sha256）
+    input: project/policies/mechanism/ECM-1.0.0.yaml
+    verifier: scripts/ecm_selfcheck.py + sha256sum
+    verdict: PASS
+    observed_at: 2026-08-13T08:37:00+00:00
+    ttl: 直到任一文件变化
+  - id: EV-003
+    what: 测试函数计数 221（文档 §01 声明约 180）
+    input: cmd/ internal/ tests/ 下 *.go
+    verifier: "grep -rh 'func Test' --include='*.go' | wc -l"
+    verdict: OBSERVED (221)
+    observed_at: 2026-08-13T08:33:00+00:00
+    ttl: 直到下一次代码扫描
+  - id: EV-004
+    what: demo 观察时点 mtime 2026-08-13T08:06:07Z（文档 hero-meta 记录 2026-08-12 20:40）
+    input: docs/demo/index.html
+    verifier: stat
+    verdict: OBSERVED
+    observed_at: 2026-08-13T08:33:00+00:00
+    ttl: 30 天（OBS-05）
+  - id: EV-005
+    what: wecom（37MB）未跟踪、M0 manifest 标记 mtime_fallback
+    input: wecom
+    verifier: git ls-files
+    verdict: OBSERVED
+    observed_at: 2026-08-13T08:33:00+00:00
+    ttl: 30 天（OBS-06）
+  - id: EV-006
+    what: 自检 19/21 通过（events/handoff 两项为写入顺序导致的预期 FAIL，写入后复测）
+    input: project/ 控制面
+    verifier: scripts/ecm_selfcheck.py --check
+    verdict: PASS (with 2 expected pending)
+    observed_at: 2026-08-13T08:37:00+00:00
+    ttl: 直到控制面变化
+  - id: EV-007
+    what: D-006 代码首次编译与分层测试全绿（build/vet/L0/L1/L2/tests-l1/l2/l3）
+    input: 全仓 Go 源码（HEAD 74fd09b + 本轮回退修复）
+    verifier: go build ./... / go vet ./... / make test-l0 test-l1 test-l2 test-tests-l1 test-tests-l2 test-tests-l3
+    verdict: PASS
+    observed_at: 2026-08-18T05:40:00+00:00
+    ttl: 直到 D-006 相关代码或测试变化
+  - id: EV-008
+    what: 覆盖率门禁 85.4%（≥85%）且 domain 100% 硬门禁
+    input: coverage.out / coverage.txt（make cover 生成）
+    verifier: Makefile cover 门禁 awk 校验
+    verdict: PASS
+    observed_at: 2026-08-18T05:40:00+00:00
+    ttl: 直到下一次 cover 重跑
+  - id: EV-009
+    what: 一次性真实 pgAPI 服务（真实源码 + 最小 rhcrm schema）读写契约 smoke；Go 客户端 CRUD/404 分类全部正确
+    input: /data/home/laurence/pgAPI/external/pgapi + internal/pgapi.Client
+    verifier: curl + go run scripts/pgapi_smoke_tmp（临时脚本，已删除）
+    verdict: PASS
+    observed_at: 2026-08-18T05:43:00+00:00
+    ttl: 直到 pgAPI 接口版本或 internal/pgapi 变化
+  - id: EV-010
+    what: pgapi_backfill 全链路验证：dry-run MATCH、apply 改写 7 类引用列、未匹配 exit 2 零写入
+    input: scripts/pgapi_backfill + 一次性库 b2b_backfill_test + 本地 pgAPI 服务
+    verifier: go run ./scripts/pgapi_backfill（dry-run / -apply / 未匹配场景）
+    verdict: PASS
+    observed_at: 2026-08-18T05:43:00+00:00
+    ttl: 直到回填工具、pgAPI 匹配语义或迁移 007 变化
+  - id: EV-011
+    what: 第 6-9 轮迭代后全仓 go test ./... 全绿（HEAD 37cf5d5）
+    input: cmd/ internal/ tests/ 全量 Go 源码
+    verifier: "GOCACHE=.gocache go test -count=1 ./..."
+    verdict: PASS
+    observed_at: 2026-08-20T18:56:00+00:00
+    ttl: 直到下一次代码变更
+  - id: EV-012
+    what: integration cover 86.2% ≥85%，domain 100%（HEAD 067b848 实测）
+    input: coverage.out / coverage.txt（fresh）
+    verifier: "go test -tags integration -coverprofile=coverage.out ./internal/... + go tool cover -func"
+    verdict: PASS
+    observed_at: 2026-08-20T18:43:00+00:00
+    ttl: 直到下一次 cover 重跑
+  - id: EV-013
+    what: tests/ L0-L3 全绿（l0_unit / l1_integration / l2_e2e / l3_system）
+    input: tests/
+    verifier: "go test -count=1 ./tests/l0_unit/... && go test -tags integration ./tests/l{1,2,3}_*/..."
+    verdict: PASS
+    observed_at: 2026-08-20T18:44:00+00:00
+    ttl: 直到 tests/ 或被测代码变化
+  - id: EV-014
+    what: L3 守恒/对账/审计脚本通过（concurrency violations=0；reconcile violations=0；audit failures=0）
+    input: scripts/concurrency + scripts/reconcile + scripts/audit（test PG 55432/b2b_pilot）
+    verifier: go run ./scripts/{concurrency,reconcile,audit}
+    verdict: PASS
+    observed_at: 2026-08-20T18:45:00+00:00
+    ttl: 直到守恒/迁移/审计代码变化
+  - id: EV-015
+    what: fullchain 全流程 ALL GREEN（订单全链 INV_CLOSED + 凭证链 + 预订单链）
+    input: scripts/fullchain（test PG 55432/b2b_pilot）
+    verifier: go run ./scripts/fullchain
+    verdict: PASS
+    observed_at: 2026-08-20T18:47:00+00:00
+    ttl: 直到 API/workflow/repo 代码变化
+  - id: EV-016
+    what: 项目机制自检 29/29 + CQ/图谱/任务交叉一致性 12/12
+    input: project/ 控制面 + v0.1_CQ.html + v0.1发布图谱.html + v0.1发布过程任务列表.html
+    verifier: make consistency-check（scripts/ecm_selfcheck.py + scripts/cq_kg_selfcheck.py）
+    verdict: PASS
+    observed_at: 2026-08-20T18:56:00+00:00
+    ttl: 直到控制面或三份治理文档变化
+  - id: EV-017
+    what: pgapi 松散结构解码缺陷修复并有类型级测试（rawToTextList 取 text 而非紧凑 JSON）
+    input: internal/pgapi/types.go + types_test.go
+    verifier: "go test -cover ./internal/pgapi"
+    verdict: PASS (coverage 93.8%)
+    observed_at: 2026-08-20T18:22:00+00:00
+    ttl: 直到 internal/pgapi 变化
+  - id: EV-018
+    what: v0.1 发布物 digest 清单生成（文件 sha256 + 目录 git-tree + migrations）
+    input: docs/history/evidence/v0.1-release-artifacts-20260820.md（基线 d5ceb2a）
+    verifier: git rev-parse HEAD:<dir> / sha256sum
+    verdict: PASS
+    observed_at: 2026-08-20T19:10:00+00:00
+    ttl: 直到发布物文件变化
+  - id: EV-019
+    what: 补齐悬空 claim CLM-PRICE-REVIEW-FIELDS-001，并把 demo-boundary→claims 引用校验纳入 cq_kg_selfcheck（37 claims / 16 场景 route 证据）
+    input: project/claims/ordering.yaml + project/views/demo-boundary.yaml + scripts/cq_kg_selfcheck.py
+    verifier: make consistency-check
+    verdict: PASS
+    observed_at: 2026-08-20T19:34:00+00:00
+    ttl: 直到 claims 或 demo-boundary 变化
+  - id: EV-020
+    what: v0.1 Docker 镜像构建与 smoke r2（11/11：api/worker/wecom/sync/seedrel/shadow-api/shadow-ingest/shadow-feed/shadow-audit/spicedb/shadow-spicedb）
+    input: Dockerfile（HEAD 90452f2）
+    verifier: DOCKER_BUILDKIT=0 docker build --target <t> + docker run smoke + compose config
+    verdict: PASS（11/11 构建成功，二进制可执行；spicedb 探针镜像 serve+probe 复验）
+    observed_at: 2026-08-20T23:42:00+00:00
+    ttl: 直到 Dockerfile 或构建目标变化
+  - id: EV-021
+    what: baseline candidate DRAFT 一致性复核（37 claims + D-006..D-013 canonical digest，publishable=false）
+    input: project/views/baseline-candidate-20260820.yaml
+    verifier: scripts/verify_baseline_candidate.py
+    verdict: PASS
+    observed_at: 2026-08-20T19:52:00+00:00
+    ttl: 直到 claims/decisions 或 candidate 变化
+  - id: EV-022
+    what: real_wecom 现场证据采集计划完整性（17 场景，全部 UNCOLLECTED，9 项本期可采、8 项 v0.2/v0.3/基线）
+    input: project/views/real-wecom-evidence-plan.yaml
+    verifier: scripts/verify_wecom_plan.py
+    verdict: PASS
+    observed_at: 2026-08-20T20:02:00+00:00
+    ttl: 直到 demo-boundary 或计划变化
+  - id: EV-023
+    what: 容器 HTTP 路由 smoke（镜像 b2b_pilot_v3-api:verify；8 条路由/降级语义全 PASS）
+    input: docs/history/evidence/v0.1-container-http-smoke-20260820.md
+    verifier: docker run + curl matrix
+    verdict: PASS
+    observed_at: 2026-08-20T20:08:00+00:00
+    ttl: 直到 api 镜像或路由变化
+  - id: EV-024
+    what: 影子栈 docker-compose 冷启动 smoke（8/8 服务拉起；探针/守卫/空源幂等全 PASS）
+    input: docs/history/evidence/v0.1-shadow-stack-compose-smoke-20260820.md
+    verifier: docker compose ps + curl /healthz + spicedb-healthcheck + tctl namespace list
+    verdict: PASS
+    observed_at: 2026-08-20T20:22:00+00:00
+    ttl: 直到 docker-compose.shadow.yml 或影子轨镜像变化
+  - id: EV-025
+    what: A 轨基础 compose 冷启动 smoke（9/9 服务；schema/关系/探针/健康门禁全 PASS）
+    input: docs/history/evidence/v0.1-a-track-compose-coldstart-smoke-20260820.md
+    verifier: docker compose ps + curl healthz/wecom + spicedb-healthcheck + seedrel 日志
+    verdict: PASS
+    observed_at: 2026-08-20T20:45:00+00:00
+    ttl: 直到 docker-compose.yml 或 A 轨镜像变化

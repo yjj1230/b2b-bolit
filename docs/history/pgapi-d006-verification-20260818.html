@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>pgAPI D-006 验证报告 · 2026-08-18</title>
+<style>
+  :root{--ink:#1f1d18;--muted:#6b665b;--blue:#1B365D;--green:#2f6b3a;--red:#9b3b3b;--amber:#8a6d3b;
+        --paper:#f6f5ef;--panel:#ffffff;--rule:#d8d5c8;--code-bg:#f0eee4;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--paper);color:var(--ink);font:15px/1.72 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;}
+  .wrap{max-width:980px;margin:0 auto;padding:48px 40px 96px;}
+  h1{font-size:34px;line-height:1.2;margin:10px 0 12px;}
+  h2{font-size:22px;color:var(--blue);margin:40px 0 12px;padding-top:16px;border-top:1px solid var(--rule);}
+  h3{font-size:16px;margin:22px 0 8px;}
+  p{margin:8px 0;}
+  .kicker{font-size:12px;letter-spacing:.2em;color:var(--blue);text-transform:uppercase;}
+  .meta{display:grid;grid-template-columns:170px 1fr;gap:6px 18px;background:var(--panel);border:1px solid var(--rule);border-left:4px solid var(--blue);padding:16px 20px;margin:20px 0;}
+  .meta dt{color:var(--muted);font-size:13px;} .meta dd{font-weight:600;}
+  table{width:100%;border-collapse:collapse;margin:12px 0 20px;background:var(--panel);font-size:13.5px;}
+  th{background:var(--code-bg);color:var(--blue);text-align:left;padding:8px 10px;border-bottom:2px solid var(--rule);}
+  td{padding:8px 10px;border-bottom:1px solid var(--rule);vertical-align:top;}
+  code{background:var(--code-bg);padding:1px 5px;border-radius:3px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;}
+  pre{background:var(--code-bg);padding:12px 14px;overflow:auto;margin:10px 0;font-size:12.5px;line-height:1.5;}
+  .pass{color:var(--green);font-weight:600;} .fail{color:var(--red);font-weight:600;} .warn{color:var(--amber);font-weight:600;}
+  .badge{display:inline-block;padding:2px 9px;border-radius:10px;font-size:12px;font-weight:600;}
+  .badge.pass{background:#e7f1e6;} .badge.open{background:#f5edda;color:#8a6d3b;} .badge.risk{background:#f6e5e3;color:#9b3b3b;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">b2b_pilot_v3 · D-006 验证轮</div>
+  <h1>pgAPI 数据库访问二分 · 验证报告</h1>
+  <p class="lede">承接 <code>pgAPI重构历史.html</code> 的交接：前任 Agent 在无法执行任何命令的环境下完成了 D-006 实现与提交，但从未编译/测试。本报告记录 2026-08-18 在 10.0.2.160 上完成的编译、分层测试、真实 pgAPI 契约 smoke 与回填工具全链路验证。</p>
+
+  <div class="meta">
+    <dt>验证主机</dt><dd>10.0.2.160（hostname: gpu）</dd>
+    <dt>仓库</dt><dd>/data/home/laurence/b2b_pilot_v3 · branch <code>graph_guide</code></dd>
+    <dt>验证起点 HEAD</dt><dd><code>74fd09b0d75ba2d0a42facef954a4242714a70e4</code>（D-006 提交 57a5c6f 的祖先）</dd>
+    <dt>pgAPI 工程</dt><dd>/data/home/laurence/pgAPI/external/pgapi（FastAPI 0.1.0 源码）</dd>
+    <dt>ECM 状态</dt><dd>ECM 1.0.0 <span class="badge open">PROPOSED / BOOTSTRAP_DIAGNOSTIC</span>；不伪造 ACTIVE、不写 handoff ACCEPTED（ECM-REC-004）</dd>
+    <dt>Go</dt><dd>go1.25.4 linux/amd64；GOCACHE 置于工作区内（宿主机缓存只读）</dd>
+  </div>
+
+  <h2>1 · 结论摘要</h2>
+  <table>
+    <tr><th>验证项</th><th>结果</th><th>说明</th></tr>
+    <tr><td>全仓编译</td><td class="pass">PASS</td><td><code>go build ./...</code> exit 0（首次真实编译）</td></tr>
+    <tr><td>L0 单测</td><td class="pass">PASS</td><td><code>make test-l0</code>：domain/api/authz/wecom/pgapi/orderdata 全绿</td></tr>
+    <tr><td>L2 工作流/API/企微</td><td class="pass">PASS</td><td><code>make test-l2</code>（165s）</td></tr>
+    <tr><td>L1 真实 PG + SpiceDB</td><td class="pass">PASS</td><td><code>make test-l1</code>：repo 234s / authz 13s；migrations 001–007 按序成功</td></tr>
+    <tr><td>tests/l1 + l2 + l3</td><td class="pass">PASS</td><td>HTTP+DB 黑盒、E2E、系统验证全绿</td></tr>
+    <tr><td>静态检查</td><td class="pass">PASS</td><td><code>go vet ./...</code> exit 0；新增包 <code>-race</code> 通过</td></tr>
+    <tr><td>覆盖率门禁</td><td class="pass">PASS</td><td>total 85.4% ≥ 85%；domain 100% 硬门禁通过</td></tr>
+    <tr><td>007 迁移真实执行</td><td class="pass">PASS</td><td>31 张表；指向 customers/products 的 FK = 0；pgapi_entity_mappings 就位</td></tr>
+    <tr><td>真实 pgAPI 服务 smoke</td><td class="pass">PASS</td><td>本地一次性后端（真实 pgAPI 源码 + 最小 rhcrm schema）：search/get/POST/PATCH/DELETE-400 全部符合预期</td></tr>
+    <tr><td>Go 客户端契约</td><td class="pass">PASS</td><td><code>internal/pgapi.Client</code> 对真实服务的 CRUD/404 分类/数组字段（spec、quantity_kg、sales_users）全部正确</td></tr>
+    <tr><td>回填工具</td><td class="pass">PASS</td><td>dry-run 4/4 MATCH → exit 0；-apply 改写 7 类引用列；未匹配 dry-run → exit 2 且零写入</td></tr>
+  </table>
+
+  <h2>2 · 发现并修复的问题</h2>
+  <p>以下问题全部来自“从未编译/未跑测试”的 D-006 代码，修复均为测试代码修复或测试补充，<strong>未改动任何生产行为</strong>：</p>
+  <table>
+    <tr><th>#</th><th>位置</th><th>问题</th><th>修复</th></tr>
+    <tr><td>F1</td><td><code>internal/workflows/activities_test.go:161</code></td><td>测试代码编译失败：<code>_, created, err :=</code> 左侧无新变量</td><td><code>:=</code> → <code>=</code></td></tr>
+    <tr><td>F2</td><td>同文件 TestFakeStoreEdgeCases</td><td>编译修复后暴露断言方向写反：同键异 payload 本应判幂等冲突，却断言成功</td><td>改为断言 <code>IsIdempotencyConflict</code> + created=false，并补“同键同 payload 重放返回原订单”正向用例（强化而非弱化）</td></tr>
+    <tr><td>F3</td><td><code>internal/repo/outbox_integration_test.go:107</code></td><td>D-006 后 <code>SetCustomerContactTx("cust-nope")</code> 不再被本地客户 FK 拒绝，多出 1 条 contact_upsert，期望 4 过时</td><td>期望 4 → 5，并注明 D-006 语义依据</td></tr>
+    <tr><td>F4</td><td><code>internal/pgapi</code> / <code>internal/orderdata</code></td><td>新增 D-006 代码覆盖不足（client.go 47.8%、provider.go 0%），致 L3 门禁 84.1% &lt; 85%</td><td>补 11 个 pgapi 客户端测试 + 3 个 HTTPProvider 测试，门禁升至 85.4%</td></tr>
+  </table>
+
+  <h2>3 · 真实 pgAPI 契约验证（一次性环境）</h2>
+  <p>因未提供真实 CARH_DB 配置，在测试 PG 上建 <code>b2b_pgapi_test</code> 库与最小 <code>rhcrm</code> schema（仅 products/customers/purchase-contracts 三张表 + 两个 trace stub 函数），运行<strong>真实 pgAPI 服务源码</strong>（uvicorn 127.0.0.1:8010，PGAPI_API_KEY=test-key-123）完成：</p>
+  <ul>
+    <li>健康检查免鉴权；业务接口缺 Key 返回 401。</li>
+    <li>products/customers 的 search/get/addresses/POST/PATCH 响应结构与 <code>internal/pgapi</code> 类型定义一致；purchase-contracts 只读查询正常（spec/quantity_kg 数组字段正确解析）。</li>
+    <li>DELETE 返回 400 “Business delete is not supported” —— 与 spec §4.5/§5.6 一致，客户端不实现 DELETE 是正确边界。</li>
+    <li>POST 客户 4 必填、POST 产品 2 必填校验与 spec 一致；我方 <code>CustomerWrite/ProductWrite</code> 字段满足。</li>
+    <li>Go 客户端对真实服务的 CRUD、404 分类（<code>pgapi.IsNotFound</code>）全部通过。</li>
+  </ul>
+  <p>证据：<code>docs/history/evidence/pgapi-d006-20260818/pgapi_service_smoke.txt</code>、<code>go_client_pgapi_smoke.txt</code>。</p>
+
+  <h2>4 · pgapi_backfill 工具验证</h2>
+  <p>在一次性库 <code>b2b_backfill_test</code>（migrations 001–007 全量应用）植入 legacy customers/products 与 7 类流程引用后：</p>
+  <pre>MATCH customer cust-0001 -&gt; rec_cust_0001 by customer_name
+MATCH customer cust-0002 -&gt; rec_cust_0002 by customer_name
+MATCH product  prod-c68  -&gt; rec_prod_c68  by spec
+MATCH product  prod-d90  -&gt; rec_prod_d90  by spec
+summary: customers=2 products=2 matched=4 problems=0
+backfill applied: 4 mappings committed</pre>
+  <p>apply 后验证：<code>pgapi_entity_mappings</code> 4 行；orders.customer_id、customer_contacts.customer_id、order_items/stock_prepare_items/shipment_items/invoice_items/inventory_items.product_id 全部由旧 ID 改写为 pgAPI record_id。</p>
+  <p>安全边界验证：植入无匹配 legacy 产品后 dry-run 输出 <code>FAIL product prod-zzz (NOPE/不存在的产品): no exact product_name/spec match in pgAPI</code>，exit 2，映射表与引用列零改动。</p>
+  <p>证据：<code>docs/history/evidence/pgapi-d006-20260818/backfill_*.txt</code>。</p>
+
+  <h2>5 · 验证命令快照</h2>
+  <pre>go build ./...
+go vet ./...
+make test-l0
+make test-l2
+make test-l1
+make test-tests-l1
+make test-tests-l2
+make test-tests-l3
+go test -count=1 ./...
+go test -count=1 -tags deferred ./internal/wecom/...
+go test -race -count=1 ./internal/pgapi/... ./internal/orderdata/... ./internal/config/...
+make cover   # total 85.4% / domain 100%</pre>
+
+  <h2>6 · 当前仍开放的事项（不宣称完成）</h2>
+  <table>
+    <tr><th>ID</th><th>事项</th><th>状态</th><th>说明</th></tr>
+    <tr><td>OI-014</td><td>D-006 拆分验证</td><td class="warn">OPEN（自动可验证部分已闭环）</td><td>本机 build/test/coverage 全部完成；真实 pgAPI 测试环境 smoke 由用户/现场执行（本轮确认无需继续）</td></tr>
+    <tr><td>OI-015</td><td>旧主数据回填</td><td class="warn">OPEN</td><td>工具已在一次性库全链路验证；真实数据 dry-run/审批/生产 apply 仍待用户安排</td></tr>
+    <tr><td>H1/H2</td><td>真实 pgAPI 测试地址/Key、写接口开放</td><td class="warn">OPEN</td><td>本地一次性验证已足够（用户 2026-08-18 裁决）</td></tr>
+    <tr><td>H4</td><td>purchase-contracts 是否接入订单展示/对账</td><td class="warn">OPEN</td><td>查询能力已具备，未接流程</td></tr>
+    <tr><td>H5</td><td>是否新增 b2b 对外产品/客户管理端点</td><td class="warn">OPEN</td><td>写能力在 Client/Provider 层，未暴露为 b2b HTTP API</td></tr>
+    <tr><td>H6</td><td>pgAPI 不可用降级策略（缓存/重试）</td><td class="warn">OPEN</td><td>当前失败显式暴露，无缓存</td></tr>
+    <tr><td>OI-001/002</td><td>ECM 激活四件套与激活测试</td><td class="warn">OPEN</td><td>与本轮无关；机制保持 PROPOSED</td></tr>
+  </table>
+
+  <h2>7 · 诚实声明</h2>
+  <ul>
+    <li>ECM 1.0.0 仍为 PROPOSED：本轮处于 BOOTSTRAP_DIAGNOSTIC + 用户授权的 D-006 bootstrap exception，<strong>未宣布 ECM PASS</strong>。</li>
+    <li>handoff HOF-20260813-001 仍为 OFFERED / accepted=false；按 ECM-REC-004 未写 ACCEPTED。本轮同步了其 spec/open_items/evidence digest 与 change_cursor（用户 2026-08-18 授权）。</li>
+    <li>本地 pgAPI 后端是“真实服务源码 + 最小合成 schema”，只能证明<strong>协议与工具正确</strong>，不能替代真实 CARH 数据的 dry-run。</li>
+    <li>全部测试输出原始文件见 <code>docs/history/evidence/pgapi-d006-20260818/</code>。</li>
+  </ul>
+</div>
+</body>
+</html>

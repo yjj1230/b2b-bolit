@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CHANGELOG · ReBAC 场景变更 · B2B 订单履约验证项目</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+SC:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:#f5f4ed; --paper2:#efeee5; --ink:#1f1d18; --ink2:#6b665b;
+    --ink3:#3a382f; --blue:#1B365D; --rule:#d4d1c5;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif; line-height:1.6;}
+  .wrap{max-width:960px; margin:0 auto; padding:48px 40px 80px;}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;}
+  .folio{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--rule); padding-bottom:10px;
+    font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink2);}
+  .folio a{color:var(--ink2); border:none;}
+  .folio a:hover{color:var(--blue);}
+  .tag{display:inline-block; padding:3px 10px; font-size:11px; letter-spacing:.16em; background:var(--paper2); color:var(--blue);}
+  .kicker{display:flex; align-items:baseline; gap:12px; margin-top:48px;}
+  h1{font-size:clamp(32px,5vw,50px); line-height:1.12; font-weight:500; margin-top:14px; letter-spacing:-.01em;}
+  .lede{margin-top:18px; font-size:17px; line-height:1.7; color:var(--ink3); max-width:720px;}
+  h2{font-size:23px; font-weight:600; margin:52px 0 14px; color:var(--blue); display:flex; align-items:baseline; gap:12px; border-top:1px solid var(--rule); padding-top:26px;}
+  h2 .no{font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.12em;}
+  h3{font-size:17.5px; font-weight:600; margin:30px 0 10px; color:var(--ink);}
+  h3 .no{color:var(--blue); font-family:'IBM Plex Mono',monospace; font-size:12px; margin-right:8px;}
+  p{margin:10px 0; color:var(--ink3);}
+  ul,ol{margin:10px 0 10px 26px; color:var(--ink3);}
+  li{margin:5px 0;}
+  a{color:var(--blue); text-decoration:none; border-bottom:1px solid var(--rule);}
+  a:hover{border-bottom-color:var(--blue);}
+  blockquote{border-left:2px solid var(--blue); padding:10px 18px; margin:16px 0; background:var(--paper2); font-style:italic;}
+  table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  .table-wrap{overflow-x:auto; margin:16px 0 24px; border:1px solid var(--rule);}
+  .table-wrap table{margin:0;}
+  th{background:var(--paper2); color:var(--blue); text-align:left; font-weight:600; padding:9px 12px; border-bottom:1.5px solid var(--blue); font-size:12.5px; white-space:nowrap;}
+  td{padding:9px 12px; border-bottom:1px solid var(--rule); vertical-align:top; color:var(--ink3);}
+  tr:nth-child(even) td{background:#faf9f3;}
+  tr:hover td{background:#f0ede0;}
+  .mermaid{background:var(--paper); border:1px solid var(--rule); padding:18px; overflow-x:auto; text-align:center; margin:20px 0;}
+  .mermaid svg{max-width:100%; height:auto;}
+  .mermaid svg.statediagram span,.mermaid svg.statediagram div{color:#1f1d18 !important;}
+  .mermaid svg.statediagram text{fill:#1f1d18 !important;}
+  figcaption{text-align:center; font-size:12px; color:var(--ink2); margin:-10px 0 26px; font-style:italic;}
+  code{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace; font-size:13px; background:var(--paper2); padding:1px 5px;}
+  pre{background:var(--paper2); border:1px solid var(--rule); padding:16px 18px; overflow-x:auto; font-size:12.8px; line-height:1.55; margin:14px 0;}
+  pre code{background:none; padding:0;}
+  footer.colophon{margin-top:56px; padding-top:14px; border-top:1px solid var(--rule); display:flex; justify-content:space-between;
+    font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink2); flex-wrap:wrap; gap:8px;}
+  footer.colophon a{color:var(--ink2); border:none;}
+  footer.colophon a:hover{color:var(--blue);}
+  .toc{border:1px solid var(--rule); background:var(--paper2); padding:18px 24px; margin:26px 0;}
+  .toc .tt{font-size:11px; letter-spacing:.2em; color:var(--blue); margin-bottom:8px;}
+  .toc a{display:block; padding:3px 0; color:var(--ink3); border:none;}
+  .toc a:hover{color:var(--blue);}
+  .toc .mono{font-size:12px; color:var(--blue); margin-right:8px;}
+  @media(max-width:720px){.wrap{padding:28px 18px 60px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="folio">
+    <span><a href="index.html">← Docs</a> · B2B Order Fulfillment</span>
+    <span>CHANGELOG · ReBAC</span>
+    <span>A–H 场景矩阵</span>
+  </header>
+  <div class="kicker">
+    <span class="tag">Changelog · ReBAC 变更影响矩阵</span>
+    <span class="mono" style="font-size:11px; letter-spacing:.18em; color:var(--ink2);">授权场景 · 变更闭环</span>
+  </div>
+  <h1>授权 RBAC+ReBAC 实战场景<br/><span style="font-style:italic; color:var(--blue);">变更影响矩阵</span></h1>
+  <p class="lede">输入：<span class="mono">spec/rebac_cases_spicedb.html</span>（COO/业务视角授权表 + 三层授权模型）；方法论：双 graph → meta/架构 → 开发 → 测试 → 验证 → 倒推回双 graph（<span class="mono">spec/evolve.md</span>）；状态：阶段 0 完成（分析 + 倒推验证），阶段 1+ 待人类架构师 review 关键决策后落地。</p>
+  <blockquote>输入：<span class="mono">spec/rebac_cases_spicedb.html</span>（COO/业务视角授权表 + 三层授权模型） 方法论：双 graph → meta/架构 → 开发 → 测试 → 验证 → 倒推回双 graph（<span class="mono">spec/evolve.md</span>） 状态：阶段 0 完成（分析 + 倒推验证）；<strong>阶段 1+ 待人类架构师 review 关键决策后落地</strong></blockquote>
+<h2><span class="no">1</span> ·  Spec 输入摘要（已验证）</h2>
+<ul><li><strong>8 个实战场景（A–H）</strong>：A 商务开备货单 / B 改额度·多次发货 / C 仓管确认驳回 / D 客户联系人看物流·上传凭证 / E 跨租户拒绝 / F 作废窗口（阶段二）/ G 临时代办 TTL / H 客户换对接人</li><li><strong>三层授权模型</strong>：RBAC 模板层（T1-T6，阶段二 role/role_grant，v1 用直接关系）→ ReBAC 数据层（CRM/Workflow 维护关系 → <strong>Outbox 投影器</strong>同步 SpiceDB）→ ABAC 条件层（静态属性建模为关系对象=阶段二评估；动态条件 caveat=阶段二）</li><li><strong>全景映射</strong>（spec §5）：</li><li>6 关系：<span class="mono">account_owner</span> / <span class="mono">owner</span>(prestock) / <span class="mono">warehouse_operator</span> / <span class="mono">requester</span> / <span class="mono">contact</span> / <span class="mono">uploader</span></li><li>5 资源：<span class="mono">customer</span> / <span class="mono">order</span> / <span class="mono">prestock</span> / <span class="mono">shipment</span> / <span class="mono">evidence</span></li><li>8 权限：<span class="mono">create_prestock</span> / <span class="mono">change_quota</span> / <span class="mono">request_shipment</span> / <span class="mono">confirm</span> / <span class="mono">reject</span> / <span class="mono">append_evidence</span> / <span class="mono">view</span> / <span class="mono">void</span></li><li><strong>两道门原则</strong>：SpiceDB 管关系授权，Temporal Workflow 管状态/额度（与现有设计一致，保持不变）</li></ul>
+<h2><span class="no">2</span> ·  逐场景影响矩阵（A–H）</h2>
+<div class="table-wrap"><table>
+<tr><th>场景</th><th>spec 要求的 relation/permission</th><th>现有 schema.zed 对应项</th><th>差距</th><th>涉及 CQ</th><th>变更性质</th></tr>
+<tr><td>A 开备货单</td><td><span class="mono">order#create_prestock via customer-&gt;account_owner</span>；订单创建人</td><td><span class="mono">order</span> 无 create_prestock；<span class="mono">customer.owner</span></td><td><strong>prestock 缺失</strong>；<span class="mono">customer.owner</span> vs <span class="mono">account_owner</span> 命名分歧</td><td>CQ-01/02</td><td>新增 definition + 权限 + 命名决策</td></tr>
+<tr><td>B 改额度/多次发货</td><td><span class="mono">prestock#owner → change_quota/request_shipment/close</span></td><td>挂在 <span class="mono">order.stock/ship</span>（粗粒度）</td><td><strong>prestock 非一等对象</strong>；权限粒度不匹配</td><td>CQ-01/02/06/07</td><td>授权对象迁移（破坏性）</td></tr>
+<tr><td>C 仓管确认/驳回</td><td><span class="mono">shipment#warehouse_operator → confirm/reject</span>；字段裁剪（无价格/销售备注）</td><td>挂在 <span class="mono">order.warehouse-&gt;staff</span></td><td><strong>shipment 非一等对象</strong>；warehouse_operator 缺失</td><td>CQ-01/02/03</td><td>授权对象迁移 + 投影扩展</td></tr>
+<tr><td>D 客户联系人</td><td><span class="mono">customer#contact</span> + <span class="mono">shipment#customer_contact → view_evidence/append_evidence</span>；凭证只追加版本</td><td><strong>contact 缺失</strong>；evidence 缺失</td><td>新实体×2 + 新关系×2</td><td>CQ-02/03/12</td><td>新增 definition + 投影扩展</td></tr>
+<tr><td>E 跨租户拒绝</td><td>所有 permission 末尾 <span class="mono">&amp; tenant-&gt;member</span></td><td>已有 tenant 层级边 + L1-07 跨租户拒绝测试</td><td>✅ 已覆盖（需保持）</td><td>CQ-02</td><td>验证性</td></tr>
+<tr><td>F 作废窗口</td><td><span class="mono">caveat within_void_window(now, created_at) { now &lt; created_at + 30min }</span></td><td>仅有 <span class="mono">expiry_ok</span></td><td><strong>caveat 缺失</strong>；spec 标注<strong>阶段二</strong>（v1 由 Workflow 判定）</td><td>CQ-13</td><td>阶段二预留</td></tr>
+<tr><td>G 临时代办</td><td>临时写 <span class="mono">prestock#owner@user:li_na</span> → TTL 3 天 → Outbox 自动 DeleteRelationships</td><td>已有 <span class="mono">expiry_ok</span> caveat + delegate 模式（order 级）</td><td>模式可复用，<strong>需扩展到 prestock</strong> + <strong>Outbox 到期删除</strong></td><td>CQ-13</td><td>模式扩展 + 基础设施</td></tr>
+<tr><td>H 客户换对接人</td><td><span class="mono">customer#contact</span> 元组 Delete old + Write new（Outbox）</td><td>contact 缺失</td><td>新关系 + Outbox Delete+Write</td><td>CQ-02/12</td><td>新增 + 基础设施</td></tr>
+</table></div>
+<h2><span class="no">3</span> ·  全景对照（relation / permission / definition）</h2>
+<div class="table-wrap"><table>
+<tr><th>Spec 全景项</th><th>现有 schema.zed</th><th>差距</th></tr>
+<tr><td><span class="mono">prestock</span> definition</td><td>❌ 缺失（订单级 <span class="mono">order.stock</span> 粗粒度）</td><td><strong>关键实体缺失</strong></td></tr>
+<tr><td><span class="mono">shipment</span> definition</td><td>❌ 缺失（订单级 <span class="mono">order.ship</span> 粗粒度）</td><td><strong>关键实体缺失</strong></td></tr>
+<tr><td><span class="mono">evidence</span> definition</td><td>❌ 缺失</td><td>新实体</td></tr>
+<tr><td><span class="mono">customer.account_owner</span></td><td><span class="mono">customer.owner</span></td><td>命名分歧（待决策）</td></tr>
+<tr><td><span class="mono">customer.contact</span></td><td>❌ 缺失</td><td>场景 D/H 核心</td></tr>
+<tr><td><span class="mono">shipment.warehouse_operator</span></td><td><span class="mono">order.warehouse-&gt;staff</span>（跨层挂载）</td><td>层级偏移（待决策）</td></tr>
+<tr><td><span class="mono">shipment.requester</span> / <span class="mono">shipment.uploader</span> / <span class="mono">evidence.uploader</span></td><td>❌ 缺失</td><td>场景 B/D/F 核心</td></tr>
+<tr><td><span class="mono">prestock.owner</span></td><td>❌ 缺失</td><td>场景 A/B/G 核心</td></tr>
+<tr><td><span class="mono">within_void_window</span> caveat</td><td>❌ 缺失</td><td>阶段二</td></tr>
+<tr><td>8 个细粒度 permission</td><td>6 个粗粒度（view/edit/approve/stock/ship/confirm_payment）</td><td>粒度不匹配（待决策）</td></tr>
+<tr><td><span class="mono">role</span> / <span class="mono">role_grant</span> RBAC 模板层</td><td>❌ 缺失</td><td><strong>阶段二</strong>（spec 明确 v1 用直接关系）</td></tr>
+<tr><td><span class="mono">sales_team</span> 分组 / 静态属性建模</td><td>❌ 缺失</td><td>阶段二可选</td></tr>
+</table></div>
+<h2><span class="no">4</span> ·  倒推双 graph 验证（阶段 0 核心结论）</h2>
+<h3><span class="no">4.1 世界知识图谱（01 §1.2）— 本体层面**一致**</span></h3>
+<ul><li><span class="mono">StockPrepare</span>（备货审批聚合）、<span class="mono">Shipment</span>（发货单）<strong>已是世界知识图谱的一等实体</strong>（01-core-graph.html:65-66）✅</li><li>实体语义与 spec 的 prestock/shipment 对齐（备货聚合/一次发货单）</li><li><strong>结论</strong>：世界知识图谱不需要新增实体，只需补充关系（ASSIGNED_TO/REQUESTS/CONTACT_OF）与 Evidence（凭证）</li></ul>
+<h3><span class="no">4.2 授权图谱（schema.zed）— 与本体**不一致**（spec 暴露的裂缝）</span></h3>
+<ul><li>本体有 StockPrepare/Shipment，但授权图谱未将其投影为一等 SpiceDB definition——授权维度缺失两个实体级对象</li><li>现有把备货/发货权挂在 <span class="mono">order</span> 上（<span class="mono">order.stock</span>/<span class="mono">order.ship</span>），是&quot;聚合视图授权&quot;而非&quot;对象级授权&quot;</li><li><strong>判定</strong>：这是 graph 内部的层级偏移（实体 vs 授权对象不对齐），spec 的场景 B/C/D 精确隔离要求（<span class="mono">prestock:PS-8801#owner</span>、<span class="mono">shipment:SHP-02#warehouse_operator</span>）无法由现有 schema 表达</li></ul>
+<h3><span class="no">4.3 CQ 覆盖验证</span></h3>
+<div class="table-wrap"><table>
+<tr><th>CQ</th><th>现有 schema 能否精确回答</th><th>结论</th></tr>
+<tr><td>CQ-01 操作权限</td><td>订单级粗粒度（备货=stock/发货=ship），无法回答&quot;对这张备货单能改额度吗&quot;</td><td><strong>不精确</strong> → 需 prestock/shipment 级</td></tr>
+<tr><td>CQ-02 数据可见范围</td><td>仓管经 order.warehouse 可见整单；无法表达&quot;客户联系人只见物流视图&quot;</td><td><strong>不精确</strong> → 需 shipment/customer 级</td></tr>
+<tr><td>CQ-03 字段剥离</td><td>BFF 投影已实现仓管剥离价格</td><td>✅ 模式一致，需扩展字段清单（客户视图：price/internal_note）</td></tr>
+<tr><td>CQ-13 代办时效</td><td>expiry_ok caveat + order.delegate</td><td>✅ 模式可复用，需扩展到 prestock/shipment</td></tr>
+</table></div>
+<h3><span class="no">4.4 代码实测（阶段 0 证据）</span></h3>
+<ol><li><span class="mono">schema.zed</span>：仅 tenant/customer/warehouse/order 四个 definition + expiry_ok caveat——与 §2/§3 差距一致</li><li><strong>生产路径从未调用 SpiceDB 关系写入</strong>（<span class="mono">TouchRelationship</span>/<span class="mono">DeleteRelationship</span> 仅存在于 authz 客户端，无生产调用点）——<strong>Outbox 投影器是缺失的基础设施</strong>，spec 的场景 G/H 与&quot;业务库关系=SpiceDB 关系&quot;承诺均依赖它</li><li><span class="mono">api/projection.go</span> 仅按 WAREHOUSE 角色剥离价格——客户联系人视图、仓管&quot;无销售备注&quot;视图未实现</li><li>现有 L1-07 权限矩阵（9 类场景）全部基于 order 级——迁移将影响其断言</li></ol>
+<h2><span class="no">5</span> ·  阶段二边界（v1 不实现，schema 预留）</h2>
+<ul><li><span class="mono">role</span>/<span class="mono">role_grant</span> RBAC 模板层（spec §6.2：v1 直接用 <span class="mono">account_owner: user</span> 直接关系）</li><li><span class="mono">within_void_window</span> caveat（spec §6.4：v1 状态门由 Temporal Workflow 判定）</li><li><span class="mono">sales_team</span> subject-set 分组（spec §6.3 可选）</li><li>静态属性建模（order_status 等，spec §6.4 反模式警示）</li></ul>
+<h2><span class="no">6</span> ·  待人类架构师 review 的关键决策（阻塞点）</h2>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>决策</th><th>选项</th></tr>
+<tr><td>D1</td><td>授权对象迁移：prestock/shipment/evidence 是否成为独立一等 SpiceDB definition（order 保留聚合视图）</td><td>全量迁移 / 分阶段（evidence 留阶段二）/ 不迁移</td></tr>
+<tr><td>D2</td><td>命名：<span class="mono">customer.owner</span> → <span class="mono">customer.account_owner</span></td><td>统一 / 保留并标注等价</td></tr>
+<tr><td>D3</td><td>权限粒度：8 个细粒度 permission vs 6 个粗粒度</td><td>按 spec 细化 / 保留粗粒度+Activity 二次判断</td></tr>
+<tr><td>D4</td><td>Outbox 投影器是否本次落地（spec 核心机制 + 当前生产无关系写入路径）</td><td>本次落地（表+投影器+幂等）/ 仅 schema+测试先行</td></tr>
+</table></div>
+<blockquote>决策批准后按：文档设计（01/02/03/04/05）→ schema.zed + authz 代码 → 测试 → 验证（roundtrip 倒推 + 回归）落地。</blockquote>
+<h2><span class="no">7</span> ·  人类架构师决策结果（2026-08，全部批准推荐项）</h2>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>决策</th><th>结果</th><th>落地</th></tr>
+<tr><td>D1</td><td>授权对象迁移</td><td>✅ 全量迁移</td><td>schema.zed v2：prestock/shipment/evidence 独立 definition；order 保留聚合视图（含 create_prestock 聚合入口）</td></tr>
+<tr><td>D2</td><td>命名统一</td><td>✅ account_owner</td><td>customer.owner → customer.account_owner（schema + L1-07/08 测试同步迁移）</td></tr>
+<tr><td>D3</td><td>权限粒度</td><td>✅ 按 spec 细化</td><td>8 细粒度 permission + authz 枚举/StaticChecker 矩阵扩展</td></tr>
+<tr><td>D4</td><td>Outbox 投影器</td><td>✅ 本次落地</td><td>migration 004 + repo 事务内写入点 + 投影器（幂等/失败重放/场景 G/H 规则）+ L1-15 全链测试</td></tr>
+</table></div>
+<h2><span class="no">8</span> ·  变更闭环验证（阶段 4）</h2>
+<ul><li>全量回归（含 -tags integration）：<strong>6 包全绿</strong>（api/authz/config/domain/repo/wecom/workflows）</li><li>覆盖率门禁：<span class="mono">make cover</span> 通过（domain 100% 硬门禁）</li><li>roundtrip 倒推：code-review-graph 增量重建（13 文件 / 95 节点 / 1133 边增量），</li></ul>
+<p>新 schema.zed（prestock/shipment/evidence + account_owner + 8 权限）与 <span class="mono">01-core-graph.html</span> §1.4</p>
+<p>权威版本一致；Projector/RelationWriter/OutboxStore 已入图（callers_of ApplyShipment 10 调用点）</p>
+<ul><li>CQ 覆盖：CQ-01/02/03/13 由对象级 schema 精确回答（L1-07 八场景 + L1-15）；CQ-15（凭证只追加）</li></ul>
+<p>由 evidence definition + 投影测试背书；作废窗口（阶段二预留，shipment#void permission 已建模；编号待核心图谱阶段二扩展为 CQ-16）</p>
+  <footer class="colophon">
+    <span><a href="index.html">← Docs Index</a></span>
+    <span>CHANGELOG · B2B Order Fulfillment</span>
+  </footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,43 @@
+# project/baselines/schema.yaml — Baseline schema（ECM §09 M1 交付物"基线 schema"）
+# 定义 baseline manifest 的字段、校验与发布条件；baseline 对象模型见 ECM-1.0.0.yaml ontology.baseline。
+# 当前无已发布 baseline（project.yaml baseline.id=NONE）；本 schema 供 M3/M4 生成第一个 baseline 时使用。
+schema: ECM-BASELINE-SCHEMA/v1
+mechanism: {id: ECM, version: 1.0.0}
+
+required_fields:
+  baseline_id: {type: string, format: "BL-YYYYMMDD-NNN", note: 稳定 ID}
+  status: {enum: [PUBLISHED, SUPERSEDED]}
+  published_at: {type: RFC3339, note: ECM-CANON-002}
+  mechanism: {id: string, version: string, spec_digest: sha256}
+  scope: {type: list, of: claim_id, note: 本基线覆盖的 claim 集合}
+  includes:    # 冻结对象摘要（ECM-CANON-004：排序去重后按 canonical-json 生成 digest）
+    claims: {type: map, of: "claim_id -> sha256"}
+    decisions: {type: map, of: "decision_id -> sha256"}
+    artifacts: {type: map, of: "path -> sha256"}
+    evidence: {type: map, of: "evidence_id -> sha256"}
+  open_risks: {type: list, of: "risk_id", note: 未闭合风险显式保留，不得静默}
+  open_conflicts: {type: list, of: conflict_id}
+  approver: {type: list, of: owner_id}
+
+publish_predicate:   # §11 baseline_ready(scope) 的字段级表达
+  all_claims_accepted_or_deferred_outside_scope: bool
+  no_active_semantic_conflict_in_scope: bool
+  every_r2_r3_claim_has_owner_and_oracle: bool
+  artifacts_implement_accepted_claim_versions: bool
+  evidence_pass_fresh_replayable_digest_matched: bool
+  demo_only_not_represented_as_production: bool
+
+validations:
+  - id: BAS-001
+    rule: baseline_id 在 baselines/ 内唯一且内容不可变；修改须发新 baseline_id
+  - id: BAS-002
+    rule: 所有 digest 由版本化 canonicalizer 生成（ECM-CANON-005）；集合先按 UTF-8 字节序排序去重（ECM-CANON-004）
+  - id: BAS-003
+    rule: publish_predicate 六项全部为 true 才可 PUBLISHED；R3 缺口不得被平均分掩盖（§11 stop_conditions）
+  - id: BAS-004
+    rule: baseline 中 demo-only 行为必须标注 demo_only/backend_exists/real_wecom_verified 三态之一（§09 DELIVERY 声明簇）
+
+example:   # 占位示例：M3 后由真实数据填充
+  baseline_id: BL-00000000-000
+  status: PUBLISHED
+  note: 示例占位；首个真实 baseline 预计在 M2/M3 完成后产生

@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>企微侧边栏 · 销售订单助手｜双端演示</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="phone-framework.css">
+<link rel="stylesheet" href="wecom.css">
+<style>
+
+  /* 移动端手机壳：固定 390×844（自然手机尺寸，居中展示） */
+  html, body { height: 100%; }
+  body { display: flex; align-items: center; justify-content: center; }
+  #mobileView { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+  #phone {
+    width: 390px; height: 844px;
+    border-radius: 40px;
+    box-shadow: 0 20px 80px rgba(0,0,0,.8), 0 0 0 1px rgba(255,255,255,.06);
+  }
+
+  /* 移动端全屏业务页 → 企微浅色风格（覆盖 phone-framework 深色默认） */
+  #mobileView .fullscreen-page { background: #F4F5F7; }
+  #mobileView .fullscreen-page .page-header {
+    background: #fff; border-bottom: 1px solid #EFF0F2;
+  }
+  #mobileView .fullscreen-page .page-title {
+    color: #1F2329; font-size: 15px; font-weight: 600;
+  }
+  #mobileView .fullscreen-page .page-close {
+    color: #86909C; font-size: 24px; font-weight: 300;
+  }
+  #mobileView .fullscreen-page .page-body { background: #F4F5F7; }
+
+  /* ===== 侧边栏业务页通用样式（PC aside 与移动端全屏页共用） ===== */
+  .aside-scroll {
+    flex: 1; overflow-y: auto;
+    padding: 12px 14px 14px;
+    display: flex; flex-direction: column; gap: 10px;
+    background: #F4F5F7;
+  }
+  .aside-scroll.light { background: #F4F5F7; }
+
+  /* 移动端侧边栏 H5 内部 Tab 条 */
+  .aside-tabs {
+    display: flex;
+    background: #fff;
+    border-bottom: 1px solid #EFF0F2;
+    padding: 6px 14px;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .aside-tab {
+    flex: 1; height: 30px; border: none; border-radius: 5px;
+    background: transparent; color: #86909C; font-size: 12px;
+    cursor: pointer; font-family: inherit;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .aside-tab.is-active {
+    background: rgba(7,193,96,.1); color: #07C160; font-weight: 600;
+  }
+
+  /* 群上下文头 */
+  .group-ctx {
+    background: #fff; border-radius: 6px; padding: 10px 12px;
+    display: flex; align-items: center; gap: 10px;
+    border: 1px solid #EFF0F2;
+  }
+  .group-ctx .ctx-avatar {
+    width: 38px; height: 38px; border-radius: 6px; background: #07C160;
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 600; flex-shrink: 0;
+  }
+  .group-ctx .ctx-name { font-size: 15px; font-weight: 600; color: #1F2329; }
+  .group-ctx .ctx-sub { font-size: 11px; color: #86909C; margin-top: 2px; display: flex; align-items: center; gap: 6px; }
+  .grade-chip { font-size: 10px; padding: 1px 6px; border-radius: 3px; font-weight: 500; }
+  .grade-B { background: rgba(255,138,35,.12); color: #FF7D00; }
+
+  /* 预订单确认卡片 */
+  .preorder-card {
+    background: #fff; border-radius: 6px; border: 1px solid #EFF0F2;
+    overflow: hidden;
+  }
+  .preorder-head {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 12px; border-bottom: 1px solid #F1F2F4;
+  }
+  .preorder-head .ai-chip {
+    background: rgba(7,193,96,.1); color: #07C160; font-size: 11px;
+    padding: 2px 8px; border-radius: 3px; display: inline-flex; align-items: center; gap: 4px;
+    font-weight: 500;
+  }
+  .preorder-head .ai-chip svg { width: 11px; height: 11px; }
+  .preorder-head .po-title { font-size: 14px; font-weight: 600; color: #1F2329; }
+  .preorder-head .po-status { margin-left: auto; font-size: 11px; color: #86909C; }
+  .preorder-body { padding: 10px 12px; }
+  .po-origin {
+    background: #F7F8FA; border-radius: 4px; padding: 8px 10px; margin-bottom: 10px;
+    font-size: 12px; color: #4E5969;
+  }
+  .po-origin .po-origin-label { font-size: 10px; color: #86909C; margin-bottom: 3px; display: flex; align-items: center; gap: 4px; }
+  .po-origin .po-origin-label svg { width: 11px; height: 11px; }
+  .po-origin .po-quote { color: #1F2329; font-size: 13px; line-height: 1.5; }
+  .po-origin .po-src { display: block; margin-top: 4px; font-size: 10px; color: #B5BAC1; }
+  .po-fields { display: flex; flex-direction: column; gap: 7px; }
+  .po-field { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; }
+  .po-field .k { color: #86909C; font-size: 12px; }
+  .po-field .v { color: #1F2329; font-weight: 500; }
+  .po-field .v.amount { color: #1F2329; font-weight: 600; }
+  .po-field .v.warn { color: #FF7D00; }
+  .po-field .v.editable { color: #07C160; }
+  .po-hint {
+    margin-top: 8px; font-size: 11px; color: #86909C;
+    display: flex; align-items: flex-start; gap: 5px; line-height: 1.5;
+  }
+  .po-hint svg { width: 12px; height: 12px; flex-shrink: 0; margin-top: 1px; }
+  .po-actions { display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid #F1F2F4; }
+  .po-actions button {
+    flex: 1; height: 34px; border-radius: 4px; font-size: 13px; font-weight: 500;
+    border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+  }
+  .po-actions .btn-ignore { background: #F2F3F5; color: #4E5969; }
+  .po-actions .btn-edit { background: rgba(7,193,96,.1); color: #07C160; }
+  .po-actions .btn-confirm { background: #07C160; color: #fff; }
+  .po-actions button:active { opacity: .85; }
+  .po-actions button svg { width: 14px; height: 14px; }
+  .preorder-card.done .preorder-body, .preorder-card.done .po-actions { display: none; }
+  .po-result { display: none; padding: 14px 12px; text-align: center; }
+  .preorder-card.done .po-result { display: block; }
+  .po-result .ok-ico { width: 38px; height: 38px; margin: 0 auto 8px; color: #07C160; }
+  .po-result .ok-title { font-size: 15px; font-weight: 600; color: #1F2329; }
+  .po-result .ok-sub { font-size: 12px; color: #86909C; margin-top: 4px; line-height: 1.6; }
+
+  .todo-sec-title {
+    font-size: 12px; color: #86909C; font-weight: 500;
+    display: flex; align-items: center; gap: 6px; margin: 4px 2px 2px;
+  }
+  .todo-sec-title .dot { width: 4px; height: 4px; border-radius: 50%; background: #C9CDD4; }
+  .todo-sec-title .count { color: #FA5151; font-size: 11px; }
+
+  .approval-item {
+    background: #fff; border: 1px solid #EFF0F2; border-radius: 6px; padding: 10px 12px;
+    display: flex; align-items: center; gap: 10px; cursor: pointer;
+  }
+  .approval-item:active { background: #FAFBFC; }
+  .approval-item .ap-icon {
+    width: 32px; height: 32px; border-radius: 6px; background: rgba(7,193,96,.1);
+    color: #07C160; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .approval-item .ap-icon svg { width: 16px; height: 16px; }
+  .approval-item .ap-main { flex: 1; min-width: 0; }
+  .approval-item .ap-title { font-size: 13px; color: #1F2329; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .approval-item .ap-sub { font-size: 11px; color: #86909C; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .approval-item .ap-arrow { color: #C9CDD4; flex-shrink: 0; }
+  .approval-item .ap-arrow svg { width: 14px; height: 14px; }
+  .approval-item .ap-tag { font-size: 10px; color: #FF7D00; border: 1px solid rgba(255,138,35,.3); border-radius: 3px; padding: 1px 5px; flex-shrink: 0; }
+
+  .order-item {
+    background: #fff; border: 1px solid #EFF0F2; border-radius: 6px; padding: 10px 12px;
+    display: flex; flex-direction: column; gap: 6px; cursor: pointer;
+  }
+  .order-item:active { background: #FAFBFC; }
+  .order-row1 { display: flex; align-items: center; gap: 8px; }
+  .order-no { font-size: 12px; color: #4E5969; font-weight: 500; }
+  .order-state { font-size: 10px; padding: 2px 6px; border-radius: 3px; font-weight: 500; }
+  .st-approving { background: rgba(255,138,35,.12); color: #FF7D00; }
+  .st-ship { background: rgba(7,193,96,.12); color: #07C160; }
+  .st-done { background: rgba(7,193,96,.12); color: #07C160; }
+  .order-row2 { display: flex; justify-content: space-between; font-size: 12px; color: #86909C; }
+  .order-row2 .prod { color: #1F2329; font-weight: 500; }
+  .order-row3 { display: flex; justify-content: space-between; align-items: center; }
+  .order-amount { font-size: 14px; font-weight: 600; color: #1F2329; }
+  .order-progress { font-size: 10px; color: #B5BAC1; }
+
+  .order-detail-card { background: #fff; border-radius: 6px; border: 1px solid #EFF0F2; padding: 12px; }
+  .od-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .od-head .od-no { font-size: 15px; font-weight: 600; color: #1F2329; }
+  .od-head .od-state { margin-left: auto; }
+  .od-kv { display: flex; flex-direction: column; gap: 6px; padding-bottom: 10px; border-bottom: 1px solid #F1F2F4; margin-bottom: 10px; }
+  .od-kv .row { display: flex; font-size: 12px; }
+  .od-kv .row .k { color: #86909C; width: 72px; flex-shrink: 0; }
+  .od-kv .row .v { color: #1F2329; font-weight: 500; }
+  .od-tl-title { font-size: 12px; color: #4E5969; font-weight: 600; margin-bottom: 8px; }
+  .wc-tl-item { display: flex; gap: 10px; position: relative; padding-bottom: 14px; }
+  .wc-tl-item::before {
+    content: ''; position: absolute; left: 7px; top: 16px; bottom: 0;
+    width: 2px; background: #E5E6EB;
+  }
+  .wc-tl-item:last-child::before { display: none; }
+  .wc-tl-dot {
+    width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0; margin-top: 1px;
+    background: #E5E6EB; position: relative; z-index: 1;
+  }
+  .wc-tl-item.done .wc-tl-dot { background: #07C160; }
+  .wc-tl-item.done .wc-tl-dot::after {
+    content: ''; position: absolute; left: 4px; top: 4px; width: 8px; height: 8px;
+    background: #fff; border-radius: 50%;
+  }
+  .wc-tl-item.current .wc-tl-dot { background: #FF7D00; box-shadow: 0 0 0 4px rgba(255,138,35,.15); }
+  .wc-tl-item.current .wc-tl-dot::after {
+    content: ''; position: absolute; left: 4px; top: 4px; width: 8px; height: 8px;
+    background: #fff; border-radius: 50%;
+  }
+  .wc-tl-main { flex: 1; min-width: 0; }
+  .wc-tl-title { font-size: 13px; color: #1F2329; font-weight: 500; }
+  .wc-tl-item.current .wc-tl-title { color: #FF7D00; }
+  .wc-tl-desc { font-size: 11px; color: #86909C; margin-top: 2px; }
+  .wc-tl-time { font-size: 10px; color: #B5BAC1; margin-top: 2px; }
+
+  .stock-card { background: #fff; border: 1px solid #EFF0F2; border-radius: 6px; padding: 12px; }
+  .stock-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .stock-head .stk-ico {
+    width: 32px; height: 32px; border-radius: 6px; background: rgba(64,158,255,.12);
+    color: #409EFF; display: flex; align-items: center; justify-content: center;
+  }
+  .stock-head .stk-ico svg { width: 16px; height: 16px; }
+  .stock-head .stk-name { font-size: 14px; font-weight: 600; color: #1F2329; }
+  .stock-head .stk-sku { font-size: 11px; color: #B5BAC1; }
+  .stock-rows { display: flex; flex-direction: column; gap: 6px; }
+  .stock-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; padding: 4px 0; }
+  .stock-row .wh { color: #4E5969; display: flex; align-items: center; gap: 6px; }
+  .stock-row .wh .wh-dot { width: 6px; height: 6px; border-radius: 50%; background: #C9CDD4; }
+  .stock-row .qty { color: #1F2329; font-weight: 600; }
+  .stock-row .qty.low { color: #FA5151; }
+  .stock-total { margin-top: 8px; padding-top: 8px; border-top: 1px solid #F1F2F4; font-size: 12px; color: #86909C; display: flex; justify-content: space-between; }
+  .stock-total b { color: #07C160; font-size: 15px; }
+
+  .order-step-wrap { display: flex; flex-direction: column; gap: 10px; }
+  .step-indicator { display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
+  .step-indicator .step-pill {
+    flex: 1; text-align: center; font-size: 11px; color: #86909C; padding: 4px 0;
+    border-radius: 4px; background: #F2F3F5;
+  }
+  .step-indicator .step-pill.active { background: rgba(7,193,96,.1); color: #07C160; font-weight: 600; }
+  .step-card { background: #fff; border: 1px solid #EFF0F2; border-radius: 6px; padding: 12px; }
+  .step-card h5 { font-size: 13px; color: #1F2329; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .step-card h5 .step-ico { color: #07C160; width: 16px; height: 16px; }
+  .cust-pick { display: flex; align-items: center; gap: 10px; padding: 8px; border: 1px solid #EFF0F2; border-radius: 5px; }
+  .cust-pick.selected { border-color: rgba(7,193,96,.5); background: rgba(7,193,96,.04); }
+  .cust-pick .cp-avatar { width: 34px; height: 34px; border-radius: 6px; background: #07C160; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 600; flex-shrink: 0; }
+  .cust-pick .cp-main { flex: 1; min-width: 0; }
+  .cust-pick .cp-name { font-size: 13px; font-weight: 600; color: #1F2329; }
+  .cust-pick .cp-sub { font-size: 11px; color: #86909C; margin-top: 2px; }
+  .cust-pick .cp-check { color: #07C160; }
+  .cust-pick .cp-check svg { width: 18px; height: 18px; }
+
+  .risk-card { border-radius: 6px; padding: 12px; background: #fff; border: 1px solid #EFF0F2; }
+  .risk-card.warn { border-color: rgba(255,138,35,.4); background: #FFFBF5; }
+  .risk-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .risk-head .rk-badge { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 4px; }
+  .risk-head .rk-badge.b { background: rgba(255,138,35,.15); color: #FF7D00; }
+  .risk-head .rk-title { font-size: 14px; font-weight: 600; color: #1F2329; }
+  .risk-items { display: flex; flex-direction: column; gap: 5px; }
+  .risk-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #4E5969; }
+  .risk-item .rk-ok { color: #07C160; width: 14px; height: 14px; flex-shrink: 0; }
+  .risk-item .rk-warn { color: #FF7D00; width: 14px; height: 14px; flex-shrink: 0; }
+  .risk-item .rk-text { flex: 1; }
+  .risk-item .rk-tag { font-size: 10px; color: #FF7D00; background: rgba(255,138,35,.1); padding: 1px 5px; border-radius: 3px; flex-shrink: 0; }
+  .risk-sum { margin-top: 10px; padding-top: 8px; border-top: 1px dashed #E5E6EB; font-size: 12px; color: #FF7D00; line-height: 1.6; display: flex; gap: 5px; }
+  .risk-sum svg { width: 14px; height: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  .contract-card { border-radius: 6px; padding: 12px; background: #fff; border: 1px solid #EFF0F2; }
+  .contract-card.hit { border-color: rgba(7,193,96,.4); }
+  .ct-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .ct-head .ct-ico { color: #07C160; width: 16px; height: 16px; }
+  .ct-head .ct-title { font-size: 13px; font-weight: 600; color: #1F2329; flex: 1; }
+  .ct-head .ct-tag { font-size: 10px; padding: 2px 6px; border-radius: 3px; background: rgba(7,193,96,.1); color: #07C160; font-weight: 500; }
+  .ct-body { display: flex; flex-direction: column; gap: 5px; font-size: 12px; color: #4E5969; }
+  .ct-body .row { display: flex; justify-content: space-between; }
+  .ct-body .row .k { color: #86909C; }
+  .ct-body .row .v { color: #1F2329; font-weight: 500; }
+  .ct-body .row .v.warn { color: #FF7D00; }
+  .ct-quota { margin-top: 8px; }
+  .ct-quota .q-bar { height: 6px; border-radius: 3px; background: #F2F3F5; overflow: hidden; }
+  .ct-quota .q-fill { height: 100%; background: #07C160; border-radius: 3px; }
+  .ct-quota .q-label { font-size: 11px; color: #86909C; margin-top: 4px; display: flex; justify-content: space-between; }
+
+  .form-row { margin-bottom: 10px; }
+  .form-row label { display: block; font-size: 12px; color: #4E5969; margin-bottom: 5px; font-weight: 500; }
+  .form-row input, .form-row select, .form-row textarea {
+    width: 100%; height: 36px; border: 1px solid #E5E6EB; border-radius: 5px;
+    padding: 0 10px; font-size: 13px; color: #1F2329; background: #fff; outline: none;
+    font-family: inherit;
+  }
+  .form-row input:focus, .form-row select:focus { border-color: #07C160; }
+  .form-row textarea { height: auto; padding: 8px 10px; resize: none; }
+  .form-row .form-hint { font-size: 11px; color: #B5BAC1; margin-top: 4px; }
+  .form-row .inline { display: flex; gap: 8px; }
+  .form-row .inline > div { flex: 1; }
+  .form-row .form-quota { font-size: 11px; color: #07C160; margin-top: 4px; }
+  .form-row .form-quota.warn { color: #FF7D00; }
+
+  .step-actions { display: flex; gap: 8px; margin-top: 4px; }
+  .step-actions button {
+    flex: 1; height: 38px; border-radius: 5px; font-size: 14px; font-weight: 500;
+    border: none; cursor: pointer;
+  }
+  .step-actions .btn-prev { background: #F2F3F5; color: #4E5969; }
+  .step-actions .btn-next { background: #07C160; color: #fff; }
+  .step-actions button:active { opacity: .85; }
+
+  .order-success { text-align: center; padding: 30px 20px; }
+  .order-success .ok-ico { width: 52px; height: 52px; margin: 0 auto 12px; color: #07C160; }
+  .order-success h4 { font-size: 17px; color: #1F2329; font-weight: 600; margin-bottom: 6px; }
+  .order-success p { font-size: 13px; color: #86909C; line-height: 1.7; }
+  .order-success .os-no { font-size: 12px; color: #07C160; font-weight: 600; margin: 10px 0 4px; }
+  .order-success .btn-back { margin-top: 18px; height: 40px; width: 100%; background: #07C160; color: #fff; border: none; border-radius: 5px; font-size: 14px; cursor: pointer; }
+
+  .wc-light-tip {
+    background: rgba(255,138,35,.08); border: 1px solid rgba(255,138,35,.25);
+    border-radius: 4px; padding: 8px 10px; font-size: 12px; color: #FF7D00;
+    display: flex; align-items: flex-start; gap: 6px; margin: 6px 0; line-height: 1.5;
+  }
+  .wc-light-tip svg { width: 13px; height: 13px; flex-shrink: 0; margin-top: 1px; }
+
+  /* 智能体 */
+  .ai-chat { font-size: 12px; color: #4E5969; line-height: 1.7; display: flex; flex-direction: column; gap: 8px; }
+  .ai-msg { max-width: 85%; padding: 7px 10px; border-radius: 8px; font-size: 12px; line-height: 1.6; white-space: pre-line; }
+  .ai-msg.user { align-self: flex-end; background: #07C160; color: #fff; border-radius: 8px 2px 8px 8px; }
+  .ai-msg.bot { align-self: flex-start; background: #F2F3F5; color: #1F2329; border-radius: 2px 8px 8px 8px; }
+  .wc-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+  .wc-chip {
+    background: #F2F3F5; border: none; border-radius: 12px; padding: 5px 12px;
+    font-size: 11px; color: #4E5969; cursor: pointer; font-family: inherit;
+  }
+  .wc-chip:active { background: rgba(7,193,96,.12); color: #07C160; }
+
+  /* ===== PC 端补充样式（wecom.css 缺失的类） ===== */
+  .wc-chat-sub { font-size: 11px; color: var(--wc-text-tertiary); margin-top: 2px; }
+  .wc-send-btn {
+    height: 34px; padding: 0 16px; border: none; border-radius: 4px;
+    background: var(--wc-brand); color: #fff; font-size: 13px; cursor: pointer;
+    font-family: inherit; flex-shrink: 0;
+  }
+  .wc-send-btn:active { opacity: .85; }
+  .wc-badge-mini {
+    min-width: 15px; height: 15px; border-radius: 8px;
+    background: #FA5151; color: #fff; font-size: 10px;
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 0 4px; margin-left: 2px; font-weight: 500;
+  }
+  .wc-aside-tab.is-active .wc-badge-mini { background: var(--wc-brand); }
+  .wc-system-tip {
+    align-self: center; text-align: center;
+    font-size: 11px; color: var(--wc-text-tertiary);
+    background: rgba(0,0,0,.03); border-radius: 4px;
+    padding: 4px 10px; margin: 4px 0; max-width: 80%;
+  }
+</style>
+
+<body>
+<div id="mobileView" class="visible">
+    <div id="phone">
+
+      <div id="status-bar">
+        <span class="time" id="statusTime">9:30</span>
+        <div class="right-icons">
+          <svg width="16" height="10" viewBox="0 0 16 10" fill="none">
+            <rect x="0" y="6" width="3" height="4" rx="0.5" fill="#fff"/>
+            <rect x="4.5" y="4" width="3" height="6" rx="0.5" fill="#fff"/>
+            <rect x="9" y="2" width="3" height="8" rx="0.5" fill="#fff"/>
+            <rect x="13.5" y="0" width="3" height="10" rx="0.5" fill="#fff"/>
+          </svg>
+          <svg width="14" height="10" viewBox="0 0 14 10" fill="none">
+            <path d="M7 8.5a.8.8 0 110-1.6.8.8 0 010 1.6z" fill="#fff"/>
+            <path d="M2.5 5.5a5.5 5.5 0 019 0" stroke="#fff" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+            <path d="M.5 3a8.5 8.5 0 0113 0" stroke="#fff" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+          </svg>
+          <div class="battery"><div class="level"><div class="fill"></div></div></div>
+        </div>
+      </div>
+
+      <div id="nav">
+        <div class="back" id="navBack">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M12 4l-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="title" id="navTitle">王总-铸造厂</div>
+        <div class="more" id="navMore">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <circle cx="10" cy="5" r="1.5" fill="currentColor"/>
+            <circle cx="10" cy="10" r="1.5" fill="currentColor"/>
+            <circle cx="10" cy="15" r="1.5" fill="currentColor"/>
+          </svg>
+        </div>
+      </div>
+
+      <div id="chat-area">
+        <div id="watermark"></div>
+        <div id="messages"></div>
+      </div>
+
+      <div id="toolbar">
+        <div class="tool-scroll">
+          <button class="tool-btn hot" data-panel="todos">
+            <svg class="tool-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="14" height="14" rx="2"/><path d="M7 10l2 2 4-4"/></svg>
+            <span class="tool-label">订单助手</span>
+          </button>
+          <button class="tool-btn" data-panel="quickreply">
+            <svg class="tool-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12v9H9l-4 3v-3H4z"/></svg>
+            <span class="tool-label">快捷回复</span>
+          </button>
+          <button class="tool-btn" data-panel="catalog">
+            <svg class="tool-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="16" height="14" rx="1.5"/><circle cx="7" cy="8" r="1.5"/><path d="M2 13l4-3 3 2 4-4 5 5"/></svg>
+            <span class="tool-label">商品图册</span>
+          </button>
+          <button class="tool-btn" data-panel="collect">
+            <svg class="tool-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v16M6 6l4-4 4 4M6 14l4 4 4-4"/></svg>
+            <span class="tool-label">对外收款</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="input-bar">
+        <button class="mic-btn" id="micBtn" aria-label="语音">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+        </button>
+        <input type="text" id="chatInput" placeholder="输入消息..." />
+        <button class="face-btn" id="faceBtn" aria-label="表情">☺</button>
+        <button class="plus-btn" id="plusBtn" aria-label="更多">＋</button>
+      </div>
+
+      <!-- 移动端订单助手全屏页（侧边栏 H5：唯一容器 + 内部 5 Tab 内容切换） -->
+      <div class="fullscreen-page" id="page-todos">
+        <div class="page-header">
+          <button class="page-close" data-page="todos">×</button>
+          <span class="page-title">订单助手</span>
+          <span class="page-spacer"></span>
+        </div>
+        <div class="aside-tabs" id="mAsideTabs">
+          <button class="aside-tab is-active" data-mtab="todos">待办</button>
+          <button class="aside-tab" data-mtab="orders">订单</button>
+          <button class="aside-tab" data-mtab="stock">库存</button>
+          <button class="aside-tab" data-mtab="create">下单</button>
+          <button class="aside-tab" data-mtab="ai">智能体</button>
+        </div>
+        <div class="aside-scroll" id="mTodos"></div>
+        <div class="aside-scroll" id="mOrders" style="display:none"></div>
+        <div class="aside-scroll" id="mStock" style="display:none"></div>
+        <div class="aside-scroll" id="mCreate" style="display:none"></div>
+        <div class="aside-scroll" id="mAi" style="display:none"></div>
+        <div class="aside-scroll" id="mOdBody" style="display:none"></div>
+      </div>
+
+    </div><!-- /#phone -->
+  </div>
+  <script>
+  // ============================================================
+  // 企微侧边栏 · 销售订单助手 —— 双端共享业务渲染
+  // 同一套业务数据 + 渲染函数，PC 三栏与移动端手机壳共用
+  // ============================================================
+
+  // ---------- 业务状态（共享） ----------
+  const state = {
+    preorderDone: false,
+    preorderAction: '',   // confirmed / ignored
+    preorderQty: 5,
+    createStep: 1,
+  };
+
+  // ---------- 数据 ----------
+  const ORDER_DETAILS = {
+    'od-1': {
+      no: 'ORD-20260811-0108', state: '待价格审批', stateClass: 'st-approving',
+      kv: [['客户', 'XX 铸造有限公司'], ['产品', '高粘度钠基膨润土-N320'], ['数量', '5 吨 · 阳原仓'], ['金额', '¥41,000'], ['合同', 'HT-2025-0038（框架）'], ['提交人', '李经理']],
+      tl: [
+        { t: '订单提交', d: '李经理 · 来自预订单确认', time: '今天 09:26', done: true },
+        { t: '待价格审批', d: '销售主管 张主管 · 进行中', time: '等待中', done: false, current: true },
+        { t: '待董事长审批', d: 'C/D 级客户需董事长终审', time: '', done: false },
+        { t: '合同生成', d: '系统校验模板/要素/编号', time: '', done: false },
+        { t: '备货审批', d: '商务制定计划 → 仓管确认', time: '', done: false },
+        { t: '发货出库', d: '仓管填实际发货确认', time: '', done: false },
+        { t: '开票回单', d: '按有效发货开票，回单不卡开票', time: '', done: false },
+      ]
+    },
+    'od-2': {
+      no: 'ORD-20260809-0102', state: '待价格审批', stateClass: 'st-approving',
+      kv: [['客户', '智厨餐饮'], ['产品', '改性膨润土-GM-2'], ['数量', '3 吨 · 长兴仓'], ['金额', '¥25,800'], ['合同', '单次合同（待生成）'], ['提交人', '李经理']],
+      tl: [
+        { t: '订单提交', d: '李经理 · 手动创建', time: '08-09 17:20', done: true },
+        { t: '待价格审批', d: '销售主管 张主管 · 进行中', time: '等待中', done: false, current: true },
+        { t: '合同生成', d: '系统校验模板/要素/编号', time: '', done: false },
+        { t: '备货审批', d: '商务制定计划 → 仓管确认', time: '', done: false },
+        { t: '发货出库', d: '仓管填实际发货确认', time: '', done: false },
+        { t: '开票回单', d: '按有效发货开票', time: '', done: false },
+      ]
+    },
+    'od-3': {
+      no: 'ORD-20260808-0097', state: '已发货 · 回单待上传', stateClass: 'st-ship',
+      kv: [['客户', 'XX 铸造有限公司'], ['产品', '高粘度钠基膨润土-N320'], ['数量', '5 吨 · 阳原仓'], ['金额', '¥41,000'], ['发货单', 'DO-20260807-031'], ['出库日期', '08-07']],
+      tl: [
+        { t: '订单提交', d: '李经理 · 手动创建', time: '08-07 10:12', done: true },
+        { t: '价格审批', d: '张主管 通过', time: '08-07 11:00', done: true },
+        { t: '备货完成', d: '阳原仓 备货确认 5 吨', time: '08-07 14:20', done: true },
+        { t: '发货出库', d: '仓管 王师傅 · 实际发货 5 吨', time: '08-07 16:45', done: true },
+        { t: '待回单', d: '出库超 5 天未回单，已进例外审核', time: '已超期', done: false, current: true },
+        { t: '开票', d: '按有效发货开票（回单不卡开票）', time: '', done: false },
+      ]
+    },
+    'od-4': {
+      no: 'ORD-20260703-0087', state: '已完成', stateClass: 'st-done',
+      kv: [['客户', 'XX 铸造有限公司'], ['产品', '高粘度钠基膨润土-N320'], ['数量', '10 吨 · 阳原仓'], ['金额', '¥82,000'], ['合同', 'HT-2025-0038（框架）']],
+      tl: [
+        { t: '订单提交', d: '李经理', time: '07-03', done: true },
+        { t: '审批通过', d: '张主管 + 董事长（C/D 级）', time: '07-03', done: true },
+        { t: '备货完成', d: '阳原仓', time: '07-05', done: true },
+        { t: '发货出库', d: '实际发货 10 吨', time: '07-07', done: true },
+        { t: '回单上传', d: '王总 已签收', time: '07-12', done: true },
+        { t: '开票完成', d: '已开票 ¥82,000', time: '07-20', done: true },
+        { t: '归档', d: '订单闭环', time: '07-28', done: true },
+      ]
+    },
+  };
+
+  const STOCK = [
+    { name: '高粘度钠基膨润土-N320', sku: 'N320', rows: [['阳原仓','26.5 吨',false],['长兴仓','3.0 吨',true],['东莞仓','12.0 吨',false],['成都仓','8.5 吨',false]], total: 50 },
+    { name: '改性膨润土-GM-2', sku: 'GM-2', rows: [['阳原仓','15.0 吨',false],['长兴仓','9.5 吨',false],['东莞仓','0 吨',false],['成都仓','4.0 吨',false]], total: 28.5 },
+  ];
+
+  // ---------- SVG 片段 ----------
+  const I = {
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+    ok: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+    warn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>',
+    spark: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l1.8 5.4L19 9l-5.2 1.6L12 16l-1.8-5.4L5 9l5.2-1.6z"/></svg>',
+    arrow: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>',
+    edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>',
+    close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>',
+    info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>',
+  };
+
+  // ============================================================
+  // 共享渲染函数（PC aside 与移动端全屏页都用）
+  // ============================================================
+
+  function renderTodos(el) {
+    const qty = state.preorderQty;
+    const amount = (qty * 8200).toLocaleString('zh-CN');
+    const doneCard = state.preorderDone ? `
+      <div class="preorder-card done">
+        <div class="preorder-head">
+          <span class="ai-chip">${I.spark} AI 捕捉</span>
+          <span class="po-title">预订单 #P-20260811-003</span>
+          <span class="po-status">${state.preorderAction === 'confirmed' ? '已确认' : '已忽略'}</span>
+        </div>
+        <div class="po-result">
+          <svg class="ok-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+          <div class="ok-title">${state.preorderAction === 'confirmed' ? '已确认，订单已创建' : '已忽略'}</div>
+          <div class="ok-sub">${state.preorderAction === 'confirmed' ? '正式订单 ORD-20260811-0108 已进入审批流<br>待销售主管价格审批' : '预订单已归档，不会生成正式订单'}</div>
+        </div>
+      </div>` : `
+      <div class="preorder-card">
+        <div class="preorder-head">
+          <span class="ai-chip">${I.spark} AI 捕捉</span>
+          <span class="po-title">预订单 #P-20260811-003</span>
+          <span class="po-status">待人工确认</span>
+        </div>
+        <div class="preorder-body">
+          <div class="po-origin">
+            <div class="po-origin-label">${I.spark} 来自群消息</div>
+            <div class="po-quote">「王总：再发5吨高粘度钠基膨润土-N320，还是发阳原仓，老规矩」</div>
+            <span class="po-src">王总-铸造厂 · 09:24 · 群聊</span>
+          </div>
+          <div class="po-fields">
+            <div class="po-field"><span class="k">客户</span><span class="v">XX 铸造有限公司</span></div>
+            <div class="po-field"><span class="k">产品</span><span class="v">高粘度钠基膨润土-N320</span></div>
+            <div class="po-field"><span class="k">数量</span><span class="v editable">${qty} 吨</span></div>
+            <div class="po-field"><span class="k">发货仓</span><span class="v">阳原仓</span></div>
+            <div class="po-field"><span class="k">预估金额</span><span class="v amount">¥${amount}</span></div>
+            <div class="po-field"><span class="k">合同</span><span class="v warn">HT-2025-0038 · 额度 62%</span></div>
+          </div>
+          <div class="po-hint">${I.info} AI 生成预订单，确认后才会成为正式订单进入审批流；客户评级 B 级下滑中，已自动附加风控提示。</div>
+        </div>
+        <div class="po-actions">
+          <button class="btn-ignore" data-po-action="ignore">${I.close} 忽略</button>
+          <button class="btn-edit" data-po-action="edit">${I.edit} 修改</button>
+          <button class="btn-confirm" data-po-action="confirm">${I.check} 确认下单</button>
+        </div>
+      </div>`;
+    el.innerHTML = `
+      <div class="group-ctx">
+        <div class="ctx-avatar">王</div>
+        <div style="flex:1;min-width:0;">
+          <div class="ctx-name">王总-铸造厂</div>
+          <div class="ctx-sub"><span>XX 铸造有限公司</span><span class="grade-chip grade-B">B级 下滑中</span></div>
+        </div>
+      </div>
+      <div class="todo-sec-title"><span class="dot"></span> 预订单 · 待确认 ${state.preorderDone ? '' : '<span class="count">1</span>'}</div>
+      ${doneCard}
+      <div class="todo-sec-title"><span class="dot"></span> 审批待办</div>
+      <div class="approval-item" data-open-order="od-2">
+        <div class="ap-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div>
+        <div class="ap-main"><div class="ap-title">ORD-20260809-0102 · 待价格审批</div><div class="ap-sub">智厨餐饮 · 改性膨润土 3吨 · 提交于 08-09 17:20</div></div>
+        <span class="ap-tag">需审批</span><span class="ap-arrow">${I.arrow}</span>
+      </div>
+      <div class="approval-item" data-open-order="od-3">
+        <div class="ap-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <div class="ap-main"><div class="ap-title">ORD-20260808-0097 · 已发货运单待回单</div><div class="ap-sub">XX 铸造 · N320 5吨 · 出库 08-07，超 5 天未回单</div></div>
+        <span class="ap-tag" style="color:#FA5151;border-color:rgba(250,81,81,.3);">回单异常</span><span class="ap-arrow">${I.arrow}</span>
+      </div>`;
+    // 事件
+    el.querySelectorAll('[data-po-action]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const action = btn.dataset.poAction;
+        if (action === 'confirm') { state.preorderDone = true; state.preorderAction = 'confirmed'; }
+        else if (action === 'ignore') { state.preorderDone = true; state.preorderAction = 'ignored'; }
+        else if (action === 'edit') {
+          const cur = state.preorderQty;
+          const next = prompt('修改数量（吨）：', String(cur));
+          if (next && !isNaN(next) && parseFloat(next) > 0) { state.preorderQty = parseFloat(next); }
+        }
+        refreshAll();
+        if (action === 'edit') return;
+      });
+    });
+    el.querySelectorAll('[data-open-order]').forEach(item => {
+      item.addEventListener('click', () => openOrderDetail(item.dataset.openOrder));
+    });
+  }
+
+  function renderOrders(el) {
+    const orders = [
+      { key: 'od-1', no: 'ORD-20260811-0108', st: '待价格审批', stc: 'st-approving', prod: '高粘度钠基膨润土-N320', spec: '5 吨 · 阳原仓', amt: '¥41,000', pg: '审批中 · 提交于今天 09:26' },
+      { key: 'od-2', no: 'ORD-20260809-0102', st: '待价格审批', stc: 'st-approving', prod: '改性膨润土-GM-2', spec: '3 吨 · 长兴仓', amt: '¥25,800', pg: '审批中 · 提交于 08-09' },
+      { key: 'od-3', no: 'ORD-20260808-0097', st: '已发货', stc: 'st-ship', prod: '高粘度钠基膨润土-N320', spec: '5 吨 · 阳原仓', amt: '¥41,000', pg: '回单未上传 · 08-07 出库' },
+      { key: 'od-4', no: 'ORD-20260703-0087', st: '已完成', stc: 'st-done', prod: '高粘度钠基膨润土-N320', spec: '10 吨 · 阳原仓', amt: '¥82,000', pg: '已归档 · 07-28' },
+    ];
+    el.innerHTML = orders.map(o => `
+      <div class="order-item" data-detail="${o.key}">
+        <div class="order-row1"><span class="order-no">${o.no}</span><span class="order-state ${o.stc}">${o.st}</span></div>
+        <div class="order-row2"><span class="prod">${o.prod}</span><span>${o.spec}</span></div>
+        <div class="order-row3"><span class="order-amount">${o.amt}</span><span class="order-progress">${o.pg}</span></div>
+      </div>`).join('');
+    el.querySelectorAll('.order-item[data-detail]').forEach(item => {
+      item.addEventListener('click', () => openOrderDetail(item.dataset.detail));
+    });
+  }
+
+  function renderOrderDetail(key, el) {
+    const d = ORDER_DETAILS[key];
+    if (!d) return;
+    const tlHtml = d.tl.map(item => `
+      <div class="wc-tl-item ${item.done ? 'done' : ''} ${item.current ? 'current' : ''}">
+        <div class="wc-tl-dot"></div>
+        <div class="wc-tl-main">
+          <div class="wc-tl-title">${item.t}</div>
+          <div class="wc-tl-desc">${item.d}</div>
+          ${item.time ? `<div class="wc-tl-time">${item.time}</div>` : ''}
+        </div>
+      </div>`).join('');
+    el.innerHTML = `
+      <div class="order-detail-card">
+        <div class="od-head"><span class="od-no">${d.no}</span><span class="order-state ${d.stateClass} od-state">${d.state}</span></div>
+        <div class="od-kv">${d.kv.map(r => `<div class="row"><span class="k">${r[0]}</span><span class="v">${r[1]}</span></div>`).join('')}</div>
+        <div class="od-tl-title">履约进度</div>
+        ${tlHtml}
+      </div>`;
+  }
+
+  function renderStock(el) {
+    el.innerHTML = STOCK.map(s => `
+      <div class="stock-card">
+        <div class="stock-head">
+          <div class="stk-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h20M4 8l1.5-4.5A2 2 0 0 1 7.4 2h9.2a2 2 0 0 1 1.9 1.5L20 8M6 8v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8"/></svg></div>
+          <div style="flex:1;min-width:0;"><div class="stk-name">${s.name}</div><div class="stk-sku">SKU: ${s.sku}</div></div>
+        </div>
+        <div class="stock-rows">${s.rows.map(r => `<div class="stock-row"><span class="wh"><span class="wh-dot"></span>${r[0]}</span><span class="qty ${r[2] ? 'low' : ''}">${r[1]}</span></div>`).join('')}</div>
+        <div class="stock-total"><span>可用库存合计</span><b>${s.total} 吨</b></div>
+      </div>`).join('') + `
+      <div style="font-size:11px;color:#B5BAC1;padding:2px 4px;line-height:1.6;">库存实时数据 · 仓管侧价格已剥离 · 数据更新于 09:28</div>`;
+  }
+
+  function renderCreate(el) {
+    const step = state.createStep;
+    const pills = [1,2,3,4,5].map(n => `
+      <div class="step-pill ${n === step ? 'active' : ''}">${['选客户','风控','合同','明细','提交'][n-1]}</div>`).join('');
+    let body = '';
+    if (step === 1) {
+      body = `
+        <div class="step-card">
+          <h5><svg class="step-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>选择客户</h5>
+          <div class="cust-pick selected">
+            <div class="cp-avatar">王</div>
+            <div class="cp-main"><div class="cp-name">XX 铸造有限公司</div><div class="cp-sub">来自当前群「王总-铸造厂」 · B 级</div></div>
+            <span class="cp-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span>
+          </div>
+          <div style="font-size:11px;color:#86909C;margin-top:8px;">已自动带入当前客户群关联的客户信息</div>
+        </div>`;
+    } else if (step === 2) {
+      body = `
+        <div class="risk-card warn">
+          <div class="risk-head"><span class="rk-badge b">B 级 · 下滑中</span><span class="rk-title">风控审计</span></div>
+          <div class="risk-items">
+            <div class="risk-item">${I.ok}<span class="rk-text">回款信用：良好</span></div>
+            <div class="risk-item">${I.warn}<span class="rk-text">退货率：偏高 8.3%（2026-03 一批水分超标，已解决）</span><span class="rk-tag">需关注</span></div>
+            <div class="risk-item">${I.ok}<span class="rk-text">信用额度：已用 ¥186万/¥300万（62%）</span></div>
+            <div class="risk-item">${I.ok}<span class="rk-text">经营风险：无异常</span></div>
+            <div class="risk-item">${I.ok}<span class="rk-text">合同纠纷：无</span></div>
+            <div class="risk-item">${I.warn}<span class="rk-text">对话舆情：近 7 天 2 次质量负面，王总 3 天未回复</span><span class="rk-tag">需关注</span></div>
+          </div>
+          <div class="risk-sum">${I.warn}<span>综合：可以下单，但客户满意度在下降，建议下单前联系王总确认情况</span></div>
+        </div>`;
+    } else if (step === 3) {
+      body = `
+        <div class="contract-card hit">
+          <div class="ct-head">
+            <svg class="ct-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <span class="ct-title">合同匹配</span><span class="ct-tag">已命中框架合同</span>
+          </div>
+          <div class="ct-body">
+            <div class="row"><span class="k">合同</span><span class="v">《2025年度膨润土供销框架合同》HT-2025-0038</span></div>
+            <div class="row"><span class="k">有效期</span><span class="v">至 2026-03-31</span></div>
+            <div class="row"><span class="k">价格</span><span class="v">¥8,200 / 吨（自动填入）</span></div>
+            <div class="row"><span class="k">账期</span><span class="v">60 天</span></div>
+          </div>
+          <div class="ct-quota">
+            <div class="q-bar"><div class="q-fill" style="width:62%"></div></div>
+            <div class="q-label"><span>已用额度 ¥186万</span><span>剩余 ¥114万（62%）</span></div>
+          </div>
+        </div>`;
+    } else if (step === 4) {
+      body = `
+        <div class="step-card">
+          <h5><svg class="step-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>填写订单明细</h5>
+          <div class="form-row"><label>产品</label><select id="fProduct"><option selected>高粘度钠基膨润土-N320</option><option>改性膨润土-GM-2</option><option>有机膨润土-188L</option></select></div>
+          <div class="form-row"><div class="inline">
+            <div><label>数量（吨）</label><input id="fQty" type="number" value="5" min="1" /></div>
+            <div><label>发货仓</label><select id="fWh"><option selected>阳原仓</option><option>长兴仓</option><option>东莞仓</option><option>成都仓</option></select></div>
+          </div></div>
+          <div class="form-row"><label>交期</label><input id="fDate" type="date" value="2026-08-15" /></div>
+          <div class="form-row"><label>特殊标记</label><textarea id="fNote" rows="2" placeholder="选填：客户特殊要求、交期备注等"></textarea></div>
+          <div class="form-row"><div class="form-quota">本次金额 ¥41,000，下单后额度占比 76%，在额度内</div></div>
+        </div>`;
+    } else {
+      body = `
+        <div class="step-card">
+          <h5><svg class="step-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>提交前确认</h5>
+          <div class="ct-body">
+            <div class="row"><span class="k">客户</span><span class="v">XX 铸造有限公司（B 级）</span></div>
+            <div class="row"><span class="k">产品</span><span class="v">高粘度钠基膨润土-N320</span></div>
+            <div class="row"><span class="k">数量</span><span class="v">5 吨 · 阳原仓</span></div>
+            <div class="row"><span class="k">金额</span><span class="v">¥41,000</span></div>
+            <div class="row"><span class="k">合同</span><span class="v">HT-2025-0038（框架）</span></div>
+            <div class="row"><span class="k">风控</span><span class="v warn">B 级 · 2 项需关注（放行）</span></div>
+          </div>
+          <div style="font-size:11px;color:#86909C;margin-top:8px;line-height:1.6;">提交后进入审批流：销售主管价格审批 → C/D 级董事长终审 → 合同生成校验</div>
+        </div>`;
+    }
+    const navBtns = step > 1 ? '<button class="btn-prev" data-create-prev>上一步</button>' : '';
+    const nextLabel = ['下一步：风控审计','下一步：合同校验','下一步：填写明细','下一步：提交','确认提交'][step-1];
+    const nextBtn = step < 5
+      ? `<button class="btn-next" data-create-next>${nextLabel}</button>`
+      : `<button class="btn-next" data-create-submit style="background:#FA5151;">${nextLabel}</button>`;
+    el.innerHTML = `
+      <div class="step-indicator">${pills}</div>
+      ${body}
+      <div class="step-actions">${navBtns}${nextBtn}</div>`;
+    el.querySelector('[data-create-next]')?.addEventListener('click', () => { state.createStep++; renderCreate(el); });
+    el.querySelector('[data-create-prev]')?.addEventListener('click', () => { state.createStep--; renderCreate(el); });
+    el.querySelector('[data-create-submit]')?.addEventListener('click', () => {
+      el.innerHTML = `
+        <div class="order-success">
+          <svg class="ok-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+          <h4>订单已提交</h4>
+          <p>已进入审批流，销售主管与董事长（C/D 级）将收到审批卡片</p>
+          <div class="os-no">ORD-20260811-0109</div>
+          <div class="os-tl">提交时间 09:32 · 当前节点：待价格审批</div>
+        </div>`;
+    });
+  }
+
+  function renderAI(el) {
+    el.innerHTML = `
+      <div class="wc-aside-section" style="border:1px solid #EFF0F2;border-radius:4px;background:#fff;padding:10px 12px 8px;">
+        <h4 style="font-size:11px;font-weight:500;color:#86909C;margin:0 0 6px;">订单智能体 · 助手能力</h4>
+        <div style="font-size:12px;color:#4E5969;line-height:1.8;">说一句话即可下单 / 查单 / 查库存，AI 只生成候选，人工确认后生效。</div>
+      </div>
+      <div class="wc-aside-section" style="border:1px solid #EFF0F2;border-radius:4px;background:#fff;padding:10px 12px 8px;">
+        <h4 style="font-size:11px;font-weight:500;color:#86909C;margin:0 0 6px;">快捷指令</h4>
+        <div class="wc-chips">
+          <button class="wc-chip" data-ai-cmd="再发5吨N320到阳原仓">再发 5 吨 N320</button>
+          <button class="wc-chip" data-ai-cmd="查一下ORD-20260808-0097到哪了">查订单进度</button>
+          <button class="wc-chip" data-ai-cmd="N320各仓还有多少">查 N320 库存</button>
+          <button class="wc-chip" data-ai-cmd="给王总催一下回单">催回单</button>
+        </div>
+      </div>
+      <div class="wc-aside-section" style="border:1px solid #EFF0F2;border-radius:4px;background:#fff;padding:10px 12px 8px;">
+        <h4 style="font-size:11px;font-weight:500;color:#86909C;margin:0 0 6px;">对话</h4>
+        <div class="ai-chat" id="aiChat${el.id}"></div>
+        <div style="display:flex;gap:6px;margin-top:10px;">
+          <input id="aiInput${el.id}" placeholder="跟智能体说一句话..." style="flex:1;height:34px;border:1px solid #E5E6EB;border-radius:4px;padding:0 10px;font-size:12px;outline:none;font-family:inherit;"/>
+          <button class="ai-send" data-ai-send="${el.id}" style="height:34px;padding:0 14px;background:#07C160;color:#fff;border:none;border-radius:4px;font-size:12px;cursor:pointer;">发送</button>
+        </div>
+        <div style="font-size:10px;color:#B5BAC1;margin-top:6px;">AI 生成内容仅作为候选，正式订单需人工确认</div>
+      </div>`;
+    const chatBox = el.querySelector(`#aiChat${el.id}`);
+    const aiSay = (role, text) => {
+      const div = document.createElement('div');
+      div.className = 'ai-msg ' + role;
+      div.textContent = text;
+      chatBox.appendChild(div);
+    };
+    el.querySelectorAll('[data-ai-cmd]').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const cmd = chip.dataset.aiCmd;
+        aiSay('user', cmd);
+        setTimeout(() => {
+          if (cmd.includes('再发')) aiSay('bot', '已生成预订单：#P-20260811-003\n客户：XX 铸造 · N320 5 吨 · 阳原仓\n预估 ¥41,000\n请到「待办」人工确认后才会成为正式订单。');
+          else if (cmd.includes('订单进度')) aiSay('bot', 'ORD-20260808-0097：已发货（08-07 出库），当前卡在「待回单」，出库已超 5 天，已自动进例外审核。');
+          else if (cmd.includes('库存')) aiSay('bot', 'N320 可用库存：阳原 26.5t / 长兴 3t / 东莞 12t / 成都 8.5t，合计 50 吨。长兴仓库存偏低。');
+          else if (cmd.includes('催回单')) aiSay('bot', '已为 ORD-20260808-0097 生成催办提醒（轻提醒，不打扰），商务侧会跟进回单。');
+        }, 500);
+      });
+    });
+    const sendBtn = el.querySelector(`[data-ai-send="${el.id}"]`);
+    const input = el.querySelector(`#aiInput${el.id}`);
+    sendBtn.addEventListener('click', () => {
+      if (!input.value.trim()) return;
+      aiSay('user', input.value.trim());
+      input.value = '';
+      setTimeout(() => aiSay('bot', '收到，我会先给出候选方案，涉及下单/改单需要您在「待办」确认后才生效。'), 500);
+    });
+  }
+
+  
+// ============================================================
+  // 视图控制（双端共享）
+  // ============================================================
+  let mobilePage = null;
+
+  function openOrderDetail(key) {
+    renderOrderDetail(key, document.getElementById('mOdBody'));
+    switchAsideTab('od');
+  }
+
+  // 侧边栏 H5 单容器：全部内容在 page-todos 内，Tab/详情切换只切显示
+  function switchAsideTab(tabKey) {
+    // 更新 Tab 高亮（od 详情不算 tab，保持当前 tab 高亮）
+    document.querySelectorAll('#mAsideTabs .aside-tab').forEach(t => {
+      t.classList.toggle('is-active', t.dataset.mtab === tabKey);
+    });
+    const map = { todos:'mTodos', orders:'mOrders', stock:'mStock', create:'mCreate', ai:'mAi', od:'mOdBody' };
+    const targetId = map[tabKey];
+    if (!targetId) return;
+    document.querySelectorAll('#page-todos .aside-scroll').forEach(s => s.style.display = 'none');
+    const el = document.getElementById(targetId);
+    if (el) el.style.display = 'flex';
+    if (tabKey === 'todos') renderTodos(el);
+    else if (tabKey === 'orders') renderOrders(el);
+    else if (tabKey === 'stock') renderStock(el);
+    else if (tabKey === 'create') { state.createStep = 1; renderCreate(el); }
+    else if (tabKey === 'ai') renderAI(el);
+  }
+  document.querySelectorAll('#mAsideTabs .aside-tab').forEach(tab => {
+    tab.addEventListener('click', () => switchAsideTab(tab.dataset.mtab));
+  });
+
+  // 打开/关闭全屏页（只有 page-todos 一个容器）
+  function showMobilePage() {
+    const page = document.getElementById('page-todos');
+    if (page) page.classList.add('open');
+    mobilePage = 'todos';
+  }
+  function closeMobilePage() {
+    const page = document.getElementById('page-todos');
+    if (page) page.classList.remove('open');
+    mobilePage = null;
+  }
+
+  document.querySelectorAll('#toolbar .tool-btn[data-panel]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const p = btn.dataset.panel;
+      // 企微原生聊天工具栏应用（快捷回复/商品图册/对外收款）——点击仅官方行为，不打开业务页
+      if (['quickreply','catalog','collect'].includes(p)) return;
+      // 业务入口：订单助手 → 打开侧边栏 H5（默认待办 Tab）
+      switchAsideTab('todos');
+      showMobilePage();
+    });
+  });
+
+  // 全屏页关闭
+  document.querySelectorAll('.page-close').forEach(btn => {
+    btn.addEventListener('click', () => closeMobilePage());
+  });
+
+  // 双端刷新
+  function refreshAll() {
+    // 官方工具栏按钮不承载业务状态（无角标）；状态只在侧边栏 H5 内部体现
+    if (mobilePage === 'todos') renderTodos(document.getElementById('mTodos'));
+  }
+
+  // ============================================================
+  // 初始化（移动端）
+  // ============================================================
+  document.getElementById('statusTime').textContent = '9:30';
+
+  // 聊天消息渲染
+  const mChatEl = document.getElementById('messages');
+  function mAdd(type, content) {
+    const div = document.createElement('div');
+    div.className = 'msg msg-' + type;
+    if (type === 'time') div.textContent = content;
+    else if (type === 'system') div.textContent = content;
+    else if (type === 'customer') {
+      div.innerHTML = '<div class="msg-avatar">王</div><div class="msg-bubble"><div class="msg-content"></div></div>';
+      div.querySelector('.msg-content').textContent = content;
+    } else {
+      div.innerHTML = '<div class="msg-bubble"><div class="msg-content"></div><div class="read-tag">已读</div></div><div class="msg-avatar">李</div>';
+      div.querySelector('.msg-content').textContent = content;
+    }
+    mChatEl.appendChild(div);
+    mChatEl.scrollTop = mChatEl.scrollHeight;
+  }
+
+  // 聊天初始消息
+  mAdd('time', '今天 08:45');
+  mAdd('customer', '李经理，上周那批 N320 车间说指标有点波动，你帮我留意下');
+  mAdd('sales', '好的王总，我让技术跟进一下，下午给您回复');
+  mAdd('time', '今天 09:24');
+  mAdd('customer', '再发5吨高粘度钠基膨润土-N320，还是发阳原仓，老规矩');
+  mAdd('sales', '收到王总，我看下库存和合同价，马上给您确认');
+
+  renderTodos(document.getElementById('mTodos'));
+</script>
+</body>
+</html>

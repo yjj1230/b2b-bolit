@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>证据收敛式项目迭代机制</title>
+<style>
+  :root {
+    --ink: #18201d;
+    --muted: #65706b;
+    --paper: #f5f5f1;
+    --surface: #ffffff;
+    --line: #d6dad6;
+    --line-strong: #a9b1ac;
+    --green: #176b4d;
+    --green-soft: #e8f3ed;
+    --red: #a33a2b;
+    --red-soft: #f8ebe8;
+    --amber: #8a5b12;
+    --amber-soft: #fbf0d8;
+    --blue: #2a5f8a;
+    --blue-soft: #eaf1f7;
+    --violet: #6d4f7e;
+    --violet-soft: #f1ebf4;
+    --nav-width: 270px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    color: var(--ink);
+    background: var(--paper);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-size: 16px;
+    line-height: 1.72;
+    letter-spacing: 0;
+  }
+  a { color: inherit; }
+  .layout { display: grid; grid-template-columns: var(--nav-width) minmax(0, 1fr); }
+  .side {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    padding: 28px 22px;
+    border-right: 1px solid var(--line);
+    background: #edf0ed;
+    overflow: auto;
+  }
+  .side-mark {
+    display: inline-grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    margin-bottom: 18px;
+    border: 1px solid var(--ink);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-weight: 800;
+  }
+  .side-title { margin: 0 0 5px; font-size: 17px; line-height: 1.35; }
+  .side-sub { margin: 0 0 22px; color: var(--muted); font-size: 12px; }
+  .side nav { display: grid; gap: 2px; }
+  .side nav a {
+    display: grid;
+    grid-template-columns: 30px 1fr;
+    padding: 7px 8px;
+    color: #3f4b46;
+    text-decoration: none;
+    font-size: 13px;
+    border-left: 2px solid transparent;
+  }
+  .side nav a:hover { color: var(--green); border-left-color: var(--green); background: rgba(255,255,255,.65); }
+  .side nav span { color: #8b948f; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .side-foot { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; }
+  main { min-width: 0; background: var(--surface); }
+  .hero {
+    min-height: 76vh;
+    display: flex;
+    align-items: flex-end;
+    padding: 70px clamp(28px, 7vw, 108px) 56px;
+    border-bottom: 1px solid var(--line);
+    background: #14221c;
+    color: #f3f5f2;
+  }
+  .hero-inner { max-width: 980px; }
+  .eyebrow { margin-bottom: 22px; color: #8fc7ad; font-size: 12px; font-weight: 800; text-transform: uppercase; }
+  h1 { max-width: 900px; margin: 0; font-family: Georgia, "Songti SC", serif; font-size: 72px; line-height: 1.08; font-weight: 600; }
+  .hero .lead { max-width: 850px; margin: 28px 0 0; color: #c9d2cd; font-size: 20px; line-height: 1.65; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 34px; color: #9cab9f; font-size: 12px; }
+  .band { padding: 72px clamp(28px, 7vw, 108px); border-bottom: 1px solid var(--line); }
+  .band.alt { background: #f7f8f6; }
+  .inner { max-width: 1120px; margin: 0 auto; }
+  .section-head { display: grid; grid-template-columns: 82px minmax(0, 1fr); gap: 24px; margin-bottom: 36px; }
+  .section-no { padding-top: 4px; color: var(--green); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 14px; font-weight: 800; }
+  h2 { margin: 0; font-family: Georgia, "Songti SC", serif; font-size: 38px; line-height: 1.25; font-weight: 600; }
+  h3 { margin: 38px 0 14px; font-size: 21px; line-height: 1.35; }
+  h4 { margin: 0 0 8px; font-size: 15px; }
+  p { margin: 0 0 16px; }
+  .intro { max-width: 920px; color: #3e4944; font-size: 18px; }
+  .thesis {
+    margin: 28px 0;
+    padding: 24px 26px;
+    border-left: 4px solid var(--green);
+    background: var(--green-soft);
+    font-family: Georgia, "Songti SC", serif;
+    font-size: 22px;
+    line-height: 1.6;
+  }
+  .grid-2, .grid-3, .grid-4 { display: grid; gap: 18px; }
+  .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .panel { padding: 20px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+  .panel p, .panel li { color: #4d5853; font-size: 14px; }
+  .panel .kicker { margin-bottom: 9px; color: var(--green); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; font-weight: 800; }
+  .panel.danger { border-top: 4px solid var(--red); }
+  .panel.warn { border-top: 4px solid var(--amber); }
+  .panel.good { border-top: 4px solid var(--green); }
+  .panel.info { border-top: 4px solid var(--blue); }
+  ul, ol { margin: 10px 0 18px; padding-left: 22px; }
+  li { margin: 6px 0; }
+  code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  code { padding: 2px 5px; background: #edf0ed; border-radius: 3px; font-size: .88em; }
+  pre {
+    overflow: auto;
+    margin: 18px 0 24px;
+    padding: 22px;
+    border: 1px solid #303b36;
+    border-radius: 6px;
+    background: #17201c;
+    color: #dce8e1;
+    font-size: 13px;
+    line-height: 1.62;
+  }
+  pre code { padding: 0; background: none; color: inherit; font-size: inherit; }
+  .table-wrap { overflow-x: auto; margin: 18px 0 28px; border: 1px solid var(--line); border-radius: 6px; }
+  table { width: 100%; border-collapse: collapse; background: var(--surface); font-size: 13px; line-height: 1.55; }
+  th, td { padding: 12px 13px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+  th { background: #edf0ed; color: #3c4842; font-size: 12px; }
+  tr:last-child td { border-bottom: 0; }
+  td:first-child { font-weight: 650; }
+  .tag { display: inline-block; padding: 2px 7px; border-radius: 3px; font-size: 11px; font-weight: 750; white-space: nowrap; }
+  .tag.green { color: var(--green); background: var(--green-soft); }
+  .tag.red { color: var(--red); background: var(--red-soft); }
+  .tag.amber { color: var(--amber); background: var(--amber-soft); }
+  .tag.blue { color: var(--blue); background: var(--blue-soft); }
+  .tag.violet { color: var(--violet); background: var(--violet-soft); }
+  .flow {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(105px, 1fr));
+    gap: 10px;
+    margin: 24px 0;
+  }
+  .flow.six { grid-template-columns: repeat(6, minmax(120px, 1fr)); }
+  .flow-step { position: relative; min-height: 112px; padding: 14px; border: 1px solid var(--line-strong); background: #fff; }
+  .flow-step:not(:last-child)::after { content: ">"; position: absolute; right: -9px; top: 40%; z-index: 2; color: var(--green); font-weight: 900; }
+  .flow-step b { display: block; margin-bottom: 7px; color: var(--green); font-size: 12px; }
+  .flow-step span { display: block; color: #4f5b55; font-size: 12px; line-height: 1.5; }
+  .formula { margin: 18px 0; padding: 18px 20px; border: 1px dashed var(--line-strong); background: #fafbf9; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+  .callout { margin: 22px 0; padding: 18px 20px; border: 1px solid var(--line); background: #fbfcfb; }
+  .callout strong { color: var(--green); }
+  .case { margin-top: 22px; padding: 22px 0; border-top: 1px solid var(--line); }
+  .case:first-of-type { border-top: 0; }
+  .case-head { display: grid; grid-template-columns: 140px 1fr; gap: 18px; margin-bottom: 12px; }
+  .case-id { color: var(--green); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; font-weight: 800; }
+  .case h4 { font-size: 18px; }
+  .decision-tree { display: grid; gap: 0; margin: 22px 0; border: 1px solid var(--line); }
+  .decision-row { display: grid; grid-template-columns: 42px minmax(190px, .8fr) minmax(260px, 1.7fr); }
+  .decision-row > * { padding: 12px 14px; border-bottom: 1px solid var(--line); }
+  .decision-row:last-child > * { border-bottom: 0; }
+  .decision-row .n { color: var(--green); background: #edf0ed; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 800; }
+  .metric { padding: 14px 0; border-bottom: 1px solid var(--line); }
+  .metric:last-child { border-bottom: 0; }
+  .metric b { display: inline-block; min-width: 160px; }
+  .status-line { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0; }
+  .footer { padding: 44px clamp(28px, 7vw, 108px); background: #14221c; color: #b7c5bd; }
+  .footer .inner { display: flex; justify-content: space-between; gap: 24px; font-size: 12px; }
+  @media (max-width: 1100px) {
+    .layout { grid-template-columns: 1fr; }
+    .side { position: static; width: 100%; height: auto; border-right: 0; border-bottom: 1px solid var(--line); }
+    .side nav { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .side-foot { display: none; }
+    .flow, .flow.six { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .flow-step::after { display: none; }
+    .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 720px) {
+    .side nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .hero { min-height: 70vh; padding-top: 52px; }
+    h1 { font-size: 42px; }
+    .hero .lead { font-size: 17px; }
+    .band { padding-top: 52px; padding-bottom: 52px; }
+    .section-head { grid-template-columns: 1fr; gap: 5px; }
+    h2 { font-size: 30px; }
+    .grid-2, .grid-3, .grid-4, .flow, .flow.six { grid-template-columns: 1fr; }
+    .decision-row { grid-template-columns: 36px 1fr; }
+    .decision-row > :last-child { grid-column: 1 / -1; padding-left: 50px; }
+    .case-head { grid-template-columns: 1fr; gap: 4px; }
+    .footer .inner { display: block; }
+  }
+  @media print {
+    .layout { display: block; }
+    .side { display: none; }
+    .hero { min-height: 0; color: #000; background: #fff; border-bottom: 2px solid #000; }
+    .hero .lead, .hero-meta, .eyebrow { color: #333; }
+    .band { break-inside: auto; padding: 34px 24px; }
+    .panel, .table-wrap, pre, .callout { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="side">
+    <div class="side-mark">EC</div>
+    <h2 class="side-title">证据收敛式项目<br />迭代机制</h2>
+    <p class="side-sub">Evidence-Convergent Project Evolution</p>
+    <nav aria-label="文档目录">
+      <a href="#conclusion"><span>00</span>核心结论</a>
+      <a href="#diagnosis"><span>01</span>现状诊断</a>
+      <a href="#principles"><span>02</span>设计原则</a>
+      <a href="#directory"><span>03</span>目录结构</a>
+      <a href="#model"><span>04</span>信息结构</a>
+      <a href="#authority"><span>05</span>权威裁决</a>
+      <a href="#flow"><span>06</span>信息流动</a>
+      <a href="#mechanism"><span>07</span>机制演进</a>
+      <a href="#simulation"><span>08</span>推演验证</a>
+      <a href="#migration"><span>09</span>迁移方案</a>
+      <a href="#handoff"><span>10</span>Agent 交接</a>
+      <a href="#contract"><span>11</span>执行契约</a>
+      <a href="#agent-conformance"><span>A</span>符合性协议</a>
+    </nav>
+    <div class="side-foot">基于 2026-08-13 对当前仓库 <code>spec</code>、<code>docs</code>、<code>docs/demo</code>、代码与测试的重新扫描。</div>
+  </aside>
+
+  <main>
+    <header class="hero">
+      <div class="hero-inner">
+        <div class="eyebrow">Project Operating Model / v1.0 Proposal</div>
+        <h1>证据收敛式<br />项目迭代机制</h1>
+        <p class="lead">项目不是一条从需求到代码的流水线，而是一组异步更新、粒度不同、权威范围不同的事实与承诺。机制的任务不是选出一份“最新文档”，而是持续回答：每条声明现在是什么状态，谁有权决定它，哪些制品已经跟上，哪些证据仍然有效，下一步改哪里最能推动项目向前。</p>
+        <div class="hero-meta">
+          <span>机制身份：ECM 1.0.0 · PROPOSED</span>
+          <span>历史载体：本文件（bootstrap 提案，2026-08-13 前为唯一载体）</span>
+          <span>正式规范源（bootstrap 落库 2026-08-13）：project/policies/mechanism/ECM-1.0.0.yaml（机器规范源）与 ECM-1.0.0.html（同版本冻结指南）；指针 project/policies/mechanism/current.yaml 当前 status=PROPOSED、未激活——本文件保留为历史 bootstrap 提案，读取不构成激活/接受/授权（附录 A.4 状态机 BOOTSTRAP_DIAGNOSTIC 只读盘点 + 用户已授权的控制面迁移）</span>
+          <span>扫描范围：spec 49 个制品 / docs 42 个制品</span>
+          <span>实现观察：108 个 Go 文件 / 41 个测试文件 / 221 个 Test 函数</span>
+          <span>当前最新产品制品：docs/demo · 2026-08-12 20:40</span>
+        </div>
+      </div>
+    </header>
+
+    <section id="conclusion" class="band">
+      <div class="inner">
+        <div class="section-head"><div class="section-no">00</div><div><h2>先给结论：目录不能承担真相，关系才能</h2></div></div>
+        <p class="intro">合理方案不是重新规定“以后以 spec 为准”或“永远看最新 demo”。目录只表达制品的职责与生命周期；真正的决定性必须落在带稳定 ID 的声明、决策、实现和证据关系上。时间是裁决条件之一，不是最高权威。</p>
+        <div class="thesis">以“声明”为最小治理单位，以“决策”为语义权威，以“制品”为不同视角的投影，以“证据”为可重放观察，以“基线”为某一时刻可交付的一致切片，以“机制版本”为所有裁决的可审计前提。</div>
+        <div class="callout"><strong>本文件的身份与效力：</strong>仓库根目录的 <code>证据收敛式项目迭代机制.html</code> 是 <code>ECM 1.0.0</code> 的引导提案（<code>PROPOSED</code>），也是当前设计讨论的完整人类可读载体；它不是已经生效的项目门禁。只有完成 §07 的批准与发布、生成版本化规范，并由 <code>project/policies/mechanism/current.yaml</code> 和 <code>project/project.yaml</code> 共同指向后，某个 ECM 版本才是 <code>ACTIVE</code>。在此之前，Agent 可以依据本文分析和执行首次迁移，但不得声称项目已由 ECM 正式治理。</div>
+        <div class="grid-4">
+          <div class="panel good"><div class="kicker">DIRECTORY</div><h4>目录分职责，不排真相顺序</h4><p><code>spec</code> 保存来源，<code>docs</code> 保存解释，<code>demo</code> 保存可交互假设，代码保存实现，测试保存验证程序，<code>project</code> 保存它们之间的治理关系。</p></div>
+          <div class="panel info"><div class="kicker">INFORMATION</div><h4>状态必须正交</h4><p>“已决定、已实现、已验证”是三个不同维度。一个需求可以已决定但未实现；一个 demo 可以已实现但尚未被业务接受。</p></div>
+          <div class="panel warn"><div class="kicker">FLOW</div><h4>每次变化触发局部收敛</h4><p>任何制品变化先生成变更事件，按声明关系计算影响，只让受影响的文档、demo、代码与证据进入待收敛状态。</p></div>
+          <div class="panel danger"><div class="kicker">META</div><h4>机制也按同一规则治理</h4><p>规则变更先成为提案，经历史回放、影子运行和人工批准后生效；旧基线继续绑定旧机制，禁止无声改尺子。</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="diagnosis" class="band alt">
+      <div class="inner">
+        <div class="section-head"><div class="section-no">01</div><div><h2>当前仓库不是乱，而是缺少显式语义</h2></div></div>
+        <p class="intro">现有资料已经自然形成了多条演进支线，但目录名、文件名和更新时间无法表达它们之间的真实关系。以下不是抽象担忧，而是本次扫描直接观察到的事实。</p>
+        <div class="table-wrap"><table>
+          <thead><tr><th>观察</th><th>当前事实</th><th>暴露的问题</th></tr></thead>
+          <tbody>
+            <tr><td>来源与加工混放</td><td><code>spec</code> 同时含业务原稿、调研、技术核验、方法论、评审逐字稿、修改意见和 UI 实现。</td><td>“位于 spec”不能自动等价于“一手且已批准”。</td></tr>
+            <tr><td>最新 demo 快速演进</td><td><code>docs/demo</code> 在 8 月 10–12 日连续迭代，晚于主体架构、测试和多数产品文档。</td><td>交互现状领先，但不能据此声称后端、测试或业务规则已同步。</td></tr>
+            <tr><td>同日资料也会漂移</td><td>8 月 12 日评审决定人工下单改为单页长表单，demo 已实现；<code>docs/用例总表.html</code> 仍写 4 步向导。</td><td>文件级“最新”太粗，必须定位到声明级差异。</td></tr>
+            <tr><td>现在与未来混在同一意见中</td><td>评审将物流小程序标为“分期”，当前 demo 仍展示图片发群。</td><td>二者可能分别属于 v0 当前方案和 vNext 目标方案，不应被误判成直接冲突。</td></tr>
+            <tr><td>前提被否定但下游仍存在</td><td>评审指出“客户签收后发凭证”的前提不成立，真实链路是司机、仓库、商务的线下回单；较早用例仍保留客户凭证识别。</td><td>前提变化应自动重开依赖声明，而不是等人碰巧发现。</td></tr>
+            <tr><td>代码与产品节奏分叉</td><td>代码的最近集中变更在 8 月 7 日，demo 与产品评审持续到 8 月 12 日。</td><td>demo 是交互探索的当前事实，不是已经交付的系统事实。</td></tr>
+            <tr><td>测试数字会被误读</td><td>仓库有 221 个 Test 函数，已有文档声明约 180 个，说明报告快照与当前代码计数不在同一观察时点。</td><td>任何覆盖与通过结论都必须绑定 commit、环境、命令和验证器版本。</td></tr>
+          </tbody>
+        </table></div>
+        <div class="callout"><strong>根因：</strong>当前系统主要管理“文件”，但项目真正演进的是文件内部的业务声明、设计决定、交互假设、实现行为和验证结论。文件是容器，不是治理原子。</div>
+      </div>
+    </section>
+
+    <section id="principles" class="band">
+      <div class="inner">
+        <div class="section-head"><div class="section-no">02</div><div><h2>七条不变原则</h2></div></div>
+        <div class="grid-2">
+          <div class="panel"><div class="kicker">P1 / SCOPED AUTHORITY</div><h4>权威必须带问题域</h4><p>业务原稿决定业务意图，已批准决策决定当前承诺，demo 证明交互长什么样，代码证明系统实际做什么，测试证明某个观察程序看到了什么。任何制品都不得越权。</p></div>
+          <div class="panel"><div class="kicker">P2 / CLAIM ATOM</div><h4>以声明而非文件为原子</h4><p>一个文件可同时包含已确认、待定、分期和已废弃内容。每条可影响行为的陈述都要有稳定 <code>claim_id</code>，状态单独管理。</p></div>
+          <div class="panel"><div class="kicker">P3 / ORTHOGONAL STATUS</div><h4>语义、实现、验证三态分离</h4><p><code>ACCEPTED</code> 不等于 <code>IMPLEMENTED</code>，<code>IMPLEMENTED</code> 不等于 <code>VERIFIED</code>，测试通过也不能反向把一个待定业务假设变成已批准需求。</p></div>
+          <div class="panel"><div class="kicker">P4 / CAUSAL TIME</div><h4>用因果时序，不只用修改时间</h4><p><code>mtime</code> 只能提示扫描顺序。裁决需要来源发生时间、观察时间、生效区间、替代关系与基线版本；复制旧文件不能制造新事实。</p></div>
+          <div class="panel"><div class="kicker">P5 / LOCAL INVALIDATION</div><h4>变化只作废受影响证据</h4><p>声明、代码、环境、验证器或机制变化时，通过依赖边计算影响半径。旧证据转 <code>STALE</code>，保留审计，不全量删除、不默认全仓重跑。</p></div>
+          <div class="panel"><div class="kicker">P6 / EXPLICIT UNKNOWN</div><h4>未知和冲突是合法状态</h4><p>机制要允许项目在部分未知下继续，但高风险未知不得伪装为共识。阻塞应落到具体声明、负责人和所需最小问题，而不是笼统地“等业务确认”。</p></div>
+          <div class="panel"><div class="kicker">P7 / VERSIONED METHOD</div><h4>治理规则本身是受治理制品</h4><p>权威矩阵、状态机、阈值、生成器和门禁都有版本、负责人、适用范围、测试与迁移计划。方法变更不能重写历史判断。</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="directory" class="band alt">
+      <div class="inner">
+        <div class="section-head"><div class="section-no">03</div><div><h2>目标目录：控制面与内容面分离</h2></div></div>
+        <p class="intro">不建议把 Go 源码强行搬入编号目录，也不建议一次性重命名全部历史文件。新增一个轻量控制面 <code>project/</code>，让现有 <code>spec</code>、<code>docs</code>、demo、代码与测试继续按各自工具习惯存在；控制面只保存稳定关系和状态。</p>
+<pre><code>b2b_pilot_v3/
+├── project/                         # 项目控制面：权威关系在这里，不在目录排序里
+│   ├── project.yaml                 # 项目身份、当前 baseline、机制版本、owner
+│   ├── ontology.yaml                # artifact/claim/edge/status 的受控词表
+│   ├── claims/                      # 原子声明；按业务域拆分，稳定 ID 不随文件移动
+│   │   ├── ordering.yaml
+│   │   ├── fulfillment.yaml
+│   │   ├── authorization.yaml
+│   │   └── wecom-interaction.yaml
+│   ├── decisions/                   # ADR/PDR/BDR：业务、产品、技术决策
+│   ├── conflicts/open/              # 尚未裁决的冲突记录
+│   ├── conflicts/resolved/          # 保留裁决过程与替代关系
+│   ├── baselines/                   # 可交付一致切片的 manifest，不复制内容
+│   ├── policies/                    # 权威矩阵、门禁、TTL、机制版本及迁移
+│   ├── events/project-events.jsonl  # append-only 变化/裁决/失效审计流
+│   └── views/                       # 自动生成的漂移、覆盖、待办视图
+│
+├── spec/                            # 来源面：为什么要做、谁说的、何时说的
+│   ├── raw/                         # 原始接收件/导出/图片；内容不可改，只增新版本
+│   ├── research/                    # 外部事实与可行性调研，标注来源和有效期
+│   ├── reviews/                     # 逐字稿、会议结论、修改意见；结论与原话分开
+│   ├── normalized/                  # 从 raw 提炼的需求视图，可重建
+│   └── index.yaml                   # 每个来源的 provenance、digest、时间与权限
+│
+├── docs/                            # 解释面：为不同读者组织的当前一致视图
+│   ├── product/                     # 用户旅程、用例、验收口径
+│   ├── architecture/                # 架构、数据、接口、ADR 的可读视图
+│   ├── verification/                # 测试策略与结果摘要，不存原始证据
+│   ├── operations/                  # 部署、运行、故障与交接
+│   ├── demo/                        # 可运行交互模型 + fixtures + 场景 manifest
+│   ├── reports/                     # 某 baseline 的派生报告
+│   ├── history/                     # 冻结旧视图；禁止继续编辑
+│   └── index.html
+│
+├── evidence/                        # 证据面：机器输出与其绑定关系
+│   ├── manifests/                   # 小型、入库：run manifest 与 digest
+│   ├── raw/                         # 大型输出可进 CI artifact/object storage
+│   ├── snapshots/                   # 截图、API 契约快照、图谱快照
+│   └── attestations/                # 人工验收与签名结论
+│
+├── cmd/ internal/ migrations/       # 实现面：保持 Go 项目惯例
+├── tests/ scripts/                  # 验证程序；每项关联 claim_id
+├── schema.zed docker-compose.yml
+└── Makefile</code></pre>
+        <h3>目录职责的硬边界</h3>
+        <div class="table-wrap"><table>
+          <thead><tr><th>区域</th><th>允许回答</th><th>不得单独回答</th><th>变更策略</th></tr></thead>
+          <tbody>
+            <tr><td><code>spec/raw</code></td><td>谁在何时表达了什么；原始附件是什么</td><td>当前是否已批准、是否已实现</td><td>不可覆盖，只追加新版本与来源索引</td></tr>
+            <tr><td><code>project</code></td><td>当前承诺、状态、依赖、冲突、基线、适用机制</td><td>面向读者的完整叙事</td><td>结构化审查；所有状态变化写事件流</td></tr>
+            <tr><td><code>docs</code></td><td>在指定 baseline 下如何理解项目</td><td>未经决策记录自行创造业务规则</td><td>可人工维护或生成；必须声明覆盖的 baseline</td></tr>
+            <tr><td><code>docs/demo</code></td><td>某交互假设当前可如何操作和感知</td><td>后端已实现、业务已接受、真实企微可用</td><td>每个场景绑定 claim 和 assumption</td></tr>
+            <tr><td>代码</td><td>当前 commit 的实现行为</td><td>行为是否正确、是否满足业务意义</td><td>由图谱/静态分析提取 implementation edges</td></tr>
+            <tr><td>测试与 <code>evidence</code></td><td>在指定输入、环境、oracle 下观察到了什么</td><td>未覆盖空间中不存在缺陷</td><td>程序与结果分离；结果绑定所有摘要</td></tr>
+          </tbody>
+        </table></div>
+        <div class="callout"><strong>为什么不使用“00-spec / 01-docs / 02-demo / 03-code”？</strong>编号会暗示单向瀑布与全局优先级，恰好掩盖本项目的现实。这里的顺序是控制关系：来源提供事实，声明承载承诺，视图解释承诺，制品实现承诺，证据观察制品；任一处都可以先变化，但必须通过关系网收敛。</div>
+      </div>
+    </section>
+
+    <section id="model" class="band">
+      <div class="inner">
+        <div class="section-head"><div class="section-no">04</div><div><h2>信息结构：六种对象、九种关系、三组状态</h2></div></div>
+        <h3>六种必要对象</h3>
+        <div class="table-wrap"><table>
+          <thead><tr><th>对象</th><th>用途</th><th>必须包含</th></tr></thead>
+          <tbody>
+            <tr><td>Source</td><td>保存原始表达与外部事实</td><td><code>source_id</code>、来源人/系统、发生时间、观察时间、digest、可信范围、有效期</td></tr>
+            <tr><td>Claim</td><td>项目可判断、可实现、可验证的最小声明</td><td>主谓宾、scope、风险、owner、语义状态、实现状态、验证状态、验收 oracle</td></tr>
+            <tr><td>Decision</td><td>在候选之间形成当前承诺</td><td>选择、理由、前提、反对项、决策人、生效区间、替代关系、复核条件</td></tr>
+            <tr><td>Artifact</td><td>承载说明、交互、代码、配置、测试程序或报告</td><td>kind、路径/URI、版本、digest、覆盖 claim、生成方式、baseline</td></tr>
+            <tr><td>Evidence</td><td>对声明或制品进行一次可重放观察</td><td>输入摘要、artifact、环境、验证器、机制版本、命令、原始输出、结论、TTL</td></tr>
+            <tr><td>Baseline</td><td>冻结某一交付时刻相互一致的一组对象</td><td>包含的 claim/decision/artifact/evidence digest、机制版本、开放风险、批准人</td></tr>
+          </tbody>
+        </table></div>
+        <h3>九种关系</h3>
+        <div class="status-line">
+          <span class="tag green">DERIVED_FROM</span><span class="tag green">REFINES</span><span class="tag blue">IMPLEMENTS</span><span class="tag blue">VERIFIES</span><span class="tag violet">DECIDES</span><span class="tag violet">SUPERSEDES</span><span class="tag amber">DEPENDS_ON</span><span class="tag red">CONFLICTS_WITH</span><span class="tag amber">VALID_DURING</span>
+        </div>
+        <p>关系必须可定位到声明或文件片段；只有文件路径而没有 claim 边，无法做可靠影响分析。多对多是正常状态：一条“群内金额不可见”声明会同时约束 demo 截图、API 投影、ReBAC、测试和产品说明。</p>
+
+        <h3>三组状态必须分开</h3>
+        <div class="grid-3">
+          <div class="panel good"><div class="kicker">SEMANTIC</div><h4>这是不是当前承诺</h4><p><code>PROPOSED → ACCEPTED → DEFERRED / REJECTED / SUPERSEDED</code></p></div>
+          <div class="panel info"><div class="kicker">IMPLEMENTATION</div><h4>制品是否已经跟上</h4><p><code>UNPLANNED → PLANNED → PARTIAL → IMPLEMENTED → DRIFTED</code></p></div>
+          <div class="panel warn"><div class="kicker">VERIFICATION</div><h4>证据是否足够且仍有效</h4><p><code>UNVERIFIED → PASS / FAIL → STALE / INVALID / EXPIRED</code></p></div>
+        </div>
+        <p class="callout"><strong>禁止合并成一个“状态=完成”。</strong>当前 demo 的单页长表单可以是 <code>ACCEPTED + IMPLEMENTED(demo) + UNVERIFIED(code)</code>；物流小程序可以是 <code>DEFERRED(vNext) + UNPLANNED</code>；当前图片发群则是另一个 v0 声明的 <code>ACCEPTED/CONDITIONAL + IMPLEMENTED(demo)</code>。</p>
+
+        <h3>Claim 示例</h3>
+<pre><code>claim_id: CLM-ORDER-ENTRY-UI-001
+statement:
+  subject: 群内人工下单
+  predicate: uses_interaction_pattern
+  object: 单页长表单
+scope:
+  product: wecom-order-assistant
+  role: sales
+  scenario: XS2
+  phase: pilot-v0
+authority:
+  basis: DEC-DEMO-REVIEW-20260812-XS2
+  sources:
+    - SRC-REVIEW-20260812-MINUTES
+semantic_status: ACCEPTED
+implementation:
+  demo: IMPLEMENTED
+  backend: NOT_APPLICABLE
+  production_ui: UNPLANNED
+verification:
+  demo_smoke: PASS
+  business_uat: UNVERIFIED
+risk: R1
+owner: product-ordering
+acceptance:
+  oracle: "客户锁定；合同主体自动匹配；字段分组；单页提交"
+relations:
+  supersedes: CLM-ORDER-ENTRY-UI-000   # 4 步向导
+  reflected_by:
+    - docs/demo/index.html#XS2
+    - docs/用例总表.html#XS2          # 当前应被标记 STALE</code></pre>
+
+        <h3>完整度不是百分比，而是一个向量</h3>
+        <div class="grid-2">
+          <div class="panel"><div class="metric"><b>范围完整度</b>关键角色、场景、异常、阶段是否有声明</div><div class="metric"><b>分解完整度</b>业务目标是否被拆成可设计、可实现、可验收的粒度</div><div class="metric"><b>追踪完整度</b>必需 claim 是否都有来源、决策、实现和验证边</div></div>
+          <div class="panel"><div class="metric"><b>证据充分度</b>证据等级是否达到风险要求，是否覆盖反例</div><div class="metric"><b>冲突闭合度</b>是否还有未裁决矛盾、前提失效或范围重叠</div><div class="metric"><b>新鲜度</b>依赖摘要、环境、验证器和 TTL 是否仍有效</div></div>
+        </div>
+        <div class="formula">completeness := [scope, decomposition, trace, evidence, conflict_closure, freshness]<br />handoff 逐维设门槛；禁止用平均分掩盖任一 R3 缺口。</div>
+        <h3>细节颗粒度的判断标准</h3>
+        <p>不追求“每句话一个 ID”。当一段信息满足以下任一条件时，拆成独立 claim：它可以被单独接受或拒绝；它有不同 owner；它会映射到不同实现；它需要不同 oracle；它的风险或生效阶段不同。否则保持在同一声明中，避免治理对象爆炸。</p>
+      </div>
+    </section>
+
+    <section id="authority" class="band alt">
+      <div class="inner">
+        <div class="section-head"><div class="section-no">05</div><div><h2>冲突裁决：新鲜度有用，但不能越权</h2></div></div>
+        <h3>按问题选择权威，不按文件夹选冠军</h3>
+        <div class="table-wrap"><table>
+          <thead><tr><th>要回答的问题</th><th>首要权威</th><th>次级证据</th><th>不能替代它的东西</th></tr></thead>
+          <tbody>
+            <tr><td>业务真实流程是什么</td><td>被识别的业务 owner 的一手事实 + 已批准 BDR</td><td>逐字稿、现场观察、业务系统数据</td><td>demo、代码、测试通过</td></tr>
+            <tr><td>当前版本承诺做什么</td><td>生效中的 Decision + Claim baseline</td><td>规范化 PRD、范围表</td><td>原始材料中尚未裁决的建议</td></tr>
+            <tr><td>交互当前设计成什么样</td><td>已批准交互 claim；其当前 demo 是最强可视投影</td><td>UI spec、UAT 记录</td><td>后端代码、较旧产品说明</td></tr>
+            <tr><td>系统当前实际做什么</td><td>目标 commit 的代码 + 真实运行观察</td><td>API 快照、图谱、日志</td><td>架构图、demo</td></tr>
+            <tr><td>实现是否满足某声明</td><td>有效 oracle 下的证据组合</td><td>静态分析、测试、人工验收</td><td>单一覆盖率数字</td></tr>
+            <tr><td>某次交付包含什么</td><td>签名 Baseline manifest</td><td>构建产物、SBOM、evidence manifest</td><td>工作区最新状态</td></tr>
+          </tbody>
+        </table></div>
+
+        <h3>九步裁决算法</h3>
+        <div class="decision-tree">
+          <div class="decision-row"><div class="n">1</div><b>归一化</b><span>先判断两个陈述是否真在谈同一 subject / predicate / scope / phase。不同阶段、角色或终端的陈述可以并存。</span></div>
+          <div class="decision-row"><div class="n">2</div><b>可采信性</b><span>来源身份、完整性、digest、时间和上下文不明的材料只能做线索，不能直接进当前承诺。</span></div>
+          <div class="decision-row"><div class="n">3</div><b>问题域权威</b><span>按上表选择谁有资格回答当前问题；demo 对交互形态强，对业务真实性和生产实现弱。</span></div>
+          <div class="decision-row"><div class="n">4</div><b>决策状态</b><span><code>ACCEPTED</code> 高于 <code>PROPOSED</code>；<code>DEFERRED</code> 不是被否定，而是对特定 phase 不生效。</span></div>
+          <div class="decision-row"><div class="n">5</div><b>因果时序</b><span>明确 <code>SUPERSEDES</code> 的后继优先；只有同权威、同 scope、依赖前提未变时，较新观察才优先。</span></div>
+          <div class="decision-row"><div class="n">6</div><b>具体性</b><span>更窄且不违反上位约束的声明覆盖更宽默认规则；例如群内资金信息禁发高于某页面“展示完整订单”的泛化描述。</span></div>
+          <div class="decision-row"><div class="n">7</div><b>证据反驳</b><span>代码/测试可证明“当前没做到”或“假设不可行”，但不能自动改写业务目标；它们生成反例并重开决策。</span></div>
+          <div class="decision-row"><div class="n">8</div><b>人工裁决</b><span>仍不可区分时，生成不超过 3 个高信息增益问题，交给对应 owner；记录选择、理由、前提与复核日期。</span></div>
+          <div class="decision-row"><div class="n">9</div><b>局部失效</b><span>裁决后标记被替代 claim，并只让受影响视图、demo、代码和证据变为 <code>STALE</code>。</span></div>
+        </div>
+        <div class="formula">authority(candidate, question) = admissibility × domain_authority × decision_state × scope_fit × causal_freshness<br />mtime 只影响 causal_freshness 的一部分；任一前置项为 0，文件再新也不能成为答案。</div>
+
+        <h3>一致性的五个层次</h3>
+        <div class="grid-3">
+          <div class="panel"><h4>语义一致</h4><p>同一 scope 下没有两个同时生效、互相排斥的 accepted claim。</p></div>
+          <div class="panel"><h4>时间一致</h4><p>观察、决策、生效和替代顺序可解释，没有拿旧证据证明新制品。</p></div>
+          <div class="panel"><h4>结构一致</h4><p>产品、数据、接口、权限和流程的依赖边不缺失、不悬空。</p></div>
+          <div class="panel"><h4>行为一致</h4><p>demo、代码和运行对已接受 claim 的实现没有不可解释漂移。</p></div>
+          <div class="panel"><h4>证据一致</h4><p>不同观察器的结论可组合；冲突结果不被平均或重跑到绿。</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="flow" class="band">
+      <div class="inner">
+        <div class="section-head"><div class="section-no">06</div><div><h2>信息流动：事件驱动的局部收敛双循环</h2></div></div>
+        <p class="intro">每次提交不是“同步所有文档”的命令，而是一个变化事件。系统先识别变化触及哪些声明，再决定需要更新视图、实现还是验证。不能自动裁决的部分被压缩成人类问题包；其余工作继续。</p>
+        <div class="flow" aria-label="项目收敛流">
+          <div class="flow-step"><b>1 / INGEST</b><span>登记变化、来源、digest、观察时点与提交者角色</span></div>
+          <div class="flow-step"><b>2 / NORMALIZE</b><span>抽取或关联 claim；区分事实、提案、决定和观察</span></div>
+          <div class="flow-step"><b>3 / DIFF</b><span>做声明级语义 diff，不只看文本 diff</span></div>
+          <div class="flow-step"><b>4 / IMPACT</b><span>沿依赖边计算受影响视图、demo、代码、测试和证据</span></div>
+          <div class="flow-step"><b>5 / ROUTE</b><span>自动同步、生成任务，或向 owner 发最小问题包</span></div>
+          <div class="flow-step"><b>6 / VERIFY</b><span>运行受影响挑战，绑定制品、环境、验证器与机制摘要</span></div>
+          <div class="flow-step"><b>7 / BASELINE</b><span>门禁通过后发布新的可交付一致切片</span></div>
+        </div>
+
+        <h3>五种入口的差异化路由</h3>
+        <div class="table-wrap"><table>
+          <thead><tr><th>变化入口</th><th>先把它当作什么</th><th>自动动作</th><th>何时需要人</th></tr></thead>
+          <tbody>
+            <tr><td>spec 更新</td><td>新的来源事实或需求候选，不直接等于 accepted</td><td>抽取候选 claim；与当前 baseline 比较；标记依赖前提变化；生成决策候选</td><td>语义变化、范围变化、R2/R3 冲突或 owner 不明确</td></tr>
+            <tr><td>docs 更新</td><td>视图变化；可能只是表达修正，也可能偷带新规则</td><td>比对所引用 claim；纯表达更新只重建视图摘要；新增规范性语句则转成 proposal</td><td>文档试图越过 decision 直接修改当前承诺</td></tr>
+            <tr><td>demo 更新</td><td>可执行交互提案或已接受交互的实现</td><td>运行场景 smoke/截图 diff；检查 claim 覆盖；更新 demo implementation 状态</td><td>出现未绑定交互、改变业务规则、权限、字段或流程节点</td></tr>
+            <tr><td>代码更新</td><td>实现事实变化</td><td>图谱影响分析；重跑相关测试；对照 accepted claim 与接口契约；使旧运行证据 stale</td><td>代码行为与承诺冲突但无法判断是需求变了还是实现错了</td></tr>
+            <tr><td>测试更新</td><td>验证器或 oracle 变化，风险高于普通代码变更</td><td>校准测试自身；旧结果按 verifier digest 局部失效；检查是否降低断言强度</td><td>oracle 改变业务含义、删除高风险断言或引入临时豁免</td></tr>
+          </tbody>
+        </table></div>
+
+        <h3>快循环：推进项目</h3>
+<pre><code>on ARTIFACT_CHANGED(event):
+  register(event.path, kind, digest, author_role, observed_at)
+  candidate_changes = semantic_diff(event, referenced_claims)
+
+  for change in candidate_changes:
+    if change.is_editorial:
+      rebuild_view(change)
+      continue
+
+    claim = resolve_or_propose_claim(change)
+    conflicts = find_active_conflicts(claim.scope)
+    impact = traverse(claim, DEPENDS_ON | IMPLEMENTS | VERIFIES | REFLECTS)
+
+    if conflicts.need_human_decision:
+      emit_question_packet(max_items=3, ranked_by=closed_risk_per_cost)
+      mark(claim, WAITING_DECISION)
+    else:
+      apply_authority_policy(claim)
+      mark_impacted_artifacts(STALE, impact)
+      dispatch_minimal_tasks(impact)
+
+  run_affected_verifiers()
+  publish_baseline_only_if(handoff_predicate == true)</code></pre>
+        <h3>慢循环：更新机制本身</h3>
+        <div class="flow six">
+          <div class="flow-step"><b>A / OBSERVE</b><span>记录漏检、误报、死锁、人工成本和事故</span></div>
+          <div class="flow-step"><b>B / PROPOSE</b><span>形成 policy/rule/schema 变更提案</span></div>
+          <div class="flow-step"><b>C / REPLAY</b><span>在历史正反例上回放，检查召回与误伤</span></div>
+          <div class="flow-step"><b>D / SHADOW</b><span>新旧机制并行计算，不改变当前门禁</span></div>
+          <div class="flow-step"><b>E / APPROVE</b><span>人审查差异、迁移成本和失败回滚</span></div>
+          <div class="flow-step"><b>F / ACTIVATE</b><span>发布新版本；基线显式选择何时迁移</span></div>
+        </div>
+
+        <h3>人介入的接口必须窄</h3>
+        <p>系统不应把整仓资料丢给人“看一下”。每个问题包最多 3 项，并包含：冲突的精确 claim、各候选及来源、受影响范围、不回答的风险、推荐项与可逆性、最晚决策点。人的回答生成 Decision，不直接覆盖文件；后续自动派生修改任务。</p>
+<pre><code>question_id: QP-20260813-001
+claim: CLM-RECEIPT-CHAIN-003
+question: "pilot-v0 的签收凭证由谁首次数字化？"
+options:
+  - driver_to_warehouse_bot
+  - warehouse_upload
+  - keep_offline_and_defer
+conflicting_sources:
+  - docs/用例总表.html#XS6
+  - spec/review/202608121845_修改意见.html#XS5-XS6
+impact_if_unanswered: [demo.XS6, workflow.receipt, authz.receipt, tests.CQ-09]
+risk: R2
+recommendation: warehouse_upload
+owner: business-fulfillment
+deadline_gate: before production-ui implementation</code></pre>
+      </div>
+    </section>
+
+    <section id="mechanism" class="band alt">
+      <div class="inner">
+        <div class="section-head"><div class="section-no">07</div><div><h2>机制的版本化：不能悄悄换尺子</h2></div></div>
+        <p class="intro">机制不是一个永远正确的脚本，而是一组有边界、有误差、会演进的政策与观察器。它必须像业务制品一样被声明、测试、批准和回滚。</p>
+        <h3>机制自身放在哪里</h3>
+        <p>机制采用“机器规范是规范源、人类指南是发布视图”的双制品结构。版本号进入文件名，已发布版本不可原地覆盖；当前生效版本由指针选择，不能靠无版本文件或修改时间猜测。</p>
+<pre><code>project/
+├── project.yaml                              # 项目选择的 ACTIVE 机制及摘要
+└── policies/mechanism/
+    ├── current.yaml                          # 仓库级当前机制指针
+    ├── ECM-1.0.0.yaml                        # 规范源：对象、状态、权威、门禁、迁移
+    ├── ECM-1.0.0.html                        # 同版本的人类指南
+    ├── CHANGELOG.md                          # 版本差异与迁移提示
+    ├── calibration-cases.yaml                # 历史正例、反例和预期答案
+    └── migrations/ECM-0.9.3-to-1.0.0.yaml    # 迁移与回滚说明
+
+证据收敛式项目迭代机制.html                    # 当前 bootstrap 提案；不是 ACTIVE 指针</code></pre>
+        <div class="table-wrap"><table>
+          <thead><tr><th>制品</th><th>权威范围</th><th>Agent 使用规则</th></tr></thead>
+          <tbody>
+            <tr><td><code>ECM-x.y.z.yaml</code></td><td>机器可判定语义的唯一规范源</td><td>状态、权威矩阵、门禁与兼容性以它为准</td></tr>
+            <tr><td><code>ECM-x.y.z.html</code></td><td>同版本的人类解释、案例和操作指南</td><td>若与 YAML 冲突，报告发布缺陷，不得自行择一</td></tr>
+            <tr><td><code>current.yaml</code></td><td>仓库采用哪个已发布版本</td><td>不得指向 <code>PROPOSED</code>，只能由激活或回滚操作改变</td></tr>
+            <tr><td><code>project.yaml</code></td><td>当前项目或 baseline 的机制绑定</td><td>当前项目应与指针一致；历史 baseline 可保留旧版本</td></tr>
+            <tr><td>根目录当前 HTML</td><td><code>ECM 1.0.0 PROPOSED</code> 的 bootstrap 载体</td><td>可指导首次落库，但不具 ACTIVE 门禁效力</td></tr>
+          </tbody>
+        </table></div>
+        <h3>当前指针与项目绑定</h3>
+<pre><code># project/policies/mechanism/current.yaml
+mechanism_id: ECM
+version: 1.0.0
+status: ACTIVE
+spec: project/policies/mechanism/ECM-1.0.0.yaml
+guide: project/policies/mechanism/ECM-1.0.0.html
+spec_digest: sha256:...
+guide_digest: sha256:...
+activation_decision: DEC-MECHANISM-ECM-1.0.0
+
+# project/project.yaml
+mechanism:
+  id: ECM
+  version: 1.0.0
+  status: ACTIVE
+  pointer: project/policies/mechanism/current.yaml
+  spec_digest: sha256:...
+  policy_component_digests:
+    ontology: sha256:...
+    authority_matrix: sha256:...
+    state_machine: sha256:...
+    evidence_policy: sha256:...
+    handoff_policy: sha256:...</code></pre>
+        <h3>Agent 启动协议</h3>
+        <ol>
+          <li>从仓库根目录读取 <code>project/project.yaml</code>；不得搜索并选择“最新 ECM 文件”。</li>
+          <li>沿指针读取 <code>current.yaml</code>，确认 ID、版本、<code>status=ACTIVE</code> 与项目绑定一致。</li>
+          <li>读取固定版本的 YAML 规范源和 HTML 指南，核对规范、指南及实际参与判断的组件摘要。</li>
+          <li>冻结这次机制快照，将 ID、版本和摘要写入本轮事件、证据、handoff 与 baseline。</li>
+          <li>若指针缺失、状态非 ACTIVE、版本不一致、摘要不匹配或 YAML/HTML 冲突，报告 <code>MECHANISM_UNRESOLVED</code>，不得回退为读取根目录提案并假定生效。</li>
+          <li>仅首次迁移可读取本根目录提案；输出必须标明 <code>bootstrap_mode=true</code> 和 <code>mechanism_status=PROPOSED</code>。</li>
+        </ol>
+        <h3>版本边界</h3>
+        <div class="table-wrap"><table>
+          <thead><tr><th>变更</th><th>版本建议</th><th>影响</th></tr></thead>
+          <tbody>
+            <tr><td>修正文案、增加不影响判定的字段</td><td>PATCH</td><td>不改变既有 baseline 判定；可直接升级生成视图</td></tr>
+            <tr><td>增加新对象/关系、调整默认 TTL、改问题排序权重</td><td>MINOR</td><td>旧项目可继续使用旧规则；迁移后重算受影响视图或证据新鲜度</td></tr>
+            <tr><td>改变权威优先级、状态语义、风险门槛或 handoff 谓词</td><td>MAJOR</td><td>必须影子运行、差异审查和显式 baseline 迁移；禁止自动覆盖历史结论</td></tr>
+          </tbody>
+        </table></div>
+        <h3>Policy manifest</h3>
+<pre><code>mechanism_id: ECM
+version: 1.0.0
+status: PROPOSED  # 本文当前真实状态；批准发布后才成为 ACTIVE
+effective_from: 2026-08-13
+owner: project-governance
+components:
+  ontology: sha256:...
+  authority_matrix: sha256:...
+  state_machine: sha256:...
+  evidence_policy: sha256:...
+  handoff_policy: sha256:...
+compatibility:
+  reads_claim_schema: "^1.0"
+calibration:
+  corpus: project/policies/calibration-cases.yaml
+  expected:
+    must_detect:
+      - stale_usecase_after_demo_review
+      - deferred_future_vs_current_not_conflict
+      - invalidated_business_premise
+rollback_to: 0.9.3
+approved_by: [product-owner, tech-owner, qa-owner]</code></pre>
+        <h3>规则从事故到生效</h3>
+        <ol>
+          <li>事故或漏检先记录为不可改写的案例，包含当时输入、旧机制输出和人工正确答案。</li>
+          <li>提出最小规则变更，声明它要修复的案例、可能误伤的范围和退出条件。</li>
+          <li>在历史正例、反例和边界例上回放；不能只验证促成该规则的单一事故。</li>
+          <li>影子运行至少一个真实迭代周期，对比新旧机制产生的冲突数、漏检数、人工问题数和交付阻塞时长。</li>
+          <li>人批准后冻结 YAML 规范源和同版本 HTML，记录两者摘要与 activation Decision；已发布文件不可原地修改。</li>
+          <li>原子更新 <code>current.yaml</code>，再更新选择迁移的项目和 baseline；旧 baseline 保持旧版本并可重放。</li>
+          <li>规则长期零命中、误报过高或前提失效时进入退役提案，同样走回放与批准。</li>
+        </ol>
+        <div class="callout"><strong>局部绑定原则：</strong>证据不只绑定一个粗粒度的“机制总版本”，还绑定实际参与判定的 policy component digest。修改文档排版规则不应让数据库一致性证据失效；修改测试证据等级规则才应重开相应验证结论。</div>
+      </div>
+    </section>
+
+    <section id="simulation" class="band">
+      <div class="inner">
+        <div class="section-head"><div class="section-no">08</div><div><h2>桌面推演：用当前项目反过来攻击这套机制</h2></div></div>
+        <p class="intro">下面不是理想流程示意，而是用本仓库已经发生或很可能发生的变化验证机制。每个案例都检查：会不会误覆盖、会不会全量重跑、会不会把未知伪装成完成、会不会阻塞无关工作。</p>
+
+        <div class="case"><div class="case-head"><div class="case-id">SIM-01 / SPEC</div><div><h4>业务一手资料更新：签收凭证前提被否定</h4></div></div><p><b>输入：</b>评审说明客户签收完全无感，司机带纸质出库单回仓库，旧用例却让客户在群内发签收照片。</p><p><b>机制结果：</b>创建新的事实 Source；命中 <code>CLM-RECEIPT-CHAIN</code> 的前提冲突。由于业务 owner 的当前事实对“真实流程”有权威，旧 claim 不被悄悄删除，而转为 <code>CHALLENGED</code>。只让 XS6 demo、凭证流程、相关权限和 CQ-09 测试进入 stale；订单查询、审价等无关区域继续。</p><p><b>判断：</b><span class="tag green">通过</span> 局部阻塞且保留审计，没有让 demo 的存在反向证明业务流程成立。</p></div>
+
+        <div class="case"><div class="case-head"><div class="case-id">SIM-02 / DOCS</div><div><h4>产品文档落后：用例总表仍是 4 步向导</h4></div></div><p><b>输入：</b>同日会议决策和更晚 demo 都已采用单页长表单，<code>docs/用例总表.html</code> 尚未更新。</p><p><b>机制结果：</b>三者关联同一 claim。Decision 明确 supersede 旧交互，demo 是该 accepted claim 的实现投影；用例总表被标记 <code>STALE_VIEW</code>，生成一个文档同步任务。无需人工裁决，也不重跑后端测试。</p><p><b>判断：</b><span class="tag green">通过</span> “更晚”只用于确认 demo 与决策的因果顺序；真正的权威来自已批准 Decision。</p></div>
+
+        <div class="case"><div class="case-head"><div class="case-id">SIM-03 / DEMO</div><div><h4>demo 先探索：设计师把物流图片改成小程序</h4></div></div><p><b>输入：</b>小程序在评审里是分期方向，但 demo 分支提前实现。</p><p><b>机制结果：</b>若改动绑定 vNext deferred claim，则记录为 <code>DEFERRED + IMPLEMENTED(demo)</code>，不影响 v0 baseline；若它覆盖了 v0 场景且未声明 phase，则检测为 scope 冲突，要求补清阶段而非认定“最新 demo 就是需求”。</p><p><b>判断：</b><span class="tag green">通过</span> 允许探索，不让探索无声升级为当前承诺。</p></div>
+
+        <div class="case"><div class="case-head"><div class="case-id">SIM-04 / CODE</div><div><h4>代码先修复：群内接口不再返回金额</h4></div></div><p><b>输入：</b>代码实现字段投影收紧，产品文档和 demo 已有“群内资金信息不发”规则。</p><p><b>机制结果：</b>图谱找到 API projection、ReBAC、群截图与测试的共同 claim。代码 implementation 状态更新；相关契约与安全测试重跑；通过后将代码从 <code>DRIFTED/PARTIAL</code> 推到 <code>IMPLEMENTED</code>。不会因为代码先落地就生成新的业务决定。</p><p><b>判断：</b><span class="tag green">通过</span> 代码可以领先于文档同步，但必须能追溯到已有承诺。</p></div>
+
+        <div class="case"><div class="case-head"><div class="case-id">SIM-05 / TEST</div><div><h4>测试更新：把“金额必须为空”改成“不检查金额”</h4></div></div><p><b>输入：</b>测试仍然全绿，但 oracle 被弱化。</p><p><b>机制结果：</b>测试程序是 verifier。其 digest 和断言语义变化导致旧 PASS 证据 stale；校准用例应检测出断言强度下降。R2 权限声明没有有效 oracle 时回到 <code>UNVERIFIED</code>，禁止仅凭绿灯交付。</p><p><b>判断：</b><span class="tag green">通过</span> 测试变化不会被当成普通实现维护；能防止“删断言换全绿”。</p></div>
+
+        <div class="case"><div class="case-head"><div class="case-id">SIM-06 / METHOD</div><div><h4>机制更新：规定所有 demo 改动必须先有 accepted claim</h4></div></div><p><b>输入：</b>新规则看似更一致，却会扼杀用 demo 探索交互的现实工作方式。</p><p><b>机制结果：</b>历史回放会在早期 demo 探索案例中产生大量误报；影子运行显示问题包数量上升、迭代变慢。规则被修改为“demo 可实现 proposed claim，但不得进入交付 baseline，且改变高风险业务规则时必须先决策”。</p><p><b>判断：</b><span class="tag green">通过</span> 慢循环能拒绝过度严格但不合用的治理规则。</p></div>
+
+        <h3>故障注入结论</h3>
+        <div class="grid-3">
+          <div class="panel good"><h4>不会因更新来源不同而失灵</h4><p>五类入口有不同语义，但都收敛到同一 claim/decision/evidence 模型。</p></div>
+          <div class="panel good"><h4>不会因局部冲突而冻结全项目</h4><p>按依赖图局部 stale；只有高风险且处于交付关键路径的未知才阻塞对应 baseline。</p></div>
+          <div class="panel warn"><h4>仍依赖一项人类纪律</h4><p>业务 owner、产品 owner、技术 owner 和验收 owner 必须可识别。没有 owner 的高风险声明无法靠目录或算法补出来。</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="migration" class="band alt">
+      <div class="inner">
+        <div class="section-head"><div class="section-no">09</div><div><h2>迁移当前项目：先加控制面，再整理目录</h2></div></div>
+        <p class="intro">目标不是一次性把 91 个 docs/spec 制品全部重命名。首先让关键声明可追踪，让新的变化进入机制；历史材料按价值逐步补登记。迁移期间，原路径继续有效。</p>
+        <div class="table-wrap"><table>
+          <thead><tr><th>阶段</th><th>时间建议</th><th>交付物</th><th>退出条件</th></tr></thead>
+          <tbody>
+            <tr><td>M0 · 冻结现状索引</td><td>0.5 天</td><td>扫描 manifest：路径、kind、digest、git 时间、推定 owner；记录当前 demo/docs/spec 差异</td><td>所有现有制品有 artifact_id，不移动文件</td></tr>
+            <tr><td>M1 · 建控制面</td><td>1 天</td><td><code>project.yaml</code>、ontology、authority policy、事件日志、基线 schema</td><td>能够表达本文 SIM-01..06</td></tr>
+            <tr><td>M2 · 抽关键 claims</td><td>1–2 天</td><td>先覆盖 17 个 demo 场景、29 个评审共识、待定项、关键权限与流程不变量</td><td>R2/R3 声明 100% 有 owner、source、decision 状态</td></tr>
+            <tr><td>M3 · 建追踪边</td><td>1–2 天</td><td>claim → demo 场景 → 代码模块/API → 测试；接入知识图谱查询</td><td>可从任一高风险 claim 找到实现和证据缺口</td></tr>
+            <tr><td>M4 · 自动门禁</td><td>1 天</td><td>schema 校验、未绑定 demo 变更、弱化测试检测、stale evidence、冲突报告</td><td>PR 能输出局部收敛清单</td></tr>
+            <tr><td>M5 · 渐进归档</td><td>按需</td><td>新资料进入细分目录；旧资料移动时保留 redirect/map；history 冻结</td><td>没有断链，旧 baseline 可重放</td></tr>
+          </tbody>
+        </table></div>
+
+        <h3>本项目第一批应登记的声明簇</h3>
+        <div class="grid-2">
+          <div class="panel"><div class="kicker">PRODUCT / UX</div><h4>17 个角色场景</h4><p>XS1–XS6、XSZG1、SW1–SW3、XSZL1、CW1–CW2、CG1–CG3、DSZ1。把评审的 29 个共识按场景挂接，不重新发明编号。</p></div>
+          <div class="panel"><div class="kicker">BUSINESS PREMISE</div><h4>签收与凭证链</h4><p>优先解决“客户照片、司机回传、仓库上传、商务接收”之间的真实责任链，这是当前最明显的上游前提冲突。</p></div>
+          <div class="panel"><div class="kicker">SECURITY</div><h4>群成员角色与最小权限交集</h4><p>CRM 身份映射、群内金额不可见、群内信息按成员权限交集裁剪，应作为 R2/R3 横切声明连接 demo、API、ReBAC 与测试。</p></div>
+          <div class="panel"><div class="kicker">DELIVERY</div><h4>demo 与生产边界</h4><p>逐场景标注 <code>demo_only</code>、<code>backend_exists</code>、<code>real_wecom_verified</code>，消除“演示可点 = 系统已交付”的误读。</p></div>
+        </div>
+
+        <h3>第一版不做什么</h3>
+        <ul>
+          <li>不把所有自然语言自动拆成 claim；先覆盖高风险和高变更区域。</li>
+          <li>不要求所有历史文档补齐元数据后项目才能继续；新变化强制、旧资料按触达补齐。</li>
+          <li>不自动裁决业务语义；系统只排序证据、发现冲突、缩小问题。</li>
+          <li>不把原始大证据全塞进 Git；Git 保存 manifest 和摘要，大文件由 CI artifact 或对象存储保留。</li>
+          <li>不追求一个“项目一致性 92%”的总分；门禁看风险分层后的完整度向量与开放反例。</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="handoff" class="band">
+      <div class="inner">
+        <div class="section-head"><div class="section-no">10</div><div><h2>Agent Handoff：先确认起点，再继续工作</h2></div></div>
+        <p class="intro">Handoff 不是一段会话摘要，而是一个有版本、有摘要、有接受回执的状态转移。接手 Agent 的第一件事不是扫描代码或执行待办，而是验证机制、baseline、交接包和交接后的变化窗口，建立可信起点。</p>
+        <div class="thesis">接手第一原则：先证明“我接到的状态仍然是当前状态”，再继承任务；不能验证的上下文只能作为线索，不能作为继续实施或宣布完成的依据。</div>
+
+        <h3>交接包放在哪里</h3>
+<pre><code>project/handoffs/
+├── current.yaml                              # 最近一次已接受 handoff 的指针
+└── HOF-20260813-001/
+    ├── manifest.yaml                         # 交接身份、机制、baseline、commit 与摘要
+    ├── summary.md                            # 面向接手者的最小叙事
+    ├── open-items.yaml                       # 未完成任务、冲突、未知、风险、owner
+    ├── decisions-since-baseline.yaml         # baseline 后新增但尚未并入的决定
+    ├── evidence-index.yaml                   # 有效/STALE/INVALID 证据索引
+    └── acceptance.yaml                       # 接手 Agent 的校验结果和接受/拒绝回执</code></pre>
+
+        <h3>接手 Agent 必须首先做什么</h3>
+        <div class="decision-tree">
+          <div class="decision-row"><div class="n">1</div><b>解析机制</b><span>执行 §07 Agent 启动协议；确认 ACTIVE ECM 版本和摘要。机制不明时只允许进入 bootstrap/diagnostic 模式。</span></div>
+          <div class="decision-row"><div class="n">2</div><b>定位交接</b><span>读取 <code>project/handoffs/current.yaml</code> 和固定 ID 的 manifest；禁止按目录时间挑“最新交接包”。</span></div>
+          <div class="decision-row"><div class="n">3</div><b>校验基点</b><span>核对 repo、branch、commit、working-tree digest、baseline ID、机制版本、claim/evidence 索引摘要。</span></div>
+          <div class="decision-row"><div class="n">4</div><b>检查变化窗口</b><span>比较 <code>handoff.created_at</code> 到当前时刻之间的提交、未提交修改、外部资料和过期证据；任何新增变化先进入正常收敛流。</span></div>
+          <div class="decision-row"><div class="n">5</div><b>恢复开放状态</b><span>读取开放 claim、冲突、反例、临时豁免、等待人工问题和未完成验证；按风险和依赖重建下一步，不照抄前任优先级。</span></div>
+          <div class="decision-row"><div class="n">6</div><b>写接受回执</b><span>记录 ACCEPTED、CONDITIONAL 或 REJECTED、接手 Agent 身份、观察时间、差异及首个动作。只有 ACCEPTED/CONDITIONAL 后才能继续实施。</span></div>
+        </div>
+
+        <h3>Handoff manifest 最小字段</h3>
+<pre><code>handoff_id: HOF-20260813-001
+status: OFFERED
+from: agent-or-human-id
+created_at: 2026-08-13T12:00:00+08:00
+project:
+  repo: b2b_pilot_v3
+  branch: main
+  commit: f7f7ba8...
+  working_tree_digest: sha256:...
+mechanism:
+  id: ECM
+  version: 1.0.0
+  spec_digest: sha256:...
+baseline:
+  id: BL-20260813-001
+  manifest_digest: sha256:...
+scope_in_progress: [CLM-..., CLM-...]
+open_items_digest: sha256:...
+evidence_index_digest: sha256:...
+change_cursor: EVT-000184
+next_recommended_action:
+  action: resolve_claim_conflict
+  target: CLM-RECEIPT-CHAIN-003
+  reason: highest_closed_risk_per_cost
+expires_at: 2026-08-14T12:00:00+08:00</code></pre>
+
+        <h3>三方责任</h3>
+        <div class="table-wrap"><table>
+          <thead><tr><th>角色</th><th>必须负责</th><th>不得做</th></tr></thead>
+          <tbody>
+            <tr><td>交出方</td><td>冻结观察时点；诚实记录未完成、失败、临时假设、未提交修改和外部依赖；生成摘要</td><td>把建议写成决定；把未验证写成已完成；只留下自然语言聊天摘要</td></tr>
+            <tr><td>系统/机制</td><td>生成 manifest、摘要校验、变化窗口、TTL 与证据状态；保存 OFFERED → ACCEPTED/REJECTED 审计链</td><td>因前任 Agent 声称完成就自动关闭反例或未知</td></tr>
+            <tr><td>接手方</td><td>独立校验、识别交接后变化、重算优先级、写接受回执并声明首个动作</td><td>未校验就继续改代码；自行选择机制或 baseline；把交接摘要当作证据</td></tr>
+          </tbody>
+        </table></div>
+
+        <h3>接受状态与失败处理</h3>
+        <ul>
+          <li><code>ACCEPTED</code>：摘要匹配、变化窗口已吸收、没有阻塞接手的未知；正常继续。</li>
+          <li><code>CONDITIONAL</code>：可继续不受影响工作，但明确列出需重建的证据、失效假设或未决问题。</li>
+          <li><code>REJECTED</code>：机制无法解析、baseline/commit 不存在、摘要错配、交接已过期且影响不可界定，或开放高风险项被遗漏。停止实施，先修复交接包或重建 baseline。</li>
+        </ul>
+        <div class="callout"><strong>当前仓库的 bootstrap 例外：</strong>由于本文仍为 <code>PROPOSED</code> 且 <code>project/</code> 控制面尚未落库，首次接手 Agent 应先声明 bootstrap 模式，核对本文件身份与 Git 工作区，随后执行 §09 的 M0/M1；不能伪造一个 ACTIVE 指针或假装已有正式 handoff 包。</div>
+      </div>
+    </section>
+
+    <section id="contract" class="band">
+      <div class="inner">
+        <div class="section-head"><div class="section-no">11</div><div><h2>最小可执行契约</h2></div></div>
+        <p class="intro">下面是这套设计真正落地时不可删减的部分。工具可以替换，目录可以渐进迁移，但这些条件不满足时，不得声称信息已经收敛。</p>
+        <h3>每次变化必须产出</h3>
+        <ol>
+          <li>一个带 digest、actor、时间与 kind 的 ArtifactChanged 事件。</li>
+          <li>声明级差异：新增、修改、替代、仅表达变化或无法解析。</li>
+          <li>受影响对象集合与理由，至少覆盖 docs、demo、code、tests、evidence 五类。</li>
+          <li>自动任务或人工问题包；每项有 owner、风险、截止门禁和完成条件。</li>
+          <li>验证结果及其绑定摘要；失败、过期和冲突不能被绿灯覆盖。</li>
+        </ol>
+        <h3>Agent 执行前置条件</h3>
+        <p>除首次 bootstrap 迁移外，Agent 必须先成功执行 §07 的启动协议和 §10 的 handoff 接受协议。只有机制与交接状态均可解析后，才能使用 ECM 作权威裁决、证据失效与 baseline 门禁。</p>
+        <h3>Baseline 可发布谓词</h3>
+<pre><code>baseline_ready(scope) :=
+  all required claims in scope are ACCEPTED or explicitly DEFERRED outside scope
+  and no active semantic conflict overlaps scope
+  and every R2/R3 claim has an owner and an independent acceptance oracle
+  and required artifacts implement the accepted claim versions
+  and required evidence is PASS, fresh, replayable, and digest-matched
+  and demo-only behavior is not represented as production capability
+  and every approved exception has owner, reason, expiry, and rollback
+  and the baseline records mechanism_version and policy_component_digests
+  and the open-risk manifest is acknowledged by the delivery owner</code></pre>
+        <h3>绝对停止条件</h3>
+        <div class="table-wrap"><table>
+          <thead><tr><th>条件</th><th>动作</th></tr></thead>
+          <tbody>
+            <tr><td>同 scope 高风险业务声明冲突</td><td>停止相关实现/交付，提交最小问题包；不冻结无关工作。</td></tr>
+            <tr><td>证据与制品/环境/验证器 digest 不匹配</td><td>证据标 <code>INVALID</code>，从最早变化处重跑受影响子集。</td></tr>
+            <tr><td>测试 oracle 被删除或弱化</td><td>旧 PASS 转 <code>STALE</code>；高风险 claim 回到 <code>UNVERIFIED</code>。</td></tr>
+            <tr><td>demo 含未绑定的业务规则或权限变化</td><td>允许保留在探索分支，但不得进入交付 baseline。</td></tr>
+            <tr><td>机制主版本改变但未完成迁移</td><td>旧 baseline 继续绑定旧机制；新机制只能影子运行。</td></tr>
+            <tr><td>机制指针缺失、状态非 ACTIVE 或摘要不匹配</td><td>报告 <code>MECHANISM_UNRESOLVED</code>；停止 ECM 门禁判断，不得自行选择最新文件。</td></tr>
+            <tr><td>Handoff 未接受、摘要错配或变化窗口未检查</td><td>报告 <code>HANDOFF_UNRESOLVED</code>；停止恢复实施，先重建可信起点。</td></tr>
+            <tr><td>预算耗尽仍有不可消除风险</td><td>输出 <code>CONDITIONAL</code> 与剩余风险，不得使用“完整通过”。</td></tr>
+          </tbody>
+        </table></div>
+
+        <h3>成功指标</h3>
+        <div class="grid-3">
+          <div class="panel good"><h4>变化到定位</h4><p>从任一 spec/docs/demo/code/test 变化到生成受影响 claim 清单，目标小于 5 分钟。</p></div>
+          <div class="panel good"><h4>问题到责任人</h4><p>R2/R3 未知或冲突 100% 有 owner、问题包和最晚决策门。</p></div>
+          <div class="panel good"><h4>声明到证据</h4><p>每个进入 baseline 的高风险 claim 可在一次查询内回到来源、决策、实现和原始证据。</p></div>
+          <div class="panel info"><h4>局部重算率</h4><p>多数变化只重建受影响子图；全仓重跑必须能解释原因。</p></div>
+          <div class="panel info"><h4>机制发现率</h4><p>历史事故回放持续通过；新规则同时报告漏检下降与误报成本。</p></div>
+          <div class="panel warn"><h4>人工负担</h4><p>衡量每轮问题包数量、决策等待时长和无效问题率，防止治理机制成为项目瓶颈。</p></div>
+        </div>
+
+        <div class="thesis">最终目标不是让所有文件在每一刻完全相同，而是让任何差异都有类型、有原因、有权威范围、有影响半径、有下一步；让项目能在异步变化中持续前进，同时知道自己哪些地方尚未收敛。</div>
+      </div>
+    </section>
+
+    <section id="agent-conformance" class="band alt">
+      <div class="inner">
+        <div class="section-head"><div class="section-no">A</div><div><h2>附录 A · Agent 符合性协议</h2></div></div>
+        <p class="intro">本附录是面向读取、接手或操作本项目的 Agent 的规范性执行协议。正文提供理由、模型和示例；本附录规定可机械判定的输入、顺序、状态、输出和停止条件。Agent 只有满足本附录全部适用条款，才可以声明 <code>ECM_CONFORMANT</code>。</p>
+
+        <h3>A.1 规范效力与优先级</h3>
+        <div class="table-wrap"><table>
+          <thead><tr><th>规则 ID</th><th>规范要求</th></tr></thead>
+          <tbody>
+            <tr><td>ECM-AUTH-001</td><td>本协议只约束项目内信息解释、handoff、证据和 baseline 操作，不授予任何读取、写入、执行、网络、提交、发布或外部通信权限。</td></tr>
+            <tr><td>ECM-AUTH-002</td><td>Agent 必须遵守其运行环境的系统/开发者指令、用户当前请求、适用的仓库级指令和工具安全约束。ECM 与更高优先级约束冲突时，Agent 必须停止冲突动作并输出 <code>INSTRUCTION_CONFLICT</code>；不得用 ECM 覆盖更高优先级约束。</td></tr>
+            <tr><td>ECM-AUTH-003</td><td>在更高优先级约束允许的范围内，固定版本 <code>ECM-x.y.z.yaml</code> 是机器判定的规范源；同版本 HTML 是解释性发布视图。二者冲突时不得自行选择，必须输出 <code>MECHANISM_CONTENT_CONFLICT</code>。</td></tr>
+            <tr><td>ECM-AUTH-004</td><td>本根目录 HTML 当前是 <code>ECM 1.0.0 PROPOSED</code>。除 bootstrap 外，读取本文不构成机制激活、handoff 接受、baseline 接受或任务授权。</td></tr>
+          </tbody>
+        </table></div>
+
+        <h3>A.2 规范词与禁止推断</h3>
+        <div class="grid-2">
+          <div class="panel"><h4>规范词</h4><p><code>MUST / 必须</code>：不满足即不符合。<code>MUST NOT / 不得</code>：任何情况下都禁止，除非更高优先级指令显式覆盖。<code>SHOULD / 应</code>：可偏离，但回执必须记录理由。<code>MAY / 可以</code>：允许但不要求。</p></div>
+          <div class="panel"><h4>空值语义</h4><p>字段缺失、空字符串、无法读取、无法验证或多个候选不可区分，一律是 <code>UNKNOWN</code>，不得按默认同意、最近文件、前任陈述或 Agent 常识补全。</p></div>
+        </div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>规则 ID</th><th>Agent MUST NOT 推断</th></tr></thead>
+          <tbody>
+            <tr><td>ECM-INFER-001</td><td>文件更新更晚，所以语义权威更高。</td></tr>
+            <tr><td>ECM-INFER-002</td><td>位于 <code>spec</code>，所以内容已批准；位于 <code>docs</code>，所以内容已过期。</td></tr>
+            <tr><td>ECM-INFER-003</td><td>demo 可操作，所以生产代码已实现；测试通过，所以业务声明正确。</td></tr>
+            <tr><td>ECM-INFER-004</td><td>前任 Agent 写了“完成”，所以开放反例、未知、脏工作区或失败证据可以关闭。</td></tr>
+            <tr><td>ECM-INFER-005</td><td>存在多个 mechanism、baseline 或 handoff 候选时，可以按文件名、目录顺序、mtime 或语义相似度选择一个。</td></tr>
+            <tr><td>ECM-INFER-006</td><td>用户要求继续工作，所以隐含批准了 destructive action、外部发布、扩大范围或改变机制版本。</td></tr>
+          </tbody>
+        </table></div>
+
+        <h3>A.3 固定术语与观察边界</h3>
+        <div class="table-wrap"><table>
+          <thead><tr><th>术语</th><th>唯一含义</th></tr></thead>
+          <tbody>
+            <tr><td><code>repo_root</code></td><td>当前工作目录所属 Git 仓库的规范化绝对根路径；若不在 Git 仓库中则为 <code>UNKNOWN</code>。</td></tr>
+            <tr><td><code>observation_started_at</code></td><td>接手校验第一次读取项目状态之前记录的带时区时间。</td></tr>
+            <tr><td><code>snapshot</code></td><td><code>repo_root + branch/detached + HEAD + working_tree_fingerprint + mechanism digest + baseline digest + handoff digest + event cursor</code> 的不可变组合。</td></tr>
+            <tr><td><code>current</code></td><td>仅指某次已验证 snapshot 中由显式指针选中的对象；不表示目录中 mtime 最新的对象。</td></tr>
+            <tr><td><code>working_tree_fingerprint</code></td><td>机制实现规定的确定性工作区指纹。未规定算法时必须至少记录完整 porcelain 状态和相关文件 digest，并标为 <code>PARTIAL</code>；不得虚构完整摘要。</td></tr>
+            <tr><td><code>change window</code></td><td>从 handoff <code>created_at/change_cursor</code> 到接手 snapshot 的提交、工作区变化、项目事件、外部来源变化和证据过期集合。</td></tr>
+            <tr><td><code>read</code></td><td>成功取得字节或结构化值，不等于 schema 合法、摘要匹配、语义接受或具备执行授权。</td></tr>
+            <tr><td><code>accepted handoff</code></td><td>接手 Agent 已完成 A.6，写出有效 acceptance receipt，且结果为 <code>ACCEPTED</code> 或 <code>CONDITIONAL</code>。</td></tr>
+            <tr><td><code>risk</code></td><td><code>R0</code>=局部、可逆、无外部影响；<code>R1</code>=单模块或低影响业务偏差；<code>R2</code>=跨模块、权限/资金/一致性/真实流程风险；<code>R3</code>=安全、合规、不可逆数据、重大外部影响或交付真实性风险。若多个等级适用，取最高；无法分类为 <code>UNKNOWN</code>，在 handoff 决策中按 R3 处理。</td></tr>
+            <tr><td><code>scope token</code></td><td>规范化标识 <code>type:id</code>，其中 type 只能是 <code>project|baseline|domain|claim|artifact|path|flow|evidence</code>。路径必须是仓库相对 POSIX 路径，不含 <code>.</code>、<code>..</code> 或符号链接逃逸。</td></tr>
+            <tr><td><code>scope intersects</code></td><td>两个 scope 集合相交，当且仅当存在相同 token，或一个 <code>path:a</code> 是另一个 <code>path:a/...</code> 的路径段祖先，或已验证依赖图存在任一方向的 <code>DEPENDS_ON/IMPLEMENTS/VERIFIES</code> 可达关系。依赖图缺失或查询失败时结果为 <code>UNKNOWN</code>，按相交处理。</td></tr>
+            <tr><td><code>absorbed change</code></td><td>变化已被一个明确的 claim/decision/artifact/evidence 新版本接收，所有受影响边已重算，旧证据已标记，且该处理写入当前 event cursor 之前。</td></tr>
+            <tr><td><code>open / conflicting / unbounded change</code></td><td><code>open</code>=已识别影响但未完成；<code>conflicting</code>=与同 scope 生效声明矛盾；<code>unbounded</code>=来源、范围、依赖或新鲜度任一无法确定。三者均不得视为 absorbed。</td></tr>
+          </tbody>
+        </table></div>
+
+        <h3>A.3.1 规范化与摘要规则</h3>
+        <div class="table-wrap"><table>
+          <thead><tr><th>规则 ID</th><th>规范要求</th></tr></thead>
+          <tbody>
+            <tr><td>ECM-CANON-001</td><td>所有文本路径先以 UTF-8 解码、转换为仓库相对 POSIX 路径并拒绝根外解析；比较区分大小写。不能无损 UTF-8 解码时返回 <code>CANONICALIZATION_FAILED</code>。</td></tr>
+            <tr><td>ECM-CANON-002</td><td>所有时间使用 RFC 3339、显式时区和秒级精度。缺时区或解析失败为 <code>UNKNOWN</code>；不得使用文件 mtime 代替业务发生时间、决策时间或 handoff 创建时间。</td></tr>
+            <tr><td>ECM-CANON-003</td><td>digest 格式固定为 <code>sha256:&lt;64 lowercase hex&gt;</code>，对文件原始字节计算；不得在计算前换行转换、格式化 YAML/HTML 或字符集转码。</td></tr>
+            <tr><td>ECM-CANON-004</td><td>集合在比较和摘要前按 UTF-8 字节升序排序并去重；重复 ID 若内容不同则返回 <code>DUPLICATE_ID_CONFLICT</code>，不得采用先到或后到项。</td></tr>
+            <tr><td>ECM-CANON-005</td><td>结构化 manifest 的规范摘要必须由版本化 canonicalizer 生成。若机制规范未声明 canonicalizer ID/version，则 manifest digest 为 <code>UNKNOWN</code>，ACTIVE 校验失败。</td></tr>
+            <tr><td>ECM-CANON-006</td><td>Git 工作区观察至少包含 HEAD、branch/detached、已跟踪修改、暂存修改、未跟踪路径和子模块状态。任一类别未观察到时，working tree 只能标为 <code>PARTIAL</code>。</td></tr>
+          </tbody>
+        </table></div>
+
+        <h3>A.4 Agent 运行状态机</h3>
+<pre><code>UNINITIALIZED
+  -> BOOTSTRAP_DIAGNOSTIC   when project/project.yaml or ACTIVE mechanism is absent
+  -> MECHANISM_VALIDATING   otherwise
+
+MECHANISM_VALIDATING
+  -> HANDOFF_VALIDATING     when mechanism pointer, schema and digests all pass
+  -> BLOCKED                on MECHANISM_UNRESOLVED or instruction conflict
+
+HANDOFF_VALIDATING
+  -> READY                  when acceptance = ACCEPTED
+  -> READY_CONDITIONAL      when acceptance = CONDITIONAL and action is outside blocked_scope
+  -> BLOCKED                when acceptance = REJECTED
+
+READY | READY_CONDITIONAL
+  -> EXECUTING              only for an action authorized by the current user request
+  -> REVALIDATE             when any snapshot component changes
+
+REVALIDATE
+  -> HANDOFF_VALIDATING     for project-state changes
+  -> MECHANISM_VALIDATING   for mechanism/policy changes
+  -> BLOCKED                when the change cannot be bounded
+
+任何未列出的状态转移 := INVALID_TRANSITION</code></pre>
+        <div class="callout"><strong>BOOTSTRAP_DIAGNOSTIC 的权限边界：</strong>该状态允许只读盘点并提出/执行用户已授权的控制面迁移；不得使用 ECM 门禁宣布 PASS、不得生成伪造的 ACTIVE 指针、不得把自身生成的 handoff 自行视为已被独立接手方接受。</div>
+
+        <h3>A.5 确定性发现与机制校验算法</h3>
+<pre><code>procedure RESOLVE_MECHANISM(repo_root):
+  01. require repo_root is known; else return BLOCKED(REPO_ROOT_UNKNOWN)
+  02. read exactly repo_root/project/project.yaml
+      missing => return BOOTSTRAP_DIAGNOSTIC(PROJECT_CONTROL_PLANE_MISSING)
+  03. schema-validate project.yaml; invalid => BLOCKED(PROJECT_MANIFEST_INVALID)
+  04. require mechanism.pointer is one normalized relative path inside repo_root
+      absolute/outside/multiple => BLOCKED(MECHANISM_POINTER_INVALID)
+  05. read exactly pointer target; do not search alternatives
+  06. require pointer.status == ACTIVE
+  07. require pointer.id/version == project.yaml mechanism.id/version
+  08. read exactly pointer.spec and pointer.guide; both must remain inside repo_root
+  09. verify bytes with declared digest algorithm and digest values
+  10. schema-validate YAML spec; verify HTML declares same id/version/status
+  11. require all referenced policy components exist and match digests
+  12. freeze mechanism snapshot; return MECHANISM_VALID
+end
+
+Any failure in 05..11 => BLOCKED(MECHANISM_UNRESOLVED)
+No fallback search, nearest-version choice, mtime choice, or implicit default is permitted.</code></pre>
+
+        <h3>A.6 确定性 Handoff 接受算法</h3>
+<pre><code>procedure ACCEPT_HANDOFF(valid_mechanism, max_attempts = 2):
+  for attempt in 1..max_attempts:
+    01. capture S0 := project snapshot and observation_started_at
+    02. read exactly project/handoffs/current.yaml
+        missing => return REJECTED(HANDOFF_POINTER_MISSING)
+    03. require pointer selects exactly one handoff_id and status in {OFFERED, ACCEPTED}
+    04. read selected manifest and every required file; validate schemas and digests
+    05. require manifest mechanism id/version/digest == valid_mechanism snapshot
+    06. require repo identity matches; referenced commit and baseline must exist
+    07. compute change_window(manifest.change_cursor/created_at, S0)
+    08. classify every change using the closed definitions in A.3
+    09. load every open item; require id, status, risk, owner or explicit UNKNOWN,
+        blocked_scope, next_gate, and evidence status
+    10. independently recompute the next action from current risk/dependency state;
+        predecessor recommendation is advisory only
+    11. capture S1 using the same snapshot algorithm
+    12. if S1 != S0: append HANDOFF_RACE and restart the loop
+    13. decide by A.7; write acceptance receipt bound to S1
+    14. reread receipt and verify its digest; return decision
+  end
+  return REJECTED(HANDOFF_RACE_EXHAUSTED)
+end</code></pre>
+        <p>步骤 13 的写入只有在用户当前请求和运行环境授权写入时才执行。若写入未获授权，Agent 必须输出同构的内存回执并标记 <code>receipt_persisted=false</code>；此时 handoff decision 可以表示本次观察结论，但持久化 handoff 状态保持不变，Agent 不得声称仓库已记录接受。</p>
+
+        <h3>A.7 唯一接受决策表</h3>
+        <div class="table-wrap"><table>
+          <thead><tr><th>按顺序匹配的条件</th><th>唯一结果</th><th>允许动作</th></tr></thead>
+          <tbody>
+            <tr><td>更高优先级指令冲突、机制无效、摘要错配、repo/baseline 不存在、变化不可界定、R3 项被遗漏</td><td><code>REJECTED</code></td><td>只允许诊断、修复交接或请求决定；不得恢复实施</td></tr>
+            <tr><td>存在已界定的 stale 证据、R0/R1 未知、与请求动作 scope 不相交的冲突，且每项都有 blocked_scope 与 next_gate</td><td><code>CONDITIONAL</code></td><td>只允许执行按 A.3 判定为不与任何 blocked_scope 相交的已授权动作</td></tr>
+            <tr><td>所有摘要匹配；变化窗口为空或已吸收；无开放反例；无 R2/R3 UNKNOWN；无未拥有或过期豁免</td><td><code>ACCEPTED</code></td><td>可在用户授权范围内恢复实施</td></tr>
+            <tr><td>无法命中以上任一行</td><td><code>REJECTED(DECISION_INCOMPLETE)</code></td><td>不得通过自由解释降级为 CONDITIONAL</td></tr>
+          </tbody>
+        </table></div>
+        <p>决策表自上而下执行，首个匹配行即为结果。<code>CONDITIONAL</code> 不是“基本通过”；任何待执行动作都必须先证明与全部 <code>blocked_scope</code> 不相交。</p>
+
+        <h3>A.7.1 协议适用性判定</h3>
+        <div class="table-wrap"><table>
+          <thead><tr><th>输入事实</th><th>handoff 协议结果</th></tr></thead>
+          <tbody>
+            <tr><td>用户明确要求“接手、继续、恢复、从前任状态推进”，或存在指向当前任务的 handoff ID</td><td><code>REQUIRED</code>，必须执行 A.6</td></tr>
+            <tr><td>用户明确要求全新、独立、忽略既有进行中状态的分析，且请求不依赖未完成工作</td><td><code>NOT_APPLICABLE</code>；仍须解析机制，但不接受 handoff</td></tr>
+            <tr><td>请求是只读查阅，且答案不依赖 baseline、开放任务或完成状态</td><td><code>NOT_APPLICABLE</code>；不得因此声明项目状态</td></tr>
+            <tr><td>无法判断请求是否依赖既有进行中状态</td><td><code>REQUIRED</code>；失败关闭，执行 A.6</td></tr>
+          </tbody>
+        </table></div>
+
+        <h3>A.8 Acceptance receipt 机器契约</h3>
+<pre><code>protocol: ECM-HANDOFF
+protocol_version: 1.0.0
+conformance: ECM_CONFORMANT | NON_CONFORMANT
+agent_id: required-nonempty-string
+observed_at: required-rfc3339-with-timezone
+repo_root: required-absolute-path
+snapshot:
+  branch: required-string-or-DETACHED
+  head: required-full-commit-sha
+  working_tree_fingerprint: required-string
+mechanism:
+  id: ECM
+  version: required-semver
+  status: ACTIVE | PROPOSED
+  spec_digest: required-digest-or-UNKNOWN
+  bootstrap_mode: required-boolean
+handoff:
+  id: required-id-or-NONE
+  manifest_digest: required-digest-or-UNKNOWN
+  decision: ACCEPTED | CONDITIONAL | REJECTED
+  reason_codes: required-array
+  blocked_scope: required-array
+  change_window_count: required-nonnegative-integer
+  receipt_persisted: required-boolean
+baseline:
+  id: required-id-or-NONE
+  manifest_digest: required-digest-or-UNKNOWN
+open_items: required-array
+first_authorized_action: required-object-or-NONE
+assumptions: required-array
+unknowns: required-array</code></pre>
+        <div class="table-wrap"><table>
+          <thead><tr><th>规则 ID</th><th>回执约束</th></tr></thead>
+          <tbody>
+            <tr><td>ECM-REC-001</td><td><code>assumptions</code> 与 <code>unknowns</code> 必须显式存在；没有条目时使用空数组，不得省略。</td></tr>
+            <tr><td>ECM-REC-002</td><td><code>first_authorized_action</code> 必须同时包含 action、target、依据和授权来源；没有已授权动作时为 <code>NONE</code>。</td></tr>
+            <tr><td>ECM-REC-003</td><td><code>conformance=ECM_CONFORMANT</code> 只说明协议执行符合，不说明项目正确、handoff 已接受或任务已完成。</td></tr>
+            <tr><td>ECM-REC-004</td><td><code>bootstrap_mode=true</code> 时，mechanism.status 必须是 <code>PROPOSED</code>，handoff.decision 不得是 <code>ACCEPTED</code>，baseline 不得被声明为 ECM 发布基线。</td></tr>
+          </tbody>
+        </table></div>
+
+        <h3>A.9 失败码与停止语义</h3>
+        <div class="table-wrap"><table>
+          <thead><tr><th>失败码</th><th>含义</th><th>恢复条件</th></tr></thead>
+          <tbody>
+            <tr><td><code>INSTRUCTION_CONFLICT</code></td><td>ECM 动作与更高优先级约束冲突</td><td>获得明确授权或选择不冲突动作</td></tr>
+            <tr><td><code>PROJECT_CONTROL_PLANE_MISSING</code></td><td><code>project/project.yaml</code> 不存在</td><td>进入获授权的 bootstrap，或由 owner 建立控制面</td></tr>
+            <tr><td><code>MECHANISM_UNRESOLVED</code></td><td>机制指针、状态、版本、schema 或摘要无法验证</td><td>修复并重新从 A.5 第 1 步执行</td></tr>
+            <tr><td><code>MECHANISM_CONTENT_CONFLICT</code></td><td>规范源与同版本指南矛盾</td><td>发布修正版；不得原地修改已发布版本</td></tr>
+            <tr><td><code>HANDOFF_UNRESOLVED</code></td><td>交接包缺失、无效、过期或不能完整解析</td><td>修复/重建交接包后从 A.6 第 1 步执行</td></tr>
+            <tr><td><code>HANDOFF_RACE_EXHAUSTED</code></td><td>两次校验期间 snapshot 均发生变化</td><td>获得稳定观察窗口后重新接手</td></tr>
+            <tr><td><code>BASELINE_UNRESOLVED</code></td><td>baseline 不存在、摘要错配或依赖不可达</td><td>重建或显式选择有效 baseline</td></tr>
+            <tr><td><code>INVALID_TRANSITION</code></td><td>尝试执行 A.4 未列出的状态转移</td><td>回到最近可验证状态重新执行协议</td></tr>
+            <tr><td><code>CANONICALIZATION_FAILED</code></td><td>路径、文本、时间或摘要输入无法按 A.3.1 规范化</td><td>修复输入或由机制新版本显式定义处理规则</td></tr>
+            <tr><td><code>DUPLICATE_ID_CONFLICT</code></td><td>同一稳定 ID 对应不同内容</td><td>创建冲突记录并由 owner 裁决，禁止覆盖</td></tr>
+          </tbody>
+        </table></div>
+        <p><strong>“停止”只停止依赖该无效前提的动作。</strong>Agent 仍可执行更高优先级指令允许的只读诊断、报告事实或处理明确不相交的任务；但不得使用未解析的机制、handoff 或 baseline 作完成性结论。</p>
+
+        <h3>A.10 幂等性、并发与更新后义务</h3>
+        <ol>
+          <li><b>幂等：</b>相同 snapshot、相同机制、相同 handoff 输入必须产生相同 decision、reason codes 和 blocked scope；Agent 文风差异不得改变判定。</li>
+          <li><b>并发：</b>任何指针、HEAD、工作区、机制、baseline、handoff、event cursor 或证据新鲜度在校验中变化，都视为 snapshot 变化，按 A.6 重试；不得把前后两次观察拼成一个 snapshot。</li>
+          <li><b>最小写入：</b>接手校验默认只读。除 acceptance receipt 外，不得在 <code>READY</code> 前修改项目制品；receipt 写入也必须在用户授权范围内。</li>
+          <li><b>变更后重验证：</b>Agent 自己造成的任何 snapshot 变化都必须进入正常事件流；完成前重新核对机制版本、受影响 claim、证据与开放项。</li>
+          <li><b>交出义务：</b>Agent 停止、换人、换线程或上下文将无法完整保留时，必须在授权允许下生成新的 <code>OFFERED</code> handoff；不得覆盖上一份已接受回执。</li>
+          <li><b>无自证：</b>同一 Agent 可以生成交接提议，也可以在连续工作中做一致性自检，但不得把自己的自检描述为独立接手验证；需要独立性时必须由不同 Agent 或人产生 acceptance。</li>
+        </ol>
+
+        <h3>A.11 符合性声明</h3>
+        <p>Agent 对外声明结果时必须使用以下之一，不得只写“已按 ECM 处理”：</p>
+<pre><code>ECM_CONFORMANT:
+  protocol_version: 1.0.0
+  mode: ACTIVE | BOOTSTRAP_DIAGNOSTIC
+  mechanism: ECM@x.y.z
+  handoff: HOF-id | NONE
+  decision: ACCEPTED | CONDITIONAL | REJECTED | NOT_APPLICABLE
+  snapshot: &lt;digest-or-explicit-partial-identity&gt;
+  receipt_persisted: true | false
+  limitations: [...]  # 必须存在
+
+NON_CONFORMANT:
+  violated_rules: [ECM-...]
+  reason_codes: [...]
+  actions_not_taken: [...]
+  recovery_required: [...]</code></pre>
+        <h3>A.12 可验证性边界与激活门槛</h3>
+        <div class="table-wrap"><table>
+          <thead><tr><th>规则 ID</th><th>规范要求</th></tr></thead>
+          <tbody>
+            <tr><td>ECM-ACT-001</td><td>本 HTML 附录定义语义契约，但单独存在时不能证明实现符合。ECM 版本只有同时发布 YAML Schema、canonicalizer、状态机/决策表测试向量和可重放 validator，才允许标记 <code>ACTIVE</code>。</td></tr>
+            <tr><td>ECM-ACT-002</td><td>激活测试必须至少覆盖：缺失指针、根外路径、摘要错配、HTML/YAML 冲突、重复 ID、R3 UNKNOWN、CONDITIONAL scope 相交、两次并发变化、无写权限回执和 bootstrap 禁止自激活。</td></tr>
+            <tr><td>ECM-ACT-003</td><td>validator 输出必须包含协议版本、输入 snapshot、每条适用规则 PASS/FAIL/NOT_APPLICABLE、最终状态和失败码；只输出布尔值不符合。</td></tr>
+            <tr><td>ECM-ACT-004</td><td>若两个符合性实现对同一测试向量产生不同最终状态、失败码或 allowed actions，该机制版本为 <code>CALIBRATION_FAILED</code>，不得用于门禁。</td></tr>
+          </tbody>
+        </table></div>
+        <div class="thesis">符合性不是“听起来遵循了原则”，而是同一输入得到同一状态、同一失败码和同一允许动作。任何无法确定的字段都保留为 UNKNOWN；任何未获授权的动作都保持未执行；任何机制、交接或基线歧义都不得由 Agent 自行猜平。</div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div class="inner"><span>证据收敛式项目迭代机制 · v1.0 Proposal</span><span>基于 b2b_pilot_v3 当前资料与《证据收敛式项目 Review》方法扩展</span></div>
+    </footer>
+  </main>
+</div>
+</body>
+</html>

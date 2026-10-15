@@ -1,0 +1,98 @@
+# project/claims/fulfillment.yaml — 履约域原子声明（ECM §04 Claim 模型）
+# M2 落库（2026-08-13 首批）+ 修订（2026-08-14，基于最新原始需求：
+#   spec/Demo意见收集_文字版.html 第 6 项「签收凭证：删除销售侧客户上传场景，保留仓管与司机场景」
+#   + docs/demo/index.html fb29859 落地：XS6 已删除、CG3 已校准）
+# 来源引用：SRC-ADVICE = spec/demo意见收集_文字版.html（+ spec/Demo意见收集.docx 原图/批注）；
+#           SRC-REVIEW-20260812 = spec/review/202608121845_修改意见.html；
+#           SRC-USECASE-V2 = docs/用例总表.html；SRC-DEMO = docs/demo/index.html
+
+claims:
+  # ---- 签收凭证链：业务事实与真实链路 ----
+  - claim_id: CLM-RECEIPT-CHAIN-001
+    statement: {subject: 客户签收, predicate: is, object: 无感（客户不提供签收凭证；客户只在货物有问题时在客户群反馈异常，属另一类场景）}
+    scope: {product: wecom-order-assistant, phase: pilot-v0, domain: fulfillment}
+    authority: {basis: 评审现场事实（XS6-01）+ 原始需求确认（意见收集第 6 项）, sources: [SRC-REVIEW-20260812#XS6-01, SRC-ADVICE#receipt]}
+    semantic_status: ACCEPTED   # 前提冲突已由原始需求正式背书（2026-08-14）
+    implementation: {demo: IMPLEMENTED, backend: NOT_APPLICABLE, production_ui: UNPLANNED}
+    verification: {demo_smoke: PASS, business_uat: UNVERIFIED}
+    risk: R2
+    owner: business-fulfillment
+    acceptance: {oracle: 业务流梳理文档（OI-012）终稿对照；客户异常反馈场景独立于凭证链}
+    relations: {supersedes: CLM-RECEIPT-CHAIN-010, conflicts_resolved_with: CLM-RECEIPT-CHAIN-010(2026-08-14 闭合)}
+  - claim_id: CLM-RECEIPT-CHAIN-010
+    statement: {subject: 签收凭证获取, predicate: was, object: 客户群内发签收照片→销售转发凭证机器人（旧前提，已证伪）}
+    scope: {product: wecom-order-assistant, role: sales, scenario: XS6, phase: pilot-v0}
+    authority: {basis: 旧用例与 demo 现状（已被否定）, sources: [SRC-USECASE-V2#XS6, SRC-DEMO#XS6(已删除), SRC-ADVICE#receipt]}
+    semantic_status: SUPERSEDED   # 2026-08-14：demo 已删 XS6，意见收集明确删除；保留审计（SIM-01 校准案例）
+    implementation: {demo: REMOVED, backend: UNPLANNED, production_ui: UNPLANNED}
+    verification: {demo_smoke: NOT_APPLICABLE, business_uat: UNVERIFIED}
+    risk: R2
+    owner: business-fulfillment
+    acceptance: {oracle: 全页面搜索无“客户拍摄签收单/销售转发签收照片”叙事（验收已过）}
+    relations: {superseded_by: CLM-RECEIPT-CHAIN-011, note: 旧声明保留为不可改写案例（SIM-01 输入），不得删除}
+  - claim_id: CLM-RECEIPT-CHAIN-011
+    statement: {subject: 真实凭证链, predicate: is, object: 司机把回单/签收照片给仓管（运满满时司机直传系统/仓管人工下载；否则仓管接收）→ 仓管转发凭证机器人 OCR 匹配订单 → 已办可查}
+    scope: {product: wecom-order-assistant, role: warehouse, scenario: CG3, phase: pilot-v0}
+    authority: {basis: 原始需求第 6 项（正确业务关系）, sources: [SRC-ADVICE#receipt, SRC-DEMO#CG3]}
+    semantic_status: ACCEPTED
+    implementation: {demo: IMPLEMENTED, backend: UNPLANNED, production_ui: UNPLANNED}
+    verification: {demo_smoke: PASS, business_uat: UNVERIFIED}
+    risk: R2
+    owner: business-fulfillment
+    acceptance: {oracle: demo 复评：CG3 司机私聊→仓管转发凭证机器人→OCR 匹配→已办可查}
+    relations: {supersedes: CLM-RECEIPT-CHAIN-010, refines: CLM-RECEIPT-CHAIN-002}
+  - claim_id: CLM-RECEIPT-CHAIN-002
+    statement: {subject: 真实签收回单线下链路, predicate: is, object: 司机带出库单→客户签字→带回仓库→交商务；线上化入口 = 司机给仓管照片/运满满直传（客户不参与）}
+    scope: {product: wecom-order-assistant, phase: pilot-v0, domain: fulfillment}
+    authority: {basis: 评审事实 XS6-01 + 原始需求细化, sources: [SRC-REVIEW-20260812#XS6-01, SRC-ADVICE#receipt]}
+    semantic_status: ACCEPTED
+    implementation: {demo: IMPLEMENTED, backend: NOT_APPLICABLE, production_ui: NOT_APPLICABLE}
+    verification: {demo_smoke: NOT_APPLICABLE, business_uat: UNVERIFIED}
+    risk: R2
+    owner: business-fulfillment
+    acceptance: {oracle: 宇航+红利业务流梳理文档对照（OI-012）}
+    relations: {refines: CLM-RECEIPT-CHAIN-001}
+  - claim_id: CLM-RECEIPT-CHAIN-003
+    statement: {subject: 司机回传电子凭证, predicate: has, object: 驱动力缺口（运费月结凭纸质票；运满满渠道司机可直传，其他司机仍依赖仓管人工接收）}
+    scope: {product: wecom-order-assistant, phase: pilot-v0, domain: fulfillment}
+    authority: {basis: 评审事实 XS6-02 + 原始需求补充, sources: [SRC-REVIEW-20260812#XS6-02, SRC-ADVICE#receipt]}
+    semantic_status: CHALLENGED   # 业务侧问题持续开放；运满满渠道部分缓解
+    implementation: {demo: NOT_APPLICABLE, backend: NOT_APPLICABLE, production_ui: NOT_APPLICABLE}
+    verification: {demo_smoke: NOT_APPLICABLE, business_uat: UNVERIFIED}
+    risk: R2
+    owner: business-fulfillment
+    acceptance: {oracle: 内部工作流调整答复（弘毅/华斌/张栋）}
+    relations: {depends_on: CLM-RECEIPT-CHAIN-001}
+  - claim_id: CLM-RECEIPT-CHAIN-004
+    statement: {subject: 凭证机器人（append_evidence）, predicate: is, object: 仓管/财务转发自动识别登记（只追加不覆盖），凭证不在群内展现；上传入口为备选}
+    scope: {product: wecom-order-assistant, role: [warehouse, finance], scenario: [CG3, CW1], phase: pilot-v0}
+    authority: {basis: demo 现状 + 原始需求第 6 项（CG3 方向符合）, sources: [SRC-DEMO#CG3, SRC-ADVICE#receipt]}
+    semantic_status: ACCEPTED
+    implementation: {demo: IMPLEMENTED, backend: UNPLANNED, production_ui: UNPLANNED}
+    verification: {demo_smoke: PASS, business_uat: UNVERIFIED}
+    risk: R1
+    owner: product-fulfillment
+    acceptance: {oracle: demo 复评：凭证机器人 OCR 匹配订单、v3 追加、已办可查}
+    relations: {refines: CLM-RECEIPT-CHAIN-011}
+  - claim_id: CLM-RECEIPT-CHAIN-005
+    statement: {subject: 凭证链落地节点, predicate: is, object: 仓管为凭证回传枢纽（demo 已表达）；系统侧催收/自动化待业务流确认}
+    scope: {product: wecom-order-assistant, phase: vnext, domain: fulfillment}
+    authority: {basis: 评审行动项 XS6-03 + 原始需求落地, sources: [SRC-REVIEW-20260812#XS6-03, SRC-ADVICE#receipt]}
+    semantic_status: DEFERRED
+    implementation: {demo: IMPLEMENTED, backend: UNPLANNED, production_ui: UNPLANNED}
+    verification: {demo_smoke: PASS, business_uat: UNVERIFIED}
+    risk: R2
+    owner: business-fulfillment
+    acceptance: {oracle: 内部反馈答复 + 业务流文档（OI-012）}
+    relations: {depends_on: CLM-RECEIPT-CHAIN-003}
+  - claim_id: CLM-RECEIPT-CHAIN-006
+    statement: {subject: 财务无回单开票审批(CW2), predicate: is, object: 例外审核闸门（无签收回单也开票，放行/驳回可写备注，依据随卡展示）}
+    scope: {product: wecom-order-assistant, role: finance, scenario: CW2, phase: pilot-v0}
+    authority: {basis: 用例总表 v2 + demo 现状, sources: [SRC-USECASE-V2#CW2, SRC-DEMO#CW2]}
+    semantic_status: ACCEPTED
+    implementation: {demo: IMPLEMENTED, backend: UNPLANNED, production_ui: UNPLANNED}
+    verification: {demo_smoke: PASS, business_uat: UNVERIFIED}
+    risk: R2
+    owner: business-finance
+    acceptance: {oracle: demo 复评 + 财务流程确认}
+    relations: {related_to: CLM-RECEIPT-CHAIN-011}

@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>v0.1 发布过程跟踪 · 任务拓扑 + 物料/证据清单</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      primaryColor: '#f6f1e9', primaryBorderColor: '#c96442', primaryTextColor: '#2a2722',
+      lineColor: '#b9b2a6', fontSize: '14.5px',
+      fontFamily: '"Inter","Noto Sans SC",system-ui,-apple-system,sans-serif',
+      sequenceMessageMargin: 30, actorBkg: '#f6f1e9', actorBorder: '#c96442',
+      signalColor: '#3a372f', actorTextColor: '#2a2722'
+    },
+    flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'basis' },
+    sequence: { useMaxWidth: true, showSequenceNumbers: false, wrap: true }
+  });
+</script>
+<style>
+  :root{
+    --bg:#fafaf7; --paper:#f6f1e9;
+    --ink:#15140f; --ink2:#5a564e; --ink3:#8a8478;
+    --line:#e7e5e0; --line2:#d8d3c8;
+    --accent:#c96442; --accent-soft:#fbf1ec;
+    --green:#1f7a3a; --green-bg:#e9f3ec; --green-line:#cfe3d4;
+    --amber:#9a6b00; --amber-bg:#f8f1df; --amber-line:#ead8ac;
+    --red:#9c2a25; --red-bg:#f6e7e6; --red-line:#e6c6c4;
+    --violet:#5b3a8a; --violet-bg:#efeaef; --violet-line:#d9cceb;
+    --cyan:#156b74; --cyan-bg:#e2f0f1; --cyan-line:#bfdfe2;
+    --card:#ffffff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter','Noto Sans SC',system-ui,-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;line-height:1.8;font-size:15px;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1180px;margin:0 auto;padding:40px 26px 90px}
+  header.hero{background:linear-gradient(135deg,#1a1712 0%,#3a322a 55%,#5a4636 100%);color:#fdf6ec;border-radius:20px;padding:38px 38px 30px;margin-bottom:30px;box-shadow:0 18px 40px -18px rgba(21,20,15,.45)}
+  header.hero h1{margin:0 0 12px;font-size:30px;letter-spacing:-.02em;font-weight:800;font-family:'Inter','Noto Sans SC',sans-serif}
+  header.hero p{margin:4px 0;color:#e9dfd2;font-size:14px}
+  header.hero strong{color:#fff}
+  .hero-badges{margin-top:18px;display:flex;flex-wrap:wrap;gap:8px}
+  .badge{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 13px;font-size:12px;font-weight:600;border:1px solid transparent;background:rgba(255,255,255,.10);color:#f3ecdf;border-color:rgba(255,255,255,.16)}
+  .badge.blue,.badge.green,.badge.amber,.badge.red,.badge.violet,.badge.cyan{background:rgba(255,255,255,.12);color:#fdf6ec}
+  .kicker{display:block;font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:4px}
+  h2{font-size:20px;font-weight:700;margin:52px 0 6px;color:var(--ink);letter-spacing:-.01em;padding-bottom:12px;border-bottom:2px solid var(--line)}
+  h2 .ln{display:inline-block;margin-right:10px;font-size:11px;font-weight:800;letter-spacing:.16em;color:var(--accent);vertical-align:2px}
+  h2.a .ln{color:var(--cyan)}
+  h2.f .ln{color:var(--amber)}
+  h2.d .ln{color:var(--cyan)}
+  h2.w .ln{color:var(--green)}
+  h2.o .ln{color:var(--violet)}
+  h2.q .ln{color:var(--red)}
+  h3{font-size:16.5px;font-weight:700;margin:28px 0 10px;color:var(--ink)}
+  h4{font-size:14.5px;font-weight:700;margin:20px 0 8px;color:var(--ink)}
+  p{margin:8px 0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:24px 26px;margin:16px 0;box-shadow:0 1px 0 #f0ece5,0 8px 24px -20px rgba(21,20,15,.18)}
+  .card.blue{border-color:var(--cyan-line);background:linear-gradient(180deg,#fbfefe,#fff)}
+  .card.green{border-color:var(--green-line);background:linear-gradient(180deg,#fbfdfb,#fff)}
+  .card.amber{border-color:var(--amber-line);background:linear-gradient(180deg,#fdfbf4,#fff)}
+  .card.red{border-color:var(--red-line);background:linear-gradient(180deg,#fdf8f7,#fff)}
+  .card.violet{border-color:var(--violet-line);background:linear-gradient(180deg,#fcfafd,#fff)}
+  .card.cyan{border-color:var(--cyan-line);background:linear-gradient(180deg,#f8fcfc,#fff)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr}}
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:16px;background:#fff;margin:16px 0;box-shadow:0 1px 0 #f0ece5}
+  table{width:100%;border-collapse:collapse;font-size:13px;border-radius:16px;overflow:hidden}
+  th{background:#f4f1ec;color:var(--ink);text-align:left;font-weight:700;padding:11px 14px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);border-bottom:1px solid var(--line);white-space:nowrap;position:sticky;top:0}
+  td{padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  tbody tr:nth-child(even){background:#fbfaf7}
+  tbody tr:hover td{background:#f4f1ec}
+  .tag{display:inline-block;border-radius:999px;padding:1px 9px;font-size:11.5px;font-weight:700;white-space:nowrap;border:1px solid transparent}
+  .tag.green{background:var(--green-bg);color:var(--green);border-color:var(--green-line)}
+  .tag.blue{background:var(--cyan-bg);color:var(--cyan);border-color:var(--cyan-line)}
+  .tag.amber{background:var(--amber-bg);color:var(--amber);border-color:var(--amber-line)}
+  .tag.red{background:var(--red-bg);color:var(--red);border-color:var(--red-line)}
+  .tag.violet{background:var(--violet-bg);color:var(--violet);border-color:var(--violet-line)}
+  .tag.cyan{background:var(--cyan-bg);color:var(--cyan);border-color:var(--cyan-line)}
+  .tag.gray{background:#f2efe9;color:var(--ink2);border-color:var(--line)}
+  .mermaid{background:#fff;border:1px solid var(--line);border-radius:20px;padding:18px;margin:16px 0;overflow-x:auto;box-shadow:0 1px 0 #f0ece5;text-align:center}
+  .topo-wrap{overflow-x:auto;background:#fff;border:1px solid var(--line);border-radius:20px;padding:14px;margin:16px 0;box-shadow:0 1px 0 #f0ece5}
+  .topo-wrap .mermaid{border:none;box-shadow:none;margin:0;padding:8px}
+  .line-diags .mermaid{overflow-x:auto;text-align:center;max-width:320px;margin:12px auto}
+  .line-diags .mermaid svg{max-width:none !important;width:auto !important;height:auto}
+  .topo-wrap .mermaid svg{max-width:none !important;width:auto !important;height:auto}
+  .small{font-size:12.5px;color:var(--ink3)}
+  code, .mono{font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9em;background:#f4f1ec;border-radius:6px;padding:1px 6px;color:#2a2722}
+  pre{background:#201d18;color:#e9dfd2;border-radius:14px;padding:16px 18px;overflow-x:auto;font-size:13px;line-height:1.6}
+  pre code{background:none;color:inherit;padding:0}
+  .toc{column-count:2;column-gap:30px;font-size:14px}
+  .toc a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line);line-height:2.1}
+  .toc a:hover{color:var(--accent);border-bottom-color:var(--accent)}
+  @media(max-width:760px){.toc{column-count:1}}
+  ul{margin:8px 0 8px 1.2em;padding:0}
+  li{margin:4px 0}
+  .bar{height:9px;border-radius:6px;background:#efece4;overflow:hidden;min-width:90px;display:inline-block;vertical-align:middle}
+  .bar > i{display:block;height:100%;border-radius:6px}
+  .bar.g > i{background:var(--green)}
+  .bar.a > i{background:var(--amber)}
+  .bar.r > i{background:var(--red)}
+  .pct{font-weight:800;font-family:'JetBrains Mono',ui-monospace,monospace}
+  .pct.g{color:var(--green)}.pct.a{color:var(--amber)}.pct.r{color:var(--red)}
+  .legend{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+  footer{margin-top:60px;text-align:center;color:var(--ink3);font-size:12px;border-top:1px solid var(--line);padding-top:22px;line-height:1.9}
+  .done{color:var(--green);font-weight:700}
+  .todo{color:var(--amber);font-weight:700}
+  .snap{font-size:12px;color:var(--ink2);background:var(--accent-soft);border:1px solid var(--accent-line,var(--accent));border-radius:999px;padding:2px 10px;display:inline-block}
+  .conclusion-box{border-left:4px solid var(--green);background:var(--green-bg);padding:18px 22px;border-radius:14px;margin:18px 0}
+  .chart-chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink2)}
+  .g0{color:var(--ink2)}.g1{color:var(--cyan)}.g2{color:var(--violet)}.g3{color:var(--red)}.g4{color:var(--green)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <h1>v0.1 发布过程跟踪</h1>
+  <div style="margin:12px 0;padding:12px 14px;border:2px solid #b45309;border-radius:10px;background:#fffbeb;color:#78350f;font-size:14px;line-height:1.7">
+    <b>◆ 最新状态（2026-08-20 · 本仓 commit 067b848 · 测试服务器实况核对）——生产 No-Go 仍有效，但测试环境侧 R-01..R-05/R-08 已收敛。</b><br/>
+    已解决（测试环境）：R-01 基线冻结（pilot_v3@85eb85d → /opt/pilot_v3；旧系统 feat_v0.1@f3ed1f80 + e9505509/d7dcb649 → 121.43.58.1:3002）；R-02 api 28080 healthy、auth-url 200、业务库/seedrel 就绪、pgAPI 测试（pgapi-test/carh_test）已接通；R-03/D-09 V01 档审批角色已配（王杰/马弘毅，open_id 0 跨应用）；R-04 B2B_V01_ 自动确认小改已部署并推送 f3ed1f80；R-05 飞书白名单 4 URL + 网页授权通过、企微 official（agent 1000007）双签名就绪；<b>R-08 备库已搭建并 promote（b2b-replica:25433）、全项目已切备库（override f3592ea）、sync 已灌 5,214 条真实订单（cfdad13）、backfill dry-run 空跑确认无源数据（O-08 测试环境不适用）</b>；信息确认自动确认豁免已修复并推送（e9505509/d7dcb649，含事件特征兜底）。<br/>
+    部分进展：R-06 真实授权已通，完整下单闭环待约虹励（另：SO-20260820-0012 主管审批已修复信息确认误拦截）；D-08 多维表已录 9 客户/293 产品/10 订单，仓库清单与 users 表待补；R-09 PC 兜底全 200，正式回退口径待拍板。<br/>
+    未决（阻塞生产发布）：R-10 UAT 与 Go/No-Go 五张表；R-07 新窗口日期。<br/>
+    影子轨：代码侧已提交（D-008..D-013 · internal/shadow · shadowguard · 008 迁移 · docker-compose.shadow.yml · shadow-ingest/feed/audit · 写哨兵；D-012=新单实时增量、D-013=v0.1 桥接闭环+影子硬口径），本地全栈预演通过；HR1 真实 status 基线 + JSONL 形态适配完成、待业务签字；HR2 pgAPI 只读凭据未决；SH-10/11/12 待环境执行。
+  </div>
+
+  <p>目标：把「完成 v0.1（=<strong>2 次发布：R1 测试环境 → R2 生产环境</strong> · 销售助手虹励接入）所需的所有工作任务」放进一张可跟踪的图，并标注当前完成度（百分比），配以物料/证据/准备材料清单。</p>
+  <p>范围：v0.1 = <strong>http://127.0.0.1:8000 桥接下单 + 我的订单/状态回显</strong>（飞书审批流全程续跑 · 旧系统零回滚） · <strong>R1 测试环境</strong>：数据结构与数据和生产基本一致，仅对测试账号有感知；<strong>R2 生产环境</strong>：正式对所有线上用户有感知。依据：<strong>docs/发布计划v2/渐进式发布计划v2.html · 0.1版本周工作计划.html（D0–D3 · 门禁 G0–G4）· docs/10-v0.1-release-prep.html（现场行动手册 T1–T4）</strong></p>
+  <div class="hero-badges">
+    <span class="badge blue">应用开发 · b2b</span>
+    <span class="badge cyan">R1 测试环境 · 先发</span>
+    <span class="badge green">R2 生产环境 · 后发</span>
+    <span class="badge amber">旧系统 · 仅一处小改</span>
+    <span class="badge cyan">数据线 · T1/T2/T3</span>
+    <span class="badge green">企微线 · T4</span>
+    <span class="badge violet">主备库 · D系列</span>
+    <span class="badge red">发布执行 · R1测试 → R2生产 · G0–G4</span>
+  </div>
+</header>
+
+<div class="card amber">
+  <h3 style="margin-top:0">0 · 阅读说明（先看这一条）</h3>
+  <p>本页完成度是<strong>当前快照估算</strong>（截止 2026-08-20 11:00，本仓 067b848 + 测试服务器核对后），是跟踪基线，不是承诺工期。08-19 的现场 No-Go 结论在生产侧仍有效；本文档已把 08-20 已解决的测试环境侧事项逐项刷新。判定口径：<span class="done">绿 ✓</span> = 代码/证据已提交且可复核；<span class="todo">黄 ▽</span> = 方案已定/部分实现、待现场或联调落地；<span class="pct r">红</span> = 未开工。百分比为任务级估算，各条线的完成度汇总见表下注。<br>
+  <strong>三条铁律</strong>：① v0.1 旧系统零回滚、飞书审批流不停（所有同步与桥接只单向不回写）；② 数据不可丢失、无不能解决的死路；③ 任一 P0 不堵上，对应的刀不发——<strong>先 R1 测试环境发布、后 R2 生产环境发布</strong>，两次发布前都必须过对应门禁，NO-GO 就顺延、绝不压缩验证。</p>
+</div>
+
+<div class="card cyan" id="s0a">
+  <h3 style="margin-top:0">0.1 双环境发布模型：R1 测试环境 → R2 生产环境（先测试 后生产）</h3>
+  <p>v0.1 不是发一次，而是<strong>同一套设计与代码，按环境发两次</strong>。两次发布在<strong>设计、代码</strong>上共享同一基线与产物，不重复计工作量；<strong>配置</strong>与<strong>发布执行</strong>按环境各自独立，分别追踪进度。</p>
+  <table>
+    <tr><th style="width:170px">维度</th><th style="width:44%">R1 · 测试环境（先发）</th><th>R2 · 生产环境（后发）</th></tr>
+    <tr><td>定位</td><td>与生产数据结构和数据基本一致，仅对<strong>测试账号</strong>有感知</td><td>正式发布，<strong>所有线上用户</strong>有感知</td></tr>
+    <tr><td>设计 / 代码</td><td colspan="2" class="small">共享同一基线与镜像（线 A / D / W / O 主体工作只做一次），不分环境重复</td></tr>
+    <tr><td>配置</td><td>测试环境配置集：<code>B2B_PG_DSN(测试副本)</code>、测试回调/域名、测试账号白名单、测试企微应用</td><td>生产环境配置集：<code>B2B_PG_DSN(可写副本)</code>、生产回调/域名、全量用户可见、正式企微应用</td></tr>
+    <tr><td>发布执行</td><td>R1 发布日：测试配置冻结 → 部署 → 测试账号 smoke → 验收 → 证据归档</td><td>R2 发布日：生产配置冻结 → 发布物锁定 → 生产 smoke → 监控 → 证据归档</td></tr>
+    <tr><td>门禁</td><td>R1 不通过不进入 R2；R1 的测试环境发布结果作为 R2 的输入证据之一</td><td>G2 Go/No-Go 只对生产发布放行；R2 是唯一对全员的正式发布</td></tr>
+    <tr><td>当前完成度</td><td><span class="pct a">≈ 45%</span> <span class="bar a"><i style="width:45%"></i></span>（配置 60% · 发布执行 25%）</td><td><span class="pct r">≈ 5%</span> <span class="bar r"><i style="width:5%"></i></span>（配置 10% · 发布执行 0%）</td></tr>
+  </table>
+  <p class="small"><strong>进度口径</strong>：设计/代码类的完成度仍按线 A/D/W/O 统一追踪；只有<strong>配置类</strong>（A-02、O-03、T4.1/企微环境参数等）和<strong>发布类</strong>（E 线 R 系列、验收、证据）分 R1/R2 双份追踪。测试环境先发 = 用最接近生产的配置与数据先消解不确定性；生产环境后发 = 把 R1 已验证过的确定性动作原样再执行一次。</p>
+</div>
+
+<div class="card">
+  <h3 style="margin-top:0">目录</h3>
+  <div class="toc">
+    <a href="#s0">0 · 阅读说明与总览</a><br>
+    <a href="#s0a">0.1 · 双环境发布模型（R1测试 → R2生产）</a><br>
+    <a href="#s1">1 · 全任务拓扑大图（六线 × 全部任务 × 百分比）</a><br>
+    <a href="#s2">2 · 应用开发（b2b 新系统）· 线 A</a><br>
+    <a href="#s3">3 · 旧系统小改与配置 · 线 F</a><br>
+    <a href="#s4">4 · 数据线：调研/映射/主数据/同步 · 线 D</a><br>
+    <a href="#s5">5 · 企微线：配置/卡片/侧边栏/群 · 线 W</a><br>
+    <a href="#s6">6 · 主备库/可写副本/回填 · 线 O</a><br>
+    <a href="#s7">7 · 发布执行：R1测试先发 → R2生产后发 · 门禁 G0–G4 · 线 E</a><br>
+    <a href="#s8">8 · 物料 / 证据 / 准备材料清单（tabular）</a><br>
+    <a href="#s9">9 · 关键风险与下一步</a>
+  </div>
+</div>
+
+<!-- ============ 0 总览 ============ -->
+<h2 id="s0">0 · 总体完成度总览</h2>
+
+<div class="grid3">
+  <div class="card blue">
+    <h4 style="margin-top:0">已完成提交（绿 ✓）</h4>
+    <ul>
+      <li><code>internal/bridge</code> 桥接模块（OAuth + token 缓存 + 下单 + 幂等 <code>B2B_V01_</code> + Recorder）</li>
+      <li>桥接 API <code>/api/v1/bridge/{auth-url,callback,orders}</code> + PC 兜底 console UI + PG 台账回写</li>
+      <li><code>internal/orderdata → pgAPI</code> 只读（products/customers/purchase-contracts）</li>
+      <li><code>cmd/sync</code> HTTPFetcher（pgAPI 分页拉取）+ <code>SanitizeRow</code> 敏感剥离</li>
+      <li>企微销售助理 H5/PC 页面（<code>GET /assistant</code>）与 official JS-SDK/OAuth/template_card/<code>SendGroupCard</code> 代码已提交（真实验收待现场）</li>
+    </ul>
+  </div>
+  <div class="card amber">
+    <h4 style="margin-top:0">方案已定 · 待落地（黄 ▽）</h4>
+    <ul>
+      <li>字段映射业务签字 / 仓库清单与 users 表 / 企微生产租户配置填值</li>
+      <li>同步 Job 真实源接线（file/http 已闭环，bitable/通讯录待 T1 调研）</li>
+    </ul>
+  </div>
+  <div class="card red">
+    <h4 style="margin-top:0">未开工（红）</h4>
+    <ul>
+      <li>虹励真实下单闭环（R-06）、企微现场 V-A..V-F 剩余项、UAT 签字、Go/No-Go</li>
+      <li>发布日 R 系列（smoke / 监控 / 证据归档 / G4 复盘）</li>
+      <li>回滚演练、pgAPI 真实只读契约（HR2）、回填 dry-run、影子环境 SH-10/11</li>
+    </ul>
+  </div>
+</div>
+
+<div class="card">
+  <h3>六条线完成度（百分比汇总 · 线 E 分 R1/R2）</h3>
+  <table>
+    <tr><th style="width:230px">工作线</th><th style="width:120px">完成度</th><th style="width:150px">进度条</th><th>一句话现状</th></tr>
+    <tr><td><span class="tag blue">A · 应用开发（b2b）</span></td><td><span class="pct a">≈ 85%</span></td><td><span class="bar a"><i style="width:85%"></i></span></td><td>桥接/API/PC/企微页面已部署测试环境并 200；剩 pgAPI 真实契约复核、配置/镜像/发布物锁定</td></tr>
+    <tr><td><span class="tag amber">F · 旧系统小改+配置</span></td><td><span class="pct a">≈ 85%</span></td><td><span class="bar a"><i style="width:85%"></i></span></td><td>唯一小改（f3ed1f80）+ V01 档已部署测试环境；真实 B2B_V01_ 下单闭环随 R-06</td></tr>
+    <tr><td><span class="tag cyan">D · 数据线（T1/T2/T3）</span></td><td><span class="pct a">≈ 40%</span></td><td><span class="bar a"><i style="width:40%"></i></span></td><td>真实 status 基线（f3ed1f80）+ 9 客户/100+ 产品/9 订单已录；同步 file/http+interval 已闭环；业务签字与真实源接线待落地</td></tr>
+    <tr><td><span class="tag green">W · 企微线（T4）</span></td><td><span class="pct a">≈ 65%</span></td><td><span class="bar a"><i style="width:65%"></i></span></td><td>备案域名就绪；企微 official 已启用、网关三入口全 200、PC 兜底可用；V-A..V-F 现场验收与正式回退口径待办</td></tr>
+    <tr><td><span class="tag violet">O · 主备库/可写副本/回填</span></td><td><span class="pct red">≈ 15%</span></td><td><span class="bar r"><i style="width:15%"></i></span></td><td>主备/提升方案已定（D-007 P3）；现场盘点、备库搭建、promote、回填 dry-run 未落地</td></tr>
+    <tr><td><span class="tag red">E · 发布执行（R1测试→R2生产门禁）</span></td><td><span class="pct red">≈ 18%</span></td><td><span class="bar r"><i style="width:18%"></i></span></td><td>R1 测试环境 ≈45%、R2 生产环境 ≈5%；测试环境 api/企微/旧系统已就位；R-06 虹励闭环、R1 验收、runbook、UAT、Go/No-Go 待做</td></tr>
+  </table>
+  <p class="small">注：百分比为任务加权估算，随本跟踪文档迭代更新。08-20 快照：测试环境侧的代码/配置主体已就位（R-01..R-05 关闭），剩余大头是<strong>R-06 虹励真实下单闭环、R-10 UAT/Go-No-Go</strong>（R-08 测试环境已收敛）与影子轨 HR1/HR2 外部输入。生产 08-21 原窗口仍按 No-Go 纪律处理，新窗口待 R-07 裁决。</p>
+</div>
+
+<div class="card blue">
+  <h3 style="margin-top:0">0.1 发布目标与成功标准（S1–S6 · R1 先行验证 → R2 最终验收）</h3>
+  <p class="small">S1–S6 是 v0.1 的共同成功标准；<strong>R1 测试环境</strong>先在测试账号上逐条跑通并留证，<strong>R2 生产环境</strong>对所有线上用户正式验收同一组标准。任何一条在 R1 不满足，不得进入 R2。</p>
+  <table>
+    <tr><th style="width:60px">#</th><th>可验证的成功标准</th><th style="width:240px">证据形式</th></tr>
+    <tr><td><code>S1</code></td><td>虹励在 v0.1 完成 OAuth 授权并成功下单，订单进入旧飞书审批流（飞书中心出现待办）</td><td>桥接联调记录：授权→下单→flow_id/instance_id 回写</td></tr>
+    <tr><td><code>S2</code></td><td>「我的订单」列表显示状态/当前节点，详情跳旧系统 <code>/flows/:flow_id</code></td><td>自建单列表截图 + 详情跳转记录</td></tr>
+    <tr><td><code>S3</code></td><td>系统运行在<strong>可写副本</strong>（由备库提升）上，与主库/飞书抽样一致；桥接只写旧系统、只回写 v0.1 PG</td><td>promote 记录 + row count 校验</td></tr>
+    <tr><td><code>S4</code></td><td>原飞书生产流程全程可用，旧系统零回滚、审批链无感续跑</td><td>飞书待办截图 + 旧系统零改动清单</td></tr>
+    <tr><td><code>S5</code></td><td>任何故障 30 分钟内可回退（关桥接开关即停 v0.1 下单）</td><td>回退演练记录（08-20）</td></tr>
+    <tr><td><code>S6</code></td><td>发布后 24h 无 P0/P1 缺陷，问题有 owner 与处置</td><td>监控截图 + 问题清单</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <h3 style="margin-top:0">0.1 · 任务速览 Mindmap（六线 + 完成度，供快速定位）</h3>
+  <div class="mermaid">
+mindmap
+  root((v0.1 发布<br/>R1测试→R2生产<br/>目标 08-21))
+    A 应用开发 b2b
+      销售助手下单桥接 ~ 100%
+      下单页与订单状态回显 ~ 100%
+      商务可见8784单真实合同 ~ 85%
+      真实订单JSON可解析 ~ 70%
+      发布物可上线锁定 ~ 30%
+    F 旧系统小改与配置
+      v0.1订单自动过信息确认 ~ 100%
+      虹励可下单且推给真实审批人 ~ 85%
+      旧系统零回归且待办可达 ~ 30%
+    D 数据线 T1 T2 T3
+      飞书数据可映射入新库 ~ 70%
+      新库有真实客户产品人员 ~ 60%
+      飞书新单周期流入新库可见 ~ 35%
+    W 企微线 T4
+      企微应用与可信域名就绪 ~ 90%
+      企微入口可查单点卡收单 ~ 75%
+    O 主备库 D系列
+      主备拓扑与连接口径定稿 ~ 15到20%
+      可写副本就绪且含全量数据 ~ 100%
+      切换不打断原飞书流程 ~ 5%
+    E 发布执行 双环境门禁 G0到G4
+      测试环境发布且测试账号走通 ~ 45%
+      生产环境发布且全量用户走通 ~ 5%
+  </div>
+  <p class="small"><strong>读法</strong>：每个叶子节点 = 一个业务任务（短句为<strong>业务成果</strong>）；末尾 <strong>~ XX%</strong> 即该业务成果当前完成度——距离「可上线、可被虹励/商务直接使用」还差多少（<span class="pct g">≥95% 绿=已提交可复核</span> · <span class="pct a">30–94% 黄=主体能力已具备、待联调/冻结</span> · <span class="pct r">&lt;30% 红=未开工/未达业务可用</span>）。本 Mindmap 与下方 §1 大拓扑图一一对应。</p>
+</div>
+
+<!-- ============ 1 大拓扑图 ============ -->
+<h2 id="s1">1 · 全任务拓扑大图（六线 × 全部任务 × 百分比）</h2>
+
+<div class="card">
+  <p>这是本页的总纲。六个 subgraph 对应六条工作线；每个任务节点标注 <code>ID · 占比%</code>，颜色按完成度（<span class="tag green">绿≈已提交</span> <span class="tag amber">黄≈待落地</span> <span class="tag red">红≈未开工</span>）。箭头为依赖顺序，绿边 = 强依赖、灰边 = 并行可先行。</p>
+  <div class="card">
+  <p>总纲已按每条工作线拆成<strong>纵向小图</strong>：每条线从顶到底竖排全部任务，每个节点标注 <code>ID · 完成度%</code>，颜色按完成度（<span class="tag green">绿≈已提交</span> <span class="tag amber">黄≈待落地</span> <span class="tag red">红≈未开工</span>）。六条线完成后汇聚到线 E：<strong>R1 测试环境先发 → R2 生产环境后发</strong>，过门禁 G1–G4 → GO。箭头 = 依赖顺序。</p>
+<div class="topo-wrap"><p class="small" style="margin:2px 2px 6px">总纲：<strong>一张纵向拓扑大图</strong>，六条工作线各一列竖排全部任务，节点两行=短任务名+完成度%，颜色<span class="tag green">绿=已提交</span> <span class="tag amber">黄=待落地</span> <span class="tag red">红=未开工</span>；箭头=依赖、虚线=阶段推进；完整任务描述见 §2–§7。</p>
+  <div class="mermaid topo">
+flowchart TB
+    direction TB
+
+    subgraph LINEA[线 A · 应用开发 b2b · ≈85%]
+      direction TB
+      A00[契约审计<br/>100%]:::done
+      A01[基线锁定<br/>100%]:::done
+      A03[桥接实现<br/>95%]:::done
+      A06C[桥接API<br/>95%]:::done
+      A06AB[合同只读<br/>85%]:::wip
+      A03B[契约复核<br/>30%]:::todo
+      A02[配置冻结<br/>35%]:::todo
+      A04[冻结rc1<br/>30%]:::todo
+      A05[联调部署<br/>75%]:::wip
+      A07[P0修复<br/>10%]:::todo
+      A08[发布物<br/>5%]:::todo
+    end
+
+    subgraph LINEF[线 F · 旧系统小改+配置 · ≈85%]
+      direction TB
+      T01[旧系统小改<br/>100%]:::done
+      T02[白名单<br/>90%]:::wip
+      T03[配审人<br/>100%]:::done
+      T04[测试核对<br/>30%]:::todo
+    end
+
+    subgraph LINED[线 D · 数据线 T1/T2/T3 · ≈40%]
+      direction TB
+      T11[现状调研<br/>70%]:::wip
+      T12[字段映射<br/>70%]:::wip
+      T13[状态映射<br/>65%]:::wip
+      T14[敏感复核<br/>15%]:::todo
+      T21[29表来源<br/>25%]:::wip
+      T22[主数据<br/>60%]:::wip
+      T23[审批人<br/>80%]:::wip
+      T24[凭证存储<br/>5%]:::todo
+      T31[飞书应用<br/>60%]:::wip
+      T32[同步接线<br/>70%]:::wip
+      T33[同步部署<br/>40%]:::wip
+      T34[通讯录<br/>5%]:::todo
+      T35[对账V1-6<br/>5%]:::todo
+    end
+
+    subgraph LINEW[线 W · 企微线 T4 · ≈65%]
+      direction TB
+      W31[前置申请<br/>80%]:::wip
+      W32[卡片回调<br/>75%]:::wip
+      W33[H5工作台<br/>85%]:::wip
+      W34[群绑定<br/>70%]:::wip
+      W35[总检V-AF<br/>20%]:::todo
+    end
+
+    subgraph LINEO[线 O · 主备库/副本/回填 · ≈15%]
+      direction TB
+      O01[PG盘点<br/>20%]:::wip
+      O01A[字段实测<br/>10%]:::todo
+      O02[主备方案<br/>20%]:::wip
+      O03[连接口径<br/>15%]:::wip
+      O05[全量校验<br/>10%]:::todo
+      O06[备库提升<br/>100%]:::done
+      O07[副本迁移<br/>10%]:::todo
+      O08[回填dryrun<br/>100%]:::done
+      O09[切换预演<br/>5%]:::todo
+      O10[数据对账<br/>5%]:::todo
+    end
+
+    subgraph LINEE[线 E · 发布执行 · R1测试→R2生产 · ≈18%]
+      direction TB
+      E01[环境盘点<br/>40%]:::wip
+      E02[Runbook双环境<br/>10%]:::todo
+      E03[监控日志<br/>10%]:::todo
+      E04[回退演练<br/>5%]:::todo
+      R1CFG[R1测试配置冻结<br/>40%]:::wip
+      R1GO[R1测试发布<br/>20%]:::todo
+      R1ACC[R1测试验收<br/>15%]:::todo
+      R2CFG[R2生产配置冻结<br/>10%]:::todo
+      BUAT[虹励UAT<br/>5%]:::todo
+      GNO[Go/No-Go生产<br/>5%]:::todo
+      GATE[门禁G1-G4]:::gate
+      R01[R2生产发布日<br/>0%]:::todo
+      GO[全量用户走通<br/>0%]:::wicked
+    end
+
+    LINEA -.->|阶段| LINEF -.-> LINED -.-> LINEW -.-> LINEO -.-> LINEE
+
+    A00-->A03
+    A03-->A06C
+    A03-->A06AB
+    A06AB-->A03B
+    A01-->A04
+    T01-->T04
+    T02-->T03
+    T11-->T12
+    T12-->T13
+    T12-->T14
+    T12-->T21
+    T12-->T32
+    T12-->T22
+    T22-->T23
+    T31-->T32
+    T32-->T33
+    T33-->T35
+    T34-->T35
+    W31-->W32
+    W31-->W33
+    W31-->W34
+    W32-->W35
+    W33-->W35
+    W34-->W35
+    O02-->O06
+    O06-->O09
+    O08-->O10
+    E01-->E02
+    E02-->R1CFG
+    R1CFG-->R1GO
+    R1GO-->R1ACC
+    R1ACC-->E04
+    E04-->R2CFG
+    R2CFG-->BUAT
+    BUAT-->GNO
+    GNO-->GATE
+    GATE-->R01
+    R01-->GO
+
+    classDef done fill:#ecfdf5,stroke:#059669,color:#065f46
+    classDef wip fill:#fffbeb,stroke:#b45309,color:#92400e
+    classDef todo fill:#fef2f2,stroke:#dc2626,color:#991b1b
+    classDef gate fill:#f1f5f9,stroke:#334155,color:#0f172a
+    classDef wicked fill:#fdf4ff,stroke:#a21caf,color:#86198f
+  </div></div>
+</div><!-- /topo-wrap -->
+  <p class="small">读法：每个节点 = 一个工作任务。上游绿节点（A 线桥接主体）多数已提交；线 E 自 <strong>R1CFG（测试配置冻结）</strong>起拆为「先测试、后生产」两个阶段。真正决定 08-21 生产发布的，是 F/T-01 旧系统小改 + D 线同步接线 + W 线企微 + O 线主备提升 + R1→R2 双环境门禁这些「黄/红」密集区。</p>
+</div>
+
+<div class="card">
+  <h3>按依赖排序的任务速览表（含百分比）</h3>
+  <table>
+    <tr><th style="width:180px">工作线</th><th style="width:170px">前序（本线内）</th><th style="width:90px">当前完成度</th><th style="width:150px">故障后 30min 回退依据</th></tr>
+    <tr><td><span class="tag blue">A · 应用开发</span></td><td>审计→bridge→桥接 API→合同只读→契约复核→冻结→镜像→发布物</td><td><span class="pct a">≈ 85%</span></td><td>关桥接开关即停 v0.1 下单</td></tr>
+    <tr><td><span class="tag amber">F · 旧系统小改</span></td><td>小改→独立测试→生产核对</td><td><span class="pct a">≈ 85%</span></td><td>V01 profile 前缀订单剥离即可隔离</td></tr>
+    <tr><td><span class="tag cyan">D · 数据线</span></td><td>调研→映射→来源→主数据→同步接线→部署→对账</td><td><span class="pct a">≈ 40%</span></td><td>同步只读，停 Job 不回写飞书</td></tr>
+    <tr><td><span class="tag green">W · 企微线</span></td><td>申请→卡片→H5→群→总检</td><td><span class="pct a">≈ 65%</span></td><td>回 PC 兜底 / 回原飞书流程</td></tr>
+    <tr><td><span class="tag violet">O · 主备库</span></td><td>盘点→方案→备库→promote→回填→预演</td><td><span class="pct red">≈ 15%</span></td><td>副本重建为备库 / 回切主库</td></tr>
+    <tr><td><span class="tag red">E · 发布执行</span></td><td>盘点→runbook→R1测试配置冻结→R1测试发布/验收→回退演练→R2生产配置冻结→UAT→Go/No-Go→R2生产发布→复盘</td><td><span class="pct red">≈ 18%</span></td><td>R1/R2 同一回退手册「停 b2b、商务回飞书」</td></tr>
+  </table>
+</div>
+
+<!-- ============ 2 线A ============ -->
+<h2 id="s2" class="a">2 · 应用开发（b2b 新系统）· 线 A</h2>
+
+<div class="card green">
+  <h3 style="margin-top:0">2.1 已完成并提交（代码证据）</h3>
+  <table>
+    <tr><th style="width:50px">#</th><th style="width:220px">任务</th><th>状态 / 证据</th><th style="width:90px">完成度</th></tr>
+    <tr><td><code>A-00</code></td><td>下单桥接缺口审计 / 契约表</td><td>核验旧系统 <code>/api/approval/feishu-user-by-code</code> 与 <code>POST /external-orders/create</code> 契约、multipart 字段、幂等键 <code>B2B_V01_</code>（8–200 字符）</td><td><span class="pct g">100%</span></td></tr>
+    <tr><td><code>A-01</code></td><td>代码基线锁定 rc0</td><td>测试服务器已冻结 pilot_v3@85eb85d → /opt/pilot_v3；本仓影子实现 commit 4e53763</td><td><span class="pct g">100%</span></td></tr>
+    <tr><td><code>A-03B</code></td><td><code>internal/bridge</code> 实现</td><td>OAuth 代理 + token 缓存(2h/提前15min 重授权) + multipart 下单调用器 + 幂等键映射 + 错误分类 + Recorder 回写；测试服务器 auth-url 实测 200</td><td><span class="pct g">95%</span></td></tr>
+    <tr><td><code>A-06C</code></td><td>桥接 API + PC 兜底 console</td><td><code>/api/v1/bridge/{auth-url,callback,orders}</code> + <code>/bridge</code> 静态下单/我的订单页 + PG 台账回写；测试环境 auth-url/assistant/bridge 全 200</td><td><span class="pct g">95%</span></td></tr>
+    <tr><td><code>A-06A/B</code></td><td>合同表只读可见（M-05）</td><td><code>internal/orderdata</code>：products/customers/purchase-contracts 经 pgAPI 只读；多维表已录 9 客户/100+ 产品；真实 pgAPI 契约仍待 HR2</td><td><span class="pct a">85%</span></td></tr>
+  </table>
+</div>
+
+<div class="card amber">
+  <h3 style="margin-top:0">2.2 待落地（方案已定 / 部分实现）</h3>
+  <table>
+    <tr><th style="width:50px">#</th><th style="width:220px">任务</th><th>待办要点</th><th style="width:90px">完成度</th></tr>
+    <tr><td><code>A-03/A-06</code></td><td>pgAPI 真实数据契约复核</td><td>旧系统代码库 f3ed1f80 已只读核对真实 status/JSONL 形态；pgAPI 真实响应形状（HR2）与字段级契约复核未做</td><td><span class="pct a">30%</span></td></tr>
+    <tr><td><code>A-02</code></td><td>发布配置矩阵冻结</td><td>测试环境桥接/企微/审批配置已落地；生产配置集与可写副本连接口径待 R2CFG</td><td><span class="pct a">35%</span></td></tr>
+    <tr><td><code>A-04</code></td><td>代码冻结 rc1 + 镜像</td><td>Dockerfile 已有 api/worker/wecom/sync/shadow-* 全部 target；镜像构建与 rc1 冻结未做</td><td><span class="pct a">30%</span></td></tr>
+    <tr><td><code>A-05</code></td><td>联调环境部署 + tests</td><td>测试服务器 api/企微网关/旧系统已部署并联通；compose 全栈（含影子栈）本地校验通过，R1 目标环境部署待执行</td><td><span class="pct a">75%</span></td></tr>
+    <tr><td><code>A-07</code></td><td>P0 修复 rc2 + 回归</td><td>rc2 全量回归（L0/L1/L2/tests 全层 + cover 门禁）</td><td><span class="pct a">10%</span></td></tr>
+    <tr><td><code>A-08</code></td><td>发布物锁定</td><td>最终 tag / 镜像 digest / 配置 digest / migrations 版本写入《0.1 发布物清单》</td><td><span class="pct r">5%</span></td></tr>
+  </table>
+  <p class="small"><strong>本线下一刀</strong>：A-03/A-06 真实契约复核（G1 门禁）→ A-02 配置冻结 → A-04 rc1 镜像 → A-05 联调。桥接主体已就位，剩余多为联调与冻结动作。</p>
+</div>
+
+<!-- ============ 3 线F ============ -->
+<h2 id="s3" class="f">3 · 旧系统小改与配置（tripartite-approval）· 线 F</h2>
+
+<div class="card amber">
+  <h3 style="margin-top:0">3.1 这是 v0.1「唯一允许」的旧系统代码改动</h3>
+  <p>按发布计划 v2「明确不做」：旧系统<strong>只动一处</strong>（第 1 次的幂等键前缀自动确认 + V01 profile 注入），其余（bug / 深链 / auto_approve / 回款 / exift 升级链）一律不触碰。</p>
+  <table>
+    <tr><th style="width:60px">#</th><th style="width:230px">任务</th><th>待办要点</th><th style="width:90px">完成度</th></tr>
+    <tr><td><code>T-01</code></td><td>旧系统唯一小改</td><td>已完成并部署测试环境：externalOrders.ts + submitExternalOrder.ts 前缀判定/自动确认/V01 profile 注入；tsc 0 错误；已推送 feat_v0.1 @ f3ed1f80；真实下单闭环随 R-06</td><td><span class="pct g">100%</span></td></tr>
+    <tr><td><code>T-02</code></td><td>旧系统配置（非代码）</td><td>飞书白名单 3 URL 已配、网页授权实测通过；白名单已含俞家俊/王杰/陈虹励；企微后台回调 URL 人工切换与可信 IP 核对待办</td><td><span class="pct a">90%</span></td></tr>
+    <tr><td><code>T-03</code></td><td>approval_profiles 配置</td><td>V01 档已建：TEST_SUPERVISOR/TEST_CHAIRMAN/MANAGER=王杰、业务角色=马弘毅；审批定义重建 9ADFD966、回调/challenge 全通；真实人选待业务方替换</td><td><span class="pct g">100%</span></td></tr>
+    <tr><td><code>T-04</code></td><td>小改独立测试 + 生产核对</td><td>tsc 0 错误 + 测试环境已部署；普通订单零影响与真实主管/董事长待办仍需 B2B_V01_ 真实下单（R-06）+ 生产核对</td><td><span class="pct a">30%</span></td></tr>
+  </table>
+  <p class="small"><strong>红线</strong>：T-03 的 <code>TEST_SUPERVISOR</code> 不漏配（P0-1）；T-01 是 G1 门禁项，必须先于发布。旧系统为独立仓库（tripartite-approval），改动在那边收口并经独立测试。</p>
+</div>
+
+<!-- ============ 4 线D ============ -->
+<h2 id="s4" class="d">4 · 数据线：调研/映射/主数据/同步（现场）· 线 D</h2>
+
+<div class="card cyan">
+  <h3 style="margin-top:0">4.1 T1 系列：飞书侧调研与字段映射（P0 前置）</h3>
+  <table>
+    <tr><th style="width:60px">#</th><th style="width:220px">任务</th><th>待办要点</th><th style="width:90px">完成度</th></tr>
+    <tr><td><code>T1.1</code></td><td>飞书数据现状调研</td><td>旧系统代码库 f3ed1f80 只读核对完成（真实 status/JSONL 形态）；16 表行数/增长速率的现场清单待补</td><td><span class="pct a">70%</span></td></tr>
+    <tr><td><code>T1.2</code></td><td>字段映射核对表冻结</td><td>ingest/feed 配置已按真实 5 源 + 35 条 status 规则生成（4e53763）；业务逐字段签字与权威源裁决待办</td><td><span class="pct a">70%</span></td></tr>
+    <tr><td><code>T1.3</code></td><td>状态/枚举语义映射</td><td>真实 status ↔ Signal 对照表已按 f3ed1f80 生成；异常/驳回/退回归并规则与 detail 字段名待业务签字冻结</td><td><span class="pct a">65%</span></td></tr>
+    <tr><td><code>T1.4</code></td><td>敏感字段处置复核</td><td>open_id→内部 user_id、view_token 丢弃、文件迁移、归档加密；脱敏演练 + dump 正则零命中 + 复核单</td><td><span class="pct r">15%</span></td></tr>
+  </table>
+</div>
+
+<div class="card cyan">
+  <h3 style="margin-top:0">4.2 T2 系列：29 表来源与真实主数据</h3>
+  <table>
+    <tr><th style="width:60px">#</th><th style="width:220px">任务</th><th>待办要点</th><th style="width:90px">完成度</th></tr>
+    <tr><td><code>T2.1</code></td><td>29 表来源确认单</td><td>29 张表逐表确认需要/暂缓/归档 + 来源（迁移/运行时/回调/手工/seed）；汇总《来源缺口表》</td><td><span class="pct a">25%</span></td></tr>
+    <tr><td><code>T2.2</code></td><td>真实主数据录入</td><td>多维表已录 9 真实客户/100+ 产品/9 真实订单；两个外租仓清单、users 表 wecom_user_id、pgAPI record_id 回填待办</td><td><span class="pct a">60%</span></td></tr>
+    <tr><td><code>T2.3</code></td><td>审批人分配映射</td><td>V01 审批档已配（王杰/马弘毅），open_id 对齐当前飞书应用；新系统 B2B_ASSIGNEE_* 与真实人选替换待收口</td><td><span class="pct a">80%</span></td></tr>
+    <tr><td><code>T2.4</code></td><td>凭证文件存储就绪</td><td>evidence/ 目录（租户隔离+静态加密）+ 路径解析/存在性校验脚本；从飞书只读拷贝历史回单/发票（可后置，先手动上传备选）</td><td><span class="pct r">5%</span></td></tr>
+  </table>
+</div>
+
+<div class="card cyan">
+  <h3 style="margin-top:0">4.3 T3 系列：数据同步任务（cmd/sync）</h3>
+  <table>
+    <tr><th style="width:60px">#</th><th style="width:220px">任务</th><th>待办要点</th><th style="width:90px">完成度</th></tr>
+    <tr><td><code>T3.1</code></td><td>飞书开放平台应用与权限</td><td>旧系统侧飞书应用 cli_aad5dd8a70f8dcc5 已用；pgAPI/bitable/通讯录只读应用与权限申请仍待 T1</td><td><span class="pct a">60%</span></td></tr>
+    <tr><td><code>T3.2</code></td><td>同步 Job 开发/接线</td><td><code>cmd/sync</code> file/http 双源 + interval 循环 + state-file 探针已闭环；bitable/evidence/contact 真实源待 T1 调研接线</td><td><span class="pct a">70%</span></td></tr>
+    <tr><td><code>T3.3</code></td><td>同步 Job 部署（compose sync）</td><td>Dockerfile sync target 与 compose sync（interval 5m + healthcheck 15min 探针）已提交；目标环境部署与真实源配置待做</td><td><span class="pct a">40%</span></td></tr>
+    <tr><td><code>T3.4</code></td><td>企微通讯录同步（users 真实化）</td><td>userlist API → users（姓名/wecom_user_id/角色标注）；角色映射规则与业务确认；upsert 幂等</td><td><span class="pct r">5%</span></td></tr>
+    <tr><td><code>T3.5</code></td><td>对账与一致性（V1-V6）</td><td>同批次幂等 / 抽样逐字段核对 / 事件可追溯 / 敏感零残留 / 同步期间飞书零写入 / 商务可操作</td><td><span class="pct r">5%</span></td></tr>
+  </table>
+  <p class="small"><strong>本线现状</strong>：代码侧 HTTPFetcher 已就位（syn/example.json 已含 file+http 双源模板），但真实源接线、同步部署、主数据、对账全部待现场落地——是发布周 D1/D2 的工作主体。</p>
+</div>
+
+<!-- ============ 5 线W ============ -->
+<h2 id="s5" class="w">5 · 企微线（现场）· 线 W</h2>
+
+<div class="card green">
+  <h3 style="margin-top:0">5.1 0.1 企微范围（冻结）</h3>
+  <table>
+    <tr><th style="width:120px">能力</th><th style="width:170px">必需</th><th>说明</th></tr>
+    <tr><td>S1 · 侧边栏 H5</td><td><span class="tag red">必需</span></td><td>双票据签名 + 静默授权 + 上下文注入（X-WeCom-Context）；备案域名就绪</td></tr>
+    <tr><td>S3 · 应用消息卡片</td><td><span class="tag red">必需</span></td><td>审批/催办/状态卡 template_card → 回调 → HTTP 信号</td></tr>
+    <tr><td>S4 · 工作台</td><td><span class="tag red">必需</span></td><td>工作台入口可用</td></tr>
+    <tr><td>S2 · 预订单人工确认</td><td><span class="tag amber">可选</span></td><td>需确认卡流程；<code>P1</code> 可后置</td></tr>
+    <tr><td>会话存档 / 意图自动建单</td><td><span class="tag gray">不做</span></td><td>v0.2 起（用户 08-18 裁决）</td></tr>
+  </table>
+</div>
+
+<div class="card green">
+  <h3 style="margin-top:0">5.2 T4 现场任务</h3>
+  <table>
+    <tr><th style="width:60px">#</th><th style="width:230px">任务</th><th>待办要点</th><th style="width:90px">完成度</th></tr>
+    <tr><td><code>T4.1</code></td><td>企微前置申请与配置</td><td>备案域名就绪；测试环境 official（agent 1000007）已启用、jsapi 双签名就绪；生产租户配置与可信 IP 核对待填</td><td><span class="pct a">80%</span></td></tr>
+    <tr><td><code>T4.2</code></td><td>出站卡片与审批回调验证（S3）</td><td>template_card/双按钮回调已实现；企微网关三入口全 200；审价卡→通过→状态卡真实链路（V-C）待现场</td><td><span class="pct a">75%</span></td></tr>
+    <tr><td><code>T4.3</code></td><td>侧边栏 H5 与工作台验证（S1/S4）</td><td>/assistant 已部署 200；official 双签名 + OAuth exchange 代码就绪；三入口分流与真实群上下文（V-D）待现场</td><td><span class="pct a">85%</span></td></tr>
+    <tr><td><code>T4.4</code></td><td>客户群/仓库群绑定与守门员</td><td>群绑定 SQL/SendGroupCard/回单机器人代码已实现；真实绑定清单与 V-E/V-F 待现场</td><td><span class="pct a">70%</span></td></tr>
+    <tr><td><code>T4.5</code></td><td>企微 API 总检</td><td>V-A/B 级配置项多数已实测；V-C..V-F 现场验收与《企微对接验收单》未执行</td><td><span class="pct a">20%</span></td></tr>
+  </table>
+  <p class="small"><strong>红线</strong>：备案域名已就绪，但测试/生产 <code>domain</code> 不一致时仍按环境分别注入；若官方群发不可达，回退 PC 兜底（<code>bridge_ui.html</code>）或销售人工转发并记录裁决（staff_scene_v0.1 §6）。</p>
+</div>
+
+<!-- ============ 6 线O ============ -->
+<h2 id="s6" class="o">6 · 主备库 / 可写副本 / 回填 · 线 O</h2>
+
+<div class="card violet">
+  <h3 style="margin-top:0">6.1 核心策略（D-007 Q3=P3）</h3>
+  <p><strong>先建主库、再做备库、发布前把备库提升为可写副本</strong>，0.1 在副本上运行；主库只做同步与准备。这是一次不打扰旧环境的生产级预演——副本异常，旧飞书流程照常，商务无损。</p>
+  <table>
+    <tr><th style="width:60px">#</th><th style="width:230px">任务</th><th>待办要点</th><th style="width:90px">完成度</th></tr>
+    <tr><td><code>O-01</code></td><td>现场 PG 现状盘点</td><td>主库地址/同步任务状态/6 张 rhcrm 表数据量/最新时间/pgAPI 指向；基准：客户 3,217 / 产品 306 / 购销合同 8,784（存量 7,485 + 三方 1,299）</td><td><span class="pct a">20%</span></td></tr>
+    <tr><td><code>O-01A</code></td><td>真实字段形状实测（M-01）</td><td>合同 spec / quantity_kg / ship_status 与客户 sales_users 抽真实记录看 JSON 形状；异常即归一化或兜底（G0 门禁）</td><td><span class="pct r">10%</span></td></tr>
+    <tr><td><code>O-02</code></td><td>主库→可写副本方案定稿</td><td>流复制优先；promote 步骤；切换/回切 runbook v1</td><td><span class="pct a">20%</span></td></tr>
+    <tr><td><code>O-03</code></td><td>pgAPI 连接口径冻结</td><td>发布时 pgAPI 指向可写副本；CARH_DB_* / PGAPI_API_KEY / trace 函数存在性</td><td><span class="pct a">15%</span></td></tr>
+    <tr><td><code>O-05</code></td><td>主库全量校验</td><td>release-prep T1/T2 映射核对 + 行数/关键字段抽样比对（orders/stock/shipment/invoice + 事件表），差异清零或裁决（G1）</td><td><span class="pct r">10%</span></td></tr>
+    <tr><td><code>O-06</code></td><td>备库搭建 + 提升可写副本</td><td>副本追平主库后按 runbook promote；验证可读可写；保留主库继续同步（G1）</td><td><span class="pct r">10%</span></td></tr>
+    <tr><td><code>O-07</code></td><td>副本应用 migrations 001-007</td><td>31 表、FK=0、pgapi_entity_mappings 检查</td><td><span class="pct r">10%</span></td></tr>
+    <tr><td><code>O-08</code></td><td>回填 dry-run</td><td>用真实 pgAPI 数据跑 pgapi_backfill dry-run 记录 MATCH/FAIL；任何 FAIL 上报 owner，绝<code>-apply</code>（G1）</td><td><span class="pct r">10%</span></td></tr>
+    <tr><td><code>O-09</code></td><td>切换预演</td><td>按 runbook 做真实切换（b2b+pgAPI 指向副本），记录耗时与异常（G2）</td><td><span class="pct r">5%</span></td></tr>
+    <tr><td><code>O-10</code></td><td>数据对账</td><td>副本关键表与主库/飞书抽样一致；记录分叉点（G2）</td><td><span class="pct r">5%</span></td></tr>
+  </table>
+  <p class="small"><strong>本线是发布成败的数据底座</strong>：O-06/O-07/O-08 在 D1 完成，O-09/O-10 在 D2 完成；任何一环不满足即 NO-GO。</p>
+</div>
+
+<!-- ============ 7 线E ============ -->
+<h2 id="s7" class="q">7 · 发布执行：R1 测试环境 → R2 生产环境 · 门禁 G0–G4 · 线 E</h2>
+
+<div class="card cyan">
+  <h3 style="margin-top:0">7.0 双环境发布总览（同一设计/代码，两次配置与发布）</h3>
+  <p>线 E 自 <strong>R1 测试配置冻结</strong>起拆成两次发布：<strong>R1 测试环境</strong>先发，数据结构和数据与生产基本一致、仅测试账号有感知；<strong>R2 生产环境</strong>后发，对所有线上用户有感知。两次发布共享同一套设计/代码/镜像与 runbook 骨架，但<strong>配置集、发布动作、验收证据、复盘各做各的</strong>，分别追踪进度。</p>
+  <table>
+    <tr><th style="width:110px">阶段</th><th style="width:44%">R1 · 测试环境（先发）</th><th>R2 · 生产环境（后发）</th></tr>
+    <tr><td>配置冻结</td><td>R1CFG：测试库连接、测试回调/可信域名、测试账号白名单（仅测试账号可见）、测试企微应用参数</td><td>R2CFG：生产可写副本连接、生产回调/可信域名、全员可见、正式企微应用参数</td></tr>
+    <tr><td>发布执行</td><td>R1GO：部署测试环境 → 测试账号 smoke（授权→下单→状态回显→详情跳转）</td><td>R01..R08：生产发布日时序（冻结窗口→切副本→拉起发布物→首单 smoke→发布确认）</td></tr>
+    <tr><td>验收</td><td>R1ACC：测试账号全链路验收 + 虹励确认；发现的问题只允许在 R1 内闭环，不得带病进 R2</td><td>UAT 签字 + Go/No-Go 五张表 + 发布后 24h 无 P0/P1</td></tr>
+    <tr><td>回退</td><td>回退 = 关闭测试入口/测试白名单，生产用户无感</td><td>回退 = 停 b2b、商务回原飞书流程（30min 内）</td></tr>
+    <tr><td>当前完成度</td><td><span class="pct a">≈ 45%</span> <span class="bar a"><i style="width:45%"></i></span></td><td><span class="pct r">≈ 5%</span> <span class="bar r"><i style="width:5%"></i></span></td></tr>
+  </table>
+  <p class="small"><strong>为什么测试环境也要按一次正式发布来跟踪</strong>：R1 的数据结构和数据与生产基本一致，所以它能提前暴露真实契约、配置项、发布时序里的不确定性；R1 每完成一步，R2 对应的不确定性就消解一步。因此 R1 不是"搭个假的联调环境"，而是<strong>生产发布的带妆彩排</strong>，它的配置与发布动作同样要有 owner、证据和完成度。</p>
+</div>
+
+<div class="card red">
+  <h3 style="margin-top:0">7.1 门禁总图（不满足即停止/回退）</h3>
+  <div class="mermaid">
+flowchart TD
+    G0["G0 · 08-18 18:00<br/>范围/口径/双环境发布方案冻结"]:::g0 --> G1["G1 · 08-19 18:00<br/>数据校验/可写副本/代码/契约就绪"]:::g1
+    G1 --> R1["R1 · 08-20 测试环境发布<br/>测试配置冻结+部署+测试账号smoke"]:::r1
+    R1 -->|"R1通过"| G2["G2 · 08-20 18:00<br/>生产预演+UAT+回退演练+Go"]:::g2
+    R1 -->|"R1不通过"| FIX["R1修复后重发<br/>不进入R2"]:::ng
+    G2 -->|"GO"| G3["G3 · 08-21 生产发布窗口<br/>切至可写副本+首单smoke"]:::g3
+    G2 -->|"NO-GO"| NG["顺延一天或缩小范围<br/>绝不压缩验证"]:::ng
+    G3 -->|"关键项失败"| RB["执行回退<br/>商务回原飞书流程"]:::rb
+    G3 -->|"成功"| G4["G4 · 08-21 18:00<br/>8h 稳定 · P0/P1=0"]:::g4
+    classDef g0 fill:#eef2f7,stroke:#64748b,color:#334155
+    classDef g1 fill:#eff6ff,stroke:#2563eb,color:#1d4ed8
+    classDef g2 fill:#fdf4ff,stroke:#7c3aed,color:#5b21b6
+    classDef g3 fill:#fee2e2,stroke:#dc2626,color:#991b1b
+    classDef g4 fill:#d1fae5,stroke:#059669,color:#065f46
+    classDef ng fill:#fff7ed,stroke:#b45309,color:#92400e
+    classDef rb fill:#fef2f2,stroke:#dc2626,color:#991b1b
+    classDef r1 fill:#fff7ed,stroke:#ea580c,color:#9a3412
+  </div>
+</div>
+
+<div class="card">
+  <h3>7.2 E 线任务明细（共享任务 + R1/R2 分环境任务）</h3>
+  <p class="small">共享任务 = 双环境共用的盘点/runbook/监控/回退演练；分环境任务 = R1 测试环境与 R2 生产环境各自独立的配置冻结、发布、验收、证据与决策动作。</p>
+
+  <h4>7.2.1 共享任务（设计/代码/发布底座，只做一次）</h4>
+  <table>
+    <tr><th style="width:60px">#</th><th style="width:230px">任务</th><th>待办要点</th><th style="width:90px">完成度</th></tr>
+    <tr><td><code>E-01</code></td><td>环境与资源盘点（O-01 运维侧）</td><td>测试环境 api 28080/企微网关/旧系统 3002 已盘点；生产端口/DNS/HTTPS/监控与备份清单待补齐</td><td><span class="pct a">40%</span></td></tr>
+    <tr><td><code>E-02</code></td><td>Runbook v1/v2（双环境版）+ 回退手册</td><td>按小时列出 R1 测试发布与 R2 生产发布两套动作/责任人/检查点/回退步骤；回退手册含「停 b2b、商务回飞书」与「副本重建为备库」两套</td><td><span class="pct r">10%</span></td></tr>
+    <tr><td><code>E-03</code></td><td>监控与日志就绪</td><td>服务健康 / PG 复制延迟 / pgAPI 错误率 / 企微回调成功率四类看板（测试环境与生产环境同一套监控）</td><td><span class="pct r">10%</span></td></tr>
+    <tr><td><code>E-04</code></td><td>回退演练（生产回退）</td><td>模拟「可写副本不可用/应用故障」，计时执行回退手册；商务能立即回原飞书（G2）</td><td><span class="pct r">5%</span></td></tr>
+  </table>
+
+  <h4>7.2.2 R1 · 测试环境发布任务（先发，仅测试账号有感知）</h4>
+  <table>
+    <tr><th style="width:60px">#</th><th style="width:230px">任务</th><th>待办要点</th><th style="width:90px">完成度</th></tr>
+    <tr><td><code>R1-01</code></td><td>R1 测试环境配置冻结（R1CFG）</td><td>测试配置大部分已落地（api/企微/旧系统）；测试账号白名单与配置快照未正式冻结归档</td><td><span class="pct a">40%</span></td></tr>
+    <tr><td><code>R1-02</code></td><td>R1 测试环境发布 + smoke（R1GO）</td><td>api/企微网关已运行；完整 smoke 与虹励真实下单闭环（R-06）未执行</td><td><span class="pct a">20%</span></td></tr>
+    <tr><td><code>R1-03</code></td><td>R1 测试环境验收（R1ACC）</td><td>授权链路已实测；S1–S6 测试账号验收待 R1 发布执行</td><td><span class="pct r">10%</span></td></tr>
+    <tr><td><code>R1-04</code></td><td>R1 证据归档</td><td>测试发布截图/命令输出/配置快照/问题清单入 <code>docs/history/evidence/</code>，作为 R2 Go/No-Go 输入</td><td><span class="pct r">5%</span></td></tr>
+  </table>
+
+  <h4>7.2.3 R2 · 生产环境发布任务（后发，全员有感知）</h4>
+  <table>
+    <tr><th style="width:60px">#</th><th style="width:230px">任务</th><th>待办要点</th><th style="width:90px">完成度</th></tr>
+    <tr><td><code>R2-01</code></td><td>R2 生产环境配置冻结（R2CFG）</td><td>生产可写副本连接、生产域名/回调、全员可见、正式企微应用参数；配置 digest 纳入发布物清单</td><td><span class="pct r">10%</span></td></tr>
+    <tr><td><code>B-07</code></td><td>虹励 UAT + 签字</td><td>测试环境通过后，在生产配置就绪的预演环境走体验脚本：授权→下单→飞书待办→信息确认自动通过→列表回显→详情跳转；业务 owner 签字（G2）</td><td><span class="pct r">5%</span></td></tr>
+    <tr><td><code>G2/Go</code></td><td>Go/No-Go 决策会议</td><td>范围达成/数据校验/UAT/预演/回退演练 + <strong>R1 测试环境验收证据</strong>五张表；结论仅 GO/NO-GO</td><td><span class="pct r">5%</span></td></tr>
+    <tr><td><code>R-01..08</code></td><td>R2 生产发布日执行</td><td>09:00 冻结窗口→09:30 切副本→10:00 起发布物→10:30 首单 smoke→11:30 发布确认→值班/证据归档/G4 复盘</td><td><span class="pct r">0%</span></td></tr>
+    <tr><td><code>GO</code></td><td><strong>MVP 终点（全员）</strong></td><td>同步可见 → 备货 → 发货 → 开票 → 回单；飞书侧原流程照常（17 场景 walkthrough + N 用例）</td><td><span class="pct r">0%</span></td></tr>
+  </table>
+</div>
+
+<div class="card amber">
+  <h3>7.3 发布日时序（R1 测试环境先发 → R2 生产环境后发）</h3>
+
+  <h4>7.3.1 R1 · 测试环境发布时序（先发，仅测试账号有感知）</h4>
+  <div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant Ops as 发布指挥
+    participant DB as 测试环境 PG（近生产数据）
+    participant API as pgAPI（测试）
+    participant APP as b2b 测试发布物
+    participant WX as 企微 / 测试账号（虹励）
+    Ops->>DB: 09:00 测试配置冻结 + 发布前快照
+    Ops->>APP: 09:30 拉起测试 api/worker/wecom/sync
+    APP->>API: 测试库连接校验客户/产品
+    WX->>APP: 10:00 测试账号首单 smoke（授权→下单→状态回显）
+    APP-->>WX: 订单/审批卡片回执
+    WX-->>Ops: 每步截图确认
+    Ops->>Ops: 11:00 R1 验收 / 证据归档
+    Note over Ops,WX: R1 不通过 → 修复后重发，不进入 R2
+  </div>
+
+  <h4>7.3.2 R2 · 生产环境发布时序（后发，全员有感知）</h4>
+  <div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant Ops as 发布指挥
+    participant DB as 现场 PG 主库/可写副本
+    participant API as pgAPI
+    participant APP as b2b 生产发布物
+    participant WX as 企微 / 虹励
+    Ops->>Ops: 前置确认：R1 测试环境验收通过
+    Ops->>DB: 09:00 冻结窗口 + 发布前快照
+    Ops->>DB: 09:30 切换 b2b 与 pgAPI 到可写副本
+    DB-->>API: 副本可读可写
+    Ops->>APP: 10:00 拉起 api/worker/wecom/sync
+    APP->>API: X-API-Key 校验客户/产品
+    WX->>APP: 10:30 首单 smoke（看订单→备货→发货→开票）
+    APP-->>WX: 订单/审批卡片回执
+    WX-->>Ops: 每步截图确认
+    Ops->>Ops: 11:30 发布确认 / 失败回退（30min 内）
+  </div>
+</div>
+
+<!-- ============ 8 物料/证据表 ============ -->
+<h2 id="s8">8 · 物料 / 证据 / 准备材料清单</h2>
+
+<div class="card">
+  <h3 style="margin-top:0">8.1 线上物料 ↔ 线下物料（交接为核心）</h3>
+  <p class="small">物料 = 可版本、可引用、可回放的信息块；每次交接「打包→接收方校验→回执签收→写入事件日志→后续工作才允许开始」。下表把 v0.1 发布所需的材料、证据、准备物与交接判据列全。</p>
+  <table>
+    <tr><th style="width:170px">物料 / 证据</th><th style="width:90px">形态</th><th>从哪来 / 到哪去</th><th style="width:240px">交接判据 / 证据等级</th></tr>
+    <tr><td>发布范围单（签字版）</td><td><span class="tag gray">线上</span></td><td>B-01 冻结 → 所有执行引用</td><td>仅虹励；范围=OAuth+下单+我的订单+回显+详情跳转+驳回重提；L2</td></tr>
+    <tr><td>demo×workflow 不一致裁决表</td><td><span class="tag gray">线上</span></td><td>B-02 → 范围边界</td><td>每条给「本期做/不做/下一版」；L2</td></tr>
+    <tr><td>桥接契约表（tripartite 审计）</td><td><span class="tag gray">线上</span></td><td>A-00 → A-03B 实现</td><td>OAuth / external-orders/create / submission-status 字段与错误码；L1</td></tr>
+    <tr><td>代码/决策基线</td><td><span class="tag gray">线上</span></td><td>graph_guide @ 524111e + D-007 (45eeab7) + rhcrm 8545b11</td><td>git hash + digest 冻结；L1</td></tr>
+    <tr><td>字段映射核对表（冻结基线）</td><td><span class="tag gray">线上</span> / 现场</td><td>T1.2 → 同步 Job 配置 + 下次全面迁移</td><td>T1.2 产出，git 提交，100% 覆盖 8 表；L1</td></tr>
+    <tr><td>状态/枚举语义映射表</td><td><span class="tag gray">线上</span></td><td>T1.3 → 状态机</td><td>100% 状态值有归属，业务确认；L2</td></tr>
+    <tr><td>29 表来源确认单</td><td><span class="tag gray">线上</span></td><td>T2.1 → 迁移目标表清单</td><td>29 表全部有结论；L1</td></tr>
+    <tr><td>现场取证清单 / 基线表（只读）</td><td><span class="tag amber">线下</span></td><td>《既有生产环境部署调研需求》→ §6 基线采集表回填 → 对账</td><td>JSONL/多维表/pgAPI/RHCRM 计数 + 时间戳，同口径；L1</td></tr>
+    <tr><td>真实主数据清单</td><td><span class="tag amber">线下</span></td><td>T2.2 录入 → users/customers/products/warehouses</td><td>无 seed 演示残留、虹励确认；L2</td></tr>
+    <tr><td>审批人分配映射 / role map 配置单</td><td><span class="tag amber">线下</span></td><td>T2.3 / T-03 → approval_routing + approval_profiles</td><td>无硬编码残留、TEST_SUPERVISOR 必配；L2</td></tr>
+    <tr><td>飞书侧数据现状清单（16 表）</td><td><span class="tag amber">线下</span></td><td>T1.1 → T1.2/T3.2 配置回填</td><td>16 表可访问、行数/最新时间/样例脱敏；L1</td></tr>
+    <tr><td>脱敏复核单 / 正则扫描结果</td><td><span class="tag amber">线下</span></td><td>T1.4 → 上线安全门</td><td>dump 扫描 open_id/token/secret/private_key 零命中；L1</td></tr>
+    <tr><td>同步配置（sync.example.json → 真实值）</td><td><span class="tag gray">线上</span></td><td>config/sync.example.json → 真实源配置</td><td>file+http 双源模板已建，回填 T1.1 结果；L1</td></tr>
+    <tr><td>同步批次 / migration_batches 日志</td><td><span class="tag gray">线上</span></td><td>cmd/sync 落库 → 幂等锚点 + 审计</td><td>checksum UNIQUE(tenant,source,checksum)；L1</td></tr>
+    <tr><td>旧系统小改补丁 + 独立测试记录</td><td><span class="tag amber">线下</span></td><td>T-01/T-04 → 生产</td><td>自动确认 + V01 profile 注入；普通订单行为不变；L1</td></tr>
+    <tr><td>旧系统配置截图</td><td><span class="tag amber">线下</span></td><td>T-02/T-03 → 重定向白名单 + 白名单 + role map</td><td>含系统时间/URL；敏感值打码；L2</td></tr>
+    <tr><td>主备切换 runbook v1/v2 + 回退手册</td><td><span class="tag gray">线上</span></td><td>O-02 / E-02 → 发布日现场</td><td>步骤可执行、可回滚、责任人明确；L1</td></tr>
+    <tr><td>pgAPI 连接配置表</td><td><span class="tag gray">线上</span></td><td>O-03 → b2b+pgAPI 指可写副本</td><td>CARH_DB_* / PGAPI_API_KEY / trace 存在性；L1</td></tr>
+    <tr><td>回填 dry-run 结果</td><td><span class="tag amber">线下</span></td><td>O-08 → 上线数据底座</td><td>MATCH/FAIL 清单，FAIL 上报不 apply；L1</td></tr>
+    <tr><td>企微测试/生产租户配置（wecom-tenant.test/prod.json）</td><td><span class="tag amber">线下</span></td><td>T4.1 → 企微对接</td><td>corp_id/agent/secret/token/AESKey/domain 按环境注入；V-A/V-B 通过；无明文密钥入 git；L2</td></tr>
+    <tr><td>staff_scene_v0.1.html（现场验证与处理单）</td><td><span class="tag gray">线上</span></td><td>T4.3/T4.4/T4.5 → 现场执行</td><td>PC/企微双端闭环清单 + 回退裁决；按页回填验收单；L1</td></tr>
+    <tr><td>企微对接验收单（V-A..V-F）</td><td><span class="tag amber">线下</span></td><td>T4.5 → 企微线收口</td><td>六条验收全绿 + 截图/日志/时间戳；L1</td></tr>
+    <tr><td>影子发布物（compose + 8 镜像/config digest + D-008..D-011）</td><td><span class="tag gray">线上</span></td><td>4e53763 → 《0.1 发布物清单》</td><td>shadow-api/worker/ingest/feed/audit/migrate/seedrel 镜像 digest + 六铁律守卫证据；L1</td></tr>
+    <tr><td>影子 HR1 映射签字表</td><td><span class="tag amber">线下</span></td><td>业务方 → shadow-feed 权威版冻结</td><td>35 条真实 status 规则逐条签字 + detail 字段名 T1.3；L2</td></tr>
+    <tr><td>影子 HR2 pgAPI 只读凭据证据</td><td><span class="tag amber">线下</span></td><td>数据方 → 影子 R1</td><td>只读 key + 真实响应样例 + 写接口被拒证据；L1</td></tr>
+    <tr><td>UAT 脚本 v2 + 签字</td><td><span class="tag amber">线下</span></td><td>B-03/B-05/B-07 → G2 门禁</td><td>虹励 + 业务 owner 签字；L2</td></tr>
+    <tr><td>Go/No-Go 决策表（五张 + R1 证据）</td><td><span class="tag gray">线上</span></td><td>B-08 → 生产发布决策</td><td>范围达成/数据校验/UAT/预演/回退演练 5 表 + R1 测试环境验收证据；L1</td></tr>
+    <tr><td>《0.1 发布物清单》（R1/R2 两份）</td><td><span class="tag gray">线上</span></td><td>A-08 → R1/R2 发布日</td><td>tag / 镜像 digest / 配置 digest / migrations 版本；R1 测试环境与 R2 生产环境各自锁定；L1</td></tr>
+    <tr><td>R1 测试环境发布证据包（R1-01..R1-04）</td><td><span class="tag amber">线下</span> → <span class="tag gray">线上</span></td><td>R1-04 → docs/history/evidence/</td><td>测试配置快照、测试账号 smoke 截图、验收清单、问题闭环记录；L1</td></tr>
+    <tr><td>R2 生产环境发布证据包（R-01..R-08）</td><td><span class="tag gray">线上</span></td><td>R-07 → docs/history/evidence/</td><td>发布单、截图、命令输出、监控曲线、问题清单；L1</td></tr>
+    <tr><td>发布复盘报告</td><td><span class="tag gray">线上</span></td><td>P-01 → 下一轮迭代输入</td><td>预期 vs 实际、偏差归因、新 Gap；L2</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <h3>8.2 证据可信度分级（刻画本页每个「100%」/「95%」的证据支撑）</h3>
+  <table>
+    <tr><th style="width:110px">等级</th><th style="width:220px">含义</th><th>在 v0.1 的实例</th></tr>
+    <tr><td><span class="tag green">L1 · 可复核</span></td><td>第二人可重复执行得同结果</td><td>桥接契约表、git hash、同步批次、回填 dry-run、V-A..V-F 命令输出</td></tr>
+    <tr><td><span class="tag blue">L2 · 可追溯</span></td><td>来自系统界面/日志/文件，有来源</td><td>配置截图（打码）、UAT 签字、UAT 脚本、role map 配置单</td></tr>
+    <tr><td><span class="tag amber">L3 · 访谈</span></td><td>业务/运维口述</td><td>虹励对主数据/审批人/仓库清单的确认（待 L2 复核）</td></tr>
+    <tr><td><span class="tag red">L0 · 无证据</span></td><td>无法取证</td><td>任何承诺「应该可以」但无命令/截图支撑的项——一律标 L0 不得填补</td></tr>
+  </table>
+</div>
+
+<!-- ============ 9 风险 ============ -->
+<h2 id="s9">9 · 关键风险与下一步</h2>
+
+<div class="grid2">
+<div class="card amber">
+  <h3 style="margin-top:0">9.1 高发风险（按 v0.1 实际）</h3>
+  <table>
+    <tr><th style="width:180px">风险</th><th style="width:80px">等级</th><th>当前方案</th></tr>
+    <tr><td>企微真实验收未过 → 入口不可用</td><td class="risk-mid">中</td><td>备案域名已就绪；按 staff_scene_v0.1.html 现场执行 V-A..V-F；不可达回退 PC 兜底（bridge_ui.html）</td></tr>
+    <tr><td>真实字段 JSON 形状与文档不符（sales_users/spec）</td><td class="risk-mid">中</td><td>O-01A/M-01 今日实测；异常则 pgAPI 归一化或 RawMessage 兜底</td></tr>
+    <tr><td>V01 profile 漏配 TEST_SUPERVISOR → 卡单</td><td class="risk-mid">中（测试环境已关闭）</td><td>T-03 已配（王杰/马弘毅）；真实人选替换 + 生产双人复核仍待办</td></tr>
+    <tr><td>主备复制 / promote 异常 → 副本不可写</td><td class="risk-high">高</td><td>O-02 runbook + O-06 写测试 + O-09 预演 + R-02 切前快照 + 回切主库</td></tr>
+    <tr><td>同步数据不准 → 商务看到错状态</td><td class="risk-mid">中</td><td>O-05 主库全量校验 + 抽样比对，差异不清零不进 G1</td></tr>
+    <tr><td>回填未匹配/歧义 → 历史单不可见</td><td class="risk-mid">中</td><td>O-08 dry-run 前置，FAIL 上报绝 -apply</td></tr>
+    <tr><td>发布范围蔓延 → 拖垮 08-21</td><td class="risk-mid">中</td><td>范围单签字；新增一律下一版</td></tr>
+  </table>
+</div>
+<div class="card green">
+  <h3 style="margin-top:0">9.2 下一步（按本文完成度，倒推）</h3>
+  <ol>
+    <li><strong>已关闭（08-20 测试环境）</strong>：T-01 旧系统小改 + T-03 V01 profile、R-01 基线、R-02 bridge/业务库、R-05 回调白名单、R-08 备库提升/切库/回填 dry-run——均已部署/配置并留证。</li>
+    <li><strong>下一刀（R1 前必须）</strong>：R-06 约虹励真实下单闭环；HR2 pgAPI 只读凭据；影子 HR1 业务签字；R-10 UAT 与 Go/No-Go 五张表。</li>
+    <li><strong>同窗并行</strong>：T4.1 生产租户配置填值；T4.3/T4.4 现场 V-C..V-F；O-02 主备方案定稿（O-06/O-08 已收敛）；E-02 双环境 runbook；影子 SH-10 独立环境新单全集重放（D-012）。</li>
+    <li><strong>R1 发布（新窗口待 R-07 裁决）</strong>：R1-01 测试配置冻结 → R1-02 测试环境部署 smoke → R1-03 测试账号验收；通过后 R2-01 生产配置冻结 → B-07 UAT + E-04 回退演练 → G2 Go/No-Go → R 系列生产发布日 smoke → G4 复盘。</li>
+  </ol>
+  <p class="small">本跟踪文档在每次门禁/关键任务完成时更新；当前快照基准：本仓 4e53763、测试服务器 pilot_v3@85eb85d + 旧系统 f3ed1f80。R1 与 R2 的配置/发布完成度分别刷新，并随生产发布进入下一轮（v0.2）时归档基线。</p>
+</div>
+<div class="card">
+  <h3 style="margin-top:0">9.3 影子轨 S（docs/v0.1/12-shadow-full-flow.html · D-008..D-011）</h3>
+  <table>
+    <tr><th style="width:120px">项</th><th>状态（2026-08-20）</th><th>口径</th></tr>
+    <tr><td>SH-01 设计 + 决策</td><td>✅ 完成</td><td>12-shadow-full-flow.html + project/decisions/D-008..D-011.yaml</td></tr>
+    <tr><td>SH-02 008 五表</td><td>✅ 完成</td><td>migrations/shadow/008_shadow.sql（submission_mode=shadow + chang-an-shadow/u-shadow-*/仓库基座）</td></tr>
+    <tr><td>SH-03/13 启动守卫</td><td>✅ 完成</td><td>internal/shadowguard 六项 fail-fast；api/worker/ingest/feed/audit 全接入；shadow-migrate 前置库名断言</td></tr>
+    <tr><td>SH-05 回放/映射/分歧</td><td>✅ 完成</td><td>internal/shadow 纯函数 + S-01..S-03 测试绿</td></tr>
+    <tr><td>SH-06 影子模式</td><td>✅ 完成</td><td>Shadow=true Timer 全抑制 + shadow-inject；S-06 绿 + TestShadowParityWithNonShadow 同信号对拍（六同）</td></tr>
+    <tr><td>SH-14 Temporal 隔离</td><td>✅ 完成</td><td>B2B_TASK_QUEUE 注入 + shadow- WorkflowID 前缀 + 影子租户 chang-an-shadow</td></tr>
+    <tr><td>SH-04/07/08 三命令</td><td>✅ 完成</td><td>cmd/shadow-ingest|feed|audit（audit -interval + state-file 探针）；本地全栈 smoke：摄入→建单→Signal→INV_CLOSED→四张数报告</td></tr>
+    <tr><td>SH-09 compose/Makefile</td><td>✅ 完成</td><td>docker-compose.shadow.yml（独立环境 + 自带 shadow-temporal）+ shadow-up/down/replay/audit/reset-skipped/sentinel</td></tr>
+    <tr><td>SH-15 写哨兵</td><td>✅ 完成</td><td>scripts/shadow_sentinel（生产库 shadow_* 零存在校验）</td></tr>
+    <tr><td>A9 重放策略</td><td>✅ 完成</td><td>影子 Starter AllowDuplicate + TerminateExisting（代码+单测）</td></tr>
+    <tr><td>代码提交</td><td>✅ 4e53763</td><td>internal/shadow + shadowguard + 008 迁移 + compose/Makefile/Dockerfile + 三命令 + 哨兵 + 测试文档全量入库</td></tr>
+    <tr><td>D-009 原则</td><td>✅ 已拍板</td><td>无托底；全节点覆盖 + 差异映射可接受</td></tr>
+    <tr><td>D-010 环境/生命周期/容量</td><td>✅ 已拍板</td><td>独立环境（零共享面）；v0.3 上线后撤销；≤1 万条/天</td></tr>
+    <tr><td>D-011 持续发布/六同</td><td>✅ 已拍板</td><td>v0.1 后多次发布；S 线工具配置 / F 线 workflow 影子先行；六同原则 + 四类例外</td></tr>
+    <tr><td>A13 驱动方式</td><td>⬜ 未决</td><td>影子侧种子（推荐）/ 飞书测试环境 / 生产飞书注入（默认不做）三选一</td></tr>
+    <tr><td>HR1 映射/状态语义冻结</td><td>🟡 代码事实基线已生成并提交 · 待业务签字</td><td>已按 tripartite-approval@f3ed1f80 真实 status 枚举重写 shadow-feed 配置（35 条规则）；join_source 关联 orders.jsonl + 嵌套 detail 适配已提交 4e53763；还需业务逐条签字 + detail 字段名冻结</td></tr>
+    <tr><td>HR2 pgAPI 只读凭据/契约</td><td>🔴 高风险 · 外部输入</td><td>需只读 key + 真实最小集合 + 响应样例 + 写接口被拒证据</td></tr>
+    <tr><td>SH-10 R1 专用环境重放（D-012）</td><td>⬜ 环境侧待执行</td><td>上线以来新单全集 + 内部种子重放 + S-01..S-08 + 基线报告（G2 影子证据包）</td></tr>
+    <tr><td>SH-11 影子正式上线</td><td>⬜ 环境侧待执行</td><td>独立环境同镜像 + 真实只读源 + 哨兵 + 24h 稳定（G4）</td></tr>
+    <tr><td>SH-12 v0.2 Go 证据</td><td>⬜ 依赖 SH-11</td><td>连续 7 日审计 + 分歧裁决 + 复用清单</td></tr>
+    <tr><td>生命周期终点</td><td>⬜ v0.3 后执行</td><td>归档报告/分歧/覆盖基线 → 停栈 → drop b2b_shadow → 回收凭据</td></tr>
+  </table>
+</div>
+</div>
+
+<div class="conclusion-box card green">
+  <h3 style="margin-top:0;margin-bottom:6px">一句话结论</h3>
+  <p style="margin:0"><strong>08-20 快照：测试环境侧 R-01..R-05/R-08 已关闭（基线、bridge、V01 档、旧系统小改、白名单、备库提升均落地并留证），线 A ≈85%、线 F ≈85%、线 W ≈65%、线 O 备库/回填段已收敛；生产侧仍维持 No-Go 纪律，卡在 R-06 虹励真实下单、R-10 UAT/Go-No-Go 与新窗口 R-07。影子轨 S 已按 D-008..D-013 实现并提交（本仓 067b848；影子代码 4e53763，独立环境 + 自带 shadow-temporal；SH-01..SH-09/13/14/15 ✅、六同对拍 ✅、integration cover 86.2%；D-012 新单实时增量、D-013 v0.1 硬口径）；HR1 真实 status 映射基线与 JSONL 形态适配已完成，剩业务签字；HR2 pgAPI 只读凭据仍红；SH-10/11/12 与 v0.3 teardown 为环境侧任务。</strong></p>
+</div>
+
+<footer>
+  v0.1 发布过程跟踪 · 双环境：R1 测试环境（先）→ R2 生产环境（后） · 配套：docs/发布计划v2/渐进式发布计划v2.html · 0.1版本周工作计划.html · docs/10-v0.1-release-prep.html · v0.1发布后架构.html · 分期部署数据流分析.html · 既有生产环境部署调研需求.html · 快照 2026-08-20 · 本仓 4e53763 · 测试服务器 pilot_v3@85eb85d / 旧系统 f3ed1f80 · 生产窗口待 R-07 裁决
+</footer>
+
+</div>
+</body>
+</html>

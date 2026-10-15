@@ -1,0 +1,741 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>销售订单业财POC：业务流程及需求拆解 V1.1</title>
+<style>
+:root{--navy:#17365d;--blue:#2e74b5;--ink:#253447;--muted:#667487;--line:#d9e2ec;--bg:#edf2f7;--soft:#f6f9fc;--process:#b85c1e;--org:#a53f52;--product:#147d73;--p0:#c43b3b;--p1:#d47a21;--p2:#4c72a4}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.75 "Microsoft YaHei","PingFang SC",Arial,sans-serif}.page{max-width:1380px;margin:26px auto;background:white;border-radius:18px;box-shadow:0 14px 44px rgba(31,55,80,.11);overflow:hidden}.hero{padding:46px 62px 34px;background:linear-gradient(135deg,#f8fbff,#edf5fc);border-bottom:1px solid var(--line)}.hero h1{margin:0 0 8px;color:var(--navy);font-size:32px}.hero p{margin:0;color:var(--muted);font-size:16px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:22px}.card{padding:14px 16px;border-radius:10px;background:white;border:1px solid var(--line)}.card strong{display:block;font-size:16px}.card small{color:var(--muted)}.card.process{border-top:4px solid var(--process)}.card.org{border-top:4px solid var(--org)}.card.product{border-top:4px solid var(--product)}.layout{display:grid;grid-template-columns:245px minmax(0,1fr);gap:42px;padding:36px 58px 66px}.toc{position:sticky;top:18px;align-self:start;max-height:calc(100vh - 36px);overflow:auto;border-left:3px solid var(--line);padding-left:15px}.toc strong{display:block;color:var(--navy);margin-bottom:9px}.toc a{display:block;padding:4px 0;color:#536477;text-decoration:none;font-size:13px;line-height:1.45}.toc a:hover{color:var(--blue)}.toc .level-3{padding-left:12px;color:#718096;font-size:12px}article{min-width:0}article>h1:first-child{display:none}h2{margin:42px 0 15px;padding-bottom:8px;border-bottom:2px solid #e7edf4;color:var(--navy);font-size:24px}h2:first-of-type{margin-top:0}h3{margin:27px 0 10px;color:var(--blue);font-size:19px}p{margin:8px 0 13px}ul,ol{margin:8px 0 18px;padding-left:1.5em}li{margin:5px 0}blockquote{margin:0 0 23px;padding:15px 18px;background:#eef5fb;border-left:5px solid var(--blue);border-radius:0 9px 9px 0}hr{border:0;border-top:1px solid var(--line);margin:34px 0}table{width:100%;border-collapse:collapse;margin:14px 0 24px;font-size:13.5px}th,td{padding:10px 11px;border:1px solid var(--line);vertical-align:top;text-align:left}th{background:#eef4fa;color:var(--navy);white-space:nowrap}tbody tr:nth-child(even){background:#fbfcfe}.diagram{margin:17px 0 27px;padding:18px;background:#fbfdff;border:1px solid var(--line);border-radius:12px;overflow:auto}.mermaid{display:flex;justify-content:center;background:transparent;margin:0}.diagram svg{max-width:100%;height:auto}details{margin:11px 0 14px;border:1px solid var(--line);border-radius:10px;background:#fff;overflow:hidden;box-shadow:0 2px 7px rgba(37,52,71,.035)}summary{cursor:pointer;list-style:none;padding:14px 17px;font-weight:600;color:var(--navy);background:#f7f9fc;position:relative;padding-right:42px}summary::-webkit-details-marker{display:none}summary:after{content:'＋';position:absolute;right:16px;top:12px;color:var(--blue);font-size:20px;font-weight:400}details[open] summary:after{content:'−'}details[open] summary{border-bottom:1px solid var(--line);background:#eef5fb}details>p,details>ul,details>ol{margin-left:18px;margin-right:18px}details>ul:last-child,details>p:last-child{margin-bottom:17px}code{background:#eef1f4;padding:2px 5px;border-radius:4px}.footer{padding:17px 58px;border-top:1px solid var(--line);background:#fafcff;color:var(--muted);text-align:center;font-size:13px}@media(max-width:900px){body{background:white}.page{margin:0;border-radius:0;box-shadow:none}.hero{padding:30px 19px 24px}.hero h1{font-size:25px}.cards{grid-template-columns:1fr}.layout{display:block;padding:24px 18px 48px}.toc{position:static;max-height:245px;margin-bottom:25px;padding:12px 14px;border:1px solid var(--line);border-left:4px solid var(--blue);border-radius:8px}h2{font-size:21px}table{display:block;overflow-x:auto;font-size:12.5px}.diagram{padding:10px}.footer{padding:14px 18px}}@media print{body{background:white}.page{max-width:none;margin:0;box-shadow:none}.toc{display:none}.layout{display:block;padding:25px 38px}.hero{padding:30px 38px}details{break-inside:avoid}details:not([open])>*:not(summary){display:block}summary:after{display:none}}
+</style></head><body><main class="page"><header class="hero"><h1>销售订单业财 POC：业务流程及需求拆解 V1.1</h1><p>一条主干流程＋ORD / STK / SHP / INV 四个环节｜每个环节连续呈现目标、流程、角色、问题和优先级</p><div class="cards"><div class="card process"><strong>业务流程问题</strong><small>老板或业务负责人拍板</small></div><div class="card org"><strong>组织执行问题</strong><small>管理层明确责任并督促</small></div><div class="card product"><strong>产品优化问题</strong><small>产品和技术设计解决</small></div></div></header><div class="layout"><nav class="toc"><strong>目录</strong><a class="level-2" href="#一-问题分类及责任边界">一、问题分类及责任边界</a><a class="level-2" href="#二-销售订单业务主流程">二、销售订单业务主流程</a><a class="level-3" href="#2.1-主干流程图">2.1 主干流程图</a><a class="level-3" href="#2.2-四个环节总览">2.2 四个环节总览</a><a class="level-2" href="#三-ORD-销售订单创建审批">三、ORD 销售订单创建审批</a><a class="level-3" href="#3.1-本环节核心目标">3.1 本环节核心目标</a><a class="level-3" href="#3.2-ORD-分支流程图">3.2 ORD 分支流程图</a><a class="level-3" href="#3.3-涉及角色及需要的信息">3.3 涉及角色及需要的信息</a><a class="level-3" href="#3.4-当前问题-建议方案及优先级">3.4 当前问题、建议方案及优先级</a><a class="level-3" href="#3.5-ORD-需求优先级汇总">3.5 ORD 需求优先级汇总</a><a class="level-2" href="#四-STK-备货审批">四、STK 备货审批</a><a class="level-3" href="#4.1-本环节核心目标">4.1 本环节核心目标</a><a class="level-3" href="#4.2-STK-分支流程图">4.2 STK 分支流程图</a><a class="level-3" href="#4.3-涉及角色及需要的信息">4.3 涉及角色及需要的信息</a><a class="level-3" href="#4.4-当前问题-建议方案及优先级">4.4 当前问题、建议方案及优先级</a><a class="level-3" href="#4.5-STK-需求优先级汇总">4.5 STK 需求优先级汇总</a><a class="level-2" href="#五-SHP-发货审批">五、SHP 发货审批</a><a class="level-3" href="#5.1-本环节核心目标">5.1 本环节核心目标</a><a class="level-3" href="#5.2-SHP-分支流程图">5.2 SHP 分支流程图</a><a class="level-3" href="#5.3-涉及角色-权限及需要的信息">5.3 涉及角色、权限及需要的信息</a><a class="level-3" href="#5.4-当前问题-建议方案及优先级">5.4 当前问题、建议方案及优先级</a><a class="level-3" href="#5.5-SHP-需求优先级汇总">5.5 SHP 需求优先级汇总</a><a class="level-2" href="#六-INV-开票审批">六、INV 开票审批</a><a class="level-3" href="#6.1-本环节核心目标">6.1 本环节核心目标</a><a class="level-3" href="#6.2-INV-分支流程图">6.2 INV 分支流程图</a><a class="level-3" href="#6.3-涉及角色及需要的信息">6.3 涉及角色及需要的信息</a><a class="level-3" href="#6.4-当前问题-建议方案及优先级">6.4 当前问题、建议方案及优先级</a><a class="level-3" href="#6.5-INV-需求优先级汇总">6.5 INV 需求优先级汇总</a><a class="level-2" href="#七-跨四个环节的共同要求">七、跨四个环节的共同要求</a><a class="level-3" href="#7.1-主流程与子流程状态">7.1 主流程与子流程状态</a><a class="level-3" href="#7.2-权限原则">7.2 权限原则</a><a class="level-3" href="#7.3-附件归属">7.3 附件归属</a><a class="level-3" href="#7.4-通知和日志">7.4 通知和日志</a><a class="level-2" href="#八-建议给开发团队的任务顺序">八、建议给开发团队的任务顺序</a><a class="level-3" href="#8.1-P0-完整走通并保证正确性">8.1 P0：完整走通并保证正确性</a><a class="level-3" href="#8.2-P1-提升销售-商务-仓库和财务效率">8.2 P1：提升销售、商务、仓库和财务效率</a><a class="level-3" href="#8.3-P2-进一步自动化">8.3 P2：进一步自动化</a><a class="level-2" href="#九-单个问题的补充模板">九、单个问题的补充模板</a><a class="level-2" href="#十-文档目标">十、文档目标</a></nav><article><h1 id="销售订单业财-POC-业务流程及需求拆解-V1.1">销售订单业财 POC：业务流程及需求拆解 V1.1</h1><blockquote>
+<p>文档定位：基于《飞书三方审批 销售订单业财流程 POC 流程说明》，从业务方视角说明销售订单主流程及 ORD、STK、SHP、INV 四个环节。每个环节先明确新系统应达到的核心目标，再展示分支流程、角色和信息，最后将业务流程问题、组织执行问题、产品优化问题放回对应环节，说明现状、建议方案和优先级。<br>使用对象：老板及业务负责人、管理层、产品经理、技术开发团队、销售、商务、仓库和财务相关人员。<br>版本说明：V1.1 根据业务方反馈调整文档结构，删除已明确或不需要讨论的问题，不再将流程图与问题分类分开呈现。</p>
+</blockquote>
+<hr>
+<h2 id="一-问题分类及责任边界">一、问题分类及责任边界</h2><p>本文仍将问题区分为三类，但不再单独集中罗列，而是放在四个业务环节中分别说明。</p>
+<table>
+<thead>
+<tr>
+<th>分类</th>
+<th>判断标准</th>
+<th>主要处理责任</th>
+<th>产品技术边界</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>业务流程问题</td>
+<td>流程缺失、现有流程不适应真实业务，或例外、变更规则尚未定义</td>
+<td>老板、业务负责人、财务或相关部门负责人拍板</td>
+<td>规则确认后才能固化，技术不能代替业务决定</td>
+</tr>
+<tr>
+<td>组织执行问题</td>
+<td>流程和责任方向基本明确，但受内部执行、外部协作、信息回传时效等影响</td>
+<td>管理层明确执行要求、协作方式、时限及异常升级</td>
+<td>产品可提醒、留痕和展示异常，不能消除所有外部客观时差</td>
+</tr>
+<tr>
+<td>产品优化问题</td>
+<td>业务流程基本明确，但页面、权限、状态、通知、附件、数据关联或自动化不能有效支撑</td>
+<td>产品经理和技术团队</td>
+<td>根据业务目标设计方案，并由业务按真实场景验收</td>
+</tr>
+</tbody></table>
+<p>优先级定义：</p>
+<table>
+<thead>
+<tr>
+<th>优先级</th>
+<th>含义</th>
+<th>处理原则</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>P0</td>
+<td>主链路无法正确走通，可能造成错单、错发、重复办理、开票回款被卡或状态失真</td>
+<td>完整 POC 验收和新系统上线前必须解决</td>
+</tr>
+<tr>
+<td>P1</td>
+<td>主流程可以运行，但存在明显人工工作量、查询困难、跨部门等待或高频异常</td>
+<td>主链路稳定后优先建设</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>进一步提升自动化、体验和管理分析</td>
+<td>基础流程和数据稳定后实施</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="二-销售订单业务主流程">二、销售订单业务主流程</h2><p>当前 POC 以一个主流程编号串联四个审批环节，不是四套互相独立的流程：</p>
+<ol>
+<li><strong>ORD 销售订单创建审批</strong>：订单发起、信息确认、主管审批，产出正式合同。</li>
+<li><strong>STK 备货审批</strong>：根据销售下单时填写的账期或结算方式，进入相应的备货、到款确认和选仓流程，产出出库单。</li>
+<li><strong>SHP 发货审批</strong>：仓库办理发货、记录本批发货信息、处理回单及开票信息；分批发货时，剩余数量进入下一批备货和发货。</li>
+<li><strong>INV 开票审批</strong>：根据正常回单或经批准的例外依据形成开票处理，关联发票并完成后续资料办理。</li>
+</ol>
+<h3 id="2.1-主干流程图">2.1 主干流程图</h3><div class="diagram"><pre class="mermaid">flowchart LR
+    A[客户形成订单需求] --> B[ORD 销售订单创建审批]
+    B -->|审批通过并形成正式合同| C[STK 备货审批]
+    C -->|确定发货仓并生成出库单| D[SHP 发货审批]
+    D -->|本批发货完成| E{是否还有剩余未发数量}
+    E -->|有| C
+    E -->|无| F{回单或例外依据是否满足}
+    F -->|满足| G[INV 开票审批]
+    F -->|暂不满足| H[继续跟踪回单或补充例外材料]
+    H --> F
+    G --> I[发票关联与销售查询]
+    I --> J[资料办理完成并归档]</pre></div><h3 id="2.2-四个环节总览">2.2 四个环节总览</h3><table>
+<thead>
+<tr>
+<th>环节</th>
+<th>业务起点</th>
+<th>核心办理内容</th>
+<th>环节主要产出</th>
+<th>下一步</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ORD</td>
+<td>销售员或代办人提交订单</td>
+<td>信息确认、主管审批、合同处理</td>
+<td>审批通过的销售订单、正式合同</td>
+<td>进入 STK</td>
+</tr>
+<tr>
+<td>STK</td>
+<td>ORD 完成</td>
+<td>按账期判断节点、确认到款、商务选仓</td>
+<td>发货仓、仓库任务、出库单</td>
+<td>进入 SHP</td>
+</tr>
+<tr>
+<td>SHP</td>
+<td>STK 完成</td>
+<td>仓库发货、分批、实际发货信息、回单及开票信息</td>
+<td>发货批次、剩余未发量、回单或例外材料</td>
+<td>返回 STK 或进入 INV</td>
+</tr>
+<tr>
+<td>INV</td>
+<td>SHP 满足开票条件</td>
+<td>开票申请、无票办理、真实开票、发票关联及资料办理</td>
+<td>开票结果、发票附件及相关资料</td>
+<td>后续归档</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="三-ORD-销售订单创建审批">三、ORD 销售订单创建审批</h2><h3 id="3.1-本环节核心目标">3.1 本环节核心目标</h3><p>即使没有任何现有系统，新系统在 ORD 环节也应做到：</p>
+<ol>
+<li>支持销售员本人和授权代办人快速创建订单，准确记录实际提交人和归属销售。</li>
+<li>一次性收集后续商务、仓库和财务真正需要的订单信息及附件，避免重复询问和线下转发。</li>
+<li>保证信息确认、主管审批、退回、修改和再次提交的流程状态真实、不可重复推进。</li>
+<li>审批通过后形成可供销售下载、商务查看和后续环节使用的正式合同。</li>
+<li>销售能够通过订单看板快速查看自己的订单、产品、数量、发货状态、合同和发票。</li>
+</ol>
+<h3 id="3.2-ORD-分支流程图">3.2 ORD 分支流程图</h3><div class="diagram"><pre class="mermaid">flowchart TD
+    A[销售员或授权代办人创建订单] --> B[系统生成主流程编号和 ORD 实例]
+    B --> C[销售订单信息确认]
+    C -->|发现问题| D[退回提交人修改]
+    D --> A
+    C -->|确认通过| E[销售主管审批]
+    E -->|拒绝或退回| D
+    E -->|审批通过| F[生成或盖章正式合同]
+    F --> G[合同及订单信息传入 STK]</pre></div><h3 id="3.3-涉及角色及需要的信息">3.3 涉及角色及需要的信息</h3><table>
+<thead>
+<tr>
+<th>角色</th>
+<th>本环节职责</th>
+<th>需要查看或填写的信息</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>销售员</td>
+<td>确认客户真实需求、订单归属及后续跟进</td>
+<td>下单日期、客户名称、产品名称、数量、价格、账期、地址、包装、交期、特殊要求、合同或下单依据</td>
+</tr>
+<tr>
+<td>销售代办人</td>
+<td>根据授权替指定销售创建订单</td>
+<td>与销售相同的订单字段，并明确实际创建人和归属销售</td>
+</tr>
+<tr>
+<td>销售主管</td>
+<td>审核订单及价格信息</td>
+<td>客户、产品、数量、单价、金额、账期、合同和审批意见</td>
+</tr>
+<tr>
+<td>商务</td>
+<td>在 ORD 通过后承接完整订单</td>
+<td>客户、产品、数量、价格、账期、地址、交期、包装、特殊发货要求及全部相关附件</td>
+</tr>
+</tbody></table>
+<h3 id="3.4-当前问题-建议方案及优先级">3.4 当前问题、建议方案及优先级</h3><details open>
+<summary><strong>ORD-01｜业务流程问题｜退回、撤回、修改和再次提交的边界｜P0</strong></summary>
+
+<ul>
+<li><strong>当前 POC</strong>：节点拒绝后当前阶段终止，提交人可以基于原数据修改后再次提交；订单进入后续阶段后支持整单撤销或作废，历史记录和附件不删除。</li>
+<li><strong>现存问题</strong>：订单进入不同阶段后，哪些字段仍可修改、修改后从哪个节点重新审批、已经生成的合同如何处理，需要按环节形成明确规则。</li>
+<li><strong>建议方案</strong>：在 ORD 明确客户、产品、数量、价格、账期、地址、交期等核心字段的修改范围；核心字段变化后重新进入相应审批；旧合同和旧审批记录保留但标记失效。</li>
+<li><strong>验收标准</strong>：撤回或退回后不会出现旧待办继续推进、旧合同仍被当作有效合同或重复生成订单。</li>
+</ul>
+</details>
+
+<details>
+<summary><strong>ORD-02｜组织执行问题｜客户、销售归属和产品等基础数据需要持续维护｜P1</strong></summary>
+
+<ul>
+<li><strong>当前情况</strong>：客户负责人变化、代办关系、产品新增或名称变化会直接影响订单归属和后续发票推送。</li>
+<li><strong>现存问题</strong>：如果基础数据没有及时更新，系统会按照错误数据正确执行，最终仍产生错误结果。</li>
+<li><strong>建议方案</strong>：明确客户负责人交接、代办授权、产品新增和产品名称核对的责任岗位；系统保留变更记录和待维护清单。</li>
+<li><strong>产品边界</strong>：产品可以提供权限、日志和提醒，不能自行判断现实中客户应归属哪位销售。</li>
+</ul>
+</details>
+
+<details open>
+<summary><strong>ORD-03｜产品优化问题｜销售订单创建和订单看板设计｜P1</strong></summary>
+
+<ul>
+<li><strong>销售创建订单目标</strong>：页面简单、信息清晰，支持合同或文件生成草稿、历史信息建议、历史订单再次发起和人工填写。</li>
+<li><strong>订单看板最少展示</strong>：<ul>
+<li>下单日期；</li>
+<li>客户名称；</li>
+<li>产品名称或型号；</li>
+<li>数量；</li>
+<li>发货状态或当前办理节点。</li>
+</ul>
+</li>
+<li><strong>筛选建议</strong>：客户名称、月份或时间范围、发货状态、开票情况。</li>
+<li><strong>附件入口</strong>：盖章合同可从订单行或详情页直接点开、下载；发票开具后，可从同一订单直接点开、下载。</li>
+<li><strong>设计原则</strong>：销售进入看板首先是快速找到订单并判断是否已发货、是否已开票，而不是展示大量审批技术字段或仅展示订单金额。</li>
+<li><strong>验收标准</strong>：销售可以在手机端通过客户或时间快速找到订单，直接看到产品和数量，并在少量操作内下载合同和发票。</li>
+</ul>
+</details>
+
+<details>
+<summary><strong>ORD-04｜产品优化问题｜当前处理人、task_id 和旧待办防重复｜P0</strong></summary>
+
+<ul>
+<li><strong>当前 POC 基础</strong>：系统通过当前 task_id、当前处理人和节点状态校验是否可以办理。</li>
+<li><strong>需要保证</strong>：非当前处理人只读；已办理任务和旧链接只读；重复点击不重复创建订单或跳过后续节点；退回后新任务与旧任务明确区分。</li>
+<li><strong>验收标准</strong>：多角色、多次点击、刷新、撤回重提和旧链接访问均不会造成审批跳过或重复流转。</li>
+</ul>
+</details>
+
+<h3 id="3.5-ORD-需求优先级汇总">3.5 ORD 需求优先级汇总</h3><table>
+<thead>
+<tr>
+<th>优先级</th>
+<th>需求</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>P0</td>
+<td>修改重提规则；任务与处理人校验；旧待办防重复；核心附件向后续环节传递</td>
+</tr>
+<tr>
+<td>P1</td>
+<td>销售快速下单；销售订单看板；合同和发票直接下载；基础数据维护提醒</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>合同及订单文件智能识别、历史异常智能提醒</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="四-STK-备货审批">四、STK 备货审批</h2><h3 id="4.1-本环节核心目标">4.1 本环节核心目标</h3><p>新系统在 STK 环节应做到：</p>
+<ol>
+<li>根据销售下单时填写的账期或结算方式，自动进入正确的备货和到款确认节点。</li>
+<li>让商务能够在一个页面查看订单产品、数量、交期、地址、包装、库存和在途信息，准确选择发货仓库。</li>
+<li>支持一笔订单多个产品分配给不同仓库，并为各仓库生成明确、独立的发货任务。</li>
+<li>商务确认仓库后生成正确的出库单，并将合同编号、产品、数量和发货要求传入 SHP。</li>
+<li>分批发货仍有剩余数量时，能够继续形成下一批备货任务，但不重复计算主订单金额和数量。</li>
+</ol>
+<h3 id="4.2-STK-分支流程图">4.2 STK 分支流程图</h3><div class="diagram"><pre class="mermaid">flowchart TD
+    A[ORD 审批通过并形成合同] --> B{读取销售填写的账期或结算方式}
+    B -->|款到发货| C[财务确认到款]
+    B -->|账期或其他已明确方式| D[进入商务选仓]
+    C --> D
+    D --> E[商务查看产品、数量、库存和在途]
+    E --> F{是否需要多个仓库}
+    F -->|否| G[选择单一发货仓]
+    F -->|是| H[按产品明细和数量分配仓库]
+    G --> I[生成仓库任务和出库单]
+    H --> I
+    I --> J[进入 SHP 发货审批]</pre></div><h3 id="4.3-涉及角色及需要的信息">4.3 涉及角色及需要的信息</h3><table>
+<thead>
+<tr>
+<th>角色</th>
+<th>本环节职责</th>
+<th>需要查看或填写的信息</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>销售员/代办人</td>
+<td>在 ORD 下单时准确填写账期、交期和发货要求</td>
+<td>账期、是否款到发货、要求到货时间、地址和特殊要求</td>
+</tr>
+<tr>
+<td>财务</td>
+<td>对款到发货订单确认实际到款</td>
+<td>客户、订单、应到金额、实际到款和确认结果</td>
+</tr>
+<tr>
+<td>商务</td>
+<td>核对订单、查看库存和在途、确认发货仓</td>
+<td>客户、合同、产品、数量、包装、交期、各仓库存、在途、历史仓库和发货要求</td>
+</tr>
+<tr>
+<td>仓库</td>
+<td>接收分配到本仓的下一步任务</td>
+<td>本仓负责的产品明细和数量，不在 STK 环节查看价格与金额</td>
+</tr>
+</tbody></table>
+<h3 id="4.4-当前问题-建议方案及优先级">4.4 当前问题、建议方案及优先级</h3><details open>
+<summary><strong>STK-01｜业务流程问题｜多仓、分批和主订单之间的数据关系｜P0</strong></summary>
+
+<ul>
+<li><strong>当前 POC</strong>：商务填写发货仓后生成出库单；分批发货有剩余数量时返回 STK。</li>
+<li><strong>现存问题</strong>：一个订单多个产品可能需要多个仓库；分批返回 STK 时如果直接形成新的独立订单，可能导致数量、金额和报表重复。</li>
+<li><strong>建议方案</strong>：保留一个主订单，STK 按仓库和批次生成子任务；主订单持续汇总订单总量、各仓分配量、累计已发量和剩余未发量。</li>
+<li><strong>需要确认</strong>：同一产品首期是否允许拆分给多个仓库。</li>
+<li><strong>验收标准</strong>：多仓和分批后主订单金额不重复，各仓任务和剩余数量均准确可追溯。</li>
+</ul>
+</details>
+
+<details>
+<summary><strong>STK-02｜组织执行问题｜到款确认需要及时反映真实到账结果｜P1</strong></summary>
+
+<ul>
+<li><strong>业务规则</strong>：款到发货订单需要财务确认到款；账期等其他明确业务按对应路径处理。</li>
+<li><strong>现存问题</strong>：规则本身明确，但实际到账后如果节点未及时更新，会增加销售和商务等待时间。</li>
+<li><strong>建议方案</strong>：明确到款确认的办理时限和替岗方式；系统对长时间未办理事项提醒财务和相关管理人员。</li>
+<li><strong>验收标准</strong>：真实到账后能在规定时间内完成确认，销售和商务看到一致状态。</li>
+</ul>
+</details>
+
+<details>
+<summary><strong>STK-03｜组织执行问题｜商务选仓依赖各仓库存及时准确维护｜P0</strong></summary>
+
+<ul>
+<li><strong>当前情况</strong>：商务选择仓库需要依赖阳原、长兴、东莞、成都四个仓库的库存数据。</li>
+<li><strong>现存问题</strong>：如果库存缺少产品型号、批号、包装或数量，或长期不更新，商务无法准确判断该仓是否有货和何时可发。</li>
+<li><strong>建议方案</strong>：明确各仓库存维护人员、更新时限和盘点机制；系统展示库存最后更新时间和责任人，超时进入异常清单。</li>
+<li><strong>验收标准</strong>：商务选仓时可以判断每个仓库实际库存、可用库存和数据新鲜度。</li>
+</ul>
+</details>
+
+<details open>
+<summary><strong>STK-04｜产品优化问题｜多仓库及产品明细分仓｜P0</strong></summary>
+
+<ul>
+<li><strong>现存问题</strong>：单一发货仓字段无法支撑多个产品由不同仓库发货，容易出现截图后在微信群额外通知其他仓管的情况。</li>
+<li><strong>建议方案</strong>：商务选择仓库时支持多选；每条产品明细指定发货仓库和数量；各仓分别生成待办和出库信息。</li>
+<li><strong>验收标准</strong>：一笔订单的多个产品可以准确分配给阳原、长兴、东莞或成都，各仓只看到并办理本仓明细。</li>
+</ul>
+</details>
+
+<details>
+<summary><strong>STK-05｜产品优化问题｜库存、在途和建议仓库集中展示｜P1</strong></summary>
+
+<ul>
+<li><strong>商务需要查看</strong>：实际库存、可用库存、已占用库存、在途数量、预计到仓时间、数据更新时间。</li>
+<li><strong>建议方案</strong>：选仓页面集中展示四个仓库信息，并结合客户地区、历史发货仓库、库存、在途和交期给出建议仓库，最终由商务确认。</li>
+<li><strong>验收标准</strong>：商务无需跨多个库存表和微信记录查询，即可完成选仓判断。</li>
+</ul>
+</details>
+
+<h3 id="4.5-STK-需求优先级汇总">4.5 STK 需求优先级汇总</h3><table>
+<thead>
+<tr>
+<th>优先级</th>
+<th>需求</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>P0</td>
+<td>主订单与多仓、分批关系；产品明细分仓；各仓任务独立；库存基础数据可信</td>
+</tr>
+<tr>
+<td>P1</td>
+<td>到款超时提醒；库存和在途集中展示；历史仓库与建议仓库</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>备货建议、库存预测和仓间调货建议</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="五-SHP-发货审批">五、SHP 发货审批</h2><h3 id="5.1-本环节核心目标">5.1 本环节核心目标</h3><p>新系统在 SHP 环节应做到：</p>
+<ol>
+<li>仓管只看到完成发货所需的信息，不能看到订单单价和金额，但必须看到合同编号。</li>
+<li>仓库能够清楚知道本仓需要发什么产品、多少数量、什么包装、发往哪里及有哪些特殊要求。</li>
+<li>每次实际发货形成独立发货批次，分批后持续保留剩余未发任务。</li>
+<li>支持仓库或办理人无法继续办理时进行有原因、有记录、有通知的转交或换仓。</li>
+<li>真实反映回单由外部司机或相关外部人员回传所产生的时间差，不能因为回单暂时未取得而让所有订单永久卡在开票前。</li>
+<li>发货、回单和开票衔接围绕同一发货批次进行，保证实际发货量、签收量和可开票量可以追溯。</li>
+</ol>
+<h3 id="5.2-SHP-分支流程图">5.2 SHP 分支流程图</h3><div class="diagram"><pre class="mermaid">flowchart TD
+    A[仓库收到本仓发货任务和出库单] --> B[查看客户、合同编号、产品、数量、包装、地址和要求]
+    B --> C{本仓是否可以发货}
+    C -->|不能| D[填写原因并转交或申请换仓]
+    D --> E[新仓库或新办理人接收任务]
+    E --> B
+    C -->|可以| F[安排出库和物流]
+    F --> G[记录本批实际发货信息]
+    G --> H{订单是否全部发完}
+    H -->|否| I[保留剩余未发数量并返回 STK]
+    H -->|是| J[等待客户签收及回单]
+    J --> K{外部司机或人员是否已回传回单}
+    K -->|已回传| L[上传并关联本发货批次]
+    K -->|暂未回传| M[继续跟踪并判断是否进入例外开票申请]
+    L --> N[确认开票信息并进入 INV]
+    M -->|例外批准| N
+    M -->|暂不批准| J</pre></div><h3 id="5.3-涉及角色-权限及需要的信息">5.3 涉及角色、权限及需要的信息</h3><table>
+<thead>
+<tr>
+<th>角色</th>
+<th>本环节职责</th>
+<th>可以查看的信息</th>
+<th>不应查看的信息</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>仓管人员</td>
+<td>确认本仓任务、安排发货、填写本批结果、处理转交和相关附件</td>
+<td>客户/公司基础信息、合同编号、收货地址和联系人、产品名称或型号、数量、包装、交期、发货要求、特殊备注、出库单</td>
+<td>产品单价、订单金额</td>
+</tr>
+<tr>
+<td>商务</td>
+<td>跟踪仓库办理、分批、剩余未发、转交、回单及异常</td>
+<td>全部订单及履约信息，包括价格、金额、合同、库存、发货和回单</td>
+<td>无</td>
+</tr>
+<tr>
+<td>销售员</td>
+<td>查看本人订单发货结果并跟进客户</td>
+<td>发货仓库、发货状态、实际发货量、物流、预计到货、回单和后续发票</td>
+<td>其他销售订单</td>
+</tr>
+<tr>
+<td>外部司机或相关外部人员</td>
+<td>将货物送达客户并回传签收证明</td>
+<td>完成交付所需的地址、联系人和送货信息</td>
+<td>公司内部价格、金额及不必要的业务信息</td>
+</tr>
+</tbody></table>
+<h3 id="5.4-当前问题-建议方案及优先级">5.4 当前问题、建议方案及优先级</h3><details open>
+<summary><strong>SHP-01｜业务流程问题｜回单存在客观回传时差，需要正常与例外两条开票路径｜P0</strong></summary>
+
+<ul>
+<li><strong>真实业务场景</strong>：货物送达后，回单由外部司机、物流人员或相关外部人员先取得，再回传给公司内部仓管或业务人员。外部人员无法保证立即回传，因此存在客观时间差。</li>
+<li><strong>问题性质</strong>：不是内部责任不清，也不是简单要求某个内部岗位及时上传就能解决；如果系统坚持“只有上传回单才能开票”，会因外部回传时差影响开票和回款。</li>
+<li><strong>建议方案</strong>：<ol>
+<li>有回单时，按正常路径核对签收量并进入开票；</li>
+<li>回单暂未回传但客户确已收货时，允许按财务和管理层确认的替代依据发起无回单例外开票；</li>
+<li>明确例外申请人、审批人、可用材料、客户或金额范围；</li>
+<li>开票后继续保留后补回单任务。</li>
+</ol>
+</li>
+<li><strong>验收标准</strong>：系统既不取消回单管理，也不会让符合例外条件的订单长期卡住。</li>
+</ul>
+</details>
+
+<details>
+<summary><strong>SHP-02｜业务流程问题｜订单变更、撤回、取消和发货后处理规则｜P0</strong></summary>
+
+<ul>
+<li><strong>当前 POC</strong>：支持撤回、拒绝和整单撤销或作废。</li>
+<li><strong>现存问题</strong>：仓库收到任务后，销售如果修改地址、数量、发货要求或撤回订单，需要明确是否停止发货、是否重新选仓、是否释放任务以及通知哪些人员。</li>
+<li><strong>建议方案</strong>：按“仓库未接单、已接单未发货、部分发货、全部发货”分别定义变更方式；涉及发货的重要变化向仓库、商务和销售强提醒并保留日志。</li>
+<li><strong>验收标准</strong>：被撤回或取消的订单不会继续发货，已部分发货订单保留真实已发记录。</li>
+</ul>
+</details>
+
+<details>
+<summary><strong>SHP-03｜组织执行/外部协作问题｜回单回传时效受外部人员影响｜P0</strong></summary>
+
+<ul>
+<li><strong>当前情况</strong>：公司内部可以催促和跟踪，但回单首先掌握在外部司机、物流或相关外部人员手中，无法保证实时回传。</li>
+<li><strong>现存影响</strong>：内部仓管或商务收到回单的时间不确定，造成回单状态、开票时间和客户实收数据存在延迟。</li>
+<li><strong>建议方案</strong>：按仓库和物流方式记录预计回单时限；超过时限自动提醒内部跟进人；无法及时取得时进入例外开票判断，而不是将问题描述为“内部责任不清”。</li>
+<li><strong>产品边界</strong>：系统可以提醒、记录和提供例外路径，但无法强制外部司机实时传回资料。</li>
+</ul>
+</details>
+
+<details open>
+<summary><strong>SHP-04｜产品优化问题｜分批发货、剩余任务和转交｜P0</strong></summary>
+
+<ul>
+<li><strong>建议方案</strong>：每次发货形成独立批次，记录原订单数量、本次计划量、本次实际量、累计已发量、剩余量、仓库、批号、包装、物流和发货时间。</li>
+<li><strong>转交要求</strong>：当前仓库无法发货时，可以填写原因后转交具备权限的仓库或办理人；商务和销售收到仓库变化通知；原待办关闭，新待办生效。</li>
+<li><strong>验收标准</strong>：第一次部分发货后不会把整单标记完成，转交不会重复创建订单或重复计算数量。</li>
+</ul>
+</details>
+
+<details>
+<summary><strong>SHP-05｜产品优化问题｜仓管页面的信息与权限设计｜P0</strong></summary>
+
+<ul>
+<li><strong>必须展示</strong>：<ul>
+<li>客户或公司基础名称；</li>
+<li>合同编号；</li>
+<li>收货地址、联系人和联系电话；</li>
+<li>产品名称或型号；</li>
+<li>数量；</li>
+<li>包装类型；</li>
+<li>要求发货或到货时间；</li>
+<li>发货要求、特殊备注；</li>
+<li>出库单及需要随货的附件。</li>
+</ul>
+</li>
+<li><strong>不得展示</strong>：产品单价、订单金额。</li>
+<li><strong>页面目标</strong>：仓管进入页面后可以直接判断“给谁发、发什么、发多少、送到哪里、有什么要求”，不需要再向商务索要订单信息。</li>
+<li><strong>验收标准</strong>：仓管账号无法查看价格和金额，但可以看到合同编号及完成发货所需的全部信息。</li>
+</ul>
+</details>
+
+<details>
+<summary><strong>SHP-06｜产品优化问题｜回单按发货批次关联｜P0</strong></summary>
+
+<ul>
+<li><strong>现存问题</strong>：一笔订单可能多仓或分批发货，回单如果只挂在整张订单下，无法判断对应哪次发货和可开票数量。</li>
+<li><strong>建议方案</strong>：回单绑定具体发货批次；一个批次支持多份回单文件、补充扫描件和版本记录；记录本次实际签收量和签收差异。</li>
+<li><strong>验收标准</strong>：任何回单都能追溯到订单、仓库、本次发货量和实际签收量。</li>
+</ul>
+</details>
+
+<h3 id="5.5-SHP-需求优先级汇总">5.5 SHP 需求优先级汇总</h3><table>
+<thead>
+<tr>
+<th>优先级</th>
+<th>需求</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>P0</td>
+<td>回单正常/例外路径；分批发货；剩余任务；转交换仓；撤回强提醒；仓管权限和信息；回单按批次关联</td>
+</tr>
+<tr>
+<td>P1</td>
+<td>回单超时跟踪；物流信息；预计到货；销售发货通知；发货异常工作台</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>物流状态自动对接、自动识别回单和签收差异</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="六-INV-开票审批">六、INV 开票审批</h2><h3 id="6.1-本环节核心目标">6.1 本环节核心目标</h3><p>新系统在 INV 环节应做到：</p>
+<ol>
+<li>正确承接有回单正常开票和经批准的无回单例外开票。</li>
+<li>区分“开票申请已生成或已抄送”和“财务已经真实开票”，不能将通知动作当作完成结果。</li>
+<li>支持无需开票、合并开票、分批或部分开票等已经确认的业务规则。</li>
+<li>发票开出后正确关联订单，自动通知当前销售或授权代管人。</li>
+<li>销售能够从订单看板或订单详情直接查看和下载发票。</li>
+</ol>
+<h3 id="6.2-INV-分支流程图">6.2 INV 分支流程图</h3><div class="diagram"><pre class="mermaid">flowchart TD
+    A[SHP 完成开票信息确认] --> B{开票依据}
+    B -->|有回单| C[按实际签收信息生成开票申请]
+    B -->|无回单但例外批准| D[按批准数量和材料生成开票申请]
+    B -->|无需开票| E[无票销售办理]
+    C --> F[财务接收并实际办理开票]
+    D --> F
+    F --> G{实际开票结果}
+    G -->|成功| H[上传并关联发票]
+    G -->|失败或信息有误| I[进入开票异常处理]
+    H --> J[推送当前销售或代管人]
+    J --> K[销售查看、下载和发送发票]
+    E --> L[进入后续资料办理]
+    K --> L</pre></div><h3 id="6.3-涉及角色及需要的信息">6.3 涉及角色及需要的信息</h3><table>
+<thead>
+<tr>
+<th>角色</th>
+<th>本环节职责</th>
+<th>需要查看或填写的信息</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>销售员/提交人</td>
+<td>确认客户开票要求，必要时发起无回单例外</td>
+<td>客户、开票主体、产品、数量、金额、合同编号、开票要求和例外依据</td>
+</tr>
+<tr>
+<td>商务</td>
+<td>查看全公司开票状态、处理匹配异常并衔接订单资料</td>
+<td>订单、发货批次、回单、签收量、开票申请和发票状态</td>
+</tr>
+<tr>
+<td>财务/出纳</td>
+<td>根据有效开票申请实际开票并上传结果</td>
+<td>客户开票资料、产品或开票品名、数量、金额、合同编号、回单或批准的例外依据</td>
+</tr>
+<tr>
+<td>销售主管/管理层</td>
+<td>按业务规则处理例外或特殊事项</td>
+<td>无回单原因、替代材料、订单和客户风险信息</td>
+</tr>
+</tbody></table>
+<h3 id="6.4-当前问题-建议方案及优先级">6.4 当前问题、建议方案及优先级</h3><details open>
+<summary><strong>INV-01｜业务流程问题｜开票申请抄送不等于真实开票完成｜P0</strong></summary>
+
+<ul>
+<li><strong>当前 POC</strong>：需要开票时生成开票申请抄送，抄送人不承担审批推进动作。</li>
+<li><strong>现存问题</strong>：如果系统只知道申请已抄送，不知道财务是否已接收、已开票或开票失败，INV 状态就无法反映真实结果。</li>
+<li><strong>建议方案</strong>：明确财务实际办理或结果回传节点；状态至少区分待开票、开票处理中、已开票、开票失败和无需开票。</li>
+<li><strong>验收标准</strong>：只有财务确认或真实发票上传并关联成功后，订单才能显示已开票。</li>
+</ul>
+</details>
+
+<details>
+<summary><strong>INV-02｜业务流程问题｜合并、部分、无票和开票品名规则需要书面化｜P0</strong></summary>
+
+<ul>
+<li><strong>当前 POC</strong>：支持同客户合并开票和无票销售办理。</li>
+<li><strong>现存问题</strong>：能够合并的客户、产品、单价、主体、税率和时间范围，以及分批开票和开票品名规则，需要由财务和业务负责人统一确认。</li>
+<li><strong>建议方案</strong>：形成可维护规则表；系统按照规则推荐，特殊情况由有权限人员确认并保留原因。</li>
+<li><strong>验收标准</strong>：系统生成的开票建议与财务规则一致，异常和人工调整可追溯。</li>
+</ul>
+</details>
+
+<details>
+<summary><strong>INV-03｜组织执行问题｜客户负责人变化及发票代管关系需要及时维护｜P1</strong></summary>
+
+<ul>
+<li><strong>当前情况</strong>：销售离职、客户转交或存在发票代管人时，发票实际接收人可能与历史订单归属人不同。</li>
+<li><strong>现存问题</strong>：如果人员关系没有同步更新，发票可能推送给错误人员或无人处理。</li>
+<li><strong>建议方案</strong>：销售管理者通过正式交接维护当前客户负责人和发票代管人；系统保留历史人员和变更记录。</li>
+<li><strong>验收标准</strong>：后续发票自动发送给当前有效销售或代管人，历史订单仍可追溯原负责人。</li>
+</ul>
+</details>
+
+<details open>
+<summary><strong>INV-04｜产品优化问题｜真实开票状态、发票关联和销售下载｜P1</strong></summary>
+
+<ul>
+<li><strong>建议方案</strong>：发票优先按订单号、合同编号、客户和开票信息匹配订单；匹配失败进入异常清单；匹配成功后自动通知当前销售或代管人。</li>
+<li><strong>销售使用要求</strong>：销售订单看板显示开票情况；发票附件可以从订单直接点开和下载，后续仍能快速找到并再次发送。</li>
+<li><strong>验收标准</strong>：发票上传不等于已推送；系统能够区分匹配、推送和销售可查询状态。</li>
+</ul>
+</details>
+
+<h3 id="6.5-INV-需求优先级汇总">6.5 INV 需求优先级汇总</h3><table>
+<thead>
+<tr>
+<th>优先级</th>
+<th>需求</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>P0</td>
+<td>回单例外规则承接；真实开票完成证据；合并、部分、无票及品名规则</td>
+</tr>
+<tr>
+<td>P1</td>
+<td>发票自动匹配；当前销售或代管人推送；订单中直接查看下载；开票异常清单</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>更复杂的自动合并建议、财务规则智能检查和应收分析</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="七-跨四个环节的共同要求">七、跨四个环节的共同要求</h2><h3 id="7.1-主流程与子流程状态">7.1 主流程与子流程状态</h3><ul>
+<li>一个主流程编号串联 ORD、STK、SHP、INV。</li>
+<li>主流程状态由四个环节以及真实业务结果汇总，不能因为某个待办被点击就直接完成。</li>
+<li>订单、备货、发货批次、回单、开票记录和发票之间必须可以互相追溯。</li>
+<li>多维表用于管理查看，但不能单独作为业务状态的唯一判断依据。</li>
+</ul>
+<h3 id="7.2-权限原则">7.2 权限原则</h3><table>
+<thead>
+<tr>
+<th>角色</th>
+<th>权限原则</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>销售员</td>
+<td>查看本人客户和订单，可查看价格、合同、发货、开票和发票</td>
+</tr>
+<tr>
+<td>代办人</td>
+<td>查看授权销售范围，并区分实际提交人和归属销售</td>
+</tr>
+<tr>
+<td>商务</td>
+<td>查看全公司订单及完整履约信息</td>
+</tr>
+<tr>
+<td>仓管</td>
+<td>只查看本仓任务及完成发货所需信息；不查看单价和金额；必须查看合同编号</td>
+</tr>
+<tr>
+<td>财务</td>
+<td>查看开票和到款所需客户、产品、金额、合同及相关依据</td>
+</tr>
+<tr>
+<td>管理层</td>
+<td>查看全公司流程、异常和规则执行情况</td>
+</tr>
+</tbody></table>
+<h3 id="7.3-附件归属">7.3 附件归属</h3><ul>
+<li>系统合同、客户合同及下单依据归属于具体订单。</li>
+<li>出库单、实际发货信息和回单归属于具体仓库任务或发货批次。</li>
+<li>开票申请和发票归属于具体开票记录，并关联一笔或多笔订单。</li>
+<li>销售能够从订单直接找到合同和发票；仓管能够从本仓任务找到出库单和随货资料。</li>
+</ul>
+<h3 id="7.4-通知和日志">7.4 通知和日志</h3><ul>
+<li>通知必须说明发生了什么、由谁办理、是否需要立即处理，并跳转到具体订单或任务。</li>
+<li>撤回、拒绝、再次提交、转交、换仓、回单例外和关键字段修改必须保留操作日志。</li>
+<li>旧待办关闭后不得继续推进；同步异常不能改变真实业务记录。</li>
+</ul>
+<hr>
+<h2 id="八-建议给开发团队的任务顺序">八、建议给开发团队的任务顺序</h2><h3 id="8.1-P0-完整走通并保证正确性">8.1 P0：完整走通并保证正确性</h3><ol>
+<li>主订单与 ORD、STK、SHP、INV 四个环节的状态关系。</li>
+<li>当前处理人、task_id、旧待办只读和重复提交防护。</li>
+<li>退回、撤回、修改、重提和整单作废规则。</li>
+<li>多仓及产品明细分配。</li>
+<li>发货批次、分批、剩余未发数量、转交和换仓。</li>
+<li>仓管页面信息及价格、金额权限隔离。</li>
+<li>回单按批次关联以及正常/例外开票路径。</li>
+<li>区分开票申请和真实开票结果。</li>
+<li>仓库办理人员可以将当前发货任务转交给具备权限的其他仓库办理人员；转交时必须填写原因，记录原办理人、新办理人和转交时间，通知商务及相关人员，并关闭原办理人的旧待办，避免重复办理。</li>
+</ol>
+<h3 id="8.2-P1-提升销售-商务-仓库和财务效率">8.2 P1：提升销售、商务、仓库和财务效率</h3><ol>
+<li>销售快速下单和订单看板。</li>
+<li>合同和发票从订单直接查看、下载。</li>
+<li>库存、在途和建议仓库集中展示。</li>
+<li>商务全公司订单和异常工作台。</li>
+<li>回单超时跟踪和开票异常处理。</li>
+<li>发票自动匹配及当前销售或代管人推送。</li>
+<li>权限、通知、附件和操作日志完善。</li>
+</ol>
+<h3 id="8.3-P2-进一步自动化">8.3 P2：进一步自动化</h3><ol>
+<li>合同及订单文件自动提取。</li>
+<li>历史订单信息自动带出和异常识别。</li>
+<li>备货建议、库存预测和仓间调货建议。</li>
+<li>自动识别回单、物流状态和签收差异。</li>
+<li>产品名称映射及经营分析。</li>
+</ol>
+<hr>
+<h2 id="九-单个问题的补充模板">九、单个问题的补充模板</h2><p>后续从销售、商务、仓库和财务访谈中发现的新问题，应直接补充到对应 ORD、STK、SHP 或 INV 环节，不再单独放入脱离流程的问题清单。</p>
+<details>
+<summary><strong>[环节-编号]｜[问题类型]｜[问题名称]｜[优先级]</strong></summary>
+
+<ul>
+<li><strong>业务场景</strong>：什么角色在什么情况下处理什么订单。</li>
+<li><strong>当前流程</strong>：该环节现在如何流转。</li>
+<li><strong>当前操作</strong>：实际线上或线下如何办理。</li>
+<li><strong>问题描述</strong>：具体问题和发生条件。</li>
+<li><strong>业务影响</strong>：影响下单、交付、库存、开票、回款、资料还是数据。</li>
+<li><strong>建议方案</strong>：业务希望新系统达到的结果。</li>
+<li><strong>需要确认或责任人</strong>：谁拍板规则或负责执行。</li>
+<li><strong>优先级及理由</strong>：P0/P1/P2。</li>
+<li><strong>验收标准</strong>：用什么真实业务结果判断完成。</li>
+</ul>
+</details>
+
+<hr>
+<h2 id="十-文档目标">十、文档目标</h2><p>阅读者首先看到一条完整的销售订单主线，再进入 ORD、STK、SHP、INV 四个环节。每个环节都能连续看到：</p>
+<blockquote>
+<p>核心目标 → 分支流程图 → 涉及角色和信息 → 当前业务问题 → 问题类型 → 建议方案 → 优先级 → 验收标准</p>
+</blockquote>
+<p>通过这种结构，老板和业务负责人可以先处理必须拍板的业务流程问题，管理层可以明确组织执行要求，产品和技术团队可以直接识别真正需要开发的功能及前置条件，避免流程、管理和产品需求混在一起造成理解割裂和重复返工。</p>
+</article></div><footer class="footer">业务方需求拆解 V1.1｜依据飞书三方审批销售订单业财流程 POC 说明整理</footer></main>
+<script type="module">import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';mermaid.initialize({startOnLoad:true,theme:'base',securityLevel:'loose',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'},themeVariables:{primaryColor:'#eef5fb',primaryTextColor:'#17365d',primaryBorderColor:'#2e74b5',lineColor:'#6b7f93',secondaryColor:'#f6fbfa',tertiaryColor:'#fff8e8',fontFamily:'Microsoft YaHei, PingFang SC, Arial'}});</script></body></html>

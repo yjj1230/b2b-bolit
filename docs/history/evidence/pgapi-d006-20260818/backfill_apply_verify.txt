@@ -1,0 +1,48 @@
+== pgapi_entity_mappings ==
+ tenant_id | entity_type | legacy_id |   record_id   |  matched_by   
+-----------+-------------+-----------+---------------+---------------
+ chang-an  | customer    | cust-0001 | rec_cust_0001 | customer_name
+ chang-an  | customer    | cust-0002 | rec_cust_0002 | customer_name
+ chang-an  | product     | prod-c68  | rec_prod_c68  | spec
+ chang-an  | product     | prod-d90  | rec_prod_d90  | spec
+(4 rows)
+
+== orders/customer_contacts ==
+   id   |  customer_id  
+--------+---------------
+ ORD-L1 | rec_cust_0001
+ ORD-L2 | rec_cust_0002
+(2 rows)
+
+ tenant_id |  customer_id  |   user_id   
+-----------+---------------+-------------
+ chang-an  | rec_cust_0001 | li-customer
+(1 row)
+
+== product refs ==
+  id  |  product_id  
+------+--------------
+ oi-1 | rec_prod_c68
+ oi-2 | rec_prod_d90
+(2 rows)
+
+  id   |  product_id  
+-------+--------------
+ spi-1 | rec_prod_c68
+(1 row)
+
+  id   |  product_id  
+-------+--------------
+ shi-1 | rec_prod_c68
+(1 row)
+
+  id  |  product_id  
+------+--------------
+ ii-1 | rec_prod_c68
+(1 row)
+
+ warehouse_id |  product_id  | qty 
+--------------+--------------+-----
+ wh-1         | rec_prod_c68 | 100
+(1 row)
+
